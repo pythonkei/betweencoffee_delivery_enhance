@@ -1,0 +1,97 @@
+<!-- templates/eshop/fps_payment.html -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-8">
+                <div class="card shadow-sm">
+                    <div hidden class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0">FPS轉數快支付</h4>
+                    </div>
+                    <div class="card-body p-5">
+                        <!-- 支付信息 -->
+                        <div class="text-center mb-4">
+                            <div class="mb-4">
+                                <div class="payment-info">
+                                    <img src="{% static 'images/fps-logo.png' %}"
+                                    class="payment-logo img-fluid"
+                                    style="width: 100px; height: auto; filter: brightness(0.8);">
+                                </div>
+                            </div>
+                            <h5>FPS轉數快支付</h5>
+                            <h5>請使用手機銀行App 掃描二維碼完成支付</h5>
+                            <p hidden class="text-muted">訂單編號: #{{ order.id }}</p>
+                            <h3 class="text-primary mt-2">HK$ {{ order.total_price|floatformat:2 }}</h3>
+                        </div>
+
+                        <!-- 二維碼 -->
+                        {% if fps_qr_code %}
+                        <div class="text-center mb-5">
+                            <img src="data:image/png;base64,{{ fps_qr_code }}" 
+                                alt="FPS支付二維碼" 
+                                class="img-fluid border rounded"
+                                style="max-width: 300px;">
+                            <p hidden class="text-muted mt-3">請掃描上方二維碼完成支付</p>
+                            <p class="text-muted mt-3">或</p>
+                            <p class="text-muted card-text-md">本店轉數快識別碼 :<br> <span class="card-text-lg text-primary mt-2">68492033</span></p>
+                            <p class="text-muted card-text-md">商戶名稱: <br><span class="card-text-lg text-primary mt-2">Between Coffee</span></b></p>
+                        </div>
+                        {% endif %}
+
+                        <!-- 支付說明 -->
+                        <div class="border rounded p-3 mb-4">
+                            <p><i class="fas fa-info-circle mr-2"></i>付款說明：</p>
+                            <ul class="mb-0 pl-3">
+                                <li>打開您的手機銀行App</li>
+                                <li>選擇"轉數快"付款功能</li>
+                                <li>掃描上方二維碼或手動輸入轉數快識別碼</li>
+                                <li>支付完成後請耐心等待確認</li>
+                            </ul>
+                        </div>
+
+                        <!-- 參考資訊 -->
+                        <div hidden class="border rounded p-3 mb-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>商戶名稱:</strong>
+                                    <p>Between Coffee</p>
+                                </div>
+                                <div hidden class="col-md-6">
+                                    <strong>轉數快 ID:</strong>
+                                    <p>8492033</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>參考編號:</strong>
+                                    <p class="text-primary font-weight-bold">{{ fps_reference }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="text-center pt-4">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'eshop:order_payment_confirmation' %}?order_id={{ order.id }}" 
+                                   class="btn btn-primary btn-outline-primary mr-3">
+                                    <i class="fas fa-check mr-2"></i>我已完成支付
+                                </a>
+                                <a href="{% url 'eshop:order_confirm' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left mr-2"></i>返回修改
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+{% endblock %}

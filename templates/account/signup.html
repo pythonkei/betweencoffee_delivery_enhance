@@ -1,0 +1,64 @@
+<!-- account/signup.html -->
+{% extends 'layouts/blank.html' %}
+{% load i18n %}
+{% load allauth account %}
+{% block head_title %}{% trans "Signup" %}{% endblock head_title %}
+
+
+{% block content %}
+<!-- blank header spacing-->
+<section class="ftco-section-blank"></section>
+
+
+<section class="ftco-subpage-section {% block class %}allauth{% endblock %}"><!-- class allauth password check and pop message -->
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col col-lg-8 mb-5">
+            {% element h1 %}
+                {% trans "Sign Up" %}
+            {% endelement %}
+
+            {% setvar link %}
+                <a href="{{ login_url }}">
+                {% endsetvar %}
+                {% setvar end_link %}
+                </a>
+            {% endsetvar %}
+
+            {% element p %}
+                {% blocktranslate %}Already have an account? Then please {{ link }}sign in{{ end_link }}.{% endblocktranslate %}
+            {% endelement %}
+
+            {% if not SOCIALACCOUNT_ONLY %}
+                {% url 'account_signup' as action_url %}
+                {% element form form=form method="post" action=action_url tags="entrance,signup" %}
+                    {% slot body %}
+                        {% csrf_token %}
+                        {% element fields form=form unlabeled=True %}
+                        {% endelement %}
+                        {{ redirect_field }}
+                    {% endslot %}
+                    {% slot actions %}
+                        {% element button tags="prominent,signup" type="submit" %}
+                            {% trans "Sign Up" %}
+                        {% endelement %}
+                    {% endslot %}
+                {% endelement %}
+            {% endif %}
+
+            {% if PASSKEY_SIGNUP_ENABLED %}
+                {% element hr %}
+                {% endelement %}
+                {% element button href=signup_by_passkey_url tags="prominent,signup,outline,primary" %}
+                    {% trans "Sign up using a passkey" %}
+                {% endelement %}
+            {% endif %}
+
+            {% include 'socialuser/social_logins.html' %}
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

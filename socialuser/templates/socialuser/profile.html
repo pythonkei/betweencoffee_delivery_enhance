@@ -1,0 +1,43 @@
+<!-- socialuser/templates/socialuser/profile.html -->
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+<!-- blank header spacing-->
+<section class="ftco-section-blank"></section>
+
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col col-lg-6 mb-5 ftco-animate">
+                <div class="profile-form">
+                    <div class="img-box">
+                        <img class="img-2 mb-4" src="{{ profile.avatar }}" />
+                    </div>
+                    <div class="text-center mb-5 ">
+                        <h1 hidden>{{ profile.name }}</h1>
+                        <div class="h3 mb-2 -mt-3">
+                            <i class="icon-user"></i> {{ profile.user.username }}
+                        </div>
+
+                        <!-- Add phone number display -->
+                        {% if profile.hk_phone %}
+                        <div class="h3 mb-2 mt-4">
+                            <i class="icon-phone"></i> {{ profile.hk_phone }}
+                        </div>
+                        {% endif %}
+
+                        {% if profile.info %}
+                        <div class="mt-8 hyphens-auto">{{ profile.info|linebreaksbr }}</div>
+                        {% endif %}
+                    </div>
+                    <div hidden class="text-center">
+                        <a href="{% url 'profile-edit' %}" class="btn btn-primary btn-outline-primary">Edit Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

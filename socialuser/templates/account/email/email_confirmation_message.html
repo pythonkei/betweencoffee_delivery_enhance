@@ -1,0 +1,21 @@
+{% extends "account/email/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<h2 style="color: #2a4365;">{% trans "Verify Your Email Address" %}</h2>
+
+<p>{% blocktrans %}Hello <strong>{{ user_display }}</strong>,{% endblocktrans %}</p>
+
+<p>{% blocktrans with site_name=current_site.name %}You're receiving this email to verify your account at {{ site_name }}.{% endblocktrans %}</p>
+
+<p style="margin: 20px 0;">
+  <a href="{{ activate_url }}" style="background-color: #4299e1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+    {% trans "Verify Email" %}
+  </a>
+</p>
+
+<p>{% trans "Or copy this link to your browser:" %}<br>
+<code style="word-break: break-all;">{{ activate_url }}</code></p>
+
+<p style="margin-top: 30px;">{% blocktrans %}Thanks,<br>The {{ site_name }} Team{% endblocktrans %}</p>
+{% endblock %}

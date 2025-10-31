@@ -1,0 +1,122 @@
+<!-- socialuser/templates/socialuser/profile_settings.html -->
+{% extends 'layouts/blank.html' %}
+
+
+{% block content %}
+<section class="ftco-section-blank">
+</section>
+
+<section class="ftco-subpage-section ftco-section-single-product">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col col-lg-8 col-md-10 mb-5">
+                <h1 class="mb-8">帳戶設定</h1>
+
+                <table class="table-responsive-lg w-100 ">
+                    <tbody>
+                        <tr>
+                            <th scope="row" class="pt-4 pb-1">電子郵件</th>
+                            <td id="email-address" class="pt-4 pb-1 pl-4">
+                                {% if user.email %}{{ user.email }}{% else %}無電子郵件{% endif %}
+                            </td>
+                            <td class="pt-4 pb-1 pl-4">
+                                <a id="email-edit" class="btn"
+                                    hx-get="{% url 'profile-emailchange' %}"
+                                    hx-target="#email-address"
+                                    hx-swap="innerHTML" >
+                                    修改
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Email verification -->
+                        <tr class="border-b">
+                            <th scope="row" class="pb-4 font-medium">  
+                            </th>
+                            <td class="pb-4 pl-4">
+                                <div class="badge badge-{% if user.emailaddress_set.first.verified %}success{% else %}warning{% endif %}">
+                                    {% if user.emailaddress_set.first.verified %}已驗證{% else %}未驗證{% endif %}
+                                </div>
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        {% if 'Verification email sent' in message.message %}
+                                            <div class="text-green-500 text-sm mt-1">{{ message }}</div>
+                                        {% elif 'No email address' in message.message %}
+                                            <div class="text-red-500 text-sm mt-1">{{ message }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td class="pb-4 pl-4">
+                                {% if not user.emailaddress_set.first.verified %}
+                                    <form method="post" action="{% url 'profile-emailverify' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn">驗證</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr class="border-b">
+                            <th scope="row" class="py-4">你的名稱</th>
+                            <td id="username" class="py-4 pl-4">
+                                {{ user.username }}
+                            </td>
+                            <td class="py-4 pl-4">
+                                <a id="username-edit" class="btn"
+                                    hx-get="{% url 'profile-usernamechange' %}"
+                                    hx-target="#username"
+                                    hx-swap="innerHTML" >
+                                    修改
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="border-b">
+                            <th scope="row" class="py-4">手機號碼</th>
+                            <td id="phone-number" class="py-4 pl-4">
+                                {% if user.profile.hk_phone %}
+                                    {{ user.profile.hk_phone }}
+                                {% else %}
+                                    未設定
+                                {% endif %}
+                            </td>
+                            <td class="py-4 pl-4">
+                                <a id="phone-edit" class="btn"
+                                    hx-get="{% url 'profile-phonechange' %}"
+                                    hx-target="#phone-number"
+                                    hx-swap="innerHTML">
+                                    修改
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="">
+                            <th scope="row" class="py-4">刪除帳戶</th>
+                            <td class="py-4 pl-4">
+                                一旦刪除，帳戶將會永久刪除。
+                            </td>
+                            <td class="py-4 pl-4">
+                                <a href="{% url 'profile-delete' %}" class="btn">刪除</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="flexable-vh-20"></div>
+
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (document.getElementById('confirm-delete').value !== '1') {
+        e.preventDefault();
+        alert('請輸入“1”以確認刪除帳戶');
+    }
+});
+</script>
+
+{% endblock %}

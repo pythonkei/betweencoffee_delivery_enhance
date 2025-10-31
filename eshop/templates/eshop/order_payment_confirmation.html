@@ -1,0 +1,770 @@
+<!-- eshop/templates/eshop/order_payment_confirmation.html -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+{% load tz %}
+
+{% block content %}
+
+<!-- Shop info -->
+<section>
+    <div class="cm-fixedbtn u-section" id="js-fixedbtn">
+        <div class="cm-fixedbtn-inner ftco-animate">
+        <dl class="cm-fixedbtn__open u-fonten is-bold">
+            <dt class="cm-fixedbtn__openTitle">OPEN</dt>
+            <dd class="cm-fixedbtn__openBody">7:00 - 19:00</dd>
+        </dl>
+
+        <div class="cm-fixedbtn__info is-map">
+            <a href="#access" target="_blank" class="cm-fixedbtn__infoTarget">
+                <p class="cm-fixedbtn__infoTargetTitle">
+                <span class="icon material-icons">pin_drop</span>
+                <span class="txt">地図</span>
+                </p>
+                <p class="cm-fixedbtn__infoTargetBody">葵涌 宏達工業中心地下</p>
+            </a>
+        </div>
+
+        <div class="cm-fixedbtn__info is-tel">
+            <a href="tel:24789522" class="cm-fixedbtn__infoTarget">
+            <p class="cm-fixedbtn__infoTargetTitle">
+                <span class="icon material-icons">phone_iphone</span>
+                <span class="txt">電話</span>
+            </p>
+            <p class="cm-fixedbtn__infoTargetBody u-fonten is-bold">2478 9522</p>
+            </a>
+        </div>
+        </div>
+    </div>
+</section>
+<!-- end Shop info -->
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="imgbox">
+            <div class="svg-box-2"><img src= {% static 'images/coffee_title_bg-01.svg' %} class="noise_animation change-svg-color"></div>
+        </div>
+        <div class="row justify-content-center">
+
+            <div class="col col-lg-8 mb-5">
+                <!-- 提示信息部分 -->
+                <div class="shadow-sm mb-5 rounded text-center">
+                    {% if payment_status == 'paid' %}
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="text-success mb-3">支付成功！</h3>
+                    <h5 class="mb-5">您的訂單我們已收到，感謝您的購買！</h5>
+
+                    <!-- 咖啡豆訂單 - 不顯示進度條和時間 -->
+                    {% if is_beans_only %}
+                        <div class="mt-4 p-3 bg-theme rounded">
+                            <div class="font-weight-normal text-white h5">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                您的咖啡豆已準備就緒，隨時可以提取！
+                            </div>
+                        </div>
+
+                    <!-- 咖啡訂單或混合訂單 - 顯示進度條和時間 -->
+                    {% elif has_coffee and order.estimated_ready_time %}
+                        <div class="mt-4">
+                            <!-- progress bar -->
+                            <div class="progress progress-modern">
+                                <div id="order-progress" class="progress-bar progress-bar-striped progress-bar-animated progress-bar-modern" 
+                                    role="progressbar" style="width: {% if order.status == 'ready' or order.status == 'completed' %}100%{% else %}0%{% endif %};"
+                                    aria-valuenow="{% if order.status == 'ready' or order.status == 'completed' %}100{% else %}0{% endif %}" 
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    <span id="progress-text">
+                                        {% if order.status == 'ready' or order.status == 'completed' %}100% 完成{% else %}准备中...{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- info -->
+                            <div class="d-flex justify-content-between mt-2 progress-labels">
+                                <span>訂單確認</span>
+                                <span>制作中</span>
+                                <span>完成</span>
+                            </div>
+                        </div>
+                        <!-- end progress bar -->
+
+                        <!-- 同時渲染兩個狀態區塊，透過樣式控制顯示 -->
+                        <div class="mt-4 p-3 bg-theme rounded" id="countdown-section" 
+                            style="display: {% if order.status == 'ready' or order.status == 'completed' %}none{% else %}block{% endif %};">
+                            <div class="font-weight-normal text-white h5" id="countdown-display">
+                                <i class="fas fa-clock mr-1"></i>
+                                預計提取時間: 
+                                <span id="estimated-time" class="text-white">{{ estimated_time }}</span>
+                                <span id="countdown-text" class="text-white">
+                                    (約{{ remaining_minutes }} minutes後)<br>我們正制作中, 請耐心等候~
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-theme rounded" id="ready-section" 
+                            style="display: {% if order.status == 'ready' or order.status == 'completed' %}block{% else %}none{% endif %};">
+                            <div class="font-weight-normal text-white h5">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                預計提取時間: <span class="text-white">{{ estimated_time }}</span> (已完成)<br>
+                                {% if is_mixed_order %}
+                                    您訂購的商品已準備就緒，隨時可以提取！
+                                {% else %}
+                                    您的咖啡已準備就緒，隨時可以提取！
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    <!-- 其他情況（沒有預計時間） -->
+                    {% else %}
+                        <!-- 沒有預計時間的情況 -->
+                        <div class="mt-4 p-3 bg-theme rounded">
+                            <div class="font-weight-normal text-white h5">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                您的商品已準備就緒，隨時可以提取！
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <!-- 支付狀態不是paid的情況 -->
+                {% endif %}
+                </div>
+                <!-- 結束支付成功區塊 -->
+
+
+                <!-- ========== FPS 和現金支付狀態顯示========== -->
+                {% if order and order.payment_method == 'fps' and not order.is_paid %}
+                <div class="mt-4 p-3 bg-theme rounded text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-mobile-alt fa-2x mr-3"></i>
+                        <div>
+                            <h5 class="mb-1">FPS轉數快支付處理中</h5>
+                            <p class="mb-0">您的FPS付款正在處理中，請確保已完成轉帳作業。</p>
+                            {% if order.fps_reference %}
+                            <p class="mb-0 mt-1"><strong>參考編號:</strong> {{ order.fps_reference }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if order and order.payment_method == 'cash' and not order.is_paid %}
+                <div class="mt-4 p-3 bg-theme rounded">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-money-bill-wave fa-2x mr-3"></i>
+                        <div>
+                            <h5 class="mb-1">現金支付待確認</h5>
+                            <p class="mb-0">請於到店取貨時支付現金</p>
+                            <p class="mb-0 mt-1"><strong>訂單號碼:</strong> #{{ order.id }}</p>
+                            <p class="mb-0"><strong>應付金額:</strong> HK$ {{ order.total_price|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- ========== end ========== -->
+
+
+                <!-- 訂單狀態顯示 -->
+                <div class="shadow-sm mb-5 rounded text-center">
+                    {% if payment_status == 'pending' %}
+                    <div class="mb-4">
+                        <i class="fas fa-clock text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="text-warning mb-4">支付處理中</h3>
+                    <h5 class="mb-0">您的付款正在處理中，請稍後查看訂單狀態。</h5>
+                    <p class="mt-3">若長時間未更新，請聯絡客服並提供訂單號碼: #{{ order.id }}</p>
+                    {% elif payment_status != 'paid' %}
+                    <div class="mb-4">
+                        <i class="fas fa-question-circle text-info" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="text-info mb-4">支付狀態未知</h3>
+                    <h5 class="mb-0">無法確定您的付款狀態，請檢查訂單歷史或聯絡客服。</h5>
+                    {% endif %}
+                </div>
+
+                {% if order and payment_status == 'paid' %}
+                <!-- 二維碼與取餐碼部分 -->
+                <div class="order-item mb-5 p-5 rounded text-center" id="qrcode-section">
+                    <h5 class="mb-4">請向店員出示此二維碼提取</h5>
+                    
+                    <!-- 二維碼 -->
+                    <div class="mb-4">
+                        <img src="data:image/png;base64,{{ order.qr_code }}" 
+                            alt="取餐二维码" 
+                            class="img-fluid"
+                            style="max-width: 250px; height: auto;">
+                        <p hidden class="text-muted mt-3">請向店員出示此二維碼提取</p>
+                    </div>
+                    
+                    <!-- 提取碼 -->
+                    <div class="mb-4">
+                        <h5>- 提取碼 -</h5>
+                        <div class="display-4 text-primary font-weight-bold color-theme">
+                            {{ order.pickup_code }}
+                        </div>
+                        <p class="text-muted mt-3">請告知店員您的提取碼</p>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button class="btn btn-primary btn-outline-primary mr-3" onclick="saveAsImage()">
+                            <i class="fas fa-download mr-2"></i>保存圖片
+                        </button>
+                        <button class="btn btn-primary btn-outline-primary" onclick="copyOrderNumber()">
+                            <i class="fas fa-copy mr-2"></i>複製訂單編號
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 訂單資訊 -->
+                <div class="order-item-v2 mb-5 rounded">
+                    <div class="d-flex justify-content-between mb-4">
+                        <div class="">
+                            <h5 class="mb-3">訂單編號: #{{ order.id }}</h5>
+                            <p class="mb-0">訂單時間: {{ order.created_at|date:"Y-m-d H:i" }}</p>
+                        </div>
+
+                        <div class="text-md-right">
+                            <p class=" mb-3">
+                                <strong>支付狀態:</strong> <span class="badge badge-success">已支付</span>
+                            </p>
+                            <p class="h5 mb-0">HK$ {{ order.total_price|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 商品信息 -->
+                <div class="order-item mb-5 p-5 rounded">
+                    <h5 class="mb-4">商品明細</h5>
+                    
+                    <div class="order-items">
+                        {% for item in items %}
+                        <div class="d-flex align-items-center mb-4 pb-3">
+                            <div class="mr-3">
+                                <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 98px; height: 98px; ">
+                                    <img src="{{ item.image|default:'/static/images/default-product.png' }}" 
+                                        alt="{{ item.name }}" 
+                                        class="img-fluid" 
+                                        style="max-height: 110px;">
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 align-self-baseline">
+                                <h5 class="mb-1 text-white">{{ item.name }}</h5>
+                                <p class="mb-1 text-white">數量: {{ item.quantity }}</p>
+                                <div class="text-muted">
+                                    {% if item.cup_level_cn %} 杯型: {{ item.cup_level_cn }}{% endif %}
+                                    {% if item.milk_level_cn %}  &nbsp;牛奶: {{ item.milk_level_cn }}{% endif %}
+                                    {% if item.grinding_level_cn %} 研磨: {{ item.grinding_level_cn }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 align-self-baseline">
+                                <div class="text-right">
+                                    <span class="h5 text-white">HK$ {{ item.total_price|default:item.price|floatformat:2 }}</span>
+                                    <div class="text-muted">HK$ {{ item.price|floatformat:2 }} / 單價</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-warning">
+                            沒有商品資訊
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
+                            <h5 class="mb-0">總計:</h5>
+                            <h5 class="mb-0 text-primary">HK$ {{ order.total_price|floatformat:2 }}</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 客户信息 -->
+                {% if order.name or order.phone %}
+                <div hidden class="order-item mb-5 p-5 rounded">
+                    <h5 class="mb-4">客戶信息</h5>
+                    
+                    <div class="row">
+                        {% if order.name %}
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-1"><strong>姓名:</strong></p>
+                            <p class="text-muted">{{ order.name }}</p>
+                        </div>
+                        {% endif %}
+                        {% if order.phone %}
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-1"><strong>電話:</strong></p>
+                            <p class="text-muted">{{ order.phone }}</p>
+                        </div>
+                        {% endif %}
+                        {% if order.email %}
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-1"><strong>電郵:</strong></p>
+                            <p class="text-muted">{{ order.email }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 操作按钮 -->
+                <div class="d-flex justify-content-center mt-4">
+                    <a href="{% url 'index' %}" class="btn btn-primary btn-outline-primary">
+                        <i class="fas fa-home mr-2"></i>返回首页
+                    </a>
+                    <a hidden href="{% url 'eshop:order_detail' order.id %}" class="btn btn-primary btn-outline-primary">
+                        <i class="fas fa-file-alt mr-2"></i>查看訂單詳情
+                    </a>
+                </div>
+                
+                {% elif not order %}
+                <!-- 如果沒有訂單訊息，顯示基本成功訊息 -->
+                <div class="text-center mt-5 py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="text-success mb-4">支付成功！</h3>
+                    <p class="text-muted mb-5">感謝您的購買，訂單處理中</p>
+                    <a href="{% url 'index' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home mr-2"></i>返回首页
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+
+<!-- 引入html2canvas用于保存图片 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+<!-- Order 二維碼_訂單號碼 -->
+<script>
+    // 複製訂單號碼功能
+    function copyOrderNumber() {
+        navigator.clipboard.writeText("{{ order.id }}").then(function() {
+            alert("訂單號碼已複製到剪貼簿");
+        }, function() {
+            alert("複製失敗，請手動複製");
+        });
+    }
+    
+    // 複製訂單號碼功能
+    function saveAsImage() {
+        html2canvas(document.getElementById('qrcode-section')).then(function(canvas) {
+            const link = document.createElement('a');
+            link.download = 'between_coffee_order_{{ order.id }}.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
+    
+    // 頁面載入後執行
+    document.addEventListener('DOMContentLoaded', function() {
+        // 檢查是否需要顯示二維碼（支付成功狀態）
+        {% if payment_status == 'paid' %}
+        // 動畫效果
+        const qrSection = document.getElementById('qrcode-section');
+        if (qrSection) {
+            qrSection.classList.add('animate__animated', 'animate__fadeInUp');
+        }
+        {% endif %}
+    });
+</script>
+
+
+<!-- 即時倒數計時功能 -->
+<script>
+class CountdownTimer {
+    constructor(orderId) {
+        this.orderId = orderId;
+        this.timerInterval = null;
+        this.maxRetries = 10; // 最大重试次数
+        this.retryCount = 0;
+    }
+    
+    start() {
+        console.log('啟動倒數計時器，訂單ID:', this.orderId);
+        // 立即更新一次
+        this.updateCountdown();
+        
+        // 每分鐘更新一次
+        this.timerInterval = setInterval(() => {
+            this.updateCountdown();
+        }, 60000); // 60秒 = 1分钟
+    }
+    
+    stop() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+            console.log('倒數計時器已停止');
+        }
+    }
+    
+    async updateCountdown() {
+        try {
+            const response = await fetch(`/eshop/countdown/${this.orderId}/`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                console.error('取得倒數數據失敗:', data.error);
+                return;
+            }
+            
+            console.log('API回傳資料:', data);
+            this.updateDisplay(data);
+            
+            // 重置重試計數
+            this.retryCount = 0;
+            
+        } catch (error) {
+            console.error('倒數計時更新失敗:', error);
+            this.retryCount++;
+            
+            // 如果重试次数过多，停止计时器
+            if (this.retryCount >= this.maxRetries) {
+                console.error('達到最大重試次數，停止計時器');
+                this.stop();
+            }
+        }
+    }
+    
+    updateDisplay(data) {
+        const countdownSection = document.getElementById('countdown-section');
+        const readySection = document.getElementById('ready-section');
+        const countdownText = document.getElementById('countdown-text');
+        
+        console.log('更新顯示，數據:', data);
+        console.log('countdownSection:', countdownSection);
+        console.log('readySection:', readySection);
+        
+        if (!countdownSection || !readySection) {
+            console.error('找不到显示元素');
+            return;
+        }
+        
+        // 根據API回傳的狀態更新顯示
+        if (data.is_ready || data.status === 'ready' || data.status === 'completed') {
+            // 制作完成
+            console.log('显示完成状态');
+            countdownSection.style.display = 'none';
+            readySection.style.display = 'block';
+            this.stop(); // 停止計時器
+            
+            // 完成動畫效果
+            readySection.classList.add('animate__animated', 'animate__fadeIn');
+        } else {
+            // 制作中
+            console.log('显示制作中状态，剩余分钟:', data.remaining_minutes);
+            countdownSection.style.display = 'block';
+            readySection.style.display = 'none';
+            
+            // 更新倒數文字
+            if (countdownText) {
+                const minutes = data.remaining_minutes;
+                if (minutes === 1) {
+                    countdownText.innerHTML = `(約1 minute後)<br>我們正制作中, 請耐心等候~`;
+                } else {
+                    countdownText.innerHTML = `(約${minutes} minutes後)<br>我們正制作中, 請耐心等候~`;
+                }
+            }
+        }
+    }
+}
+
+
+// 页面加载后启动倒数计时器
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('页面加载完成，检查启动条件');
+    console.log('payment_status:', '{{ payment_status }}');
+    console.log('order.estimated_ready_time:', '{{ order.estimated_ready_time }}');
+    console.log('is_ready:', '{{ is_ready }}');
+    console.log('has_coffee:', '{{ has_coffee }}');
+    console.log('is_beans_only:', '{{ is_beans_only }}');
+    
+    // 只有包含咖啡且有时间预计且未完成的订单才启动计时器
+    {% if payment_status == 'paid' and order.estimated_ready_time and not is_ready and has_coffee and not is_beans_only %}
+    console.log('满足启动条件，开始倒数计时');
+    const countdownTimer = new CountdownTimer({{ order.id }});
+    countdownTimer.start();
+    
+    // 将计时器存储到全局变量以便其他函数访问
+    window.countdownTimer = countdownTimer;
+    
+    // 页面可见性变化时处理计时器
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            console.log('页面不可见，暂停计时器');
+            countdownTimer.stop();
+        } else {
+            console.log('页面可见，重新启动计时器');
+            countdownTimer.start();
+        }
+    });
+    {% else %}
+    console.log('不满足启动条件，不启动倒数计时');
+    {% endif %}
+});
+</script>
+
+
+<!-- front WebSocket config -->
+<script>
+class OrderWebSocket {
+    constructor(orderId) {
+        this.orderId = orderId;
+        this.socket = null;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
+    }
+
+    connect() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/order/${this.orderId}/`;
+        
+        this.socket = new WebSocket(wsUrl);
+        
+        this.socket.onopen = () => {
+            console.log('WebSocket 连接已建立');
+            this.reconnectAttempts = 0;
+        };
+
+        this.socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.handleMessage(data);
+        };
+
+        this.socket.onclose = () => {
+            console.log('WebSocket 连接已关闭');
+            this.handleReconnect();
+        };
+
+        this.socket.onerror = (error) => {
+            console.error('WebSocket 错误:', error);
+        };
+    }
+
+    handleMessage(data) {
+        if (data.type === 'order_notification') {
+            this.showNotification(data);
+        }
+        
+        // 更新订单状态显示
+        if (data.status === 'ready' || data.status === 'completed') {
+            this.updateOrderStatus(data.status);
+        }
+    }
+
+    showNotification(data) {
+        // 使用浏览器的通知 API
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Between Coffee 订单更新', {
+                body: data.message,
+                icon: '/static/images/logo.png'
+            });
+        }
+        
+        // 同时在页面显示通知
+        this.showInPageNotification(data.message);
+    }
+
+    showInPageNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-info alert-dismissible fade show';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        `;
+        
+        document.querySelector('.container').prepend(notification);
+        
+        // 3秒后自动消失
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    updateOrderStatus(status) {
+        // 更新页面状态显示
+        if (status === 'ready' || status === 'completed') {
+            const countdownTimer = window.countdownTimer;
+            if (countdownTimer) {
+                countdownTimer.stop();
+            }
+            
+            // 强制显示完成状态
+            document.getElementById('countdown-section').style.display = 'none';
+            document.getElementById('ready-section').style.display = 'block';
+            
+            // 播放完成音效
+            this.playCompletionSound();
+        }
+    }
+
+    playCompletionSound() {
+        const audio = document.getElementById('completion-sound');
+        if (audio) {
+            audio.play().catch(e => console.log('音频播放失败:', e));
+        }
+    }
+
+    handleReconnect() {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            setTimeout(() => {
+                console.log(`尝试重新连接 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+                this.connect();
+            }, 3000);
+        }
+    }
+
+    disconnect() {
+        if (this.socket) {
+            this.socket.close();
+        }
+    }
+}
+
+// 在頁面載入時初始化 WebSocket
+document.addEventListener('DOMContentLoaded', function() {
+    {% if payment_status == 'paid' and order %}
+    // 請求通知權限
+    if ('Notification' in window) {
+        Notification.requestPermission();
+    }
+    
+    // 連線 WebSocket
+    window.orderWebSocket = new OrderWebSocket({{ order.id }});
+    window.orderWebSocket.connect();
+    {% endif %}
+});
+</script>
+
+
+<!-- 進度條 config -->
+<script>
+class OrderProgress {
+    constructor(orderId, estimatedReadyTime) {
+        this.orderId = orderId;
+        this.estimatedReadyTime = new Date(estimatedReadyTime);
+        this.progressBar = document.getElementById('order-progress');
+        this.progressText = document.getElementById('progress-text');
+        this.updateInterval = null;
+    }
+
+    start() {
+        // 立即更新一次
+        this.updateProgress();
+        
+        // 每10秒更新一次進度
+        this.updateInterval = setInterval(() => {
+            this.updateProgress();
+        }, 10000);
+    }
+
+    stop() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+        }
+    }
+
+    updateProgress() {
+        const now = new Date();
+        const orderCreated = new Date('{{ order.created_at|date:"c" }}');
+        
+        if (now >= this.estimatedReadyTime) {
+            // 已完成
+            this.setProgress(100, '100%');
+            this.stop();
+            return;
+        }
+
+        const totalTime = this.estimatedReadyTime - orderCreated;
+        const elapsedTime = now - orderCreated;
+        
+        // 計算進度百分比（前10%留給訂單處理，後90%用於製作）
+        let progress = (elapsedTime / totalTime) * 90;
+        progress = Math.max(0, Math.min(90, progress)); // 限制在0-90%
+        
+        // 如果已經開始製作，加上基礎10%
+        if (progress > 0) {
+            progress += 10;
+        }
+        
+        this.setProgress(progress, `${Math.round(progress)}%`);
+    }
+
+    setProgress(percentage, text) {
+        this.progressBar.style.width = `${percentage}%`;
+        this.progressBar.setAttribute('aria-valuenow', percentage);
+        this.progressText.textContent = text;
+        
+        // 根據進度改變顏色
+        if (percentage >= 100) {
+            this.progressBar.classList.remove('bg-info');
+            this.progressBar.classList.add('bg-success');
+        } else if (percentage >= 70) {
+            this.progressBar.classList.remove('bg-info');
+            this.progressBar.classList.add('bg-info');
+        } else {
+            this.progressBar.classList.remove('bg-info', 'bg-success');
+            this.progressBar.classList.add('bg-info');
+        }
+    }
+
+    complete() {
+        this.setProgress(100, '100%');
+        this.stop();
+    }
+}
+
+// 在页面加载时初始化进度条
+document.addEventListener('DOMContentLoaded', function() {
+    // 只有包含咖啡且有预计时间且不是纯咖啡豆订单才初始化进度条
+    {% if payment_status == 'paid' and order.estimated_ready_time and has_coffee and not is_beans_only %}
+    const estimatedTime = new Date('{{ order.estimated_ready_time|date:"c" }}');
+    window.orderProgress = new OrderProgress({{ order.id }}, estimatedTime);
+    
+    // 只有订单还在制作中时才启动进度条
+    {% if not is_ready %}
+    window.orderProgress.start();
+    {% else %}
+    window.orderProgress.complete();
+    {% endif %}
+    {% endif %}
+});
+</script>
+
+
+<!-- Shop info bar 180px after scrolling -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const shopInfoBar = document.getElementById('js-fixedbtn');
+        
+        // Hide initially
+        shopInfoBar.style.display = 'block'; // Ensure it's visible to animate
+        shopInfoBar.classList.remove('active');
+    
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 580) {
+                shopInfoBar.classList.add('active');
+            } else {
+                shopInfoBar.classList.remove('active');
+            }
+        });
+    });
+</script>
+
+
+{% endblock content %}

@@ -1,0 +1,731 @@
+<!-- eshop/templates/eshop/order_confirm.html -->
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+{% load tz %} 
+
+{% block content %}
+
+<!-- Shop info -->
+<section>
+    <div class="cm-fixedbtn u-section" id="js-fixedbtn">
+    </div>
+</section>
+<!-- end Shop info -->
+
+<section class="ftco-section-blank-small"></section>
+
+<!-- 显示登录提示（访客） -->
+{% if not user.is_authenticated %}
+<div class="row justify-content-center align-items-center">
+    <h4>訪客結帳</h4>
+    <p>您正在以訪客身分結帳。<a href="{% url 'account_login' %}?next={% url 'eshop:order_confirm' %}">登入</a>以保存訂單历史记录并获得更快的结账体验。</p>
+</div>
+{% endif %}
+
+
+<div class="hiddenLarge">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-7 Rtable Rtable--4cols Rtable--collapse js-RtableAccordions w-100">
+                <div class="d-flex w-100 position-relative">
+                    <div class="w-50">
+                        <button class="Accordion fontsize-md" role="tab" aria-selected="false">訂單詳情<span class="arrow"></span></button>
+                    </div>
+                    <div class="w-50">
+                        <div class="total-price mb-5 text-right">
+                            <span class="h5">${{ total_price|floatformat:"-2" }}</span>
+                        </div>
+                    </div>
+                </div>
+            <!-- table content -->
+            <div class="row">
+                <div class="Rtable-cell sidebar-box ftco-animate mt-6">
+                    {% for item in items %}
+                        <div class="block-21 mb-5 d-flex">
+                            <div class="blog-img mr-4">
+                                <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
+                                <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
+                            </div>
+                            <div class="text">
+                                <h3 class="heading">{{ item.name }}</h3>
+                                <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
+
+                                {% if item.type == 'coffee' %}
+                                <div class="meta pb-2">
+                                    <div>
+                                        <span class="icon material-symbols-outlined">water_full</span>
+                                        杯量 :
+                                        <strong>
+                                        {% if item.cup_level == 'Small' %}細
+                                        {% elif item.cup_level == 'Medium' %}中
+                                        {% elif item.cup_level == 'Large' %}大
+                                        {% endif %}
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <span class="icon material-symbols-outlined">humidity_mid</span>
+                                        奶量 :
+                                        <strong>
+                                        {% if item.milk_level == 'Light' %}少
+                                        {% elif item.milk_level == 'Medium' %}正常
+                                        {% elif item.milk_level == 'Extra' %}追加
+                                        {% endif %}
+                                        </strong>
+                                    </div>
+                                </div>
+                                {% elif item.type == 'bean' %}
+                                <div class="meta pb-2">
+                                    <div>
+                                        <span class="icon material-symbols-outlined">roller_shades</span>
+                                        研磨 :
+                                        <strong>
+                                        {% if item.grinding_level == 'Non' %}免研磨
+                                        {% elif item.grinding_level == 'Light' %}細
+                                        {% elif item.grinding_level == 'Medium' %}中
+                                        {% elif item.grinding_level == 'Deep' %}粗
+                                        {% endif %}
+                                        </strong>
+                                    </div>
+                                    {% if item.weight %}
+                                    <div>
+                                        <span class="icon material-symbols-outlined">scale</span>
+                                        重量 :
+                                        <strong>
+                                        {% if item.weight == '200g' %}200g
+                                        {% elif item.weight == '1kg' %}1kg
+                                        {% endif %}
+                                        </strong>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- table content -->
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- 帳單資訊輸入和支付選擇 -->
+<section class="ftco-section-billing">
+    <div class="container">
+        <div class="row">
+            <!-- info from -->
+            <div class="col-xl-7">
+                <h3 class="mb-4 billing-heading">聯絡方式</h3>
+                <form method="POST" action="{% url 'eshop:order_confirm' %}" class="billing-form" id="payment-form">
+                    {% csrf_token %}
+                    <!-- 隱藏欄位用於調試 -->
+                    <input type="hidden" name="debug_info" value="form_submitted">
+                    <!-- 输入info -->
+                    <div class="row">
+                        <div class="col-md-8 px-0 mb-3">
+                            <div class="form-group">
+                                <label for="name">名稱</label>
+                                <input required class="form-control" type="text" name="name" placeholder="Ricky" autocomplete="off" value="{% if initial_data.name %}{{ initial_data.name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"/>
+                            </div>
+                        </div>
+
+                        <div class="w-100"></div>
+
+                        <div class="col-md-6 px-0 mb-3">
+                            <div class="form-group">
+                                <label for="phone">電話 / Whatsapp</label>
+                                <input required class="form-control mb-2" type="text" name="phone" 
+                                    placeholder="98092384" autocomplete="off"
+                                    pattern="[0-9]{8}" 
+                                    title="請輸入8位數字香港電話號碼"
+                                    value="{% if initial_data.phone %}{{ initial_data.phone }}{% elif user.is_authenticated and user.profile.phone %}{{ user.profile.hk_phone }}{% endif %}"/>
+                                <caption class="">默認以 WhatsApp 通知</caption>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email">電郵</label>
+                                <input class="form-control" type="email" name="email" placeholder="mark_yeung@gmail.com" autocomplete="off" value="{% if initial_data.email %}{{ initial_data.email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}"/>
+                            </div>
+                        </div>
+
+                        <div class="w-100"></div>
+
+                        <div class="col-md-6 px-0">
+                            <div class="form-group">
+                                <label for="pickup_time">到店提取時間</label>
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                                    <select name="pickup_time" class="form-control" required>
+                                        <option value="5 分鐘後" {% if initial_data.pickup_time == "5 分鐘後" %}selected{% endif %}>5 分鐘後</option>
+                                        <option value="10 分鐘後" {% if initial_data.pickup_time == "10 分鐘後" %}selected{% endif %}>10 分鐘後</option>
+                                        <option value="15 分鐘後" {% if initial_data.pickup_time == "15 分鐘後" %}selected{% endif %}>15 分鐘後</option>
+                                        <option value="30 分鐘後" {% if initial_data.pickup_time == "30 分鐘後" %}selected{% endif %}>30 分鐘後</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-100"></div>
+
+                        <!-- 付款方式選擇 -->
+                        <div class="col-md-12 px-0 mb-4 pt-4">
+                            <div class="form-group">
+                                <label for="payment_method" class="mb-3">支付方式</label>
+                                
+                                
+                                <!-- 方案1: 现代卡片式设计 -->
+                                <div class="payment-scheme active" id="scheme-modern">
+                                    <div class="payment-methods-modern">
+                                        <!-- 支付宝 -->
+                                        <div class="payment-modern-card">
+                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="alipay-modern" value="alipay" checked>
+                                            <label class="payment-modern-label" for="alipay-modern">
+                                                <div class="payment-modern-header">
+                                                    <div class="payment-modern-info">
+                                                        <img src="{% static 'images/alipay-logo.png' %}" alt="支付宝" class="payment-modern-logo">
+                                                        <span class="payment-modern-name">支付宝支付</span>
+                                                    </div>
+                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
+                                                </div>
+                                            </label>
+                                            <div class="payment-modern-details">
+                                                <p class="text-muted small mb-0">使用支付宝扫码支付，快速安全</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- PayPal -->
+                                        <div class="payment-modern-card">
+                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="paypal-modern" value="paypal">
+                                            <label class="payment-modern-label" for="paypal-modern">
+                                                <div class="payment-modern-header">
+                                                    <div class="payment-modern-info">
+                                                        <img src="{% static 'images/paypal-logo.png' %}" alt="PayPal" class="payment-modern-logo">
+                                                        <span class="payment-modern-name">PayPal支付</span>
+                                                    </div>
+                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
+                                                </div>
+                                            </label>
+                                            <div class="payment-modern-details">
+                                                <p class="text-muted small mb-0">使用PayPal账户或信用卡支付</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- FPS轉數快 -->
+                                        <div class="payment-modern-card">
+                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="fps-modern" value="fps">
+                                            <label class="payment-modern-label" for="fps-modern">
+                                                <div class="payment-modern-header">
+                                                    <div class="payment-modern-info">
+                                                        <i class="fas fa-mobile-alt payment-modern-icon fps-icon"></i>
+                                                        <span class="payment-modern-name">FPS 轉數快</span>
+                                                    </div>
+                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
+                                                </div>
+                                            </label>
+                                            <div class="payment-modern-details">
+                                                <p class="text-muted small mb-0">使用香港手機銀行App掃碼支付</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- 现金支付 -->
+                                        <div class="payment-modern-card">
+                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="cash-modern" value="cash">
+                                            <label class="payment-modern-label" for="cash-modern">
+                                                <div class="payment-modern-header">
+                                                    <div class="payment-modern-info">
+                                                        <i class="fas fa-money-bill-wave payment-modern-icon cash-icon"></i>
+                                                        <span class="payment-modern-name">现金支付</span>
+                                                    </div>
+                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
+                                                </div>
+                                            </label>
+                                            <div class="payment-modern-details">
+                                                <p class="text-muted small mb-0">到店取货时支付现金，如有訂單相關問題，我們會連絡您</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+
+                        <div hidden class="col-md-12 px-0">
+                            <div class="form-group mt-2">
+                                <div class="radio">
+                                    <label class="mr-3 mr-2"><input type="radio" name="optradio">&nbsp; Monthly Coffee Pass? </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- info from -->
+
+                <!-- cart item -->
+                <div class="col-xl-5 sidebar">
+                    <div class="sidebar-box ftco-animate mt-6 hiddenSmall">
+                        {% for item in items %}
+                            <div class="block-21 mb-5 d-flex">
+                                <div class="blog-img mr-4">
+                                    <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
+                                    <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
+                                </div>
+                                <div class="text">
+                                    <h3 class="heading">{{ item.name }}</h3>
+                                    <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
+
+                                    {% if item.type == 'coffee' %}
+                                    <div class="meta pb-2">
+                                        <div>
+                                            <span class="icon material-symbols-outlined">water_full</span>
+                                            杯量 :
+                                            <strong>
+                                            {% if item.cup_level == 'Small' %}細
+                                            {% elif item.cup_level == 'Medium' %}中
+                                            {% elif item.cup_level == 'Large' %}大
+                                            {% endif %}
+                                            </strong>
+                                        </div>
+                                        <div>
+                                            <span class="icon material-symbols-outlined">humidity_mid</span>
+                                            奶量 :
+                                            <strong>
+                                            {% if item.milk_level == 'Light' %}少
+                                            {% elif item.milk_level == 'Medium' %}正常
+                                            {% elif item.milk_level == 'Extra' %}追加
+                                            {% endif %}
+                                            </strong>
+                                        </div>
+                                    </div>
+                                    {% elif item.type == 'bean' %}
+                                    <div class="meta pb-2">
+                                        <div>
+                                            <span class="icon material-symbols-outlined">roller_shades</span>
+                                            研磨 :
+                                            <strong>
+                                            {% if item.grinding_level == 'Non' %}免研磨
+                                            {% elif item.grinding_level == 'Light' %}細
+                                            {% elif item.grinding_level == 'Medium' %}中
+                                            {% elif item.grinding_level == 'Deep' %}粗
+                                            {% endif %}
+                                            </strong>
+                                        </div>
+                                        {% if item.weight %}
+                                        <div>
+                                            <span class="icon material-symbols-outlined">scale</span>
+                                            重量 :
+                                            <strong>
+                                            {% if item.weight == '200g' %}200g
+                                            {% elif item.weight == '1kg' %}1kg
+                                            {% endif %}
+                                            </strong>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- 支付信息-->
+                    <div class="sidebar-box ftco-animate">
+                        <div class="dividerline mb-4"></div>
+                        <div class="total-price mb-5 text-right">
+                            <span class="h4">總計: </span>
+                            <span class="h4">${{ total_price|floatformat:"-2" }}</span>
+                        </div>
+                        <div class="block-21 justify-content-end">
+                            <div class="form-group pb-5">
+                            <!-- 支付按钮 -->
+                            <button type="submit" class="btn btn-primary btn-primary-outline pr-8 pl-8 py-3" id="payment-button">確認並支付</button>
+                                <div class="text-center mt-3">
+                                    <span class=""><a href="{% url 'cart:cart_detail' %}" class="btn">返回購物車</a></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END 支付信息-->
+                </div>
+                <!-- end card item -->
+        </div>
+                </form>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+
+
+
+<!-- 商店資訊欄滾動後顯示 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const shopInfoBar = document.getElementById('js-fixedbtn');
+        
+        // 初始隱藏
+        shopInfoBar.style.display = 'block';
+        shopInfoBar.classList.remove('active');
+    
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 180) {
+                shopInfoBar.classList.add('active');
+            } else {
+                shopInfoBar.classList.remove('active');
+            }
+        });
+    });
+
+// table config //
+(function ($) {
+    "use strict";
+    $.fn.responsiveTable = function() { 
+      var toggleColumns = function($table) {
+        var isExpanded = $table.find(".Accordion").attr("aria-selected") === "true";
+        $table.find(".Rtable-cell").toggleClass("hiddenSmall", !isExpanded);
+      };
+      
+      $(this).each(function(){ 
+        toggleColumns($(this)); 
+      });
+  
+      $(this).find(".Accordion").click(function() {
+        var $accordion = $(this);
+        var isSelected = $accordion.attr("aria-selected") !== "true";
+        $accordion.attr("aria-selected", isSelected);
+        toggleColumns($accordion.parents(".Rtable"));
+      });
+    };
+  }(jQuery));
+  
+  // 初始化
+  $(".js-RtableAccordions").responsiveTable();
+
+  document.querySelectorAll('.Accordion').forEach(accordion => {
+    accordion.addEventListener('click', function() {
+      this.classList.toggle('active');
+    });
+  });
+</script>
+
+
+<!-- 支付方式-調試腳本 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('payment-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                console.log('表单提交事件触发');
+                // 获取支付方式
+                const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+                console.log('选择的支付方式:', paymentMethod ? paymentMethod.value : '未选择');
+                
+                // 显示加载状态
+                const submitButton = document.getElementById('payment-button');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
+                }
+            });
+        }
+    });
+</script>
+
+
+<style>
+    @media all and (min-width: 1200px) { 
+    .hiddenLarge {display: none; }
+    }
+
+    .payment-options {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        background-color: transparent;
+    }
+
+    .payment-options .form-check {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .payment-options .form-check:last-child {
+        border-bottom: none;
+    }
+</style>
+
+
+<script>
+// 支付方式折叠交互
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentRadios = document.querySelectorAll('.payment-radio');
+    const paymentLabels = document.querySelectorAll('.payment-label');
+    
+    // 初始显示第一个支付方式的详情
+    const firstPaymentDetails = document.querySelector('.payment-radio:checked + .payment-label + .payment-details');
+    if (firstPaymentDetails) {
+        firstPaymentDetails.style.maxHeight = firstPaymentDetails.scrollHeight + 'px';
+    }
+    
+    // 点击支付选项时切换显示
+    paymentLabels.forEach(label => {
+        label.addEventListener('click', function() {
+            const radio = this.previousElementSibling;
+            const details = this.nextElementSibling;
+            
+            // 关闭所有其他支付方式的详情
+            document.querySelectorAll('.payment-details').forEach(detail => {
+                if (detail !== details) {
+                    detail.style.maxHeight = '0';
+                    detail.style.padding = '0 20px';
+                }
+            });
+            
+            // 重置所有箭头
+            document.querySelectorAll('.payment-arrow').forEach(arrow => {
+                if (arrow !== this.querySelector('.payment-arrow')) {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            });
+            
+            // 切换当前支付方式的详情
+            if (radio.checked) {
+                if (details.style.maxHeight && details.style.maxHeight !== '0px') {
+                    details.style.maxHeight = '0';
+                    details.style.padding = '0 20px';
+                    this.querySelector('.payment-arrow').style.transform = 'rotate(0deg)';
+                } else {
+                    details.style.maxHeight = details.scrollHeight + 'px';
+                    details.style.padding = '10px 20px 15px';
+                    this.querySelector('.payment-arrow').style.transform = 'rotate(180deg)';
+                }
+            }
+        });
+    });
+    
+    // 表单提交前验证支付方式
+    const paymentForm = document.getElementById('payment-form');
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+            const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+            if (!selectedPayment) {
+                e.preventDefault();
+                alert('请选择支付方式');
+                return false;
+            }
+            
+            // 显示加载状态
+            const submitButton = document.getElementById('payment-button');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
+            }
+        });
+    }
+});
+</script>
+
+
+
+
+<!-- 修复后的支付方案切换脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 方案切换功能
+    const schemeButtons = document.querySelectorAll('[data-scheme]');
+    const schemes = document.querySelectorAll('.payment-scheme');
+    
+    schemeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const scheme = this.dataset.scheme;
+            
+            // 更新按钮状态
+            schemeButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 显示对应方案
+            schemes.forEach(schemeEl => {
+                schemeEl.style.display = 'none';
+                schemeEl.classList.remove('active');
+            });
+            
+            const targetScheme = document.getElementById(`scheme-${scheme}`);
+            if (targetScheme) {
+                targetScheme.style.display = 'block';
+                targetScheme.classList.add('active');
+                
+                // 重新初始化当前方案的交互
+                setTimeout(() => initPaymentInteractions(), 10);
+            }
+        });
+    });
+
+    // 统一的支付方式交互逻辑 - 修复版本
+    function initPaymentInteractions() {
+        const activeScheme = document.querySelector('.payment-scheme.active');
+        if (!activeScheme) return;
+
+        const paymentRadios = activeScheme.querySelectorAll('input[type="radio"]');
+        const paymentLabels = activeScheme.querySelectorAll('label[class*="payment-"]');
+        
+        // 初始显示第一个支付方式的详情
+        const firstPayment = activeScheme.querySelector('input[type="radio"]:checked');
+        if (firstPayment) {
+            const firstDetails = firstPayment.parentElement.querySelector('[class*="details"]');
+            if (firstDetails) {
+                firstDetails.classList.add('open');
+            }
+        }
+
+        // 点击支付选项时切换显示
+        paymentLabels.forEach(label => {
+            label.addEventListener('click', function(e) {
+                const radio = this.previousElementSibling;
+                if (!radio || radio.type !== 'radio') return;
+                
+                const details = this.nextElementSibling;
+                if (!details || !details.classList.contains('payment-modern-details') && 
+                    !details.classList.contains('payment-minimal-details') && 
+                    !details.classList.contains('payment-gradient-details')) {
+                    return;
+                }
+
+                // 如果点击的是当前选中的支付方式，则切换展开/收起
+                if (radio.checked) {
+                    const isOpening = !details.classList.contains('open');
+                    
+                    // 关闭所有其他支付方式的详情
+                    activeScheme.querySelectorAll('[class*="details"].open').forEach(detail => {
+                        if (detail !== details) {
+                            detail.classList.remove('open');
+                        }
+                    });
+
+                    // 重置所有箭头
+                    activeScheme.querySelectorAll('[class*="arrow"]').forEach(arrow => {
+                        if (arrow !== this.querySelector('[class*="arrow"]')) {
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    // 切换当前支付方式的详情
+                    if (isOpening) {
+                        details.classList.add('open');
+                        this.querySelector('[class*="arrow"]').style.transform = 'rotate(180deg)';
+                    } else {
+                        details.classList.remove('open');
+                        this.querySelector('[class*="arrow"]').style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    // 如果点击的是其他支付方式，选中它并展开详情
+                    radio.checked = true;
+                    
+                    // 关闭所有其他支付方式的详情
+                    activeScheme.querySelectorAll('[class*="details"].open').forEach(detail => {
+                        detail.classList.remove('open');
+                    });
+
+                    // 重置所有箭头
+                    activeScheme.querySelectorAll('[class*="arrow"]').forEach(arrow => {
+                        arrow.style.transform = 'rotate(0deg)';
+                    });
+
+                    // 展开当前支付方式的详情
+                    details.classList.add('open');
+                    this.querySelector('[class*="arrow"]').style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        // 监听radio变化
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    const label = this.nextElementSibling;
+                    const details = label.nextElementSibling;
+                    const arrow = label.querySelector('[class*="arrow"]');
+                    
+                    // 关闭所有其他支付方式的详情
+                    activeScheme.querySelectorAll('[class*="details"].open').forEach(detail => {
+                        if (detail !== details) {
+                            detail.classList.remove('open');
+                        }
+                    });
+
+                    // 重置所有箭头
+                    activeScheme.querySelectorAll('[class*="arrow"]').forEach(arr => {
+                        if (arr !== arrow) {
+                            arr.style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    // 展开当前支付方式的详情
+                    if (details) {
+                        details.classList.add('open');
+                    }
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(180deg)';
+                    }
+                }
+            });
+        });
+    }
+
+    // 初始化支付交互
+    initPaymentInteractions();
+
+    // 监听方案切换，重新初始化交互
+    schemeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            setTimeout(initPaymentInteractions, 50);
+        });
+    });
+
+    // 表单提交验证
+    const paymentForm = document.getElementById('payment-form');
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+            const activeScheme = document.querySelector('.payment-scheme.active');
+            const selectedPayment = activeScheme.querySelector('input[name="payment_method"]:checked');
+            
+            if (!selectedPayment) {
+                e.preventDefault();
+                alert('请选择支付方式');
+                return false;
+            }
+            
+            // 显示加载状态
+            const submitButton = document.getElementById('payment-button');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
+            }
+        });
+    }
+
+    // 修复：确保页面加载时正确初始化所有状态
+    setTimeout(() => {
+        const activeScheme = document.querySelector('.payment-scheme.active');
+        if (activeScheme) {
+            // 确保只有一个支付方式展开
+            const openDetails = activeScheme.querySelectorAll('[class*="details"].open');
+            if (openDetails.length > 1) {
+                // 关闭除第一个外的所有
+                for (let i = 1; i < openDetails.length; i++) {
+                    openDetails[i].classList.remove('open');
+                }
+            }
+        }
+    }, 100);
+});
+</script>
+
+
+
+
+{% endblock content %}

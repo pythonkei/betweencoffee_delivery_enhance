@@ -1,0 +1,41 @@
+{% extends 'coffee/base.html' %}
+{% load static %}
+
+{% block title %}登入 - 咖啡外送{% endblock %}
+
+{% block content %}
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="login-wrap p-4 p-md-5">
+                    <div class="icon d-flex align-items-center justify-content-center" style="background-image: url({% static 'images/login_bg.jpg' %});">
+                        <span class="fa fa-user-o"></span>
+                    </div>
+                    <h3 class="text-center mb-4">會員登入</h3>
+                    <form method="post" class="login-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" name="username" class="form-control rounded-left" placeholder="用戶名" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" class="form-control rounded-left" placeholder="密碼" required>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="form-control btn btn-primary rounded submit px-3">登入</button>
+                        </div>
+                        <div class="form-group d-md-flex">
+                            <div class="w-50 text-md-left">
+                                <a href="#">忘記密碼？</a>
+                            </div>
+                            <div class="w-50 text-md-right">
+                                還沒有帳號？ <a href="{% url 'register' %}">立即註冊</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

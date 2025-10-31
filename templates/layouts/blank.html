@@ -1,0 +1,22 @@
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="blank-container">
+    {# This block will be overridden by child templates < login_cancelled.html #}
+    {% block blank_inner_content %}{% endblock %}
+</div>
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+.blank-container {
+    background: transparent;
+    padding-top: 24vh;  /* Changed from 'top' to 'padding-top' */
+}
+</style>
+{% endblock %}
+
+
+

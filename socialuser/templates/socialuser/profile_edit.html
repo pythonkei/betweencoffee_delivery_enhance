@@ -1,0 +1,104 @@
+<!-- socialuser/templates/socialuser/profile_edit.html -->
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+<!-- blank header spacing-->
+<section class="ftco-section-blank"></section>
+
+
+<section class="ftco-subpage-section ftco-section-single-product">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col col-lg-8 mb-5 ftco-animate">
+                {% if onboarding %}
+                <h1 class="mb-4">完成您的個人資料</h1>
+                <div class="alert alert-info">
+                    <p>請填寫以下資料以繼續使用我們的服務</p>
+                </div>
+                {% else %}
+                <h1 class="mb-4">編輯個人資料</h1>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Profile Image -->
+                    <div class="form-group text-center">
+                        <img id="avatar-preview" src="{{ user.profile.avatar }}" 
+                             class="rounded-circle mb-3" width="120" height="120">
+                        {{ form.image }}
+                    </div>
+                    
+                    <!-- Display Name -->
+                    <div hidden class="form-group">
+                        <label>{{ form.displayname.label }}</label>
+                        {{ form.displayname }}
+                    </div>
+                    
+                    <!-- Phone Number (Required) -->
+                    <div class="form-group">
+                        <label>{{ form.phone.label }} <span class="text-danger">*</span></label>
+                        {{ form.phone }}
+                        <small class="form-text text-muted">{{ form.phone.help_text }}</small>
+                        {% if form.phone.errors %}
+                            <div class="text-danger">{{ form.phone.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Additional Info -->
+                    <div class="form-group">
+                        <label>{{ form.info.label }}</label>
+                        {{ form.info }}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">儲存</button>
+                    {% if onboarding %}
+                    <a class="btn btn-outline-secondary ml-2" href="{% url 'index' %}">稍後填寫</a>
+                    {% else %}
+                    <a class="btn btn-outline-secondary ml-2" href="{{ request.META.HTTP_REFERER }}">取消</a>
+                    {% endif %}
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="flexable-vh-20"></div>
+
+<script>
+    // Updates the avatar
+    const fileInput = document.querySelector('input[type="file"]');
+
+    fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    const image = document.querySelector('#avatar');
+
+    if (file && file.type.includes('image')) {
+        const url = URL.createObjectURL(file);
+        image.src = url;
+    }
+    });
+
+    // This updates the username
+    const display_nameInput = document.getElementById('id_displayname');
+    const display_nameOutput = document.getElementById('displayname');
+
+    display_nameInput.addEventListener('input', (event) => {
+        display_nameOutput.innerText = event.target.value;
+    });
+
+    // Preview image before upload
+    document.getElementById('id_image').addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatar-preview').src = e.target.result;
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+</script>
+
+
+{% endblock %}

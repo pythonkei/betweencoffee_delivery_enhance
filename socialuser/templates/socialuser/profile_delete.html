@@ -1,0 +1,41 @@
+<!-- socialuser/templates/socialuser/profile_delete.html -->
+{% extends 'layouts/blank.html' %}
+{% comment %} {% extends 'layouts/box.html' %} {% endcomment %}
+
+{% block content %}
+<section class="ftco-section-blank"></section>
+
+
+<section class="ftco-subpage-section ftco-section-single-product">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-6 mb-5 ftco-animate">
+                <h1 class="mb-4">停用帳戶</h1>
+                
+                <div class="">
+                    <p>您確定要刪除您的帳戶嗎？</p>
+                    <p>- 您的帳戶將停用但不會永久刪除。</p>
+                    <p>- 您可以在 30 天內再次登入以重新啟用您的帳戶。</p>
+                </div>
+
+            <form method='POST'>
+                {% csrf_token %}
+                    <div class="form-group">
+                        <label for="confirm-delete">輸入「1」確認：</label>
+                        <input type="text" id="confirm-delete" name="confirm" class="form-control" required 
+                            pattern="DEACTIVATE" title="Please type 1 to confirm">
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-danger">停用我的帳戶</button>
+                        <a class="btn btn-secondary ml-2" href="{% url 'profile-settings' %}">取消</a>
+                    </div>
+            </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

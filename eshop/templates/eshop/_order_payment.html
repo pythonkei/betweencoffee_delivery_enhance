@@ -1,0 +1,340 @@
+<!-- eshop/templates/eshop/order_payment.html -->
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+{% load tz %}
+
+{% block content %}
+
+<section class="ftco-section-blank"></section>
+
+<!-- Shop info -->
+<section>
+    <div class="cm-fixedbtn u-section" id="js-fixedbtn">
+        <div class="cm-fixedbtn-inner ftco-animate">
+        <dl class="cm-fixedbtn__open u-fonten is-bold">
+            <dt class="cm-fixedbtn__openTitle">OPEN</dt>
+            <dd class="cm-fixedbtn__openBody">7:00 - 19:00</dd>
+        </dl>
+
+        <div class="cm-fixedbtn__info is-map">
+            <a href="#access" target="_blank" class="cm-fixedbtn__infoTarget">
+                <p class="cm-fixedbtn__infoTargetTitle">
+                <span class="icon material-icons">pin_drop</span>
+                <span class="txt">地図</span>
+                </p>
+                <p class="cm-fixedbtn__infoTargetBody">葵涌 宏達工業中心地下</p>
+            </a>
+        </div>
+
+        <div class="cm-fixedbtn__info is-tel">
+            <a href="tel:24789522" class="cm-fixedbtn__infoTarget">
+            <p class="cm-fixedbtn__infoTargetTitle">
+                <span class="icon material-icons">phone_iphone</span>
+                <span class="txt">電話</span>
+            </p>
+            <p class="cm-fixedbtn__infoTargetBody u-fonten is-bold">2478 9522</p>
+            </a>
+        </div>
+        </div>
+    </div>
+</section>
+<!-- end Shop info -->
+
+
+<!-- subheader-->
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-lg-12 col-md-7 col-sm-12 text-center">
+                <h1 class="mt-5 bread">結賬</h1>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end subheader-->
+
+
+<section class="ftco-section">
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-12 col-sm-12">
+                <div class="card to-transparent mb-4">
+                    <div class="card-body to-transparent">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3>訂單摘要</h3>
+                            <span class="badge badge-{% if order.is_paid %}success{% else %}warning{% endif %}">
+                                {% if order.is_paid %}已支付{% else %}待處理{% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="order-items mb-4">
+                            {% for item in items %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="mr-3">
+                                    <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 76px; height: 76px;">
+                                        <img src="{{ item.image }}" alt="{{ item.name }}" class="img-fluid" style="max-height: 80px;">
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">{{ item.name }} x {{ item.quantity }} </h6>
+                                    <p class="mt-1 text-muted">
+                                        
+                                        {% if item.type == 'coffee' %}
+                                            {% if item.cup_level %} | 杯型: 
+                                                {% if item.cup_level == 'Small' %}細
+                                                {% elif item.cup_level == 'Medium' %}中
+                                                {% elif item.cup_level == 'Large' %}大
+                                                {% else %}{{ item.cup_level }}{% endif %}
+                                            {% endif %}
+                                            {% if item.milk_level %} | 奶量: 
+                                                {% if item.milk_level == 'Light' %}少
+                                                {% elif item.milk_level == 'Medium' %}正常
+                                                {% elif item.milk_level == 'Extra' %}追加
+                                                {% else %}{{ item.milk_level }}{% endif %}
+                                            {% endif %}
+                                        {% elif item.type == 'bean' %}
+                                            {% if item.grinding_level %} | 研磨: 
+                                                {% if item.grinding_level == 'Non' %}免研磨
+                                                {% elif item.grinding_level == 'Light' %}細
+                                                {% elif item.grinding_level == 'Medium' %}中
+                                                {% elif item.grinding_level == 'Deep' %}粗
+                                                {% else %}{{ item.grinding_level }}{% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <span>${{ item.total_price|floatformat:2 }}</span>
+                                    <div class="text-muted">${{ item.price|floatformat:2 }} / 單價</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <h5>總計</h5>
+                            <h5>${{ order.total_price|floatformat:2 }}</h5>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if order.order_type == 'quick' %}
+                <div class="card to-transparent mb-4">
+                    <div class="card-body ">
+                        <h5 class="mb-3">快速訂單詳情</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>姓名:</strong> {{ order.name }}</p>
+                                <p class="mb-1"><strong>電話:</strong> {{ order.phone }}</p>
+                                <p hidden class="mb-0"><strong>杯型:</strong> {{ order.cup_size }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>取貨時間:</strong> {{ order.pickup_time }}</p>
+                                <p class="mb-0"><strong>通知方式:</strong> WhatsApp / SMS</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Alipay -->
+                <div class="row justify-content-center pb-5 mt-4">
+                    <div class="col-md-8 text-center">
+                        <h3 class="mb-4">使用支付寶付款</h3>
+                        <a href="{% url 'eshop:alipay_payment' order.id %}" class="btn btn-primary">
+                            <img src="{% static 'images/alipay-logo.png' %}" alt="支付宝" style="height: 30px; margin-right: 10px;">
+                            支付寶付款
+                        </a>
+                    </div>
+                </div>
+                <!-- Error message -->
+                {% if alipay_error %}
+                <div class="row justify-content-center mt-3">
+                    <div class="col-md-8">
+                        <div class="alert alert-danger">
+                            <strong>支付宝支付错误:</strong>
+                            {{ alipay_error }}
+                            <br><small>請嘗試其他付款方式或聯絡客服</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- 支付 Choose -->
+                <div class="row justify-content-center pb-5">
+                    <div class="col-md-8 text-center">
+                        <h3 class="mb-4">或</h3>
+                        <h3 class="mb-4">Paypal付款</h3>
+                        <div id="paypal-button" class="mb-4"></div>
+                        <p>
+                            <span class="mr-2"><a href="{% url 'cart:cart_detail' %}">返回購物車</a></span>
+                        </p>
+                        <!-- 支付状态提示 -->
+                        <div class="alert-info mb-4 to-transparent">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            您的購物車中的商品會保留直到付款完成。如果付款遇到問題，您可以返回購物車繼續修改訂單。
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="flexable-vh-20"></div>
+
+
+<!-- 
+<script src="https://www.paypal.com/sdk/js?client-id=AdEmBoUTqx8pCmSTkZgZmgbIaZbz6A8-gOKNj8MuLyYeI6vmFVpKVRHsPNRnyKCLAvcd-c5Uu2rbBgNa&currency=HKD&locale=zh_HK"></script>
+-->
+
+<!-- paypal checkout sdk js and zh_HK locale parameter - Hidden credit card option-->
+<script src="https://www.paypal.com/sdk/js?client-id=AdEmBoUTqx8pCmSTkZgZmgbIaZbz6A8-gOKNj8MuLyYeI6vmFVpKVRHsPNRnyKCLAvcd-c5Uu2rbBgNa&currency=HKD&locale=zh_HK&disable-funding=card"></script>
+
+
+<!-- PayPal 設置 -->
+<script>
+  paypal.Buttons({
+    // Configure environment (auto-set from SDK script)
+    style: {
+      size: 'large',
+      color: 'blue',
+      shape: 'rect',
+    },
+
+    // 設置交易
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: {
+            value: '{{ order.total_price|floatformat:2 }}',
+            currency_code: 'HKD'
+          }
+        }]
+      });
+    },
+
+    // 完成交易
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        // 重定向到確認頁面
+        window.location.href = "{% url 'eshop:order_payment_confirmation' %}";
+      });
+    },
+
+    // 處理錯誤
+    onError: function(err) {
+      console.error('PayPal錯誤:', err);
+    }
+  }).render('#paypal-button');
+</script>
+
+
+<!-- 訂單狀態檢查 -->
+<script>
+    // 訂單狀態檢查函數
+    function checkOrderStatus(orderId) {
+        fetch(`/eshop/check_order_status/${orderId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('網絡響應異常');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('訂單狀態:', data);
+                if (data.is_paid) {
+                    // 支付成功，跳轉到確認頁面
+                    window.location.href = "{% url 'eshop:order_payment_confirmation' %}?order_id=" + orderId;
+                } else if (data.error) {
+                    console.error('錯誤:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('檢查訂單狀態時出錯:', error);
+            });
+    }
+
+    // 如果是支付寶支付，啟動定期檢查
+    {% if order and not order.is_paid %}
+    // 5秒後開始檢查，每10秒檢查一次
+    setTimeout(() => {
+        const orderId = {{ order.id }};
+        // 立即檢查一次
+        checkOrderStatus(orderId);
+        // 然後設置定期檢查
+        const intervalId = setInterval(() => {
+            checkOrderStatus(orderId);
+        }, 10000);
+        
+        // 10分鐘後停止檢查
+        setTimeout(() => {
+            clearInterval(intervalId);
+            console.log('10分鐘後停止檢查訂單狀態');
+        }, 600000);
+    }, 5000);
+    {% endif %}
+</script>
+
+
+<!-- Shop info bar 180px after scrolling -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const shopInfoBar = document.getElementById('js-fixedbtn');
+        
+        // Hide initially
+        shopInfoBar.style.display = 'block'; // Ensure it's visible to animate
+        shopInfoBar.classList.remove('active');
+    
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 480) {
+                shopInfoBar.classList.add('active');
+            } else {
+                shopInfoBar.classList.remove('active');
+            }
+        });
+    });
+</script>
+
+
+<style>
+    /* Add badge styling */
+    .badge-success {
+        background-color: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    
+    .order-items .d-flex {
+        padding: 10px 0;
+        {% comment %} border-bottom: 1px solid #eee; {% endcomment %}
+    }
+    
+    .img-container {
+        width: 75px;
+        height: 75px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .img-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+</style>
+
+{% endblock content %}

@@ -1,0 +1,73 @@
+<!-- account/login.html -->
+{% extends 'layouts/blank.html' %}
+{% load i18n %}
+{% load allauth account %}
+{% block head_title %}{% trans "Login" %}{% endblock head_title %}
+
+
+{% block content %}
+<!-- blank header spacing-->
+<section class="ftco-section-blank"></section>
+
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col col-lg-8 text-center">
+                <span class="subheading"><h1>登入</h1></span>
+                    <p class="h5 pt-2">請使用社交帳戶登入
+                    <a hidden href="{% url 'account_signup' %}?next={% url 'profile-onboarding' %}">立即註冊</a>
+                    </p>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumbs -->
+    <div hidden class="container">
+        <div class="col-lg-12 col-md-7 col-sm-12 text-center mb-4">
+            <div class="container">
+                <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'index' %}">返回</a></p>
+            </div>
+        </div>
+    </div>
+    <!-- end breadcrumbs -->
+</section>
+<!-- End Header Banner-->
+
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center mt-2">
+            <div class="col col-lg-8 mb-5">
+                {% url 'account_login' as login_url %}
+                {% comment %}
+                {% element form form=form method="post" action=login_url tags="entrance,login" %}
+                    {% slot body %}
+                        {% csrf_token %}
+                        {% element fields form=form unlabeled=True %}
+                        {% endelement %}
+
+                        <div class="remember-me-container" style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <input type="checkbox" name="remember" id="id_remember" style="margin-right: 8px;">
+                            <label for="id_remember" style="margin-bottom: 0;">Remember Me:</label>
+                        </div>
+
+                        {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                        {% endif %}
+                    {% endslot %}
+
+                    {% slot actions %}
+                        {% element button type="submit" tags="prominent,login" %}
+                            {% trans "Sign In" %}
+                        {% endelement %}
+                    {% endslot %}
+                {% endelement %}
+                {% endcomment %}
+
+                {% include 'socialuser/social_logins.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

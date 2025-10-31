@@ -1,0 +1,14 @@
+{% load i18n %}
+{% trans "Verify Your Email Address" %}
+
+{% blocktrans %}Hello {{ user_display }},{% endblocktrans %}
+
+{% blocktrans with site_name=current_site.name %}You're receiving this email to verify your account at {{ site_name }}.{% endblocktrans %}
+
+{% trans "Please click the following link to verify your email:" %}
+{{ activate_url }}
+
+{% trans "Or copy and paste the link into your browser." %}
+
+{% blocktrans %}Thanks,
+The {{ site_name }} Team{% endblocktrans %}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试Twilio配置</title>
+    <style>
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Twilio配置测试</h1>
+    
+    {% if success %}
+        <p class="success">{{ success }}</p>
+    {% endif %}
+    
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+    
+    <p class="info">配置的电话号码: {{ configured_number }}</p>
+    <p class="info">号码存在: {{ number_exists|yesno:"是,否" }}</p>
+    
+    {% if account_numbers %}
+        <h2>你的Twilio账户中的号码:</h2>
+        <ul>
+            {% for number in account_numbers %}
+                <li>{{ number }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    <p><a href="{% url 'admin:index' %}">返回管理界面</a></p>
+</body>
+</html>

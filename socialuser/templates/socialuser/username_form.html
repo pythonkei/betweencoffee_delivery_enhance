@@ -1,0 +1,8 @@
+<!-- socialuser/templates/socialuser/username_form.html -->
+<form action="{% url 'profile-usernamechange' %}" method="post" class="flex gap-2 text-black" autocomplete="off">
+    {% csrf_token %}
+    {% for field in form %}{{ field }}{% endfor %}
+    <button class="btn" type="submit">確認</button>
+</form>
+
+<a hx-swap-oob="true" id="username-edit" href="{% url 'profile-settings' %}" class="text-right">取消</a>

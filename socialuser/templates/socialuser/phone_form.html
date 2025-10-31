@@ -1,0 +1,14 @@
+<!-- socialuser/templates/socialuser/phone_form.html -->
+<form action="{% url 'profile-phonechange' %}" method="post" class="flex gap-2 text-black" autocomplete="off">
+    {% csrf_token %}
+        {{ form.phone }}
+        {% if form.phone.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.phone.errors|join:", " }}
+            </div>
+        {% endif %}
+            <small hidden class="form-text text-muted">請輸入8位數字香港電話號碼</small>
+    <button class="btn" type="submit">確認</button>
+</form>
+
+<a hx-swap-oob="true" id="phone-edit" href="{% url 'profile-settings' %}" class="text-right">取消</a>

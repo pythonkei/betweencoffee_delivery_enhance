@@ -1,0 +1,81 @@
+<!-- nav.html -->
+{% load socialaccount %}
+<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">&#65371; Between &#65373; </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">HOME</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Shop
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'coffee_menu' %}">咖啡</a>
+                        <a class="dropdown-item" href="{% url 'bean_menu' %}">烘焙豆</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'about' %}">US</a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cart:cart_detail' %}">
+                        <i class="icon-shopping-cart"></i>
+                        <span class="cart-count cart-amount-label cart-amount-label-pill">{{ cart|length }}</span>
+                    </a>
+                </li>
+                
+                <!-- User Account Dropdown - Only shows icon for anonymous users -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="icon-user"></i>
+                        {% if user.is_authenticated %}
+                            <span class="d-none d-lg-inline text-nonecase">{{ user.username|truncatechars:10 }}</span>
+                        {% endif %}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                        {% if user.is_authenticated %}
+                            <div hidden class="dropdown-header">
+                                Signed in as <strong>{{ user.username }}</strong>
+                            </div>
+                            <a class="dropdown-item" href="{% url 'profile' %}">
+                                <i class="icon-user mr-2"></i> 個人資料
+                            </a>
+                            <a class="dropdown-item" href="{% url 'profile-orders' %}">
+                                <i class="icon-cog mr-2"></i> 訂單記錄
+                            </a>
+                            <a class="dropdown-item" href="{% url 'profile-settings' %}">
+                                <i class="icon-cog mr-2"></i> 設定
+                            </a>
+                            <a class="dropdown-item" href="{% url 'account_logout' %}">
+                                <i class="icon-exit mr-2"></i> 登出
+                            </a>
+                        {% else %}
+                            <a class="dropdown-item" href="{% url 'account_login' %}">
+                                <i class="icon-user mr-2"></i> 登入
+                            </a>
+                            <a hidden class="dropdown-item" href="{% url 'account_signup' %}">
+                                <i class="icon-user-plus mr-2"></i> 註冊
+                            </a>
+                            <!--
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% provider_login_url 'google' %}">
+                                <i class="icon-google mr-2"></i> Continue with Google
+                            </a>
+                            <a class="dropdown-item" href="{% provider_login_url 'facebook' %}">
+                                <i class="icon-facebook mr-2"></i> Continue with Facebook
+                            </a>
+                            -->
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,35 @@
+{% extends 'layouts/blank.html' %}
+{% load i18n %}
+
+{% block blank_inner_content %}
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col col-lg-8 text-center">
+                <h1>{% trans "Login Cancelled" %}</h1>
+                
+                {% url 'account_login' as login_url %}
+                
+                <div class="mt-4">
+                    <p class="h5 pb-3">
+                        {% blocktrans %}
+                        您已取消社交登入程序<br>如果這是意外，您可以再試一次
+                        {% endblocktrans %}
+                    </p>
+                </div>
+                
+                <div class="mt-4">
+                    {% include 'socialuser/social_logins.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="flexable-vh-20"></div>
+{% endblock %}
+
+
+{% block extra_css %}
+{{ block.super }} {# < This inherits the CSS from blank.html #}
+{% endblock %}

@@ -1,0 +1,2 @@
+{% load i18n %}
+{% blocktrans %}Please Verify Your Email for {{ site_name }}{% endblocktrans %}

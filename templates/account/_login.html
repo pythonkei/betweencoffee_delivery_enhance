@@ -1,0 +1,62 @@
+{% extends "betweencoffee_delivery/base.html" %}
+{% load socialaccount %}
+{% providers_media_js %}
+
+{% block content %}
+
+<section class="ftco-section-blank">
+  <h2>Social User Home function defined</h2>
+  <p>This is the social user landing page</p>
+</section>
+
+<section class="ftco-subpage-section ftco-section-single-product">
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card" style="background-color: transparent;">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Sign In</h3>
+          
+
+          <!-- Social Login Buttons -->
+          <div class="social-login">
+            <a href="" 
+               class="btn btn-facebook btn-block mb-3">
+              <i class="fab fa-facebook-f mr-2"></i> Continue with Facebook
+            </a>
+            
+            <a href="" 
+               class="btn btn-google btn-block">
+              <i class="fab fa-google mr-2"></i> Continue with Google
+            </a>
+          </div>
+          
+          <div class="text-center mt-4">
+            <p class="mb-0">By continuing, you agree to our Terms of Service</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<div class="flexable-vh-20"></div>
+
+<style>
+    .btn-facebook {
+    background: #3b5998;
+    color: white;
+    }
+    .btn-google {
+    background: #dd4b39;
+    color: white;
+    }
+    .social-login {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}

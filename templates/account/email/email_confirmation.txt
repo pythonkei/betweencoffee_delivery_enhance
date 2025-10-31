@@ -1,0 +1,11 @@
+Hello {{ user.username }},
+
+Thank you for registering with {{ site_name }}!
+
+To verify your email address, please click the following link:
+{{ activate_url }}
+
+If you didn't request this, please ignore this email.
+
+Best regards,
+The {{ site_name }} Team

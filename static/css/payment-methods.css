@@ -1,0 +1,140 @@
+/* 支付方式选择器样式 - 修复版本 */
+
+/* 方案1: 现代卡片式设计 - 修复 */
+.payment-methods-modern {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+.payment-modern-card {
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.payment-modern-card:last-child {
+    border-bottom: none;
+}
+
+.payment-modern-radio {
+    display: none;
+}
+
+.payment-modern-label {
+    display: block;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0;
+    position: relative;
+}
+
+.payment-modern-label:hover {
+    background-color: #f8f9ff;
+}
+
+.payment-modern-radio:checked + .payment-modern-label {
+    background-color: #f0f7ff;
+    border-left: 4px solid #007bff;
+}
+
+.payment-modern-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-modern-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.payment-modern-logo {
+    height: 28px;
+    width: auto;
+    border-radius: 4px;
+}
+
+.payment-modern-icon {
+    font-size: 24px;
+    width: 28px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-modern-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.payment-modern-arrow {
+    transition: transform 0.3s ease;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.payment-modern-radio:checked + .payment-modern-label .payment-modern-arrow {
+    transform: rotate(180deg);
+    color: #007bff;
+}
+
+/* 修复：使用 height 替代 max-height */
+.payment-modern-details {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+    background-color: #fafbfc;
+}
+
+.payment-modern-details.open {
+    height: auto;
+    padding: 15px 20px;
+}
+
+
+/* 图标颜色定义 */
+.alipay-icon { color: #1677ff; }
+.paypal-icon { color: #003087; }
+.fps-icon { color: #00a0e9; }
+.cash-icon { color: #28a745; }
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .payment-modern-label,
+    .payment-minimal-label,
+    .payment-gradient-label {
+        padding: 16px;
+    }
+    
+    .payment-modern-info,
+    .payment-minimal-info,
+    .payment-gradient-info {
+        gap: 12px;
+    }
+    
+    .payment-modern-logo,
+    .payment-minimal-logo,
+    .payment-gradient-logo {
+        height: 24px;
+    }
+    
+    .payment-modern-name,
+    .payment-minimal-name,
+    .payment-gradient-name {
+        font-size: 14px;
+    }
+}
+
+/* 无障碍访问支持 */
+.payment-modern-label:focus,
+.payment-minimal-label:focus,
+.payment-gradient-label:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
