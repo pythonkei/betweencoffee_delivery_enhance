@@ -28,43 +28,63 @@ def format_price(value):
 
 
 # Ensure that each option combination is treated as a unique or new item.
+# cart/views.py
 @require_POST
 def add_to_cart(request, product_id, product_type):
-    if product_type == 'coffee':
-        product = get_object_or_404(CoffeeItem, id=product_id)
-        cup_level = request.POST.get('cup_level', 'M')
-        milk_level = request.POST.get('milk_level', 'M')
-        grinding_level = None
-        weight = None
-    elif product_type == 'bean':
-        product = get_object_or_404(BeanItem, id=product_id)
-        grinding_level = request.POST.get('grinding_level', 'Non')
-        weight = request.POST.get('weight', '200g')  # 获取重量选项
-        cup_level = None
-        milk_level = None
-    else:
-        return redirect('coffee_menu')
+    print(f"收到添加购物车请求: 产品ID={product_id}, 类型={product_type}")
+    
+    try:
+        if product_type == 'coffee':
+            product = get_object_or_404(CoffeeItem, id=product_id)
+            cup_level = request.POST.get('cup_level', 'Medium')
+            milk_level = request.POST.get('milk_level', 'Medium')
+            grinding_level = None
+            weight = None
+            print(f"咖啡选项 - 杯量: {cup_level}, 奶量: {milk_level}")
+        elif product_type == 'bean':
+            product = get_object_or_404(BeanItem, id=product_id)
+            grinding_level = request.POST.get('grinding_level', 'Non')
+            weight = request.POST.get('weight', '200g')
+            cup_level = None
+            milk_level = None
+            print(f"咖啡豆选项 - 研磨: {grinding_level}, 重量: {weight}")
+        else:
+            print(f"无效的产品类型: {product_type}")
+            return JsonResponse({
+                'success': False, 
+                'message': '无效的产品类型'
+            })
 
-    quantity = int(request.POST.get('quantity', 1))
+        quantity = int(request.POST.get('quantity', 1))
+        print(f"数量: {quantity}")
 
-    cart = Cart(request)
-    cart.add(product, product_type, quantity=quantity, cup_level=cup_level, 
-            milk_level=milk_level, grinding_level=grinding_level, weight=weight)
+        cart = Cart(request)
+        cart.add(product, product_type, quantity=quantity, cup_level=cup_level, 
+                milk_level=milk_level, grinding_level=grinding_level, weight=weight)
 
-    # 计算单价（考虑重量选项）
-    if product_type == 'bean' and weight:
-        unit_price = product.get_price(weight)
-    else:
-        unit_price = product.price  # For coffee items
+        # 计算单价
+        if product_type == 'bean' and weight:
+            unit_price = product.get_price(weight)
+        else:
+            unit_price = product.price
 
-    return JsonResponse({
-        'success': True,
-        'cart_count': len(cart),
-        'product_name': product.name,
-        'product_price': format_price(unit_price),
-        'quantity': quantity,
-        'image_url': product.image.url if product.image else ''
-    })
+        print(f"添加到购物车成功: {product.name}")
+
+        return JsonResponse({
+            'success': True,
+            'cart_count': len(cart),
+            'product_name': product.name,
+            'product_price': format_price(unit_price),
+            'quantity': quantity,
+            'image_url': product.image.url if product.image else ''
+        })
+
+    except Exception as e:
+        print(f"添加到购物车错误: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'服务器错误: {str(e)}'
+        })
 
 
 

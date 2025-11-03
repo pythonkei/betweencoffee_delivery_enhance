@@ -6,11 +6,11 @@ from .views import create_order
 app_name = 'cart'
 
 urlpatterns = [
-    path('count/', views.cart_count, name='cart_count'),
-    path('cart_add_base/', views.cart_add_base, name='cart_add_base'),
     path('', views.cart_detail, name='cart_detail'),
     path('add/<int:product_id>/<str:product_type>/', views.add_to_cart, name='add_to_cart'),
     path('remove/<str:product_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('count/', views.cart_count, name='cart_count'),
+    path('cart_add_base/', views.cart_add_base, name='cart_add_base'),
     path('update_cart/', views.update_cart, name='update_cart'),
     path('create_order/', create_order, name='create_order'),
 ]

@@ -1,0 +1,1 @@
+web: python manage.py migrate && gunicorn betweencoffee_delivery.wsgi
