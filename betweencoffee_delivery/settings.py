@@ -29,7 +29,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-vwi14g!cw8o+^=72zclbmgskh_jrm4h_-^v3u!ti1p)@)p6u)&'
 
 # For Render config
-SECRET_KEY = os.environ.get('SECRET_KEY', default='django-insecure-vwi14g!cw8o+^=72zclbmgskh_jrm4h_-^v3u!ti1p)@)p6u)&')
+# Django Secret Key - 移除硬编码
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-development-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # 从环境变量读取，生产环境,通过判断是否在 Render 环境来设置[citation:5]
@@ -330,9 +331,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # Real emails test
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'pythonkei@gmail.com'
-# In google app name : betweencoffee_delivery_email_confirm,
+EMAIL_HOST_USER = 'pythonkei@gmail.com' # In google app name : betweencoffee_delivery_email_confirm,
+
+# 邮箱配置 - 使用环境变量
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='fyzl jxbv jndk xajw')
+'''
 EMAIL_HOST_PASSWORD = 'fyzl jxbv jndk xajw' # NOT your regular password (see note below), gen by google
+'''
 DEFAULT_FROM_EMAIL = 'pythonkei@gmail.com' # Should match EMAIL_HOST_USER
 SERVER_EMAIL = 'pythonkei@gmail.com'  # For error notifications
 
@@ -433,6 +438,7 @@ ALIPAY_APP_ID = '9021000151625966'
 https://blog.csdn.net/qq_51738765/article/details/147196238?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_utm_term~default-0-147196238-blog-122902877.235^v43^pc_blog_bottom_relevance_base7&spm=1001.2101.3001.4242.1&utm_relevant_index=2
 '''
 
+'''硬编码
 # App Private Key PKCS8 Format *one line and remove space
 ALIPAY_APP_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4Vyqi5S4iJFW4lfP+wIQTBa2EPPUs47F+1psrRt5rQeULbB4RmwAvqrEnFNrgSoHhK2rRao9hXRIsafSyLI/TIWLa29ngPPtXNZNa7OYem9wOPiJhAAzVqBhPrFLZ7XNX4Gwkr9NkzdVnPdRlqk22YIIdstLfalFOvqegG3FWlzDUm4eouNJYlG0dQlBR/m+jMJ/Q0Sy7aIaidgN5Ph7pxUshXkjHbqIYXsgT7129wFU/W/2wdvUff4GnaEnNBLwZbe7TE73jkLQWylLnO8BfBsXOaCCmXZmGUL/3qVHYAgTUT4Z1XkUdYZw77Li6rSxfYdp+R6ld/4BNnX3SsAFrAgMBAAECggEARpP5Gw0sMJ5Aw7+F/8+twaq22J6OMHWtC6cXGea0WdSM4WavzIXP+HAeC5yMgLuGJrP83dkytFByGNcofN9a4bcypiDutlAi2y0EEhgJs0ZxZnKbrw/Z2iPVywtrXUzwkIC4ZwN6qGm2fyTJIXOm9WDV8JD689c88i1E+KQJLOFnngfFI9vRUpX8b9QzDa/t6TFnDJyga0ftRWLQCn9rvoHPRpjBsFodRUe/CAEtOQR8j+ykJhRhk5lSB1sJ66c0Mj/+IT9SBXorlaQ91cIIdUOak2JL+N6E4BhKXZYUBpOM6STyZQ+/k+dC7fziTIgJ9LwkIwmh+AIfwcAChbo1YQKBgQDkbyrSPmlIlXhJYCGZFnxSZXPhZCGNJ976lb1CYtZzKx1K0QcZT/1e8mnw7Q+Uq8Vv8BCUgpAr5pe+72xPGZoE9lIalWLs26koCtKeQWTaT5nybh9XgwynrNT4F9NqwCbl0kE8pfNBZpR3h+0DbfNgDTw3nUF/OW8n3ghoa2qCPwKBgQDOldjSrgEhYwz34/jlkrquRI89CXCaOy41hPzFCF8zS5j3C70qjt6I0Ro4E+U9zgOnWzLiJxSzWTJ3f9Gv81q4LvEOdsTSH+YRK5jUApn84U8zC26KlcMnUxW7KdG5QdARICeN5r1H1EcixbZUR8ORLffWt0Hw1D/KDTuqoI+d1QKBgQDJOAdvVVymfEuNzukpkb4HUqil1O8dCQ8IithA3xFqN4NBASmQqX5VoZGikR+VZU2wkbX5K51VnnTy0rIEZ1fdoSCnnAmc/M1foVDv6EivaUkBXPGsw5plJQAgXdR0hzh8Xx3qD4BcjsCfHhOwXqzwYhg2IQaty+jXJGUhneUfPwKBgQC2yHq5nd++LKeSxZC5f2PRQTQDa1DIBcjS7cHAi7G/7wl+vFI5T4OyRmEOcPwJ/TfaYaTZ2H5GWYt/lAZxyb3g7Re4Fnn6+OJVGt/z5gFdb/TlUx4RXIT5TFgT6+J2KbbxECQvN5MN9NKj/49dbsmosKVyw16CuSlfmunKBJpNqQKBgH347BjZdeua7gJiMGO/QRJMKEjL9HLB9l0xsg+udxDN/55xmunVVK9kDt337LnSs17f++1Z+YkHjSGOIPpNSgdBiKRSDptQVnQ3bm+Q31WdraqaTUrR3X3YifHkBDUrcqjbnonJlbd/5yK+aows9IgcHvNC3sSRBrtc20z47zXJ
@@ -442,6 +448,20 @@ MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4Vyqi5S4iJFW4lfP+wIQTBa2EPPUs
 ALIPAY_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTKp2l7B+SLjrIWqXeRUYCnH291jq05/fAPcV/bSrZbXRT2vEi9SfypceTaRjnKbsJp8tozYEPHJxqV0Ia4nr4zFixHhlSGJk/uMICC16dkQ3NebHy7PUMJjyu2rhtB4GyvF2HZwlcku21BR2iVMqh5ZO5WNxz0qjx9gbAqk5ebqFktPAPPa86dnoVeHIK4KPs/L3Mfkqc03fypbj/4v1IPKEcmvB2kKnGGrZCoOGvknApJGSQkH3JPN+gpFJEJnnehASd+sRTLTTDG8K/KL8mo2fdwZ/w7APJkkVUzHRLOileFlyijehwapeJ+yJAmvan8lR0oIAsBZlp0+HBIW6QIDAQAB
 -----END PUBLIC KEY-----"""
+'''
+
+
+# 支付宝配置 - 使用环境变量
+ALIPAY_APP_ID = env('ALIPAY_APP_ID', default='9021000151625966')
+ALIPAY_APP_PRIVATE_KEY = env('ALIPAY_APP_PRIVATE_KEY', default='''-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4Vyqi5S4iJFW4lfP+wIQTBa2EPPUs47F+1psrRt5rQeULbB4RmwAvqrEnFNrgSoHhK2rRao9hXRIsafSyLI/TIWLa29ngPPtXNZNa7OYem9wOPiJhAAzVqBhPrFLZ7XNX4Gwkr9NkzdVnPdRlqk22YIIdstLfalFOvqegG3FWlzDUm4eouNJYlG0dQlBR/m+jMJ/Q0Sy7aIaidgN5Ph7pxUshXkjHbqIYXsgT7129wFU/W/2wdvUff4GnaEnNBLwZbe7TE73jkLQWylLnO8BfBsXOaCCmXZmGUL/3qVHYAgTUT4Z1XkUdYZw77Li6rSxfYdp+R6ld/4BNnX3SsAFrAgMBAAECggEARpP5Gw0sMJ5Aw7+F/8+twaq22J6OMHWtC6cXGea0WdSM4WavzIXP+HAeC5yMgLuGJrP83dkytFByGNcofN9a4bcypiDutlAi2y0EEhgJs0ZxZnKbrw/Z2iPVywtrXUzwkIC4ZwN6qGm2fyTJIXOm9WDV8JD689c88i1E+KQJLOFnngfFI9vRUpX8b9QzDa/t6TFnDJyga0ftRWLQCn9rvoHPRpjBsFodRUe/CAEtOQR8j+ykJhRhk5lSB1sJ66c0Mj/+IT9SBXorlaQ91cIIdUOak2JL+N6E4BhKXZYUBpOM6STyZQ+/k+dC7fziTIgJ9LwkIwmh+AIfwcAChbo1YQKBgQDkbyrSPmlIlXhJYCGZFnxSZXPhZCGNJ976lb1CYtZzKx1K0QcZT/1e8mnw7Q+Uq8Vv8BCUgpAr5pe+72xPGZoE9lIalWLs26koCtKeQWTaT5nybh9XgwynrNT4F9NqwCbl0kE8pfNBZpR3h+0DbfNgDTw3nUF/OW8n3ghoa2qCPwKBgQDOldjSrgEhYwz34/jlkrquRI89CXCaOy41hPzFCF8zS5j3C70qjt6I0Ro4E+U9zgOnWzLiJxSzWTJ3f9Gv81q4LvEOdsTSH+YRK5jUApn84U8zC26KlcMnUxW7KdG5QdARICeN5r1H1EcixbZUR8ORLffWt0Hw1D/KDTuqoI+d1QKBgQDJOAdvVVymfEuNzukpkb4HUqil1O8dCQ8IithA3xFqN4NBASmQqX5VoZGikR+VZU2wkbX5K51VnnTy0rIEZ1fdoSCnnAmc/M1foVDv6EivaUkBXPGsw5plJQAgXdR0hzh8Xx3qD4BcjsCfHhOwXqzwYhg2IQaty+jXJGUhneUfPwKBgQC2yHq5nd++LKeSxZC5f2PRQTQDa1DIBcjS7cHAi7G/7wl+vFI5T4OyRmEOcPwJ/TfaYaTZ2H5GWYt/lAZxyb3g7Re4Fnn6+OJVGt/z5gFdb/TlUx4RXIT5TFgT6+J2KbbxECQvN5MN9NKj/49dbsmosKVyw16CuSlfmunKBJpNqQKBgH347BjZdeua7gJiMGO/QRJMKEjL9HLB9l0xsg+udxDN/55xmunVVK9kDt337LnSs17f++1Z+YkHjSGOIPpNSgdBiKRSDptQVnQ3bm+Q31WdraqaTUrR3X3YifHkBDUrcqjbnonJlbd/5yK+aows9IgcHvNC3sSRBrtc20z47zXJ
+-----END PRIVATE KEY-----''')
+ALIPAY_PUBLIC_KEY = env('ALIPAY_PUBLIC_KEY', default='''-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTKp2l7B+SLjrIWqXeRUYCnH291jq05/fAPcV/bSrZbXRT2vEi9SfypceTaRjnKbsJp8tozYEPHJxqV0Ia4nr4zFixHhlSGJk/uMICC16dkQ3NebHy7PUMJjyu2rhtB4GyvF2HZwlcku21BR2iVMqh5ZO5WNxz0qjx9gbAqk5ebqFktPAPPa86dnoVeHIK4KPs/L3Mfkqc03fypbj/4v1IPKEcmvB2kKnGGrZCoOGvknApJGSQkH3JPN+gpFJEJnnehASd+sRTLTTDG8K/KL8mo2fdwZ/w7APJkkVUzHRLOileFlyijehwapeJ+yJAmvan8lR0oIAsBZlp0+HBIW6QIDAQAB
+-----END PUBLIC KEY-----''')
+
+
+
 
 
 ALIPAY_DEBUG = True
@@ -450,16 +470,28 @@ ALIPAY_NOTIFY_URL = 'http://localhost:8080/eshop/alipay_notify/'
 ALIPAY_SIGN_TYPE = 'RSA2'
 ALIPAY_CHARSET = 'utf-8'
 
-
+'''
 # PayPal form 开发者平台
 PAYPAL_ENVIRONMENT = 'sandbox'  # 或 'production'
 PAYPAL_CLIENT_ID = 'AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-'
 PAYPAL_CLIENT_SECRET = 'EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS'
+'''
 
 
+# PayPal 配置 - 使用环境变量
+PAYPAL_CLIENT_ID = env('PAYPAL_CLIENT_ID', default='AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-')
+PAYPAL_CLIENT_SECRET = env('PAYPAL_CLIENT_SECRET', default='EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS')
+
+'''
 # FPS config
 FPS_MERCHANT_ID = env('FPS_MERCHANT_ID', default='BETWEENCOFFEE')
 FPS_MERCHANT_NAME = 'Between Coffee'
+FPS_BANK_ACCOUNT = env('FPS_BANK_ACCOUNT', default='')
+FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
+'''
+
+# FPS 配置 - 使用环境变量
+FPS_MERCHANT_ID = env('FPS_MERCHANT_ID', default='BETWEENCOFFEE')
 FPS_BANK_ACCOUNT = env('FPS_BANK_ACCOUNT', default='')
 FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
 
@@ -488,10 +520,18 @@ Notification URL: http://localhost.com/eshop/order_payment_confirmation/
 Message Delivery: Enabled
 '''
 
+'''
 # Twilio配置（示例）
 TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
 TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
 TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
+'''
+
+# Twilio 配置 - 使用环境变量
+TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
+TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
+TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
+
 
 '''
 twilio

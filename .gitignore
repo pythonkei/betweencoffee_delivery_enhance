@@ -29,3 +29,28 @@ media/
 .DS_Store
 Thumbs.db
 .env
+
+# Environment variables
+.env
+*.env
+
+# Local development files
+local_settings.py
+.env.local
+.env.production
+
+# Database
+*.sqlite3
+*.db
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
