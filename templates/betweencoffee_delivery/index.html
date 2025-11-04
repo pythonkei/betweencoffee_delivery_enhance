@@ -1,0 +1,373 @@
+{% extends 'layouts/blank.html' %}
+{% load static %}
+{% block title %}Between Coffee - Index{% endblock %}
+
+{% block content %}
+
+<section class="feed bg-gry overflow-hidden">
+    <div class="feed__clock helvetica"><span id="clock"></span></div>
+    <div class="feed__layer">
+        <div class="feed__layer-parts feed__layer-parts--01"></div>
+        <div class="feed__layer-parts feed__layer-parts--02"></div>
+    </div>
+    <div class="feed__mask">
+        <svg id="_レイヤー_1" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="0" height="0" viewBox="0 0 2430 570" fill="none">
+            <clipPath id="mask" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
+                <path id="Exclude" d="M2430 570H0V0H2430V570ZM10 564H131.451V167.571H135.5C137.659 168.1 138.874 169.422 139.144 171.536C139.413 173.122 139.549 177.086 139.549 183.429V564H261V203.25C261 164.136 260.595 132.422 259.785 108.107C259.245 83.7931 257.491 64.7643 254.522 51.0215C251.554 37.2787 246.561 27.4998 239.544 21.6855C232.527 15.8712 222.675 12.436 209.99 11.3789C197.575 9.79318 181.517 9 161.814 9H10V564ZM367.79 87C348.167 87 332.038 87.7948 319.403 89.3848C307.038 90.4447 297.36 93.8898 290.371 99.7197C283.382 105.55 278.408 115.355 275.451 129.135C272.494 142.915 270.613 162.26 269.807 187.17C269.269 211.55 269 243.085 269 281.775V369.225C269 407.915 269.269 439.715 269.807 464.625C270.613 489.005 272.494 508.085 275.451 521.865C278.408 535.645 283.382 545.45 290.371 551.28C297.36 557.11 307.038 560.82 319.403 562.41C332.038 563.47 348.167 564 367.79 564H420.21C440.102 564 456.231 563.47 468.597 562.41C480.962 560.82 490.64 557.11 497.629 551.28C504.618 545.45 509.592 535.645 512.549 521.865C515.506 508.085 517.252 489.005 517.79 464.625C518.596 439.715 519 407.915 519 369.225V281.775C519 242.555 518.596 210.755 517.79 186.375C517.252 161.995 515.506 142.915 512.549 129.135C509.592 115.355 504.618 105.55 497.629 99.7197C490.64 93.8898 480.828 90.4447 468.193 89.3848C455.828 87.7948 439.833 87 420.21 87H367.79ZM529 564H680.21C700.102 564 716.231 563.471 728.597 562.414C740.962 560.828 750.64 557.129 757.629 551.314C764.618 545.5 769.592 535.721 772.549 521.979C775.506 508.236 777.252 489.207 777.79 464.893C778.596 440.05 779 408.336 779 369.75V282.536C779 243.422 778.596 211.707 777.79 187.393C777.252 163.078 775.506 144.049 772.549 130.307C769.592 116.564 764.618 106.786 757.629 100.972C750.64 95.1574 740.828 91.7212 728.193 90.6641C715.828 89.0784 699.833 88.2861 680.21 88.2861H649.968V9H529V564ZM787 369.225C787 407.915 787.27 439.715 787.81 464.625C788.619 489.005 790.509 508.085 793.478 521.865C796.446 535.645 801.439 545.45 808.456 551.28C815.473 557.11 825.19 560.82 837.604 562.41C850.289 563.47 866.483 564 886.186 564H1038V87H916.549V325.5H912.5C910.611 324.97 909.396 323.91 908.856 322.32C908.587 320.2 908.451 315.96 908.451 309.6V87H787V369.225ZM1046 369.75C1046 408.336 1046.27 440.05 1046.81 464.893C1047.63 489.207 1049.52 508.236 1052.51 521.979C1055.49 535.721 1060.5 545.5 1067.55 551.314C1074.6 557.129 1084.36 560.828 1096.83 562.414C1109.58 563.471 1125.84 564 1145.63 564H1168V9H1046V369.75ZM1176 369.75C1176 408.336 1176.27 440.05 1176.81 464.893C1177.61 489.207 1179.5 508.236 1182.45 521.979C1185.41 535.721 1190.39 545.5 1197.38 551.314C1204.37 557.129 1214.05 560.828 1226.42 562.414C1239.05 563.471 1255.19 564 1274.82 564H1297V9H1176V369.75ZM1306 325.5H1456.94C1456.94 333.449 1456.67 338.219 1456.13 339.81C1455.59 340.87 1453.3 341.4 1449.27 341.4H1306V564H1433.12C1453.03 564 1469.18 563.47 1481.55 562.41C1493.93 560.82 1503.62 557.11 1510.61 551.28C1517.61 545.45 1522.58 535.645 1525.54 521.865C1528.5 508.085 1530.25 489.005 1530.79 464.625C1531.6 439.715 1532 407.915 1532 369.225V246H1388.73C1384.7 246 1382.41 245.47 1381.87 244.41C1381.33 242.82 1381.06 238.05 1381.06 230.1H1532V87H1306V325.5ZM1540 564H1661.94V246.857H1666C1668.17 246.857 1669.39 247.914 1669.66 250.028C1669.93 252.143 1670.06 256.371 1670.06 262.714V564H1792V282.536C1792 243.422 1791.59 211.707 1790.78 187.393C1790.24 163.078 1788.48 144.049 1785.5 130.307C1782.52 116.564 1777.5 106.786 1770.46 100.972C1763.41 95.1574 1753.52 91.7212 1740.79 90.6641C1728.32 89.0783 1712.2 88.2861 1692.42 88.2861H1661.94V9H1540V564ZM1907 369.75C1907 408.336 1907.27 440.05 1907.81 464.893C1908.62 489.207 1910.51 508.236 1913.48 521.979C1916.45 535.721 1921.44 545.5 1928.46 551.314C1935.48 557.129 1945.21 560.828 1957.62 562.414C1970.31 563.471 1986.51 564 2006.22 564H2069V342H2035.79C2031.47 342 2029.04 340.942 2028.5 338.828C2028.23 337.242 2028.09 333.013 2028.09 326.143H2069V88.2861H2028.5V9H1907V369.75ZM2177.47 140.198C2137.27 231.345 2098.67 318.407 2086 419.099C2086 419.099 2086 494.494 2086 530.499C2086 566.504 2292.64 572.178 2316.42 540.634C2321.15 502.563 2327.47 457.134 2332.42 419.099C2341.33 350.567 2353.43 298.268 2386.31 225C2386.37 224.891 2429.03 140.196 2422.28 133.637C2422.27 133.631 2422.26 133.624 2422.26 133.618L2177.47 140.198ZM2220.42 380.232C2285.83 375.024 2265.8 494.678 2198.8 480.622C2157.34 471.924 2172.25 384.069 2220.42 380.232ZM2238.85 394.569C2210.74 373.436 2163.5 435.76 2191.88 464.417C2225.43 498.282 2271.42 419.076 2238.85 394.569ZM2087.6 346.5C2098.3 306 2109.91 270.001 2124.5 235C2132.8 215.116 2165.08 151.195 2164.08 135.32C2162.8 114.93 2105.99 74.2764 2090.18 59.8281L2087.6 346.5ZM1854.39 234C1848.31 234 1843.89 234.28 1841.12 234.842C1838.36 235.403 1836.7 236.947 1836.15 239.474C1835.59 241.719 1835.32 245.93 1835.32 252.105L1822.88 239.474L1816.66 245.789C1812.24 250 1809.19 253.228 1807.54 255.474C1806.15 257.719 1806.15 259.965 1807.54 262.211C1808.92 264.457 1811.68 267.684 1815.83 271.895H1798V280.737C1798 286.912 1798.14 291.404 1798.42 294.211C1798.97 296.737 1800.49 298.28 1802.98 298.842C1805.74 299.403 1810.16 299.685 1816.24 299.685L1803.39 312.737L1809.2 318.632C1813.62 323.123 1816.94 326.21 1819.15 327.895C1821.36 329.298 1823.57 329.298 1825.78 327.895C1827.99 326.491 1831.17 323.684 1835.32 319.474V338H1843.61C1849.97 338 1854.39 337.72 1856.88 337.158C1859.64 336.597 1861.3 335.053 1861.85 332.526C1862.41 330 1862.68 325.789 1862.68 319.895L1875.12 332.526L1881.34 326.211C1886.04 321.72 1889.08 318.351 1890.46 316.105C1892.12 313.86 1892.12 311.614 1890.46 309.368C1889.08 307.123 1886.04 303.895 1881.34 299.685H1900V291.263C1900 284.807 1899.72 280.315 1899.17 277.789C1898.62 274.982 1897.1 273.299 1894.61 272.737C1892.12 272.176 1887.84 272.035 1881.76 272.315L1894.61 259.263L1888.8 253.368C1884.66 248.877 1881.48 245.93 1879.27 244.526C1877.06 242.842 1874.85 242.702 1872.63 244.105C1870.42 245.228 1867.11 248.035 1862.68 252.526V234H1854.39ZM649.968 246.857C654 246.857 656.284 247.65 656.822 249.235C657.629 250.292 658.032 254.786 658.032 262.714V326.143H649.968V246.857ZM389.968 246C394 246 396.284 246.795 396.822 248.385C397.629 249.445 398.032 253.95 398.032 261.9V325.5C394 325.5 391.581 324.97 390.774 323.91C390.237 322.32 389.968 317.55 389.968 309.6V246ZM2291.13 185.001C2294.29 184.875 2297.62 193.678 2294.38 197.384L2250.78 289.778C2245.18 285.946 2245.78 282.24 2246.27 276.274C2247.27 264.451 2282.65 185.344 2291.13 185.001ZM1854.39 121C1848.31 121 1843.89 121.284 1841.12 121.851C1838.36 122.417 1836.7 123.976 1836.15 126.526C1835.59 128.794 1835.32 133.045 1835.32 139.279L1822.88 126.526L1816.66 132.902C1812.24 137.153 1809.19 140.412 1807.54 142.68C1806.15 144.947 1806.15 147.214 1807.54 149.481C1808.92 151.749 1811.68 155.008 1815.83 159.259H1798V168.187C1798 174.421 1798.14 178.955 1798.42 181.789C1798.97 184.34 1800.49 185.899 1802.98 186.466C1805.74 187.033 1810.16 187.315 1816.24 187.315L1803.39 200.494L1809.2 206.445C1813.62 210.98 1816.94 214.097 1819.15 215.798C1821.36 217.215 1823.57 217.215 1825.78 215.798C1827.99 214.381 1831.17 211.547 1835.32 207.296V226H1843.61C1849.97 226 1854.39 225.716 1856.88 225.149C1859.64 224.583 1861.3 223.024 1861.85 220.474C1862.41 217.923 1862.68 213.672 1862.68 207.721L1875.12 220.474L1881.34 214.097C1886.04 209.562 1889.08 206.162 1890.46 203.895C1892.12 201.627 1892.12 199.36 1890.46 197.093C1889.08 194.826 1886.04 191.566 1881.34 187.315H1900V178.813C1900 172.296 1899.72 167.762 1899.17 165.211C1898.62 162.377 1897.1 160.676 1894.61 160.109C1892.12 159.543 1887.84 159.401 1881.76 159.685L1894.61 146.506L1888.8 140.555C1884.66 136.021 1881.48 133.045 1879.27 131.628C1877.06 129.928 1874.85 129.785 1872.63 131.202C1870.42 132.336 1867.11 135.17 1862.68 139.704V121H1854.39ZM2188.56 9.29785C2168 9.29775 2089.53 5.86594 2089.53 18.9326C2089.53 31.9996 2089.53 33.5004 2089.53 43.9844C2105.5 56.5002 2113.02 62.2092 2129.5 77C2147.03 92.746 2165.66 111.796 2179.14 130.988L2422.19 124.711H2422.17C2406.48 105.065 2389.94 88.4482 2370.87 72.1943C2357.92 61.1649 2308.95 17.3261 2296.7 14.1152C2270.34 7.20376 2215 9.29797 2188.56 9.29785ZM1854.39 9C1848.31 9 1843.89 9.28041 1841.12 9.8418C1838.36 10.4032 1836.7 11.9474 1836.15 14.4736C1835.59 16.7193 1835.32 20.93 1835.32 27.1055L1822.88 14.4736L1816.66 20.7891C1812.24 24.9996 1809.19 28.228 1807.54 30.4736C1806.15 32.7192 1806.15 34.9654 1807.54 37.2109C1808.92 39.4565 1811.68 42.6842 1815.83 46.8945H1798V55.7373C1798 61.9125 1798.14 66.404 1798.42 69.2109C1798.97 71.7369 1800.49 73.2804 1802.98 73.8418C1805.74 74.4032 1810.16 74.6846 1816.24 74.6846L1803.39 87.7373L1809.2 93.6318C1813.62 98.1229 1816.94 101.21 1819.15 102.895C1821.36 104.298 1823.57 104.298 1825.78 102.895C1827.99 101.491 1831.17 98.6842 1835.32 94.4736V113H1843.61C1849.97 113 1854.39 112.72 1856.88 112.158C1859.64 111.597 1861.3 110.053 1861.85 107.526C1862.41 105 1862.68 100.789 1862.68 94.8945L1875.12 107.526L1881.34 101.211C1886.04 96.7197 1889.08 93.3511 1890.46 91.1055C1892.12 88.8599 1892.12 86.6137 1890.46 84.3682C1889.08 82.1226 1886.04 78.8949 1881.34 74.6846H1900V66.2627C1900 59.8068 1899.72 55.3153 1899.17 52.7891C1898.62 49.9823 1897.1 48.2987 1894.61 47.7373C1892.12 47.176 1887.84 47.0347 1881.76 47.3154L1894.61 34.2627L1888.8 28.3682C1884.66 23.8772 1881.48 20.9299 1879.27 19.5264C1877.06 17.8421 1874.85 17.702 1872.63 19.1055C1870.42 20.2284 1867.11 23.0354 1862.68 27.5264V9H1854.39Z" fill="white"/>
+            </clipPath>
+        </svg>
+    </div>
+    <div hidden class="feed__triangle">
+        <img src="https://wondercrecue.com/wp-content/themes/wondercrecue2025/assets/images/index_feed_triangle.svg" alt="Wonder Crecue（ワンダークリック）">
+    </div>
+</section>
+
+
+<!-- owl-carousel config file: main.js, animate.css -->
+<section hidden class="home-slider owl-carousel">
+    <div class="slider-item noise-img" style="background-image: url({% static 'images/section_bg_01.svg' %});">
+        <span hidden class="img-owl-bg">
+            <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+        </span>
+        
+        <div hidden class="overlay"></div>
+        <div class="container">
+            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+                <div class="col-md-12 col-sm-12 text-center">
+                    <p hidden class="img-owl-bg">
+                        <div class="noise-img"><img src= {% static 'images/owl_title_bg_01.svg' %} class="noise_animation"></div>
+                        <div hidden class="noise-img"><img src= {% static 'images/_cup_360.gif' %}></div>
+                    </p>
+                     <h2 class="subheading">No bullsh*t... Just Caffeine!!</h2>
+                    {% comment %}<h2 class="mb-2">No bullsh*t... Just good coffee.</h2>
+                    <h5 class=" mb-md-4">由你們响應</h5> {% endcomment %}
+
+                    <p hidden><a href="{% url 'coffee_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">立即落單</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% comment %} <div class="slider-item" style="background-image: url({% static 'images/bg_5.jpg' %});">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+                <div class="col-md-8 col-sm-12 text-center ftco-animate">
+                    <span class="subheading">More than ... </span>
+                    <h1 class="mb-4">好豆 &#8226; 造就好生活</h1>
+                    <p class="mb-4 mb-md-5">配方咖啡豆<br>孕育出其獨特的風味特性</p>
+                    <p><a href="{% url 'bean_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">我們的配方</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slider-item" style="background-image: url({% static 'images/bg_3.jpg' %});">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+                <div class="col-md-8 col-sm-12 text-center ftco-animate">
+                    <span class="subheading">~ Brew with Soul ~</span>
+                    <h1 class="mb-4">啡咖師的日常</h1>
+                    <p class="mb-4 mb-md-5">不只是余韻，更是生命!</p>
+                    <p><a href="#" class="btn btn-primary p-3 px-xl-4 py-xl-3">了解更多</a></p>
+                </div>
+            </div>
+        </div>
+    </div> {% endcomment %}
+</section>
+<!-- end owl-carousel -->
+
+
+<!-- Shop info & Quick Order box -->
+<section class="ftco-intro">
+    <div class="container-wrap">
+        <div class="wrap d-md-flex align-items-xl-end">
+            <div class="info">
+                <div hidden class="row mt-sm-2" >
+                    <div class="col-xl-3 col-md-10 d-flex pb-sm-4 ">
+                        <div class="icon"><span class="icon-whatsapp"></span></div>
+                        <div class="text">
+                            <h3>2478 9522</h3>
+                            <p>Whatsapp</p>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-10 d-flex pb-sm-4">
+                        <div class="icon"><span class="icon-my_location"></span></div>
+                        <div class="text">
+                            <h3>葵涌 宏達工業中心地下</h3>
+                            <p style="height: 32px;">Google Map</p>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-10 d-flex pb-sm-4">
+                        <div class="icon"><span class="icon-clock-o"></span></div>
+                        <div class="text">
+                            <h3>每週 星期 1 - 5</h3>
+                            <p>7:00 am - 8:00 pm</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coffee quick order -->
+            <div class="book p-4 align-items-md-end">
+                <div class="imgbox">
+                    <img src= {% static 'images/wakemeup.png' %} class="img">
+                </div>
+                <div class="contentbox">
+                    <h3>[極速落單] -- WakeMeup 醒神配方<br>專為早上或午飯後, 5分鐘即時享用 !!</h3>
+
+                    <form action="{% url 'eshop:quick_order' %}" method="POST" class="appointment-form-home">
+                        {% csrf_token %}
+                        <div class="d-md-flex">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control" placeholder="名稱" autocomplete="off" required
+                                    {% if user.is_authenticated %}value="{{ user.get_full_name|default:user.username }}"{% endif %}>
+                            </div>
+                        </div>
+
+                        <div class="d-md-flex">
+                            <div class="form-group">
+                                <!-- time picker -->
+                                <div hidden class="input-wrap">
+                                    <div class="icon"><span class="ion-md-clock"></span></div>
+                                    <input type="text" class="form-control ui-timepicker-standard" id="time" value="" placeholder="提取時間" autocomplete="off">
+                                </div>
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="icon material-symbols-outlined">schedule</span></div>
+                                    <select name="pickup_time" class="form-control" autocomplete="off" required>
+                                        <option value="5 分鐘後">5 分鐘後</option>
+                                        <optgroup></optgroup>
+                                        <option value="10 分鐘後">10 分鐘後</option>
+                                        <optgroup></optgroup>
+                                        <option value="15 分鐘後">15 分鐘後</option>
+                                        <optgroup></optgroup>
+                                        <option value="30 分鐘後">30 分鐘後</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group ml-md-4">
+                                <div class="icon"><span class="icon material-symbols-outlined">mobile_friendly</span></div>
+                                <input name="phone" type="text" class="form-control" 
+                                    placeholder="電話 / WhatsApp" autocomplete="off" required
+                                    pattern="[0-9]{8}" 
+                                    title="請輸入8位數字電話號碼"
+                                    {% if user.is_authenticated and user.profile.phone %} 
+                                        value="{{ user.profile.hk_phone }}"
+                                    {% endif %}>
+                            </div>
+
+                            <!-- Add email field (hidden) -->
+                            <input type="hidden" name="email" 
+                            {% if user.is_authenticated %}value="{{ user.email }}"{% endif %}>
+                            
+                            <div class="d-md-flex">
+                                <div class="form-group">
+                                    <div class="select-wrap">
+                                        <div class="icon"><span class="icon material-symbols-outlined">glass_cup</span></div>
+                                        <select name="cup_size" id="" class="form-control" autocomplete="off" required>
+                                            <option value="大">大</option>
+                                            <optgroup></optgroup>
+                                            <option value="正常" selected>正常</option>
+                                            <optgroup></optgroup>
+                                            <option value="細">細</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group ml-md-4">
+                                    <button type="submit" class="btn btn-white py-3 px-5">立即落單</button>
+                                </div>
+                            </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            <!-- End Coffee quick order -->
+        </div>
+    </div>
+</section>
+
+
+
+<!-- Best Sell -->
+<section class="ftco-section overflow-hidden">
+    <div class="container">
+        <div class="imgbox">
+            <img hidden src="{% static 'images/section_bg_01.svg' %}" class="section-bg-img">
+        </div>
+        <div class="row justify-content-center mb-5 pb-3">
+            <div class="col-md-7 heading-section ftco-animate text-center">
+                <span class="subheading">Between<br>Selections</span>
+                <h2 class="mb-4">&#65371;最強人氣&#65373;</h2>
+                <p>上班上到打恰睡 @@<br>來一杯續命啡! 立即充滿能量!</p>
+            </div>
+        </div>
+
+        <!-- 方案1 -->
+        <div class="asymmetric-grid asymmetric-grid-v1 ftco-animate">
+            {% for coffee in shop_hot_coffees %}
+            <div class="asymmetric-item">
+                <div class="modern-card-v1">
+                    <div class="card-header-v1">
+                        <div class="name-corner-v1" style="display: none;">{{ coffee.name }}</div>
+                        {% if coffee.get_index_image %}
+                        <a href="{% url 'coffee' coffee.id %}" class="card-link" id="svg_over">
+                            <span id="svg_over_on"><img src="{% static 'images/product_hover.svg' %}" class="noise_animation"></span>
+                            <canvas id="mouse_hit"></canvas>
+                            <!-- 灵活的图片容器 -->
+                            <div class="coffee-image-container">
+                                <img 
+                                    src="{{ coffee.get_index_image }}" 
+                                    alt="{{ coffee.name }}"
+                                    {% comment %} 可选：手动指定图片类型以获得最佳效果 {% endcomment %}
+                                    {% comment %} data-image-size="large" {% endcomment %}
+                                    {% comment %} data-orientation="landscape" {% endcomment %}
+                                >
+                            </div>
+                        </a>
+                        {% else %}
+                        <!-- 无图片时的容器 -->
+                        <div class="coffee-image-container">
+                            <!-- 纯CSS错误处理会在这里显示 -->
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-content-v1">
+                        <h3 class="coffee-name-v1">{{ coffee.name }}</h3>
+                        <p class="introduction-text-v1">{{ coffee.introduction }}</p>
+                        <p class="price-v1">{{ coffee.price|floatformat:"-2"|default:"0" }}</p>
+                        <a href="{% url 'coffee' coffee.id %}" class="btn asymmetric-btn-v1">落單</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- end Best Sell-->
+
+
+
+<!-- Shop message -->
+<section class="ftco-counter" id="section-counter" style="background-image: url('{% static 'images/deco_01_v3.png' %}'); background-repeat: no-repeat; background-size: cover">
+    <div class="container">
+        <div class="row align-items-xl-end pr-md-5">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="mid-banner">
+                        <span>Between Say:</span>
+                        <div class="menu-entry playfair_deco" >
+                            <p hidden class="lg_message">Caffeine first, then the work, You Know Priorities?? You're Doing Okay ~!!! What Between Coffee Wants to Convey Through Its Coffee</p>
+                            <p class="lg_message">We made the rules,<br>No bullsh*t.....<br> Just good Caffeine!!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end Shop message -->
+
+<div class="flexable-vh-20"></div>
+
+
+<!-- Bean -->
+<section class="ftco-section overflow-hidden">
+    <div class="articleStyle_08 nullWay active activeAfter">
+        <div class="eyecatch">
+            <div class="blobsVideo">
+                <div class="inner">
+                    <div class="videoWrap">
+                        <video class="video" muted playsinline loop autoplay >
+                        <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end eyecatch -->
+
+        <div class="inner">
+            <div class="content">
+                <div class="svg-box"><img src= {% static 'images/owl_title_bg_02.svg' %} class="noise_animation"></div>
+
+                <h class="subheading">Handcrafted<br />Roastery</h>
+                <h2 class="mb-4">&#65371; 咖啡豆是會呼吸的 &#65373;</h2>
+                <p class="my-4">從「火」與「嚴謹」出發 -<br>曲線烘焙設計與適切度</p>
+                <div class="summaryStyle_01 summary">
+                    <p class=""><a href="{% url 'bean_menu' %}" class="btn btn-primary btn-outline-primary px-4 py-3 mr-4">詳細</a>
+                    <a href="{% url 'bean_menu' %}" class="btn btn-primary btn-outline-primary px-4 py-3">定期購入</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end Bean -->
+
+
+<section class="ftco-section-blank-small"></section>
+
+
+<!-- noise active filter for noise_animation -->
+<div class="noise-filiter">
+	<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+		<defs>
+			<filter id="noise-0">
+				<feTurbulence id="turbulence_0_desktop" baseFrequency="0.02" numOctaves="2" result="noise" seed="0" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-1">
+				<feTurbulence id="turbulence_1_desktop" baseFrequency="0.04" numOctaves="1" result="noise" seed="1" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"></feDisplacementMap>
+			</filter>
+			<filter id="noise-2">
+				<feTurbulence id="turbulence_2_desktop" baseFrequency="0.02" numOctaves="3" result="noise" seed="2" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="2.4"></feDisplacementMap>
+			</filter>
+			<filter id="noise-3">
+				<feTurbulence id="turbulence_3_desktop" baseFrequency="0.04" numOctaves="1" result="noise" seed="3" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-4">
+				<feTurbulence id="turbulence_4_desktop" baseFrequency="0.02" numOctaves="3" result="noise" seed="4" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"></feDisplacementMap>
+			</filter>
+		</defs>
+	</svg>
+	<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+		<defs>
+			<filter id="noise-5">
+				<feTurbulence id="turbulence_0_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="0"></feTurbulence>
+				<feDisplacementMap id="displacement_smart" in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-6">
+				<feTurbulence id="turbulence_1_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="1"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-7">
+				<feTurbulence id="turbulence_2_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="2"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-8">
+				<feTurbulence id="turbulence_3_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="3"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-9">
+				<feTurbulence id="turbulence_4_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="4"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+		</defs> 
+	</svg>
+</div>
+<!-- end noise active filter for noise_animation -->
+
+{% endblock %}
+
+<script>
+    $(document).ready(function() {
+        $('.js-example-basic-single').select2();
+    });
+</script>

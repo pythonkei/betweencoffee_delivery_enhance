@@ -1,0 +1,78 @@
+{% extends 'layouts/blank.html' %}
+{% load static %}
+{% block title %}Between Coffee - Coffee Menu{% endblock %}
+
+{% block content %}
+<!-- Header Banner-->
+<section class="subpage-banner-h500 py-lg-4">
+  <div class="ftco-subpage-banner" id="section-counter">
+    <div class="svg-bg ftco-counter noise_animation" style="background-image: url({% static 'images/title_bg_img_01.svg' %});" data-stellar-background-ratio="0.73" ></div>
+
+      <div class="container">
+        <div class="row justify-content-center mt-5 p-2">
+            <div class="col-lg-12 col-md-12 heading-section text-center">
+              <span class="subheading">Explore<br>Between</span>
+              <h2 class="mb-3">&#65371;咖啡&#65373;</h2>
+              <p style="color:#ccc;">建構共同空間拉近彼此距離<br />細意品嚐</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-3">
+          <p class="icon_text"><a href="{% url 'index' %}"><i class="icon material-symbols-outlined icon_vert-align-middle">undo</i> 首頁</a></p>
+        </div>
+      </div>
+    </div>
+</section>
+<!-- End Header Banner-->
+
+
+<section class="ftco-subpage-section">
+    <div class="container post_archive">
+        <!-- Search bar -->
+        <div hidden class="row justify-content-center">
+            <div class="col-md-6 col-sm-12 text-center">
+                <!-- Search form -->
+                <form method="GET" action="{% url 'coffee_menu_search' %}">
+                    <div class="md-form mt-0 active-cyan-2">
+                        <input class="form-control" name="q" type="text" placeholder="Search Our Menu" aria-label="Search" value="{{ request.GET.q }}">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Coffee item list -->
+        <div class="row justify-content-center mt-4">
+          <div hidden class="ani_coffee_line_il"></div>
+            {% for coffee in coffee_menu %}
+            <div class="col col-lg-4 col-md-12">
+              <div class="menu-wrap">
+                <!-- coffee_menu.html - 保持不变，使用详情页图片 -->
+                <div class="menu-img">
+                  <a href="{% url 'coffee' coffee.id %}" id="svg_over" >
+                    <span id="svg_over_on"><img src= {% static 'images/product_hover.svg' %} class="noise_animation"></span>
+                    <canvas id="mouse_hit"></canvas>
+                    <!-- 使用详情页图片 -->
+                    <img src="{{ coffee.image.url }}" alt="{{ coffee.name }}" class="img">
+                  </a>
+                </div>
+                <div class="text text-center">
+                  <h5 class="mt-3 text-uppercase">{{ coffee.name }}</h5>
+                  <p class="price"><span>$ {{ coffee.price|floatformat:"-2"|default:"0" }}</span></p>
+                  <p class="m-4">{{ coffee.description }}</p>
+                  <form action="{% url 'coffee' coffee.id %}" method="post" class="pt-2">
+                    {% csrf_token %}
+                    <a href="{% url 'coffee' coffee.id %}" class="btn btn-primary btn-outline-primary">落單</a>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- end Coffee item list -->
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+
+{% endblock content %}

@@ -1,0 +1,352 @@
+<!-- betweencoffee_delivery/bean.html -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block title %}Between Coffee - {{ bean.name }}{% endblock %}
+
+{% block content %}
+<!-- Header Banner-->
+<section class="ftco-section-blank-small"></section>
+
+<section hidden class="ftco-single-product" id="section-single-product" data-stellar-background-ratio="0.5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 heading-single-product ftco-animate text-center">
+                <span class="subheading">Freshly<br>Roasted Specialty !!</span>
+                <h4 class="mb-3 pt-3">烘焙師以新鮮<br>產生共鳴 !!</h4>
+                <p hidden style="color:#ccc;">通常會在 5 分鐘內準備就緒!!</p>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumbs -->
+    <div hidden class="container">
+        <div class="col-lg-12 col-md-7 col-sm-12 text-center mb-4">
+            <div class="container">
+                <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'coffee_menu' %}">返回 列表</a></p>
+            </div>
+        </div>
+    </div>
+    <!-- end breadcrumbs -->
+</section>
+<!-- End Header Banner-->
+
+
+<!-- Render Bean by for loop bean_pk -->
+<section class="ftco-subpage-section ftco-section-single-product">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <span class="title-bg-head">&#65371;SERVED<br>&nbsp;&nbsp;&nbsp;FRESH&#65373;</span>
+            <div class="col-lg-6 mb-5">
+                <div class="img-box">
+                    <!-- 使用详情页图片 -->
+                    <img src="{{ bean.image.url }}" class="img-4" alt="{{ bean.name }}">
+                    <span class="img-deco-bg">
+                        <div hidden class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right side Product content -->
+            <div class="col-lg-6 product-details pl-md-5 position-relative">
+                <div class="sticker-box">
+                    <div class="sticker">
+                        <div class="front"><img src= {% static 'images/float_bean.png' %}></div>
+                        <div class="bg"></div>
+                        <p><span>Crafting<br>Perfection</span>打造完美<br>新鮮質量!</p>
+                    </div>
+                </div>
+
+                <div class="block-23 mb-3">
+                    <p class="h3 bean-title"><span>{{ bean.name }}</span></p>
+                    <p class="price">${{ bean.price_200g|floatformat:"0" }}</p>
+                    <p class="pb-2">{{ bean.description }}</p>
+                </div>
+
+                <div class="block-23 mb-3">
+                    <ul>
+                        <li><span class="icon material-icons">pin_drop</span><span class="text">產地 :<span class="pl-3">{{ bean.origin }}</span></span></li>
+                        <li><span class="icon material-symbols-outlined">thermostat</span><span class="text">處理法 :<span class="pl-3">水洗處理後於白蘭地酒桶陳釀</span></span></li>
+
+                        <!-- roast level -->
+                        <li><span class="icon material-symbols-outlined">Home_storage</span><span class="text">烘焙水平 :</span></li>
+                        <div class="roastrange-field" style="padding-bottom: 4vh;">
+                            <div class="roastrange">
+                                <div class="roastrange-item">
+                                    <div class="roastrange-label"><span>浅</span></div>
+                                </div>
+                                <div class="roastrange-item here">
+                                    <div class="roastrange-label"><span style="color:#c49b63;">中浅</span></div>
+                                </div>
+                                <div class="roastrange-item">
+                                    <div class="roastrange-label"><span>中</span></div>
+                                </div>
+                                <div class="roastrange-item">
+                                    <div class="roastrange-label"><span>中深</span></div>
+                                </div>
+                                <div class="roastrange-item">
+                                    <div class="roastrange-label"><span>深</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end roast level -->
+                        <li><span class="icon material-icons">coffee</span><span class="text">風味 :<span class="pl-3">{{ bean.flavor }}</span></span></li>
+                    </ul>
+                </div>
+
+                <!-- Add to Cart Form -->
+                <form id="add-to-cart-form" class="pt-2">
+                    {% csrf_token %}
+                    <div class="row mt-4">
+                        <!-- Weight Level -->
+                        <div class="col-md-8">
+                            <div class="form-group d-flex">
+                                <p>淨量 :</p>
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                                    <select name="weight" id="weight" class="form-control pr-5">
+                                        <option value="200g" data-price="{{ bean.price_200g|floatformat:'0' }}">200g - ${{ bean.price_200g|floatformat:"0" }}</option>
+                                        <option value="1kg" data-price="{{ bean.price_1kg|floatformat:'0' }}">1kg - ${{ bean.price_1kg|floatformat:"0" }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grinding Level -->
+                        <div class="col-md-8">
+                            <div class="form-group d-flex">
+                                <p>研磨 :</p>
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                                    <select name="grinding_level" id="grinding_level" class="form-control pr-5">
+                                        <option value="Non" selected>免研磨</option>
+                                        <option value="Light">細</option>
+                                        <option value="Medium">中</option>
+                                        <option value="Deep">粗</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="w-100 form-group">
+							<div class="input-group col col-md-8 d-flex mb-3">
+                                <p>數量 :</p>
+                                    <span class="input-group-btn mr-2">
+                                        <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
+                                            <i class="icon-minus"></i>
+                                        </button>
+                                    </span>
+                                    <input type="text" id="quantity" name="quantity" class="form-control input-number text-center" value="1" min="1" max="100">
+                                    <span class="input-group-btn ml-2">
+                                        <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
+                                            <i class="icon-plus"></i>
+                                        </button>
+                                    </span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-md-12 mt-4 d-flex button-d-flex">
+                            <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3">加入購物車</button>
+                            <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></p></span>
+                        </div>
+                    </div>
+                </form>
+                <!-- info -->
+                <div class="block-23 mt-5 mb-3">
+                    <ul>
+                        <li><span class="icon material-symbols-outlined">lightbulb_2</span><span class="text">保存方法 :<span class="pl-3">儲存於常温或25°C以下 [避免陽光直射]</span></span></li>
+                        <li><span class="icon material-icons">coffee</span><span class="text">賞味期限 :<span class="pl-3">24天（含出貨日期）</span></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flexable-vh-20"></div>
+</section>
+<!-- end for loop int:bean_pk -->
+
+
+<!-- Add to Cart Popup by default: hidden -->
+<div id="cart-popup" class="cart-popup">
+    <div class="popup-header">
+        <span class="icon material-icons">check_circle</span>
+        <p>已加入購物車</p>
+    </div>
+    <div class="popup-content">
+        <img id="popup-product-image" class="popup-image popup-image-circle-mask" src="" alt="Product">
+        <div class="popup-details">
+            <div class="popup-header-line">
+                <span class="popup-product-name" id="popup-product-name"></span>
+                <span class="popup-quantity" id="popup-quantity"></span>
+            </div>
+            <div class="popup-meta">
+                <span id="popup-price"></span>
+            </div>
+            <div class="popup-actions">
+                <button onclick="window.location.href='{% url 'cart:cart_detail' %}'" 
+                        class="popup-checkout-btn">
+                    立即結算
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="ftco-section-blank-small"></section>
+
+
+<!-- JavaScript for AJAX Add to Cart and Popup -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 更新价格显示的函数 - 只显示单价
+        function updatePriceDisplay() {
+            const weightSelect = document.getElementById('weight');
+            const priceElement = document.querySelector('.price');
+            
+            const selectedWeight = weightSelect.value;
+            
+            // 根据重量获取价格
+            let unitPrice;
+            if (selectedWeight === '200g') {
+                unitPrice = {{ bean.price_200g }};
+            } else if (selectedWeight === '1kg') {
+                unitPrice = {{ bean.price_1kg }};
+            }
+            
+            // 只显示单价，不乘以数量
+            priceElement.textContent = '$' + unitPrice.toFixed(0);
+        }
+
+        // 移除数量变化监听，因为价格不再随数量变化
+        document.getElementById('weight').addEventListener('change', updatePriceDisplay);
+        // 初始更新
+        updatePriceDisplay();
+        
+        // 监听重量和数量变化
+        document.getElementById('weight').addEventListener('change', updatePriceDisplay);
+        document.getElementById('quantity').addEventListener('change', updatePriceDisplay);
+        document.getElementById('quantity').addEventListener('input', updatePriceDisplay);
+        
+        // 初始更新
+        updatePriceDisplay();
+
+        // Quantity Controls
+        document.querySelectorAll('.quantity-left-minus').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const input = document.getElementById('quantity');
+                let value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                    updatePriceDisplay(); // 更新价格显示
+                }
+            });
+        });
+    
+        document.querySelectorAll('.quantity-right-plus').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const input = document.getElementById('quantity');
+                let value = parseInt(input.value);
+                input.value = value + 1;
+                updatePriceDisplay(); // 更新价格显示
+            });
+        });
+    
+        // Handle Add to Cart Form Submission
+        document.getElementById('add-to-cart-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // 获取当前重量和数量
+            const weightSelect = document.getElementById('weight');
+            const quantityInput = document.getElementById('quantity');
+            const selectedWeight = weightSelect.value;
+            const quantity = parseInt(quantityInput.value);
+            
+            // 根据重量计算单价
+            let unitPrice;
+            if (selectedWeight === '200g') {
+                unitPrice = {{ bean.price_200g }};
+            } else if (selectedWeight === '1kg') {
+                unitPrice = {{ bean.price_1kg }};
+            }
+            
+            // 计算总价
+            const totalPrice = unitPrice * quantity;
+    
+            fetch("{% url 'cart:add_to_cart' bean.id 'bean' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    showPopup({
+                        name: data.product_name,
+                        price: totalPrice.toFixed(0), // 使用计算的总价
+                        quantity: data.quantity,
+                        image: data.image_url
+                    });
+                    document.querySelectorAll('.cart-count').forEach(element => {
+                        element.textContent = data.cart_count;
+                    });
+                    
+                    // 移除自动跳转代码，只显示弹窗
+                    // 不添加 setTimeout 跳转代码
+                } else {
+                    alert('加入購物車失敗: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+
+    // Popup 
+    function showPopup(product) {
+        const popup = document.getElementById('cart-popup');
+        
+        // Clear any existing animations
+        popup.classList.remove('show', 'hide');
+        
+        // Set product details
+        document.getElementById('popup-product-image').src = product.image;
+        document.getElementById('popup-product-name').textContent = product.name;
+        document.getElementById('popup-quantity').textContent = product.quantity;
+        let price = product.price.toString();
+        if (price.endsWith('.00')) {
+            price = price.slice(0, -3);
+        }
+        document.getElementById('popup-price').textContent = '$' + price;
+        
+        // Show popup with fade-in
+        popup.classList.add('show');
+        
+        // Set up auto-hide
+        const hideTimer = setTimeout(() => {
+            popup.classList.add('hide');
+            
+            // Remove visibility after animation
+            popup.addEventListener('animationend', function handler() {
+                popup.classList.remove('show', 'hide');
+                popup.removeEventListener('animationend', handler);
+            });
+        }, 6000);
+    
+        // Clear timer if new item added before previous timeout
+        popup._hideTimer = hideTimer;
+    }
+
+</script>
+
+
+
+{% endblock %}

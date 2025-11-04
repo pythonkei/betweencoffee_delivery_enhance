@@ -1,0 +1,316 @@
+<!-- betweencoffee_delivery/coffee.html -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block title %}Between Coffee - {{ coffee.name }}{% endblock %}
+
+{% block content %}
+<!-- Header Banner-->
+<section class="ftco-section-blank-small"></section>
+
+<section hidden class="ftco-single-product" id="section-single-product" data-stellar-background-ratio="0.5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 heading-single-product ftco-animate text-center">
+                <span class="subheading">Ready <br>in 5 minutes !!</span>
+                <h2>Crafting Perfection</h2>
+                <h4 class="mb-3 pt-3">緊貼你的節奏<br>我們5分鐘內準備就緒 !!</h4>
+                <p hidden style="color:#ccc;">通常會在 5 分鐘內準備就緒!!</p>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumbs -->
+    <div hidden class="container">
+        <div class="col-lg-12 col-md-7 col-sm-12 text-center ftco-animate mb-4">
+            <div class="container">
+                <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'coffee_menu' %}">返回</a></p>
+            </div>
+        </div>
+    </div>
+    <!-- end breadcrumbs -->
+</section>
+<!-- End Header Banner-->
+
+
+<!-- Render Coffee by for loop coffee_id -->
+<section class="ftco-subpage-section ftco-section-single-product">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <span class="title-bg-head">&#65371;BREWED<br>&nbsp;&nbsp;&nbsp;FAST&#65373;</span>
+            <!-- coffee.html - 保持不变，使用详情页图片 -->
+            <div class="col-lg-6 mb-5">
+                <div class="img-box">
+                    <!-- 使用详情页图片 -->
+                    <img src="{{ coffee.image.url }}" class="img-4" alt="{{ coffee.name }}">
+                    <span class="img-deco-bg">
+                        <div hidden class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right side Product content -->
+            <div class="col-lg-6 product-details pl-md-5  position-relative">
+                <div class="sticker-box">
+                    <div class="sticker">
+                        <div class="front"><img src= {% static 'images/takeaway_cup.png' %}></div>
+                        <div class="bg"></div>
+                        <p><span>Follow <br>Your Rhythm</span>5分鐘內<br>準備就緒!!</p>
+                    </div>
+                </div>
+
+                <div class="block-23 mb-3">
+                    <p class="h3 coffee-title">{{ coffee.name }}</p>
+                    <p class="price">${{ coffee.price|floatformat:"-2"|default:"0"  }}</p>
+                    <p class="pb-2">{{ coffee.description }}</p>
+                </div>
+
+                <div class="block-23 mb-3">
+                    <ul>
+                        <li><span class="cell-fas-icon fa-solid fa-coffee-bean"></span><span class="text">產地 :<span class="pl-3">{{ coffee.origin }}</span></span></li>
+                        <li><span class="icon material-icons">coffee</span><span class="text">風味 :<span class="pl-3">{{ coffee.flavor }}</span></span></li>
+                    </ul>
+                </div>
+
+                <!-- Ajax Add to Cart Form -->
+                <form id="add-to-cart-form" class="pt-2">
+                    {% csrf_token %}
+                    <div class="row mt-4">
+                        <!-- Cup Level -->
+                        <div class="col-md-12">
+                            <div class="form-group d-flex">
+                                <p>杯量 :</p>
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                                    <select name="cup_level" id="cup_level" class="form-control pr-5">
+                                        <option value="Small">細</option>
+                                        <option value="Medium" selected>中</option>
+                                        <option value="Large">大</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Milk Level -->
+                        <div class="col-md-12">
+                            <div class="form-group d-flex">
+                                <p>奶量 :</p>
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                                    <select name="milk_level" id="milk_level" class="form-control pr-5">
+                                        <option value="Light">少</option>
+                                        <option value="Medium" selected>正常</option>
+                                        <option value="Extra">追加</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="w-100 form-group">
+							<div class="input-group col col-md-8 d-flex mb-3">
+                                <p>數量 :</p>
+                                <span class="input-group-btn mr-2">
+                                    <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
+                                        <i class="icon-minus"></i>
+                                    </button>
+                                </span>
+                                <input type="text" id="quantity" name="quantity" class="form-control input-number text-center" value="1" min="1" max="100" autocomplete="off">
+                                <span class="input-group-btn ml-2">
+                                    <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
+                                        <i class="icon-plus"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-md-12 mt-4 d-flex button-d-flex">
+                            <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3">加入購物車</button>
+                            <span class="r-btn btn"><a href="{% url 'coffee_menu' %}">返回</a></p></span>
+                        </div>
+                    </div>
+                </form>
+                <!-- end Ajax Add to Cart Form -->
+                <!-- info -->
+                <div class="block-23 mt-5 mb-3">
+                    <ul>
+                        <li><span class="icon material-symbols-outlined">coffee</span><span class="text">健康攝取建議 :<span class="pl-3">成人不超過300毫克，孕婦200毫克以下</span></span></li>
+                        <li><span class="icon material-icons">coffee</span><span class="text">賞味期限 :<span class="pl-3">24天（含出貨日期）</span></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end for loop coffee_id -->
+
+<div class="flexable-vh-20"></div>
+
+
+<!-- Add to Cart Popup by default: hidden -->
+<div id="cart-popup" class="cart-popup">
+    <div class="popup-header">
+        <span class="icon material-icons">check_circle</span>
+        <p>已加入購物車</p>
+    </div>
+    <div class="popup-content">
+        <img id="popup-product-image" class="popup-image popup-image-circle-mask" src="" alt="Product">
+        <div class="popup-details">
+            <div class="popup-header-line">
+                <span class="popup-product-name" id="popup-product-name"></span>
+                <span class="popup-quantity" id="popup-quantity"></span>
+            </div>
+            <div class="popup-meta">
+                <span id="popup-price"></span>
+            </div>
+            <div class="popup-actions">
+                <button onclick="window.location.href='{% url 'cart:cart_detail' %}'" class="popup-checkout-btn">
+                    立即結算
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="ftco-section-blank-small"></section>
+
+
+<!-- Handle option -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Quantity Controls
+        document.querySelectorAll('.quantity-left-minus').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const input = document.getElementById('quantity');
+                let value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+            });
+        });
+    
+        document.querySelectorAll('.quantity-right-plus').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const input = document.getElementById('quantity');
+                let value = parseInt(input.value);
+                input.value = value + 1;
+            });
+        });
+    
+        // Handle Add to Cart Form Submission 处理添加到购物车表单提交
+        document.getElementById('add-to-cart-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const formData = new FormData(this);
+            
+            // 调试：打印表单数据
+            console.log('表单数据:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+            
+            // 使用正确的URL格式
+            const addToCartUrl = "{% url 'cart:add_to_cart' coffee.id 'coffee' %}";
+            console.log('请求URL:', addToCartUrl);
+            
+            fetch(addToCartUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('响应状态:', response.status);
+                if (!response.ok) {
+                    throw new Error('网络响应不正常: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('成功响应数据:', data);
+                if (data.success) {
+                    // 显示弹窗
+                    showPopup({
+                        name: data.product_name,
+                        price: data.product_price,
+                        quantity: data.quantity,
+                        image: data.image_url
+                    });
+                    
+                    // 更新购物车数量
+                    document.querySelectorAll('.cart-count').forEach(element => {
+                        element.textContent = data.cart_count;
+                    });
+                } else {
+                    alert('加入購物車失敗: ' + (data.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('请求错误:', error);
+                alert('网络错误: ' + error.message);
+            });
+        });
+    });
+    
+    // Popup 
+    function showPopup(product) {
+        const popup = document.getElementById('cart-popup');
+        
+        // Clear any existing animations
+        popup.classList.remove('show', 'hide');
+        
+        // Set product details
+        document.getElementById('popup-product-image').src = product.image;
+        document.getElementById('popup-product-name').textContent = product.name;
+        document.getElementById('popup-quantity').textContent = product.quantity;
+        let price = product.price.toString();
+        if (price.endsWith('.00')) {
+            price = price.slice(0, -3);
+        }
+        document.getElementById('popup-price').textContent = '$' + price;
+        
+        // Show popup with fade-in
+        popup.classList.add('show');
+        
+        // Set up auto-hide
+        const hideTimer = setTimeout(() => {
+            popup.classList.add('hide');
+            
+            // Remove visibility after animation
+            popup.addEventListener('animationend', function handler() {
+                popup.classList.remove('show', 'hide');
+                popup.removeEventListener('animationend', handler);
+            });
+        }, 6000);
+    
+        // Clear timer if new item added before previous timeout
+        popup._hideTimer = hideTimer;
+    }
+</script>
+
+<div style="display: none;" id="debug-info">
+    <h4>调试信息</h4>
+    <div id="debug-content"></div>
+</div>
+
+<script>
+// 调试函数
+function debugLog(message) {
+    console.log(message);
+    const debugContent = document.getElementById('debug-content');
+    if (debugContent) {
+        debugContent.innerHTML += '<p>' + new Date().toLocaleTimeString() + ': ' + message + '</p>';
+    }
+}
+
+// 显示调试信息（开发时使用）
+// document.getElementById('debug-info').style.display = 'block';
+</script>
+
+
+{% endblock %}
