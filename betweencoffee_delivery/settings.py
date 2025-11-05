@@ -26,9 +26,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vwi14g!cw8o+^=72zclbmgskh_jrm4h_-^v3u!ti1p)@)p6u)&'
+# SECRET_KEY = 'django-insecure-vwi14g!cw8o+^=72zclbmgskh_jrm4h_-^v3u!ti1p)@)p6u)&'
 
-# Render SECRET_KEY: c3-l_@i#p&(xnfbl(epimk9v1@ojzo8#jdo_f+h+b%9v#jp2f2
+# Render SECRET_KEY: Keub6QImLKq0srBx2mLWEyundshqHFYZ1Agg96_UZ9HH3d-338hcuiJz5tZtMTd7fX8
 
 
 # For Render config
@@ -188,7 +188,6 @@ if 'RENDER' in os.environ:
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
             conn_max_age=600,
-            conn_health_checks=True,
         )
     }
 else:
@@ -203,6 +202,9 @@ else:
             'PORT': '5432',
         }
     }
+
+
+
 
 
 '''
@@ -497,6 +499,58 @@ FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
 FPS_MERCHANT_ID = env('FPS_MERCHANT_ID', default='BETWEENCOFFEE')
 FPS_BANK_ACCOUNT = env('FPS_BANK_ACCOUNT', default='')
 FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
+
+
+
+# ===== 生产环境安全配置 =====
+# 检测是否在 Render 生产环境
+IS_RENDER = 'RENDER' in os.environ
+
+if IS_RENDER:
+    # 确保使用环境变量中的 SECRET_KEY
+    SECRET_KEY = env('SECRET_KEY')
+    
+    # 调试模式关闭
+    DEBUG = False
+    
+    # 允许的主机
+    ALLOWED_HOSTS = []
+    RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+    if RENDER_EXTERNAL_HOSTNAME:
+        ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    
+    # HTTPS 重定向
+    SECURE_SSL_REDIRECT = True
+    
+    # HSTS 设置
+    SECURE_HSTS_SECONDS = 31536000  # 1年
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Cookie 安全
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    
+    # 其他安全头
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # 对于 Render，可能需要这个设置
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    # 开发环境设置
+    DEBUG = True
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+
+
+
+
+
+
+
+
 
 
 '''
