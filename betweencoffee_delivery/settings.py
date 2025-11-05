@@ -28,6 +28,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-vwi14g!cw8o+^=72zclbmgskh_jrm4h_-^v3u!ti1p)@)p6u)&'
 
+# Render SECRET_KEY: c3-l_@i#p&(xnfbl(epimk9v1@ojzo8#jdo_f+h+b%9v#jp2f2
+
+
 # For Render config
 # Django Secret Key - 移除硬编码
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-development-only')
