@@ -182,13 +182,10 @@ WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 
 # 开发环境使用本地数据库，生产环境使用 Render 的数据库
-if 'RENDER' in os.environ:
-    # Render 生产环境 - 使用环境变量
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-        )
+        'default': dj_database_url.parse(DATABASE_URL)
     }
 else:
     # 本地开发环境
