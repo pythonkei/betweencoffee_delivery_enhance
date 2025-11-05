@@ -1,3 +1,5 @@
+# Config git pushing what ignore list
+
 # Python
 __pycache__/
 *.py[cod]

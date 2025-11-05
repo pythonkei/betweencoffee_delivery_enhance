@@ -39,7 +39,7 @@ DEBUG = 'RENDER' not in os.environ
 
 
 # 基础Redis配置，从环境变量读取URL，默认为本地开发地址
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:8080')
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 
 CACHES = {
     "default": {
