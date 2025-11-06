@@ -22,9 +22,14 @@ from django.conf.urls.static import static
 from .views import Index, About, CoffeeMenu, Coffee, BeanMenu, Bean, CoffeeMenuSearch, BeanMenuSearch, ItemInCart # use own views render index and about
 # from eshop.views import OrderConfirm
 from socialuser.views import profile_view
+from django.http import HttpResponse
+
+def health_check(request):
+    return HttpResponse("OK", status=200)
 
 
 urlpatterns = [
+    path('health/', health_check),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', Index.as_view(), name='index'), # find own app html file

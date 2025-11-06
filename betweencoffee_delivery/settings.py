@@ -14,6 +14,7 @@ import os
 import logging
 import dj_database_url
 
+
 from environ import Env
 env = Env()
 env.read_env()
@@ -37,43 +38,73 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-develop
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # 从环境变量读取，生产环境,通过判断是否在 Render 环境来设置[citation:5]
-DEBUG = 'RENDER' not in os.environ
+# DEBUG = 'RENDER' not in os.environ
+
+# 临时启用调试 - 完成后务必关闭！
+DEBUG = True
+# 允许的主机 - 只定义一次！
+ALLOWED_HOSTS = ['*']  # 临时允许所有主机
 
 
-
-# 基础Redis配置，从环境变量读取URL，默认为本地开发地址
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,  # 使用环境变量或默认值
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "SOCKET_CONNECT_TIMEOUT": 5,  # 连接超时（秒）
-            "SOCKET_TIMEOUT": 5,           # 读写超时（秒）
-            "IGNORE_EXCEPTIONS": True,    # 当Redis出现异常时，让缓存静默失败，防止因缓存问题导致整个站点崩溃[citation:1][citation:3]
-            # 如果Redis服务器需要密码，且未包含在URL中，可在此指定
-            # "PASSWORD": "your-redis-password-here",
-            # 如果使用了hiredis，可以启用压缩（可选）
-            # "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+# 详细的日志配置
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
         },
-        "KEY_PREFIX": "betweencoffee",  # 为所有缓存键设置一个全局前缀，避免多项目冲突
-    }
-}
-
-# 配置Channels层使用Redis（如果你使用了Django Channels）
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [REDIS_URL],  # 同样使用环境变量
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }
 
-# default:
-ALLOWED_HOSTS = []
+
+
+# 基础Redis配置，从环境变量读取URL，默认为本地开发地址
+REDIS_URL = os.environ.get('REDIS_URL', None)  # 允许为 None
+
+if REDIS_URL:
+    # 使用 Redis 配置
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            # ... 其他配置
+        }
+    }
+else:
+    # 使用内存缓存
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+
+# 修正后的 Channels 配置（保留第 98-104 行，删除第 200-206 行）
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
+        }
+    }
+else:
+    # 当没有 Redis 时使用内存后端
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+
 
 # 获取 Render 分配给你的域名并添加到允许列表中
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -161,17 +192,6 @@ TEMPLATES = [
 
 ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-}
-
-
-
 WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 
@@ -182,10 +202,11 @@ WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 
 # 开发环境使用本地数据库，生产环境使用 Render 的数据库
+# 数据库配置 - 修正版本
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
 else:
     # 本地开发环境
@@ -261,20 +282,22 @@ USE_TZ = True  # Enable timezone support
 
 
 # Static files configuration
+# 简化静态文件配置
 STATIC_URL = '/static/'
 
-# 直接使用现有的 static 目录
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# 移除可能有Render冲突的配置
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
 
 # 对于生产环境，仍然设置 STATIC_ROOT 但指向相同目录
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+
 # 简化 Whitenoise 配置
 #STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# 修改后（跳过文件验证）：
+# 修改后（Render跳过文件验证）：
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Default primary key field type
@@ -504,42 +527,24 @@ FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
 
 # ===== 生产环境安全配置 =====
 # 检测是否在 Render 生产环境
+
+# 生产环境配置
 IS_RENDER = 'RENDER' in os.environ
 
 if IS_RENDER:
-    # 确保使用环境变量中的 SECRET_KEY
-    SECRET_KEY = env('SECRET_KEY')
-    
-    # 调试模式关闭
     DEBUG = False
-    
-    # 允许的主机
-    ALLOWED_HOSTS = []
+    # 确保有正确的主机名
     RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
     if RENDER_EXTERNAL_HOSTNAME:
-        ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+        ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME, 'betweencoffee.onrender.com']
+    else:
+        ALLOWED_HOSTS = ['betweencoffee.onrender.com', 'localhost']
     
-    # HTTPS 重定向
+    # 安全配置
     SECURE_SSL_REDIRECT = True
-    
-    # HSTS 设置
-    SECURE_HSTS_SECONDS = 31536000  # 1年
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    
-    # Cookie 安全
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    
-    # 其他安全头
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
-    
-    # 对于 Render，可能需要这个设置
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 else:
-    # 开发环境设置
     DEBUG = True
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -588,6 +593,32 @@ TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
 TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
 TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
 TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
+
+
+
+# 在文件末尾添加配置验证
+def check_settings():
+    required_env_vars = [
+        'SECRET_KEY',
+        'DATABASE_URL',
+    ]
+    
+    missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
+    if missing_vars:
+        print(f"Missing environment variables: {missing_vars}")
+    
+    # 检查数据库连接
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        print("Database: OK")
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+
+# 应用启动时执行检查
+check_settings()
+
 
 
 '''
