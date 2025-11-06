@@ -42,8 +42,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-develop
 
 # 临时启用调试 - 完成后务必关闭！
 DEBUG = True
-# 允许的主机 - 只定义一次！
-ALLOWED_HOSTS = ['*']  # 临时允许所有主机
+ALLOWED_HOSTS = ['betweencoffee.onrender.com', 'localhost', '127.0.0.1']
 
 
 # 详细的日志配置
@@ -620,6 +619,8 @@ def check_settings():
 check_settings()
 
 
+# 在settings.py末尾添加
+DEBUG_PROPAGATE_EXCEPTIONS = True
 
 '''
 twilio
