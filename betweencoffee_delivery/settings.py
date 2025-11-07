@@ -13,14 +13,75 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 import logging
 import dj_database_url
+from pathlib import Path
 
 
 from environ import Env
 env = Env()
 env.read_env()
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Railway 环境检测
+IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None
+
+# 安全密钥配置
+if IS_RAILWAY:
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+else:
+    SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-development-only')
+
+# 调试模式配置
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+
+
+# 域名和主机配置
+if IS_RAILWAY:
+    # 获取 Railway 分配的主机名
+    RAILWAY_STATIC_URL = os.environ.get('RAILWAY_STATIC_URL')
+    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    
+    ALLOWED_HOSTS = []
+    if RAILWAY_PUBLIC_DOMAIN:
+        ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
+    if RAILWAY_STATIC_URL:
+        ALLOWED_HOSTS.append(RAILWAY_STATIC_URL)
+    
+    # 添加通用的 Railway 域名
+    ALLOWED_HOSTS.extend(['*.railway.app', '.railway.app'])
+    
+    # CSRF 信任源
+    CSRF_TRUSTED_ORIGINS = []
+    if RAILWAY_PUBLIC_DOMAIN:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{RAILWAY_PUBLIC_DOMAIN}')
+    if RAILWAY_STATIC_URL:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{RAILWAY_STATIC_URL}')
+    CSRF_TRUSTED_ORIGINS.append('https://*.railway.app')
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+
+# 数据库配置 - Railway 适配
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# Django Secret Key - 移除硬编码
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-development-only')
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,17 +93,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Render SECRET_KEY: Keub6QImLKq0srBx2mLWEyundshqHFYZ1Agg96_UZ9HH3d-338hcuiJz5tZtMTd7fX8
 
 
-# For Render config
-# Django Secret Key - 移除硬编码
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-development-only')
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # 从环境变量读取，生产环境,通过判断是否在 Render 环境来设置[citation:5]
 # DEBUG = 'RENDER' not in os.environ
 
 # 临时启用调试 - 完成后务必关闭！
-DEBUG = True
-ALLOWED_HOSTS = ['betweencoffee.onrender.com', 'localhost', '127.0.0.1']
+# DEBUG = True
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['betweencoffee.onrender.com', 'localhost', '127.0.0.1']
 
 
 # 详细的日志配置
@@ -153,8 +214,8 @@ SITE_DOMAIN = "betweencoffee.com"  # Your production domain
 
 
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -200,6 +261,9 @@ WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 # Database configuration for both development and production
 
 
+
+'''
+Render
 # 开发环境使用本地数据库，生产环境使用 Render 的数据库
 # 数据库配置 - 修正版本
 DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -219,9 +283,7 @@ else:
             'PORT': '5432',
         }
     }
-
-
-
+'''
 
 
 '''
@@ -283,21 +345,38 @@ USE_TZ = True  # Enable timezone support
 # Static files configuration
 # 简化静态文件配置
 STATIC_URL = '/static/'
+# 对于生产环境，仍然设置 STATIC_ROOT 但指向相同目录
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# 确保静态文件目录存在
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# 修改后（Render跳过文件验证）：
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# 生产环境安全配置
+if IS_RAILWAY and not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    
 # 移除可能有Render冲突的配置
 # STATICFILES_DIRS = [
 #     os.path.join(BASE_DIR, 'static'),
 # ]
 
-# 对于生产环境，仍然设置 STATIC_ROOT 但指向相同目录
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 
 # 简化 Whitenoise 配置
 #STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# 修改后（Render跳过文件验证）：
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -546,10 +625,6 @@ if IS_RENDER:
 else:
     DEBUG = True
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
-
-
-
 
 
 

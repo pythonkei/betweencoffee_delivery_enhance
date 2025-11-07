@@ -29,7 +29,6 @@ def health_check(request):
 
 
 urlpatterns = [
-    path('health/', health_check),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', Index.as_view(), name='index'), # find own app html file
