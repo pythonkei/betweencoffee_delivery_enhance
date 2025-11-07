@@ -71,7 +71,6 @@ if DATABASE_URL:
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            conn_health_checks=True,
         )
     }
 else:
@@ -86,7 +85,7 @@ else:
 
 # Django Secret Key - 移除硬编码
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-development-only')
-
+# for Railwy Variables -> SECRET_KEY: mohf-@y+t3$!_hjjmai58iuler74_@4!ui1qij$-m=vl+$h(8u
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
