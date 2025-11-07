@@ -63,30 +63,32 @@ else:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
     CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
 
-# 数据库配置 - Railway 适配
+# 从环境变量获取 DATABASE_URL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
     # 解析 DATABASE_URL
     db_info = urlparse(DATABASE_URL)
     
+    # 配置 DATABASES 字典
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': db_info.path[1:],  # 移除开头的 '/'
+            'ENGINE': 'django.db.backends.postgresql',  # 根据您的数据库调整，例如MySQL等
+            'NAME': db_info.path[1:],  # 移除路径开头的 '/'
             'USER': db_info.username,
             'PASSWORD': db_info.password,
             'HOST': db_info.hostname,
             'PORT': db_info.port,
-            'CONN_MAX_AGE': 600,
+            # 如果需要，可以添加其他参数，例如：
+            'CONN_MAX_AGE': 600,  # 设置连接最大年龄（可选）
         }
     }
 else:
-    # 开发环境 - 使用 SQLite
+    # 如果 DATABASE_URL 不存在，可以回退到默认配置（例如SQLite）
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
 
