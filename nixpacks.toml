@@ -5,6 +5,7 @@ cmds = [
 
 [phases.build]
 cmds = [
+    "python check_config.py",
     "python manage.py collectstatic --noinput",
 ]
 
