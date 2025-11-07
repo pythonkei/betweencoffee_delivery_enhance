@@ -24,7 +24,7 @@ env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Railway 环境检测
-IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None
+IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None or os.environ.get('RAILWAY_STATIC_URL') is not None or os.environ.get('RAILWAY_PUBLIC_DOMAIN') is not None
 
 # 安全密钥配置
 if IS_RAILWAY:
@@ -64,17 +64,25 @@ else:
 
 # 数据库配置 - Railway 适配
 DATABASE_URL = os.environ.get('DATABASE_URL')
+
 if DATABASE_URL:
+    # 生产环境 - 使用 Railway 提供的数据库
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
 else:
+    # 开发环境 - 使用 SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 
 # Django Secret Key - 移除硬编码
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-fallback-key-for-development-only')
@@ -670,28 +678,19 @@ TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
 
 
 
-# 在文件末尾添加配置验证
-def check_settings():
-    required_env_vars = [
-        'SECRET_KEY',
-        'DATABASE_URL',
-    ]
-    
-    missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
-    if missing_vars:
-        print(f"Missing environment variables: {missing_vars}")
-    
-    # 检查数据库连接
-    try:
-        from django.db import connection
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-        print("Database: OK")
-    except Exception as e:
-        print(f"Database connection failed: {e}")
+# 在文件末尾添加调试信息
+def check_railway_environment():
+    print("=== Railway Environment Check ===")
+    print(f"RAILWAY_ENVIRONMENT: {os.environ.get('RAILWAY_ENVIRONMENT')}")
+    print(f"RAILWAY_STATIC_URL: {os.environ.get('RAILWAY_STATIC_URL')}")
+    print(f"RAILWAY_PUBLIC_DOMAIN: {os.environ.get('RAILWAY_PUBLIC_DOMAIN')}")
+    print(f"DATABASE_URL: {'***SET***' if os.environ.get('DATABASE_URL') else 'NOT SET'}")
+    print(f"IS_RAILWAY: {IS_RAILWAY}")
+    print("=================================")
 
-# 应用启动时执行检查
-check_settings()
+# 只在启动时执行一次
+if __name__ != '__main__':
+    check_railway_environment()
 
 
 # 在settings.py末尾添加
