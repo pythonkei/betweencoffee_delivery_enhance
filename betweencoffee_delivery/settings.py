@@ -14,6 +14,7 @@ import os
 import logging
 import dj_database_url
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 from environ import Env
@@ -66,12 +67,19 @@ else:
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    # 生产环境 - 使用 Railway 提供的数据库
+    # 解析 DATABASE_URL
+    db_info = urlparse(DATABASE_URL)
+    
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-        )
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': db_info.path[1:],  # 移除开头的 '/'
+            'USER': db_info.username,
+            'PASSWORD': db_info.password,
+            'HOST': db_info.hostname,
+            'PORT': db_info.port,
+            'CONN_MAX_AGE': 600,
+        }
     }
 else:
     # 开发环境 - 使用 SQLite
