@@ -22,7 +22,10 @@ env = Env()
 env.read_env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Railway 环境检测
+IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None or os.environ.get('RAILWAY_STATIC_URL') is not None or os.environ.get('RAILWAY_PUBLIC_DOMAIN') is not None
 
 
 # Quick-start development settings - unsuitable for production
@@ -203,17 +206,16 @@ WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 
 
-'''
-Render
-# 开发环境使用本地数据库，生产环境使用 Render 的数据库
-# 数据库配置 - 修正版本
+# Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
+
 if DATABASE_URL:
+    # 使用 Railway 或生产环境的数据库
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
 else:
-    # 本地开发环境
+    # 本地开发环境 - 使用 PostgreSQL
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -224,7 +226,6 @@ else:
             'PORT': '5432',
         }
     }
-'''
 
 
 '''
@@ -547,17 +548,15 @@ FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
 # ===== 生产环境安全配置 =====
 # 检测是否在 Render 生产环境
 
-# 生产环境配置
-IS_RENDER = 'RENDER' in os.environ
 
-if IS_RENDER:
-    DEBUG = False
+# 生产环境安全配置
+if IS_RAILWAY and not DEBUG:
     # 确保有正确的主机名
-    RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-    if RENDER_EXTERNAL_HOSTNAME:
-        ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME, 'betweencoffee.onrender.com']
+    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if RAILWAY_PUBLIC_DOMAIN:
+        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app']
     else:
-        ALLOWED_HOSTS = ['betweencoffee.onrender.com', 'localhost']
+        ALLOWED_HOSTS = ['.railway.app', 'localhost']
     
     # 安全配置
     SECURE_SSL_REDIRECT = True
@@ -566,7 +565,6 @@ if IS_RENDER:
 else:
     DEBUG = True
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
 
 
 
