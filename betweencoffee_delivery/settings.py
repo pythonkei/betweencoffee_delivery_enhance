@@ -37,11 +37,13 @@ if IS_RAILWAY:
         ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app']
     else:
         ALLOWED_HOSTS = ['.railway.app']
-    
-    # 安全配置
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    # 生产环境安全配置
+    if not DEBUG:
+        SECURE_SSL_REDIRECT = True
+        SESSION_COOKIE_SECURE = True
+        CSRF_COOKIE_SECURE = True
+        SECURE_BROWSER_XSS_FILTER = True
+        SECURE_CONTENT_TYPE_NOSNIFF = True
 else:
     # 开发环境配置
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
@@ -64,7 +66,7 @@ else:
 
 # 临时启用调试 - 完成后务必关闭！
 # DEBUG = True
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = ['betweencoffee.onrender.com', 'localhost', '127.0.0.1']
 
 
@@ -316,6 +318,7 @@ STATICFILES_DIRS = [
 # 修改后（Render跳过文件验证）：
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
+
 # 生产环境安全配置
 if IS_RAILWAY and not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -563,10 +566,8 @@ FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
 
 
 
-# ===== 生产环境安全配置 =====
-# 检测是否在 Render 生产环境
 
-
+'''
 # 生产环境安全配置
 if IS_RAILWAY and not DEBUG:
     # 确保有正确的主机名
@@ -583,7 +584,7 @@ if IS_RAILWAY and not DEBUG:
 else:
     DEBUG = True
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
+'''
 
 
 
