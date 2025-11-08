@@ -26,7 +26,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Railway 环境检测
 IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None or os.environ.get('RAILWAY_STATIC_URL') is not None or os.environ.get('RAILWAY_PUBLIC_DOMAIN') is not None
+# DEBUG 配置
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
+# 生产环境安全配置
+if IS_RAILWAY:
+    # 确保有正确的主机名
+    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if RAILWAY_PUBLIC_DOMAIN:
+        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app']
+    else:
+        ALLOWED_HOSTS = ['.railway.app']
+    
+    # 安全配置
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    # 开发环境配置
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
