@@ -243,8 +243,14 @@ class OrderModel(models.Model):
     is_paid = models.BooleanField(default=False)
     is_delivery = models.BooleanField(default=False)
     items = models.JSONField()  # Stores order items as JSON
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+    total_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00  # 明确的数字默认值
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True  # 对于时间字段使用 auto_now_add
+    )
 
     ORDER_TYPE_CHOICES = [
         ('normal', '普通訂單'),
