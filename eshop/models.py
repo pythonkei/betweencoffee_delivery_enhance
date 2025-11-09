@@ -19,7 +19,7 @@ class CoffeeItem(models.Model):
     price = models.DecimalField(max_digits=5, decimal_places=2)
     origin = models.CharField(max_length=30, blank=True)
     flavor = models.TextField(max_length=200, blank=True)
-    list_date = models.DateTimeField(default=datetime.now,blank=True)
+    list_date = models.DateTimeField(default=timezone.now,blank=True)
     # Cup level choices
     CUP_LEVEL_CHOICES = [
         ('Small', 'Small'),
@@ -83,7 +83,7 @@ class BeanItem(models.Model):
     ]
     grinding_level = models.CharField(max_length=10, choices=GRINDING_LEVEL_CHOICES, default='Non') 
     flavor = models.TextField(max_length=200, blank=True)
-    list_date = models.DateTimeField(default=datetime.now,blank=True)
+    list_date = models.DateTimeField(default=timezone.now,blank=True)
     is_published = models.BooleanField(default=True)
     is_shop_hot_item = models.BooleanField(default=False)
     # 新增排序字段
