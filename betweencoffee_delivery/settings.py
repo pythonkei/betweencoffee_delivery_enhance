@@ -418,8 +418,6 @@ SERVER_EMAIL = 'pythonkei@gmail.com'
 
 
 
-
-
 # ===== Social Account Only Configuration =====
 # Disable regular account functionality
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disabled for regular accounts
