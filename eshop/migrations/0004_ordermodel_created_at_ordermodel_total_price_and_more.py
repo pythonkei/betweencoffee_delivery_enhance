@@ -19,8 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ordermodel',
             name='total_price',
-            field=models.DecimalField(decimal_places=2, default=django.utils.timezone.now, max_digits=10),
-            preserve_default=False,
+            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AlterField(
             model_name='ordermodel',
