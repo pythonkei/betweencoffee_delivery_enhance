@@ -27,7 +27,7 @@ from django.http import HttpResponse
 
 # 健康检查视图
 def health_check(request):
-    return HttpResponse('OK')
+    return HttpResponse('OK', status=200)
 
 
 urlpatterns = [

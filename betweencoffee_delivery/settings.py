@@ -15,8 +15,6 @@ import logging
 import dj_database_url
 from pathlib import Path
 from urllib.parse import urlparse
-
-
 from environ import Env
 env = Env()
 env.read_env()
@@ -24,22 +22,8 @@ env.read_env()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# DEBUG 配置
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true' or os.environ.get('RAILWAY_ENVIRONMENT') is None
-
-# 确保本地开发时使用正确的ALLOWED_HOSTS
-if DEBUG:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
-else:
-    # Railway生产环境配置
-    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    if RAILWAY_PUBLIC_DOMAIN:
-        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app']
-    else:
-        ALLOWED_HOSTS = ['.railway.app']
-# Railway 环境检测
-IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None or os.environ.get('RAILWAY_STATIC_URL') is not None or os.environ.get('RAILWAY_PUBLIC_DOMAIN') is not None
-
+# Railway 环境检测 <- cant run local
+IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None
 
 # Railway生产环境安全配置
 if IS_RAILWAY:
@@ -60,6 +44,31 @@ else:
     # 开发环境配置
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+
+# DEBUG 配置
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+# 确保本地开发时使用正确的ALLOWED_HOSTS
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+else:
+    # Railway生产环境配置
+    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if RAILWAY_PUBLIC_DOMAIN:
+        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app']
+    else:
+        ALLOWED_HOSTS = ['.railway.app']
+
+
+# ALLOWED_HOSTS 配置
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+if IS_RAILWAY:
+    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if RAILWAY_PUBLIC_DOMAIN:
+        ALLOWED_HOSTS.extend([RAILWAY_PUBLIC_DOMAIN, '.railway.app'])
+    else:
+        ALLOWED_HOSTS.append('.railway.app')
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -69,30 +78,8 @@ else:
 # Render SECRET_KEY: Keub6QImLKq0srBx2mLWEyundshqHFYZ1Agg96_UZ9HH3d-338hcuiJz5tZtMTd7fX8
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-fallback-secret-key-here')
+# On Railway SECRET_KEY = os.environ.get('mohf-@y+t3$!_hjjmai58iuler74_@4!ui1qij$-m=vl+$h(8u')
 
-# 只在非 Railway 环境启用调试
-if not IS_RAILWAY:
-    DEBUG = True
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
-    
-    # 详细的错误日志（仅本地）
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-            },
-        },
-        'loggers': {
-            'django': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-        },
-    }
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # 从环境变量读取，生产环境,通过判断是否在 Render 环境来设置[citation:5]
@@ -102,26 +89,6 @@ if not IS_RAILWAY:
 # DEBUG = True
 # ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = ['betweencoffee.onrender.com', 'localhost', '127.0.0.1']
-
-
-# 详细的日志配置
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
 
 
 
@@ -169,9 +136,17 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 
-CSRF_TRUSTED_ORIGINS = [ 'https://*' ]
+
+# 替换原来的 CSRF_TRUSTED_ORIGINS
+if IS_RAILWAY:
+    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if RAILWAY_PUBLIC_DOMAIN:
+        CSRF_TRUSTED_ORIGINS = [f'https://{RAILWAY_PUBLIC_DOMAIN}']
+    else:
+        CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+else:
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:8081', 'http://127.0.0.1:8081']
 
 
 # Application definition
