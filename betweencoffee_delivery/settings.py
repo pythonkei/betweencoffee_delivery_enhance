@@ -24,12 +24,24 @@ env.read_env()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# DEBUG 配置
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true' or os.environ.get('RAILWAY_ENVIRONMENT') is None
+
+# 确保本地开发时使用正确的ALLOWED_HOSTS
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+else:
+    # Railway生产环境配置
+    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if RAILWAY_PUBLIC_DOMAIN:
+        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app']
+    else:
+        ALLOWED_HOSTS = ['.railway.app']
 # Railway 环境检测
 IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None or os.environ.get('RAILWAY_STATIC_URL') is not None or os.environ.get('RAILWAY_PUBLIC_DOMAIN') is not None
-# DEBUG 配置
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-# 生产环境安全配置
+
+# Railway生产环境安全配置
 if IS_RAILWAY:
     # 确保有正确的主机名
     RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
@@ -56,9 +68,31 @@ else:
 
 # Render SECRET_KEY: Keub6QImLKq0srBx2mLWEyundshqHFYZ1Agg96_UZ9HH3d-338hcuiJz5tZtMTd7fX8
 
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-fallback-secret-key-here')
 
-
-
+# 只在非 Railway 环境启用调试
+if not IS_RAILWAY:
+    DEBUG = True
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+    
+    # 详细的错误日志（仅本地）
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
+        },
+    }
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # 从环境变量读取，生产环境,通过判断是否在 Render 环境来设置[citation:5]
@@ -228,6 +262,12 @@ WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
+
+# 检查本地数据库连接 PostgreSQL connection
+# sudo service postgresql start
+# 检查数据库是否存在
+# psql -h localhost -p 5432 -U postgres -l
+
 
 if DATABASE_URL:
     # 使用 Railway 或生产环境的数据库

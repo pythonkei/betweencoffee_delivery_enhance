@@ -1,0 +1,221 @@
+// 共通
+.bg-gry {
+    position: relative;
+    z-index: 5;
+    background-color: #ebebeb;
+}
+// 共通ここまで
+
+
+.feed {
+    $this: &;
+
+    position: relative;
+    background-image: url(../images/index_feed_image.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    &::before,
+    &::after {
+        display: block;
+        width: 100%;
+        background-color: #ebebeb;
+        content: '';
+    }
+
+    &::before {
+        height: 285px;
+    }
+
+    &::after {
+        height: 50px;
+    }
+
+    &__layer {
+        display: flex;
+    }
+
+    &__layer-parts {
+        width: 2430px;
+        height: 570px;
+        flex-shrink: 0;
+        background-color: #ebebeb;
+        background-image: url(../images/bg_4.jpg);
+        clip-path: url(#mask);
+        animation: feedScroll 60s infinite linear 0.5s both;
+    }
+
+    &__mask {
+        height: 0;
+    }
+
+    &__triangle {
+        position: absolute;
+        right: -140px;
+        bottom: 0;
+        transform: rotate(-229deg);
+        width: 577px;
+        mix-blend-mode: difference;
+    }
+
+    @include _mq(xl) {
+        &::before {
+            height: 225px;
+        }
+
+        &__layer-parts {
+            width: 1701px;
+            height: 399px;
+        }
+
+        &__triangle {
+            width: 440px;
+        }
+    }
+
+    @include _mq(sm) {
+        &::before {
+            height: 160px;
+        }
+
+        &__layer-parts {
+            width: 1020.6px;
+            height: 239.4px;
+        }
+
+        &__triangle {
+            width: 340px;
+        }
+    }
+}
+
+//スライドアニメーション
+@keyframes feedScroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+
+
+
+.feed {
+  position: relative;
+  background-image: url(../images/index_feed_image.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+
+
+.feed::before, .feed::after {
+  display: block;
+  width: 100%;
+  /*background-color: ##121213; */
+  background-image: url(../images/bg_4.jpg);
+  /* background-color:transparent; */
+  content: "";
+}
+
+.feed::before {
+  height: 130px;
+}
+
+.feed::after {
+  height: 20px;
+}
+
+.feed__layer {
+  display: flex;
+}
+
+.feed__layer-parts {
+  width: 2430px;
+  height: 570px;
+  flex-shrink: 0;
+  background-color: rgba(18,18,18,1);
+  /* background-image: url(../images/bg_4.jpg); */
+  /* background:transparent; */
+  content: ""
+  -webkit-clip-path: url(#mask);
+          clip-path: url(#mask);
+  animation: feedScroll 60s infinite linear 0.5s both;
+}
+
+.feed__mask {
+  height: 0;
+}
+
+.feed__triangle {
+  position: absolute;
+  right: -140px;
+  bottom: 0;
+  transform: rotate(-229deg);
+  width: 577px;
+  mix-blend-mode: difference;
+}
+
+.feed__clock {
+  position: absolute;
+  display: block;
+  top: 85px;
+  right: 3%;
+  font-weight: 500;
+  font-size: 18px;
+  background-color: #0f0f0f;
+  z-index: 100;
+
+  span {
+      font-weight: inherit;
+      font-size: inherit;
+  }
+}
+
+
+@media screen and (max-width: 1200px) {
+  .feed::before {
+    height: 140px;
+  }
+  .feed__layer-parts {
+    width: 1701px;
+    height: 399px;
+  }
+  .feed__triangle {
+    width: 440px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .feed::before {
+    height: 160px;
+  }
+  .feed__layer-parts {
+    width: 1020.6px;
+    height: 239.4px;
+  }
+  .feed__triangle {
+    width: 340px;
+  }
+}
+
+@keyframes feedScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+
+.cls-1 {
+    fill: transparent;
+}
+
+

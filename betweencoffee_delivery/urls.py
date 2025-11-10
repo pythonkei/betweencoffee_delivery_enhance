@@ -24,11 +24,14 @@ from .views import Index, About, CoffeeMenu, Coffee, BeanMenu, Bean, CoffeeMenuS
 from socialuser.views import profile_view
 from django.http import HttpResponse
 
+
+# 健康检查视图
 def health_check(request):
-    return HttpResponse("OK", status=200)
+    return HttpResponse('OK')
 
 
 urlpatterns = [
+    path('health/', health_check, name='health_check'),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', Index.as_view(), name='index'), # find own app html file
