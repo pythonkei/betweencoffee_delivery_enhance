@@ -47,27 +47,20 @@ else:
 
 
 # 基础Redis配置，从环境变量读取URL，默认为本地开发地址
-REDIS_URL = os.environ.get('REDIS_URL', None)  # 允许为 None
+REDIS_URL = os.environ.get('REDIS_URL', '').strip('"')  # 移除可能的引号
 
-if REDIS_URL:
+if REDIS_URL and REDIS_URL.startswith('redis://'):
     # 使用 Redis 配置
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": REDIS_URL,
-            # ... 其他配置
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
         }
     }
-else:
-    # 使用内存缓存
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        }
-    }
-
-# 修正后的 Channels 配置（保留第 98-104 行，删除第 200-206 行）
-if REDIS_URL:
+    
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -77,7 +70,13 @@ if REDIS_URL:
         }
     }
 else:
-    # 当没有 Redis 时使用内存后端
+    # 使用内存缓存和内存通道层
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+    
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer"
@@ -557,10 +556,24 @@ Notification URL: http://localhost.com/eshop/order_payment_confirmation/
 Message Delivery: Enabled
 '''
 
+# 详细的错误日志
+import sys
 
+# 捕获所有未处理的异常
+def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+        
+    print("=== UNHANDLED EXCEPTION ===")
+    print(f"Type: {exc_type}")
+    print(f"Value: {exc_value}")
+    print("Traceback:")
+    import traceback
+    traceback.print_exception(exc_type, exc_value, exc_traceback)
+    print("===========================")
 
-
-
+sys.excepthook = handle_unhandled_exception
 
 
 
