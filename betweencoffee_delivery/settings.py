@@ -577,6 +577,32 @@ sys.excepthook = handle_unhandled_exception
 
 
 
+import os
+
+# 在文件开头添加调试信息
+print("Available environment variables:")
+for key in sorted(os.environ.keys()):
+    if 'GOOGLE' in key or 'OAUTH' in key:
+        print(f"{key}: {os.environ[key]}")
+
+# 或者在读取 OAUTH_GOOGLE_CLIENT_ID 之前添加
+try:
+    google_client_id = env('OAUTH_GOOGLE_CLIENT_ID')
+    print(f"OAUTH_GOOGLE_CLIENT_ID found: {google_client_id}")
+except Exception as e:
+    print(f"Error getting OAUTH_GOOGLE_CLIENT_ID: {e}")
+
+# 在 settings.py 中检查
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': env('OAUTH_GOOGLE_CLIENT_ID'),  # 确保这里与 Railway 中的名称一致
+            'secret': env('OAUTH_GOOGLE_SECRET'),
+            'key': ''
+        }
+    }
+}
+
 
 # 在settings.py末尾添加
 DEBUG_PROPAGATE_EXCEPTIONS = True
