@@ -17,29 +17,39 @@ IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-fallback-secret-key-here')
-# On Railway SECRET_KEY = os.environ.get('mohf-@y+t3$!_hjjmai58iuler74_@4!ui1qij$-m=vl+$h(8u')
+# On Railway 环境变量 SECRET_KEY = os.environ.get('mohf-@y+t3$!_hjjmai58iuler74_@4!ui1qij$-m=vl+$h(8u')
 
-# DEBUG 配置
-DEBUG = env.bool('DEBUG', default=True)
+# DEBUG 配置 - 在 Railway 上强制设为 False
+if IS_RAILWAY:
+    DEBUG = False
+else:
+    DEBUG = env.bool('DEBUG', default=True)
 
 # ALLOWED_HOSTS 配置
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
-if IS_RAILWAY:
-    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    if RAILWAY_PUBLIC_DOMAIN:
-        ALLOWED_HOSTS.extend([RAILWAY_PUBLIC_DOMAIN, '.railway.app'])
-    else:
-        ALLOWED_HOSTS.append('.railway.app')
 
-# CSRF 配置
+# 替换现有的安全配置
 if IS_RAILWAY:
+    # 确保有正确的主机名
     RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     if RAILWAY_PUBLIC_DOMAIN:
+        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app', 'localhost', '127.0.0.1', '0.0.0.0']
         CSRF_TRUSTED_ORIGINS = [f'https://{RAILWAY_PUBLIC_DOMAIN}']
     else:
+        ALLOWED_HOSTS = ['.railway.app', 'localhost', '127.0.0.1', '0.0.0.0']
         CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+    
+    # 安全配置
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 else:
+    DEBUG = True
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
     CSRF_TRUSTED_ORIGINS = ['http://localhost:8081', 'http://127.0.0.1:8081']
+
+
 
 
 
@@ -85,8 +95,6 @@ else:
 
 
 
-
-
 # Application definition
 INSTALLED_APPS = [
     'eshop',
@@ -124,7 +132,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # 确保 WhiteNoise 在 SecurityMiddleware 之后
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -257,8 +265,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-# 修改后（Render跳过文件验证）：
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# 使用 WhiteNoise 服务静态文件
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -266,11 +274,14 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+'''
 # Security settings for production
 if IS_RAILWAY and not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+'''
+
 
 # Enable Whole cart session
 CART_SESSION_ID = 'cart'
@@ -389,34 +400,31 @@ PHONENUMBER_DEFAULT_REGION = "HK"
 PHONENUMBER_DB_FORMAT = "NATIONAL"  # Store without country code
 
 
-'''
-# Show environ的DEBUG输出
-logging.basicConfig(level=logging.DEBUG)
-'''
 
+# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'INFO',  # 改为INFO级别，减少DEBUG输出
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
-        'environ': {  # 添加这个配置来减少environ的DEBUG输出
+        'environ': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
-        'eshop': {
+        'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
-        'alipay': {
+        'gunicorn': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     },
@@ -427,6 +435,7 @@ def check_railway_environment():
     print("=== Railway Environment Check ===")
     print(f"RAILWAY_ENVIRONMENT: {os.environ.get('RAILWAY_ENVIRONMENT')}")
     print(f"RAILWAY_PUBLIC_DOMAIN: {os.environ.get('RAILWAY_PUBLIC_DOMAIN')}")
+    print(f"PORT: {os.environ.get('PORT')}")
     print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
     print(f"DEBUG: {DEBUG}")
     print("=================================")
@@ -434,8 +443,8 @@ def check_railway_environment():
 if __name__ != '__main__':
     check_railway_environment()
 
-# 支付宝中国配置
-ALIPAY_APP_ID = '9021000151625966'
+
+
 
 '''
 应用公钥：工具生成的公钥需要上传到支付宝的
@@ -458,24 +467,19 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTKp2l7B+SLjrIWqXeRUYCnH291jq05/fAPc
 '''
 
 
-# 支付宝配置 - 使用环境变量
+# 支付宝中国配置
+ALIPAY_APP_ID = '9021000151625966'
 ALIPAY_APP_ID = env('ALIPAY_APP_ID', default='9021000151625966')
-ALIPAY_APP_PRIVATE_KEY = env('ALIPAY_APP_PRIVATE_KEY', default='''-----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4Vyqi5S4iJFW4lfP+wIQTBa2EPPUs47F+1psrRt5rQeULbB4RmwAvqrEnFNrgSoHhK2rRao9hXRIsafSyLI/TIWLa29ngPPtXNZNa7OYem9wOPiJhAAzVqBhPrFLZ7XNX4Gwkr9NkzdVnPdRlqk22YIIdstLfalFOvqegG3FWlzDUm4eouNJYlG0dQlBR/m+jMJ/Q0Sy7aIaidgN5Ph7pxUshXkjHbqIYXsgT7129wFU/W/2wdvUff4GnaEnNBLwZbe7TE73jkLQWylLnO8BfBsXOaCCmXZmGUL/3qVHYAgTUT4Z1XkUdYZw77Li6rSxfYdp+R6ld/4BNnX3SsAFrAgMBAAECggEARpP5Gw0sMJ5Aw7+F/8+twaq22J6OMHWtC6cXGea0WdSM4WavzIXP+HAeC5yMgLuGJrP83dkytFByGNcofN9a4bcypiDutlAi2y0EEhgJs0ZxZnKbrw/Z2iPVywtrXUzwkIC4ZwN6qGm2fyTJIXOm9WDV8JD689c88i1E+KQJLOFnngfFI9vRUpX8b9QzDa/t6TFnDJyga0ftRWLQCn9rvoHPRpjBsFodRUe/CAEtOQR8j+ykJhRhk5lSB1sJ66c0Mj/+IT9SBXorlaQ91cIIdUOak2JL+N6E4BhKXZYUBpOM6STyZQ+/k+dC7fziTIgJ9LwkIwmh+AIfwcAChbo1YQKBgQDkbyrSPmlIlXhJYCGZFnxSZXPhZCGNJ976lb1CYtZzKx1K0QcZT/1e8mnw7Q+Uq8Vv8BCUgpAr5pe+72xPGZoE9lIalWLs26koCtKeQWTaT5nybh9XgwynrNT4F9NqwCbl0kE8pfNBZpR3h+0DbfNgDTw3nUF/OW8n3ghoa2qCPwKBgQDOldjSrgEhYwz34/jlkrquRI89CXCaOy41hPzFCF8zS5j3C70qjt6I0Ro4E+U9zgOnWzLiJxSzWTJ3f9Gv81q4LvEOdsTSH+YRK5jUApn84U8zC26KlcMnUxW7KdG5QdARICeN5r1H1EcixbZUR8ORLffWt0Hw1D/KDTuqoI+d1QKBgQDJOAdvVVymfEuNzukpkb4HUqil1O8dCQ8IithA3xFqN4NBASmQqX5VoZGikR+VZU2wkbX5K51VnnTy0rIEZ1fdoSCnnAmc/M1foVDv6EivaUkBXPGsw5plJQAgXdR0hzh8Xx3qD4BcjsCfHhOwXqzwYhg2IQaty+jXJGUhneUfPwKBgQC2yHq5nd++LKeSxZC5f2PRQTQDa1DIBcjS7cHAi7G/7wl+vFI5T4OyRmEOcPwJ/TfaYaTZ2H5GWYt/lAZxyb3g7Re4Fnn6+OJVGt/z5gFdb/TlUx4RXIT5TFgT6+J2KbbxECQvN5MN9NKj/49dbsmosKVyw16CuSlfmunKBJpNqQKBgH347BjZdeua7gJiMGO/QRJMKEjL9HLB9l0xsg+udxDN/55xmunVVK9kDt337LnSs17f++1Z+YkHjSGOIPpNSgdBiKRSDptQVnQ3bm+Q31WdraqaTUrR3X3YifHkBDUrcqjbnonJlbd/5yK+aows9IgcHvNC3sSRBrtc20z47zXJ
------END PRIVATE KEY-----''')
-ALIPAY_PUBLIC_KEY = env('ALIPAY_PUBLIC_KEY', default='''-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTKp2l7B+SLjrIWqXeRUYCnH291jq05/fAPcV/bSrZbXRT2vEi9SfypceTaRjnKbsJp8tozYEPHJxqV0Ia4nr4zFixHhlSGJk/uMICC16dkQ3NebHy7PUMJjyu2rhtB4GyvF2HZwlcku21BR2iVMqh5ZO5WNxz0qjx9gbAqk5ebqFktPAPPa86dnoVeHIK4KPs/L3Mfkqc03fypbj/4v1IPKEcmvB2kKnGGrZCoOGvknApJGSQkH3JPN+gpFJEJnnehASd+sRTLTTDG8K/KL8mo2fdwZ/w7APJkkVUzHRLOileFlyijehwapeJ+yJAmvan8lR0oIAsBZlp0+HBIW6QIDAQAB
------END PUBLIC KEY-----''')
-
-
-
+ALIPAY_APP_PRIVATE_KEY = env('ALIPAY_APP_PRIVATE_KEY', default='')
+ALIPAY_PUBLIC_KEY = env('ALIPAY_PUBLIC_KEY', default='')
 
 
 ALIPAY_DEBUG = True
-ALIPAY_RETURN_URL = 'http://localhost:8080/eshop/alipay_callback/'
-ALIPAY_NOTIFY_URL = 'http://localhost:8080/eshop/alipay_notify/'
 ALIPAY_SIGN_TYPE = 'RSA2'
 ALIPAY_CHARSET = 'utf-8'
+ALIPAY_RETURN_URL = 'http://localhost:8080/eshop/alipay_callback/'
+ALIPAY_NOTIFY_URL = 'http://localhost:8080/eshop/alipay_notify/'
+
 
 '''
 # PayPal form 开发者平台
@@ -556,55 +560,21 @@ Notification URL: http://localhost.com/eshop/order_payment_confirmation/
 Message Delivery: Enabled
 '''
 
-# 详细的错误日志
+# 异常处理
 import sys
-
-# 捕获所有未处理的异常
 def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
-        
     print("=== UNHANDLED EXCEPTION ===")
     print(f"Type: {exc_type}")
     print(f"Value: {exc_value}")
-    print("Traceback:")
     import traceback
     traceback.print_exception(exc_type, exc_value, exc_traceback)
     print("===========================")
 
 sys.excepthook = handle_unhandled_exception
 
-
-
-import os
-
-# 在文件开头添加调试信息
-print("Available environment variables:")
-for key in sorted(os.environ.keys()):
-    if 'GOOGLE' in key or 'OAUTH' in key:
-        print(f"{key}: {os.environ[key]}")
-
-# 或者在读取 OAUTH_GOOGLE_CLIENT_ID 之前添加
-try:
-    google_client_id = env('OAUTH_GOOGLE_CLIENT_ID')
-    print(f"OAUTH_GOOGLE_CLIENT_ID found: {google_client_id}")
-except Exception as e:
-    print(f"Error getting OAUTH_GOOGLE_CLIENT_ID: {e}")
-
-# 在 settings.py 中检查
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': env('OAUTH_GOOGLE_CLIENT_ID'),  # 确保这里与 Railway 中的名称一致
-            'secret': env('OAUTH_GOOGLE_SECRET'),
-            'key': ''
-        }
-    }
-}
-
-
-# 在settings.py末尾添加
 DEBUG_PROPAGATE_EXCEPTIONS = True
 
 
