@@ -518,6 +518,30 @@ TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
 TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
 
 
+# 异常处理
+import sys
+def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    print("=== UNHANDLED EXCEPTION ===")
+    print(f"Type: {exc_type}")
+    print(f"Value: {exc_value}")
+    import traceback
+    traceback.print_exception(exc_type, exc_value, exc_traceback)
+    print("===========================")
+
+sys.excepthook = handle_unhandled_exception
+
+DEBUG_PROPAGATE_EXCEPTIONS = True
+
+# 在 settings.py 中添加
+try:
+    from .local_settings import *
+except ImportError:
+    pass
+
+
 '''
 # 生产环境安全配置
 if IS_RAILWAY and not DEBUG:
@@ -565,22 +589,7 @@ Notification URL: http://localhost.com/eshop/order_payment_confirmation/
 Message Delivery: Enabled
 '''
 
-# 异常处理
-import sys
-def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    print("=== UNHANDLED EXCEPTION ===")
-    print(f"Type: {exc_type}")
-    print(f"Value: {exc_value}")
-    import traceback
-    traceback.print_exception(exc_type, exc_value, exc_traceback)
-    print("===========================")
 
-sys.excepthook = handle_unhandled_exception
-
-DEBUG_PROPAGATE_EXCEPTIONS = True
 
 
 
