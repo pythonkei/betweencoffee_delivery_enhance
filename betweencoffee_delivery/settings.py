@@ -266,7 +266,12 @@ STATICFILES_DIRS = [
 ]
 
 # 使用 WhiteNoise 服务静态文件
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# 添加 WhiteNoise 配置
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
