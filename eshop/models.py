@@ -87,8 +87,7 @@ class BeanItem(models.Model):
     is_published = models.BooleanField(default=True)
     is_shop_hot_item = models.BooleanField(default=False)
     # 新增排序字段
-    hot_item_order = models.PositiveIntegerField(default=0, verbose_name='热门商品排序',
-                                               help_text='数字越小显示越靠前')
+    hot_item_order = models.PositiveIntegerField(default=0, verbose_name='热门商品排序', help_text='数字越小显示越靠前')
 
     def __str__(self):
         return self.name
