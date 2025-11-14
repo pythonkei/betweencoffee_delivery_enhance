@@ -1,6 +1,13 @@
 # 搜索整个文件，引用 hot_item_order command
 # grep -n "hot_item_order"() betweencoffee_delivery/views.py
 
+# 检查所有模板文件
+# grep -r "hot_item_order" ./templates/
+
+# 检查所有Python文件
+#grep -r "hot_item_order" . --include="*.py" | grep -v "__pycache__" | grep -v "migrations"
+
+
 
 # eshop/views.py:
 from django.conf import settings
