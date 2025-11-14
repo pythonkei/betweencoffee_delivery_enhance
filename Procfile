@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --access-logfile - --error-logfile -
+web: python manage.py collectstatic --noinput && gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --workers=3
