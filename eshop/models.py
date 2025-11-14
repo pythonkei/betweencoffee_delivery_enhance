@@ -37,8 +37,7 @@ class CoffeeItem(models.Model):
     is_published = models.BooleanField(default=True)
     is_shop_hot_item = models.BooleanField(default=False)
     # 新增排序字段
-    hot_item_order = models.PositiveIntegerField(default=0, verbose_name='热门商品排序', 
-                                               help_text='数字越小显示越靠前')
+    # hot_item_order = models.PositiveIntegerField(default=0, verbose_name='热门商品排序', help_text='数字越小显示越靠前')
 
     def __str__(self):
         return self.name
@@ -62,7 +61,7 @@ class CoffeeItem(models.Model):
 
     class Meta:
         verbose_name_plural = "Coffee"
-        ordering = ['hot_item_order', '-list_date']  # 添加默认排序
+        ordering = []
 
 
 class BeanItem(models.Model):
@@ -70,7 +69,7 @@ class BeanItem(models.Model):
     introduction = models.TextField(max_length=200, blank=True)
     description = models.TextField(max_length=400, blank=True)
     image = models.ImageField(upload_to='bean_images/')
-    image_index = models.ImageField(upload_to='bean_images/index/', blank=True, null=True, verbose_name='首页图片')
+    # image_index = models.ImageField(upload_to='bean_images/index/', blank=True, null=True, verbose_name='首页图片')
     price_200g = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     price_1kg = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     origin = models.CharField(max_length=50, blank=True)
@@ -87,7 +86,7 @@ class BeanItem(models.Model):
     is_published = models.BooleanField(default=True)
     is_shop_hot_item = models.BooleanField(default=False)
     # 新增排序字段
-    hot_item_order = models.PositiveIntegerField(default=0, verbose_name='热门商品排序', help_text='数字越小显示越靠前')
+    # hot_item_order = models.PositiveIntegerField(default=0, verbose_name='热门商品排序', help_text='数字越小显示越靠前')
 
     def __str__(self):
         return self.name
@@ -111,7 +110,7 @@ class BeanItem(models.Model):
     
     class Meta:
         verbose_name_plural = "Bean"
-        ordering = ['hot_item_order', '-list_date']  # 添加默认排序
+        ordering = []
     
     # 获取价格的方法
     def get_price(self, weight):

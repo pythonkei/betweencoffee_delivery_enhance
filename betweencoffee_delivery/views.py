@@ -31,7 +31,7 @@ class Index(View):
         shop_hot_coffees = CoffeeItem.objects.filter(
             is_shop_hot_item=True, 
             is_published=True
-        ).order_by('hot_item_order', '-list_date')[:4]
+        )[:4]
         
         cart = Cart(request)  # Initialize the cart
 

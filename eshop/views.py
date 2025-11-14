@@ -1,3 +1,7 @@
+# 搜索整个文件，引用 hot_item_order command
+# grep -n "hot_item_order"() betweencoffee_delivery/views.py
+
+
 # eshop/views.py:
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404

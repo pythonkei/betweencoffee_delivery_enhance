@@ -12,10 +12,10 @@ mark_as_quick.short_description = "🟢 标记为快速订单"
 
 # CoffeeItem Admin
 class CoffeeItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'is_published', 'is_shop_hot_item', 'hot_item_order', 'image_preview', 'index_image_preview')
+    list_display = ('name', 'price', 'is_published', 'is_shop_hot_item', 'image_preview', 'index_image_preview')
     list_filter = ('is_published', 'is_shop_hot_item', 'list_date')
     search_fields = ('name', 'introduction', 'description')
-    list_editable = ('hot_item_order', 'is_published', 'is_shop_hot_item')  # 允许直接编辑排序字段
+    list_editable = ('is_published', 'is_shop_hot_item')  # 允许直接编辑排序字段
     fieldsets = (
         ('基本信息', {
             'fields': ('name', 'introduction', 'description', 'price', 'origin', 'flavor')
@@ -28,7 +28,7 @@ class CoffeeItemAdmin(admin.ModelAdmin):
             'fields': ('cup_level', 'milk_level')
         }),
         ('状态管理', {
-            'fields': ('is_published', 'is_shop_hot_item', 'hot_item_order', 'list_date')
+            'fields': ('is_published', 'is_shop_hot_item', 'list_date')
         }),
     )
 
@@ -49,10 +49,10 @@ class CoffeeItemAdmin(admin.ModelAdmin):
 
 # BeanItem Admin
 class BeanItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price_200g', 'price_1kg', 'is_published', 'is_shop_hot_item', 'hot_item_order', 'image_preview', 'index_image_preview')
+    list_display = ('name', 'price_200g', 'price_1kg', 'is_published', 'is_shop_hot_item', 'image_preview', 'index_image_preview')
     list_filter = ('is_published', 'is_shop_hot_item', 'list_date')
     search_fields = ('name', 'introduction', 'description')
-    list_editable = ('hot_item_order', 'is_published', 'is_shop_hot_item')  # 允许直接编辑排序字段
+    list_editable = ('is_published', 'is_shop_hot_item')  # 允许直接编辑排序字段
     fieldsets = (
         ('基本信息', {
             'fields': ('name', 'introduction', 'description', 'price_200g', 'price_1kg', 'origin', 'flavor')
@@ -65,7 +65,7 @@ class BeanItemAdmin(admin.ModelAdmin):
             'fields': ('grinding_level',)
         }),
         ('状态管理', {
-            'fields': ('is_published', 'is_shop_hot_item', 'hot_item_order', 'list_date')
+            'fields': ('is_published', 'is_shop_hot_item', 'list_date')
         }),
     )
 
