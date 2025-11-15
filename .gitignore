@@ -19,7 +19,7 @@ betweencoffee_delivery/
 *.log
 local_settings.py
 db.sqlite3
-media/
+/media/          # ← 只忽略根目录的 media（用户上传文件）
 
 # IDE
 .vscode/
