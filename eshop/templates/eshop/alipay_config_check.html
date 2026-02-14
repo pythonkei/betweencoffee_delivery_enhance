@@ -1,0 +1,134 @@
+<!-- eshop/templates/eshop/alipay_config_check.html -->
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col col-lg-8">
+                <h2 class="mb-4 text-center">支付宝配置检查</h2>
+                
+                {% if success %}
+                <div class="alert alert-success">
+                    <h4><i class="fas fa-check-circle"></i> 支付宝配置正常</h4>
+                    <p>支付宝SDK配置正确，可以正常创建支付订单。</p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">配置信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th width="30%">APP ID</th>
+                                <td>{{ app_id }}</td>
+                            </tr>
+                            <tr>
+                                <th>环境</th>
+                                <td>{{ gateway }}</td>
+                            </tr>
+                            <tr>
+                                <th>调试模式</th>
+                                <td>{{ debug_mode }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">测试支付链接</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>点击下面的链接测试支付宝支付（测试订单金额0.01元）：</p>
+                        <a href="{{ test_payment_url }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-external-link-alt"></i> 测试支付宝支付
+                        </a>
+                        <hr>
+                        <small class="text-muted">
+                            <strong>注意：</strong> 这是一个测试支付链接，实际订单会使用真实的订单金额。
+                        </small>
+                    </div>
+                </div>
+                
+                {% else %}
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 支付宝配置错误</h4>
+                    <p>支付宝SDK配置存在问题，无法创建支付订单。</p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">错误信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <strong>错误详情：</strong> {{ error }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">配置信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th width="30%">APP ID</th>
+                                <td>{{ app_id }}</td>
+                            </tr>
+                            <tr>
+                                <th>调试模式</th>
+                                <td>{{ debug_mode }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">故障排除步骤</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>检查 <code>settings.py</code> 中的支付宝配置</li>
+                            <li>确认支付宝公钥和私钥格式正确</li>
+                            <li>检查支付宝沙箱账户是否有效</li>
+                            <li>验证 <code>ALIPAY_RETURN_URL</code> 和 <code>ALIPAY_NOTIFY_URL</code> 配置</li>
+                            <li>检查网络连接是否可以访问支付宝API</li>
+                        </ol>
+                        
+                        <div class="mt-3">
+                            <a href="{% url 'eshop:check_alipay_keys' %}" class="btn btn-outline-primary mr-2">
+                                <i class="fas fa-key"></i> 检查密钥格式
+                            </a>
+                            <a href="{% url 'eshop:check_key_match' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-exchange-alt"></i> 检查密钥匹配
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'eshop:payment_debug' %}" class="btn btn-secondary mr-2">
+                        <i class="fas fa-cog"></i> 支付调试首页
+                    </a>
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+{% endblock %}

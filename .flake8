@@ -1,0 +1,52 @@
+# .flake8 文件内容
+[flake8]
+# 忽略的错误类型
+ignore = 
+    E203,  # 空格与冒号（在某些情况下可能误报）
+    W503,  # 在运算符前换行（PEP8标准已更改）
+    E501,  # 行太长（暂不限制）
+    
+# 最大行长度
+max-line-length = 120
+
+# 排除的目录/文件
+exclude = 
+    .git,
+    __pycache__,
+    migrations,
+    *.pyc,
+    venv,
+    env,
+    .env,
+    .venv
+
+# 包含的文件扩展名
+filename = *.py
+
+# 统计信息
+statistics = True
+count = True
+
+
+'''
+# 1. 首先检查Python语法
+python -m py_compile eshop/views.py
+
+# 2. 如果语法检查通过，使用flake8检查格式
+flake8 eshop/views.py --select=E9,E1,F82
+
+# 3. 显示错误行号和具体信息
+flake8 eshop/views.py --show-source --statistics --count
+
+# 检查特定行数范围（如错误提示第1632行附近）
+flake8 eshop/views.py --count --select=E9,F63,F7,F82 --show-source --statistics
+
+修复 eshop/views.py commmand:
+autopep8 --in-place --aggressive eshop/views.py
+
+E1: 缩进相关错误
+E9: 语法错误
+W1: 警告相关
+F4: 导入错误
+F8: 命名相关错误
+'''

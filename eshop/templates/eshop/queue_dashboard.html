@@ -1,0 +1,1858 @@
+<!-- eshop/templates/queue_dashboard.html -->
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block title %}队列仪表板{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 队列状态标签 */
+.badge-waiting { background-color: #ffc107; color: #212529; }
+.badge-preparing { background-color: #0d6efd; color: white; }
+.badge-ready { background-color: #198754; color: white; }
+
+/* 表格行样式 */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* 操作按钮间距 */
+.btn-group-vertical .btn {
+    margin-bottom: 5px;
+}
+
+/* 加载动画 */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* 统计卡片 */
+.card .card-body h2 {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+/* 调试信息区域 */
+#debug-info {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* 剩余时间倒计时 */
+.remaining-time {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #dc3545;
+}
+
+/* 时间即将结束的警告 */
+.remaining-time.warning {
+    color: #ffc107;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* 时间格式显示 */
+.time-display {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+/* 标签页样式 */
+.nav-tabs .nav-link {
+    cursor: pointer;
+}
+.nav-tabs .nav-link.active {
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ftco-section-blank-small"></section>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- 标题和统计 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4><i class="fas fa-list-ol"></i> 咖啡制作队列</h4>
+                    <div class="float-right">
+                        <span id="current-time" class="badge badge-info"></span>
+                        <span class="badge badge-light ml-2">最后更新: <span id="last-update">--:--:--</span></span>
+                        <span id="api-status" class="badge badge-secondary ml-2">API状态</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-clock"></i> 等待中</h5>
+                                    <h2 id="waiting-count">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-mug-hot"></i> 制作中</h5>
+                                    <h2 id="preparing-count">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-check-circle"></i> 已就绪</h5>
+                                    <h2 id="ready-count">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-secondary text-white">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-chart-bar"></i> 总计</h5>
+                                    <h2 id="total-count">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 控制按钮 -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <button id="refresh-btn" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> 刷新队列
+                            </button>
+                            <button id="sync-btn" class="btn btn-warning">
+                                <i class="fas fa-sync"></i> 同步队列状态
+                            </button>
+                            <button id="test-api-btn" class="btn btn-info">
+                                <i class="fas fa-bolt"></i> 测试API
+                            </button>
+                            <button id="debug-btn" class="btn btn-warning">
+                                <i class="fas fa-bug"></i> 调试
+                            </button>
+                            <button id="force-refresh-btn" class="btn btn-secondary">
+                                <i class="fas fa-redo-alt"></i> 强制刷新
+                            </button>
+                            <button id="show-raw-data-btn" class="btn btn-dark">
+                                <i class="fas fa-code"></i> 查看原始数据
+                            </button>
+                            <button id="cleanup-btn" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> 清理测试数据
+                            </button>
+                            <button id="force-update-times-btn" class="btn btn-info">
+                                <i class="fas fa-clock"></i> 更新队列时间
+                            </button>
+                            <button id="repair-queue-btn" class="btn btn-warning">
+                                <i class="fas fa-tools"></i> 修复队列
+                            </button>
+                            <button id="fix-timing-btn" class="btn btn-warning">
+                                <i class="fas fa-clock"></i> 修复时间显示
+                            </button>
+                            <button id="force-sync-btn" class="btn btn-warning">
+                                <i class="fas fa-exchange-alt"></i> 强制同步
+                            </button>
+                            <button id="fix-state-btn" class="btn btn-warning">
+                                <i class="fas fa-heartbeat"></i> 修复状态不一致
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 标签页导航 -->
+            <ul class="nav nav-tabs mb-3">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#waiting">
+                        <i class="fas fa-clock"></i> 等待队列
+                        <span class="badge badge-warning" id="waiting-tab-count">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#preparing">
+                        <i class="fas fa-mug-hot"></i> 制作中队列
+                        <span class="badge badge-primary" id="preparing-tab-count">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#ready">
+                        <i class="fas fa-check-circle"></i> 已就绪订单
+                        <span class="badge badge-success" id="ready-tab-count">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#collected">
+                        <i class="fas fa-history"></i> 已提取订单
+                        <span class="badge badge-secondary" id="collected-tab-count">0</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- 标签页内容 -->
+            <div class="tab-content">
+                <!-- 等待队列标签页 -->
+                <div class="tab-pane fade show active" id="waiting">
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-white">
+                            <h5><i class="fas fa-clock"></i> 等待队列 <span class="badge badge-light" id="waiting-count-badge">0</span></h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="waiting-queue-loading" style="display: none;">
+                                <div class="text-center">
+                                    <div class="spinner-border text-warning" role="status">
+                                        <span class="sr-only">加载中...</span>
+                                    </div>
+                                    <p class="mt-2">正在加载等待队列...</p>
+                                </div>
+                            </div>
+                            <div id="waiting-queue-content">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>位置</th>
+                                                <th>订单ID</th>
+                                                <th>取餐码</th>
+                                                <th>顾客</th>
+                                                <th>电话</th>
+                                                <th>咖啡杯数</th>
+                                                <th>预计等待</th>
+                                                <th>预计开始</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="waiting-queue-body">
+                                            <!-- 动态内容 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="waiting-queue-empty" class="text-center py-5" style="display: none;">
+                                <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">暂无等待订单</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 制作中队列标签页 -->
+                <div class="tab-pane fade" id="preparing">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="fas fa-mug-hot"></i> 制作中队列 <span class="badge badge-light" id="preparing-count-badge">0</span></h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="preparing-queue-loading" style="display: none;">
+                                <div class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">加载中...</span>
+                                    </div>
+                                    <p class="mt-2">正在加载制作中队列...</p>
+                                </div>
+                            </div>
+                            <div id="preparing-queue-content">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>订单ID</th>
+                                                <th>取餐码</th>
+                                                <th>顾客</th>
+                                                <th>咖啡师</th>
+                                                <th>开始时间</th>
+                                                <th>预计完成</th>
+                                                <th>剩余时间</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="preparing-queue-body">
+                                            <!-- 动态内容 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="preparing-queue-empty" class="text-center py-5" style="display: none;">
+                                <i class="fas fa-mug-hot fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">暂无制作中订单</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 已就绪订单标签页 -->
+                <div class="tab-pane fade" id="ready">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-check-circle"></i> 已就绪订单 <span class="badge badge-light" id="ready-count-badge">0</span></h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="ready-queue-loading" style="display: none;">
+                                <div class="text-center">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="sr-only">加载中...</span>
+                                    </div>
+                                    <p class="mt-2">正在加载已就绪订单...</p>
+                                </div>
+                            </div>
+                            <div id="ready-queue-content">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>订单ID</th>
+                                                <th>取餐码</th>
+                                                <th>顾客</th>
+                                                <th>电话</th>
+                                                <th>完成时间</th>
+                                                <th>等待提取</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ready-queue-body">
+                                            <!-- 动态内容 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="ready-queue-empty" class="text-center py-5" style="display: none;">
+                                <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">暂无已就绪订单</p>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> "等待提取"时间会每秒自动更新，无需刷新页面
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 已提取订单标签页 -->
+                <div class="tab-pane fade" id="collected">
+                    <div class="card mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5><i class="fas fa-history"></i> 已提取订单 <span class="badge badge-light" id="collected-count-badge">0</span></h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="collected-queue-loading" style="display: none;">
+                                <div class="text-center">
+                                    <div class="spinner-border text-secondary" role="status">
+                                        <span class="sr-only">加载中...</span>
+                                    </div>
+                                    <p class="mt-2">正在加载已提取订单...</p>
+                                </div>
+                            </div>
+                            <div id="collected-queue-content">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>订单ID</th>
+                                                <th>取餐码</th>
+                                                <th>顾客</th>
+                                                <th>电话</th>
+                                                <th>总价</th>
+                                                <th>提取时间</th>
+                                                <th>等待时长</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="collected-queue-body">
+                                            <!-- 动态内容 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="collected-queue-empty" class="text-center py-5" style="display: none;">
+                                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">暂无已提取订单</p>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="loadCollectedHistory()">
+                                    <i class="fas fa-sync-alt"></i> 刷新已提取记录
+                                </button>
+                                <small class="text-muted ml-3">
+                                    <i class="fas fa-info-circle"></i> 显示最近24小时的已提取订单
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 调试信息 -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-cogs"></i> 调试信息</h5>
+                </div>
+                <div class="card-body">
+                    <div id="debug-info">
+                        <!-- 动态调试信息 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 确认模态框 -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle">确认操作</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="confirmModalBody">
+                <!-- 动态内容 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirmActionBtn">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="ftco-section-blank-small"></section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ==================== 完整队列管理脚本 ====================
+$(document).ready(function() {
+    console.log('=== 队列仪表板加载 ===');
+    
+    // 全局变量
+    let currentAction = null;
+    let currentOrderId = null;
+    let preparingOrders = {}; // 存储制作中订单数据
+    let readyOrdersTimer = null; // 已就绪订单计时器
+    let collectedOrders = []; // 已提取订单缓存
+    
+    // ==================== 工具函数 ====================
+    
+    // 获取CSRF令牌
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // 更新当前时间
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('zh-HK', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        $('#current-time').text(`当前时间: ${timeStr}`);
+    }
+    
+    // 更新最后更新时间
+    function updateLastUpdateTime() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('zh-HK', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        $('#last-update').text(timeStr);
+    }
+    
+    // 格式化时间为分:秒
+    function formatTime(seconds) {
+        if (seconds < 0) seconds = 0;
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return minutes + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+    
+    // 解析时间字符串
+    function parseTime(timeStr) {
+        if (!timeStr || timeStr === 'Invalid Date' || timeStr === '--:--') {
+            return null;
+        }
+        try {
+            // 尝试多种时间格式
+            let date = new Date(timeStr);
+            if (isNaN(date.getTime())) {
+                // 如果是 HH:MM 格式
+                const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+                if (match) {
+                    const now = new Date();
+                    date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 
+                                   parseInt(match[1]), parseInt(match[2]));
+                } else {
+                    return null;
+                }
+            }
+            return date;
+        } catch (e) {
+            console.error('解析时间失败:', timeStr, e);
+            return null;
+        }
+    }
+    
+    // 显示Toast消息
+    function showToast(message, type = 'info') {
+        const toastClass = type === 'success' ? 'alert-success' : 
+                          type === 'error' ? 'alert-danger' : 
+                          type === 'warning' ? 'alert-warning' : 'alert-info';
+        
+        const toast = $(`
+            <div class="alert ${toastClass} alert-dismissible fade show fixed-top" 
+                 style="top: 80px; right: 20px; z-index: 1050; max-width: 300px;" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `);
+        
+        $('body').append(toast);
+        
+        // 3秒后自动移除
+        setTimeout(() => {
+            toast.alert('close');
+        }, 3000);
+    }
+    
+    // 计算剩余时间（秒）
+    function calculateRemainingTime(estimatedCompletionTime) {
+        if (!estimatedCompletionTime) return 0;
+        
+        const completionTime = parseTime(estimatedCompletionTime);
+        if (!completionTime) return 0;
+        
+        const now = new Date();
+        const diffMs = completionTime - now;
+        return Math.max(0, Math.floor(diffMs / 1000));
+    }
+    
+
+    // ==================== 主要功能函数 ====================
+
+    // 加载队列数据加载函数
+    // 加载队列数据加载函数
+    window.loadQueueData = function() {
+        console.log('=== 加载队列数据 ===');
+        
+        // 显示调试信息
+        $('#debug-info').prepend(`<p>[${new Date().toLocaleTimeString()}] 开始加载队列数据...</p>`);
+        
+        // 显示所有加载状态
+        $('#waiting-queue-loading').show();
+        $('#preparing-queue-loading').show();
+        $('#ready-queue-loading').show();
+        
+        // 隐藏所有内容
+        $('#waiting-queue-content').hide();
+        $('#preparing-queue-content').hide();
+        $('#ready-queue-content').hide();
+        
+        // 隐藏所有空状态
+        $('#waiting-queue-empty').hide();
+        $('#preparing-queue-empty').hide();
+        $('#ready-queue-empty').hide();
+        
+        // 添加时间戳防止缓存
+        const timestamp = new Date().getTime();
+        
+        $.ajax({
+            url: '/eshop/queue/updates/',
+            method: 'GET',
+            dataType: 'json',
+            cache: false,
+            data: { '_': timestamp },
+            success: function(response) {
+                console.log('API响应接收成功:', response);
+                
+                // 隐藏所有加载状态
+                $('#waiting-queue-loading').hide();
+                $('#preparing-queue-loading').hide();
+                $('#ready-queue-loading').hide();
+                
+                if (response.success) {
+                    console.log('使用响应数据更新队列显示');
+                    updateQueueDisplay(response);
+                    
+                    // 更新API状态
+                    $('#api-status').html('<span class="text-success">✓ API正常</span>');
+                    
+                    // 记录到调试信息
+                    const waitingCount = response.waiting_orders ? response.waiting_orders.length : 0;
+                    const preparingCount = response.preparing_orders ? response.preparing_orders.length : 0;
+                    const readyCount = response.ready_orders ? response.ready_orders.length : 0;
+                    $('#debug-info').prepend(`<p>[${new Date().toLocaleTimeString()}] 数据加载成功: 等待(${waitingCount}) 制作中(${preparingCount}) 就绪(${readyCount})</p>`);
+                } else {
+                    console.log('API返回success: false');
+                    
+                    // 更新API状态
+                    $('#api-status').html(`<span class="text-danger">✗ API错误: ${response.error || '未知错误'}</span>`);
+                    
+                    // 显示所有空状态
+                    $('#waiting-queue-empty').show();
+                    $('#preparing-queue-empty').show();
+                    $('#ready-queue-empty').show();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('=== AJAX 错误详情 ===');
+                console.error('状态:', xhr.status);
+                console.error('状态文本:', xhr.statusText);
+                console.error('错误:', error);
+                
+                // 隐藏所有加载状态
+                $('#waiting-queue-loading').hide();
+                $('#preparing-queue-loading').hide();
+                $('#ready-queue-loading').hide();
+                
+                let errorMsg = '加载失败';
+                if (xhr.status === 403) {
+                    errorMsg = '权限不足';
+                } else if (xhr.status === 404) {
+                    errorMsg = 'API端点不存在';
+                }
+                
+                // 更新API状态
+                $('#api-status').html(`<span class="text-danger">✗ ${errorMsg}</span>`);
+                
+                // 记录到调试信息
+                $('#debug-info').prepend(`<p class="text-danger">[${new Date().toLocaleTimeString()}] ${errorMsg}: ${xhr.status}</p>`);
+                
+                // 显示错误在所有空状态区域
+                const errorHtml = `
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <p class="text-danger">${errorMsg}</p>
+                    <p class="text-muted">状态码: ${xhr.status}</p>
+                    <button class="btn btn-sm btn-info" onclick="window.loadQueueData()">重试</button>
+                `;
+                
+                $('#waiting-queue-empty').html(errorHtml).show();
+                $('#preparing-queue-empty').html(errorHtml).show();
+                $('#ready-queue-empty').html(errorHtml).show();
+            }
+        });
+    };
+
+    // 更新等待表格 - 修复版本
+    function updateWaitingTable(orders) {
+        console.log('=== 更新等待表格 ===', orders);
+        const tbody = $('#waiting-queue-body');
+        const content = $('#waiting-queue-content');
+        const empty = $('#waiting-queue-empty');
+        
+        // 清空表格
+        tbody.empty();
+        
+        if (orders && orders.length > 0) {
+            console.log(`渲染 ${orders.length} 个等待订单`);
+            
+            orders.forEach(function(order) {
+                const orderId = order.id || order.order_id;
+                const position = order.position || 0;
+                const pickupCode = order.pickup_code || 'N/A';
+                const name = order.name || '顾客';
+                const phone = order.phone || 'N/A';
+                const coffeeCount = order.coffee_count || 0;
+                
+                // 使用API返回的等待秒数
+                const waitSeconds = order.wait_seconds || 0;
+                const waitMinutes = Math.floor(waitSeconds / 60);
+                const prepMinutes = order.preparation_time_minutes || (coffeeCount * 3);
+                const totalMinutes = waitMinutes + prepMinutes;
+                
+                // 格式化预计开始时间
+                let estimatedStart = order.estimated_start_time || '';
+                if (!estimatedStart && waitMinutes > 0) {
+                    estimatedStart = `约${waitMinutes}分钟后`;
+                } else if (!estimatedStart) {
+                    estimatedStart = '即将开始';
+                }
+                
+                // 创建行
+                const row = document.createElement('tr');
+                row.setAttribute('data-order-id', orderId);
+                row.setAttribute('data-wait-seconds', waitSeconds);
+                
+                row.innerHTML = `
+                    <td>${position}</td>
+                    <td>#${orderId}</td>
+                    <td><span class="badge badge-primary">${pickupCode}</span></td>
+                    <td>${name}</td>
+                    <td>${phone}</td>
+                    <td>${coffeeCount}杯</td>
+                    <td>
+                        <span class="badge badge-warning">${totalMinutes}分钟</span>
+                        <small class="text-muted d-block">(等待:${waitMinutes}分 + 制作:${prepMinutes}分)</small>
+                    </td>
+                    <td class="time-display">${estimatedStart}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info start-preparation-btn" data-order-id="${orderId}">
+                            <i class="fas fa-play"></i> 开始制作
+                        </button>
+                        <button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${orderId}">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </td>
+                `;
+                
+                tbody.append(row);
+            });
+            
+            // 显示内容，隐藏空状态
+            content.show();
+            empty.hide();
+            
+            // 记录添加的行数
+            console.log(`已添加 ${tbody.find('tr').length} 行到等待表格`);
+        } else {
+            console.log('没有等待订单数据');
+            content.hide();
+            empty.show();
+        }
+    }
+
+    // 每秒更新一次等待时间
+    function updateWaitingTimes() {
+        $('tr[data-wait-seconds]').each(function() {
+            const $row = $(this);
+            let waitSeconds = parseInt($row.data('wait-seconds')) || 0;
+            
+            // 每秒增加1秒
+            waitSeconds += 1;
+            $row.data('wait-seconds', waitSeconds);
+            
+            // 更新显示
+            const waitMinutes = Math.floor(waitSeconds / 60);
+            const prepMinutes = parseInt($row.find('.badge-warning').text().replace('分钟', '')) - waitMinutes;
+            const totalMinutes = waitMinutes + prepMinutes;
+            
+            $row.find('.badge-warning').text(totalMinutes + '分钟');
+            $row.find('.text-muted').html(`(等待:${waitMinutes}分 + 制作:${prepMinutes}分)`);
+            
+            // 更新预计开始时间
+            if (waitMinutes > 0) {
+                $row.find('.time-display').text(`约${waitMinutes}分钟后`);
+            }
+        });
+    }
+
+
+    // 更新队列显示
+    function updateQueueDisplay(data) {
+        console.log('=== 更新队列显示 ===', data);
+        
+        // 更新计数器
+        if (data.queue_summary) {
+            $('#waiting-count').text(data.queue_summary.waiting || 0);
+            $('#preparing-count').text(data.queue_summary.preparing || 0);
+            $('#ready-count').text(data.queue_summary.ready || 0);
+            $('#total-count').text(data.queue_summary.total || 0);
+            
+            // 更新badge
+            $('#waiting-count-badge').text(data.queue_summary.waiting || 0);
+            $('#preparing-count-badge').text(data.queue_summary.preparing || 0);
+            $('#ready-count-badge').text(data.queue_summary.ready || 0);
+            
+            // 更新标签页计数
+            $('#waiting-tab-count').text(data.queue_summary.waiting || 0);
+            $('#preparing-tab-count').text(data.queue_summary.preparing || 0);
+            $('#ready-tab-count').text(data.queue_summary.ready || 0);
+        }
+        
+        // 更新等待队列表格
+        if (data.waiting_orders && data.waiting_orders.length > 0) {
+            console.log('有等待订单:', data.waiting_orders);
+            updateWaitingTable(data.waiting_orders);
+        } else {
+            console.log('没有等待订单');
+            $('#waiting-queue-content').hide();
+            $('#waiting-queue-empty').show();
+        }
+        
+        // 更新制作中队列表格
+        if (data.preparing_orders && data.preparing_orders.length > 0) {
+            updatePreparingTable(data.preparing_orders);
+        } else {
+            $('#preparing-queue-content').hide();
+            $('#preparing-queue-empty').show();
+        }
+        
+        // 更新已就绪队列表格
+        if (data.ready_orders && data.ready_orders.length > 0) {
+            updateReadyTable(data.ready_orders);
+        } else {
+            $('#ready-queue-content').hide();
+            $('#ready-queue-empty').show();
+        }
+        
+        // 更新最后更新时间
+        updateLastUpdateTime();
+    }
+    
+    
+    // 更新制作中表格
+    function updatePreparingTable(orders) {
+        console.log('=== 更新制作中表格 ===');
+        const tbody = $('#preparing-queue-body');
+        
+        tbody.empty();
+        
+        if (orders && orders.length > 0) {
+            orders.forEach(function(order) {
+                const orderId = order.id || order.order_id;
+                
+                // 使用后端返回的剩余秒数
+                const remainingSeconds = order.remaining_seconds || 0;
+                const remainingMinutes = Math.floor(remainingSeconds / 60);
+                const remainingSecondsPart = remainingSeconds % 60;
+                
+                // 格式化显示
+                const remainingDisplay = `${remainingMinutes}:${remainingSecondsPart.toString().padStart(2, '0')}`;
+                
+                const row = document.createElement('tr');
+                row.className = 'preparing-order-row';
+                row.setAttribute('data-order-id', orderId);
+                row.setAttribute('data-remaining-seconds', remainingSeconds);
+                row.setAttribute('data-start-time', new Date().getTime()); // 记录开始时间
+                
+                row.innerHTML = `
+                    <td>#${orderId}</td>
+                    <td><span class="badge badge-primary">${order.pickup_code || ''}</span></td>
+                    <td>${order.name || '顾客'}</td>
+                    <td>${order.barista || '未分配'}</td>
+                    <td class="time-display">${order.started_at || '--:--'}</td>
+                    <td class="time-display">${order.estimated_completion_time || '--:--'}</td>
+                    <td class="remaining-time" data-order-id="${orderId}">${remainingDisplay}</td>
+                    <td>
+                        <button class="btn btn-sm btn-success mark-ready-btn" data-order-id="${orderId}">
+                            <i class="fas fa-check"></i> 标记完成
+                        </button>
+                    </td>
+                `;
+                
+                tbody.append(row);
+            });
+            
+            $('#preparing-queue-content').show();
+            $('#preparing-queue-empty').hide();
+        } else {
+            $('#preparing-queue-content').hide();
+            $('#preparing-queue-empty').show();
+        }
+    }
+
+    // 更新就绪表格 - 修复版本，支持实时更新时间
+    function updateReadyTable(orders) {
+        console.log('=== 更新就绪表格 ===');
+        const tbody = $('#ready-queue-body');
+        const content = $('#ready-queue-content');
+        const empty = $('#ready-queue-empty');
+        
+        tbody.empty();
+        
+        if (orders && orders.length > 0) {
+            orders.forEach(function(order) {
+                const orderId = order.id || order.order_id;
+                const pickupCode = order.pickup_code || 'N/A';
+                const name = order.name || '顾客';
+                const phone = order.phone || 'N/A';
+                const totalPrice = order.total_price || '0.00';
+                
+                // 获取完成时间和等待秒数
+                const completedTime = order.completed_time || '--:--';
+                const waitSeconds = order.wait_seconds || 0;
+                
+                // 计算初始等待时间显示
+                let waitDisplay = '';
+                if (waitSeconds < 60) {
+                    waitDisplay = `${waitSeconds}秒前`;
+                } else if (waitSeconds < 3600) {
+                    const minutes = Math.floor(waitSeconds / 60);
+                    waitDisplay = `${minutes}分钟前`;
+                } else if (waitSeconds < 86400) {
+                    const hours = Math.floor(waitSeconds / 3600);
+                    const minutes = Math.floor((waitSeconds % 3600) / 60);
+                    waitDisplay = `${hours}小时${minutes}分钟前`;
+                } else {
+                    const days = Math.floor(waitSeconds / 86400);
+                    waitDisplay = `${days}天前`;
+                }
+                
+                // 创建行
+                const row = document.createElement('tr');
+                row.setAttribute('data-order-id', orderId);
+                row.setAttribute('data-wait-seconds', waitSeconds);
+                row.setAttribute('data-ready-timestamp', Date.now());
+                
+                row.innerHTML = `
+                    <td>#${orderId}</td>
+                    <td><span class="badge badge-primary">${pickupCode}</span></td>
+                    <td>${name}</td>
+                    <td>${phone}</td>
+                    <td class="time-display">${completedTime}</td>
+                    <td class="ready-wait-time" data-seconds="${waitSeconds}">${waitDisplay}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary mark-collected-btn" data-order-id="${orderId}">
+                            <i class="fas fa-check-double"></i> 已提取
+                        </button>
+                    </td>
+                `;
+                
+                tbody.append(row);
+            });
+            
+            content.show();
+            empty.hide();
+            
+            // 启动已就绪订单实时时间更新
+            startReadyOrdersTimer();
+        } else {
+            content.hide();
+            empty.show();
+        }
+    }
+    
+    // 启动已就绪订单实时时间更新
+    function startReadyOrdersTimer() {
+        // 清除旧定时器
+        if (readyOrdersTimer) {
+            clearInterval(readyOrdersTimer);
+        }
+        
+        // 启动新定时器（每秒更新）
+        readyOrdersTimer = setInterval(updateReadyOrdersTime, 1000);
+    }
+    
+    // 更新已就绪订单的等待时间（每秒）
+    function updateReadyOrdersTime() {
+        $('.ready-wait-time').each(function() {
+            const $element = $(this);
+            let seconds = parseInt($element.data('seconds')) || 0;
+            
+            // 每秒增加1秒
+            seconds += 1;
+            $element.data('seconds', seconds);
+            
+            // 更新显示
+            let display = '';
+            if (seconds < 60) {
+                display = `${seconds}秒前`;
+            } else if (seconds < 3600) {
+                const minutes = Math.floor(seconds / 60);
+                display = `${minutes}分钟前`;
+            } else if (seconds < 86400) {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                display = `${hours}小时${minutes}分钟前`;
+            } else {
+                const days = Math.floor(seconds / 86400);
+                display = `${days}天前`;
+            }
+            
+            $element.text(display);
+        });
+    }
+
+    // 加载已提取订单历史
+    window.loadCollectedHistory = function() {
+        console.log('=== 加载已提取订单历史 ===');
+        
+        $('#collected-queue-loading').show();
+        $('#collected-queue-content').hide();
+        $('#collected-queue-empty').hide();
+        
+        $.ajax({
+            url: '/eshop/queue/collected/',
+            method: 'GET',
+            dataType: 'json',
+            data: { hours: 24 },
+            success: function(response) {
+                console.log('已提取订单响应:', response);
+                $('#collected-queue-loading').hide();
+                
+                if (response.success) {
+                    updateCollectedTable(response.orders);
+                    collectedOrders = response.orders;
+                } else {
+                    $('#collected-queue-empty').show().html(`
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                        <p class="text-danger">加载失败: ${response.error || '未知错误'}</p>
+                    `);
+                }
+            },
+            error: function(xhr) {
+                console.error('加载已提取订单失败:', xhr);
+                $('#collected-queue-loading').hide();
+                $('#collected-queue-empty').show().html(`
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <p class="text-danger">网络错误: ${xhr.status} ${xhr.statusText}</p>
+                `);
+            }
+        });
+    };
+    
+    // 更新已提取订单表格
+    function updateCollectedTable(orders) {
+        const tbody = $('#collected-queue-body');
+        const content = $('#collected-queue-content');
+        const empty = $('#collected-queue-empty');
+        
+        tbody.empty();
+        
+        if (orders && orders.length > 0) {
+            orders.forEach(function(order) {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>#${order.order_id}</td>
+                    <td><span class="badge badge-secondary">${order.pickup_code}</span></td>
+                    <td>${order.name}</td>
+                    <td>${order.phone}</td>
+                    <td>HK$${order.total_price}</td>
+                    <td class="time-display">${order.picked_at || '--:--'}</td>
+                    <td>${order.wait_duration}</td>
+                `;
+                
+                tbody.append(row);
+            });
+            
+            content.show();
+            empty.hide();
+            $('#collected-count-badge').text(orders.length);
+            $('#collected-tab-count').text(orders.length);
+        } else {
+            content.hide();
+            empty.show();
+            $('#collected-count-badge').text('0');
+            $('#collected-tab-count').text('0');
+        }
+    }
+    
+    // 添加到已提取历史
+    function addToCollectedHistory(orderData) {
+        // 添加到缓存数组的开头
+        collectedOrders.unshift({
+            order_id: orderData.order_id,
+            pickup_code: orderData.pickup_code,
+            name: orderData.name,
+            phone: orderData.phone,
+            total_price: orderData.total_price,
+            picked_at: new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' }),
+            wait_duration: '刚刚'
+        });
+        
+        // 限制只显示最近的50条记录
+        if (collectedOrders.length > 50) {
+            collectedOrders = collectedOrders.slice(0, 50);
+        }
+        
+        // 更新表格
+        updateCollectedTable(collectedOrders);
+    }
+    
+    // 倒计时更新函数
+    function updateRemainingTime() {
+        const now = new Date().getTime();
+        
+        $('.preparing-order-row').each(function() {
+            const $row = $(this);
+            const orderId = $row.data('order-id');
+            const startTime = $row.data('start-time');
+            const elapsedSeconds = Math.floor((now - startTime) / 1000);
+            
+            // 从服务器获取的原始剩余秒数
+            let remainingSeconds = parseInt($row.data('remaining-seconds'));
+            
+            if (!isNaN(remainingSeconds)) {
+                // 减去已经过去的时间
+                remainingSeconds = Math.max(0, remainingSeconds - elapsedSeconds);
+                
+                // 更新显示
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                $row.find('.remaining-time').text(display);
+                
+                // 如果时间用完，标记为就绪
+                if (remainingSeconds <= 0) {
+                    // 可选：自动标记为就绪
+                    // window.markOrderAsReady(orderId);
+                }
+            }
+        });
+    }
+
+    // ==================== 操作函数 ====================
+
+    // 开始制作订单
+    window.startOrderPreparation = function(orderId) {
+        console.log('开始制作订单:', orderId);
+        
+        const csrfToken = getCookie('csrftoken');
+        
+        if (!csrfToken) {
+            showToast('CSRF令牌未找到，请刷新页面重试', 'error');
+            return;
+        }
+        
+        fetch(`/eshop/api/start-preparation/${orderId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => {
+            console.log('HTTP状态码:', response.status);
+            
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('API响应数据:', data);
+            if (data.success) {
+                showToast('✅ 已开始制作订单 #' + orderId, 'success');
+                // 延迟1秒后刷新队列数据
+                setTimeout(() => {
+                    window.loadQueueData();
+                }, 1000);
+            } else {
+                showToast('❌ 操作失败: ' + (data.message || data.error || '未知错误'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('开始制作失败详情:', error);
+            showToast('❌ 请求失败: ' + error.message, 'error');
+        });
+    };
+
+    // 标记订单为就绪
+    window.markOrderAsReady = function(orderId) {
+        console.log('标记订单为就绪:', orderId);
+        
+        const csrfToken = getCookie('csrftoken');
+        
+        fetch(`/eshop/api/mark-ready/${orderId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast('✅ 订单 #' + orderId + ' 已标记为就绪', 'success');
+                // 立即从制作中队列移除该行
+                $(`tr[data-order-id="${orderId}"]`).remove();
+                // 延迟1秒后刷新队列数据
+                setTimeout(() => {
+                    window.loadQueueData();
+                }, 1000);
+            } else {
+                showToast('❌ 操作失败: ' + (data.message || data.error || '未知错误'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('标记就绪失败:', error);
+            showToast('❌ 请求失败: ' + error.message, 'error');
+        });
+    };
+
+    // 标记订单为已提取
+    window.markOrderAsCollected = function(orderId) {
+        console.log('标记订单为已提取:', orderId);
+        
+        // 获取订单信息（从当前行）
+        const $row = $(`tr[data-order-id="${orderId}"]`);
+        const pickupCode = $row.find('td:nth-child(2) .badge').text();
+        const name = $row.find('td:nth-child(3)').text();
+        const phone = $row.find('td:nth-child(4)').text();
+        const totalPrice = $row.find('td:nth-child(6)').text().replace('HK$', '') || '0.00';
+        
+        const csrfToken = getCookie('csrftoken');
+        
+        fetch(`/eshop/api/mark-collected/${orderId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast('✅ 订单 #' + orderId + ' 已标记为已提取', 'success');
+                
+                // 立即从就绪队列移除该行
+                $row.fadeOut(300, function() {
+                    $(this).remove();
+                    
+                    // 检查是否还有就绪订单
+                    if ($('#ready-queue-body tr').length === 0) {
+                        $('#ready-queue-content').hide();
+                        $('#ready-queue-empty').show();
+                    }
+                    
+                    // 更新统计
+                    const readyCount = parseInt($('#ready-count').text()) - 1;
+                    $('#ready-count').text(readyCount);
+                    $('#ready-count-badge').text(readyCount);
+                    $('#ready-tab-count').text(readyCount);
+                    
+                    // 添加到已提取历史
+                    addToCollectedHistory({
+                        order_id: orderId,
+                        pickup_code: pickupCode,
+                        name: name,
+                        phone: phone,
+                        total_price: totalPrice
+                    });
+                    
+                    // 切换到已提取标签页
+                    $('.nav-tabs a[href="#collected"]').tab('show');
+                });
+                
+            } else {
+                showToast('❌ 操作失败: ' + (data.message || data.error || '未知错误'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('标记提取失败:', error);
+            showToast('❌ 请求失败: ' + error.message, 'error');
+        });
+    };
+
+    // 取消订单
+    window.cancelOrder = function(orderId) {
+        if (!confirm('确定要取消订单 #' + orderId + ' 吗？')) {
+            return;
+        }
+        
+        console.log('取消订单:', orderId);
+        
+        const csrfToken = getCookie('csrftoken');
+        
+        fetch(`/eshop/api/cancel-order/${orderId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast('✅ 订单 #' + orderId + ' 已取消', 'success');
+                window.loadQueueData();
+            } else {
+                showToast('❌ 操作失败: ' + (data.message || data.error || '未知错误'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('取消订单失败:', error);
+            showToast('❌ 请求失败: ' + error.message, 'error');
+        });
+    };
+    
+    // ==================== 测试函数 ====================
+    
+    // 测试API函数
+    window.testQueueAPI = function() {
+        console.log('=== 测试API函数 ===');
+        
+        $('#api-status').html('正在测试...<i class="fas fa-spinner fa-spin ml-2"></i>');
+        
+        $.ajax({
+            url: '/eshop/queue/updates/',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log('测试API响应:', response);
+                
+                if (response.success) {
+                    const waitingCount = response.waiting_orders ? response.waiting_orders.length : 0;
+                    const preparingCount = response.preparing_orders ? response.preparing_orders.length : 0;
+                    const readyCount = response.ready_orders ? response.ready_orders.length : 0;
+                    
+                    $('#api-status').html(`<span class="text-success">✓ API正常 (等待:${waitingCount}, 制作中:${preparingCount}, 就绪:${readyCount})</span>`);
+                    
+                    showToast(`✅ API测试成功！<br>等待订单: ${waitingCount}<br>制作中: ${preparingCount}<br>已就绪: ${readyCount}`, 'success');
+                } else {
+                    $('#api-status').html(`<span class="text-danger">✗ API返回错误: ${response.error || '未知错误'}</span>`);
+                    showToast('❌ API返回错误: ' + (response.error || '未知错误'), 'error');
+                }
+            },
+            error: function(xhr) {
+                console.error('测试API错误:', xhr);
+                $('#api-status').html(`<span class="text-danger">✗ API调用失败: ${xhr.status} ${xhr.statusText}</span>`);
+                showToast('❌ API调用失败: ' + xhr.status + ' ' + xhr.statusText, 'error');
+            }
+        });
+    };
+    
+    // 调试函数
+    window.debugQueue = function() {
+        console.log('=== 调试队列系统 ===');
+        
+        $.get('/eshop/queue/updates/', function(data) {
+            console.log('API原始数据:', data);
+            showToast('✅ 调试成功！API数据已输出到控制台', 'success');
+        }).fail(function(xhr) {
+            console.error('API调试失败:', xhr);
+            showToast('❌ API调试失败: ' + xhr.status, 'error');
+        });
+    };
+    
+    // 显示原始数据
+    window.showRawData = function() {
+        $.get('/eshop/queue/updates/', function(data) {
+            console.log('原始API响应:', data);
+            showToast('✅ 原始数据已输出到控制台，请按F12查看', 'success');
+        });
+    };
+    
+    // 修复队列时间
+    window.fixQueueTimes = function() {
+        const csrfToken = getCookie('csrftoken');
+        
+        fetch('/eshop/api/fix-queue-times/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('✅ ' + data.message, 'success');
+                setTimeout(() => {
+                    window.loadQueueData();
+                }, 1000);
+            } else {
+                showToast('❌ ' + (data.error || '修复失败'), 'error');
+            }
+        })
+        .catch(error => {
+            showToast('❌ 请求失败: ' + error.message, 'error');
+        });
+    };
+    
+    // ==================== 页面初始化 ====================
+    
+    // 绑定按钮事件
+    $('#refresh-btn').click(function() {
+        console.log('刷新按钮点击');
+        window.loadQueueData();
+    });
+    
+    $('#test-api-btn').click(function() {
+        console.log('测试API按钮点击');
+        window.testQueueAPI();
+    });
+    
+    $('#debug-btn').click(function() {
+        console.log('调试按钮点击');
+        window.debugQueue();
+    });
+    
+    $('#force-refresh-btn').click(function() {
+        console.log('强制刷新按钮点击');
+        window.loadQueueData();
+    });
+    
+    $('#show-raw-data-btn').click(function() {
+        console.log('显示原始数据按钮点击');
+        window.showRawData();
+    });
+    
+    $('#cleanup-btn').click(function() {
+        if (!confirm('⚠️ 确定要清理所有测试数据吗？\n此操作将：\n1. 删除所有队列项\n2. 重置订单状态\n\n此操作不可撤销！')) {
+            return;
+        }
+        
+        const csrfToken = getCookie('csrftoken');
+        const button = $(this);
+        const originalText = button.html();
+        
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 清理中...');
+        
+        $.ajax({
+            url: '/eshop/cleanup-queue-data/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast('✅ 清理完成！' + response.message, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showToast('❌ 清理失败：' + response.error, 'error');
+                    button.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function(xhr) {
+                showToast('❌ 请求失败：' + xhr.status + ' ' + xhr.statusText, 'error');
+                button.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+    
+    // 同步队列状态按钮
+    $('#sync-btn').click(function() {
+        if (!confirm('这将同步队列状态和订单状态，修复不一致问题。继续吗？')) {
+            return;
+        }
+        
+        const button = $(this);
+        const originalText = button.html();
+        const csrfToken = getCookie('csrftoken');
+        
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 同步中...');
+        
+        console.log('开始同步队列状态...');
+        
+        $.ajax({
+            url: '/eshop/queue/sync-with-orders/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({}),
+            success: function(response) {
+                console.log('同步响应:', response);
+                
+                if (response.success) {
+                    showToast('✅ ' + response.message, 'success');
+                    // 刷新队列显示
+                    setTimeout(() => {
+                        window.loadQueueData();
+                    }, 1000);
+                } else {
+                    showToast('❌ 同步失败：' + response.error, 'error');
+                }
+                button.prop('disabled', false).html(originalText);
+            },
+            error: function(xhr) {
+                console.error('同步请求失败:', xhr);
+                showToast('❌ 请求失败：' + xhr.status + ' ' + xhr.statusText, 'error');
+                button.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+    
+    // 更新队列时间按钮
+    $('#force-update-times-btn').click(function() {
+        if (!confirm('这将强制更新所有队列时间，重新计算预计时间。继续吗？')) {
+            return;
+        }
+        
+        window.fixQueueTimes();
+    });
+    
+    // 修复队列按钮
+    $('#repair-queue-btn').click(function() {
+        if (!confirm('这将执行完整队列修复：\n1. 重置所有ready订单位置为0\n2. 重新分配waiting订单位置\n3. 更新所有预计时间\n\n继续吗？')) {
+            return;
+        }
+        
+        const button = $(this);
+        const originalText = button.html();
+        const csrfToken = getCookie('csrftoken');
+        
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 修复中...');
+        
+        console.log('开始执行完整队列修复...');
+        
+        $.ajax({
+            url: '/eshop/queue/repair-queue-data/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            success: function(result) {
+                console.log('修复结果:', result);
+                
+                if (result.success) {
+                    showToast('✅ 修复成功！' + result.message, 'success');
+                    
+                    // 等待2秒后重新加载队列数据
+                    setTimeout(() => {
+                        window.loadQueueData();
+                        button.prop('disabled', false).html(originalText);
+                    }, 2000);
+                } else {
+                    showToast('❌ 修复失败: ' + (result.error || '未知错误'), 'error');
+                    button.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function(xhr) {
+                console.error('修复请求失败:', xhr);
+                showToast('❌ 修复请求失败: ' + xhr.status + ' ' + xhr.statusText, 'error');
+                button.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    
+    // 添加修复时间按钮
+    $('#fix-timing-btn').click(function() {
+        if (!confirm('这将修复所有已就绪订单的时间显示问题。继续吗？')) {
+            return;
+        }
+        
+        const csrfToken = getCookie('csrftoken');
+        const button = $(this);
+        const originalText = button.html();
+        
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 修复中...');
+        
+        fetch('/eshop/api/fix-ready-orders-timing/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('✅ ' + data.message, 'success');
+                // 重新加载队列数据
+                setTimeout(() => {
+                    window.loadQueueData();
+                }, 1000);
+            } else {
+                showToast('❌ ' + (data.error || '修复失败'), 'error');
+            }
+            button.prop('disabled', false).html(originalText);
+        })
+        .catch(error => {
+            showToast('❌ 请求失败: ' + error.message, 'error');
+            button.prop('disabled', false).html(originalText);
+        });
+    });
+    
+    
+    // 事件委托处理动态按钮
+    $(document).on('click', '.start-preparation-btn', function() {
+        const orderId = $(this).data('order-id');
+        window.startOrderPreparation(orderId);
+    });
+    
+    $(document).on('click', '.mark-ready-btn', function() {
+        const orderId = $(this).data('order-id');
+        window.markOrderAsReady(orderId);
+    });
+    
+    $(document).on('click', '.mark-collected-btn', function() {
+        const orderId = $(this).data('order-id');
+        window.markOrderAsCollected(orderId);
+    });
+    
+    $(document).on('click', '.cancel-order-btn', function() {
+        const orderId = $(this).data('order-id');
+        window.cancelOrder(orderId);
+    });
+    
+
+
+    // 确认操作按钮
+    $('#confirmActionBtn').click(function() {
+        if (currentAction && currentOrderId) {
+            performAction(currentAction, currentOrderId);
+            $('#confirmModal').modal('hide');
+        }
+    });
+
+    // 执行操作
+    function performAction(action, orderId) {
+        console.log(`执行操作: ${action}, 订单: ${orderId}`);
+        
+        let url = '';
+        let data = {};
+        
+        switch(action) {
+            case 'start_preparation':
+                url = `/eshop/api/start-preparation/${orderId}/`;
+                break;
+            case 'mark_ready':
+                url = `/eshop/api/mark-ready/${orderId}/`;
+                break;
+            case 'mark_collected':
+                url = `/eshop/api/mark-collected/${orderId}/`;
+                break;
+            case 'cancel_order':
+                url = `/eshop/api/cancel-order/${orderId}/`;
+                break;
+            case 'pause_order':
+                showToast('⚠️ 暂停功能暂未实现', 'warning');
+                return;
+            default:
+                showToast('❌ 未知操作', 'error');
+                return;
+        }
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: data,
+            dataType: 'json',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+            },
+            success: function(response) {
+                console.log(`${action} 操作成功:`, response);
+                if (response.success) {
+                    showToast(response.message || '操作成功', 'success');
+                    window.loadQueueData();
+                } else {
+                    showToast(response.message || '操作失败', 'error');
+                }
+            },
+            error: function(xhr) {
+                console.error(`${action} 操作失败:`, xhr);
+                showToast(`操作失败: ${xhr.status} ${xhr.statusText}`, 'error');
+            }
+        });
+    }
+
+    // ==================== 初始化 ====================
+    
+    // 首先检查数据库连接和 CoffeeQueue 数据
+    $.get('/eshop/queue/coffee-queue-data/', function(data) {
+        console.log('=== CoffeeQueue 数据库数据 ===');
+        console.log('总队列项:', data.all_coffee_queues.length);
+        console.log('等待队列:', data.waiting_coffee_queues.length);
+        
+        // 显示在调试信息区域
+        let debugHtml = `
+            <h6><i class="fas fa-database"></i> CoffeeQueue 数据库数据</h6>
+            <p><strong>总队列项:</strong> ${data.all_coffee_queues.length}</p>
+            <p><strong>等待队列:</strong> ${data.waiting_coffee_queues.length}</p>
+            <p><strong>制作中队列:</strong> ${data.preparing_coffee_queues.length}</p>
+        `;
+        
+        if (data.waiting_coffee_queues.length > 0) {
+            debugHtml += `
+                <div class="mt-2">
+                    <strong>等待队列详情:</strong>
+                    <ul>
+            `;
+            data.waiting_coffee_queues.forEach(item => {
+                debugHtml += `<li>订单#${item.order_id} - 位置: ${item.position}</li>`;
+            });
+            debugHtml += `</ul></div>`;
+        }
+        
+        $('#debug-info').append(debugHtml);
+        
+        // 如果数据库有数据但页面没有显示，强制刷新
+        if (data.waiting_coffee_queues.length > 0 && $('#waiting-queue-body tr').length === 0) {
+            console.log('检测到数据不一致，强制重新加载');
+            setTimeout(() => {
+                window.loadQueueData();
+            }, 1000);
+        }
+        
+    }).fail(function(xhr) {
+        console.error('获取 CoffeeQueue 数据失败:', xhr);
+        $('#debug-info').append(`
+            <div class="alert alert-danger mt-2">
+                <strong>获取 CoffeeQueue 数据失败:</strong> ${xhr.status} ${xhr.statusText}
+            </div>
+        `);
+    });
+
+    // 初始化时间
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
+    // 启动剩余时间倒计时定时器
+    setInterval(updateRemainingTime, 1000);
+
+    // 启动等待时间定时器
+    setInterval(updateWaitingTimes, 1000);
+
+    // 延迟500ms后加载数据
+    setTimeout(function() {
+        console.log('自动加载队列数据...');
+        window.loadQueueData();
+    }, 500);
+
+    // 每3秒刷新一次队列数据（更频繁更新）
+    setInterval(function() {
+        window.loadQueueData();
+    }, 1000);  // 从3000改为1000
+
+    // 页面可见性变化时刷新
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            console.log('页面变为可见，刷新队列数据');
+            setTimeout(() => {
+                window.loadQueueData();
+            }, 500);
+        }
+    });
+
+    // 标签页切换事件
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+        const target = $(e.target).attr("href");
+        console.log('切换到标签页:', target);
+        
+        // 切换到任何标签页都刷新数据
+        setTimeout(() => {
+            window.loadQueueData();
+        }, 300);
+        
+        // 切换到已提取标签时，加载已提取订单
+        if (target === '#collected') {
+            if (collectedOrders.length === 0) {
+                window.loadCollectedHistory();
+            }
+        }
+    });
+
+    // 强制同步按钮
+    $('#force-sync-btn').click(function() {
+        const csrfToken = getCookie('csrftoken');
+        const button = $(this);
+        const originalText = button.html();
+        
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 同步中...');
+        
+        $.ajax({
+            url: '/eshop/queue/force-sync/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast('✅ ' + response.message, 'success');
+                    // 重新加载队列数据
+                    setTimeout(() => {
+                        window.loadQueueData();
+                    }, 1000);
+                } else {
+                    showToast('❌ ' + response.error, 'error');
+                }
+                button.prop('disabled', false).html(originalText);
+            },
+            error: function(xhr) {
+                showToast('❌ 请求失败: ' + xhr.status, 'error');
+                button.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+
+
+
+    $('#fix-state-btn').click(function() {
+        if (!confirm('这将修复所有订单和队列状态不一致的问题。继续吗？')) {
+            return;
+        }
+        
+        const csrfToken = getCookie('csrftoken');
+        const button = $(this);
+        const originalText = button.html();
+        
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 修复中...');
+        
+        $.ajax({
+            url: '/eshop/queue/fix-order-state/',
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast('✅ ' + response.message, 'success');
+                    // 重新加载队列数据
+                    setTimeout(() => {
+                        window.loadQueueData();
+                    }, 1000);
+                } else {
+                    showToast('❌ 修复失败: ' + response.error, 'error');
+                }
+                button.prop('disabled', false).html(originalText);
+            },
+            error: function(xhr) {
+                showToast('❌ 请求失败: ' + xhr.status, 'error');
+                button.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    
+    // 输出函数状态
+    console.log('函数检查:');
+    console.log('- loadQueueData:', typeof window.loadQueueData === 'function');
+    console.log('- testQueueAPI:', typeof window.testQueueAPI === 'function');
+    console.log('- startOrderPreparation:', typeof window.startOrderPreparation === 'function');
+    console.log('- markOrderAsReady:', typeof window.markOrderAsReady === 'function');
+    console.log('- markOrderAsCollected:', typeof window.markOrderAsCollected === 'function');
+    console.log('- loadCollectedHistory:', typeof window.loadCollectedHistory === 'function');
+});
+
+</script>
+{% endblock %}

@@ -1,51 +1,63 @@
-# cart/cart.py:
-from django.contrib.sessions.models import Session
+# cart/cart.py - 修正版本
 from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
 from eshop.models import CoffeeItem, BeanItem, CartItem
-from django.http import JsonResponse
-import json
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-# Inital cart in session processing and handle both guest and authenticated users
 class Cart:
+    """購物車類 - 修正版"""
+    
     def __init__(self, request):
-        self.session = request.session
         self.request = request
-        cart = self.session.get(settings.CART_SESSION_ID, {})
+        self.session = request.session
+        self.user = request.user
         
-        # Initialize cart as empty dict if not present
-        if not isinstance(cart, dict):
-            cart = {}
-
-        # Store user ID if authenticated
-        if request.user.is_authenticated:
-            self.user_id = request.user.id
-            # Load cart from database
-            self.load_from_db()
-            # Migrate guest cart to user cart if exists
-            if 'guest_cart' in self.session:
-                self.migrate_guest_cart()
-        else:
-            self.user_id = None
-            self.cart = cart
-
-
-    def load_from_db(self):
-        """Load cart items from database for authenticated users"""
-        db_items = CartItem.objects.filter(user_id=self.user_id)
+        # 從會話加載購物車
+        cart_id = settings.CART_SESSION_ID
+        self.cart = self.session.get(cart_id, {})
+        
+        # 如果是已認證用戶，從數據庫同步購物車
+        if self.user.is_authenticated:
+            self.sync_with_database()
+    
+    def sync_with_database(self):
+        """同步會話購物車與數據庫購物車"""
+        if not self.user.is_authenticated:
+            return
+        
+        # 從數據庫加載購物車項目
+        db_items = CartItem.objects.filter(user=self.user)
+        
+        # 如果有數據庫項目，使用數據庫項目
+        if db_items.exists():
+            self._load_from_db()
+        # 如果會話中有購物車但數據庫沒有，保存到數據庫
+        elif self.cart:
+            self._save_to_db()
+    
+    def _load_from_db(self):
+        """從數據庫加載購物車"""
+        if not self.user.is_authenticated:
+            return
+        
+        db_items = CartItem.objects.filter(user=self.user)
         self.cart = {}
         
-        # Get all product IDs
-        coffee_ids = [item.product_id for item in db_items if item.product_type == 'coffee']
-        bean_ids = [item.product_id for item in db_items if item.product_type == 'bean']
+        # 批量獲取產品
+        coffee_ids = []
+        bean_ids = []
         
-        # Fetch all products in bulk
-        coffees = CoffeeItem.objects.in_bulk(coffee_ids)
-        beans = BeanItem.objects.in_bulk(bean_ids)
+        for item in db_items:
+            if item.product_type == 'coffee':
+                coffee_ids.append(item.product_id)
+            elif item.product_type == 'bean':
+                bean_ids.append(item.product_id)
+        
+        coffees = CoffeeItem.objects.in_bulk(coffee_ids) if coffee_ids else {}
+        beans = BeanItem.objects.in_bulk(bean_ids) if bean_ids else {}
         
         for item in db_items:
             product = None
@@ -55,332 +67,268 @@ class Cart:
                 product = beans.get(item.product_id)
             
             if not product:
-                continue  # Skip if product not found
-                
-            # Recreate the same key format used in session
-            if item.product_type == 'coffee':
-                key = f"coffee_{item.product_id}_cup_{item.cup_level}_milk_{item.milk_level}"
-            elif item.product_type == 'bean':
-                # 包含重量信息
-                key = f"bean_{item.product_id}_grinding_{item.grinding_level}_weight_{item.weight}"
-            else:
-                key = f"{item.product_type}_{item.product_id}"
-
-            # 计算价格
-            if item.product_type == 'bean':
-                # 使用 CartItem 中的重量信息
-                weight = item.weight if item.weight else '200g'
-                price = str(product.get_price(weight))
-            else:
-                price = str(product.price)
-                
+                continue
+            
+            # 生成唯一鍵
+            key = self._generate_item_key(
+                item.product_type,
+                item.product_id,
+                item.cup_level,
+                item.milk_level,
+                item.grinding_level,
+                item.weight
+            )
+            
+            # 計算價格 - 使用修正的 _calculate_price 方法
+            price = self._calculate_price(product, item.product_type, item.weight)
+            
             self.cart[key] = {
                 'quantity': item.quantity,
-                'price': price,
+                'price': str(price),
                 'name': product.name,
                 'type': item.product_type,
                 'image': product.image.url if product.image else '',
                 'cup_level': item.cup_level,
                 'milk_level': item.milk_level,
                 'grinding_level': item.grinding_level,
-                'weight': item.weight  # 添加重量信息
+                'weight': item.weight or '200g',
             }
-
-
-    def migrate_guest_cart(self):
-        """Migrate guest cart items to authenticated user"""
-        guest_cart = self.session.get('guest_cart', {})
-        
-        for key, item_data in guest_cart.items():
-            # Add each item to database
-            parts = key.split('_')
-            product_type = parts[0]
-            product_id = int(parts[1])
-            
-            # Extract options based on product type
-            cup_level = item_data.get('cup_level')
-            milk_level = item_data.get('milk_level')
-            grinding_level = item_data.get('grinding_level')
-            weight = item_data.get('weight')  # 获取重量信息
-            
-            # Create or update cart item in DB
-            CartItem.objects.update_or_create(
-                user_id=self.user_id,
-                product_type=product_type,
-                product_id=product_id,
-                cup_level=cup_level,
-                milk_level=milk_level,
-                grinding_level=grinding_level,
-                weight=weight,
-                defaults={'quantity': item_data['quantity']}
-            )
-            
-            # Add to current cart
-            self.cart[key] = item_data
-        
-        # Clear guest cart from session
-        del self.session['guest_cart']
-        self.session.modified = True
-
-
-    def save(self):
-        self.session[settings.CART_SESSION_ID] = self.cart
-        
-        if self.user_id:
-            # Save to database for authenticated users
-            self.save_to_db()
-            
-            # Remove guest cart if exists
-            if 'guest_cart' in self.session:
-                del self.session['guest_cart']
-        else:
-            # Store guest cart separately
-            self.session['guest_cart'] = self.cart
-            
-        self.session.modified = True
-
-
-    def save_to_db(self):
-        """Save cart items to database for authenticated users"""
-        # First delete all existing cart items
-        CartItem.objects.filter(user_id=self.user_id).delete()
-        
-        # Then save current cart items
-        for key, item_data in self.cart.items():
-            parts = key.split('_')
-            product_type = parts[0]
-            product_id = int(parts[1])
-            
-            CartItem.objects.create(
-                user_id=self.user_id,
-                product_type=product_type,
-                product_id=product_id,
-                quantity=item_data['quantity'],
-                cup_level=item_data.get('cup_level'),
-                milk_level=item_data.get('milk_level'),
-                grinding_level=item_data.get('grinding_level'),
-                weight=item_data.get('weight')
-            )
     
-
-    def clear(self):
-        # Clear from database if authenticated
-        if self.user_id:
-            CartItem.objects.filter(user_id=self.user_id).delete()
-            
-        # Clear from session
-        self.session[settings.CART_SESSION_ID] = {}
-        if 'guest_cart' in self.session:
-            del self.session['guest_cart']
-        self.session.modified = True
-
-
-    def __iter__(self):
-        if not hasattr(self, 'cart') or not isinstance(self.cart, dict):
-            self.cart = {}
-        for item_id, item_data in self.cart.items():
-            # Split the item_id to extract product ID
-            parts = item_id.split('_')  # Split by underscores
-            product_id = int(parts[1])  # Convert to integer
-
-            yield {
-                'item_id': item_id,
-                'product_id': product_id,
-                'quantity': item_data['quantity'],
-                'price': item_data['price'],
-                'name': item_data['name'],
-                'type': item_data['type'],
-                'image': item_data['image'],
-                'cup_level': item_data.get('cup_level'),  # For coffee items ready select and keep track user action
-                'milk_level': item_data.get('milk_level'),  # For coffee items ready select and keep track and keep track user action
-                'grinding_level': item_data.get('grinding_level'),  # For bean items ready select and keep track user action
-                'total_price': float(item_data['price']) * item_data['quantity'],
-            }
-
-    def __len__(self):
-        return sum(item['quantity'] for item in self.cart.values())
-
-
-
-    # 在add方法中修改bean项目的处理逻辑
-    def add(self, product, product_type, quantity=1, cup_level=None, milk_level=None, grinding_level=None, weight=None):
-        # 生成唯一的产品ID，基于产品类型、ID和所选选项
+    def _generate_item_key(self, product_type, product_id, cup_level=None, milk_level=None, grinding_level=None, weight=None):
+        """生成唯一的購物車項目鍵"""
+        key_parts = [product_type, str(product_id)]
+        
         if product_type == 'coffee':
-            product_id = f"{product_type}_{product.id}_cup_{cup_level}_milk_{milk_level}"
+            if cup_level:
+                key_parts.append(f'cup_{cup_level}')
+            if milk_level:
+                key_parts.append(f'milk_{milk_level}')
         elif product_type == 'bean':
-            # 添加重量选项到产品ID
-            product_id = f"{product_type}_{product.id}_grinding_{grinding_level}_weight_{weight}"
-        else:
-            product_id = f"{product_type}_{product.id}"
-
-        if product_id not in self.cart:
-            # 根据重量获取价格（如果是咖啡豆）
+            if grinding_level:
+                key_parts.append(f'grinding_{grinding_level}')
+            if weight:
+                key_parts.append(f'weight_{weight}')
+        
+        return '_'.join(key_parts)
+    
+    def _calculate_price(self, product, product_type, weight=None):
+        """計算商品價格 - 修正版本"""
+        try:
             if product_type == 'bean' and weight:
-                price = str(product.get_price(weight))
+                # 確保使用正確的 get_price 方法
+                price = product.get_price(weight)
+                # 確保返回 Decimal 類型
+                if isinstance(price, Decimal):
+                    return price
+                else:
+                    # 轉換為 Decimal
+                    return Decimal(str(price))
+            elif product_type == 'coffee':
+                return product.price
             else:
-                # 对于咖啡或其他产品，使用默认价格
-                price = str(product.price)
-                
-            self.cart[product_id] = {
-                'quantity': 0,
-                'price': price,
+                logger.warning(f"未知的商品類型: {product_type}")
+                return Decimal('0')
+        except Exception as e:
+            logger.error(f"計算價格錯誤: {e}, product_id: {product.id}, type: {product_type}, weight: {weight}")
+            # 返回安全的默認值
+            return Decimal('0')
+    
+    def add(self, product, product_type, quantity=1, **options):
+        """添加商品到購物車 - 修正版：不重複添加"""
+        key = self._generate_item_key(
+            product_type,
+            product.id,
+            options.get('cup_level'),
+            options.get('milk_level'),
+            options.get('grinding_level'),
+            options.get('weight', '200g')
+        )
+        
+        # 計算價格 - 使用修正的方法
+        price = self._calculate_price(product, product_type, options.get('weight'))
+        
+        if key in self.cart:
+            # 如果商品已存在，更新數量
+            self.cart[key]['quantity'] += quantity
+        else:
+            # 否則添加新商品
+            self.cart[key] = {
+                'quantity': quantity,
+                'price': str(price),
                 'name': product.name,
                 'type': product_type,
                 'image': product.image.url if product.image else '',
-                'cup_level': cup_level,
-                'milk_level': milk_level,
-                'grinding_level': grinding_level,
-                'weight': weight,  # 存储重量信息
+                'cup_level': options.get('cup_level'),
+                'milk_level': options.get('milk_level'),
+                'grinding_level': options.get('grinding_level'),
+                'weight': options.get('weight', '200g'),
             }
-        self.cart[product_id]['quantity'] += quantity
+        
         self.save()
-
-    def remove(self, product_id):
-        if product_id in self.cart:
-            del self.cart[product_id]
-            self.save()
-
-
-    def update(self, item_key, quantity):
+    
+    def remove(self, item_key):
+        """從購物車移除商品"""
         if item_key in self.cart:
+            del self.cart[item_key]
+            self.save()
+    
+    def update(self, item_key, quantity):
+        """更新商品數量"""
+        if item_key in self.cart and quantity > 0:
             self.cart[item_key]['quantity'] = quantity
-            self.cart[item_key]['total_price'] = float(self.cart[item_key]['price']) * quantity
             self.save()
-
-
-
-    # Add method to merge carts when user logs in
-    def merge_with_user_cart(self, request):
-        if request.user.is_authenticated and 'guest_cart' in self.session:
-            user_cart = self.session.get(settings.CART_SESSION_ID, {})
-            guest_cart = self.session['guest_cart']
+    
+    def save(self):
+        """保存購物車"""
+        # 保存到會話
+        self.session[settings.CART_SESSION_ID] = self.cart
+        self.session.modified = True
+        
+        # 如果是已認證用戶，同時保存到數據庫
+        if self.user.is_authenticated:
+            self._save_to_db()
+    
+    def _save_to_db(self):
+        """保存購物車到數據庫"""
+        if not self.user.is_authenticated:
+            return
+        
+        # 獲取現有的數據庫項目
+        existing_items = CartItem.objects.filter(user=self.user)
+        existing_keys = {}
+        
+        for item in existing_items:
+            key = self._generate_item_key(
+                item.product_type,
+                item.product_id,
+                item.cup_level,
+                item.milk_level,
+                item.grinding_level,
+                item.weight
+            )
+            existing_keys[key] = item
+        
+        # 更新或創建購物車項目
+        for key, item_data in self.cart.items():
+            parts = key.split('_')
+            if len(parts) < 2:
+                continue
             
-            # Merge strategy: keep guest cart items, update quantities if same item exists
-            for item_id, item_data in guest_cart.items():
-                if item_id in user_cart:
-                    user_cart[item_id]['quantity'] += item_data['quantity']
-                else:
-                    user_cart[item_id] = item_data
+            product_type = parts[0]
+            product_id = int(parts[1])
             
-            self.cart = user_cart
-            del self.session['guest_cart']
-            self.save()
-
-
-    def get_total_price(self):
-        return sum(float(item['price']) * item['quantity'] for item in self.cart.values())
-
-
-
-
-# Cart fn between cart.py and Json response
-@csrf_exempt
-def add_to_cart(request):
-    if request.method == 'POST':
-        try:
-            logger.debug(f"Raw request body: {request.body}")
+            # 獲取選項
+            cup_level = item_data.get('cup_level')
+            milk_level = item_data.get('milk_level')
+            grinding_level = item_data.get('grinding_level')
+            weight = item_data.get('weight', '200g')
             
-            # Validate request body
-            if not request.body:
-                logger.debug("Empty request body")
-                return JsonResponse({
-                    'success': False,
-                    'message': '請求內容為空'
-                }, status=400)
-            
-            try:
-                data = json.loads(request.body)
-                logger.debug(f"Parsed JSON data: {data}")
-            except json.JSONDecodeError as e:
-                logger.debug(f"JSON decode error: {str(e)}")
-                return JsonResponse({
-                    'success': False,
-                    'message': '無效的JSON格式'
-                }, status=400)
-            
-            # Validate required fields
-            if 'item_pk' not in data:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'miss item id'
-                }, status=400)
-            
-            try:
-                item_pk = int(data['item_pk'])
-                quantity = int(data.get('quantity', 1))
-            except (ValueError, TypeError):
-                return JsonResponse({
-                    'success': False,
-                    'message': 'invliate id'
-                }, status=400)
-            
-            # Validate quantity
-            if quantity < 1:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Bigger than 0'
-                }, status=400)
-            
-            # Get product
-            try:
-                item = get_object_or_404(CoffeeItem, id=item_pk)
-            except:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Item not find'
-                }, status=404)
-            
-            # Update cart
-            cart = request.session.get('cart', {})
-            if str(item_pk) in cart:
-                cart[str(item_pk)]['quantity'] += quantity
+            # 檢查是否已存在
+            if key in existing_keys:
+                # 更新現有項目
+                cart_item = existing_keys[key]
+                cart_item.quantity = item_data['quantity']
+                cart_item.save()
+                del existing_keys[key]
             else:
-                cart[str(item_pk)] = {
-                    'quantity': quantity,
-                    'price': str(item.price),
-                    'name': item.name,
-                    'image': item.image.url if item.image else '/static/images/menu-01.png'
+                # 創建新項目
+                CartItem.objects.create(
+                    user=self.user,
+                    product_type=product_type,
+                    product_id=product_id,
+                    quantity=item_data['quantity'],
+                    cup_level=cup_level,
+                    milk_level=milk_level,
+                    grinding_level=grinding_level,
+                    weight=weight
+                )
+        
+        # 刪除不再存在的項目
+        for key, cart_item in existing_keys.items():
+            cart_item.delete()
+    
+    def clear(self):
+        """清空購物車"""
+        self.cart = {}
+        self.session.pop(settings.CART_SESSION_ID, None)
+        
+        if self.user.is_authenticated:
+            CartItem.objects.filter(user=self.user).delete()
+        
+        self.session.modified = True
+    
+    def get_total_price(self):
+        """計算購物車總價格 - 修正版"""
+        total = Decimal('0')
+        
+        for item in self.cart.values():
+            try:
+                price_str = item.get('price', '0')
+                # 確保價格字符串格式正確
+                if isinstance(price_str, str):
+                    # 移除可能存在的貨幣符號
+                    price_str = price_str.replace('$', '').strip()
+                
+                price = Decimal(str(price_str))
+                quantity = int(item.get('quantity', 0))
+                total += price * quantity
+            except (ValueError, InvalidOperation, TypeError) as e:
+                logger.error(f"價格計算錯誤: {e}, 項目: {item}")
+                continue
+        
+        return total
+    
+    def __iter__(self):
+        """迭代購物車項目 - 修正版：確保價格格式正確"""
+        for key, item_data in self.cart.items():
+            try:
+                # 確保有正確的產品ID
+                parts = key.split('_')
+                product_id = int(parts[1]) if len(parts) > 1 else 0
+                
+                # 計算單項總價
+                try:
+                    price_str = item_data.get('price', '0')
+                    # 移除可能存在的$符號
+                    if isinstance(price_str, str):
+                        price_str = price_str.replace('$', '').strip()
+                    price = Decimal(str(price_str))
+                    quantity = item_data.get('quantity', 0)
+                    item_total = price * quantity
+                    
+                    # 格式化單價：如果是整數，返回整數格式
+                    if price % 1 == 0:
+                        price_str = str(int(price))
+                    else:
+                        price_str = str(price.quantize(Decimal('0.00')))
+                    
+                    # 格式化總價：如果是整數，返回整數格式
+                    if item_total % 1 == 0:
+                        item_total_str = str(int(item_total))
+                    else:
+                        item_total_str = str(item_total.quantize(Decimal('0.00')))
+                except:
+                    price_str = "0"
+                    item_total_str = "0"
+                
+                yield {
+                    'item_id': key,
+                    'product_id': product_id,
+                    'quantity': item_data['quantity'],
+                    'price': price_str,  # 單價（不帶$符號）
+                    'name': item_data['name'],
+                    'type': item_data['type'],
+                    'image': item_data['image'],
+                    'cup_level': item_data.get('cup_level'),
+                    'milk_level': item_data.get('milk_level'),
+                    'grinding_level': item_data.get('grinding_level'),
+                    'weight': item_data.get('weight'),
+                    'total_price': item_total_str,  # 總價（不帶$符號）
                 }
-            
-            request.session['cart'] = cart
-            request.session.modified = True
-            
-            return JsonResponse({
-                'success': True, 
-                'cart_total_items': sum(temp_item['quantity'] for temp_item in cart.values())
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Server Error: {str(e)}'
-            }, status=500)
+            except Exception as e:
+                logger.error(f"購物車迭代錯誤: {e}")
+                continue
     
-    return JsonResponse({
-        'success': False,
-        'message': 'POST Only'
-    }, status=405)
-
-
-# remove_from_cart
-@csrf_exempt
-def remove_from_cart(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        item_pk = str(data.get('item_pk'))
-        
-        cart = request.session.get('cart', {})
-        if item_pk in cart:
-            del cart[item_pk]
-        
-        request.session['cart'] = cart
-        request.session.modified = True
-        return JsonResponse({
-            'success': True, 
-            'cart_total_items': sum(temp_item['quantity'] for temp_item in cart.values())
-        })
-    
-    return JsonResponse({'success': False}, status=400)
-
-# end Cart fn between cart.py and Json response
-
+    def __len__(self):
+        """購物車商品總數"""
+        return sum(item.get('quantity', 0) for item in self.cart.values())

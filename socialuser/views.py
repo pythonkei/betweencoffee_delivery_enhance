@@ -1,4 +1,5 @@
 # socialuser/views.py
+import os
 from .forms import ProfileForm, PhoneForm, EmailForm, UsernameForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -12,11 +13,82 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.conf import settings
 from django.utils import timezone
-from .forms import *
+
 from eshop.models import OrderModel
 from allauth.account.models import EmailAddress
 from django.core.mail import send_mail, EmailMultiAlternatives
 from allauth.socialaccount.views import LoginCancelledView as AllAuthLoginCancelledView
+
+from django.contrib.sites.models import Site
+from allauth.socialaccount.models import SocialApp
+
+
+
+def social_login_status(request):
+    """检查社交登录状态"""
+    current_site = Site.objects.get_current()
+    
+    context = {
+        'site': current_site,
+        'social_apps': SocialApp.objects.all(),
+        'user_social_accounts': SocialAccount.objects.filter(user=request.user) if request.user.is_authenticated else None,
+        'callback_urls': {
+            'google': f"https://{current_site.domain}/accounts/google/login/callback/",
+            'facebook': f"https://{current_site.domain}/accounts/facebook/login/callback/",
+        }
+    }
+    return render(request, 'socialuser/social_status.html', context)
+
+
+def social_login_debug(request):
+    """社交登录调试页面"""
+    current_site = Site.objects.get_current()
+    
+    # 获取社交应用配置
+    try:
+        google_app = SocialApp.objects.get(provider='google')
+        google_configured = True
+    except SocialApp.DoesNotExist:
+        google_app = None
+        google_configured = False
+        
+    try:
+        facebook_app = SocialApp.objects.get(provider='facebook')
+        facebook_configured = True
+    except SocialApp.DoesNotExist:
+        facebook_app = None
+        facebook_configured = False
+    
+    # 构建回调URL
+    if settings.IS_RAILWAY:
+        base_url = f"https://{current_site.domain}"
+    else:
+        base_url = f"http://{current_site.domain}"
+    
+    context = {
+        'current_site': current_site,
+        'is_railway': settings.IS_RAILWAY,
+        'debug': settings.DEBUG,
+        'google_configured': google_configured,
+        'facebook_configured': facebook_configured,
+        'google_app': google_app,
+        'facebook_app': facebook_app,
+        'callback_urls': {
+            'google': f"{base_url}/accounts/google/login/callback/",
+            'facebook': f"{base_url}/accounts/facebook/login/callback/",
+        },
+        'environment_vars': {
+            'OAUTH_GOOGLE_CLIENT_ID': 'Set' if settings.SOCIALACCOUNT_PROVIDERS.get('google') else 'Not Set',
+            'OAUTH_GOOGLE_SECRET': 'Set' if settings.SOCIALACCOUNT_PROVIDERS.get('google') else 'Not Set',
+            'OAUTH_FACEBOOK_CLIENT_ID': 'Set' if settings.SOCIALACCOUNT_PROVIDERS.get('facebook') else 'Not Set',
+            'OAUTH_FACEBOOK_SECRET': 'Set' if settings.SOCIALACCOUNT_PROVIDERS.get('facebook') else 'Not Set',
+            'RAILWAY_PUBLIC_DOMAIN': os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'Not Set'),
+        }
+    }
+    
+    return render(request, 'socialuser/debug.html', context)
+
+
 
 
 

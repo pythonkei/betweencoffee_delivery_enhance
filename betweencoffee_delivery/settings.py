@@ -3,21 +3,64 @@ Django settings for betweencoffee_delivery project.
 """
 
 import os
+import sys
+import logging
 import dj_database_url
 from environ import Env
-
-env = Env()
-env.read_env()
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# 初始化环境变量读取
+env = Env()
+
+# 尝试读取环境文件，但忽略错误
+try:
+    # 明确指定.env文件路径
+    env_file_path = os.path.join(BASE_DIR, '.env')
+    print(f"Looking for .env file at: {env_file_path}")
+    
+    if os.path.exists(env_file_path):
+        env.read_env(env_file_path)
+        print("Successfully loaded .env file")
+        
+        # 调试：检查关键环境变量
+        print(f"DEBUG - Google Client ID: {os.environ.get('OAUTH_GOOGLE_CLIENT_ID', 'Not set')}")
+        print(f"DEBUG - Facebook Client ID: {os.environ.get('OAUTH_FACEBOOK_CLIENT_ID', 'Not set')}")
+    else:
+        print(f".env file not found at {env_file_path}")
+        
+except Exception as e:
+    print(f"Warning: Could not read .env file: {e}")
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+
 # Railway 环境检测
 IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-fallback-secret-key-here')
-# On Railway 环境变量 SECRET_KEY = os.environ.get('mohf-@y+t3$!_hjjmai58iuler74_@4!ui1qij$-m=vl+$h(8u')
+# ==================== 安全配置 ====================
+
+def get_secret_key():
+    """安全地获取密钥，在生产环境中必须设置"""
+    secret_key = os.environ.get('SECRET_KEY')
+    if not secret_key and IS_RAILWAY:
+        raise ImproperlyConfigured(
+            "SECRET_KEY must be set in environment variables in production"
+        )
+    elif not secret_key:
+        logger.warning(
+            "Using default SECRET_KEY for development. "
+            "Set SECRET_KEY environment variable for production."
+        )
+        return 'django-insecure-development-key-change-in-production'
+    return secret_key
+
+SECRET_KEY = get_secret_key()
 
 # DEBUG 配置 - 在 Railway 上强制设为 False
 if IS_RAILWAY:
@@ -25,98 +68,94 @@ if IS_RAILWAY:
 else:
     DEBUG = env.bool('DEBUG', default=True)
 
-# ALLOWED_HOSTS 配置
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
-# 替换现有的安全配置
-if IS_RAILWAY:
-    # 确保有正确的主机名
-    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    if RAILWAY_PUBLIC_DOMAIN:
-        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app', 'localhost', '127.0.0.1', '0.0.0.0']
-        CSRF_TRUSTED_ORIGINS = [f'https://{RAILWAY_PUBLIC_DOMAIN}']
-    else:
-        ALLOWED_HOSTS = ['.railway.app', 'localhost', '127.0.0.1', '0.0.0.0']
-        CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+# ALLOWED_HOSTS 配置
+def get_allowed_hosts():
+    """安全地配置允许的主机"""
+    default_hosts = ['localhost', '127.0.0.1', '0.0.0.0']
     
-    # 安全配置
+    if IS_RAILWAY:
+        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+        if railway_domain:
+            return [railway_domain, '.railway.app'] + default_hosts
+        else:
+            logger.warning("RAILWAY_PUBLIC_DOMAIN not set, using fallback hosts")
+            return ['.railway.app'] + default_hosts
+    else:
+        return default_hosts
+
+ALLOWED_HOSTS = get_allowed_hosts()
+
+
+# CSRF 信任源配置
+def get_csrf_trusted_origins():
+    """配置CSRF信任源"""
+    if IS_RAILWAY:
+        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+        if railway_domain:
+            return [f'https://{railway_domain}', 'https://*.railway.app']
+        else:
+            return ['https://*.railway.app']
+    else:
+        return ['http://localhost:8081', 'http://127.0.0.1:8081']
+
+CSRF_TRUSTED_ORIGINS = get_csrf_trusted_origins()
+
+
+# 安全配置
+if IS_RAILWAY:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-else:
-    DEBUG = True
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
-    CSRF_TRUSTED_ORIGINS = ['http://localhost:8081', 'http://127.0.0.1:8081']
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
 
 
-
-
-
-
-
-
-# 基础Redis配置，从环境变量读取URL，默认为本地开发地址
-REDIS_URL = os.environ.get('REDIS_URL', '').strip('"')  # 移除可能的引号
-
-if REDIS_URL and REDIS_URL.startswith('redis://'):
-    # 使用 Redis 配置
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": REDIS_URL,
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            }
-        }
-    }
+# 临时调试中间件
+class DebugMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
     
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [REDIS_URL],
-            },
-        }
-    }
-else:
-    # 使用内存缓存和内存通道层
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        }
-    }
-    
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        }
-    }
+    def __call__(self, request):
+        if request.path == '/eshop/order_confirm/' and request.method == 'POST':
+            print("=== 中间件检测到订单确认POST请求 ===")
+            print(f"请求体: {request.POST}")
+        
+        response = self.get_response(request)
+        return response
 
 
+# # 检查daphne是否已安装
+# try:
+#     import daphne
+#     DAPHNE_INSTALLED = True
+# except ImportError:
+#     DAPHNE_INSTALLED = False
 
-# Application definition
+
+# ==================== 应用定义 ====================
+
 INSTALLED_APPS = [
+    'daphne',  # 必须放在最前面
+    'channels',
     'eshop',
     'cart',
     'socialuser',
-    'channels',
-    #'restaurant',
     'crispy_forms',
     'phonenumber_field',
     "django_rename_app",
-    
+    # 'debug_toolbar',
 
-    # Enable allauth social account
+    # allauth 社交登录
     'allauth',
-    'allauth.account', # Ensure the version is 0.54.0 or higher.
+    'allauth.account',
     'allauth.socialaccount',
-    # social account providers
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
 
-
-    # django lib
+    # Django 核心应用
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -132,29 +171,33 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # 确保 WhiteNoise 在 SecurityMiddleware 之后
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'betweencoffee_delivery.middleware.CartMiddleware',
+    'betweencoffee_delivery.middleware.DebugMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
-    # 处理管理员会话隔离
     'betweencoffee_delivery.middleware.AdminSessionMiddleware',
+    'eshop.view_utils.ErrorLoggingMiddleware',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'betweencoffee_delivery.urls'
 
-
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join (BASE_DIR, 'templates')],
-        'APP_DIRS': True,  # This enables Django to find app-specific templates
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -162,472 +205,605 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart_count',
+                'eshop.view_utils.error_context_processor',
             ],
+            'string_if_invalid': 'INVALID_EXPRESSION' if DEBUG else '',
         },
     },
 ]
 
-
-# ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'
 WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+# Channels 層配置 - 使用 Redis 作為後端
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('localhost', 6379)],  # 開發環境
+        },
+    },
+}
 
-# Database configuration for both development and production
-DATABASE_URL = os.environ.get('DATABASE_URL')
-
-# 检查本地数据库连接 PostgreSQL connection
-# sudo service postgresql start
-# 检查数据库是否存在
-# psql -h localhost -p 5432 -U postgres -l
-
-
-if DATABASE_URL:
-    # 使用 Railway 或生产环境的数据库
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
-    }
-else:
-    # 本地开发环境 - 使用 PostgreSQL
-    DATABASES = {
+# 或在 Railway 上使用 URL 格式：
+if IS_RAILWAY:
+    redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+    CHANNEL_LAYERS = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'betweencoffee_delivery_db',
-            'USER': 'postgres',
-            'PASSWORD': '111111',
-            'HOST': 'localhost',
-            'PORT': '5432',
-        }
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [redis_url],
+                "socket_timeout": 10,
+                "socket_connect_timeout": 10,
+                "retry_on_timeout": True,
+            },
+        },
     }
 
+# ✅ 確認 ASGI 應用設定正確
+ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'
+
+
+# # Channels层配置 - 使用Redis作为后端
+# if IS_RAILWAY:
+#     # Railway环境使用Redis
+#     CHANNEL_LAYERS = {
+#         'default': {
+#             'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#             'CONFIG': {
+#                 "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+#             },
+#         },
+#     }
+# else:
+#     # 开发环境使用内存层（无需Redis）
+#     CHANNEL_LAYERS = {
+#         "default": {
+#             "BACKEND": "channels.layers.InMemoryChannelLayer"
+#         }
+#     }
+#     print("使用内存Channel层进行开发")
 
 
 
-# Password validation
-# https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
+# ==================== 数据库配置 ====================
+
+def get_database_config():
+    """安全地配置数据库"""
+    database_url = os.environ.get('DATABASE_URL')
+    
+    if database_url:
+        try:
+            # 简化配置，移除重复参数
+            db_config = dj_database_url.parse(database_url)
+            
+            # 确保必要的配置
+            db_config.setdefault('CONN_MAX_AGE', 600)
+            db_config.setdefault('ATOMIC_REQUESTS', False)  # 改为False避免事务问题
+            
+            return {
+                'default': db_config
+            }
+        except Exception as e:
+            logger.error(f"Database configuration error: {e}")
+            raise ImproperlyConfigured(f"Invalid DATABASE_URL: {e}")
+    else:
+        # 本地开发环境
+        logger.info("Using local PostgreSQL database")
+        return {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': env('DB_NAME', default='betweencoffee_delivery_db'),
+                'USER': env('DB_USER', default='postgres'),
+                'PASSWORD': env('DB_PASSWORD', default='111111'),
+                'HOST': env('DB_HOST', default='localhost'),
+                'PORT': env('DB_PORT', default='5432'),
+                'CONN_MAX_AGE': 600,
+                'ATOMIC_REQUESTS': False,
+            }
+        }
+    
+
+DATABASES = get_database_config()
 
 
+# PostgreSQL pgAdmin Backup -
+# 步驟- 備份對話框設置Backup database: betweencoffee_delivery_db
+# betweencoffee_delivery_db  ← 右鍵這裡
+# -----------------------------------------
+# General 標籤:
+#   Filename:    /home/kei/coffee_backup_20250126_154230.backup
+#   Format:      Custom
+#   Encoding:    UTF8
+
+# Options 標籤:
+#   □ Sections: Pre-data, Data, Post-data  (全勾選)
+#   □ Verbose messages: ✓ 勾選
+#   □ Use Column Inserts
+#   □ Use Insert Commands
+
+# Dump Options #1 標籤:
+#   □ DROP DATABASE statement  (不要勾選！)
+#   □ IF EXISTS clause         (✓ 建議勾選)
+
+# Dump Options #2 標籤:
+#   保持預設
+
+# file1. betweencoffee_delivery_db_backup_20250126_6pm.backup
+
+
+# 使用 postgres 用戶測試
+# 1. 創建測試數據庫
+# sudo -u postgres createdb betweencoffee_delivery_test
+
+# 2. 檢查是否創建成功
+# sudo -u postgres psql -l | grep betweencoffee_delivery_test
+
+# 3. 恢復備份到測試數據庫
+# sudo -u postgres pg_restore --verbose --clean --if-exists --no-acl --no-owner -d betweencoffee_delivery_test betweencoffee_delivery_db_backup_20250126_6pm.backup
+
+# 4. 驗證數據恢復
+# sudo -u postgres psql -d betweencoffee_delivery_test -c "SELECT COUNT(*) FROM eshop_ordermodel;"
+# sudo -u postgres psql -d betweencoffee_delivery_test -c "SELECT COUNT(*) FROM eshop_coffeeitem;"
+
+
+
+
+# Session设置
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 明确指定会话后端
+SESSION_COOKIE_AGE = 1209600  # 2周，以秒为单位
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# 认证设置
+LOGIN_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/'
+
+
+# 密码验证
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'OPTIONS': {
+            'min_length': 6,
+        }
     },
 ]
 
-
 AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
-    # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
+# ==================== 国际化配置 ====================
 
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/2.1/topics/i18n/
-
-# LANGUAGE_CODE = 'en-us'
-
-# Set your local HK timezone
-LANGUAGE_CODE = 'zh-hant'  # 繁体中文
-TIME_ZONE = 'Asia/Hong_Kong'  # 香港時區
+LANGUAGE_CODE = 'zh-hant'
+TIME_ZONE = 'Asia/Hong_Kong'
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True  # Enable timezone support
+USE_TZ = True
 
+# ==================== 静态文件配置 ====================
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.1/howto/static-files/
-
-
-# Static files configuration
-# 简化静态文件配置
 STATIC_URL = '/static/'
-# 对于生产环境，仍然设置 STATIC_ROOT 但指向相同目录
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# 确保静态文件目录存在
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-# 使用 WhiteNoise 服务静态文件
+# WhiteNoise 配置
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-# 添加 WhiteNoise 配置
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
-# Media files
+# 媒体文件
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-'''
-# Security settings for production
-if IS_RAILWAY and not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-'''
-
-
-# Enable Whole cart session
+# 购物车会话
 CART_SESSION_ID = 'cart'
-
-# Crispy forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# ==================== 社交登录配置 ====================
 
+def get_social_providers():
+    """安全地配置社交登录提供商"""
+    providers = {}
+    
+    # 获取基础URL用于回调
+    if IS_RAILWAY:
+        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
+        base_domain = railway_domain
+    else:
+        base_domain = 'localhost:8081'
+    
+    # Google配置
+    google_client_id = env('OAUTH_GOOGLE_CLIENT_ID', default='')
+    google_secret = env('OAUTH_GOOGLE_SECRET', default='')
+    
+    if google_client_id and google_secret:
+        providers['google'] = {
+            'APP': {
+                'client_id': google_client_id,
+                'secret': google_secret,
+            },
+            'SCOPE': ['profile', 'email'],
+            'AUTH_PARAMS': {
+                'access_type': 'online',
+                'prompt': 'select_account',
+            },
+        }
+        logger.info(f"Google OAuth configured for domain: {base_domain}")
+    else:
+        logger.warning("Google OAuth credentials not set")
 
+    # Facebook配置
+    facebook_client_id = env('OAUTH_FACEBOOK_CLIENT_ID', default='')
+    facebook_secret = env('OAUTH_FACEBOOK_SECRET', default='')
+    
+    if facebook_client_id and facebook_secret:
+        providers['facebook'] = {
+            'APP': {
+                'client_id': facebook_client_id,
+                'secret': facebook_secret,
+            },
+            'METHOD': 'oauth2',
+            'SCOPE': ['email', 'public_profile'],
+            'FIELDS': [
+                'id',
+                'email', 
+                'name',
+                'first_name',
+                'last_name',
+            ],
+            'AUTH_PARAMS': {
+                'auth_type': 'reauthenticate',
+                'display': 'popup',
+            },
+            'EXCHANGE_TOKEN': True,
+            'VERIFIED_EMAIL': True,
+        }
+        logger.info(f"Facebook OAuth configured for domain: {base_domain}")
+    else:
+        logger.warning("Facebook OAuth credentials not set")
+    
+    return providers
 
-# ACCOUNT_ADAPTER = 'restaurant.account_adapter.NoNewUsersAccountAdapter'
-# LOGIN_REDIRECT_URL = 'dashboard'
+SOCIALACCOUNT_PROVIDERS = get_social_providers()
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-
-
-# Fully social login tutorial:
-# https://www.youtube.com/watch?v=dASjmItZcWE
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': env('OAUTH_GOOGLE_CLIENT_ID'),
-            'secret': env('OAUTH_GOOGLE_SECRET'),
-        },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online', # get access token in session
-            'prompt': 'consent',
-        },
-    },
-
-    'facebook': {
-        'APP': {
-            'client_id': env('OAUTH_FACEBOOK_CLIENT_ID'),
-            'secret': env('OAUTH_FACEBOOK_SECRET'),
-        },
-        'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],  # Explicitly request email
-        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-        'VERIFIED_EMAIL': True,
-    },
-}
-
-
-# Django System Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # Real emails testing
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'pythonkei@gmail.com' # In google app name : betweencoffee_delivery_email_confirm,
-
-# 邮箱配置 - 使用环境变量
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='fyzl jxbv jndk xajw')
-'''
-EMAIL_HOST_PASSWORD = 'fyzl jxbv jndk xajw' # NOT your regular password (see note below), gen by google
-'''
-DEFAULT_FROM_EMAIL = 'pythonkei@gmail.com' # Should match EMAIL_HOST_USER
-SERVER_EMAIL = 'pythonkei@gmail.com'  # For error notifications
-
-# Subject prefix for emails
-EMAIL_SUBJECT_PREFIX = 'Between Coffee'
-
-# Server email (for error messages)
-SERVER_EMAIL = 'pythonkei@gmail.com'
-
-
-
-# ===== Social Account Only Configuration =====
-# Disable regular account functionality
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disabled for regular accounts
+# allauth 关键配置
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_ADAPTER = 'socialuser.adapters.NoNewUsersAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'socialuser.adapters.SocialAccountAdapter'
 
-# Social account specific settings
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Social providers verify emails
+# 社交账户配置
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_EMAIL_REQUIRED = False
-SOCIALACCOUNT_STORE_TOKENS = True  # Recommended for social accounts
-SOCIALACCOUNT_LOGIN_ON_GET = True 
-ACCOUNT_LOGOUT_ON_GET = True  # Skip confirmation screen
-ACCOUNT_UNIQUE_EMAIL = True # Unique for each acc
-SOCIALACCOUNT_EMAIL_AUTHENTICATION = True # Trust email valid
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True # Autoconnect and saving social acc already existing in database
-SOCIALACCOUNT_EMAIL_VERIFICATION = "none" # No need verify email again if already been verify
-
-
-# Minimal required settings
-ACCOUNT_UNIQUE_EMAIL = True  # Keep email uniqueness
-LOGIN_REDIRECT_URL = '/'
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_LOGIN_ON_GET = True  # 设置为 True 可以直接跳转到 OAuth 页面
 ACCOUNT_LOGOUT_ON_GET = True
-SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_UNIQUE_EMAIL = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
+# 允许社交账户注册
+ACCOUNT_ALLOW_SOCIAL_SIGNUP = True
 
-# User email Verification Settings
+# 重要：动态站点配置
+def setup_site_config():
+    """动态配置站点信息"""
+    if IS_RAILWAY:
+        domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
+        name = 'Between Coffee - Railway'
+        protocol = 'https'
+    else:
+        domain = 'localhost:8081'
+        name = 'Between Coffee - Local'
+        protocol = 'http'
+    
+    return domain, name, protocol
+
+SITE_DOMAIN, SITE_NAME, PROTOCOL = setup_site_config()
+
+# 更新站点信息
+try:
+    from django.contrib.sites.models import Site
+    site = Site.objects.get(id=SITE_ID)
+    if site.domain != SITE_DOMAIN or site.name != SITE_NAME:
+        site.domain = SITE_DOMAIN
+        site.name = SITE_NAME
+        site.save()
+        logger.info(f"Site updated: {SITE_DOMAIN} - {SITE_NAME}")
+except Exception as e:
+    logger.warning(f"Could not update site: {e}")
+
+LOGIN_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/profile/settings/'
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/accounts/login/'
-ACCOUNT_EMAIL_CONFIRMATION_TEMPLATE = "account/email/email_confirmation"
-ACCOUNT_EMAIL_CONFIRMATION_SUBJECT = "account/email/email_confirmation_subject.txt"
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Between Coffee] "
 
-# allauth login cancell redirect
 SOCIALACCOUNT_TEMPLATES = {
     'login_cancelled': 'socialuser/login_cancelled.html',
 }
 
-# 'phonenumber_field' app configs
+
+
+# 重要：配置社交登录回调URL
+def get_social_callback_urls():
+    """配置社交登录回调URL"""
+    if IS_RAILWAY:
+        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+        if railway_domain:
+            base_url = f'https://{railway_domain}'
+        else:
+            base_url = 'https://*.railway.app'
+    else:
+        base_url = 'http://localhost:8081'
+    
+    return {
+        'google_callback': f'{base_url}/accounts/google/login/callback/',
+        'facebook_callback': f'{base_url}/accounts/facebook/login/callback/',
+    }
+
+SOCIAL_CALLBACK_URLS = get_social_callback_urls()
+
+# 电话号码字段配置
 PHONENUMBER_DEFAULT_REGION = "HK"
-PHONENUMBER_DB_FORMAT = "NATIONAL"  # Store without country code
+PHONENUMBER_DB_FORMAT = "NATIONAL"
 
+# ==================== 邮箱配置 ====================
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # 简化邮箱配置
 
-# Logging configuration
+# ==================== 日志配置 ====================
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django_errors.log'),
+            'formatter': 'verbose'
         },
     },
     'loggers': {
-        'environ': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
-        'gunicorn': {
+        'django.request': {
+            'handlers': ['file', 'console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'allauth': {
             'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'betweencoffee_delivery': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
         },
     },
 }
 
-# 调试信息
-def check_railway_environment():
-    print("=== Railway Environment Check ===")
-    print(f"RAILWAY_ENVIRONMENT: {os.environ.get('RAILWAY_ENVIRONMENT')}")
-    print(f"RAILWAY_PUBLIC_DOMAIN: {os.environ.get('RAILWAY_PUBLIC_DOMAIN')}")
-    print(f"PORT: {os.environ.get('PORT')}")
-    print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
-    print(f"DEBUG: {DEBUG}")
-    print("=================================")
-
-if __name__ != '__main__':
-    check_railway_environment()
+# ==================== payment配置 ====================
 
 
-
-
-'''
-应用公钥：工具生成的公钥需要上传到支付宝的
-支付宝公钥：这个是支付宝的公钥
-应用私钥：工具生成的应用私钥
-
-https://blog.csdn.net/qq_51738765/article/details/147196238?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_utm_term~default-0-147196238-blog-122902877.235^v43^pc_blog_bottom_relevance_base7&spm=1001.2101.3001.4242.1&utm_relevant_index=2
-'''
-
-'''硬编码
-# App Private Key PKCS8 Format *one line and remove space
-ALIPAY_APP_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4Vyqi5S4iJFW4lfP+wIQTBa2EPPUs47F+1psrRt5rQeULbB4RmwAvqrEnFNrgSoHhK2rRao9hXRIsafSyLI/TIWLa29ngPPtXNZNa7OYem9wOPiJhAAzVqBhPrFLZ7XNX4Gwkr9NkzdVnPdRlqk22YIIdstLfalFOvqegG3FWlzDUm4eouNJYlG0dQlBR/m+jMJ/Q0Sy7aIaidgN5Ph7pxUshXkjHbqIYXsgT7129wFU/W/2wdvUff4GnaEnNBLwZbe7TE73jkLQWylLnO8BfBsXOaCCmXZmGUL/3qVHYAgTUT4Z1XkUdYZw77Li6rSxfYdp+R6ld/4BNnX3SsAFrAgMBAAECggEARpP5Gw0sMJ5Aw7+F/8+twaq22J6OMHWtC6cXGea0WdSM4WavzIXP+HAeC5yMgLuGJrP83dkytFByGNcofN9a4bcypiDutlAi2y0EEhgJs0ZxZnKbrw/Z2iPVywtrXUzwkIC4ZwN6qGm2fyTJIXOm9WDV8JD689c88i1E+KQJLOFnngfFI9vRUpX8b9QzDa/t6TFnDJyga0ftRWLQCn9rvoHPRpjBsFodRUe/CAEtOQR8j+ykJhRhk5lSB1sJ66c0Mj/+IT9SBXorlaQ91cIIdUOak2JL+N6E4BhKXZYUBpOM6STyZQ+/k+dC7fziTIgJ9LwkIwmh+AIfwcAChbo1YQKBgQDkbyrSPmlIlXhJYCGZFnxSZXPhZCGNJ976lb1CYtZzKx1K0QcZT/1e8mnw7Q+Uq8Vv8BCUgpAr5pe+72xPGZoE9lIalWLs26koCtKeQWTaT5nybh9XgwynrNT4F9NqwCbl0kE8pfNBZpR3h+0DbfNgDTw3nUF/OW8n3ghoa2qCPwKBgQDOldjSrgEhYwz34/jlkrquRI89CXCaOy41hPzFCF8zS5j3C70qjt6I0Ro4E+U9zgOnWzLiJxSzWTJ3f9Gv81q4LvEOdsTSH+YRK5jUApn84U8zC26KlcMnUxW7KdG5QdARICeN5r1H1EcixbZUR8ORLffWt0Hw1D/KDTuqoI+d1QKBgQDJOAdvVVymfEuNzukpkb4HUqil1O8dCQ8IithA3xFqN4NBASmQqX5VoZGikR+VZU2wkbX5K51VnnTy0rIEZ1fdoSCnnAmc/M1foVDv6EivaUkBXPGsw5plJQAgXdR0hzh8Xx3qD4BcjsCfHhOwXqzwYhg2IQaty+jXJGUhneUfPwKBgQC2yHq5nd++LKeSxZC5f2PRQTQDa1DIBcjS7cHAi7G/7wl+vFI5T4OyRmEOcPwJ/TfaYaTZ2H5GWYt/lAZxyb3g7Re4Fnn6+OJVGt/z5gFdb/TlUx4RXIT5TFgT6+J2KbbxECQvN5MN9NKj/49dbsmosKVyw16CuSlfmunKBJpNqQKBgH347BjZdeua7gJiMGO/QRJMKEjL9HLB9l0xsg+udxDN/55xmunVVK9kDt337LnSs17f++1Z+YkHjSGOIPpNSgdBiKRSDptQVnQ3bm+Q31WdraqaTUrR3X3YifHkBDUrcqjbnonJlbd/5yK+aows9IgcHvNC3sSRBrtc20z47zXJ
------END PRIVATE KEY-----"""
-
-# Alipay Public Key from Alipay Sandbox (NOT your application public key)
-ALIPAY_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTKp2l7B+SLjrIWqXeRUYCnH291jq05/fAPcV/bSrZbXRT2vEi9SfypceTaRjnKbsJp8tozYEPHJxqV0Ia4nr4zFixHhlSGJk/uMICC16dkQ3NebHy7PUMJjyu2rhtB4GyvF2HZwlcku21BR2iVMqh5ZO5WNxz0qjx9gbAqk5ebqFktPAPPa86dnoVeHIK4KPs/L3Mfkqc03fypbj/4v1IPKEcmvB2kKnGGrZCoOGvknApJGSQkH3JPN+gpFJEJnnehASd+sRTLTTDG8K/KL8mo2fdwZ/w7APJkkVUzHRLOileFlyijehwapeJ+yJAmvan8lR0oIAsBZlp0+HBIW6QIDAQAB
------END PUBLIC KEY-----"""
-'''
-
-
-# 支付宝中国配置
-ALIPAY_APP_ID = '9021000151625966'
 ALIPAY_APP_ID = env('ALIPAY_APP_ID', default='9021000151625966')
-ALIPAY_APP_PRIVATE_KEY = env('ALIPAY_APP_PRIVATE_KEY', default='')
-ALIPAY_PUBLIC_KEY = env('ALIPAY_PUBLIC_KEY', default='')
 
+# 从文件读取密钥
+def read_key_file(filename):
+    """从文件读取密钥"""
+    key_path = os.path.join(BASE_DIR, 'keys', filename)
+    try:
+        with open(key_path, 'r') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        logger.warning(f"密钥文件未找到: {key_path}")
+        return ''
+
+ALIPAY_APP_PRIVATE_KEY = read_key_file('alipay_private_key.pem')
+ALIPAY_PUBLIC_KEY = read_key_file('alipay_public_key.pem')
+
+# 如果文件读取失败，回退到环境变量
+if not ALIPAY_APP_PRIVATE_KEY:
+    ALIPAY_APP_PRIVATE_KEY = env('ALIPAY_APP_PRIVATE_KEY', default='')
+if not ALIPAY_PUBLIC_KEY:
+    ALIPAY_PUBLIC_KEY = env('ALIPAY_PUBLIC_KEY', default='')
 
 ALIPAY_DEBUG = True
 ALIPAY_SIGN_TYPE = 'RSA2'
 ALIPAY_CHARSET = 'utf-8'
-ALIPAY_RETURN_URL = 'http://localhost:8080/eshop/alipay_callback/'
-ALIPAY_NOTIFY_URL = 'http://localhost:8080/eshop/alipay_notify/'
+ALIPAY_RETURN_URL = env('ALIPAY_RETURN_URL', default='http://localhost:8081/eshop/payment/alipay/callback/' )
+ALIPAY_NOTIFY_URL = env('ALIPAY_NOTIFY_URL', default='http://localhost:8081/eshop/payment/alipay/notify/')
 
+# PayPal配置
+PAYPAL_CLIENT_ID = env('PAYPAL_CLIENT_ID', default='')
+PAYPAL_CLIENT_SECRET = env('PAYPAL_CLIENT_SECRET', default='')
+PAYPAL_ENVIRONMENT = env('PAYPAL_ENVIRONMENT', default='sandbox')  # 添加这行
 
-'''
-# PayPal form 开发者平台
-PAYPAL_ENVIRONMENT = 'sandbox'  # 或 'production'
-PAYPAL_CLIENT_ID = 'AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-'
-PAYPAL_CLIENT_SECRET = 'EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS'
-'''
+# 如果环境变量为空，使用硬编码值作为后备（仅用于开发）
+if not PAYPAL_CLIENT_ID:
+    PAYPAL_CLIENT_ID = 'AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-'
+    logger.warning("使用后备PayPal Client ID")
 
+if not PAYPAL_CLIENT_SECRET:
+    PAYPAL_CLIENT_SECRET = 'EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS'
+    logger.warning("使用后备PayPal Client Secret")
 
-# PayPal 配置 - 使用环境变量
-PAYPAL_CLIENT_ID = env('PAYPAL_CLIENT_ID', default='AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-')
-PAYPAL_CLIENT_SECRET = env('PAYPAL_CLIENT_SECRET', default='EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS')
+print(f"DEBUG - 最终PayPal配置: {PAYPAL_CLIENT_ID[:20]}...")
 
-'''
-# FPS config
-FPS_MERCHANT_ID = env('FPS_MERCHANT_ID', default='BETWEENCOFFEE')
-FPS_MERCHANT_NAME = 'Between Coffee'
-FPS_BANK_ACCOUNT = env('FPS_BANK_ACCOUNT', default='')
-FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
-'''
-
-# FPS 配置 - 使用环境变量
+# FPS配置
 FPS_MERCHANT_ID = env('FPS_MERCHANT_ID', default='BETWEENCOFFEE')
 FPS_BANK_ACCOUNT = env('FPS_BANK_ACCOUNT', default='')
 FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
 
-
-# Twilio 配置 - 使用环境变量
+# Twilio配置
 TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
 TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
 TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
 
 
-# 异常处理
-import sys
+
+# ==================== 异常处理 ====================
+
 def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
+    """处理未捕获的异常"""
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
-    print("=== UNHANDLED EXCEPTION ===")
-    print(f"Type: {exc_type}")
-    print(f"Value: {exc_value}")
-    import traceback
-    traceback.print_exception(exc_type, exc_value, exc_traceback)
-    print("===========================")
+    
+    logger.critical(
+        "Unhandled exception",
+        exc_info=(exc_type, exc_value, exc_traceback)
+    )
 
 sys.excepthook = handle_unhandled_exception
 
-DEBUG_PROPAGATE_EXCEPTIONS = True
 
-# 在 settings.py 中添加
+
+# ==================== 环境检查 ====================
+
+
+def validate_paypal_config():
+    """验证PayPal配置"""
+    issues = []
+    
+    if not PAYPAL_CLIENT_ID:
+        issues.append("PAYPAL_CLIENT_ID 未设置")
+    elif len(PAYPAL_CLIENT_ID) < 10:
+        issues.append("PAYPAL_CLIENT_ID 长度异常")
+    
+    if not PAYPAL_CLIENT_SECRET:
+        issues.append("PAYPAL_CLIENT_SECRET 未设置")
+    elif len(PAYPAL_CLIENT_SECRET) < 10:
+        issues.append("PAYPAL_CLIENT_SECRET 长度异常")
+    
+    if not PAYPAL_ENVIRONMENT:
+        issues.append("PAYPAL_ENVIRONMENT 未设置")
+    elif PAYPAL_ENVIRONMENT not in ['sandbox', 'live']:
+        issues.append("PAYPAL_ENVIRONMENT 必须是 'sandbox' 或 'live'")
+    
+    if issues:
+        logger.warning(f"PayPal配置问题: {', '.join(issues)}")
+        return False
+    else:
+        logger.info("PayPal配置验证通过")
+        return True
+
+
+def check_environment():
+    """检查环境配置"""
+    logger.info("=== Environment Check ===")
+    logger.info(f"IS_RAILWAY: {IS_RAILWAY}")
+    logger.info(f"DEBUG: {DEBUG}")
+    logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+    logger.info(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
+    
+    # 检查社交登录配置
+    google_configured = bool(env('OAUTH_GOOGLE_CLIENT_ID', default=''))
+    facebook_configured = bool(env('OAUTH_FACEBOOK_CLIENT_ID', default=''))
+    
+    # 修复：更宽松的支付配置检查
+    alipay_configured = bool(ALIPAY_APP_ID and ALIPAY_APP_PRIVATE_KEY and ALIPAY_PUBLIC_KEY)
+    paypal_configured = bool(PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET)
+    
+    logger.info(f"Google OAuth configured: {google_configured}")
+    logger.info(f"Facebook OAuth configured: {facebook_configured}")
+    logger.info(f"Alipay configured: {alipay_configured}")
+    logger.info(f"PayPal configured: {paypal_configured}")
+    logger.info(f"SOCIAL_CALLBACK_URLS: {SOCIAL_CALLBACK_URLS}")
+    
+    # 详细支付配置信息
+    logger.info(f"Alipay App ID: {ALIPAY_APP_ID}")
+    logger.info(f"Alipay Private Key length: {len(ALIPAY_APP_PRIVATE_KEY) if ALIPAY_APP_PRIVATE_KEY else 0}")
+    logger.info(f"Alipay Public Key length: {len(ALIPAY_PUBLIC_KEY) if ALIPAY_PUBLIC_KEY else 0}")
+    
+    # 修复：更详细的PayPal配置日志
+    logger.info(f"PayPal Client ID: {'*' * 8}{PAYPAL_CLIENT_ID[-8:]}" if PAYPAL_CLIENT_ID else "PayPal Client ID: Not set")
+    logger.info(f"PayPal Client Secret: {'*' * 8}{PAYPAL_CLIENT_SECRET[-8:]}" if PAYPAL_CLIENT_SECRET else "PayPal Client Secret: Not set")
+    logger.info(f"PayPal Environment: {PAYPAL_ENVIRONMENT}")
+    
+    # 修复：添加环境变量直接检查
+    paypal_client_id_env = os.environ.get('PAYPAL_CLIENT_ID')
+    paypal_secret_env = os.environ.get('PAYPAL_CLIENT_SECRET')
+    logger.info(f"ENV PayPal Client ID: {'Set' if paypal_client_id_env else 'Not set'}")
+    logger.info(f"ENV PayPal Client Secret: {'Set' if paypal_secret_env else 'Not set'}")
+    
+    logger.info("=== Environment Check Complete ===")
+
+    # 验证PayPal配置
+    paypal_valid = validate_paypal_config()
+    logger.info(f"PayPal配置验证: {'通过' if paypal_valid else '失败'}")
+
+
+
+# 加载本地设置（如果存在）
 try:
     from .local_settings import *
+    logger.info("Local settings loaded successfully")
 except ImportError:
-    pass
+    logger.info("No local settings found, using default configuration")
+except Exception as e:
+    logger.error(f"Error loading local settings: {e}")
 
 
-'''
-# 生产环境安全配置
-if IS_RAILWAY and not DEBUG:
-    # 确保有正确的主机名
-    RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    if RAILWAY_PUBLIC_DOMAIN:
-        ALLOWED_HOSTS = [RAILWAY_PUBLIC_DOMAIN, '.railway.app']
-    else:
-        ALLOWED_HOSTS = ['.railway.app', 'localhost']
-    
-    # 安全配置
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-else:
-    DEBUG = True
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-'''
+# 在设置加载完成后运行环境检查
+try:
+    check_environment()
+    validate_paypal_config()
+except Exception as e:
+    logger.error(f"启动时配置检查失败: {e}")
+
+# 最终安全检查
+if DEBUG and IS_RAILWAY:
+    logger.warning("DEBUG mode is enabled in production environment!")
+
+if not SECRET_KEY.startswith('django-insecure-') and DEBUG:
+    logger.info("Production SECRET_KEY is being used")
 
 
-
-
-
-'''
-github working
-ac: pythonkei@gmail.com
-pw: github_123_pass
-
-Developer
-name: kei python
-ac: heyeahheyeah@yahoo.com.hk
-pw: Testing123
-
-
-Personal (buyer)
-ac: sb-btivk46269238@personal.example.com
-pw:aD5>kQro
-
-Business (seller)
-ac: sb-tmusp46269239@business.example.com
-pw:5bR/PiQE
-
-IPN:
-Notification URL: http://localhost.com/eshop/order_payment_confirmation/
-Message Delivery: Enabled
-'''
-
-
-
-
-
-
-'''
-twilio
-ac: pythonkei@gmail.com
-Recovery code: WRNU5SUTXWLZX17UXA9N7Q69
-'''
-
-
-
-'''
-# MessageBird配置（备选）
-MESSAGEBIRD_ACCESS_KEY = env('MESSAGEBIRD_ACCESS_KEY', default='')
-
-# Nexmo/Vonage配置（备选）
-NEXMO_API_KEY = env('NEXMO_API_KEY', default='')
-NEXMO_API_SECRET = env('NEXMO_API_SECRET', default='')
-'''
-
-
-'''
-# local test Email Configuration - development only
-# Display in console output for the email 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Emails print to console
-# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Require email verification
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/profile/settings/' 
-
-
-ACCOUNT_EMAIL_CONFIRMATION_TEMPLATE = 'account/email/email_confirmation_signup'
-ACCOUNT_EMAIL_CONFIRMATION_SUBJECT = "Please verify your email address"
-'''
 
 
 '''
 For myself reference
+
+virtualenvwrapper path:
+/home/kei/.virtualenvs/betweencoffee_delivery/bin/python
+/home/kei/.virtualenvs/betweencoffee_delivery/bin/python
+Check 日志 command：
+tail -f /home/kei/Desktop/betweencoffee_delivery_enhance/cron.log 
 
 HK Alipay bussiness ac
 pythonkei@gmail.com, Password_123
@@ -670,16 +846,3 @@ pythonkei
 pythonkei@gmail.com
 '''
 
-
-'''
-Fix E: Unmet dependencies.
-https://blog.csdn.net/u013832707/article/details/113104006
-
-Fix error message when run sudo apt
-The following packages have unmet dependencies:
- libnvidia-decode-570 : Depends: libnvidia-compute-570 (= 570.124.06-0ubuntu1) but 570.133.07-0ubuntu0.24.04.1 is to be installed
- libnvidia-encode-570 : Depends: libnvidia-decode-570 (>= 570.133.07) but 570.124.06-0ubuntu1 is to be installed
- nvidia-driver-570 : Depends: libnvidia-decode-570 (= 570.133.07-0ubuntu0.24.04.1) but 570.124.06-0ubuntu1 is to be installed
-Solution 2:
-sudo apt-get install -f
-'''

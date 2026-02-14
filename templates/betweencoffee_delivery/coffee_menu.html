@@ -52,7 +52,7 @@
                     <span id="svg_over_on"><img src= {% static 'images/product_hover.svg' %} class="noise_animation"></span>
                     <canvas id="mouse_hit"></canvas>
                     <!-- 使用详情页图片 -->
-                    <img src="{{ coffee.image.url }}" alt="{{ coffee.name }}" class="img">
+                    <img src="{{ coffee.get_detail_image }}" alt="{{ coffee.name }}" class="img">
                   </a>
                 </div>
                 <div class="text text-center">

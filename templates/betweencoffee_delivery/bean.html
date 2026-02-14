@@ -105,7 +105,7 @@
                                     <div class="icon"><span class="ion-ios-arrow-down"></span></div>
                                     <select name="weight" id="weight" class="form-control pr-5">
                                         <option value="200g" data-price="{{ bean.price_200g|floatformat:'0' }}">200g - ${{ bean.price_200g|floatformat:"0" }}</option>
-                                        <option value="1kg" data-price="{{ bean.price_1kg|floatformat:'0' }}">1kg - ${{ bean.price_1kg|floatformat:"0" }}</option>
+                                        <option value="500g" data-price="{{ bean.price_500g|floatformat:'0' }}">500g - ${{ bean.price_500g|floatformat:"0" }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -211,8 +211,8 @@
             let unitPrice;
             if (selectedWeight === '200g') {
                 unitPrice = {{ bean.price_200g }};
-            } else if (selectedWeight === '1kg') {
-                unitPrice = {{ bean.price_1kg }};
+            } else if (selectedWeight === '500g') {
+                unitPrice = {{ bean.price_500g }};
             }
             
             // 只显示单价，不乘以数量
@@ -270,8 +270,8 @@
             let unitPrice;
             if (selectedWeight === '200g') {
                 unitPrice = {{ bean.price_200g }};
-            } else if (selectedWeight === '1kg') {
-                unitPrice = {{ bean.price_1kg }};
+            } else if (selectedWeight === '500g') {
+                unitPrice = {{ bean.price_500g }};
             }
             
             // 计算总价

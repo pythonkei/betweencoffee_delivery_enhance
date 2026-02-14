@@ -1674,7 +1674,7 @@ pre  {
 
   .table thead th  { 
     vertical-align: bottom;
-    border-bottom: 2px solid #dee2e6; }
+    border-bottom: 1px solid #666; }
 
   .table tbody + tbody  { 
     border-top: 2px solid #dee2e6; }
@@ -6126,14 +6126,25 @@ button.bg-info:focus  {
   background-color: #c79143 !important; }
 
 
+.bg-info-2  { 
+  background-color: #17a2b8 !important; }
+
+
+a.bg-info-2:hover, a.bg-info-2:focus,
+button.bg-info:hover,
+button.bg-info:focus  { 
+  background-color: #17a2b8 !important; }
+
+
+
 .bg-warning  { 
-  background-color: #ffc107 !important; }
+  background-color: #dda80a !important; }
 
 
 a.bg-warning:hover, a.bg-warning:focus,
 button.bg-warning:hover,
 button.bg-warning:focus  { 
-  background-color: #d39e00 !important; }
+  background-color: #ac8614 !important; }
 
 
 .bg-danger  { 
@@ -9101,7 +9112,7 @@ a.text-dark:hover, a.text-dark:focus  {
 
 
 .text-muted  { 
-  color: #a5a4a4 !important; }
+  color: #aeaeae !important; }
 
 
 .text-black-50  { 
@@ -9187,7 +9198,7 @@ a.text-dark:hover, a.text-dark:focus  {
 
     .table td,
     .table th  { 
-      background-color: #fff !important; }
+      background-color: transparent !important; }
 
   .table-bordered th,
   .table-bordered td  { 
@@ -11041,7 +11052,7 @@ h1, h2, h3, h4, h5,
   height: 58px;
   background: transparent; /* clear background */
   rgba(255, 255, 255, 0.9);
-  font-size: 18px;
+  font-size: 14px;
   border-radius: 0px;
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
@@ -13578,7 +13589,7 @@ input[type="hidden"] .form-time-picker  {
           height: 100%;
           background: url('/static/images/sticker_v1.png') center top no-repeat;
           animation-name: spin;
-          animation-duration: 2s; /* speed */
+          animation-duration: 8s; /* speed */
           animation-iteration-count: infinite;
           animation-timing-function: linear;
           z-index: 100;
@@ -17205,8 +17216,8 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
     }
     
     .coffee-image-container {
-        min-height: 250px;
-        max-height: 400px;
+        /* min-height: 250px;
+        max-height: 400px; */
     }
     
     .coffee-name-v1 {
@@ -17281,3 +17292,157 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
         max-height: 550px;
     }
 }
+
+/* 支付提醒popup样式 */
+.cart-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    background: linear-gradient(135deg, #c49b63, #8a6430);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    z-index: 9999;
+    transform: translateX(400px);
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    overflow: hidden;
+}
+
+.cart-popup.show {
+    transform: translateX(0);
+}
+
+.cart-popup.hide {
+    transform: translateX(400px);
+}
+
+.popup-header {
+    background: rgba(0,0,0,0.2);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+
+.popup-header .icon {
+    font-size: 20px;
+}
+
+.popup-header p {
+    margin: 0;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.popup-content {
+    padding: 20px;
+}
+
+.popup-details {
+    color: white;
+}
+
+.popup-header-line {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.popup-product-name {
+    font-weight: 600;
+    font-size: 16px;
+    flex: 1;
+}
+
+.popup-quantity {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.popup-meta {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 15px;
+}
+
+.popup-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.popup-checkout-btn {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    color: #ff6b6b;
+}
+
+.popup-checkout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.countdown-animation {
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* 徽章样式优化 */
+.badge-success { background-color: #28a745; }
+.badge-warning { background-color: #ffc107; color: #212529; }
+.badge-danger { background-color: #dc3545; }
+.badge-info { background-color: #17a2b8; }
+.badge-secondary { background-color: #6c757d; }
+.badge-theme { background-color: #c17a3b; color: white; }
+
+
+/* Payment Reminder Popup 特定样式 */
+#payment-reminder-popup {
+    background: linear-gradient(135deg, #c49b63 0%, #8B4513 100%);
+    border-left: 4px solid #ff6b6b;
+}
+
+#payment-reminder-popup .popup-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 8px;
+}
+
+#reminder-time-left {
+    color: #ffeb3b;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* 倒计时动画 */
+.countdown-animation {
+    display: inline-block;
+    animation: countdownPulse 1s ease-in-out infinite;
+}
+
+@keyframes countdownPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+

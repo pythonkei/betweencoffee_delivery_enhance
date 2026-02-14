@@ -21,25 +21,24 @@
     <link rel="stylesheet" href={% static "css/aos.css" %} />
     <link rel="stylesheet" href={% static "css/blobs.css" %} />
     <link rel="stylesheet" href={% static "css/landing.css" %} />
+    <link rel="stylesheet" href={% static "css/jquery.timepicker.min.css" %} />
+    <link rel="stylesheet" href={% static "css/payment-methods.css" %} />
+    <link rel="stylesheet" href={% static "css/select2.min.css" %} />
     <link rel="stylesheet" href={% static "css/fontawesome/css/all.css" %} />
     <link rel="stylesheet" href={% static "css/ionicons.min.css" %} />
-    <link rel="stylesheet" href={% static "css/jquery.timepicker.min.css" %} />
     <link rel="stylesheet" href={% static "css/flaticon.css" %} />
     <link rel="stylesheet" href={% static "css/icomoon.css" %} />
-    <link rel="stylesheet" href={% static "css/payment-methods.css" %} />
+    <link rel="stylesheet" href={% static "css/toast.css" %} />
 
-    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">  {% endcomment %}
-    <link rel="stylesheet" href={% static "css/select2.min.css" %} />
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel='stylesheet' href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/htmx.org@2.0.2"></script> <!-- enable django htmx -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">  {% endcomment %}
+    {% comment %} <link href="https://fonts.googleapis.com/css2?family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap" rel="stylesheet"> {% endcomment %}
+    <!-- enable django htmx -->
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script> 
     {% django_htmx_script %}
     <!-- Use for layout extra_css -->
-
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -47,7 +46,7 @@
 <!-- body -->
 <body>
 {% include 'layouts/nav.html' %}
-{% comment %} {% include 'layouts/rightcorner_menu.html' %} <!-- temp -->  {% endcomment %}
+{% comment %} {% include 'layouts/rightcorner_menu.html' %} {% endcomment %}
 
 
 <!-- Main content extend block -->
@@ -55,6 +54,32 @@
     {% block content %}
         {% block blank_content %}
         {# This will be overridden by child templates - login_cancelled.html...... #}
+        <!-- Payment Reminder Popup -->
+        <div id="payment-reminder-popup" class="cart-popup" style="display: none;">
+            <div class="popup-header">
+                <span class="icon material-icons">access_time</span>
+                <p>支付提醒</p>
+            </div>
+            <div class="popup-content">
+                <div class="popup-details">
+                    <div class="popup-header-line">
+                        <span class="popup-product-name" id="reminder-order-name">订单即将超时</span>
+                        <span class="popup-quantity" id="reminder-time-left">05:00</span>
+                    </div>
+                    <div class="popup-meta">
+                        <span id="reminder-message">您的订单即将在5分钟后自动取消</span>
+                    </div>
+                    <div class="popup-actions">
+                        <button id="reminder-pay-now" class="popup-checkout-btn">
+                            立即支付
+                        </button>
+                        <button id="reminder-dismiss" class="popup-checkout-btn" style="background: transparent; color: white; border: 1px solid white;">
+                            稍后处理
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endblock %}
     {% endblock content %}
 
@@ -63,12 +88,10 @@
 
 <!-- footer -->
 <footer class="ftco-footer ftco-section img" style="background-image: url('{% static 'images/footer_bg_v5.jpg' %}'); background-position: bottom right; background-size:contain;">
-
-            <div hidden class="gifbox">
-            <img src= {% static 'images/cup_360.gif' %} class="">
-        </div>
+    <div hidden class="gifbox">
+        <img src= {% static 'images/cup_360.gif' %} class="">
+    </div>
     <div class="container">
-
         <div class="row mb-5">
             <div class="col-lg-4 col-md-6 mb-5 mb-md-5">
                 <div class="ftco-footer-widget mb-4">
@@ -123,7 +146,8 @@
         </div>
     </div>
 </footer>
-
+<!-- end footer -->
+ 
 <!-- noise active filter for noise_animation -->
 <div class="noise-filiter">
 	<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
@@ -176,17 +200,21 @@
 	</svg>
 </div>
 <!-- end noise active filter for noise_animation -->
-<!-- end footer -->
-
 
 
 <!-- js -->
 {% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+    <!-- For Toast -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Local -->
     <script src={% static "js/jquery-migrate-3.0.1.min.js" %}></script>
     <script src={% static "js/jquery.timepicker.min.js" %}></script>
-    <script src={% static "js/popper.min.js" %}></script>
+    <script src={% static "js/bootstrap.bundle.min.js" %}></script>
+    {% comment %}
     <script src={% static "js/bootstrap.min.js" %}></script>
+    {% endcomment %}
     <script src={% static "js/jquery.easing.1.3.js" %}></script>
     <script src={% static "js/jquery.waypoints.min.js" %}></script>
     <script src={% static "js/jquery.stellar.min.js" %}></script>
@@ -198,18 +226,17 @@
     <script src={% static "js/bootstrap-datepicker.js" %}></script>
     <script src={% static "js/scrollax.min.js" %}></script>
     <script src={% static "js/select2.min.js" %}></script>
+    <!-- 全局 Toast 管理器 -->
+    <script src={% static "js/toast-manager.js" %}></script>
     <!-- delivery tut -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-    <!--
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
-    <script src={% static "js/google-map.js" %}></script>
-    -->
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script> {% endcomment %}
     <script src={% static "js/main.js" %}></script>
-
 
 {% endblock %}
 <!-- end bloock js -->
+
+<!-- 額外的腳本區塊用於隊列管理 -->
+{% block extra_scripts %}{% endblock %}
 
 </body>
 <!-- end body -->

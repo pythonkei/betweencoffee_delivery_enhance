@@ -497,3 +497,267 @@ scrollers.forEach(scroller => {
 
 
 }) ( jQuery );
+
+
+// Payment Reminder Popup 功能 - 全局版本
+class PaymentReminder {
+    constructor() {
+        this.popup = document.getElementById('payment-reminder-popup');
+        this.orderId = null;
+        this.countdownInterval = null;
+        this.autoHideTimeout = null;
+        this.isVisible = false;
+        this.init();
+    }
+
+    init() {
+        // 确保popup存在
+        if (!this.popup) {
+            console.warn('Payment reminder popup element not found');
+            return;
+        }
+        
+        // 绑定事件
+        const payNowBtn = document.getElementById('reminder-pay-now');
+        const dismissBtn = document.getElementById('reminder-dismiss');
+        
+        if (payNowBtn) {
+            payNowBtn.addEventListener('click', () => this.handlePayNow());
+        }
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => this.hide());
+        }
+        
+        // 检查是否有需要显示的支付提醒
+        this.checkPendingReminders();
+        
+        // 设置全局事件监听
+        this.setupGlobalListeners();
+    }
+
+    setupGlobalListeners() {
+        // 监听来自其他页面的支付提醒事件
+        document.addEventListener('paymentReminderShow', (event) => {
+            if (event.detail && event.detail.order) {
+                this.showReminder(event.detail.order);
+            }
+        });
+        
+        // 监听支付成功事件
+        document.addEventListener('paymentSuccess', () => {
+            this.hide();
+        });
+    }
+
+    checkPendingReminders() {
+        // 从localStorage检查
+        const pendingOrder = localStorage.getItem('pending_payment_order');
+        if (pendingOrder) {
+            try {
+                const orderData = JSON.parse(pendingOrder);
+                // 检查订单是否仍然有效
+                if (this.isOrderValid(orderData)) {
+                    this.showReminder(orderData);
+                } else {
+                    localStorage.removeItem('pending_payment_order');
+                }
+            } catch (e) {
+                localStorage.removeItem('pending_payment_order');
+            }
+        }
+        
+        // 从API获取待支付订单（如果用户已登录）
+        this.fetchPendingOrders();
+    }
+
+    isOrderValid(orderData) {
+        // 检查订单是否仍然有效（未超时）
+        if (!orderData.payment_timeout) return false;
+        
+        const timeout = new Date(orderData.payment_timeout);
+        const now = new Date();
+        return timeout > now;
+    }
+
+    fetchPendingOrders() {
+        // 检查用户是否登录（简单检查是否有用户相关元素）
+        const userElements = document.querySelector('[data-user], .user-info, #user-menu');
+        if (!userElements) return;
+        
+        fetch('/eshop/api/pending-orders/')
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                return response.json();
+            })
+            .then(data => {
+                if (data.orders && data.orders.length > 0) {
+                    const urgentOrder = data.orders.find(order => 
+                        order.minutes_remaining <= 5 && order.minutes_remaining > 0
+                    );
+                    if (urgentOrder) {
+                        this.showReminder(urgentOrder);
+                    }
+                }
+            })
+            .catch(error => console.debug('获取待支付订单失败或用户未登录:', error));
+    }
+
+    showReminder(orderData) {
+        if (this.isVisible) return; // 防止重复显示
+        
+        this.orderId = orderData.id;
+        this.isVisible = true;
+        
+        // 更新弹出窗口内容
+        const orderName = document.getElementById('reminder-order-name');
+        const message = document.getElementById('reminder-message');
+        const timeLeft = document.getElementById('reminder-time-left');
+        
+        if (orderName) orderName.textContent = `订单 #${orderData.id}`;
+        if (message) {
+            message.textContent = 
+                `您的订单还有${orderData.minutes_remaining}分钟即将超时，请及时支付`;
+        }
+        
+        // 显示弹出窗口
+        this.popup.style.display = 'block';
+        setTimeout(() => {
+            this.popup.classList.add('show');
+        }, 100);
+
+        // 开始倒计时
+        this.startCountdown(orderData.minutes_remaining * 60);
+        
+        // 10秒后自动隐藏（但保持后台检查）
+        this.autoHideTimeout = setTimeout(() => {
+            this.hide();
+        }, 10000);
+        
+        // 保存到localStorage
+        localStorage.setItem('pending_payment_order', JSON.stringify(orderData));
+        
+        // 触发全局事件
+        document.dispatchEvent(new CustomEvent('paymentReminderShown', {
+            detail: { order: orderData }
+        }));
+    }
+
+    startCountdown(totalSeconds) {
+        const timeElement = document.getElementById('reminder-time-left');
+        if (!timeElement) return;
+        
+        this.countdownInterval = setInterval(() => {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 添加闪烁动画
+            timeElement.classList.add('countdown-animation');
+            setTimeout(() => {
+                timeElement.classList.remove('countdown-animation');
+            }, 500);
+            
+            if (totalSeconds <= 0) {
+                this.hide();
+                return;
+            }
+            
+            totalSeconds--;
+        }, 1000);
+    }
+
+    handlePayNow() {
+        if (this.orderId) {
+            // 跳转到支付页面
+            window.location.href = `/eshop/continue_payment/${this.orderId}/`;
+        } else {
+            // 跳转到订单历史
+            window.location.href = '/accounts/order_history/';
+        }
+        this.hide();
+    }
+
+    hide() {
+        this.isVisible = false;
+        
+        // 清除定时器
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
+        }
+        if (this.autoHideTimeout) {
+            clearTimeout(this.autoHideTimeout);
+            this.autoHideTimeout = null;
+        }
+        
+        // 隐藏弹出窗口
+        if (this.popup) {
+            this.popup.classList.remove('show');
+            this.popup.classList.add('hide');
+            
+            setTimeout(() => {
+                this.popup.style.display = 'none';
+                this.popup.classList.remove('hide');
+            }, 500);
+        }
+        
+        // 从localStorage移除
+        localStorage.removeItem('pending_payment_order');
+    }
+
+    // 静态方法：从任何地方触发支付提醒
+    static showGlobalReminder(orderData) {
+        document.dispatchEvent(new CustomEvent('paymentReminderShow', {
+            detail: { order: orderData }
+        }));
+    }
+}
+
+// 页面加载后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    window.paymentReminder = new PaymentReminder();
+    
+    // 全局检查支付提醒
+    function checkAndShowPaymentReminders() {
+        if (window.paymentReminder && !window.paymentReminder.isVisible) {
+            window.paymentReminder.checkPendingReminders();
+        }
+    }
+
+    // 页面加载后检查
+    setTimeout(checkAndShowPaymentReminders, 3000);
+    
+    // 每30秒检查一次
+    setInterval(checkAndShowPaymentReminders, 30000);
+});
+
+// 手动触发支付提醒的测试函数（开发时使用）
+window.testPaymentReminder = function(orderId = 123, minutesLeft = 5) {
+    if (window.paymentReminder) {
+        window.paymentReminder.showReminder({
+            id: orderId,
+            minutes_remaining: minutesLeft,
+            payment_timeout: new Date(Date.now() + minutesLeft * 60000).toISOString()
+        });
+    }
+};
+
+// 从任何地方触发支付提醒
+window.showPaymentReminder = function(orderData) {
+    PaymentReminder.showGlobalReminder(orderData);
+};
+
+
+// 页面加载后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    window.paymentReminder = new PaymentReminder();
+    
+    // 手动触发支付提醒的测试函数（开发时使用）
+    window.testPaymentReminder = function(orderId = 123, minutesLeft = 5) {
+        window.paymentReminder.showReminder({
+            id: orderId,
+            minutes_remaining: minutesLeft
+        });
+    };
+});

@@ -1,0 +1,51 @@
+<!-- templates/error.html -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block title %}錯誤 - Between Coffee{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        發生錯誤
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if error_message %}
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading">錯誤詳情：</h5>
+                        <p>{{ error_message }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">建議操作：</h5>
+                        <ul class="mb-0">
+                            <li>請返回上一頁重試</li>
+                            <li>如問題持續，請聯繫客服</li>
+                            <li>錯誤代碼：{{ request.session.error_code|default:"未知" }}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'index' %}" class="btn btn-primary mr-3">
+                            <i class="fas fa-home"></i> 返回首頁
+                        </a>
+                        <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-cart"></i> 查看購物車
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>錯誤時間：{% now "Y-m-d H:i:s" %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

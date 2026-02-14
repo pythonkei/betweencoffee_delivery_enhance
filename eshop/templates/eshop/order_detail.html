@@ -1,0 +1,244 @@
+{# templates/eshop/order_detail.html #}
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block title %}訂單追蹤 #{{ order.id }} - Between Coffee{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-timeline {
+        display: flex;
+        justify-content: space-between;
+        margin: 2rem 0;
+        position: relative;
+    }
+    .status-step {
+        text-align: center;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+    .status-step .icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        border: 3px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-size: 24px;
+        color: #6c757d;
+    }
+    .status-step.active .icon {
+        background: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+    .status-step.completed .icon {
+        background: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+    .status-step .label {
+        font-weight: 600;
+        color: #495057;
+    }
+    .status-step .time {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    .progress-bar-custom {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        margin: 2rem 0;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #00d4ff);
+        transition: width 0.5s ease;
+    }
+    .connection-status {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+    .connection-status.connected { background: #28a745; }
+    .connection-status.disconnected { background: #dc3545; }
+    .connection-status.reconnecting { background: #ffc107; color: #212529; }
+    .order-item-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<!-- blank header spacing-->
+<section class="ftco-section-blank-staff" style="padding-top:16vh"></section>
+
+<div class="container mt-4 mb-5" id="order-detail-app" data-order-id="{{ order.id }}" data-order-token="{{ order.tracking_token|default:'' }}">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- 訂單標題 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-clipboard-list text-primary mr-2"></i>
+                    訂單追蹤 #{{ order.id }}
+                </h2>
+                <span class="badge badge-primary p-3" style="font-size: 1.2rem;">
+                    取餐碼: <strong class="ml-1">{{ order.pickup_code }}</strong>
+                </span>
+            </div>
+
+            <!-- 即時狀態卡片 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="mr-3">
+                            <div id="status-icon" class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i id="status-icon-symbol" class="fas fa-check fa-lg"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 id="status-text" class="mb-1">訂單 {{ order.get_status_display }}</h4>
+                            <p id="status-description" class="text-muted mb-0">
+                                {% if order.status == 'pending' %}我們已收到您的訂單，即將開始製作。{% endif %}
+                                {% if order.status == 'preparing' %}您的咖啡正在用心製作中，請稍候。{% endif %}
+                                {% if order.status == 'ready' %}訂單已完成，請前往櫃檯取餐。{% endif %}
+                                {% if order.status == 'completed' %}感謝您的惠顧，歡迎再次光臨。{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- 進度條 -->
+                    <div class="progress-bar-custom mt-3">
+                        <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    
+                    <!-- 時間軸狀態 -->
+                    <div class="status-timeline mt-4">
+                        <div id="step-pending" class="status-step completed">
+                            <div class="icon"><i class="fas fa-check"></i></div>
+                            <div class="label">已下單</div>
+                            <div class="time" id="time-created">{{ order.created_at|date:"H:i" }}</div>
+                        </div>
+                        <div id="step-preparing" class="status-step">
+                            <div class="icon"><i class="fas fa-mug-hot"></i></div>
+                            <div class="label">製作中</div>
+                            <div class="time" id="time-preparing">--:--</div>
+                        </div>
+                        <div id="step-ready" class="status-step">
+                            <div class="icon"><i class="fas fa-bell"></i></div>
+                            <div class="label">待取餐</div>
+                            <div class="time" id="time-ready">--:--</div>
+                        </div>
+                        <div id="step-completed" class="status-step">
+                            <div class="icon"><i class="fas fa-check-double"></i></div>
+                            <div class="label">已完成</div>
+                            <div class="time" id="time-completed">--:--</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 排隊資訊（僅 pending/preparing） -->
+                    <div id="queue-info" class="mt-4 p-3 bg-light rounded d-none">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">目前排隊位置</small>
+                                <h3 id="queue-position" class="mb-0">-</h3>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">預計完成時間</small>
+                                <h3 id="estimated-time" class="mb-0 text-primary">--:--</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 訂單明細 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-bag mr-2"></i>訂單內容</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush" id="order-items">
+                        {% for item in items %}
+                        <div class="list-group-item d-flex align-items-center">
+                            <img src="{{ item.image|default:'/static/images/default-coffee.png' }}" 
+                                 class="order-item-img mr-3" alt="{{ item.name }}">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ item.name }}</h6>
+                                <small class="text-muted">
+                                    數量: {{ item.quantity }} | 
+                                    {% if item.cup_level_cn %}杯型: {{ item.cup_level_cn }} | {% endif %}
+                                    {% if item.milk_level_cn %}牛奶: {{ item.milk_level_cn }} | {% endif %}
+                                    {% if item.grinding_level_cn %}研磨: {{ item.grinding_level_cn }} | {% endif %}
+                                    {% if item.weight %}重量: {{ item.weight }}{% endif %}
+                                </small>
+                            </div>
+                            <span class="font-weight-bold">${{ item.total_price|floatformat:2 }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-center text-muted py-4">
+                            暫無商品資訊
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between">
+                    <span>總計</span>
+                    <span class="h5 mb-0 text-primary">${{ order.total_price|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <!-- 注意事項 -->
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="fas fa-info-circle mr-3 fa-lg"></i>
+                <div>
+                    頁面將自動更新訂單狀態，無需手動刷新。<br>
+                    若您已取餐，可關閉此頁面。如有疑問請聯繫櫃檯。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WebSocket 連線狀態指示器 -->
+    <div id="ws-connection-status" class="connection-status connected">
+        <i class="fas fa-circle mr-1" style="font-size: 10px;"></i>
+        <span>即時連線中</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/order-detail.js' %}"></script>
+<script>
+    // 初始化訂單追蹤頁面
+    document.addEventListener('DOMContentLoaded', function() {
+        const appContainer = document.getElementById('order-detail-app');
+        if (appContainer) {
+            const orderId = appContainer.dataset.orderId;
+            const token = appContainer.dataset.orderToken || '';
+            // OrderDetailTracker 已在 order-detail.js 中定義
+            window.orderTracker = new OrderDetailTracker(orderId, token);
+        }
+    });
+</script>
+{% endblock %}

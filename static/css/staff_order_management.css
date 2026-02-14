@@ -1,0 +1,1143 @@
+/* static/css/staff-order-management.css */
+
+/* 确保隐藏的元素不会占用空间 */
+[style*="display: none"] {
+    display: none !important;
+}
+
+/* 商品数量文本样式 */
+.text-muted {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+}
+
+/* 合并的已支付和制作中样式 */
+.badge-warning {
+    background-color: transparent;
+    color: #d0a00f;
+    border: 1px solid #d0a00f;
+}
+
+/* 已就绪样式 */
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+/* 取消/超时样式 */
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 支付倒计时样式 */
+.payment-countdown {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    border: none;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+.payment-countdown .countdown-text {
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+
+/* 员工管理特定样式调整 */
+.order-management-section {
+    margin-bottom: 3rem;
+}
+
+.order-management-section h2 {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    color: #495057;
+}
+
+/* 员工操作按钮样式 */
+.btn-success, .btn-info, .btn-primary {
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+.btn-success {
+    background: linear-gradient(110deg, #28a745, #07825dff);
+    border: none;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #208494);
+    border: none;
+}
+
+
+
+
+/* 快速订单徽章样式 */
+.badge-urgent {
+    background-color: #dc3545;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+/* 统计卡片样式 */
+.card .card-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.card .card-text {
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+
+
+/* 订单项筛选相关样式 */
+.order-section {
+    transition: all 0.3s ease;
+}
+
+/* 新增：等待訂單卡片樣式 */
+.order-item {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.order-item:hover {
+    background-color: rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.order-item.selectable {
+    cursor: pointer;
+}
+
+.order-item.selectable:hover {
+    /* transform: translateY(-2px); */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* 等待訂單的徽章樣式 */
+.order-item[data-status="waiting"] .badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+    border: 1px solid #ffc107;
+}
+
+
+/* 訂單項目圖片容器 */
+.order-items .rounded {
+    background: rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* 訂單項目文字樣式 */
+.order-items h6 {
+    color: #ddd;
+    font-weight: 600;
+}
+
+.order-items .text-muted {
+    color: #aaa !important;
+}
+
+.order-item.hidden {
+    display: none !important;
+}
+
+/* 等待訂單圖片樣式 */
+.order-item img.img-fluid {
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+/* 快速訂單標識 */
+.order-item[data-type="quick"] {
+    border-left: 4px solid #28a745 !important;
+    background: linear-gradient(90deg, rgba(40, 167, 69, 0.05) 0%, transparent 10%) !important;
+}
+
+/* 普通訂單標識 */
+.order-item[data-type="normal"] {
+    border-left: 4px solid #007bff !important;
+    background: linear-gradient(90deg, rgba(0, 123, 255, 0.05) 0%, transparent 10%) !important;
+}
+
+
+/* static/css/staff-order-management.css - 徽章样式修正 */
+
+/* 訂單類型徽章容器（左上角） */
+.order-type-badges-container {
+    position: absolute;
+    top: 0px;
+    left: -10px;
+    z-index: -1;
+}
+
+.order-type-badge {
+    display: inline-block;
+    padding: 0.6em 0.6em 0.6em 1em;
+    font-size: 0.85rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    /* border: 2px solid white; */
+}
+
+/* 普通訂單標識 */
+.order-item[data-order-type="single"] {
+    border-left: 4px solid #007bff !important;
+    background: linear-gradient(90deg, rgba(0, 123, 255, 0.05) 0%, transparent 10%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 快速訂單標識 */
+.order-item[data-type="quick"] {
+    border-left: 4px solid #28a745 !important;
+    background: linear-gradient(90deg, rgba(40, 167, 69, 0.05) 0%, transparent 10%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 混合訂單標識 */
+.order-item[data-order-type="mixed"] {
+    border-left: 4px solid #6f42c1 !important;
+    background: linear-gradient(90deg, rgba(111, 66, 193, 0.05) 0%, transparent 10%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+
+
+/* 徽章顏色定義 */
+.badge-primary {
+    background-color: #6f42c1 !important;
+    color: white !important;
+}
+
+.badge-success {
+    background-color: #fff !important;
+    color: black !important;
+}
+
+.badge-quickorder {
+    background-color: #28a745; !important;
+    color: white !important;
+}
+
+.badge-info {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+/* 確保訂單卡片有足夠的padding容納左上角徽章 */
+.order-item {
+    padding-top: 1.5rem !important;
+    padding-left: 1.5rem !important;
+    position: relative;
+    margin-top: 15px;
+}
+
+
+/* 訂單項目價格樣式 */
+.order-items .h6 {
+    color: #ddd;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.order-items .text-muted.small {
+    color: #aaa !important;
+    font-size: 0.85rem;
+}
+
+/* 取餐碼樣式 */
+.text-primary {
+    color: #007bff !important;
+    font-weight: 600;
+}
+
+/* 加载动画 */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* 新订单高亮效果 */
+.order-item.new-order {
+    animation: highlightOrder 3s ease;
+    border: 2px solid #28a745;
+}
+
+
+
+/* 新增：等待提取徽章样式 */
+.badge-lg {
+    padding: 0.6em 1em;
+    font-size: 1.05em;
+    font-weight: 600;
+}
+
+.badge-lg-round {
+    padding: 0.6em 1em 0.6em 1em;
+    font-size: 1.05em;
+    font-weight: 600;
+    background-color: #cb8409;
+    color: white;
+
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+/* 新增：预计完成时间徽章样式 */
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* 新增：提取时间徽章样式 */
+.badge-light {
+    background-color: transparent;
+    color: #ddd;
+    border: 1px solid #9d9d9d;
+}
+
+
+/* 隊列位置徽章 */
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+/* 咖啡杯數徽章 */
+.badge-dark {
+    background-color: #343a40 !important;
+    color: white !important;
+}
+
+
+/* 标签页样式 - 修復 */
+.nav-tabs {
+    border-bottom: 2px solid #454545;
+    margin-bottom: 1.5rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #777;
+    font-weight: 600;
+    padding: 1.2rem 1.8rem;
+    position: relative;
+    transition: all 0.3s ease;
+    margin-bottom: -2px;
+    font-size: 1.1rem;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom: 3px solid rgba(255, 255, 255, 0.4);
+    color: #aaa;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid #fff;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.nav-tabs .nav-link .badge {
+    font-size: 0.85em;
+    padding: 0.4em 0.7em;
+}
+
+/* 加大图标 */
+.nav-tabs .nav-link i {
+    font-size: 1.2em;
+    margin-right: 0.5rem;
+}
+
+.tab-content {
+    min-height: 400px;
+}
+
+.tab-pane {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 标签页徽章颜色 */
+#queue-tab .badge {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+#preparing-tab .badge {
+    background-color: #cb400e !important;
+    color: #fff;
+}
+
+#ready-tab .badge {
+    background-color: #28a745 !important;
+}
+
+#completed-tab .badge {
+    background-color: #17a2b8 !important;
+}
+
+/* 修复Bootstrap 4的间距类 */
+.mr-2 {
+    margin-right: 0.5rem !important;
+}
+
+.ml-2 {
+    margin-left: 0.5rem !important;
+}
+
+.mr-1 {
+    margin-right: 0.25rem !important;
+}
+
+.ml-1 {
+    margin-left: 0.25rem !important;
+}
+
+.pr-2 {
+    padding-right: 0.5rem !important;
+}
+
+
+/* 倒计时徽章样式 */
+.countdown-badge {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color:#232323;
+    background-color: #fff;
+}
+
+/* 倒计时文本样式 */
+.countdown-text {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color:#232323;
+}
+
+/* 倒计时完成状态 */
+.badge-success .countdown-text {
+    animation: pulse 2s infinite;
+}
+
+/* 隊列表格樣式 */
+.table th {
+    font-weight: 600;
+    background-color: transparent;
+    border-top: none;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* 隊列計數徽章 */
+#queue-badge {
+    font-size: 0.85em;
+    padding: 0.4em 0.7em;
+}
+
+/* 確保表格列寬適當 */
+table th:nth-child(3),
+table td:nth-child(3) {
+    min-width: 200px;
+    max-width: 200px;
+}
+
+/* 剩餘時間樣式 */
+.remaining-time {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.remaining-time.warning {
+    color: #ffc107;
+    animation: pulse 1s infinite;
+}
+
+/* 隊列卡片樣式 */
+.card .card-header {
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card .card-header .badge {
+    font-size: 1rem;
+}
+
+/* 隊列操作按鈕組 */
+.btn-group {
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.btn-group .btn {
+    margin-bottom: 5px;
+}
+
+/* 隊列加載狀態 */
+#waiting-queue-loading,
+#preparing-queue-loading,
+#ready-queue-loading {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 時間顯示樣式 */
+.time-display {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    color: #aaa;
+}
+
+/* 隊列狀態徽章 */
+.badge-waiting { background-color: #ffc107; color: #212529; }
+.badge-preparing { background-color: #0d6efd; color: white; }
+.badge-ready { background-color: #198754; color: white; }
+
+/* 订单更新动画 */
+.order-updated {
+    animation: pulseUpdate 1s ease;
+}
+
+@keyframes pulseUpdate {
+    0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+}
+
+/* 新订单通知 */
+.new-order-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    animation: slideIn 0.5s ease;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* 加载指示器 */
+.loading-indicator {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 0.5rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 实时状态指示器 */
+.realtime-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.realtime-indicator.connected {
+    background: rgba(40, 167, 69, 0.8);
+}
+
+.realtime-indicator.disconnected {
+    background: rgba(220, 53, 69, 0.8);
+}
+
+
+/* 操作按鈕樣式 */
+.start-preparation-btn {
+    background: linear-gradient(110deg, #007bff, #0056b3);
+    border: none;
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.start-preparation-btn:hover {
+    background: linear-gradient(110deg, #0056b3, #003d7a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 91, 187, 0.3);
+}
+
+
+@keyframes highlightOrder {
+    0% { background-color: rgba(40, 167, 69, 0.3); }
+    100% { background-color: transparent; }
+}
+
+/* 修復標籤頁激活狀態的CSS問題 */
+.nav-tabs .nav-link.active {
+    z-index: 1;
+}
+
+/* 添加優化樣式 */
+.refresh-loading-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    animation: slideInRight 0.3s ease;
+    min-width: 120px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.refresh-loading-indicator .loading-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.refresh-loading-indicator .loading-text {
+    font-size: 14px;
+}
+
+.refresh-loading-indicator .spinner-border {
+    width: 20px;
+    height: 20px;
+}
+
+.order-manager-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9998;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.order-manager-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-content {
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    text-align: center;
+}
+
+.toast-success {
+    background-color: #28a745;
+}
+
+.toast-error {
+    background-color: #dc3545;
+}
+
+.toast-info {
+    background-color: #17a2b8;
+}
+
+/* 新訂單高亮效果 */
+.new-order-highlight {
+    animation: highlightNewOrder 3s ease;
+    border: 2px solid #28a745 !important;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3) !important;
+}
+
+@keyframes highlightNewOrder {
+    0% { background-color: rgba(40, 167, 69, 0.3); }
+    100% { background-color: transparent; }
+}
+
+/* 實時連接指示器 */
+.realtime-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.realtime-indicator.connected {
+    background: rgba(40, 167, 69, 0.8);
+}
+
+.realtime-indicator.disconnected {
+    background: rgba(220, 53, 69, 0.8);
+}
+
+.realtime-indicator i {
+    font-size: 0.6rem;
+}
+
+/* 添加新的 CSS 樣式 */
+.remaining-time.text-success {
+    color: #28a745 !important;
+    font-weight: bold;
+}
+
+.remaining-time.text-warning {
+    color: #ffc107 !important;
+    font-weight: bold;
+}
+
+/* 為等待確認狀態添加閃爍效果（可選） */
+@keyframes pulse-waiting {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.remaining-time.waiting-confirmation {
+    animation: pulse-waiting 2s infinite;
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* 添加咖啡杯數的樣式 */
+td:contains("杯") {
+    font-weight: bold;
+    color: #333;
+}
+
+/* 如果有特殊需求，可以為咖啡杯數添加額外樣式 */
+.coffee-count {
+    font-weight: bold;
+    color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* 閃爍動畫 */
+@keyframes flash {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+    25%, 75% {
+        opacity: 0.5;
+        background-color: rgba(255, 193, 7, 0.2);
+    }
+}
+
+/* 製作中訂單標籤頁閃爍提醒 */
+#preparing-tab.flashing {
+    animation: flash 1s 3;
+}
+
+/* 新訂單加入提醒 */
+.new-order-added {
+    animation: highlightNewOrder 2s ease;
+}
+
+@keyframes highlightNewOrder {
+    0% {
+        background-color: rgba(40, 167, 69, 0.3);
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+    100% {
+        background-color: transparent;
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* 動態訂單渲染相關樣式 */
+.tab-highlight {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+    border-radius: 4px;
+}
+
+
+
+
+
+/* 隊列位置徽章樣式 */
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+/* 隊列位置標籤樣式 */
+.queue-position-tag {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
+
+.queue-position-tag i {
+    margin-right: 4px;
+}
+
+/* 閃爍動畫 */
+@keyframes flash {
+    0%, 50%, 100% {
+        opacity: 1;
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    25%, 75% {
+        opacity: 0.8;
+        background-color: rgba(40, 167, 69, 0.3);
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    }
+}
+
+/* 已就緒訂單標籤頁閃爍提醒 */
+#ready-tab.flashing {
+    animation: flash 1s 3;
+}
+
+/* 標籤頁徽章更新動畫 */
+.badge-updated {
+    animation: badgePulse 0.5s ease;
+}
+
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* 咖啡項目容器樣式 */
+.coffee-items-container {
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 單個咖啡項目樣式 */
+.coffee-item {
+    padding: 3px 5px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.coffee-item:last-child {
+    border-bottom: none;
+}
+
+/* 咖啡名稱樣式 */
+.coffee-name {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #ddd;
+}
+
+/* 數量徽章樣式 */
+.coffee-item .badge {
+    font-size: 1rem;
+    padding: 2px 6px;
+    min-width: 36px;
+    text-align: center;
+}
+
+/* 不同狀態的徽章顏色 */
+.coffee-item .badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.coffee-item .badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.coffee-item .badge-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 表格單元格樣式調整 */
+.table td {
+    vertical-align: middle;
+}
+
+/* 滾動條樣式 */
+.coffee-items-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.coffee-items-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.coffee-items-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
+}
+
+.coffee-items-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* badge 動畫效果 */
+.badge-updated {
+    animation: badgePulse 0.5s ease-in-out;
+}
+
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* 標籤頁高亮動畫 */
+.tab-highlight {
+    animation: tabHighlight 2s infinite;
+}
+
+@keyframes tabHighlight {
+    0%, 100% { box-shadow: 0 0 5px rgba(0,123,255,0.5); }
+    50% { box-shadow: 0 0 15px rgba(0,123,255,0.8); }
+}
+
+/* 新訂單高亮 */
+.new-order-highlight {
+    animation: newOrderHighlight 3s ease-in-out;
+    border-left: 4px solid #28a745 !important;
+}
+
+@keyframes newOrderHighlight {
+    0% { background-color: rgba(40, 167, 69, 0.1); }
+    100% { background-color: transparent; }
+}
+
+/* 在 staff-order-management.css 中添加以下規則 */
+
+/* 禁用不必要的動畫 */
+.order-item {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 減少動畫效果 */
+.nav-tabs .nav-link {
+    transition: none !important;
+}
+
+/* 禁用閃爍動畫 */
+@keyframes none {
+    0% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+/* 禁用脈衝動畫 */
+.payment-countdown .countdown-text {
+    animation: none !important;
+}
+
+/* 禁用高亮動畫 */
+.new-order-highlight {
+    animation: none !important;
+    border-left: 4px solid #28a745 !important;
+}
+
+/* 禁用標籤頁高亮動畫 */
+.tab-highlight {
+    animation: none !important;
+}
+
+/* 禁用徽章動畫 */
+.badge-updated {
+    animation: none !important;
+}
+
+/* 禁用新訂單動畫 */
+.new-order-added {
+    animation: none !important;
+}
+
+/* 禁用訂單更新動畫 */
+.order-updated {
+    animation: none !important;
+}
+
+/* 禁用隊列動畫 */
+.order-item.new-order {
+    animation: none !important;
+}
+
+/* 禁用實時連接指示器動畫 */
+.realtime-indicator {
+    transition: none !important;
+}
+
+/* 禁用toast動畫 */
+.order-manager-toast {
+    transition: none !important;
+}
+
+
+/* static/css/staff-order-management.css */
+/* 系统状态指示器 */
+.system-status {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1050;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.system-status.ready {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.system-status.error {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.system-status .status-icon {
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.system-status.ready .status-icon {
+    color: #28a745;
+}
+
+.system-status.error .status-icon {
+    color: #dc3545;
+}
+
+/* 刷新指示器 */
+.refresh-indicator {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+}
+
+.refresh-content {
+    display: flex;
+    align-items: center;
+}
+
+.refresh-text {
+    margin-left: 8px;
+    font-size: 14px;
+}
+
+/* 徽章更新动画 */
+.badge-updated {
+    animation: badge-pulse 0.5s ease-in-out;
+}
+
+@keyframes badge-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* 新订单高亮 */
+.new-order-highlight {
+    animation: highlight-pulse 2s ease-in-out;
+}
+
+@keyframes highlight-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0,123,255,0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0,123,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,123,255,0); }
+}
+
+/* 标签页高亮 */
+.tab-highlight {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+}
+
+/* 订单项移除动画 */
+.order-item.removing {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}

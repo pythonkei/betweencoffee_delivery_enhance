@@ -12,8 +12,8 @@
 <section class="ftco-subpage-section">
     <div class="container">
         <div class="row justify-content-center align-items-center">
-            <span class="title-bg-head">&#65371;Cart&#65373;</span>
-            <div class="col-lg-12 col-md-12 col-sm-12 ftco-animate">
+            <span class="title-bg-head">&#65371;Enjoy&#65373;</span>
+            <div class="col-lg-12 col-md-12 col-sm-12">
                 <p class="cart-head d-flex mb-3 mt-5">
                     <span class="h1"></span>
                     <span class="text-right">
@@ -68,7 +68,6 @@
                             </a>
                             <div class="cart-option">
                                 ${{ item.price|floatformat:0 }}
-                                {% if item.weight %} ({{ item.weight }}){% endif %}
                             </div>
                         <div class="cart-option-2">
                             {% if item.type == 'coffee' %}
@@ -92,7 +91,8 @@
                                     </strong>
                                 </p>
                             {% elif item.type == 'bean' %}
-                                <p class="pt-2">
+                                <!-- ✅ 優化：咖啡豆選項顯示結構與咖啡一致 -->
+                                <p>
                                     <i class="icon material-symbols-outlined">roller_shades</i>
                                     研磨 :
                                     <strong>
@@ -102,32 +102,31 @@
                                     {% elif item.grinding_level == 'Deep' %}粗
                                     {% endif %}
                                     </strong>
-                                </p>
-                                {% if item.type == 'bean' and item.weight %}
-                                <p class="mb-1 text-muted">
+                                    <br>
                                     <i class="icon material-symbols-outlined">scale</i>
-                                    重量: 
+                                    重量 :
                                     <strong>
                                     {% if item.weight == '200g' %}200g
-                                    {% elif item.weight == '1kg' %}1kg
+                                    {% elif item.weight == '500g' %}500g
+                                    {% elif item.weight == '1kg' %}500g  <!-- ✅ 兼容舊數據：將1kg顯示為500g -->
+                                    {% else %}{{ item.weight|default:"200g" }}  <!-- ✅ 顯示實際值 -->
                                     {% endif %}
                                     </strong>
                                 </p>
-                                {% endif %}
                             {% endif %}
                         </div>
                         <dl></dl>
                         <p class="product-option"></p>
                     </td>
 
-                    <!-- Mobile screen hide -->
-                    <td class="cart-item__totals right large-up-hide">
-                        <div class="cart-item__price-wrapper">
-                            <span class="cart-item__final-price item-total">
-                            ${{ item.total_price }}
-                            </span>
-                        </div>
-                    </td>
+<!-- 單項總價顯示 - 移動端 -->
+<td class="cart-item__totals right large-up-hide">
+    <div class="cart-item__price-wrapper">
+        <span class="cart-item__final-price item-total">
+            ${{ item.total_price }}
+        </span>
+    </div>
+</td>
 
                     <td class="cart-item__quantity">
                         <quantity-popover>
@@ -156,29 +155,34 @@
                                     </div>
                                 </div>
 
-                                <cart-remove-button data-index="1">
-                                    <a href="{% url 'cart:remove_from_cart' item.item_id %}" id="product-remove">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            aria-hidden="true"
-                                            focusable="false"
-                                            class="icon icon-remove">
-                                            <path d="M14 3h-3.53a3.07 3.07 0 00-.6-1.65C9.44.82 8.8.5 8 .5s-1.44.32-1.87.85A3.06 3.06 0 005.53 3H2a.5.5 0 000 1h1.25v10c0 .28.22.5.5.5h8.5a.5.5 0 00.5-.5V4H14a.5.5 0 000-1zM6.91 1.98c.23-.29.58-.48 1.09-.48s.85.19 1.09.48c.2.24.3.6.36 1.02h-2.9c.05-.42.17-.78.36-1.02zm4.84 11.52h-7.5V4h7.5v9.5z" fill="currentColor"/>
-                                            <path d="M6.55 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5zM9.45 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5z" fill="currentColor"/>
-                                        </svg>
-                                    </a>
-                                </cart-remove-button>
+<!-- 在 cart_detail.html 中修改刪除按鈕部分 -->
+<cart-remove-button data-index="1">
+    <form method="POST" action="{% url 'cart:remove_from_cart' item.item_id %}" class="remove-form" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="remove-btn" style="background: none; border: none; padding: 0; cursor: pointer; outline: none;">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                aria-hidden="true"
+                focusable="false"
+                class="icon icon-remove">
+                <path d="M14 3h-3.53a3.07 3.07 0 00-.6-1.65C9.44.82 8.8.5 8 .5s-1.44.32-1.87.85A3.06 3.06 0 005.53 3H2a.5.5 0 000 1h1.25v10c0 .28.22.5.5.5h8.5a.5.5 0 00.5-.5V4H14a.5.5 0 000-1zM6.91 1.98c.23-.29.58-.48 1.09-.48s.85.19 1.09.48c.2.24.3.6.36 1.02h-2.9c.05-.42.17-.78.36-1.02zm4.84 11.52h-7.5V4h7.5v9.5z" fill="currentColor"/>
+                <path d="M6.55 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5zM9.45 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5z" fill="currentColor"/>
+            </svg>
+        </button>
+    </form>
+</cart-remove-button>
                             </div>
                         </quantity-popover>
                     </td>
 
-                    <!-- Mobile Small hide -->
-                    <td class="cart-item__totals right small-hide">
-
-                        <div class="cart-item__price-wrapper">
-                            <span class="cart-item__final-price item-total">${{ item.total_price|floatformat:"-2" }}</span>
-                        </div>
-                    </td>
+<!-- 單項總價顯示 - 桌面端 -->
+<td class="cart-item__totals right small-hide">
+    <div class="cart-item__price-wrapper">
+        <span class="cart-item__final-price item-total">
+            ${{ item.total_price|floatformat:"-2" }}
+        </span>
+    </div>
+</td>
                     
                     </tr>
                 </tbody>
@@ -198,9 +202,9 @@
     <div class="container">
         {% with total_item=cart|length %}
         {% if total_item > 0 %}
-        <div class="row justify-content-end ftco-animate">
+        <div class="row justify-content-end">
             <div class="col col-lg-4 col-md-6 cart-wrap">
-                <div class="cart-wrap ftco-animate">
+                <div class="cart-wrap">
                     <div class="cart-total">
                         <h3 class="billing-heading mb-4">總計</h3>
                         <p class="d-flex">
@@ -211,7 +215,8 @@
                         <!-- With authentication checks -->
                         {% if cart %}
                         <p class="d-flex total-price align-items-center">
-                            <span>總計 {{ total_items }} {{ total_items|pluralize }}</span>
+                            {% comment %} <span>總計 {{ total_items }}</span> {% endcomment %}
+                            <span>總計</span>
                             <!-- Cart Total Price for payment -->
                             <span class="total-amount" style="text-align:right">${{ cart.get_total_price|floatformat:0 }}</span>
                             <form method="POST" action="{% url 'cart:create_order' %}" id="checkout-form">
@@ -234,7 +239,7 @@
 
         {% elif not order %}
         <div class="row justify-content-center align-items-center">
-            <div class="col col-lg-4 col-md-6 cart-wrap ftco-animate">
+            <div class="col col-lg-4 col-md-6 cart-wrap">
                 <div class="cart-total">
                     <h4 class="text-center mb-2">購物車沒有物品</h4>
                     <h4 class="text-center mb-5">歡迎閣下購買我們的產品 :)</h4>
@@ -257,197 +262,146 @@
 {% comment %}
 JS 處理前端購物車的動態行為 - 與後端透過 AJAX通訊, 以更新購物車+/- item,並反映DOM 中變化
 {% endcomment %}
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Event listeners for quantity buttons
+        // 修復：表單提交
+        document.getElementById('checkout-form')?.addEventListener('submit', function(e) {
+            console.log('Form submitted normally');
+        });
+
+        // 修復：刪除商品
+        document.querySelectorAll('.remove-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                })
+                .then(response => {
+                    if (response.ok) window.location.reload();
+                });
+            });
+        });
+
+        // 處理數量按鈕
         document.querySelectorAll('.quantity-left-minus, .quantity-right-plus').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
+                if (this.disabled) return;
+                this.disabled = true;
+                setTimeout(() => { this.disabled = false; }, 300);
 
-                // Find the closest cart item row
                 const cartItem = this.closest('.cart-item');
-                
-                // Get the quantity input
                 const input = cartItem.querySelector('.quantity-input');
                 const itemKey = input.dataset.itemKey;
-                const price = parseFloat(input.dataset.itemPrice);
-                let newQuantity = parseInt(input.value);
+                const price = parseFloat(input.dataset.itemPrice.replace(/[^\d.-]/g, '')) || 0;
+                let newQuantity = parseInt(input.value) || 1;
 
-                // Update quantity logic
                 if (this.classList.contains('quantity-left-minus')) {
                     newQuantity = Math.max(1, newQuantity - 1);
                 } else {
                     newQuantity += 1;
                 }
+                newQuantity = Math.min(newQuantity, 100);
                 input.value = newQuantity;
-
-                // Find total price elements
-                const itemTotalElements = cartItem.querySelectorAll('.item-total');
-                
-                // Calculate new total
-                let itemTotal = (price * newQuantity).toFixed(2);
-                if (itemTotal.endsWith('.00')) {
-                    itemTotal = itemTotal.slice(0, -3);
-                }
-                
-                // Update all total price displays in the row
-                itemTotalElements.forEach(element => {
-                    element.innerHTML = `<span class="price">$${itemTotal}</span>`;
-                });
-
-                // AJAX request
-                fetch("{% url 'cart:update_cart' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({
-                        item_key: itemKey,
-                        quantity: newQuantity
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update cart total amount
-                        document.querySelector('.total-amount').textContent = 
-                            '$' + data.cart_total_price;
-                        
-                        // Update cart count in navbar
-                        document.querySelectorAll('.cart-count').forEach(element => {
-                            element.textContent = data.cart_total_items;
-                        });
-                        // 确保没有e.preventDefault()阻止默认提交行为
-                        document.querySelector('form').addEventListener('submit', function(e) {
-                            console.log('Form submitted');
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                updateCartItem(cartItem, input, itemKey, price, newQuantity);
             });
         });
+
+        // 處理手動輸入
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('change', function(e) {
+                const cartItem = this.closest('.cart-item');
+                const itemKey = this.dataset.itemKey;
+                const price = parseFloat(this.dataset.itemPrice.replace(/[^\d.-]/g, '')) || 0;
+                let newQuantity = parseInt(this.value) || 1;
+                
+                if (isNaN(newQuantity) || newQuantity < 1) newQuantity = 1;
+                if (newQuantity > 100) newQuantity = 100;
+                this.value = newQuantity;
+                updateCartItem(cartItem, this, itemKey, price, newQuantity);
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur();
+                }
+            });
+            
+            input.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^\d]/g, '');
+                if (this.value.length > 3) this.value = this.value.slice(0, 3);
+            });
+            
+            input.addEventListener('focus', function() {
+                this.select();
+            });
+        });
+
+        // 統一的購物車更新函數
+        function updateCartItem(cartItem, input, itemKey, price, newQuantity) {
+            // 更新本地顯示
+            let itemTotal = price * newQuantity;
+            let itemTotalFormatted = Number.isInteger(itemTotal) ? 
+                itemTotal.toString() : parseFloat(itemTotal.toFixed(2)).toString();
+
+            cartItem.querySelectorAll('.item-total').forEach(element => {
+                let currentText = element.textContent || '';
+                let priceMatch = currentText.match(/\$?([\d.]+)/);
+                element.textContent = priceMatch ? 
+                    currentText.replace(priceMatch[1], itemTotalFormatted) : 
+                    '$' + itemTotalFormatted;
+            });
+
+            // AJAX 更新後端購物車
+            fetch("{% url 'cart:update_cart' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ item_key: itemKey, quantity: newQuantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const totalAmountElement = document.querySelector('.total-amount');
+                    if (totalAmountElement && data.cart_total_price) {
+                        let totalPrice = data.cart_total_price.toString();
+                        totalAmountElement.textContent = totalPrice.startsWith('$') ? 
+                            totalPrice : '$' + totalPrice;
+                    }
+                    document.querySelectorAll('.cart-count').forEach(element => {
+                        element.textContent = data.cart_total_items;
+                    });
+                }
+            });
+        }
+
+        // 初始化：確保價格有$符號
+        document.querySelectorAll('.item-total').forEach(element => {
+            let text = element.textContent || '';
+            if (text.trim() && !text.includes('$')) {
+                element.textContent = '$' + text;
+            }
+        });
+        const totalAmountElement = document.querySelector('.total-amount');
+        if (totalAmountElement) {
+            let text = totalAmountElement.textContent || '';
+            if (text.trim() && !text.includes('$')) {
+                totalAmountElement.textContent = '$' + text;
+            }
+        }
     });
 </script>
 
+<style>
+    /* 修復刪除按鈕樣式 - 內聯樣式確保覆蓋 */
+    .ftco-cart .remove-form button.remove-btn,
+    .ftco-cart .remove-form button {
+        border: none !important;
+    }
+
+</style>
 {% endblock content %}
-
-
-{% comment %} 
-範例工作流程：
-當使用者點擊 + 或 - 按鈕時，JavaScript：
-
-更新數量輸入欄位。
-
-使用新數量向 update_cart 視圖發送 AJAX 請求。
-
-update_cart 視圖更新會話資料並傳回更新後的總數（例如，cart_total_price、item_total_price）。
-
-JavaScript 接收回應並更新 DOM 以反映新的總數。
-
-DOM 代表 HTML 頁面的結構。 JavaScript 操縱 DOM 來動態更新購物車的 UI，而無需重新載入整個頁面
-
-
-當後端響應時：
-
-JavaScript 使用新的 item_total_price 更新 .item-total 元素。
-
-JavaScript 使用新的 cart_total_price 更新 .total-amount 元素。
-
-
-
-//////////////////////
-
-逐步流程：
-使用者操作：
-
-使用者點擊 + 或 - 按鈕來更改商品的數量。
-
-JavaScript的：
-
-捕獲點擊事件。
-
-更新 DOM 中的數量輸入欄位。
-
-使用新數量向 update_cart 視圖發送 AJAX 請求。
-
-後端（購物車會話）：
-
-update_cart 視圖接收請求。
-
-更新會話中的購物車資料。
-
-重新計算總額（cart_total_price、item_total_price）。
-
-在 JSON 回應中傳回更新後的總數。
-
-JavaScript的：
-
-接收 JSON 回應。
-
-更新 DOM 來反映新的總數：
-
-使用新的 item_total_price 更新 .item-total 元素。
-
-使用新的 cart_total_price 更新 .total-amount 元素。
-
-DOM：
-
-向使用者反映更新後的總數，而無需重新載入頁面。
-
-
-
-
-5.視覺表現
-以下是該關係的直觀表示：
-
-複製
-使用者操作（點擊 + 或 -）
-|
-五
-JavaScript（事件監聽器）
-|
-五
-AJAX 請求（取得 API）
-|
-五
-後端（購物車會話）
-|
-五
-JSON 回應（更新總數）
-|
-五
-JavaScript（DOM 操作）
-|
-五
-DOM（更新的 UI）
-
-
-6. 要記住的要點
-會話儲存：
-
-購物車資料儲存在會話中，使其在頁面重新載入和導航時持久存在。
-
-每個用戶都有自己的購物車數據。
-
-JavaScript的：
-
-處理動態更新而無需重新載入整個頁面。
-
-透過 AJAX 與後端通訊。
-
-DOM：
-
-表示購物車的 UI。
-
-透過 JavaScript 動態更新以反映購物車的變化。
-
-後端：
-
-管理購物車邏輯和計算。
-
-確保數據一致性 {% endcomment %}
-

@@ -1,0 +1,331 @@
+<!-- betweencoffee_delivery/templates/admin/staff_order_management.html -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block content %}
+<!-- blank header spacing-->
+<section class="ftco-section-blank-staff" style="padding-top:16vh"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col col-lg-12 mb-5">
+                <h1 class="mb-5">📋 店鋪訂單製作</h1>
+
+                <!-- 渲染器標籤頁導覽 -->
+                <ul class="nav nav-tabs mb-4 pt-4" id="orderTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="queue-tab" data-toggle="tab" href="#queue" role="tab" aria-controls="queue" aria-selected="true">
+                            <i class="fas fa-list-ol mr-2"></i>製作隊列
+                            <span class="badge ml-2" id="queue-badge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="preparing-tab" data-toggle="tab" href="#preparing" role="tab" aria-controls="preparing" aria-selected="false">
+                            <i class="fas fa-clock mr-2"></i>製作中
+                            <!-- 修改ID -->
+                            <span class="badge ml-2" id="preparing-orders-badge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="ready-tab" data-toggle="tab" href="#ready" role="tab" aria-controls="ready" aria-selected="false">
+                            <i class="fas fa-mug-hot mr-2"></i>已就緒
+                            <!-- 修改ID -->
+                            <span class="badge badge-success ml-2" id="ready-orders-badge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab" aria-controls="completed" aria-selected="false">
+                            <i class="fas fa-check-double mr-2"></i>已提取
+                            <!-- 修改ID -->
+                            <span class="badge badge-info ml-2" id="completed-orders-badge">0</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- 訂單標籤頁內容 -->
+                <div class="tab-content" id="orderTabsContent">
+                    <!-- 製作隊列標籤頁 -->
+                    <div class="tab-pane fade show active" id="queue" role="tabpanel" aria-labelledby="queue-tab">
+                        <div class="order-section" data-status="queue">
+                            <div id="waiting-queue-content">
+                                <div class="order-list" id="waiting-orders-list">
+                                    <!-- 動態內容將由JavaScript以卡片形式填充 -->
+                                </div>
+                            </div>
+                            
+                            <div id="waiting-queue-empty" class="text-center py-5" style="display: none;">
+                                <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">暫無等待訂單</p>
+                            </div>
+
+                            <!-- 不使用 隊列統計卡片 -->
+                            {% comment %} <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="card text-white bg-warning">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <h4 class="card-title" id="waiting-count">0</h4>
+                                                    <p class="card-text">等待中</p>
+                                                </div>
+                                                <div class="align-self-center">
+                                                    <i class="fas fa-clock fa-2x"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-white bg-primary">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <h4 class="card-title" id="preparing-count">0</h4>
+                                                    <p class="card-text">製作中</p>
+                                                </div>
+                                                <div class="align-self-center">
+                                                    <i class="fas fa-mug-hot fa-2x"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-white bg-success">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <h4 class="card-title" id="ready-count">0</h4>
+                                                    <p class="card-text">已就緒</p>
+                                                </div>
+                                                <div class="align-self-center">
+                                                    <i class="fas fa-check-circle fa-2x"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> {% endcomment %}
+                            
+                            
+                            <!-- 等待隊列 -->
+                                <div hidden class="card-header bg-warning text-white">
+                                    <h5><i class="fas fa-clock"></i> 等待隊列 
+                                        <span class="badge badge-light" id="waiting-queue-count">0</span>
+                                    </h5>
+                                </div>
+                                    <!-- 刪除加載指示器 -->
+                                    <!-- 
+                                    <div id="waiting-queue-loading" style="display: none;">
+                                        <div class="text-center">
+                                            <div class="spinner-border text-warning" role="status">
+                                                <span class="sr-only">加載中...</span>
+                                            </div>
+                                            <p class="mt-2">正在加載等待隊列...</p>
+                                        </div>
+                                    </div>
+                                    -->
+                                    
+                        </div>
+                    </div>
+                    
+                    <!-- 製作中訂單標籤頁 -->
+                    <div class="tab-pane fade" id="preparing" role="tabpanel" aria-labelledby="preparing-tab">
+                        <div class="order-section" data-status="preparing">
+                            <!-- 刪除加載指示器 -->
+                            <!-- 
+                            <div id="preparing-orders-loading" class="text-center py-5">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="sr-only">加載中...</span>
+                                </div>
+                                <p class="mt-2">正在加載製作中訂單...</p>
+                            </div>
+                            -->
+                            
+                            <!-- 訂單內容容器 -->
+                            <div id="preparing-orders-content" style="display: none;">
+                                <!-- 動態內容將由JavaScript填充 -->
+                            </div>
+                            
+                            <!-- 空狀態 - 修改為默認隱藏 -->
+                            <div id="preparing-orders-empty" class="text-center py-5" style="display: none;">
+                                <div class="mb-4">
+                                    <i class="fas fa-coffee h1 text-muted"></i>
+                                </div>
+                                <h4>暫無製作中的訂單</h4>
+                                <p class="text-muted">當前沒有需要製作的訂單</p>
+                            </div>
+                            
+                            <!-- 刷新按鈕 -->
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-warning btn-sm" id="refresh-preparing-orders-btn">
+                                    <i class="fas fa-sync-alt mr-1"></i> 刷新製作中訂單
+                                </button>
+                                <small class="text-muted d-block mt-1">最後更新: <span id="preparing-orders-last-update">-</span></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 已就緒訂單標籤頁 -->
+                    <div class="tab-pane fade" id="ready" role="tabpanel" aria-labelledby="ready-tab">
+                        <div class="order-section" data-status="ready">
+                            <!-- 刪除加載指示器 -->
+                            <!-- 
+                            <div id="ready-orders-loading" class="text-center py-5" style="display: none;">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="sr-only">加載中...</span>
+                                </div>
+                                <p class="mt-2">正在加載已就緒訂單...</p>
+                            </div>
+                            -->
+                            
+                            <!-- 訂單列表容器（動態渲染） -->
+                            <div id="ready-orders-list" class="order-list">
+                                <!-- 動態內容將由JavaScript填充 -->
+                            </div>
+                            
+                            <!-- 空狀態 - 修改為默認顯示（初始狀態） -->
+                            <div id="ready-orders-empty" class="text-center py-5" style="display: none;">
+                                <div class="mb-4">
+                                    <i class="fas fa-mug-hot h1 text-muted"></i>
+                                </div>
+                                <h4>暫無已就緒的訂單</h4>
+                                <p class="text-muted">當前沒有等待提取的訂單</p>
+                            </div>
+                            
+                            <!-- 刷新按鈕 -->
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-success btn-sm" id="refresh-ready-orders-btn">
+                                    <i class="fas fa-sync-alt mr-1"></i> 刷新已就緒訂單
+                                </button>
+                                <small class="text-muted d-block mt-1">最後更新: <span id="ready-orders-last-update">-</span></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 已提取訂單標籤頁 -->
+                    <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                        <div class="order-section" data-status="completed">
+                            <!-- 刪除加載指示器 -->
+                            <!-- 
+                            <div id="completed-orders-loading" class="text-center py-5" style="display: none;">
+                                <div class="spinner-border text-info" role="status">
+                                    <span class="sr-only">加載中...</span>
+                                </div>
+                                <p class="mt-2">正在加載已提取訂單...</p>
+                            </div>
+                            -->
+                            
+                            <!-- 訂單列表容器（動態渲染） -->
+                            <div id="completed-orders-list" class="order-list">
+                                <!-- 動態內容將由JavaScript填充 -->
+                            </div>
+                            
+                                <!-- 空狀態 - 修改為默認顯示 -->
+                                <div id="completed-orders-empty" class="text-center py-5" style="display: none;">
+                                    <div class="mb-4">
+                                        <i class="fas fa-box h1 text-muted"></i>
+                                    </div>
+                                    <h4>暫無最近提取的訂單</h4>
+                                    <p class="text-muted">最近4小時內沒有已提取的訂單</p>
+                                </div>
+                            
+                            <!-- 刷新按鈕 -->
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-info btn-sm" id="refresh-completed-orders-btn">
+                                    <i class="fas fa-sync-alt mr-1"></i> 刷新已提取訂單
+                                </button>
+                                <small class="text-muted d-block mt-1">最後更新: <span id="completed-orders-last-update">-</span></small>
+                            </div>
+                        </div>
+
+                        <!-- 在 staff_order_management.html 中添加調試按鈕 -->
+                        <div class="text-right mb-3">
+                            <button id="debug-badges" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-bug"></i> 徽章調試
+                            </button>
+                            <button id="refresh-badges" class="btn btn-sm btn-primary">
+                                <i class="fas fa-sync"></i> 刷新徽章
+                            </button>
+                                <button id="refresh-all-badges" class="btn btn-sm btn-primary mb-2">
+                                    <i class="fas fa-sync-alt"></i> 刷新徽章
+                                </button>
+                                <button id="check-badge-status" class="btn btn-sm btn-info">
+                                    <i class="fas fa-info-circle"></i> 檢查狀態
+                                </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div class="flexable-vh-20"></div>
+
+
+<!-- 加载外部 CSS -->
+<link rel="stylesheet" href="{% static 'css/staff_order_management.css' %}">
+
+<!-- 先載入基礎函式庫 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<!-- 更新加载顺序：严格按照依赖关系 -->
+
+<!-- 时间工具 -->
+<script src="{% static 'js/staff-order-management/time-utils.js' %}"></script>
+
+<!-- 1. 统一数据管理器（核心） -->
+<script src="{% static 'js/staff-order-management/unified-data-manager.js' %}"></script>
+
+<!-- 2. 徽章管理器（依赖统一数据） -->
+<script src="{% static 'js/staff-order-management/badge-manager.js' %}"></script>
+
+<!-- 3. 队列管理器（依赖统一数据） -->
+<script src="{% static 'js/staff-order-management/queue-manager.js' %}"></script>
+
+<!-- 4. 订单管理器 -->
+<script src="{% static 'js/staff-order-management/order-manager.js' %}"></script>
+
+<!-- 5. 各标签页渲染器 -->
+<script src="{% static 'js/staff-order-management/preparing-orders-renderer.js' %}"></script>
+<script src="{% static 'js/staff-order-management/ready-orders-renderer.js' %}"></script>
+<script src="{% static 'js/staff-order-management/completed-orders-renderer.js' %}"></script>
+
+<!-- 6. WebSocket管理器 -->
+<script src="{% static 'js/staff-order-management/websocket-manager.js' %}"></script>
+
+<!-- 7. 主初始化 -->
+<script src="{% static 'js/staff-order-management/main.js' %}"></script>
+
+<script>
+document.getElementById('debug-badges').addEventListener('click', function() {
+    if (window.badgeManager) {
+        window.badgeManager.checkStatus();
+    }
+});
+
+document.getElementById('refresh-badges').addEventListener('click', function() {
+    if (window.badgeManager) {
+        window.badgeManager.updateAllBadgesFromServer();
+    }
+});
+document.getElementById('refresh-all-badges').addEventListener('click', function() {
+    if (window.badgeManager) {
+        window.badgeManager.forceSync();
+    }
+});
+
+document.getElementById('check-badge-status').addEventListener('click', function() {
+    if (window.badgeManager) {
+        window.badgeManager.checkStatus();
+    }
+});
+</script>
+
+
+{% endblock %}

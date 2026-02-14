@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Social Login Status</title>
+</head>
+<body>
+    <h1>Social Login Status</h1>
+    
+    <h2>Site Information</h2>
+    <p>Domain: {{ site.domain }}</p>
+    <p>Name: {{ site.name }}</p>
+    
+    <h2>Social Apps</h2>
+    <ul>
+        {% for app in social_apps %}
+        <li>
+            <strong>{{ app.provider }}</strong>: {{ app.name }}<br>
+            Client ID: {{ app.client_id }}<br>
+            Key: {{ app.key }}
+        </li>
+        {% empty %}
+        <li>No social apps configured</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Callback URLs</h2>
+    <ul>
+        {% for provider, url in callback_urls.items %}
+        <li><strong>{{ provider }}:</strong> {{ url }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Your Social Accounts</h2>
+    {% if user_social_accounts %}
+        <ul>
+            {% for account in user_social_accounts %}
+            <li>{{ account.provider }}: {{ account.uid }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No social accounts connected</p>
+    {% endif %}
+    
+    <h2>Test Links</h2>
+    <p>
+        <a href="/accounts/google/login/">Test Google Login</a><br>
+        <a href="/accounts/facebook/login/">Test Facebook Login</a>
+    </p>
+</body>
+</html>

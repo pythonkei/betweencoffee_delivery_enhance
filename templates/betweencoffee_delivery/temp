@@ -8,3 +8,367 @@
 <path class=”cls-1” d="M272 0H532V548H272V0ZM396.222 446.694H408.5V101.898H396.222V446.694Z" />
 <path class=”cls-1” d="M0 0H260V436.623H135.778V101.898H123.5V436.623H0V0ZM260 548H0V446.694H260V548Z"/>
 <path class=”cls-1” d="M1940.08 74.4504V60.5071H1972.59C1965.03 53.8674 1959.99 48.777 1957.47 45.2358C1954.95 41.6947 1954.95 38.1535 1957.47 34.6123C1960.49 31.0712 1966.04 25.9808 1974.1 19.3411L1985.44 9.38157L2008.13 29.3006C2008.13 19.5624 2008.63 12.9227 2009.64 9.38157C2010.65 5.39777 2013.67 2.96323 2018.71 2.07795C2023.75 1.19265 2031.82 0.75 2042.91 0.75H2058.03V29.9646C2066.1 22.8822 2072.14 18.4558 2076.18 16.6852C2080.21 14.472 2084.24 14.6933 2088.27 17.3492C2092.31 19.5624 2098.1 24.2102 2105.66 31.2925L2116.25 40.588L2092.81 61.1711C2103.9 60.7284 2111.71 60.9497 2116.25 61.835C2120.79 62.7203 2123.56 65.3762 2124.57 69.8026C2125.58 73.7865 2126.08 80.8688 2126.08 91.0496V104.329H2092.05C2100.62 110.969 2106.17 116.059 2108.69 119.6C2111.71 123.141 2111.71 126.683 2108.69 130.224C2106.17 133.765 2100.62 139.077 2092.05 146.159L2080.71 156.118L2058.03 136.199C2058.03 145.495 2057.53 152.135 2056.52 156.118C2055.51 160.102 2052.49 162.537 2047.44 163.422C2042.91 164.307 2034.84 164.75 2023.25 164.75H2008.13V135.535C2000.57 142.175 1994.77 146.602 1990.74 148.815C1986.71 151.028 1982.67 151.028 1978.64 148.815C1974.61 146.159 1968.56 141.29 1960.49 134.207L1949.91 124.912L1973.35 104.329C1962.26 104.329 1954.19 103.886 1949.15 103.001C1944.62 102.116 1941.84 99.6811 1940.84 95.6973C1940.33 91.2709 1940.08 84.1886 1940.08 74.4504Z"/>
+
+
+
+
+
+
+<!-- 使用 order_history 的样式 -->
+<style>
+/* 确保隐藏的元素不会占用空间 */
+[style*="display: none"] {
+    display: none !important;
+}
+
+/* 商品数量文本样式 */
+.text-muted {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+}
+
+/* 合并的已支付和制作中样式 */
+.badge-warning {
+    background-color: transparent;
+    color: #d0a00f;
+    border: 1px solid #d0a00f;
+}
+
+/* 已就绪样式 */
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+/* 取消/超时样式 */
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 支付倒计时样式 */
+.payment-countdown {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    border: none;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+.payment-countdown .countdown-text {
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* 员工管理特定样式调整 */
+.order-management-section {
+    margin-bottom: 3rem;
+}
+
+.order-management-section h2 {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    color: #495057;
+}
+
+/* 员工操作按钮样式 */
+.btn-success, .btn-info {
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+.btn-success {
+    background: linear-gradient(110deg, #28a745, #07825dff);
+    border: none;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #208494);
+    border: none;
+}
+
+/* 帮助工作人员更好地处理订单 */
+/* 快速订单高亮样式 */
+.order-item[data-type="quick"] {
+    border-left: 4px solid #28a745;
+    background: linear-gradient(90deg, rgba(40, 167, 69, 0.05) 0%, transparent 10%);
+}
+
+/* 快速订单徽章样式 */
+.badge-urgent {
+    background-color: #dc3545;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+
+/* 筛选工具栏样式 */
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.btn-group .btn {
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+/* 统计卡片样式 */
+.card .card-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.card .card-text {
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+/* 订单项筛选相关样式 */
+.order-section {
+    transition: all 0.3s ease;
+}
+
+.order-item {
+    transition: all 0.3s ease;
+}
+
+.order-item.hidden {
+    display: none !important;
+}
+
+/* 高亮快速订单 */
+.order-item[data-type="quick"] {
+    border-left: 4px solid #28a745;
+}
+
+/* 高亮紧急订单（制作时间长的） */
+.order-item.urgent {
+    animation: pulse-warning 2s infinite;
+    border: 2px solid #ffc107;
+}
+
+@keyframes pulse-warning {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+/* 批量选择样式 */
+.order-item.selectable {
+    cursor: pointer;
+}
+
+.order-item.selected {
+    background-color: #e3f2fd;
+    border: 2px solid #2196f3;
+}
+
+/* 加载动画 */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* 新增：等待提取徽章样式 */
+.badge-lg {
+    padding: 0.6em 1em;
+    font-size: 1.05em;
+    font-weight: 600;
+}
+
+/* 新增：预计完成时间徽章样式 */
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* 新增：提取时间徽章样式 */
+.badge-light {
+    background-color: transparent;
+    color: #ddd;
+    border: 1px solid #9d9d9d;
+}
+
+
+/* 标签页样式 */
+.nav-tabs {
+    border-bottom: 2px solid #454545;
+    margin-bottom: 1.5rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent; /* 预先设置透明边框 */
+    color: #777;
+    font-weight: 600;
+    padding: 1.2rem 1.8rem; /* 增加内边距 */
+    position: relative;
+    transition: all 0.3s ease;
+    margin-bottom: -2px; /* 抵消边框高度 */
+    font-size: 1.1rem; /* 加大字体大小 */
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom: 3px solid rgba(255, 255, 255, 0.4); /* 悬停时半透明边框 */
+    color: #aaa;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid #fff; /* 激活时只改变边框颜色 */
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem; /* 激活状态也保持相同字体大小 */
+}
+
+.nav-tabs .nav-link .badge {
+    font-size: 0.85em; /* 稍微加大徽章字体 */
+    padding: 0.4em 0.7em; /* 增加徽章内边距 */
+}
+
+/* 加大图标 */
+.nav-tabs .nav-link i {
+    font-size: 1.2em; /* 加大图标 */
+    margin-right: 0.5rem; /* 增加图标与文字的间距 */
+}
+
+.tab-content {
+    min-height: 400px;
+}
+
+.tab-pane {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 标签页徽章颜色 */
+#ready-tab .badge {
+    background-color: #28a745 !important;
+}
+
+#preparing-tab .badge {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+#completed-tab .badge {
+    background-color: #17a2b8 !important;
+}
+
+/* 修复Bootstrap 4的间距类 */
+.mr-2 {
+    margin-right: 0.5rem !important;
+}
+
+.ml-2 {
+    margin-left: 0.5rem !important;
+}
+
+.mr-1 {
+    margin-right: 0.25rem !important;
+}
+
+.ml-1 {
+    margin-left: 0.25rem !important;
+}
+
+.pr-2 {
+    padding-right: 0.5rem !important;
+}
+
+/* 倒计时徽章样式 */
+.countdown-badge {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color:#232323;
+}
+
+/* 倒计时文本样式 */
+.countdown-text {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color:#232323;
+}
+
+/* 倒计时完成状态 */
+.badge-success .countdown-text {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* 折叠面板样式 */
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+}
+
+.card-header .btn-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 1rem 0;
+    width: 100%;
+    text-align: left;
+}
+
+.card-header .btn-link:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+}
+
+.card-header .btn-link:focus {
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.card-header .btn-link.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+    margin-top: 0.2rem;
+}
+
+/* 确保折叠内容有平滑动画 */
+.collapse {
+    transition: all 0.3s ease;
+}
+
+/* 卡片内容在折叠时的边距调整 */
+.card-body {
+    padding: 1.5rem;
+}
+
+</style>

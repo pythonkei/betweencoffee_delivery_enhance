@@ -51,7 +51,7 @@
                     <span id="svg_over_on"><img src= {% static 'images/product_hover.svg' %} class="noise_animation"></span>
                     <canvas id="mouse_hit"></canvas>
                     <!-- 使用详情页图片 -->
-                    <img src="{{ bean.image.url }}" alt="{{ bean.name }}" class="img">
+                    <img src="{{ bean.get_detail_image }}" alt="{{ bean.name }}" class="img">
                   </a>
                 </div>
 

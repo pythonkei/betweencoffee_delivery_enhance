@@ -1,58 +1,80 @@
 # eshop/alipay_utils.py:
+import os
+import time
 from alipay import AliPay
 from django.conf import settings
-import os
-import logging
+from django.core.cache import cache
 from urllib.parse import quote, unquote
+import logging
 
 logger = logging.getLogger(__name__)
 
 
 def get_alipay_client():
     """初始化支付宝客户端"""
-    # Ensure the keys are properly formatted without extra whitespace
-    private_key = settings.ALIPAY_APP_PRIVATE_KEY.strip()
-    public_key = settings.ALIPAY_PUBLIC_KEY.strip()
-    
-    alipay = AliPay(
-        appid=settings.ALIPAY_APP_ID,
-        app_private_key_string=private_key,
-        alipay_public_key_string=public_key,
-        sign_type=settings.ALIPAY_SIGN_TYPE,
-        debug=settings.ALIPAY_DEBUG
-    )
-    return alipay
+    try:
+        # Ensure the keys are properly formatted without extra whitespace
+        private_key = settings.ALIPAY_APP_PRIVATE_KEY.strip()
+        public_key = settings.ALIPAY_PUBLIC_KEY.strip()
+        
+        logger.info(f"初始化支付宝客户端 - APP_ID: {settings.ALIPAY_APP_ID}, 调试模式: {settings.ALIPAY_DEBUG}")
+        
+        alipay = AliPay(
+            appid=settings.ALIPAY_APP_ID,
+            app_private_key_string=private_key,
+            alipay_public_key_string=public_key,
+            sign_type=settings.ALIPAY_SIGN_TYPE,
+            debug=settings.ALIPAY_DEBUG
+        )
+        return alipay
+        
+    except Exception as e:
+        logger.error(f"支付宝客户端初始化失败: {str(e)}")
+        raise
+
 
 
 def create_alipay_payment(order, request):
     """创建支付宝支付订单"""
     try:
-        alipay = get_alipay_client()
+        logger.info(f"=== 创建支付宝支付开始 ===")
         
-        # 生成商品标题（使用新函数）
+        alipay = get_alipay_client()
+        logger.info(f"支付宝客户端初始化成功")
+        
+        # 生成商品标题
         subject = generate_order_subject(order)
+        logger.info(f"支付标题: {subject}")
+        
+        # 从 payment_utils 获取URL
+        from .payment_utils import get_alipay_return_url, get_alipay_notify_url
+        
+        # 构建支付参数
+        payment_params = {
+            'out_trade_no': str(order.id),
+            'total_amount': str(order.total_price),
+            'subject': subject,
+            'return_url': get_alipay_return_url(),  # 使用统一函数
+            'notify_url': get_alipay_notify_url(),  # 使用统一函数
+        }
         
         # 生成支付URL
-        order_string = alipay.api_alipay_trade_page_pay(
-            out_trade_no=str(order.id),
-            total_amount=str(order.total_price),
-            subject=subject,  # ← 使用新生成的标题
-            return_url=settings.ALIPAY_RETURN_URL,
-            notify_url=settings.ALIPAY_NOTIFY_URL
-        )
+        order_string = alipay.api_alipay_trade_page_pay(**payment_params)
         
-        # 使用正确的沙箱URL
+        # 使用正确的网关
         if settings.ALIPAY_DEBUG:
             gateway = "https://openapi-sandbox.dl.alipaydev.com/gateway.do"
         else:
             gateway = "https://openapi.alipay.com/gateway.do"
             
         payment_url = f"{gateway}?{order_string}"
+        
         return payment_url
         
     except Exception as e:
         logger.error(f"Alipay payment creation error: {str(e)}")
         raise
+    
 
 
 def generate_order_subject(order):
@@ -170,3 +192,47 @@ def debug_verification(data):
         import traceback
         logger.error(traceback.format_exc())
         return False
+    
+
+
+def create_alipay_payment_with_retry(order, request, max_retries=3):
+    """创建支付宝支付订单（带重试机制）"""
+    for attempt in range(max_retries):
+        try:
+            payment_url = create_alipay_payment(order, request)
+            return payment_url
+        except Exception as e:
+            logger.warning(f"支付宝支付创建第{attempt+1}次失败: {str(e)}")
+            if attempt < max_retries - 1:
+                time.sleep(1)  # 等待1秒后重试
+            else:
+                raise e
+
+
+# 在 alipay_utils.py 中添加
+def check_alipay_timeout(order):
+    """检查支付宝支付超时"""
+    from django.utils import timezone
+    if order.payment_timeout and timezone.now() > order.payment_timeout:
+        logger.info(f"订单 {order.id} 支付宝支付超时")
+        return True
+    return False
+
+
+def verify_alipay_with_retry(data, max_retries=2):
+    """验证支付宝通知（带重试机制）"""
+    for attempt in range(max_retries):
+        try:
+            result = verify_alipay_notification(data)
+            return result
+        except Exception as e:
+            logger.warning(f"支付宝验证第{attempt+1}次失败: {str(e)}")
+            if attempt < max_retries - 1:
+                time.sleep(0.5)
+            else:
+                return False
+
+# 移除以下视图相关函数，它们应该在 views.py 中
+# alipay_callback
+# handle_payment_cancelled
+# 等等...

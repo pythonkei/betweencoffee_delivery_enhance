@@ -4,7 +4,7 @@
 {% load tz %} 
 
 {% block content %}
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Shop info -->
 <section>
     <div class="cm-fixedbtn u-section" id="js-fixedbtn">
@@ -59,6 +59,7 @@
                                         {% if item.cup_level == 'Small' %}細
                                         {% elif item.cup_level == 'Medium' %}中
                                         {% elif item.cup_level == 'Large' %}大
+                                        {% else %}{{ item.cup_level|default:'中' }}
                                         {% endif %}
                                         </strong>
                                     </div>
@@ -69,6 +70,7 @@
                                         {% if item.milk_level == 'Light' %}少
                                         {% elif item.milk_level == 'Medium' %}正常
                                         {% elif item.milk_level == 'Extra' %}追加
+                                        {% else %}{{ item.milk_level|default:'正常' }}
                                         {% endif %}
                                         </strong>
                                     </div>
@@ -110,6 +112,7 @@
     </div>
 </div>
 
+
 <!-- 帳單資訊輸入和支付選擇 -->
 <section class="ftco-section-billing">
     <div class="container">
@@ -117,10 +120,19 @@
             <!-- info from -->
             <div class="col-xl-7">
                 <h3 class="mb-4 billing-heading">聯絡方式</h3>
-                <form method="POST" action="{% url 'eshop:order_confirm' %}" class="billing-form" id="payment-form">
+                <!-- 恢复为原始action -->
+                <form method="POST" action="{% url 'eshop:order_confirm' %}" class="billing-form" id="payment-form" onsubmit="return validateForm()">
                     {% csrf_token %}
+
                     <!-- 隱藏欄位用於調試 -->
+                    <!-- 调试信息 -->
+                    <input type="hidden" name="debug_session_key" value="{{ request.session.session_key }}">
+                    <input type="hidden" name="debug_user" value="{{ user.id }}">
+                    <input type="hidden" name="debug_timestamp" value="{% now 'U' %}">
                     <input type="hidden" name="debug_info" value="form_submitted">
+                    <input type="hidden" name="debug_session_key" value="{{ request.session.session_key }}">
+                    <input type="hidden" name="debug_user" value="{{ user.id }}">
+
                     <!-- 输入info -->
                     <div class="row">
                         <div class="col-md-8 px-0 mb-3">
@@ -153,17 +165,59 @@
 
                         <div class="w-100"></div>
 
+                        <!-- 取貨時間選項部分 -->
                         <div class="col-md-6 px-0">
+                            <!-- 方案1：完全隱藏整個取貨時間區域 -->
+                            {% if is_quick_order %}
                             <div class="form-group">
-                                <label for="pickup_time">到店提取時間</label>
-                                <div class="select-wrap">
-                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                                    <select name="pickup_time" class="form-control" required>
-                                        <option value="5 分鐘後" {% if initial_data.pickup_time == "5 分鐘後" %}selected{% endif %}>5 分鐘後</option>
-                                        <option value="10 分鐘後" {% if initial_data.pickup_time == "10 分鐘後" %}selected{% endif %}>10 分鐘後</option>
-                                        <option value="15 分鐘後" {% if initial_data.pickup_time == "15 分鐘後" %}selected{% endif %}>15 分鐘後</option>
-                                        <option value="30 分鐘後" {% if initial_data.pickup_time == "30 分鐘後" %}selected{% endif %}>30 分鐘後</option>
-                                    </select>
+                                <label for="pickup_time">取貨時間</label>
+                                <select name="pickup_time" class="form-control" required>
+                                    <option value="5" {% if initial_data.pickup_time == "5" %}selected{% endif %}>5 分鐘後</option>
+                                    <option value="10" {% if initial_data.pickup_time == "10" %}selected{% endif %}>10 分鐘後</option>
+                                    <option value="15" {% if initial_data.pickup_time == "15" %}selected{% endif %}>15 分鐘後</option>
+                                    <option value="20" {% if initial_data.pickup_time == "20" %}selected{% endif %}>20 分鐘後</option>
+                                    <option value="30" {% if initial_data.pickup_time == "30" %}selected{% endif %}>30 分鐘後</option>
+                                </select>
+                                <small class="form-text text-muted">您可以修改取貨時間</small>
+                            </div>
+                            {% else %}
+                            <!-- 普通訂單：完全隱藏取貨時間選擇 -->
+                            <input type="hidden" name="pickup_time" value="{{ initial_data.pickup_time }}">
+                            {% endif %}
+                        </div>
+
+                        <div class="w-100"></div>
+
+                        <!-- 訂單類型提示 -->
+                        <div hidden class="container mt-4">
+                            <div class="alert {% if is_quick_order %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas {% if is_quick_order %}fa-bolt{% else %}fa-shopping-cart{% endif %} me-2"></i>
+                                        <strong>{% if is_quick_order %}快速訂單模式{% else %}購物車訂單模式{% endif %}</strong>
+                                        <p class="mb-0 mt-1 small">
+                                            {% if is_quick_order %}
+                                                您正在處理 WakeMeup 快速訂單，提取時間已設定為 {{ initial_data.pickup_time }} 分鐘後
+                                            {% else %}
+                                                您正在處理購物車中的商品，請選擇提取時間
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        {% if is_quick_order %}
+                                            <a href="{% url 'eshop:clear_quick_order' %}" 
+                                            class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-shopping-cart me-1"></i>
+                                                切換到購物車訂單
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'cart:cart_detail' %}" 
+                                            class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit me-1"></i>
+                                                修改購物車
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -174,7 +228,6 @@
                         <div class="col-md-12 px-0 mb-4 pt-4">
                             <div class="form-group">
                                 <label for="payment_method" class="mb-3">支付方式</label>
-                                
                                 
                                 <!-- 方案1: 现代卡片式设计 -->
                                 <div class="payment-scheme active" id="scheme-modern">
@@ -248,8 +301,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
 
@@ -268,7 +319,7 @@
 
                 <!-- cart item -->
                 <div class="col-xl-5 sidebar">
-                    <div class="sidebar-box ftco-animate mt-6 hiddenSmall">
+                    <div class="sidebar-box mt-6 hiddenSmall">
                         {% for item in items %}
                             <div class="block-21 mb-5 d-flex">
                                 <div class="blog-img mr-4">
@@ -288,6 +339,7 @@
                                             {% if item.cup_level == 'Small' %}細
                                             {% elif item.cup_level == 'Medium' %}中
                                             {% elif item.cup_level == 'Large' %}大
+                                            {% else %}{{ item.cup_level|default:'中' }}
                                             {% endif %}
                                             </strong>
                                         </div>
@@ -298,6 +350,7 @@
                                             {% if item.milk_level == 'Light' %}少
                                             {% elif item.milk_level == 'Medium' %}正常
                                             {% elif item.milk_level == 'Extra' %}追加
+                                            {% else %}{{ item.milk_level|default:'正常' }}
                                             {% endif %}
                                             </strong>
                                         </div>
@@ -334,7 +387,7 @@
                     </div>
                     
                     <!-- 支付信息-->
-                    <div class="sidebar-box ftco-animate">
+                    <div class="sidebar-box">
                         <div class="dividerline mb-4"></div>
                         <div class="total-price mb-5 text-right">
                             <span class="h4">總計: </span>
@@ -726,6 +779,294 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 
+<script>
+// 修复表单验证函数
+function validateForm() {
+    console.log('=== 表单提交开始验证 ===');
+    
+    // 检查必填字段
+    const name = document.querySelector('input[name="name"]').value;
+    const phone = document.querySelector('input[name="phone"]').value;
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+    
+    console.log('姓名:', name);
+    console.log('电话:', phone);
+    console.log('支付方式:', paymentMethod ? payment.method.value : '未选择');
+    
+    if (!name || !name.trim()) {
+        alert('请输入姓名');
+        return false;
+    }
+    
+    if (!phone || !phone.trim()) {
+        alert('请输入电话');
+        return false;
+    }
+    
+    // 验证电话格式（香港电话8位数字）
+    const phoneRegex = /^[0-9]{8}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+        alert('请输入有效的8位香港电话号码');
+        return false;
+    }
+    
+    if (!paymentMethod) {
+        alert('请选择支付方式');
+        return false;
+    }
+    
+    console.log('表单验证通过，开始提交...');
+    
+    // 显示加载状态
+    const submitButton = document.getElementById('payment-button');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
+    }
+    
+    return true;
+}
 
+// 确保DOM加载完成后绑定事件
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('payment-form');
+    if (form) {
+        // 移除onsubmit属性，改用事件监听
+        form.onsubmit = null;
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+});
+</script>
 
+<script>
+// 检测用户从支付宝页面返回的情况
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查是否有未支付的订单
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnedFromPayment = urlParams.get('returned_from') === 'alipay';
+    const hasPendingOrder = {% if order and not order.is_paid %}true{% else %}false{% endif %};
+    
+    if (returnedFromPayment && hasPendingOrder) {
+        showPaymentCancelWarning();
+    }
+    
+    // 监听页面可见性变化（当用户切换回标签页时）
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && hasPendingOrder) {
+            // 用户可能从支付宝页面返回，检查支付状态
+            checkPaymentStatus();
+        }
+    });
+    
+    // 页面加载时检查支付状态
+    if (hasPendingOrder) {
+        setTimeout(checkPaymentStatus, 2000); // 2秒后检查一次
+    }
+});
+
+function showPaymentCancelWarning() {
+    // 显示支付取消警告
+    const warningHtml = `
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>支付未完成</strong> - 检测到您从支付宝页面返回，支付可能已被取消。
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // 在页面顶部插入警告
+    const container = document.querySelector('.container');
+    if (container) {
+        container.insertAdjacentHTML('afterbegin', warningHtml);
+    }
+}
+
+function checkPaymentStatus() {
+    // 获取当前订单ID（如果有）
+    const orderId = {% if order %}{{ order.id }}{% else %}null{% endif %};
+    
+    if (!orderId) return;
+    
+    // 查询订单支付状态
+    fetch(`/eshop/api/check-payment-status/${orderId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.is_paid) {
+                // 支付成功，跳转到成功页面
+                window.location.href = "{% url 'eshop:order_payment_confirmation' %}?order_id=" + orderId;
+            } else if (data.can_retry) {
+                // 支付未完成，显示重试选项
+                showRetryOptions(orderId);
+            }
+        })
+        .catch(error => {
+            console.error('支付状态检查失败:', error);
+        });
+}
+
+function showRetryOptions(orderId) {
+    // 显示重新支付选项
+    const retryHtml = `
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">支付未完成</h5>
+                <p class="card-text">您的订单尚未支付完成，请选择：</p>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary" onclick="retryPayment(${orderId})">
+                        <i class="fas fa-redo"></i> 重新支付
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="cancelPayment(${orderId})">
+                        <i class="fas fa-times"></i> 取消订单
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 在支付按钮位置显示重试选项
+    const paymentButton = document.getElementById('payment-button');
+    if (paymentButton) {
+        paymentButton.insertAdjacentHTML('afterend', retryHtml);
+        paymentButton.style.display = 'none';
+    }
+}
+
+// 重新支付函数
+function retryPayment(orderId) {
+    if (!confirm('确定要重新尝试支付吗？')) return;
+    
+    // 显示加载状态
+    const button = event.target;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 重新跳转中...';
+    
+    // 调用重新支付API
+    fetch(`/eshop/api/retry-payment/${orderId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            alert('重新支付失败: ' + data.error);
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-redo"></i> 重新支付';
+        }
+    })
+    .catch(error => {
+        console.error('重新支付请求失败:', error);
+        alert('网络错误，请稍后重试');
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-redo"></i> 重新支付';
+    });
+}
+
+// 取消订单函数
+function cancelPayment(orderId) {
+    if (!confirm('确定要取消这个订单吗？取消后需要重新下单。')) return;
+    
+    fetch(`/eshop/api/cancel-order/${orderId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('订单已取消');
+            window.location.href = "{% url 'cart:cart_detail' %}";
+        } else {
+            alert('取消订单失败: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('取消订单请求失败:', error);
+        alert('网络错误，请稍后重试');
+    });
+}
+</script>
+
+<script>
+// 在 order_confirm.html 的 JavaScript 部分添加
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查是否有未支付的订单
+    checkPendingOrders();
+});
+
+function checkPendingOrders() {
+    fetch('/eshop/api/check-pending-orders/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.has_pending_orders) {
+            showPendingOrderWarning(data.orders);
+        }
+    })
+    .catch(error => {
+        console.error('检查未支付订单失败:', error);
+    });
+}
+
+function showPendingOrderWarning(orders) {
+    const warningHtml = `
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>發現未完成的訂單</strong> - 您有 ${orders.length} 個未支付的訂單。
+            <div class="mt-2">
+                ${orders.map(order => `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>訂單 #${order.id} - $${order.total_price}</span>
+                        <button class="btn btn-sm btn-outline-primary" onclick="useExistingOrder(${order.id})">
+                            使用此訂單
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+
+    // 在页面顶部插入警告
+    const container = document.querySelector('.container');
+    if (container) {
+        container.insertAdjacentHTML('afterbegin', warningHtml);
+    }
+}
+
+function useExistingOrder(orderId) {
+    // 设置使用现有订单的标记
+    const form = document.getElementById('payment-form');
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'use_existing_order';
+    hiddenInput.value = orderId;
+    form.appendChild(hiddenInput);
+    
+    // 提交表单
+    form.submit();
+}
+
+</script>
 {% endblock content %}
+
+

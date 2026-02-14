@@ -1,0 +1,104 @@
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="ftco-section-blank-small"></section>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="alert alert-danger">
+                <h4><i class="fas fa-exclamation-triangle"></i> 支付失败</h4>
+                <p class="mb-0">{{ error_message }}</p>
+            </div>
+            
+            {% if order %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">订单信息</h5>
+                    <p class="mb-1"><strong>订单号:</strong> #{{ order.id }}</p>
+                    <p class="mb-1"><strong>金额:</strong> ${{ order.total_price }}</p>
+                    <p class="mb-1"><strong>支付方式:</strong> 
+                        {% if order.payment_method == 'alipay' %}支付宝
+                        {% elif order.payment_method == 'paypal' %}PayPal
+                        {% elif order.payment_method == 'fps' %}FPS轉數快
+                        {% elif order.payment_method == 'cash' %}現金支付
+                        {% else %}{{ order.payment_method }}{% endif %}
+                    </p>
+                    
+                    <div class="mt-4">
+                        {% if can_retry %}
+                        <button id="retry-payment" class="btn btn-primary mr-2">
+                            <i class="fas fa-redo"></i> 重新支付
+                        </button>
+                        {% endif %}
+                        
+                        <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-secondary mr-2">
+                            <i class="fas fa-shopping-cart"></i> 返回购物车
+                        </a>
+                        
+                        <a href="{% url 'index' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-home"></i> 返回首页
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="mt-4">
+                <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-secondary mr-2">
+                    <i class="fas fa-shopping-cart"></i> 返回购物车
+                </a>
+                <a href="{% url 'index' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-home"></i> 返回首页
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="ftco-section-blank-small"></section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const retryButton = document.getElementById('retry-payment');
+    if (retryButton) {
+        retryButton.addEventListener('click', function() {
+            // 检查 order 是否存在
+            {% if order %}
+            // 显示加载状态
+            retryButton.disabled = true;
+            retryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
+            
+            // 调用重新支付API
+            fetch('{% url "eshop:retry_payment" order.id %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('重新支付失败: ' + data.error);
+                    retryButton.disabled = false;
+                    retryButton.innerHTML = '<i class="fas fa-redo"></i> 重新支付';
+                }
+            })
+            .catch(error => {
+                console.error('重新支付请求失败:', error);
+                alert('网络错误，请稍后重试');
+                retryButton.disabled = false;
+                retryButton.innerHTML = '<i class="fas fa-redo"></i> 重新支付';
+            });
+            {% else %}
+            alert('无法重新支付：订单信息不存在');
+            {% endif %}
+        });
+    }
+});
+</script>
+{% endblock %}

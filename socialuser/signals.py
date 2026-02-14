@@ -4,7 +4,41 @@ from django.db.models.signals import post_save, pre_save, pre_delete
 from allauth.account.models import EmailAddress
 from django.contrib.auth.models import User
 from .models import Profile
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
+from django.contrib.sites.models import Site
+from django.conf import settings
+import os
 
+
+@receiver(post_migrate)
+def update_site_domain(sender, **kwargs):
+    """在数据库迁移后更新站点域名"""
+    if sender.name == 'socialuser':
+        try:
+            is_railway = os.environ.get('RAILWAY_ENVIRONMENT') is not None
+            
+            if is_railway:
+                domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
+                name = 'Between Coffee - Railway'
+            else:
+                domain = 'localhost:8081'
+                name = 'Between Coffee - Local'
+            
+            site, created = Site.objects.get_or_create(
+                id=settings.SITE_ID,
+                defaults={'domain': domain, 'name': name}
+            )
+            
+            if not created and (site.domain != domain or site.name != name):
+                site.domain = domain
+                site.name = name
+                site.save()
+                print(f"Site domain updated to: {domain}")
+                
+        except Exception as e:
+            print(f"Error updating site domain: {e}")
+            
 
 @receiver(post_save, sender=User)       
 def user_postsave(sender, instance, created, **kwargs):

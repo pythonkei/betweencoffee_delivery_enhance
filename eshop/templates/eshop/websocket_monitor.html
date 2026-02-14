@@ -1,0 +1,521 @@
+{# templates/admin/websocket_monitor.html #}
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}WebSocket 監控儀表板{% endblock %}
+
+{% block extrahead %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+    .stat-card {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+    }
+    .stat-card:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .connection-item {
+        transition: background-color 0.2s;
+    }
+    .connection-item:hover {
+        background-color: #f8f9fa;
+    }
+    .badge-connection {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+    #chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4">
+        <i class="fas fa-plug mr-2"></i>WebSocket 即時監控
+        <small class="text-muted ml-2" style="font-size: 0.9rem;">管理員專用</small>
+    </h1>
+
+    <!-- 頂部工具列 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <button id="refresh-stats" class="btn btn-outline-primary">
+                <i class="fas fa-sync-alt mr-1"></i>手動刷新
+            </button>
+            <span id="auto-refresh-badge" class="ml-2 badge badge-light">
+                <i class="fas fa-clock mr-1"></i>自動刷新: 5秒
+            </span>
+        </div>
+        <div>
+            <button id="reset-stats-btn" class="btn btn-outline-danger">
+                <i class="fas fa-trash-alt mr-1"></i>重置統計
+            </button>
+        </div>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">活躍連線</div>
+                            <div id="stat-active" class="stat-value">0</div>
+                        </div>
+                        <div class="text-primary">
+                            <i class="fas fa-users fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">員工連線</div>
+                            <div id="stat-staff" class="stat-value">0</div>
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-user-tie fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">顧客連線</div>
+                            <div id="stat-customer" class="stat-value">0</div>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-user fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">累積訊息</div>
+                            <div id="stat-messages" class="stat-value">0</div>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-envelope fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖表區塊 + 連線列表 -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line mr-2"></i>連線數趨勢（最近5分鐘）</h5>
+                </div>
+                <div class="card-body">
+                    <div id="chart-container">
+                        <canvas id="connection-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list-ul mr-2"></i>目前連線</h5>
+                    <div>
+                        <label class="mr-2">
+                            <input type="checkbox" id="filter-staff-only" class="mr-1"> 僅顯示員工
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="connection-list-container" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>類型</th>
+                                    <th>使用者</th>
+                                    <th>連線時間</th>
+                                    <th>最後活動</th>
+                                </tr>
+                            </thead>
+                            <tbody id="connection-table-body">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        <i class="fas fa-spinner fa-spin mr-1"></i>載入中...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span id="connection-count-badge" class="badge badge-secondary">0 個連線</span>
+                        <button id="refresh-connections-btn" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-redo-alt mr-1"></i>刷新
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系統廣播工具 -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-bullhorn mr-2"></i>系統廣播</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input type="text" id="broadcast-message" class="form-control" 
+                                   placeholder="輸入廣播訊息..." maxlength="200">
+                            <div class="input-group-append">
+                                <select id="broadcast-type" class="custom-select" style="max-width: 120px;">
+                                    <option value="info">資訊</option>
+                                    <option value="warning">警告</option>
+                                    <option value="success">成功</option>
+                                </select>
+                                <button id="send-broadcast-btn" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane mr-1"></i>發送
+                                </button>
+                                <button id="broadcast-test-btn" class="btn btn-outline-secondary">
+                                    <i class="fas fa-vial mr-1"></i>測試廣播
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="broadcast-history" class="small text-muted">
+                        <span>📋 最近廣播：</span><span id="last-broadcast">無</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+    // WebSocket 監控儀表板控制器
+    class WebSocketMonitor {
+        constructor() {
+            this.stats = { active_connections: 0, staff_connections: 0, customer_connections: 0, total_messages: 0 };
+            this.connections = [];
+            this.chart = null;
+            this.chartData = {
+                labels: [],
+                active: [],
+                staff: [],
+                customer: []
+            };
+            this.autoRefreshInterval = null;
+            this.init();
+        }
+
+        init() {
+            this.loadStats();
+            this.loadConnections();
+            this.initChart();
+            this.bindEvents();
+            this.startAutoRefresh(5000); // 5秒
+        }
+
+        // ====== API 呼叫 ======
+        async fetchAPI(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...options
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error(`❌ API 錯誤 (${url}):`, error);
+                throw error;
+            }
+        }
+
+        async loadStats() {
+            try {
+                const data = await this.fetchAPI('/eshop/api/websocket/stats/');
+                if (data.success) {
+                    // ✅ 修正：stats 在 data.stats 中，不是 data.data
+                    this.stats = data.stats.summary;   // 根據 websocket_manager.get_stats() 結構
+                    this.updateStatsUI();
+                    this.addChartDataPoint();
+                }
+            } catch (error) {
+                this.showToast('獲取統計失敗', 'error');
+            }
+        }
+
+        async loadConnections(onlyStaff = false) {
+            try {
+                let url = '/eshop/api/websocket/connections/';
+                if (onlyStaff) url += '?user_type=staff';
+                const data = await this.fetchAPI(url);
+                if (data.success) {
+                    // ✅ 修正：connections 在 data.connections
+                    this.connections = data.connections || [];
+                    this.renderConnections();
+                }
+            } catch (error) {
+                this.showToast('獲取連線列表失敗', 'error');
+            }
+        }
+
+        async resetStats() {
+            if (!confirm('確定重置所有統計數據？')) return;
+            try {
+                const data = await this.fetchAPI('/eshop/api/websocket/reset-stats/', {
+                    method: 'POST'
+                });
+                if (data.success) {
+                    this.showToast('統計已重置', 'success');
+                    this.loadStats();
+                    this.loadConnections();
+                }
+            } catch (error) {
+                this.showToast('重置失敗', 'error');
+            }
+        }
+
+        async sendBroadcast(message, type = 'info') {
+            if (!message.trim()) {
+                this.showToast('請輸入訊息', 'warning');
+                return;
+            }
+            try {
+                const data = await this.fetchAPI('/eshop/api/websocket/broadcast-test/', {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        message: message,
+                        message_type: type 
+                    })
+                });
+                if (data.success) {
+                    // ✅ 修正：recipient_count 在 data.data.recipient_count
+                    const count = data.data?.recipient_count || 0;
+                    this.showToast(`✅ 廣播已發送 (${count} 個連線)`, 'success');
+                    document.getElementById('last-broadcast').innerText = `${message} (${new Date().toLocaleTimeString()})`;
+                    document.getElementById('broadcast-message').value = '';
+                }
+            } catch (error) {
+                this.showToast('廣播發送失敗', 'error');
+            }
+        }
+
+        async broadcastTest() {
+            try {
+                const data = await this.fetchAPI('/eshop/api/websocket/broadcast-test/');
+                if (data.success) {
+                    const count = data.data?.recipient_count || 0;
+                    this.showToast(`✅ 測試廣播已發送 (${count} 個連線)`, 'success');
+                    document.getElementById('last-broadcast').innerText = `測試廣播 (${new Date().toLocaleTimeString()})`;
+                }
+            } catch (error) {
+                this.showToast('測試廣播失敗', 'error');
+            }
+        }
+
+        // ====== UI 更新 ======
+        updateStatsUI() {
+            document.getElementById('stat-active').innerText = this.stats.active_connections || 0;
+            // 注意：staff_connections 與 customer_connections 不在 summary 中，需要另外計算
+            // 我們可以從 this.connections 即時計算，或後續擴充 API
+            // 暫時先設為 0，但可從 this.connections 過濾
+            const staffCount = this.connections.filter(c => c.user_type === 'staff').length;
+            const customerCount = this.connections.filter(c => c.user_type === 'customer').length;
+            document.getElementById('stat-staff').innerText = staffCount;
+            document.getElementById('stat-customer').innerText = customerCount;
+            document.getElementById('stat-messages').innerText = this.stats.messages_sent || 0;
+            document.getElementById('connection-count-badge').innerText = `${this.connections.length} 個連線`;
+        }
+
+        renderConnections() {
+            const tbody = document.getElementById('connection-table-body');
+            if (!this.connections || this.connections.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">目前無活動連線</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            this.connections.forEach(conn => {
+                const userType = conn.user_type || 'unknown';
+                const userTypeClass = userType === 'staff' ? 'badge-primary' : 'badge-info';
+                const userTypeText = userType === 'staff' ? '員工' : (userType === 'customer' ? '顧客' : '其他');
+                
+                html += `<tr class="connection-item">
+                    <td><small>${conn.connection_id?.substring(0, 8) || '-'}</small></td>
+                    <td><span class="badge ${userTypeClass} badge-pill">${userTypeText}</span></td>
+                    <td>${conn.username || conn.user_id || '匿名'}</td>
+                    <td><small>${this.formatTime(conn.connected_at)}</small></td>
+                    <td><small>${this.formatTime(conn.last_activity)}</small></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ====== 圖表 ======
+        initChart() {
+            const ctx = document.getElementById('connection-chart').getContext('2d');
+            this.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: this.chartData.labels,
+                    datasets: [
+                        {
+                            label: '總連線',
+                            data: this.chartData.active,
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0,123,255,0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: '員工',
+                            data: this.chartData.staff,
+                            borderColor: '#17a2b8',
+                            backgroundColor: 'rgba(23,162,184,0.1)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '顧客',
+                            data: this.chartData.customer,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40,167,69,0.1)',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+        }
+
+        addChartDataPoint() {
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            this.chartData.labels.push(timeLabel);
+            this.chartData.active.push(this.stats.active_connections || 0);
+            this.chartData.staff.push(this.stats.staff_connections || 0);
+            this.chartData.customer.push(this.stats.customer_connections || 0);
+
+            // 保留最近20個點
+            if (this.chartData.labels.length > 20) {
+                this.chartData.labels.shift();
+                this.chartData.active.shift();
+                this.chartData.staff.shift();
+                this.chartData.customer.shift();
+            }
+
+            if (this.chart) {
+                this.chart.update();
+            }
+        }
+
+        // ====== 自動刷新 ======
+        startAutoRefresh(ms) {
+            if (this.autoRefreshInterval) clearInterval(this.autoRefreshInterval);
+            this.autoRefreshInterval = setInterval(() => {
+                this.loadStats();
+                if (document.getElementById('filter-staff-only').checked) {
+                    this.loadConnections(true);
+                } else {
+                    this.loadConnections();
+                }
+            }, ms);
+        }
+
+        // ====== 事件綁定 ======
+        bindEvents() {
+            document.getElementById('refresh-stats').addEventListener('click', () => {
+                this.loadStats();
+                this.loadConnections();
+            });
+
+            document.getElementById('refresh-connections-btn').addEventListener('click', () => {
+                const onlyStaff = document.getElementById('filter-staff-only').checked;
+                this.loadConnections(onlyStaff);
+            });
+
+            document.getElementById('filter-staff-only').addEventListener('change', (e) => {
+                this.loadConnections(e.target.checked);
+            });
+
+            document.getElementById('reset-stats-btn').addEventListener('click', () => this.resetStats());
+            document.getElementById('send-broadcast-btn').addEventListener('click', () => {
+                const msg = document.getElementById('broadcast-message').value;
+                const type = document.getElementById('broadcast-type').value;
+                this.sendBroadcast(msg, type);
+            });
+            document.getElementById('broadcast-test-btn').addEventListener('click', () => this.broadcastTest());
+        }
+
+        // ====== 輔助 ======
+        formatTime(isoString) {
+            if (!isoString) return '--';
+            try {
+                const date = new Date(isoString);
+                return date.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } catch {
+                return isoString;
+            }
+        }
+
+        showToast(message, type = 'info') {
+            // 簡單 alert，可替換為漂亮 toast
+            alert(`[${type.toUpperCase()}] ${message}`);
+        }
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        window.wsMonitor = new WebSocketMonitor();
+    });
+</script>
+{% endblock %}

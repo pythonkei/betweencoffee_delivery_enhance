@@ -3,6 +3,8 @@
 from django.utils.deprecation import MiddlewareMixin
 from cart.cart import Cart
 from django.conf import settings
+import logging
+logger = logging.getLogger(__name__)
 
 
 class CartMiddleware(MiddlewareMixin):
@@ -45,5 +47,27 @@ class AdminSessionMiddleware:
                     response.cookies[cookie]['path'] = '/admin/'
                 elif cookie == 'csrftoken':
                     response.cookies[cookie]['path'] = '/admin/'
+        
+        return response
+    
+
+
+class DebugMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # 请求前
+        if request.path == '/eshop/order_confirm/' and request.method == 'POST':
+            logger.info(f"订单确认POST请求: {request.POST}")
+            logger.info(f"Session内容: {dict(request.session)}")
+        
+        response = self.get_response(request)
+        
+        # 请求后
+        if request.path == '/eshop/order_confirm/' and request.method == 'POST':
+            logger.info(f"响应状态: {response.status_code}")
+            if hasattr(response, 'url'):
+                logger.info(f"重定向到: {response.url}")
         
         return response

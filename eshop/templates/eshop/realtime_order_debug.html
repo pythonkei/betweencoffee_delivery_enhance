@@ -1,0 +1,189 @@
+<!-- eshop/templates/eshop/realtime_order_debug.html -->
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col col-lg-10">
+                <h2 class="mb-4 text-center">订单实时调试 - #{{ order.id }}</h2>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">订单状态</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th width="40%">订单ID</th>
+                                        <td>{{ order_info.id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>状态</th>
+                                        <td>
+                                            <span class="badge badge-{% if order_info.status == 'paid' %}success{% else %}warning{% endif %}">
+                                                {{ order_info.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>是否已支付</th>
+                                        <td>
+                                            <span class="badge badge-{% if order_info.is_paid %}success{% else %}danger{% endif %}">
+                                                {{ order_info.is_paid }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>支付方式</th>
+                                        <td>{{ order_info.payment_method }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th width="40%">总金额</th>
+                                        <td>${{ order_info.total_price }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>创建时间</th>
+                                        <td>{{ order_info.created_at }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>支付超时</th>
+                                        <td>{{ order_info.payment_timeout|default:"未设置" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>支付尝试</th>
+                                        <td>{{ order_info.payment_attempts }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">支付检查</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="alert alert-{% if order_info.can_retry_payment %}success{% else %}danger{% endif %}">
+                                    <h6>可重试支付</h6>
+                                    <h4>{{ order_info.can_retry_payment }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="alert alert-{% if not order_info.is_payment_timeout %}success{% else %}danger{% endif %}">
+                                    <h6>支付超时</h6>
+                                    <h4>{{ order_info.is_payment_timeout }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="alert alert-{% if order_info.is_paid %}success{% else %}warning{% endif %}">
+                                    <h6>支付状态</h6>
+                                    <h4>{{ order_info.is_paid }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Session信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th width="40%">current_payment_order_id</th>
+                                <td>{{ session_info.current_payment_order_id|default:"未设置" }}</td>
+                            </tr>
+                            <tr>
+                                <th>payment_start_time</th>
+                                <td>{{ session_info.payment_start_time|default:"未设置" }}</td>
+                            </tr>
+                            <tr>
+                                <th>last_order_id</th>
+                                <td>{{ session_info.last_order_id|default:"未设置" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">调试操作</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <a href="{% url 'eshop:alipay_payment' order.id %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-play"></i> 测试支付流程
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <button id="refresh-btn" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-sync-alt"></i> 刷新状态
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="{% url 'eshop:order_payment_confirmation' %}?order_id={{ order.id }}" class="btn btn-outline-success btn-block">
+                                    <i class="fas fa-check"></i> 支付确认页面
+                                </a>
+                            </div>
+                            <!-- 在实时调试页面的调试操作部分添加 -->
+                            <div class="col-md-4 mb-3">
+                                <a href="{% url 'eshop:test_payment_flow' order.id %}" class="btn btn-info btn-block">
+                                    <i class="fas fa-vial"></i> 测试支付流程
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <a href="{% url 'eshop:debug_order_creation' %}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-bug"></i> 订单创建调试
+                            </a>
+                            <a href="{% url 'eshop:payment_debug' %}" class="btn btn-secondary">
+                                <i class="fas fa-cog"></i> 支付调试首页
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 自动刷新功能
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        window.location.reload();
+    });
+    
+    // 每10秒自动刷新一次
+    setInterval(function() {
+        window.location.reload();
+    }, 10000);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+<!-- eshop/templates/eshop/debug_alipay_config.html -->
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col col-lg-10">
+                <h2 class="mb-4 text-center">支付宝配置详细调试</h2>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">配置状态</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            {% for key, value in config_info.items %}
+                            <tr>
+                                <th width="40%">{{ key }}</th>
+                                <td>
+                                    {% if key == 'test_payment_url' %}
+                                        <a href="{{ value }}" target="_blank">{{ value|truncatechars:50 }}</a>
+                                    {% else %}
+                                        {{ value }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">调试工具</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <a href="{% url 'eshop:check_alipay_config' %}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-cog"></i> 配置检查
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="{% url 'eshop:check_alipay_keys' %}" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-key"></i> 密钥检查
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="{% url 'eshop:check_key_match' %}" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-exchange-alt"></i> 密钥匹配
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'eshop:payment_debug' %}" class="btn btn-secondary mr-2">
+                        <i class="fas fa-cog"></i> 支付调试首页
+                    </a>
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+{% endblock %}

@@ -79,7 +79,7 @@
 <!-- end owl-carousel -->
 
 
-<!-- Shop info & Quick Order box -->
+<!-- Shop info & 快速訂單 -->
 <section class="ftco-intro">
     <div class="container-wrap">
         <div class="wrap d-md-flex align-items-xl-end">
@@ -133,16 +133,20 @@
                                     <div class="icon"><span class="ion-md-clock"></span></div>
                                     <input type="text" class="form-control ui-timepicker-standard" id="time" value="" placeholder="提取時間" autocomplete="off">
                                 </div>
+                                <!-- 修改取貨時間選項的 value 值，只存儲數字 -->
                                 <div class="select-wrap">
                                     <div class="icon"><span class="icon material-symbols-outlined">schedule</span></div>
                                     <select name="pickup_time" class="form-control" autocomplete="off" required>
-                                        <option value="5 分鐘後">5 分鐘後</option>
+                                        <!-- ✅ 修改：value 只存儲數字，方便後續處理 -->
+                                        <option value="5">5 分鐘後</option>
                                         <optgroup></optgroup>
-                                        <option value="10 分鐘後">10 分鐘後</option>
+                                        <option value="10">10 分鐘後</option>
                                         <optgroup></optgroup>
-                                        <option value="15 分鐘後">15 分鐘後</option>
+                                        <option value="15">15 分鐘後</option>
                                         <optgroup></optgroup>
-                                        <option value="30 分鐘後">30 分鐘後</option>
+                                        <option value="20">20 分鐘後</option>
+                                        <optgroup></optgroup>
+                                        <option value="30">30 分鐘後</option>
                                     </select>
                                 </div>
                             </div>
@@ -169,7 +173,7 @@
                                         <select name="cup_size" id="" class="form-control" autocomplete="off" required>
                                             <option value="大">大</option>
                                             <optgroup></optgroup>
-                                            <option value="正常" selected>正常</option>
+                                            <option value="中" selected>中</option>
                                             <optgroup></optgroup>
                                             <option value="細">細</option>
                                         </select>

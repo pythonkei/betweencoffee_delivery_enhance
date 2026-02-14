@@ -1,0 +1,401 @@
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block title %}订单制作进度{% endblock %}
+
+{% block content %}
+<section class="ftco-section-blank-small"></section>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-coffee"></i> 您的订单制作进度</h4>
+                </div>
+                <div class="card-body">
+                    <!-- 订单信息 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>订单信息</h5>
+                            <p><strong>订单号:</strong> #{{ order.id }}</p>
+                            <p><strong>取餐码:</strong> <span class="badge badge-primary">{{ order.pickup_code }}</span></p>
+                            <p><strong>顾客姓名:</strong> {{ order.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>制作状态</h5>
+                            <div id="queue-status">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">加载中...</span>
+                                </div>
+                                <p class="mt-2">正在获取队列信息...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 进度条 -->
+                    <div class="progress mb-4" style="height: 25px;">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    
+                    <!-- 状态时间线 -->
+                    <div class="timeline mb-4" id="status-timeline">
+                        <!-- 动态生成时间线 -->
+                    </div>
+                    
+                    <!-- 队列详情 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>制作队列详情</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="queue-details">
+                                <!-- 动态加载队列详情 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <button class="btn btn-primary" onclick="refreshQueueStatus()">
+                        <i class="fas fa-sync-alt"></i> 刷新状态
+                    </button>
+                    <a href="{% url 'eshop:order_payment_confirmation' %}?order_id={{ order.id }}" 
+                       class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 返回订单详情
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 二维码模态框 -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">取餐二维码</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                {% if order.qr_code %}
+                <img src="data:image/png;base64,{{ order.qr_code }}" 
+                     class="img-fluid" alt="取餐二维码">
+                <p class="mt-2">订单号: #{{ order.id }}</p>
+                <p>取餐码: {{ order.pickup_code }}</p>
+                {% else %}
+                <p>二维码生成中...</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="ftco-section-blank-small"></section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 初始加载队列状态
+    loadQueueStatus();
+    
+    // 每30秒自动刷新
+    setInterval(loadQueueStatus, 30000);
+});
+
+// 加载队列状态
+function loadQueueStatus() {
+    $.ajax({
+        url: '{% url "eshop:get_queue_status_api" order.id %}',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            updateQueueStatus(response);
+        },
+        error: function(xhr, status, error) {
+            $('#queue-status').html(`
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    无法获取队列信息，请稍后重试
+                </div>
+            `);
+        }
+    });
+}
+
+// 刷新队列状态
+function refreshQueueStatus() {
+    $('#queue-status').html(`
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载中...</span>
+        </div>
+        <p class="mt-2">正在刷新...</p>
+    `);
+    loadQueueStatus();
+}
+
+// 更新队列状态显示
+function updateQueueStatus(data) {
+    let statusHtml = '';
+    let progress = 0;
+    let timelineHtml = '';
+    
+    if (data.queue_info) {
+        // 有队列信息（咖啡订单）
+        switch(data.queue_info.status) {
+            case 'waiting':
+                statusHtml = `
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-clock"></i> 等待制作</h5>
+                        <p>队列位置: 第 <strong>${data.queue_info.queue_position}</strong> 位</p>
+                        <p>预计等待时间: <strong>${data.queue_info.queue_wait_minutes} 分钟</strong></p>
+                        <p>预计开始制作: <strong>${formatTime(data.queue_info.estimated_start_time)}</strong></p>
+                    </div>
+                `;
+                progress = 25;
+                timelineHtml = buildTimeline('waiting', data.queue_info);
+                break;
+                
+            case 'preparing':
+                statusHtml = `
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-blender"></i> 正在制作中</h5>
+                        <p>咖啡师: <strong>${data.queue_info.barista || '准备中'}</strong></p>
+                        <p>预计完成时间: <strong>${formatTime(data.queue_info.estimated_completion_time)}</strong></p>
+                        <p>剩余时间: <strong>${data.queue_info.remaining_minutes || 0} 分钟</strong></p>
+                    </div>
+                `;
+                progress = 60;
+                timelineHtml = buildTimeline('preparing', data.queue_info);
+                break;
+                
+            case 'ready':
+                statusHtml = `
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle"></i> 已就绪，请取餐</h5>
+                        <p>制作完成时间: <strong>${formatTime(data.queue_info.actual_completion_time)}</strong></p>
+                        <p class="mt-2">
+                            <button class="btn btn-success" onclick="$('#qrCodeModal').modal('show')">
+                                <i class="fas fa-qrcode"></i> 显示取餐二维码
+                            </button>
+                        </p>
+                    </div>
+                `;
+                progress = 100;
+                timelineHtml = buildTimeline('ready', data.queue_info);
+                break;
+        }
+        
+        // 更新进度条
+        $('#progress-bar').css('width', progress + '%');
+        $('#progress-bar').text(progress + '%');
+        
+    } else {
+        // 无队列信息（可能是纯咖啡豆订单）
+        statusHtml = `
+            <div class="alert alert-success">
+                <h5><i class="fas fa-check"></i> 订单已准备就绪</h5>
+                <p>此订单为咖啡豆订单，无需制作，请前往柜台提取</p>
+                <p class="mt-2">
+                    <button class="btn btn-success" onclick="$('#qrCodeModal').modal('show')">
+                        <i class="fas fa-qrcode"></i> 显示取餐二维码
+                    </button>
+                </p>
+            </div>
+        `;
+        progress = 100;
+        timelineHtml = buildSimpleTimeline();
+    }
+    
+    $('#queue-status').html(statusHtml);
+    $('#status-timeline').html(timelineHtml);
+    
+    // 更新队列详情
+    updateQueueDetails(data);
+}
+
+// 构建时间线
+function buildTimeline(status, queueInfo) {
+    let timeline = `
+        <div class="timeline-container">
+            <div class="timeline-item ${status === 'waiting' || status === 'preparing' || status === 'ready' ? 'active' : ''}">
+                <div class="timeline-dot bg-success">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6>订单确认</h6>
+                    <p>${formatTime('{% now "Y-m-d H:i:s" %}')}</p>
+                </div>
+            </div>
+    `;
+    
+    if (queueInfo.estimated_start_time) {
+        timeline += `
+            <div class="timeline-item ${status === 'preparing' || status === 'ready' ? 'active' : ''}">
+                <div class="timeline-dot ${status === 'preparing' || status === 'ready' ? 'bg-info' : 'bg-secondary'}">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6>开始制作</h6>
+                    <p>预计: ${formatTime(queueInfo.estimated_start_time)}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (queueInfo.estimated_completion_time) {
+        timeline += `
+            <div class="timeline-item ${status === 'ready' ? 'active' : ''}">
+                <div class="timeline-dot ${status === 'ready' ? 'bg-success' : 'bg-secondary'}">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6>制作完成</h6>
+                    <p>预计: ${formatTime(queueInfo.estimated_completion_time)}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (queueInfo.actual_completion_time) {
+        timeline += `
+            <div class="timeline-item active">
+                <div class="timeline-dot bg-success">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6>已就绪</h6>
+                    <p>完成时间: ${formatTime(queueInfo.actual_completion_time)}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    timeline += `</div>`;
+    return timeline;
+}
+
+// 构建简单时间线（纯咖啡豆订单）
+function buildSimpleTimeline() {
+    return `
+        <div class="timeline-container">
+            <div class="timeline-item active">
+                <div class="timeline-dot bg-success">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6>订单确认</h6>
+                    <p>已支付完成</p>
+                </div>
+            </div>
+            <div class="timeline-item active">
+                <div class="timeline-dot bg-success">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6>准备完成</h6>
+                    <p>咖啡豆已准备就绪</p>
+                </div>
+            </div>
+            <div class="timeline-item active">
+                <div class="timeline-dot bg-success">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6>待提取</h6>
+                    <p>请前往柜台提取</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 更新队列详情
+function updateQueueDetails(data) {
+    let detailsHtml = '';
+    
+    if (data.queue_info) {
+        detailsHtml = `
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>队列位置:</strong> ${data.queue_info.queue_position}</p>
+                    <p><strong>预计开始:</strong> ${formatTime(data.queue_info.estimated_start_time)}</p>
+                    <p><strong>预计完成:</strong> ${formatTime(data.queue_info.estimated_completion_time)}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>状态:</strong> ${data.queue_info.status === 'waiting' ? '等待中' : 
+                                             data.queue_info.status === 'preparing' ? '制作中' : '已就绪'}</p>
+                    <p><strong>制作时间:</strong> ${data.queue_info.preparation_time_minutes} 分钟</p>
+                    <p><strong>咖啡师:</strong> ${data.queue_info.barista || '待分配'}</p>
+                </div>
+            </div>
+        `;
+    } else {
+        detailsHtml = `
+            <div class="alert alert-info">
+                <p><i class="fas fa-info-circle"></i> 此订单为咖啡豆订单，无需制作队列</p>
+                <p>您可以直接前往柜台凭取餐码提取</p>
+            </div>
+        `;
+    }
+    
+    $('#queue-details').html(detailsHtml);
+}
+
+// 格式化时间
+function formatTime(dateString) {
+    if (!dateString) return '计算中';
+    let date = new Date(dateString);
+    return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}
+</script>
+
+<style>
+.timeline-container {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.timeline-item.active .timeline-dot {
+    background: #28a745 !important;
+}
+
+.timeline-content {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+</style>
+{% endblock %}

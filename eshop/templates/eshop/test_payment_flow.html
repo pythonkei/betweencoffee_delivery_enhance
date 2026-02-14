@@ -1,0 +1,102 @@
+<!-- eshop/templates/eshop/test_payment_flow.html -->
+{% extends 'betweencoffee_delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col col-lg-10">
+                <h2 class="mb-4 text-center">支付流程测试 - 订单 #{{ order.id }}</h2>
+                
+                {% if success %}
+                <div class="alert alert-success">
+                    <h4><i class="fas fa-check-circle"></i> 支付URL生成成功</h4>
+                    <p>支付宝支付URL已成功生成，可以正常进行支付。</p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">支付信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>订单ID:</strong> {{ order.id }}</p>
+                        <p><strong>订单金额:</strong> ${{ order.total_price }}</p>
+                        <p><strong>支付方式:</strong> {{ order.payment_method }}</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">支付操作</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>点击下面的按钮打开支付宝支付页面：</p>
+                        <a href="{{ payment_url }}" target="_blank" class="btn btn-primary btn-lg">
+                            <i class="fas fa-external-link-alt"></i> 打开支付宝支付页面
+                        </a>
+                        
+                        <hr>
+                        
+                        <div class="mt-3">
+                            <h6>支付URL详情：</h6>
+                            <div class="alert alert-info">
+                                <small>{{ payment_url|truncatechars:100 }}</small>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyPaymentUrl()">
+                                <i class="fas fa-copy"></i> 复制支付URL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                {% else %}
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 支付URL生成失败</h4>
+                    <p>无法生成支付宝支付URL，请检查配置。</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">错误信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <strong>错误详情：</strong> {{ error }}
+                        </div>
+                        
+                        <p><strong>订单ID:</strong> {{ order_id }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'eshop:realtime_order_debug' order.id %}" class="btn btn-secondary mr-2">
+                        <i class="fas fa-bug"></i> 返回实时调试
+                    </a>
+                    <a href="{% url 'eshop:payment_debug' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog"></i> 支付调试首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+<script>
+function copyPaymentUrl() {
+    const paymentUrl = "{{ payment_url }}";
+    navigator.clipboard.writeText(paymentUrl).then(function() {
+        alert("支付URL已复制到剪贴板");
+    }, function() {
+        alert("复制失败，请手动复制");
+    });
+}
+</script>
+
+{% endblock %}

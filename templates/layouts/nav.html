@@ -27,7 +27,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'cart:cart_detail' %}">
                         <i class="icon-shopping-cart"></i>
-                        <span class="cart-count cart-amount-label cart-amount-label-pill">{{ cart|length }}</span>
+                        <span class="cart-count cart-amount-label cart-amount-label-pill">{{ cart_count }}</span>
                     </a>
                 </li>
                 
@@ -63,15 +63,6 @@
                             <a hidden class="dropdown-item" href="{% url 'account_signup' %}">
                                 <i class="icon-user-plus mr-2"></i> 註冊
                             </a>
-                            <!--
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{% provider_login_url 'google' %}">
-                                <i class="icon-google mr-2"></i> Continue with Google
-                            </a>
-                            <a class="dropdown-item" href="{% provider_login_url 'facebook' %}">
-                                <i class="icon-facebook mr-2"></i> Continue with Facebook
-                            </a>
-                            -->
                         {% endif %}
                     </div>
                 </li>

@@ -23,6 +23,7 @@ from .views import Index, About, CoffeeMenu, Coffee, BeanMenu, Bean, CoffeeMenuS
 # from eshop.views import OrderConfirm
 from socialuser.views import profile_view
 from django.http import HttpResponse
+from django.urls import include, path
 
 
 # 健康检查视图
@@ -35,6 +36,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', Index.as_view(), name='index'), # find own app html file
+    path('__debug__/', include('debug_toolbar.urls')),
     path('profile/', include('socialuser.urls')),
     path('@<username>/', profile_view, name="profile"),
 

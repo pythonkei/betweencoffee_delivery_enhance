@@ -1,0 +1,106 @@
+{% extends 'layouts/blank.html' %}
+{% load i18n %}
+{% load socialaccount %}  {# 添加这行 #}
+
+{% block blank_inner_content %}
+
+    <style>
+        .debug-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .config-item { margin: 10px 0; }
+        .callback-url { background: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; }
+    </style>
+
+<section class="ftco-subpage-section">
+    <div class="debug-container">
+        <h1>Social Login Debug Information</h1>
+        
+        <div class="section info">
+            <h2>Environment Information</h2>
+            <div class="config-item">
+                <strong>Current Site:</strong> {{ current_site.domain }} ({{ current_site.name }})
+            </div>
+            <div class="config-item">
+                <strong>Environment:</strong> {% if is_railway %}Railway{% else %}Local Development{% endif %}
+            </div>
+            <div class="config-item">
+                <strong>Debug Mode:</strong> {{ debug }}
+            </div>
+        </div>
+
+        <div class="section {% if google_configured %}success{% else %}error{% endif %}">
+            <h2>Google OAuth Configuration</h2>
+            <div class="config-item">
+                <strong>Status:</strong> {% if google_configured %}Configured{% else %}Not Configured{% endif %}
+            </div>
+            {% if google_configured %}
+            <div class="config-item">
+                <strong>Client ID:</strong> {{ google_app.client_id|truncatechars:30 }}...
+            </div>
+            <div class="config-item">
+                <strong>Secret:</strong> {{ google_app.secret|truncatechars:10 }}...
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section {% if facebook_configured %}success{% else %}error{% endif %}">
+            <h2>Facebook OAuth Configuration</h2>
+            <div class="config-item">
+                <strong>Status:</strong> {% if facebook_configured %}Configured{% else %}Not Configured{% endif %}
+            </div>
+            {% if facebook_configured %}
+            <div class="config-item">
+                <strong>Client ID:</strong> {{ facebook_app.client_id }}
+            </div>
+            <div class="config-item">
+                <strong>Secret:</strong> {{ facebook_app.secret|truncatechars:10 }}...
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section info">
+            <h2>Callback URLs</h2>
+            <p><strong>Important:</strong> Add these URLs to your OAuth provider configurations:</p>
+            
+            <div class="config-item">
+                <strong>Google Callback:</strong>
+                <div class="callback-url">{{ callback_urls.google }}</div>
+            </div>
+            
+            <div class="config-item">
+                <strong>Facebook Callback:</strong>
+                <div class="callback-url">{{ callback_urls.facebook }}</div>
+            </div>
+        </div>
+
+        <div class="section warning">
+            <h2>Environment Variables</h2>
+            {% for key, value in environment_vars.items %}
+            <div class="config-item">
+                <strong>{{ key }}:</strong> {{ value }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="section">
+            <h2>Test Links</h2>
+            <div class="config-item">
+                <a href="{% provider_login_url 'google' %}" style="background: #4285f4; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                    Test Google Login
+                </a>
+            </div>
+            <div class="config-item">
+                <a href="{% provider_login_url 'facebook' %}" style="background: #1877f2; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                    Test Facebook Login
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="flexable-vh-20"></div>
+{% endblock %}

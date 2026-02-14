@@ -27,19 +27,16 @@ from cart.cart import Cart  # Import the Cart class
 # 當使用者向伺服器發送 GET 請求時渲染 HTML template模板
 class Index(View): 
     def get(self, request, *args, **kwargs):
-        # 修改这里：按照 hot_item_order 排序，数字小的靠前
         shop_hot_coffees = CoffeeItem.objects.filter(
             is_shop_hot_item=True, 
             is_published=True
         )[:4]
         
-        cart = Cart(request)  # Initialize the cart
-
+        # 简化：上下文处理器已经处理了cart，这里不需要重复
         context = {
             'shop_hot_coffees': shop_hot_coffees,
-            'cart': cart,  # keep cart count fn
         }
-        return render (request, 'betweencoffee_delivery/index.html', context)
+        return render(request, 'betweencoffee_delivery/index.html', context)
 
 
 
