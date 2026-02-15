@@ -40,7 +40,7 @@
                             <td>{{ order.phone }}</td>
                             <td>{{ order.email }}</td>
                             <td>
-                                {% if order.is_paid %}
+                                {% if order.payment_status == 'paid' %}
                                 <i style="color: green;" class="fas fa-check"></i>
                                 {% else %}
                                 <i style="color: red;" class="fas fa-times"></i>

@@ -849,7 +849,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 检查是否有未支付的订单
     const urlParams = new URLSearchParams(window.location.search);
     const returnedFromPayment = urlParams.get('returned_from') === 'alipay';
-    const hasPendingOrder = {% if order and not order.is_paid %}true{% else %}false{% endif %};
+    const hasPendingOrder = {% if order and order.payment_status != 'paid' %}true{% else %}false{% endif %};
     
     if (returnedFromPayment && hasPendingOrder) {
         showPaymentCancelWarning();
@@ -898,7 +898,7 @@ function checkPaymentStatus() {
     fetch(`/eshop/api/check-payment-status/${orderId}/`)
         .then(response => response.json())
         .then(data => {
-            if (data.is_paid) {
+            if (data.payment_status === 'paid') {
                 // 支付成功，跳转到成功页面
                 window.location.href = "{% url 'eshop:order_payment_confirmation' %}?order_id=" + orderId;
             } else if (data.can_retry) {

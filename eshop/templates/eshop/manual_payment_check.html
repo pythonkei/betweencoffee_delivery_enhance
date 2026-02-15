@@ -22,7 +22,7 @@
                         <div class="alert alert-info">
                             <h6>当前状态:</h6>
                             <p>
-                                {% if order.is_paid %}
+                                {% if order.payment_status == 'paid' %}
                                     <span class="badge badge-success">已支付</span>
                                 {% else %}
                                     <span class="badge badge-warning">待支付</span>
@@ -67,7 +67,7 @@ document.getElementById('check-status-btn').addEventListener('click', function()
         .then(data => {
             const resultDiv = document.getElementById('status-result');
             
-            if (data.is_paid) {
+            if (data.payment_status === 'paid') {
                 resultDiv.innerHTML = `
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle mr-2"></i>

@@ -1,12 +1,9 @@
 # eshop/views/order_views.py
-import json
 import logging
-import traceback
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.utils import timezone
-from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -18,44 +15,18 @@ from datetime import timedelta
 
 # ✅ 修復：使用絕對導入，避免相對導入問題
 from eshop.models import OrderModel, CoffeeItem, BeanItem, CoffeeQueue
-from eshop.time_service import time_service
 from eshop.order_status_manager import OrderStatusManager
 from eshop.view_utils import (
     validate_and_format_phone,
-    prepare_order_confirm_context,
-    prepare_payment_error_context,
-    redirect_to_confirmation,
-    redirect_to_payment_failed,
-    handle_payment_by_order_id,
-    clear_payment_session,
-    send_payment_notifications,
-    are_orders_similar,
     find_existing_pending_order,
-    calculate_dynamic_wait_time,
-    staff_required,
-    customer_only,
-    json_response_success,
-    json_response_error,
-    process_cart_data,
-    process_quick_order_data,
-    verify_order_permission,
-    log_order_event,
-    log_payment_attempt,
-    calculate_order_total,
-    create_order_items,
-    validate_order_data,
     handle_order_error,
     handle_payment_error,
     handle_validation_error,
-    catch_order_errors,
-    handle_cart_error,
+    OrderErrorHandler,  # 新增：統一錯誤處理器
 )
 
-from eshop.queue_manager import CoffeeQueueManager
-from eshop.payment_utils import get_payment_tools, get_alipay_return_url, get_alipay_notify_url, get_payment_urls, handle_payment_callback
-
-from eshop.websocket_utils import send_order_update, send_queue_update
-from eshop.time_service import time_service
+from eshop.payment_utils import get_payment_tools
+from cart.cart import Cart
 
 
 # 设置日志

@@ -25,18 +25,18 @@
                                         <td>{{ order_info.id }}</td>
                                     </tr>
                                     <tr>
-                                        <th>状态</th>
+                                        <th>是否已支付</th>
                                         <td>
-                                            <span class="badge badge-{% if order_info.status == 'paid' %}success{% else %}warning{% endif %}">
-                                                {{ order_info.status }}
+                                            <span class="badge badge-{% if order_info.payment_status == 'paid' %}success{% else %}danger{% endif %}">
+                                                {{ order_info.payment_status }}
                                             </span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>是否已支付</th>
                                         <td>
-                                            <span class="badge badge-{% if order_info.is_paid %}success{% else %}danger{% endif %}">
-                                                {{ order_info.is_paid }}
+                                            <span class="badge badge-{% if order_info.payment_status == 'paid' %}success{% else %}danger{% endif %}">
+                                                {{ order_info.payment_status }}
                                             </span>
                                         </td>
                                     </tr>
@@ -89,9 +89,9 @@
                                 </div>
                             </div>
                             <div class="col-md-4 text-center">
-                                <div class="alert alert-{% if order_info.is_paid %}success{% else %}warning{% endif %}">
+                                <div class="alert alert-{% if order_info.payment_status == 'paid' %}success{% else %}warning{% endif %}">
                                     <h6>支付状态</h6>
-                                    <h4>{{ order_info.is_paid }}</h4>
+                                    <h4>{{ order_info.payment_status }}</h4>
                                 </div>
                             </div>
                         </div>

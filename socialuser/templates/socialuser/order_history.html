@@ -31,7 +31,7 @@
                                 </p>
                                 <!-- 统一的订单状态显示 -->
                                 <div class="mt-2">
-                                    {% if order.is_paid %}
+                                    {% if order.payment_status == 'paid' %}
                                         {% if order.status == 'preparing' %}
                                             <span class="badge badge-orange preparing-countdown" data-order-id="{{ order.id }}">
                                                 <i class="fas fa-check-circle mr-1"></i>已支付 - 製作中: 
@@ -131,17 +131,17 @@
 
                             <!-- 订单操作按钮 -->
                             <div>
-                                {% if order.is_paid and order.status == 'completed' %}
+                                {% if order.payment_status == 'paid' and order.status == 'completed' %}
                                     <!-- 隐藏"订单已完成"信息文本，但保留逻辑 -->
                                     <span class="text-success" style="display: none;">
                                         <i class="fas fa-check-circle mr-1"></i>订单已完成
                                     </span>
-                                {% elif order.is_paid and order.status == 'ready' %}
+                                {% elif order.payment_status == 'paid' and order.status == 'ready' %}
                                     <!-- 隐藏"已就绪，请取餐"信息文本，但保留逻辑 -->
                                     <span class="text-success" style="display: none;">
                                         <i class="fas fa-mug-hot mr-1"></i>已就绪，请取餐
                                     </span>
-                                {% elif order.is_paid and order.status == 'preparing' %}
+                                {% elif order.payment_status == 'paid' and order.status == 'preparing' %}
                                     <!-- 隐藏"制作中，请稍候"信息文本，但保留逻辑 -->
                                     <span class="text-warning" style="display: none;">
                                         <i class="fas fa-clock mr-1"></i>制作中，请稍候

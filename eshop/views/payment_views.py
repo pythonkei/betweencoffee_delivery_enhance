@@ -2,7 +2,7 @@
 """
 支付相关视图模块 - 修改后完整版本
 处理支付宝、PayPal、FPS、现金支付等功能
-使用统一的支付工具
+使用统一的支付工具和错误处理
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -21,6 +21,7 @@ import traceback
 # 导入项目模型
 from ..models import OrderModel, CoffeeQueue
 from eshop.order_status_manager import OrderStatusManager
+from eshop.view_utils import OrderErrorHandler  # 統一錯誤處理器
 
 # ==================== 导入统一的支付工具 ====================
 from ..payment_utils import (
@@ -670,7 +671,6 @@ def check_and_update_payment_status(request, order_id):
         return JsonResponse({
             'success': True,
             'order_id': order.id,
-            'is_paid': order.payment_status == 'paid',
             'status': order.status,
             'payment_status': order.payment_status,
             'payment_method': order.payment_method,
@@ -690,7 +690,6 @@ def query_payment_status(request, order_id):
         
         return JsonResponse({
             'order_id': order.id,
-            'is_paid': order.payment_status == 'paid',
             'payment_status': order.payment_status,
             'payment_method': order.payment_method,
             'created_at': order.created_at.isoformat(),
