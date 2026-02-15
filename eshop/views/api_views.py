@@ -2,19 +2,15 @@
 
 import json
 import logging
-import traceback
 from datetime import timedelta
 
 from django.views import View
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from django.core.exceptions import PermissionDenied
 
 from eshop.models import OrderModel, CoffeeQueue
 from eshop.queue_manager import CoffeeQueueManager
@@ -43,8 +39,10 @@ class UnifiedOrderAPI(BaseApiView, OrderApiMixin):
             if order_id:
                 # 獲取單個訂單
                 order = self.get_order(order_id)
-                include_queue_info = request.GET.get('include_queue', 'true').lower() == 'true'
-                include_items = request.GET.get('include_items', 'true').lower() == 'true'
+                include_queue_info = (request.GET.get('include_queue', 'true')
+                                      .lower() == 'true')
+                include_items = (request.GET.get('include_items', 'true')
+                                 .lower() == 'true')
                 
                 order_data = self.serialize_order(
                     order, 
@@ -72,13 +70,16 @@ class UnifiedOrderAPI(BaseApiView, OrderApiMixin):
                     if status_filter == 'active':
                         query = query.filter(status__in=['preparing', 'ready'])
                     elif status_filter == 'pending_payment':
-                        query = query.filter(payment_status="pending", status='pending')
+                        query = query.filter(payment_status="pending", 
+                                             status='pending')
                     else:
                         query = query.filter(status=status_filter)
                 
                 # 時間範圍過濾
                 if time_range == 'today':
-                    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                    today_start = timezone.now().replace(
+                        hour=0, minute=0, second=0, microsecond=0
+                    )
                     query = query.filter(created_at__gte=today_start)
                 elif time_range == 'week':
                     week_start = timezone.now() - timedelta(days=7)
@@ -95,7 +96,9 @@ class UnifiedOrderAPI(BaseApiView, OrderApiMixin):
                 
                 # 序列化
                 orders_data = [
-                    self.serialize_order(order, include_queue_info=False, include_items=False)
+                    self.serialize_order(
+                        order, include_queue_info=False, include_items=False
+                    )
                     for order in orders
                 ]
                 
@@ -407,7 +410,7 @@ def get_dashboard_stats(request):
         # 今日訂單統計
         today_orders = OrderModel.objects.filter(created_at__gte=today_start)
         today_count = today_orders.count()
-        today_revenue = sum(order.total_price for order in today_orders if order.is_paid)
+        today_revenue = sum(order.total_price for order in today_orders if order.payment_status == 'paid')
         
         # 隊列統計
         waiting_count = CoffeeQueue.objects.filter(status='waiting').count()
@@ -539,3 +542,72 @@ def update_order_pickup_times_api(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+# ==================== 健康檢查API ====================
+
+@csrf_exempt
+@require_GET
+def health_check(request):
+    """系統健康檢查端點"""
+    try:
+        # 檢查資料庫連接
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            db_ok = True
+        
+        # 檢查隊列系統
+        queue_ok = True
+        try:
+            from eshop.queue_manager import CoffeeQueueManager
+            manager = CoffeeQueueManager()
+            stats = manager.get_queue_stats()
+            queue_stats = stats
+        except Exception:
+            queue_ok = False
+            queue_stats = None
+        
+        # 檢查時間服務
+        time_ok = True
+        try:
+            from eshop.time_service import time_service
+            current_time = time_service.get_current_hk_time()
+        except Exception:
+            time_ok = False
+            current_time = None
+        
+        # 構建回應
+        response_data = {
+            'status': 'healthy' if db_ok and queue_ok and time_ok else 'degraded',
+            'timestamp': timezone.now().isoformat(),
+            'services': {
+                'database': {
+                    'status': 'healthy' if db_ok else 'unhealthy',
+                    'message': 'Database connection OK' if db_ok else 'Database connection failed'
+                },
+                'queue_system': {
+                    'status': 'healthy' if queue_ok else 'unhealthy',
+                    'message': 'Queue system OK' if queue_ok else 'Queue system failed',
+                    'stats': queue_stats
+                },
+                'time_service': {
+                    'status': 'healthy' if time_ok else 'unhealthy',
+                    'message': 'Time service OK' if time_ok else 'Time service failed',
+                    'current_time': current_time
+                }
+            },
+            'version': '1.0.0',
+            'message': 'BetweenCoffee Delivery System'
+        }
+        
+        status_code = 200 if db_ok and queue_ok and time_ok else 503
+        return JsonResponse(response_data, status=status_code)
+        
+    except Exception as e:
+        logger.error(f"健康檢查失敗: {str(e)}")
+        return JsonResponse({
+            'status': 'unhealthy',
+            'error': f'Health check failed: {str(e)}',
+            'timestamp': timezone.now().isoformat()
+        }, status=503)

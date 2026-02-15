@@ -43,7 +43,7 @@ class Command(BaseCommand):
             self.stdout.write(f"订单信息:")
             self.stdout.write(f"  ID: {order.id}")
             self.stdout.write(f"  状态: {order.status}")
-            self.stdout.write(f"  是否支付: {order.is_paid}")
+            self.stdout.write(f"  支付状态: {order.payment_status} (是否支付: {order.payment_status == 'paid'})")
             self.stdout.write(f"  预计时间: {order.estimated_ready_time}")
             
             items = order.get_items()

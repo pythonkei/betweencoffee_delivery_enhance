@@ -97,7 +97,7 @@ def alipay_payment(request, order_id):
             messages.error(request, "您无权访问此订单")
             return redirect('index')
         
-        logger.info(f"订单详情: ID={order.id}, 状态={order.status}, 已支付={order.is_paid}")
+        logger.info(f"订单详情: ID={order.id}, 状态={order.status}, 支付状态={order.payment_status}")
         
         if order.payment_status == "paid":
             logger.info(f"订单 {order.id} 已经支付，跳转到确认页面")
@@ -739,7 +739,7 @@ def cancel_timeout_payment(request, order_id):
     try:
         order = OrderModel.objects.get(id=order_id)
         
-        if order.is_payment_timeout() and not order.is_paid:
+        if order.is_payment_timeout() and order.payment_status != 'paid':
             result = OrderStatusManager.mark_as_cancelled_manually(
                 order_id=order_id,
                 staff_name='system',
@@ -807,7 +807,7 @@ def payment_failed(request):
         try:
             order = OrderModel.objects.get(id=order_id)
             if request.user.is_authenticated:
-                can_retry = order.can_retry_payment() and not order.is_paid
+                can_retry = order.can_retry_payment() and order.payment_status != 'paid'
         except OrderModel.DoesNotExist:
             pass
     

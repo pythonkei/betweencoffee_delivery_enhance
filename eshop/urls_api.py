@@ -17,6 +17,7 @@ from .views.api_views import (
     get_active_orders,
     get_quick_order_times,
     update_order_pickup_times_api,
+    health_check,
 )
 
 # ==================== 導入 WebSocket 監控視圖 ====================
@@ -54,6 +55,9 @@ urlpatterns = [
     # ==================== 兼容性 API（逐步遷移）====================
     path('recent-orders/', get_recent_orders, name='recent_orders'),
     path('active-orders/', get_active_orders, name='active_orders'),
+    
+    # ==================== 健康檢查 API ====================
+    path('health/', health_check, name='health_check'),
     
     # ==================== 🔥 WebSocket 監控 API（管理員專用）====================
     # 這些端點需要 staff_member_required 權限，已在視圖中處理
