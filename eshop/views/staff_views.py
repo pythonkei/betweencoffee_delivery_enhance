@@ -16,7 +16,7 @@ from django.db.models import Count
 from django.core.exceptions import PermissionDenied
 
 from eshop.models import OrderModel, CoffeeQueue
-from eshop.time_service import time_service
+from eshop.time_calculation import unified_time_service
 from eshop.queue_manager import CoffeeQueueManager
 from eshop.order_status_manager import OrderStatusManager
 

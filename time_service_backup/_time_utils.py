@@ -1,7 +1,7 @@
 # eshop/time_utils.py
 """
 时间工具模块 - 简化版本，只保留必要函数
-已将所有复杂时间计算迁移到 time_service.py
+已将所有复杂时间计算迁移到 unified_time_service.py
 """
 import warnings
 import logging
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 # 从统一时间服务导入函数
 try:
-    from .time_service import time_service
+    from .time_calculation import unified_time_service
 except ImportError:
     logger.error("无法导入 time_service，使用备用实现")
     
@@ -19,7 +19,7 @@ except ImportError:
     from django.utils import timezone
     
     def get_hong_kong_time():
-        warnings.warn("使用备用时间实现，请确保 time_service.py 存在")
+        warnings.warn("使用备用时间实现，请确保 unified_time_service.py 存在")
         return timezone.now().astimezone(pytz.timezone('Asia/Hong_Kong'))
     
     # 创建临时的 time_service 对象
@@ -35,7 +35,7 @@ except ImportError:
 def get_hong_kong_time():
     """获取香港时区当前时间 - 代理到统一时间服务"""
     try:
-        return time_service.get_hong_kong_time()
+        return unified_time_service.get_hong_kong_time()
     except Exception as e:
         logger.error(f"获取香港时间失败: {str(e)}")
         # 备用实现
@@ -46,7 +46,7 @@ def get_hong_kong_time():
 def format_time_for_display(dt):
     """统一格式化时间为香港时区显示 - 代理到统一时间服务"""
     try:
-        return time_service.format_time_for_display(dt)
+        return unified_time_service.format_time_for_display(dt)
     except Exception as e:
         logger.error(f"格式化时间失败: {str(e)}")
         if not dt:
@@ -61,7 +61,7 @@ def format_time_for_display(dt):
 def is_time_ready(target_time):
     """检查目标时间是否已到达（香港时区）- 代理到统一时间服务"""
     try:
-        return time_service.is_time_ready(target_time)
+        return unified_time_service.is_time_ready(target_time)
     except Exception as e:
         logger.error(f"检查时间就绪失败: {str(e)}")
         return True
@@ -69,7 +69,7 @@ def is_time_ready(target_time):
 def get_remaining_minutes(target_time):
     """获取剩余分钟数（香港时区）- 代理到统一时间服务"""
     try:
-        return time_service.get_remaining_minutes(target_time)
+        return unified_time_service.get_remaining_minutes(target_time)
     except Exception as e:
         logger.error(f"获取剩余分钟数失败: {str(e)}")
         return 0
@@ -77,7 +77,7 @@ def get_remaining_minutes(target_time):
 def calculate_remaining_time(target_time):
     """计算剩余时间（秒）- 代理到统一时间服务"""
     try:
-        return time_service.calculate_remaining_time(target_time)
+        return unified_time_service.calculate_remaining_time(target_time)
     except Exception as e:
         logger.error(f"计算剩余时间失败: {str(e)}")
         return 0
@@ -85,7 +85,7 @@ def calculate_remaining_time(target_time):
 def format_remaining_time(seconds):
     """格式化剩余时间显示 - 代理到统一时间服务"""
     try:
-        return time_service.format_remaining_time(seconds)
+        return unified_time_service.format_remaining_time(seconds)
     except Exception as e:
         logger.error(f"格式化剩余时间失败: {str(e)}")
         if seconds < 60:
@@ -104,7 +104,7 @@ def format_remaining_time(seconds):
 def calculate_progress_percentage(order):
     """计算订单制作进度百分比 - 代理到统一时间服务"""
     try:
-        return time_service.calculate_progress_percentage(order)
+        return unified_time_service.calculate_progress_percentage(order)
     except Exception as e:
         logger.error(f"计算进度百分比失败: {str(e)}")
         return 0
@@ -114,7 +114,7 @@ def calculate_progress_percentage(order):
 def get_pickup_time_display_from_choice(pickup_time_choice):
     """統一處理取貨時間選擇的顯示 - 代理到统一时间服务"""
     try:
-        return time_service._get_pickup_time_display_from_choice(pickup_time_choice)
+        return unified_time_service._get_pickup_time_display_from_choice(pickup_time_choice)
     except Exception as e:
         logger.error(f"获取取货时间显示失败: {str(e)}")
         choice_map = {
@@ -129,7 +129,7 @@ def get_pickup_time_display_from_choice(pickup_time_choice):
 def get_minutes_from_pickup_choice(pickup_time_choice):
     """從取貨時間選擇中提取分鐘數 - 代理到统一时间服务"""
     try:
-        return time_service._get_minutes_from_pickup_choice(pickup_time_choice)
+        return unified_time_service._get_minutes_from_pickup_choice(pickup_time_choice)
     except Exception as e:
         logger.error(f"从取货时间选择提取分钟数失败: {str(e)}")
         return 5
@@ -137,7 +137,7 @@ def get_minutes_from_pickup_choice(pickup_time_choice):
 def calculate_pickup_time_for_quick_order(order):
     """為快速訂單計算取貨時間相關信息 - 代理到统一时间服务"""
     try:
-        return time_service.calculate_quick_order_pickup_time(order)
+        return unified_time_service.calculate_quick_order_pickup_time(order)
     except Exception as e:
         logger.error(f"计算快速订单取货时间失败: {str(e)}")
         return None
@@ -224,7 +224,7 @@ def format_pickup_time_for_order(order):
 def calculate_all_quick_order_times():
     """計算所有快速訂單的時間信息 - 代理到统一时间服务"""
     try:
-        return time_service.calculate_all_quick_order_times()
+        return unified_time_service.calculate_all_quick_order_times()
     except Exception as e:
         logger.error(f"批量計算快速訂單時間失敗: {str(e)}")
         return {
@@ -236,7 +236,7 @@ def calculate_all_quick_order_times():
 def update_order_pickup_times(order_ids):
     """更新指定訂單的取貨時間信息 - 代理到统一时间服务"""
     try:
-        return time_service.update_order_pickup_times(order_ids)
+        return unified_time_service.update_order_pickup_times(order_ids)
     except Exception as e:
         logger.error(f"批量更新訂單取貨時間失敗: {str(e)}")
         return {

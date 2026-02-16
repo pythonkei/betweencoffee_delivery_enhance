@@ -11,7 +11,7 @@ import logging
 from django.utils import timezone
 
 from .models import OrderModel, CoffeeQueue
-from .time_service import time_service
+from .time_calculation import unified_time_service
 
 logger = logging.getLogger(__name__)
 
@@ -289,8 +289,9 @@ class OrderStatusManager:
             
             # 添加最晚開始時間（如果已計算）
             if hasattr(self.order, 'latest_start_time') and self.order.latest_start_time:
-                from .time_service import time_service
-                status_info['latest_start_time'] = time_service.format_time_for_display(self.order.latest_start_time)
+                status_info['latest_start_time'] = unified_time_service.format_time_for_display(
+                    self.order.latest_start_time, 'full'
+                )
                 status_info['is_urgent'] = self.order.should_be_in_queue_by_now() if hasattr(self.order, 'should_be_in_queue_by_now') else False
         
         return status_info
@@ -331,8 +332,9 @@ class OrderStatusManager:
         queue_display, queue_message, remaining_display = self._get_queue_display_text(queue_info)
         
         # 格式化预计时间（香港时区）
-        from .time_service import time_service
-        estimated_time_display = time_service.format_time_for_display(self.order.estimated_ready_time) if self.order.estimated_ready_time else '计算中...'
+        estimated_time_display = unified_time_service.format_time_for_display(
+            self.order.estimated_ready_time, 'full'
+        ) if self.order.estimated_ready_time else '计算中...'
         
         # 获取订单状态消息
         status_message = self._get_status_message(is_ready)
@@ -464,7 +466,6 @@ class OrderStatusManager:
     def process_payment_and_update_status(cls, order_id, payment_method="unknown"):
         """處理支付成功並更新狀態（替換原有的支付成功邏輯）"""
         try:
-            from eshop.time_service import time_service
             from datetime import timedelta
             
             order = OrderModel.objects.get(id=order_id)
@@ -559,12 +560,7 @@ class OrderStatusManager:
         """手動將訂單標記為製作中（員工操作）"""
         try:
             from django.utils import timezone
-            # 1202 follow up:
-            from eshop.time_service import time_service
             from datetime import timedelta
-            import logging
-            
-            logger = logging.getLogger(__name__)
             
             # 獲取訂單
             from eshop.models import OrderModel
@@ -596,9 +592,8 @@ class OrderStatusManager:
             order.status = 'preparing'
             order.preparation_started_at = timezone.now()
             
-            # 計算預計完成時間
-            from .time_service import time_service
-            order.estimated_ready_time = time_service.get_hong_kong_time() + timedelta(minutes=preparation_minutes)
+            # 計算預計完成時間（使用新的時間服務）
+            order.estimated_ready_time = unified_time_service.get_hong_kong_time() + timedelta(minutes=preparation_minutes)
             
             order.save(update_fields=['status', 'preparation_started_at', 'estimated_ready_time'])
             
@@ -608,7 +603,7 @@ class OrderStatusManager:
             if queue_item:
                 queue_item.status = 'preparing'
                 queue_item.actual_start_time = timezone.now()
-                queue_item.estimated_completion_time = time_service.get_hong_kong_time() + timedelta(minutes=preparation_minutes)
+                queue_item.estimated_completion_time = unified_time_service.get_hong_kong_time() + timedelta(minutes=preparation_minutes)
                 if barista_name:
                     queue_item.barista = barista_name
                 queue_item.save()
@@ -764,7 +759,13 @@ class OrderStatusManager:
         
         # 如果订单在制作中且有预计时间
         if self.order.status == 'preparing' and self.order.estimated_ready_time:
-            progress = time_service.calculate_progress_percentage(self.order)
+            # 使用新的时间服务计算进度
+            from .time_calculation.time_calculators import TimeCalculators
+            progress = TimeCalculators.calculate_progress_percentage(
+                self.order.preparation_started_at,
+                self.order.estimated_ready_time,
+                unified_time_service.get_hong_kong_time()
+            )
             return {
                 'percentage': progress,
                 'display': f'{progress}% 完成'
@@ -789,7 +790,7 @@ class OrderStatusManager:
         if not self.order.estimated_ready_time:
             return 0
         
-        now_hk = time_service.get_hong_kong_time()
+        now_hk = unified_time_service.get_hong_kong_time()
         if self.order.estimated_ready_time > now_hk:
             diff = self.order.estimated_ready_time - now_hk
             return max(0, int(diff.total_seconds() / 60))

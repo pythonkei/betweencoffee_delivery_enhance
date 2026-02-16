@@ -80,7 +80,7 @@ class QueryOptimizer:
     @cached_query('quick_order_times', timeout=30)
     def get_quick_order_times_cached(cls):
         """缓存的快速订单时间"""
-        from .time_service import time_service
+        from .time_calculation import unified_time_service
         from .models import OrderModel
         
         quick_orders = OrderModel.objects.filter(
@@ -91,7 +91,7 @@ class QueryOptimizer:
         
         results = {}
         for order in quick_orders:
-            time_info = time_service.calculate_quick_order_pickup_time(order)
+            time_info = unified_time_service.calculate_quick_order_times(order)
             if time_info:
                 results[order.id] = time_info
         

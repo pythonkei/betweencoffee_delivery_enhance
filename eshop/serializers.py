@@ -4,13 +4,23 @@
 確保隊列API和訂單API返回一致的數據結構
 """
 
-import json
 import logging
 from django.utils import timezone
-from .models import OrderModel, CoffeeQueue, CoffeeItem, BeanItem
-from .time_service import time_service
+from .models import CoffeeQueue
+from .time_calculation import unified_time_service
 
 logger = logging.getLogger(__name__)
+
+
+# 從 time_service 導入需要的函數
+def format_time_for_display(dt):
+    """時間格式化快捷函數"""
+    return unified_time_service.format_time_for_display(dt)
+
+
+def get_hong_kong_time():
+    """獲取香港時間快捷函數"""
+    return unified_time_service.get_hong_kong_time()
 
 
 class OrderDataSerializer:

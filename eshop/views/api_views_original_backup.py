@@ -22,9 +22,6 @@ from eshop.order_status_manager import OrderStatusManager
 from eshop.serializers import OrderDataSerializer, ApiResponseFormatter
 from eshop.api_utils import BaseApiView, OrderApiMixin, staff_api_required
 
-# ✅ 導入統一的API響應格式
-from core.api_response import ApiResponse, api_response_format, api_success, api_error, api_paginated
-
 logger = logging.getLogger(__name__)
 
 
@@ -113,13 +110,8 @@ class UnifiedOrderAPI(BaseApiView, OrderApiMixin):
                 )
 
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"獲取訂單失敗: {str(e)}")
-            return api_error(
-                message=f"獲取訂單失敗: {str(e)}",
-                status_code=500,
-                details={'error_type': 'order_retrieval'}
-            )
+            return self.error_response(f"獲取訂單失敗: {str(e)}", status=500)
 
 
 class UnifiedQueueAPI(BaseApiView):
@@ -166,23 +158,17 @@ class UnifiedQueueAPI(BaseApiView):
                     status='preparing').count(), 'ready_count': CoffeeQueue.objects.filter(
                     status='ready').count(), 'total_count': CoffeeQueue.objects.count(), }
 
-            return api_success(
+            return self.success_response(
                 data={
                     'queue_items': queue_data,
                     'stats': stats,
                     'queue_type': queue_type,
-                },
-                message="隊列信息獲取成功"
+                }
             )
 
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"獲取隊列信息失敗: {str(e)}")
-            return api_error(
-                message=f"獲取隊列信息失敗: {str(e)}",
-                status_code=500,
-                details={'error_type': 'queue_retrieval'}
-            )
+            return self.error_response(f"獲取隊列信息失敗: {str(e)}", status=500)
 
     def post(self, request, action=None, order_id=None):
         """隊列操作"""
@@ -202,20 +188,11 @@ class UnifiedQueueAPI(BaseApiView):
                 # 重新排序隊列
                 return self.reorder_queue(request)
             else:
-                return api_error(
-                    message="無效的操作",
-                    status_code=400,
-                    details={'action': action, 'order_id': order_id}
-                )
+                return self.error_response("無效的操作", status=400)
 
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"隊列操作失敗: {str(e)}")
-            return api_error(
-                message=f"隊列操作失敗: {str(e)}",
-                status_code=500,
-                details={'error_type': 'queue_operation'}
-            )
+            return self.error_response(f"隊列操作失敗: {str(e)}", status=500)
 
     def start_preparation(self, order_id, barista_name):
         """開始製作訂單（統一使用 OrderStatusManager）"""
@@ -229,27 +206,18 @@ class UnifiedQueueAPI(BaseApiView):
             )
 
             if not result['success']:
-                return api_error(
-                    message=result['message'],
-                    status_code=400,
-                    details={'order_id': order_id}
-                )
+                return self.error_response(result['message'], status=400)
 
             logger.info(f"訂單 {order_id} 已開始製作，咖啡師: {barista_name}")
 
-            return api_success(
+            return self.success_response(
                 data=self.serialize_order_with_queue(result['order']),
                 message="已開始製作訂單"
             )
 
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"開始製作失敗: {str(e)}")
-            return api_error(
-                message=f"開始製作失敗: {str(e)}",
-                status_code=500,
-                details={'order_id': order_id, 'error_type': 'start_preparation'}
-            )
+            return self.error_response(f"開始製作失敗: {str(e)}", status=500)
 
     def mark_as_ready_using_manager(self, order_id, barista_name):
         """標記訂單為就緒 - 使用 OrderStatusManager"""
@@ -265,27 +233,18 @@ class UnifiedQueueAPI(BaseApiView):
                 order = OrderModel.objects.get(id=order_id)
                 order_data = self.serialize_order_with_queue(order)
 
-                return api_success(
+                return self.success_response(
                     data=order_data,
                     message="訂單已標記為就緒"
                 )
             else:
                 error_msg = result.get('error', '標記就緒失敗')
                 logger.error(f"標記就緒失敗: {error_msg}")
-                return api_error(
-                    message=f"標記就緒失敗: {error_msg}",
-                    status_code=400,
-                    details={'order_id': order_id}
-                )
+                return self.error_response(f"標記就緒失敗: {error_msg}", status=400)
 
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"標記就緒失敗: {str(e)}")
-            return api_error(
-                message=f"標記就緒失敗: {str(e)}",
-                status_code=500,
-                details={'order_id': order_id, 'error_type': 'mark_ready'}
-            )
+            return self.error_response(f"標記就緒失敗: {str(e)}", status=500)
 
     def mark_as_complete_using_manager(self, order_id, staff_name):
         """標記訂單為完成 - 使用 OrderStatusManager"""
@@ -301,27 +260,18 @@ class UnifiedQueueAPI(BaseApiView):
                 order = OrderModel.objects.get(id=order_id)
                 order_data = self.serialize_order_with_queue(order)
 
-                return api_success(
+                return self.success_response(
                     data=order_data,
                     message="訂單已標記為完成"
                 )
             else:
                 error_msg = result.get('error', '標記完成失敗')
                 logger.error(f"標記完成失敗: {error_msg}")
-                return api_error(
-                    message=f"標記完成失敗: {error_msg}",
-                    status_code=400,
-                    details={'order_id': order_id}
-                )
+                return self.error_response(f"標記完成失敗: {error_msg}", status=400)
 
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"標記完成失敗: {str(e)}")
-            return api_error(
-                message=f"標記完成失敗: {str(e)}",
-                status_code=500,
-                details={'order_id': order_id, 'error_type': 'mark_complete'}
-            )
+            return self.error_response(f"標記完成失敗: {str(e)}", status=500)
 
     def reorder_queue(self, request):
         """重新排序隊列"""
@@ -330,32 +280,19 @@ class UnifiedQueueAPI(BaseApiView):
             new_order = data.get('order', [])
 
             if not new_order:
-                return api_error(
-                    message="無效的排序數據",
-                    status_code=400,
-                    details={'data': data}
-                )
+                return self.error_response("無效的排序數據", status=400)
 
             queue_manager = CoffeeQueueManager()
             success = queue_manager.reorder_queue(new_order)
 
             if success:
-                return api_success(message="隊列重新排序成功")
+                return self.success_response(message="隊列重新排序成功")
             else:
-                return api_error(
-                    message="隊列重新排序失敗",
-                    status_code=500,
-                    details={'new_order': new_order}
-                )
+                return self.error_response("隊列重新排序失敗", status=500)
 
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"重新排序隊列失敗: {str(e)}")
-            return api_error(
-                message=f"重新排序隊列失敗: {str(e)}",
-                status_code=500,
-                details={'error_type': 'reorder_queue'}
-            )
+            return self.error_response(f"重新排序隊列失敗: {str(e)}", status=500)
 
     def serialize_order_with_queue(self, order):
         """序列化訂單及隊列信息"""
@@ -389,20 +326,14 @@ def api_mark_order_as_ready(request, order_id):
         else:
             logger.error(
                 f"❌ API: 標記訂單 #{order_id} 為就緒失敗: {result.get('error')}")
-            return api_error(
-                message=result.get('error', '標記就緒失敗'),
-                status_code=400,
-                details={'order_id': order_id}
-            )
+            return JsonResponse(result, status=400)
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"❌ API: 標記訂單為就緒失敗: {str(e)}")
-        return api_error(
-            message=f"伺服器錯誤: {str(e)}",
-            status_code=500,
-            details={'order_id': order_id, 'error_type': 'api_mark_ready'}
-        )
+        return JsonResponse({
+            'success': False,
+            'error': f'伺服器錯誤: {str(e)}'
+        }, status=500)
 
 
 @csrf_exempt
@@ -425,20 +356,14 @@ def api_mark_order_as_completed(request, order_id):
         else:
             logger.error(
                 f"❌ API: 標記訂單 #{order_id} 為已提取失敗: {result.get('error')}")
-            return api_error(
-                message=result.get('error', '標記已提取失敗'),
-                status_code=400,
-                details={'order_id': order_id}
-            )
+            return JsonResponse(result, status=400)
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"❌ API: 標記訂單為已提取失敗: {str(e)}")
-        return api_error(
-            message=f"伺服器錯誤: {str(e)}",
-            status_code=500,
-            details={'order_id': order_id, 'error_type': 'api_mark_completed'}
-        )
+        return JsonResponse({
+            'success': False,
+            'error': f'伺服器錯誤: {str(e)}'
+        }, status=500)
 
 
 # ==================== 倒計時API（保持不變） ====================
@@ -453,18 +378,10 @@ class CountdownAPI(View):
 
             # 驗證訂單屬於當前用戶
             if request.user.is_authenticated and order.user != request.user:
-                return api_error(
-                    message="無權存取此訂單",
-                    status_code=403,
-                    details={'order_id': order_id, 'user_id': request.user.id}
-                )
+                return JsonResponse({'error': '無權存取此訂單'}, status=403)
 
             if order.payment_status != "paid":
-                return api_error(
-                    message="訂單未支付",
-                    status_code=400,
-                    details={'order_id': order_id, 'payment_status': order.payment_status}
-                )
+                return JsonResponse({'error': '訂單未支付'}, status=400)
 
             # 使用統一的序列化器
             order_data = OrderDataSerializer.serialize_order(
@@ -473,22 +390,19 @@ class CountdownAPI(View):
                 include_items=False
             )
 
-            return api_success(data=order_data, message="訂單倒計時信息獲取成功")
+            # 添加倒計時特定數據
+            response_data = {
+                'success': True,
+                'data': order_data
+            }
+
+            return JsonResponse(response_data)
 
         except OrderModel.DoesNotExist:
-            return api_error(
-                message="訂單不存在",
-                status_code=404,
-                details={'order_id': order_id}
-            )
+            return JsonResponse({'error': '訂單不存在'}, status=404)
         except Exception as e:
-            # ✅ 使用統一的錯誤處理
             logger.error(f"倒數API錯誤: {str(e)}", exc_info=True)
-            return api_error(
-                message="伺服器錯誤",
-                status_code=500,
-                details={'order_id': order_id, 'error_type': 'countdown_api'}
-            )
+            return JsonResponse({'error': '伺服器錯誤'}, status=500)
 
 
 # ==================== 統計API ====================
@@ -538,15 +452,13 @@ def get_dashboard_stats(request):
             'timestamp': now.isoformat(),
         }
 
-        return api_success(data=stats, message="儀表板統計數據獲取成功")
+        return JsonResponse(ApiResponseFormatter.success(data=stats))
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"獲取統計數據失敗: {str(e)}")
-        return api_error(
-            message=f"獲取統計數據失敗: {str(e)}",
-            status_code=500,
-            details={'error_type': 'dashboard_stats'}
+        return JsonResponse(
+            ApiResponseFormatter.error(f"獲取統計數據失敗: {str(e)}"),
+            status=500
         )
 
 
@@ -563,13 +475,8 @@ def get_recent_orders(request):
         return unified_api.get(request)
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"獲取最近訂單失敗: {str(e)}")
-        return api_error(
-            message=f"獲取最近訂單失敗: {str(e)}",
-            status_code=500,
-            details={'error_type': 'recent_orders'}
-        )
+        return JsonResponse(ApiResponseFormatter.error(str(e)), status=500)
 
 
 # 在适当的地方使用缓存查询
@@ -591,23 +498,16 @@ def get_active_orders(request):
                 include_queue_info=True,
                 include_items=False) for order in orders]
 
-        return api_success(
-            data={
-                'orders': orders_data,
-                'count': len(orders_data),
-                'cached': True  # 指示是否来自缓存
-            },
-            message="活動訂單獲取成功"
-        )
+        return JsonResponse({
+            'success': True,
+            'orders': orders_data,
+            'count': len(orders_data),
+            'cached': True  # 指示是否来自缓存
+        })
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"获取活动订单失败: {str(e)}")
-        return api_error(
-            message=f"獲取活動訂單失敗: {str(e)}",
-            status_code=500,
-            details={'error_type': 'active_orders'}
-        )
+        return JsonResponse(ApiResponseFormatter.error(str(e)), status=500)
 
 
 @csrf_exempt
@@ -616,16 +516,14 @@ def get_quick_order_times(request):
     """獲取快速訂單時間信息API"""
     try:
         result = unified_time_service.calculate_all_quick_order_times()
-        return api_success(data=result, message="快速訂單時間信息獲取成功")
+        return JsonResponse(result)
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"獲取快速訂單時間信息失敗: {str(e)}")
-        return api_error(
-            message=f"獲取快速訂單時間信息失敗: {str(e)}",
-            status_code=500,
-            details={'error_type': 'quick_order_times'}
-        )
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 @csrf_exempt
@@ -637,30 +535,26 @@ def update_order_pickup_times_api(request):
         order_ids = data.get('order_ids', [])
 
         if not order_ids:
-            return api_error(
-                message="未提供訂單ID",
-                status_code=400,
-                details={'data': data}
-            )
+            return JsonResponse({
+                'success': False,
+                'error': '未提供訂單ID'
+            }, status=400)
 
         result = unified_time_service.update_order_pickup_times(order_ids)
-        return api_success(data=result, message="訂單取貨時間更新成功")
+        return JsonResponse(result)
 
     except json.JSONDecodeError:
-        return api_error(
-            message="無效的JSON數據",
-            status_code=400,
-            details={'request_body': str(request.body)}
-        )
+        return JsonResponse({
+            'success': False,
+            'error': '無效的JSON數據'
+        }, status=400)
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"更新訂單取貨時間API失敗: {str(e)}")
-        return api_error(
-            message=f"更新訂單取貨時間API失敗: {str(e)}",
-            status_code=500,
-            details={'error_type': 'update_pickup_times'}
-        )
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 # ==================== 健康檢查API ====================
@@ -713,22 +607,15 @@ def health_check(request):
                     'message': 'Time service OK' if time_ok else 'Time service failed',
                     'current_time': current_time}},
             'version': '1.0.0',
-            'message': 'BetweenCoffee Delivery System'
-        }
+            'message': 'BetweenCoffee Delivery System'}
 
         status_code = 200 if db_ok and queue_ok and time_ok else 503
-        
-        return api_success(
-            data=response_data,
-            message="健康檢查完成",
-            status_code=status_code
-        )
+        return JsonResponse(response_data, status=status_code)
 
     except Exception as e:
-        # ✅ 使用統一的錯誤處理
         logger.error(f"健康檢查失敗: {str(e)}")
-        return api_error(
-            message=f"Health check failed: {str(e)}",
-            status_code=503,
-            details={'error_type': 'health_check'}
-        )
+        return JsonResponse({
+            'status': 'unhealthy',
+            'error': f'Health check failed: {str(e)}',
+            'timestamp': timezone.now().isoformat()
+        }, status=503)

@@ -23,7 +23,7 @@ from django.db.models import Q
 from eshop.models import OrderModel, CoffeeQueue
 from eshop.order_status_manager import OrderStatusManager
 from eshop.queue_manager import CoffeeQueueManager, force_sync_queue_and_orders
-from eshop.time_service import time_service   # ✅ 唯一時間服務
+from eshop.time_calculation import unified_time_service   # ✅ 唯一時間服務
 
 logger = logging.getLogger(__name__)
 
@@ -195,11 +195,11 @@ def process_waiting_queues(now, hk_tz):
                 items_display += f" - {', '.join(items_detail)}"
             
             # ✅ 統一使用 time_service 取得取貨時間資訊
-            pickup_time_info = time_service.format_pickup_time_for_order(order)
+            pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
             
             quick_order_time_info = None
             if order.is_quick_order:
-                quick_order_time_info = time_service.calculate_quick_order_pickup_time(order)
+                quick_order_time_info = unified_time_service.calculate_quick_order_times(order)
             
             wait_seconds = 0
             wait_display = '--'
@@ -213,7 +213,7 @@ def process_waiting_queues(now, hk_tz):
                 wait_minutes = max(0, int(wait_seconds / 60))
                 wait_display = f"{wait_minutes}分鐘"
             elif order.is_quick_order and order.pickup_time_choice:
-                minutes_to_add = time_service.get_minutes_from_pickup_choice(order.pickup_time_choice)
+                minutes_to_add = unified_time_service.get_minutes_from_pickup_choice(order.pickup_time_choice)
                 wait_display = f"{minutes_to_add}分鐘後"
             
             total_price = order.total_price
@@ -295,7 +295,7 @@ def process_preparing_queues(now, hk_tz):
         try:
             order = queue_item.order
             
-            pickup_time_info = time_service.format_pickup_time_for_order(order)
+            pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
             
             if order.status != 'preparing':
                 result = OrderStatusManager.mark_as_preparing_manually(
@@ -435,7 +435,7 @@ def process_ready_orders(now, hk_tz):
     ready_data = []
     for order in ready_orders:
         try:
-            pickup_time_info = time_service.format_pickup_time_for_order(order)
+            pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
             
             items = order.get_items_with_chinese_options()
             
@@ -555,7 +555,7 @@ def process_completed_orders(now, hk_tz):
         completed_data = []
         for order in completed_orders:
             try:
-                pickup_time_info = time_service.format_pickup_time_for_order(order)
+                pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
                 
                 items = order.get_items_with_chinese_options()
                 

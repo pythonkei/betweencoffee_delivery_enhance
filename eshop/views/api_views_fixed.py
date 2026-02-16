@@ -22,7 +22,8 @@ from eshop.order_status_manager import OrderStatusManager
 from eshop.serializers import OrderDataSerializer, ApiResponseFormatter
 from eshop.api_utils import BaseApiView, OrderApiMixin, staff_api_required
 
-# ✅ 導入統一的API響應格式
+# ✅ 導入統一的錯誤處理和API響應格式
+from core.error_handling import OrderErrorHandler, handle_api_exception
 from core.api_response import ApiResponse, api_response_format, api_success, api_error, api_paginated
 
 logger = logging.getLogger(__name__)

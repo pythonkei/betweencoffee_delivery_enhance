@@ -19,7 +19,7 @@ from datetime import timedelta
 
 from eshop.order_status_manager import OrderStatusManager
 from .models import CoffeeItem, BeanItem, OrderModel, CoffeeQueue
-from .time_service import time_service  # 统一时间服务
+from .time_calculation import unified_time_service  # 统一时间服务
 
 logger = logging.getLogger(__name__)
 
@@ -222,7 +222,7 @@ def find_existing_pending_order(user, current_items, current_total_price):
 def calculate_dynamic_wait_time(ready_at):
     """计算动态等待时间（每秒更新）- 使用统一时间服务"""
     try:
-        now = time_service.get_hong_kong_time()
+        now = unified_time_service.get_hong_kong_time()
         if isinstance(ready_at, str):
             from django.utils.dateparse import parse_datetime
             ready_time = parse_datetime(ready_at)

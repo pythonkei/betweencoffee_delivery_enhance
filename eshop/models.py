@@ -8,15 +8,16 @@ import qrcode
 import io
 import base64
 import logging
+import pytz
 from django.conf import settings
 from django.db import models
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 
 
-from .time_service import time_service
+from .time_calculation import unified_time_service
 
 logger = logging.getLogger(__name__)
 
@@ -422,7 +423,7 @@ class OrderModel(models.Model):
         獲取格式化的取貨時間顯示
         返回包含文本和CSS類的字典 - 使用統一格式化函數
         """
-        formatted_info = time_service.format_pickup_time_for_order(self)
+        formatted_info = unified_time_service.format_pickup_time_for_order(self)
         if formatted_info:
             return {
                 'text': formatted_info['text'],
@@ -769,7 +770,7 @@ class OrderModel(models.Model):
         """获取格式化的预计完成时间（香港时区）"""
         if not self.estimated_ready_time:
             return None
-        return time_service.format_time_for_display(self.estimated_ready_time)
+        return unified_time_service.format_time_for_display(self.estimated_ready_time)
     
 
     def calculate_times_based_on_pickup_choice(self):
@@ -779,7 +780,7 @@ class OrderModel(models.Model):
             return None, None
         
         try:
-            time_info = time_service.calculate_quick_order_pickup_time(self)
+            time_info = unified_time_service.calculate_quick_order_times(self)
             if time_info:
                 self.estimated_ready_time = time_info['estimated_pickup_time']
                 self.latest_start_time = time_info['latest_start_time']
@@ -792,7 +793,7 @@ class OrderModel(models.Model):
             logger.error(f"計算取貨時間失敗: {str(e)}")
         
         # 備用計算邏輯
-        current_time = time_service.get_hong_kong_time()
+        current_time = unified_time_service.get_hong_kong_time()
         
         # 確保有取貨時間選擇
         if not self.pickup_time_choice:
@@ -833,7 +834,7 @@ class OrderModel(models.Model):
     
     def should_be_in_queue_by_now(self):
         """檢查是否應該已經在隊列中（基於最晚開始時間）"""
-        current_time = time_service.get_hong_kong_time()
+        current_time = unified_time_service.get_hong_kong_time()
         
         if not self.latest_start_time:
             return True  # 如果沒有最晚開始時間，立即加入隊列
@@ -843,7 +844,7 @@ class OrderModel(models.Model):
 
     def get_pickup_time_display(self):
         """獲取消費時間顯示文本 - 使用統一的格式化函數"""
-        formatted_info = time_service.format_pickup_time_for_order(self)
+        formatted_info = unified_time_service.format_pickup_time_for_order(self)
         if formatted_info:
             return formatted_info['text']
         
@@ -940,7 +941,7 @@ class OrderModel(models.Model):
         total_minutes = max(1, preparation_minutes + fluctuation)
         
         # 使用香港时区当前时间作为基准
-        base_time = time_service.get_hong_kong_time()
+        base_time = unified_time_service.get_hong_kong_time()
         estimated_time = base_time + timedelta(minutes=total_minutes)
         logger.info(f"计算制作时间: {total_minutes}分钟, 预计时间: {estimated_time}")
         
@@ -1000,7 +1001,7 @@ class OrderModel(models.Model):
     
     def get_remaining_minutes(self):
         """获取剩余分钟数"""
-        return time_service.get_remaining_minutes(self.estimated_ready_time)
+        return unified_time_service.get_remaining_minutes(self.estimated_ready_time)
     
     def is_ready(self):
         """检查订单是否已完成制作"""

@@ -34,7 +34,7 @@ import pytz
 from django.utils import timezone
 from datetime import timedelta
 from .models import CoffeeQueue, OrderModel
-from .time_service import time_service  # 使用统一时间服务
+from .time_calculation import unified_time_service  # 使用统一时间服务
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
@@ -95,7 +95,7 @@ class CoffeeQueueManager:
             position = self.calculate_priority_position(order, coffee_count)
             
             # 計算製作時間 - 使用统一时间服务
-            preparation_time = time_service.calculate_preparation_time(coffee_count)
+            preparation_time = unified_time_service.calculate_preparation_time(coffee_count)
             
             # 創建隊列項
             queue_item = CoffeeQueue.objects.create(
@@ -138,13 +138,13 @@ class CoffeeQueueManager:
 
     def calculate_preparation_time(self, coffee_count):
         """统一制作时间计算 - 使用统一时间服务"""
-        return time_service.calculate_preparation_time(coffee_count)
+        return unified_time_service.calculate_preparation_time(coffee_count)
     
     # 添加静态方法，可以在其他地方调用
     @staticmethod
     def get_preparation_time(coffee_count):
         """静态方法：获取制作时间 - 使用统一时间服务"""
-        return time_service.calculate_preparation_time(coffee_count)
+        return unified_time_service.calculate_preparation_time(coffee_count)
 
 
     def update_estimated_times(self):
@@ -154,7 +154,7 @@ class CoffeeQueueManager:
             self.check_and_reorder_queue_by_priority()
             
             # 使用統一的香港時間函數
-            current_time = time_service.get_hong_kong_time()
+            current_time = unified_time_service.get_hong_kong_time()
             logger.info(f"=== 更新隊列預計時間（香港時區）===")
             logger.info(f"當前香港時間: {current_time}")
             
@@ -217,7 +217,7 @@ class CoffeeQueueManager:
                 return 0
             
             # 获取当前香港时间 - 使用统一时间服务
-            current_time = time_service.get_hong_kong_time()
+            current_time = unified_time_service.get_hong_kong_time()
             
             # 如果有预计开始时间，直接计算
             if queue_item.estimated_start_time:
@@ -297,7 +297,7 @@ class CoffeeQueueManager:
             position = self.calculate_priority_position(order, coffee_count)
             
             # 計算製作時間 - 使用统一时间服务
-            preparation_time = time_service.calculate_preparation_time(coffee_count)
+            preparation_time = unified_time_service.calculate_preparation_time(coffee_count)
             
             # 創建隊列項
             queue_item = CoffeeQueue.objects.create(
@@ -578,11 +578,11 @@ class CoffeeQueueManager:
             
             # 先更新隊列項的時間（為 OrderStatusManager 準備數據）
             queue_item.status = 'ready'
-            queue_item.actual_completion_time = time_service.get_hong_kong_time()
+            queue_item.actual_completion_time = unified_time_service.get_hong_kong_time()
             
             # 如果沒有實際開始時間，設置一個
             if not queue_item.actual_start_time:
-                queue_item.actual_start_time = time_service.get_hong_kong_time() - timedelta(minutes=queue_item.preparation_time_minutes)
+                queue_item.actual_start_time = unified_time_service.get_hong_kong_time() - timedelta(minutes=queue_item.preparation_time_minutes)
                 logger.warning(f"訂單 {order.id} 沒有實際開始時間，已補設")
             
             queue_item.save()
@@ -627,7 +627,7 @@ class CoffeeQueueManager:
     def get_preparing_orders_with_elapsed_time(self):
         """獲取製作中訂單的已用時間和剩餘時間 - 使用统一时间服务"""
         try:
-            current_time = time_service.get_hong_kong_time()
+            current_time = unified_time_service.get_hong_kong_time()
             preparing_queues = CoffeeQueue.objects.filter(status='preparing')
             
             result = []
@@ -812,7 +812,7 @@ class CoffeeQueueManager:
                     # 檢查是否有取貨時間選擇
                     if hasattr(order, 'pickup_time_choice') and order.pickup_time_choice:
                         # 重新計算取貨相關時間 - 使用统一时间服务
-                        time_info = time_service.calculate_quick_order_pickup_time(order)
+                        time_info = unified_time_service.calculate_quick_order_times(order)
                         if time_info:
                             order.estimated_ready_time = time_info['estimated_pickup_time']
                             order.latest_start_time = time_info['latest_start_time']
@@ -878,7 +878,7 @@ class CoffeeQueueManager:
                     'total_quick_orders': quick_orders.count(),
                     'time_update_success': time_update_success,
                     'integrity_issues': len(integrity_check.get('issues', [])),
-                    'timestamp': time_service.get_hong_kong_time().isoformat()
+                    'timestamp': unified_time_service.get_hong_kong_time().isoformat()
                 }
             }
             
@@ -901,7 +901,7 @@ class CoffeeQueueManager:
 # 在 queue_manager.py 中添加新的辅助函数
 def get_hong_kong_time_now():
     """获取当前香港时间 - 使用统一时间服务"""
-    return time_service.get_hong_kong_time()
+    return unified_time_service.get_hong_kong_time()
 
 
 def sync_ready_orders_timing():
@@ -995,7 +995,7 @@ def get_queue_updates():
         for queue in preparing_queues:
             if queue.actual_start_time:
                 # 計算已用時間和剩餘時間 - 使用统一时间服务
-                current_time = time_service.get_hong_kong_time()
+                current_time = unified_time_service.get_hong_kong_time()
                 elapsed = current_time - queue.actual_start_time
                 total_time = timedelta(minutes=queue.preparation_time_minutes)
                 remaining = total_time - elapsed
@@ -1033,14 +1033,14 @@ def get_queue_updates():
         # 獲取已就緒訂單（最近15分鐘內的）
         ready_queues = CoffeeQueue.objects.filter(
             status='ready',
-            actual_completion_time__gte=time_service.get_hong_kong_time() - timedelta(minutes=15)
+            actual_completion_time__gte=unified_time_service.get_hong_kong_time() - timedelta(minutes=15)
         ).order_by('-actual_completion_time')
         
         ready_orders = []
         
         for queue in ready_queues:
             if queue.actual_completion_time:
-                wait_minutes = int((time_service.get_hong_kong_time() - queue.actual_completion_time).total_seconds() / 60)
+                wait_minutes = int((unified_time_service.get_hong_kong_time() - queue.actual_completion_time).total_seconds() / 60)
             else:
                 wait_minutes = 0
                 
@@ -1059,7 +1059,7 @@ def get_queue_updates():
             'waiting_orders': waiting_orders,
             'preparing_orders': preparing_orders,
             'ready_orders': ready_orders,
-            'timestamp': time_service.get_hong_kong_time().isoformat(),
+            'timestamp': unified_time_service.get_hong_kong_time().isoformat(),
             'requires_manual_confirmation': any(order.get('is_time_up', False) for order in preparing_orders),  # 新增：是否有需要手動確認的訂單
         }
         
@@ -1112,7 +1112,7 @@ def force_sync_queue_and_orders():
                     position = last_item.position + 1 if last_item else 1
                     
                     # 使用统一时间服务计算制作时间
-                    preparation_minutes = time_service.calculate_preparation_time(coffee_count)
+                    preparation_minutes = unified_time_service.calculate_preparation_time(coffee_count)
                     
                     queue_item = CoffeeQueue.objects.create(
                         order=order,
@@ -1140,7 +1140,7 @@ def force_sync_queue_and_orders():
                 logger.info(f"订单 {order.id} 制作完成，更新队列状态为ready")
                 queue_item.status = 'ready'
                 if not queue_item.actual_completion_time:
-                    queue_item.actual_completion_time = time_service.get_hong_kong_time()
+                    queue_item.actual_completion_time = unified_time_service.get_hong_kong_time()
                 queue_item.save()
         
         logger.info(f"=== 同步完成，添加了 {added_count} 个订单到队列 ===")
@@ -1221,7 +1221,7 @@ def get_customer_queue_status(request, order_id):
             queue_item = CoffeeQueue.objects.get(order=order)
             
             # 计算预计时间 - 使用统一时间服务
-            now = time_service.get_hong_kong_time()
+            now = unified_time_service.get_hong_kong_time()
             
             queue_info = {
                 'queue_position': queue_item.position,
