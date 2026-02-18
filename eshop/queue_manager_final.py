@@ -373,19 +373,47 @@ class CoffeeQueueManager:
         """標記為已就緒"""
         try:
             order = queue_item.order
-            
+
+            # 狀態轉換日誌
+            self.logger.info(
+                f"🔄 訂單 #{order.id} 狀態轉換檢查: "
+                f"當前狀態: {order.status}, "
+                f"隊列狀態: {queue_item.status}, "
+                f"目標狀態: ready"
+            )
+
             if order.status == 'ready':
+                self.logger.info(
+                    f"ℹ️ 訂單 #{order.id} 已經是就緒狀態，無需再次標記"
+                )
                 return True
-            
+
+            # 記錄狀態轉換前信息
+            old_queue_status = queue_item.status
+            old_order_status = order.status
+            old_position = queue_item.position
+
+            # 更新隊列項狀態 - 關鍵修復：清理隊列位置
             queue_item.status = 'ready'
+            queue_item.position = 0  # ✅ 重要：清理隊列位置
             queue_item.actual_completion_time = unified_time_service.get_hong_kong_time()
-            
+
             if not queue_item.actual_start_time:
                 queue_item.actual_start_time = queue_item.actual_completion_time - timedelta(
                     minutes=queue_item.preparation_time_minutes
                 )
-            
+                self.logger.info(
+                    f"⏰ 訂單 #{order.id} 補設實際開始時間: {queue_item.actual_start_time}"
+                )
+
             queue_item.save()
+
+            self.logger.info(
+                f"✅ 訂單 #{order.id} 隊列項標記為就緒: "
+                f"隊列狀態: {old_queue_status} → ready, "
+                f"位置: {old_position} → 0, "
+                f"完成時間: {queue_item.actual_completion_time}"
+            )
             
             # 使用OrderStatusManager
             result = OrderStatusManager.mark_as_ready_manually(

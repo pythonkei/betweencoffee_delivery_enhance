@@ -177,6 +177,18 @@ class OrderStatusManager:
             order.save()
             logger.info(f"✅ 訂單 #{order_id} 狀態已更新: {old_status} → {new_status}")
             
+            # ✅ 重要：清理隊列位置（當訂單狀態變為 ready 或 completed 時）
+            if new_status in ['ready', 'completed']:
+                queue_item = CoffeeQueue.objects.filter(order=order).first()
+                if queue_item and queue_item.position > 0:
+                    old_position = queue_item.position
+                    queue_item.position = 0
+                    queue_item.save()
+                    logger.info(
+                        f"✅ 訂單 #{order_id} 隊列位置已清理: "
+                        f"位置 {old_position} → 0 (狀態: {new_status})"
+                    )
+            
             # ✅ 重要：觸發統一時間計算
             from .queue_manager import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
@@ -641,31 +653,38 @@ class OrderStatusManager:
         """手動將訂單標記為就緒"""
         try:
             order = OrderModel.objects.get(id=order_id)
-            
+
             # 檢查狀態轉換是否允許
             if order.status != 'preparing':
                 raise ValueError(f"訂單狀態 {order.status} 不能直接標記為就緒")
-            
+
             # 更新訂單狀態
             order.status = 'ready'
             order.ready_at = timezone.now()
-            
+
             # 確保預計就緒時間已設置
             if not order.estimated_ready_time:
                 order.estimated_ready_time = timezone.now()
-            
+
             order.save(update_fields=['status', 'ready_at', 'estimated_ready_time'])
-            
-            # 更新隊列項
+
+            # 更新隊列項 - 關鍵修復：清理隊列位置
             queue_item = CoffeeQueue.objects.filter(order=order).first()
             if queue_item:
+                old_position = queue_item.position
                 queue_item.status = 'ready'
+                queue_item.position = 0  # ✅ 重要：清理隊列位置
                 queue_item.actual_completion_time = timezone.now()
                 queue_item.save()
-            
+                
+                logger.info(
+                    f"✅ 訂單 #{order_id} 隊列項已更新: "
+                    f"狀態 → ready, 位置 {old_position} → 0"
+                )
+
             logger.info(f"Order {order_id} marked as ready by {staff_name or 'system'}")
             return {'success': True, 'order': order, 'queue_item': queue_item}
-            
+
         except Exception as e:
             logger.error(f"標記訂單 {order_id} 為就緒失敗: {str(e)}")
             return {'success': False, 'message': str(e)}
