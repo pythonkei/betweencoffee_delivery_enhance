@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試多重訊息彈出問題</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .log {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>測試多重訊息彈出問題</h1>
+    
+    <div class="test-section">
+        <h2>模擬按鈕點擊事件</h2>
+        <p>點擊以下按鈕模擬不同的操作，觀察控制台和頁面顯示的訊息數量：</p>
+        
+        <button id="test-start-prep">模擬「開始製作」按鈕</button>
+        <button id="test-mark-ready">模擬「已就緒」按鈕</button>
+        <button id="test-mark-collected">模擬「客戶已提取」按鈕</button>
+        
+        <div class="log" id="event-log">
+            <h3>事件日誌：</h3>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>當前組件狀態</h2>
+        <div id="component-status">
+            <p>正在檢查組件狀態...</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>解決方案</h2>
+        <p>問題：當點擊按鈕時，多個組件同時顯示成功訊息，導致重複彈出。</p>
+        <p>解決方案：只在一個地方顯示成功訊息（queue-manager.js），其他組件只處理其他邏輯。</p>
+        <p>已修改的文件：</p>
+        <ul>
+            <li>✅ order-manager.js - 移除事件處理中的 showToast 調用</li>
+            <li>✅ 所有渲染器 - 統一使用 toast-manager.js</li>
+        </ul>
+    </div>
+
+    <script>
+        // 模擬 toast-manager.js
+        window.toast = {
+            success: function(message) {
+                logEvent('toast.success', message, 'success');
+                console.log('✅ toast.success:', message);
+            },
+            error: function(message) {
+                logEvent('toast.error', message, 'error');
+                console.log('❌ toast.error:', message);
+            },
+            info: function(message) {
+                logEvent('toast.info', message, 'info');
+                console.log('ℹ️ toast.info:', message);
+            },
+            warning: function(message) {
+                logEvent('toast.warning', message, 'warning');
+                console.log('⚠️ toast.warning:', message);
+            }
+        };
+
+        // 模擬 orderManager
+        window.orderManager = {
+            showToast: function(message, type) {
+                logEvent('orderManager.showToast', `${message} (${type})`, 'info');
+                console.log(`📢 orderManager.showToast: ${message} (${type})`);
+            }
+        };
+
+        // 模擬 queue-manager.js 中的方法
+        function simulateStartPreparation(orderId = 123) {
+            logEvent('queue-manager.startPreparation', `開始製作訂單 #${orderId}`, 'info');
+            
+            // 1. 調用 API（模擬）
+            console.log(`🔄 調用 API: /eshop/queue/start/${orderId}/`);
+            
+            // 2. 顯示成功訊息
+            window.toast.success(`✅ 已開始製作訂單 #${orderId}`);
+            
+            // 3. 觸發事件
+            document.dispatchEvent(new CustomEvent('order_started_preparing', {
+                detail: { 
+                    order_id: orderId,
+                    estimated_ready_time: '15:30'
+                }
+            }));
+            
+            logEvent('事件觸發', 'order_started_preparing', 'info');
+        }
+
+        function simulateMarkAsReady(orderId = 123) {
+            logEvent('queue-manager.markAsReady', `標記訂單 #${orderId} 為就緒`, 'info');
+            
+            // 1. 調用 API（模擬）
+            console.log(`🔄 調用 API: /eshop/queue/ready/${orderId}/`);
+            
+            // 2. 顯示成功訊息
+            window.toast.success(`✅ 訂單 #${orderId} 已標記為就緒`);
+            
+            // 3. 觸發事件
+            document.dispatchEvent(new CustomEvent('order_marked_ready', {
+                detail: { order_id: orderId }
+            }));
+            
+            logEvent('事件觸發', 'order_marked_ready', 'info');
+        }
+
+        function simulateMarkAsCollected(orderId = 123) {
+            logEvent('queue-manager.markAsCollected', `標記訂單 #${orderId} 為已提取`, 'info');
+            
+            // 1. 調用 API（模擬）
+            console.log(`🔄 調用 API: /eshop/queue/collected/${orderId}/`);
+            
+            // 2. 顯示成功訊息
+            window.toast.success(`✅ 訂單 #${orderId} 已標記為已提取`);
+            
+            // 3. 觸發事件
+            document.dispatchEvent(new CustomEvent('order_collected', {
+                detail: { order_id: orderId }
+            }));
+            
+            logEvent('事件觸發', 'order_collected', 'info');
+        }
+
+        // 模擬 order-manager.js 中的事件處理（修改後版本）
+        document.addEventListener('order_started_preparing', (event) => {
+            const orderId = event.detail.order_id;
+            logEvent('order-manager.handleOrderStartedPreparing', `訂單 #${orderId} 開始製作`, 'info');
+            console.log(`🔄 order-manager: 訂單 #${orderId} 開始製作`);
+            // 注意：不再顯示成功訊息，已在 queue-manager.js 中顯示
+        });
+
+        document.addEventListener('order_marked_ready', (event) => {
+            const orderId = event.detail.order_id;
+            logEvent('order-manager.handleOrderMarkedReady', `訂單 #${orderId} 已標記為就緒`, 'info');
+            console.log(`🔄 order-manager: 訂單 #${orderId} 已標記為就緒`);
+            // 注意：不再顯示成功訊息，已在 queue-manager.js 中顯示
+        });
+
+        document.addEventListener('order_collected', (event) => {
+            const orderId = event.detail.order_id;
+            logEvent('order-manager.handleOrderCollected', `訂單 #${orderId} 已標記為已提取`, 'info');
+            console.log(`🔄 order-manager: 訂單 #${orderId} 已標記為已提取`);
+            // 注意：不再顯示成功訊息，已在 queue-manager.js 中顯示
+        });
+
+        // 日誌功能
+        function logEvent(source, message, type = 'info') {
+            const logDiv = document.getElementById('event-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<strong>[${new Date().toLocaleTimeString()}] ${source}:</strong> ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 更新組件狀態
+        function updateComponentStatus() {
+            const statusDiv = document.getElementById('component-status');
+            statusDiv.innerHTML = `
+                <p><strong>組件狀態：</strong></p>
+                <ul>
+                    <li>✅ window.toast: ${window.toast ? '已加載' : '未加載'}</li>
+                    <li>✅ window.orderManager: ${window.orderManager ? '已加載' : '未加載'}</li>
+                    <li>✅ 事件監聽器: 已註冊</li>
+                    <li>✅ 模擬函數: 已準備</li>
+                </ul>
+                <p><strong>測試說明：</strong></p>
+                <p>點擊按鈕後，觀察控制台輸出和事件日誌。理想情況下，每個操作應該只顯示一個成功訊息。</p>
+            `;
+        }
+
+        // 綁定按鈕事件
+        document.getElementById('test-start-prep').addEventListener('click', () => {
+            console.clear();
+            document.getElementById('event-log').innerHTML = '<h3>事件日誌：</h3>';
+            logEvent('測試開始', '模擬「開始製作」按鈕點擊', 'info');
+            simulateStartPreparation();
+        });
+
+        document.getElementById('test-mark-ready').addEventListener('click', () => {
+            console.clear();
+            document.getElementById('event-log').innerHTML = '<h3>事件日誌：</h3>';
+            logEvent('測試開始', '模擬「已就緒」按鈕點擊', 'info');
+            simulateMarkAsReady();
+        });
+
+        document.getElementById('test-mark-collected').addEventListener('click', () => {
+            console.clear();
+            document.getElementById('event-log').innerHTML = '<h3>事件日誌：</h3>';
+            logEvent('測試開始', '模擬「客戶已提取」按鈕點擊', 'info');
+            simulateMarkAsCollected();
+        });
+
+        // 初始化
+        updateComponentStatus();
+        logEvent('系統', '測試頁面已加載，準備測試多重訊息彈出問題', 'info');
+    </script>
+</body>
+</html>

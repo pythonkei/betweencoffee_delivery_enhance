@@ -533,7 +533,7 @@ class DynamicReadyOrdersRenderer {
             
         } catch (error) {
             console.error(`❌ 標記訂單 #${orderId} 為已提取失敗:`, error);
-            this.showToast(`❌ 操作失敗: ${error.message}`, 'error');
+            // 不再显示错误消息，由 queue-manager.js 统一处理
             
             // 恢復按鈕狀態
             const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
@@ -697,7 +697,15 @@ class DynamicReadyOrdersRenderer {
     }
     
     showToast(message, type = 'info') {
-        if (window.orderManager && window.orderManager.showToast) {
+        // 優先使用統一的 toast-manager.js
+        if (window.toast) {
+            const toastType = type === 'success' ? 'success' : 
+                             type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            window.toast[toastType](message);
+        } else if (window.orderManager && window.orderManager.showToast) {
+            // 備用方案：使用 orderManager 的 showToast
             window.orderManager.showToast(message, type);
         } else {
             // 簡單實現

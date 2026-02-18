@@ -351,10 +351,18 @@ class OrderDetailTracker {
     }
 
     showToast(message, type = 'info') {
-        // 可使用全局 toast 或簡單 alert
-        if (window.orderManager?.showToast) {
+        // 優先使用統一的 toast-manager.js
+        if (window.toast) {
+            const toastType = type === 'success' ? 'success' : 
+                             type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            window.toast[toastType](message);
+        } else if (window.orderManager?.showToast) {
+            // 備用方案：使用 orderManager 的 showToast
             window.orderManager.showToast(message, type);
         } else {
+            // 簡單實現
             alert(message);
         }
     }

@@ -9,6 +9,10 @@ class QueueManager {
         this.isLoading = false;
         this.remainingTimers = new Map();
         
+        // 新增：防止重複顯示訊息的標誌
+        this.recentlyShownToasts = new Map();
+        this.toastCooldown = 3000; // 3秒內不顯示相同訊息
+        
         // 註冊到統一數據管理器
         this.registerToUnifiedManager();
         
@@ -746,8 +750,35 @@ class QueueManager {
     }
     
     showToast(message, type = 'info') {
-        // 使用已有的toast系統或簡單實現
-        if (window.orderManager && window.orderManager.showToast) {
+        // 防止重複顯示相同訊息
+        const now = Date.now();
+        const messageKey = `${message}_${type}`;
+        
+        if (this.recentlyShownToasts.has(messageKey)) {
+            const lastShownTime = this.recentlyShownToasts.get(messageKey);
+            if (now - lastShownTime < this.toastCooldown) {
+                console.log(`⏭️ 跳過重複訊息: ${message} (${type})`);
+                return; // 在冷卻時間內，不顯示相同訊息
+            }
+        }
+        
+        // 記錄顯示時間
+        this.recentlyShownToasts.set(messageKey, now);
+        
+        // 定期清理過期的記錄
+        setTimeout(() => {
+            this.recentlyShownToasts.delete(messageKey);
+        }, this.toastCooldown);
+        
+        // 優先使用統一的 toast-manager.js
+        if (window.toast) {
+            const toastType = type === 'success' ? 'success' : 
+                             type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            window.toast[toastType](message);
+        } else if (window.orderManager && window.orderManager.showToast) {
+            // 備用方案：使用 orderManager 的 showToast
             window.orderManager.showToast(message, type);
         } else {
             // 簡單實現

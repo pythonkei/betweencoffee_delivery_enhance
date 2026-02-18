@@ -486,10 +486,18 @@ class DynamicCompletedOrdersRenderer {
     }
     
     showToast(message, type = 'info') {
-        if (window.orderManager && window.orderManager.showToast) {
+        // 優先使用統一的 toast-manager.js
+        if (window.toast) {
+            const toastType = type === 'success' ? 'success' : 
+                             type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            window.toast[toastType](message);
+        } else if (window.orderManager && window.orderManager.showToast) {
+            // 備用方案：使用 orderManager 的 showToast
             window.orderManager.showToast(message, type);
         } else {
-            // 简单实现
+            // 簡單實現
             const toastClass = type === 'success' ? 'alert-success' : 
                               type === 'error' ? 'alert-danger' : 'alert-info';
             

@@ -209,43 +209,43 @@ class OrderManager {
     handleOrderStartedPreparing(detail) {
         const orderId = detail.order_id;
         const estimatedTime = detail.estimated_ready_time;
-        
+
         console.log(`🔄 訂單 #${orderId} 開始製作，預計完成: ${estimatedTime}`);
-        
-        // 顯示成功提示
-        this.showToast(`✅ 訂單 #${orderId} 已開始製作`, 'success');
-        
+
+        // 注意：成功訊息已在 queue-manager.js 中顯示，這裡不再重複顯示
+        // 只處理其他邏輯，如更新狀態、播放聲音等
+
         // 更新隊列狀態
         if (window.queueManager) {
             // 隊列管理器會自動處理
         }
     }
-    
+
     /**
      * 處理訂單標記為就緒
      */
     handleOrderMarkedReady(detail) {
         const orderId = detail.order_id;
-        
+
         console.log(`🔄 訂單 #${orderId} 已標記為就緒`);
-        
-        // 顯示成功提示
-        this.showToast(`✅ 訂單 #${orderId} 已標記為就緒`, 'success');
-        
+
+        // 注意：成功訊息已在 queue-manager.js 中顯示，這裡不再重複顯示
+        // 只處理其他邏輯，如播放聲音
+
         // 播放提示音（如果支持）
         this.playNotificationSound('ready');
     }
-    
+
     /**
      * 處理訂單已提取
      */
     handleOrderCollected(detail) {
         const orderId = detail.order_id;
-        
+
         console.log(`🔄 訂單 #${orderId} 已標記為已提取`);
-        
-        // 顯示成功提示
-        this.showToast(`✅ 訂單 #${orderId} 已提取完成`, 'success');
+
+        // 注意：成功訊息已在 queue-manager.js 中顯示，這裡不再重複顯示
+        // 只處理其他邏輯
     }
     
     /**
@@ -490,55 +490,40 @@ class OrderManager {
     // ==================== UI輔助方法 ====================
     
     /**
-     * 顯示Toast通知
+     * 顯示Toast通知 - 使用統一的 toast-manager.js
      */
     showToast(message, type = 'info') {
-        // 檢查是否已存在toast容器
-        let toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.id = 'toast-container';
-            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1060;';
-            document.body.appendChild(toastContainer);
-        }
-        
-        // 創建toast
-        const toastId = 'toast-' + Date.now();
-        const toastClass = type === 'success' ? 'bg-success text-white' : 
-                          type === 'error' ? 'bg-danger text-white' : 
-                          type === 'warning' ? 'bg-warning text-dark' : 'bg-info text-white';
-        
-        const toast = document.createElement('div');
-        toast.id = toastId;
-        toast.className = `toast ${toastClass}`;
-        toast.setAttribute('role', 'alert');
-        toast.style.cssText = 'min-width: 250px; margin-bottom: 10px;';
-        
-        toast.innerHTML = `
-            <div class="toast-header ${toastClass}">
-                <strong class="mr-auto">
-                    ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}
-                    ${this.getToastTitle(type)}
-                </strong>
-                <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast">
+        // 優先使用統一的 toast-manager.js
+        if (window.toast) {
+            const toastType = type === 'success' ? 'success' : 
+                             type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            window.toast[toastType](message, this.getToastTitle(type));
+        } else {
+            // 備用方案：簡單的 alert
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            
+            // 創建簡單的提示
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show fixed-top`;
+            alertDiv.style.cssText = 'top: 80px; right: 20px; z-index: 1050; max-width: 300px;';
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
                     <span>&times;</span>
                 </button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        `;
-        
-        toastContainer.appendChild(toast);
-        
-        // 顯示toast
-        $(toast).toast({ delay: 3000 });
-        $(toast).toast('show');
-        
-        // 自動移除
-        toast.addEventListener('hidden.bs.toast', () => {
-            toast.remove();
-        });
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
     }
     
     /**

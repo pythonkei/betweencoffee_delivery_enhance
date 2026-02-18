@@ -12,15 +12,14 @@ from .models import CoffeeQueue, OrderModel
 from .time_calculation import unified_time_service
 from .order_status_manager import OrderStatusManager
 
-# 創建專門的隊列日誌器
-queue_logger = logging.getLogger('eshop.queue_manager')
+logger = logging.getLogger(__name__)
 
 
 class CoffeeQueueManager:
     """咖啡制作隊列管理器 - 最終版"""
     
     def __init__(self):
-        self.logger = queue_logger
+        self.logger = logging.getLogger(__name__)
     
     # ==================== 核心隊列操作方法 ====================
     
@@ -36,49 +35,26 @@ class CoffeeQueueManager:
             CoffeeQueue實例或None（如果失敗）
         """
         try:
-            # 詳細的訂單進入隊列日誌
-            self.logger.info(
-                f"📝 訂單進入隊列檢查: 訂單 #{order.id}, "
-                f"類型: {order.order_type}, "
-                f"支付狀態: {order.payment_status}, "
-                f"當前狀態: {order.status}"
-            )
+            self.logger.info(f"開始將訂單 {order.id} 加入隊列")
             
             # 檢查訂單是否已經在隊列中
             if CoffeeQueue.objects.filter(order=order).exists():
-                existing_queue = CoffeeQueue.objects.get(order=order)
-                self.logger.warning(
-                    f"⚠️ 訂單 #{order.id} 已在隊列中: "
-                    f"隊列項 #{existing_queue.id}, "
-                    f"位置: {existing_queue.position}, "
-                    f"狀態: {existing_queue.status}"
-                )
-                return existing_queue
+                self.logger.warning(f"訂單 {order.id} 已在隊列中")
+                return CoffeeQueue.objects.get(order=order)
             
             # 計算咖啡杯數
             coffee_count = self._calculate_coffee_count(order)
-            self.logger.info(
-                f"☕ 訂單 #{order.id} 咖啡杯數計算: {coffee_count} 杯"
-            )
+            self.logger.info(f"訂單 {order.id} 包含 {coffee_count} 杯咖啡")
             
             if coffee_count == 0:
-                self.logger.info(
-                    f"⏭️ 訂單 #{order.id} 不包含咖啡，跳過加入隊列"
-                )
+                self.logger.info(f"訂單 {order.id} 不包含咖啡，跳過加入隊列")
                 return None
             
             # 計算位置
             position = self._calculate_position(order, coffee_count, use_priority)
-            self.logger.info(
-                f"📍 訂單 #{order.id} 隊列位置計算: 位置 {position}, "
-                f"優先級: {'啟用' if use_priority else '禁用'}"
-            )
             
             # 計算製作時間
             preparation_time = unified_time_service.calculate_preparation_time(coffee_count)
-            self.logger.info(
-                f"⏱️ 訂單 #{order.id} 製作時間計算: {preparation_time} 分鐘"
-            )
             
             # 創建隊列項
             queue_item = CoffeeQueue.objects.create(
@@ -89,46 +65,19 @@ class CoffeeQueueManager:
                 status='waiting'
             )
             
-            self.logger.info(
-                f"✅ 訂單 #{order.id} 成功進入隊列: "
-                f"隊列項 #{queue_item.id}, "
-                f"位置: {position}, "
-                f"咖啡杯數: {coffee_count}, "
-                f"製作時間: {preparation_time}分鐘, "
-                f"狀態: waiting"
-            )
+            self.logger.info(f"創建隊列項成功: {queue_item.id}, 位置: {position}")
             
             # 檢查並重新排序隊列
             if use_priority:
-                reordered = self._check_and_reorder_queue()
-                if reordered:
-                    self.logger.info(
-                        f"🔄 訂單 #{order.id} 隊列重新排序完成"
-                    )
+                self._check_and_reorder_queue()
             
             # 更新隊列時間
-            time_updated = self.update_estimated_times()
-            if time_updated:
-                self.logger.info(
-                    f"⏰ 訂單 #{order.id} 隊列時間更新完成"
-                )
-            
-            # 最終確認日誌
-            self.logger.info(
-                f"🎉 訂單 #{order.id} 隊列處理完成: "
-                f"隊列項 #{queue_item.id}, "
-                f"最終位置: {queue_item.position}, "
-                f"狀態: {queue_item.status}"
-            )
+            self.update_estimated_times()
             
             return queue_item
             
         except Exception as e:
-            self.logger.error(
-                f"❌ 訂單 #{order.id} 添加訂單到隊列失敗: {str(e)}"
-            )
-            import traceback
-            self.logger.error(f"錯誤詳情: {traceback.format_exc()}")
+            self.logger.error(f"添加訂單到隊列失敗: {str(e)}")
             return None
     
     # ==================== 私有輔助方法 ====================
@@ -405,54 +354,19 @@ class CoffeeQueueManager:
     def start_preparation(self, queue_item, barista_name=None):
         """開始製作"""
         try:
-            # 狀態轉換日誌
-            self.logger.info(
-                f"🔄 訂單 #{queue_item.order.id} 狀態轉換檢查: "
-                f"當前狀態: {queue_item.status}, "
-                f"目標狀態: preparing"
-            )
-            
             if queue_item.status != 'waiting':
-                self.logger.warning(
-                    f"⚠️ 訂單 #{queue_item.order.id} 無法開始製作: "
-                    f"當前狀態 {queue_item.status} 不是 waiting"
-                )
                 return False
             
-            # 記錄狀態轉換前信息
-            old_status = queue_item.status
-            old_position = queue_item.position
-            
-            # 更新狀態
             queue_item.status = 'preparing'
             queue_item.actual_start_time = timezone.now()
             queue_item.barista = barista_name or '未分配'
             queue_item.save()
             
-            # 狀態轉換成功日誌
-            self.logger.info(
-                f"👨‍🍳 訂單 #{queue_item.order.id} 開始製作: "
-                f"狀態: {old_status} → preparing, "
-                f"位置: {old_position} → 0, "
-                f"咖啡師: {queue_item.barista}, "
-                f"開始時間: {queue_item.actual_start_time}"
-            )
-            
-            # 更新隊列時間
-            time_updated = self.update_estimated_times()
-            if time_updated:
-                self.logger.info(
-                    f"⏰ 訂單 #{queue_item.order.id} 隊列時間更新完成"
-                )
-            
+            self.update_estimated_times()
             return True
             
         except Exception as e:
-            self.logger.error(
-                f"❌ 訂單 #{queue_item.order.id} 開始製作失敗: {str(e)}"
-            )
-            import traceback
-            self.logger.error(f"錯誤詳情: {traceback.format_exc()}")
+            self.logger.error(f"開始製作失敗: {str(e)}")
             return False
     
     def mark_as_ready(self, queue_item, staff_name=None):
@@ -460,25 +374,9 @@ class CoffeeQueueManager:
         try:
             order = queue_item.order
             
-            # 狀態轉換日誌
-            self.logger.info(
-                f"🔄 訂單 #{order.id} 狀態轉換檢查: "
-                f"當前狀態: {order.status}, "
-                f"隊列狀態: {queue_item.status}, "
-                f"目標狀態: ready"
-            )
-            
             if order.status == 'ready':
-                self.logger.info(
-                    f"ℹ️ 訂單 #{order.id} 已經是就緒狀態，無需再次標記"
-                )
                 return True
             
-            # 記錄狀態轉換前信息
-            old_queue_status = queue_item.status
-            old_order_status = order.status
-            
-            # 更新隊列項狀態
             queue_item.status = 'ready'
             queue_item.actual_completion_time = unified_time_service.get_hong_kong_time()
             
@@ -486,113 +384,30 @@ class CoffeeQueueManager:
                 queue_item.actual_start_time = queue_item.actual_completion_time - timedelta(
                     minutes=queue_item.preparation_time_minutes
                 )
-                self.logger.info(
-                    f"⏰ 訂單 #{order.id} 補設實際開始時間: {queue_item.actual_start_time}"
-                )
             
             queue_item.save()
             
-            self.logger.info(
-                f"✅ 訂單 #{order.id} 隊列項標記為就緒: "
-                f"隊列狀態: {old_queue_status} → ready, "
-                f"完成時間: {queue_item.actual_completion_time}"
-            )
-            
-            # 使用OrderStatusManager更新訂單狀態
+            # 使用OrderStatusManager
             result = OrderStatusManager.mark_as_ready_manually(
                 order_id=order.id,
                 staff_name=staff_name or "queue_manager"
             )
             
             if not result.get('success'):
-                self.logger.error(
-                    f"❌ 訂單 #{order.id} OrderStatusManager標記失敗: {result.get('message')}"
-                )
                 return False
-            
-            self.logger.info(
-                f"✅ 訂單 #{order.id} OrderStatusManager標記成功: "
-                f"訂單狀態: {old_order_status} → ready"
-            )
             
             # 同步時間
             order.refresh_from_db()
             if not order.ready_at:
                 order.ready_at = queue_item.actual_completion_time
                 order.save(update_fields=['ready_at'])
-                self.logger.info(
-                    f"⏰ 訂單 #{order.id} 同步就緒時間: {order.ready_at}"
-                )
             
-            # 更新隊列時間
-            time_updated = self.update_estimated_times()
-            if time_updated:
-                self.logger.info(
-                    f"⏰ 訂單 #{order.id} 隊列時間更新完成"
-                )
-            
-            # 最終確認日誌
-            self.logger.info(
-                f"🎉 訂單 #{order.id} 標記為就緒完成: "
-                f"隊列項 #{queue_item.id}, "
-                f"訂單狀態: ready, "
-                f"隊列狀態: ready, "
-                f"完成時間: {queue_item.actual_completion_time}"
-            )
-            
+            self.update_estimated_times()
             return True
             
         except Exception as e:
-            self.logger.error(
-                f"❌ 訂單 #{order.id} 標記為就緒失敗: {str(e)}"
-            )
-            import traceback
-            self.logger.error(f"錯誤詳情: {traceback.format_exc()}")
+            self.logger.error(f"標記為就緒失敗: {str(e)}")
             return False
-    
-    def log_queue_statistics(self):
-        """記錄隊列統計日誌"""
-        try:
-            summary = self.get_queue_summary()
-            
-            self.logger.info(
-                f"📊 隊列統計報告: "
-                f"等待中: {summary['waiting']}, "
-                f"製作中: {summary['preparing']}, "
-                f"已就緒: {summary['ready']}, "
-                f"總數: {summary['total']}"
-            )
-            
-            # 詳細統計
-            waiting_queues = CoffeeQueue.objects.filter(status='waiting')
-            if waiting_queues.exists():
-                avg_wait_time = sum(
-                    self.calculate_wait_time(queue) for queue in waiting_queues
-                ) / waiting_queues.count()
-                
-                self.logger.info(
-                    f"⏱️ 等待隊列詳細: "
-                    f"訂單數: {waiting_queues.count()}, "
-                    f"平均等待時間: {avg_wait_time:.1f}分鐘"
-                )
-            
-            # 快速訂單統計
-            quick_orders = OrderModel.objects.filter(
-                order_type='quick', 
-                payment_status='paid',
-                status__in=['preparing', 'waiting']
-            ).count()
-            
-            if quick_orders > 0:
-                self.logger.info(
-                    f"⚡ 快速訂單統計: {quick_orders} 個快速訂單處理中"
-                )
-            
-            return summary
-            
-        except Exception as e:
-            self.logger.error(f"記錄隊列統計失敗: {str(e)}")
-            return None
     
     def sync_order_queue_status(self):
         """同步訂單與隊列狀態"""
@@ -739,15 +554,6 @@ class CoffeeQueueManager:
     def get_hong_kong_time_now():
         """獲取當前香港時間"""
         return unified_time_service.get_hong_kong_time()
-    
-    # ==================== 實例方法（兼容性修復） ====================
-    
-    def calculate_preparation_time(self, coffee_count):
-        """
-        計算製作時間 - 實例方法版本
-        用於兼容 order_status_manager.py 中的調用
-        """
-        return self.get_preparation_time(coffee_count)
 
 
 # ==================== 輔助函數 ====================

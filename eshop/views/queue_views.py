@@ -1,29 +1,29 @@
-# eshop/views/queue_views.py
 """
-佇列視圖模組 - 統一資料流版本
-已移除所有冗餘和衝突的舊API函數
-只保留統一資料API、操作API和必要的輔助函數
+佇列視圖模組 - 統一資料流版本（重構後）
+使用共用模塊消除重複代碼，提高代碼質量
 """
 
-import json
 import logging
-import traceback
 from datetime import timedelta
 import pytz
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
-from django.core.exceptions import PermissionDenied
-from django.db.models import Q
 
 from eshop.models import OrderModel, CoffeeQueue
 from eshop.order_status_manager import OrderStatusManager
 from eshop.queue_manager import CoffeeQueueManager, force_sync_queue_and_orders
-from eshop.time_calculation import unified_time_service   # ✅ 唯一時間服務
+from eshop.time_calculation import unified_time_service
+from eshop.views.queue_processors import (
+    process_waiting_queues,
+    process_preparing_queues,
+    process_ready_orders,
+    process_completed_orders
+)
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ def get_unified_queue_data(request):
         waiting_orders = process_waiting_queues(now, hk_tz)
         preparing_orders = process_preparing_queues(now, hk_tz)
         ready_orders = process_ready_orders(now, hk_tz)
-        completed_orders = process_completed_orders(now, hk_tz)   # ✅ 確保有處理已提取訂單
+        completed_orders = process_completed_orders(now, hk_tz)
         
         # 徽章摘要
         badge_summary = {
@@ -116,7 +116,7 @@ def get_unified_queue_data(request):
         return JsonResponse({
             'success': False,
             'error': str(e),
-            'data': {   # ✅ 錯誤時也返回一致的 data 結構
+            'data': {
                 'waiting_orders': [],
                 'preparing_orders': [],
                 'ready_orders': [],
@@ -124,538 +124,6 @@ def get_unified_queue_data(request):
                 'badge_summary': {'waiting': 0, 'preparing': 0, 'ready': 0, 'completed': 0}
             }
         }, status=500)
-    
-
-# ==================== 核心处理函数 ====================
-
-def process_waiting_queues(now, hk_tz):
-    """處理等待隊列數據 - 修正商品項目顯示，使用統一時間格式化"""
-    waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('position')
-    waiting_data = []
-    
-    for queue_item in waiting_queues:
-        try:
-            order = queue_item.order
-            
-            if order.status == 'ready':
-                logger.warning(f"訂單 {order.id} 狀態為 ready，更新隊列狀態")
-                queue_item.status = 'ready'
-                queue_item.actual_completion_time = timezone.now()
-                queue_item.save()
-                continue
-            
-            items = order.get_items_with_chinese_options()
-            
-            coffee_items = []
-            bean_items = []
-            all_items = []
-            coffee_count = 0
-            bean_count = 0
-            
-            for item in items:
-                item_type = item.get('type', 'unknown')
-                item_copy = item.copy()
-                
-                if not item_copy.get('image'):
-                    if item_type == 'coffee':
-                        item_copy['image'] = '/static/images/default-coffee.png'
-                    elif item_type == 'bean':
-                        item_copy['image'] = '/static/images/default-beans.png'
-                    else:
-                        item_copy['image'] = '/static/images/default-product.png'
-                
-                if item_type == 'coffee':
-                    coffee_items.append(item_copy)
-                    coffee_count += item_copy.get('quantity', 1)
-                elif item_type == 'bean':
-                    bean_items.append(item_copy)
-                    bean_count += item_copy.get('quantity', 1)
-                
-                all_items.append(item_copy)
-            
-            has_coffee = len(coffee_items) > 0
-            has_beans = len(bean_items) > 0
-            is_mixed_order = has_coffee and has_beans
-            is_beans_only = has_beans and not has_coffee
-            
-            items_count = 0
-            if has_coffee:
-                items_count += 1
-            if has_beans:
-                items_count += 1
-            
-            items_detail = []
-            if coffee_count > 0:
-                items_detail.append(f"咖啡{coffee_count}杯")
-            if bean_count > 0:
-                items_detail.append(f"咖啡豆{bean_count}包")
-            
-            items_display = f"{items_count}項商品"
-            if items_detail:
-                items_display += f" - {', '.join(items_detail)}"
-            
-            # ✅ 統一使用 time_service 取得取貨時間資訊
-            pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
-            
-            quick_order_time_info = None
-            if order.is_quick_order:
-                quick_order_time_info = unified_time_service.calculate_quick_order_times(order)
-            
-            wait_seconds = 0
-            wait_display = '--'
-            
-            if queue_item.estimated_start_time:
-                est_start = queue_item.estimated_start_time
-                if est_start.tzinfo is None:
-                    est_start = timezone.make_aware(est_start)
-                est_start_hk = est_start.astimezone(hk_tz)
-                wait_seconds = max(0, int((est_start_hk - now).total_seconds()))
-                wait_minutes = max(0, int(wait_seconds / 60))
-                wait_display = f"{wait_minutes}分鐘"
-            elif order.is_quick_order and order.pickup_time_choice:
-                minutes_to_add = unified_time_service.get_minutes_from_pickup_choice(order.pickup_time_choice)
-                wait_display = f"{minutes_to_add}分鐘後"
-            
-            total_price = order.total_price
-            if not total_price or total_price == '0.00':
-                total_price = sum(float(item.get('total_price', 0) or 0) for item in all_items)
-            
-            created_at_hk = order.created_at.astimezone(hk_tz) if order.created_at.tzinfo else timezone.make_aware(order.created_at, hk_tz)
-            
-            estimated_completion_time = None
-            estimated_completion_display = '--:--'
-            if queue_item.estimated_completion_time:
-                est_complete = queue_item.estimated_completion_time
-                if est_complete.tzinfo is None:
-                    est_complete = timezone.make_aware(est_complete)
-                estimated_completion_time = est_complete.astimezone(hk_tz)
-                estimated_completion_display = estimated_completion_time.strftime('%H:%M')
-            
-            estimated_start_display = '--:--'
-            if queue_item.estimated_start_time:
-                est_start = queue_item.estimated_start_time
-                if est_start.tzinfo is None:
-                    est_start = timezone.make_aware(est_start)
-                estimated_start_hk = est_start.astimezone(hk_tz)
-                estimated_start_display = estimated_start_hk.strftime('%H:%M')
-            
-            waiting_data.append({
-                'id': order.id,
-                'order_id': order.id,
-                'position': queue_item.position,
-                'name': order.name or '顾客',
-                'phone': order.phone or '',
-                'total_price': str(total_price),
-                'items': all_items,
-                'coffee_items': coffee_items,
-                'bean_items': bean_items,
-                'coffee_count': coffee_count,
-                'bean_count': bean_count,
-                'items_count': items_count,
-                'items_detail': items_detail,
-                'items_display': items_display,
-                'has_coffee': has_coffee,
-                'has_beans': has_beans,
-                'is_mixed_order': is_mixed_order,
-                'is_beans_only': is_beans_only,
-                'preparation_time_minutes': queue_item.preparation_time_minutes,
-                'wait_seconds': wait_seconds,
-                'wait_display': wait_display,
-                'pickup_time_info': pickup_time_info,
-                'quick_order_time_info': quick_order_time_info,
-                'pickup_time_display': pickup_time_info['text'] if pickup_time_info else '--',
-                'is_quick_order': order.is_quick_order,
-                'estimated_start_time': queue_item.estimated_start_time.isoformat() if queue_item.estimated_start_time else None,
-                'estimated_start_display': estimated_start_display,
-                'estimated_completion_time': estimated_completion_time.isoformat() if estimated_completion_time else None,
-                'estimated_completion_display': estimated_completion_display,
-                'pickup_code': order.pickup_code or '',
-                'payment_method': order.payment_method or '',
-                'payment_method_display': order.get_payment_method_display() if hasattr(order, 'get_payment_method_display') else order.payment_method,
-                'created_at': created_at_hk.isoformat(),
-                'created_at_display': created_at_hk.strftime('%H:%M'),
-                'created_at_full': created_at_hk.strftime('%Y-%m-%d %H:%M'),
-                'pickup_time_choice': order.pickup_time_choice if hasattr(order, 'pickup_time_choice') else None,
-                'pickup_time_choice_display': pickup_time_info['text'] if pickup_time_info and order.is_quick_order else None,
-            })
-            
-        except Exception as e:
-            logger.error(f"處理等待隊列項 {queue_item.id} 失敗: {str(e)}")
-            continue
-    
-    return waiting_data
-
-
-def process_preparing_queues(now, hk_tz):
-    """處理製作中隊列數據 - 使用 OrderStatusManager，添加統一時間格式化"""
-    preparing_queues = CoffeeQueue.objects.filter(status='preparing')
-    preparing_data = []
-    
-    for queue_item in preparing_queues:
-        try:
-            order = queue_item.order
-            
-            pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
-            
-            if order.status != 'preparing':
-                result = OrderStatusManager.mark_as_preparing_manually(
-                    order_id=order.id,
-                    barista_name='system',
-                    preparation_minutes=queue_item.preparation_time_minutes
-                )
-                
-                if not result['success']:
-                    logger.error(f"同步訂單 {order.id} 狀態為製作中失敗: {result['message']}")
-                else:
-                    order = result['order']
-            
-            items = order.get_items_with_chinese_options()
-            
-            coffee_items = []
-            bean_items = []
-            all_items = []
-            coffee_count = 0
-            bean_count = 0
-            
-            for item in items:
-                item_type = item.get('type', 'unknown')
-                item_copy = item.copy()
-                
-                if not item_copy.get('image'):
-                    if item_type == 'coffee':
-                        item_copy['image'] = '/static/images/default-coffee.png'
-                    elif item_type == 'bean':
-                        item_copy['image'] = '/static/images/default-beans.png'
-                    else:
-                        item_copy['image'] = '/static/images/default-product.png'
-                
-                if item_type == 'coffee':
-                    coffee_items.append(item_copy)
-                    coffee_count += item_copy.get('quantity', 1)
-                elif item_type == 'bean':
-                    bean_items.append(item_copy)
-                    bean_count += item_copy.get('quantity', 1)
-                
-                all_items.append(item_copy)
-            
-            has_coffee = len(coffee_items) > 0
-            has_beans = len(bean_items) > 0
-            items_count = 0
-            if has_coffee:
-                items_count += 1
-            if has_beans:
-                items_count += 1
-            
-            items_detail = []
-            if coffee_count > 0:
-                items_detail.append(f"咖啡{coffee_count}杯")
-            if bean_count > 0:
-                items_detail.append(f"咖啡豆{bean_count}包")
-            
-            items_display = f"{items_count}項商品"
-            if items_detail:
-                items_display += f" - {', '.join(items_detail)}"
-            
-            remaining_seconds = 0
-            if queue_item.estimated_completion_time:
-                est_completion = queue_item.estimated_completion_time
-                if est_completion.tzinfo is None:
-                    est_completion = timezone.make_aware(est_completion)
-                est_completion_hk = est_completion.astimezone(hk_tz)
-                remaining_seconds = max(0, int((est_completion_hk - now).total_seconds()))
-            
-            total_price = order.total_price
-            if not total_price or total_price == '0.00':
-                total_price = sum(float(item.get('total_price', 0) or 0) for item in all_items)
-            
-            created_at_hk = order.created_at.astimezone(hk_tz) if order.created_at.tzinfo else timezone.make_aware(order.created_at, hk_tz)
-            
-            preparation_started_at_hk = None
-            if order.preparation_started_at:
-                prep_start = order.preparation_started_at
-                if prep_start.tzinfo is None:
-                    prep_start = timezone.make_aware(prep_start)
-                preparation_started_at_hk = prep_start.astimezone(hk_tz)
-            
-            estimated_completion_time_hk = None
-            if queue_item.estimated_completion_time:
-                est_comp = queue_item.estimated_completion_time
-                if est_comp.tzinfo is None:
-                    est_comp = timezone.make_aware(est_comp)
-                estimated_completion_time_hk = est_comp.astimezone(hk_tz)
-            
-            preparing_data.append({
-                'id': order.id,
-                'order_id': order.id,
-                'pickup_code': order.pickup_code or '',
-                'name': order.name or '顾客',
-                'phone': order.phone or '',
-                'total_price': str(total_price),
-                'items': all_items,
-                'coffee_items': coffee_items,
-                'bean_items': bean_items,
-                'coffee_count': coffee_count,
-                'bean_count': bean_count,
-                'items_count': items_count,
-                'items_detail': items_detail,
-                'items_display': items_display,
-                'has_coffee': has_coffee,
-                'has_beans': has_beans,
-                'is_mixed_order': has_coffee and has_beans,
-                'is_beans_only': has_beans and not has_coffee,
-                'remaining_seconds': remaining_seconds,
-                'estimated_completion_time': estimated_completion_time_hk.strftime('%H:%M') if estimated_completion_time_hk else '--:--',
-                'estimated_completion_time_iso': estimated_completion_time_hk.isoformat() if estimated_completion_time_hk else None,
-                'payment_method': order.payment_method or '',
-                'is_quick_order': order.is_quick_order,
-                'preparation_started_at': preparation_started_at_hk.isoformat() if preparation_started_at_hk else None,
-                'created_at': created_at_hk.isoformat(),
-                'created_at_iso': created_at_hk.isoformat(),
-                'queue_item_id': queue_item.id,
-                'pickup_time_info': pickup_time_info,
-                'pickup_time_display': pickup_time_info['text'] if pickup_time_info else '--',
-                'pickup_time_choice': order.pickup_time_choice if hasattr(order, 'pickup_time_choice') else None,
-            })
-            
-        except Exception as e:
-            logger.error(f"處理製作中隊列項 {queue_item.id} 失敗: {str(e)}")
-            continue
-    
-    return preparing_data
-
-
-def process_ready_orders(now, hk_tz):
-    """處理已就緒訂單數據 - 添加統一時間格式化"""
-    ready_orders = OrderModel.objects.filter(
-        status='ready',
-        payment_status="paid",
-        picked_up_at__isnull=True
-    ).order_by('-ready_at')[:20]
-    
-    ready_data = []
-    for order in ready_orders:
-        try:
-            pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
-            
-            items = order.get_items_with_chinese_options()
-            
-            coffee_items = []
-            bean_items = []
-            all_items = []
-            coffee_count = 0
-            bean_count = 0
-            
-            for item in items:
-                item_type = item.get('type', 'unknown')
-                item_copy = item.copy()
-                
-                if not item_copy.get('image'):
-                    if item_type == 'coffee':
-                        item_copy['image'] = '/static/images/default-coffee.png'
-                    elif item_type == 'bean':
-                        item_copy['image'] = '/static/images/default-beans.png'
-                    else:
-                        item_copy['image'] = '/static/images/default-product.png'
-                
-                if item_type == 'coffee':
-                    coffee_items.append(item_copy)
-                    coffee_count += item_copy.get('quantity', 1)
-                elif item_type == 'bean':
-                    bean_items.append(item_copy)
-                    bean_count += item_copy.get('quantity', 1)
-                
-                all_items.append(item_copy)
-            
-            has_coffee = len(coffee_items) > 0
-            has_beans = len(bean_items) > 0
-            items_count = 0
-            if has_coffee:
-                items_count += 1
-            if has_beans:
-                items_count += 1
-            
-            items_detail = []
-            if coffee_count > 0:
-                items_detail.append(f"咖啡{coffee_count}杯")
-            if bean_count > 0:
-                items_detail.append(f"咖啡豆{bean_count}包")
-            
-            items_display = f"{items_count}項商品"
-            if items_detail:
-                items_display += f" - {', '.join(items_detail)}"
-            
-            total_price = order.total_price
-            if not total_price or total_price == '0.00':
-                total_price = sum(float(item.get('total_price', 0) or 0) for item in all_items)
-            
-            created_at_hk = order.created_at.astimezone(hk_tz) if order.created_at.tzinfo else timezone.make_aware(order.created_at, hk_tz)
-            
-            ready_at_hk = None
-            if order.ready_at:
-                ready_time = order.ready_at
-                if ready_time.tzinfo is None:
-                    ready_time = timezone.make_aware(ready_time)
-                ready_at_hk = ready_time.astimezone(hk_tz)
-            
-            wait_minutes = 0
-            is_beans_only = has_beans and not has_coffee
-            if ready_at_hk and not is_beans_only:
-                wait_seconds = (now - ready_at_hk).total_seconds()
-                wait_minutes = int(wait_seconds / 60)
-            
-            ready_data.append({
-                'id': order.id,
-                'order_id': order.id,
-                'pickup_code': order.pickup_code or '',
-                'name': order.name or '顾客',
-                'phone': order.phone or '',
-                'total_price': str(total_price),
-                'items': all_items,
-                'coffee_items': coffee_items,
-                'bean_items': bean_items,
-                'coffee_count': coffee_count,
-                'bean_count': bean_count,
-                'items_count': items_count,
-                'items_detail': items_detail,
-                'items_display': items_display,
-                'has_coffee': has_coffee,
-                'has_beans': has_beans,
-                'is_mixed_order': has_coffee and has_beans,
-                'is_beans_only': is_beans_only,
-                'completed_time': ready_at_hk.strftime('%H:%M') if ready_at_hk else '--:--',
-                'ready_at': ready_at_hk.isoformat() if ready_at_hk else None,
-                'wait_minutes': wait_minutes,
-                'wait_display': f"{wait_minutes}分鐘前" if wait_minutes > 0 else "刚刚",
-                'payment_method': order.payment_method or '',
-                'is_quick_order': order.is_quick_order,
-                'created_at': created_at_hk.isoformat(),
-                'pickup_time_info': pickup_time_info,
-                'pickup_time_display': pickup_time_info['text'] if pickup_time_info else '--',
-                'pickup_time_choice': order.pickup_time_choice if hasattr(order, 'pickup_time_choice') else None,
-            })
-            
-        except Exception as e:
-            logger.error(f"處理就緒訂單 {order.id} 失敗: {str(e)}")
-            continue
-    
-    ready_data.sort(key=lambda x: x.get('ready_at') or '', reverse=True)
-    return ready_data
-
-
-def process_completed_orders(now, hk_tz):
-    """處理已提取訂單數據（最近4小時） - 添加統一時間格式化"""
-    try:
-        time_threshold = now - timedelta(hours=4)
-        completed_orders = OrderModel.objects.filter(
-            status='completed',
-            picked_up_at__isnull=False,
-            picked_up_at__gte=time_threshold
-        ).order_by('-picked_up_at')[:50]
-        
-        completed_data = []
-        for order in completed_orders:
-            try:
-                pickup_time_info = unified_time_service.format_pickup_time_for_order(order)
-                
-                items = order.get_items_with_chinese_options()
-                
-                coffee_items = []
-                bean_items = []
-                all_items = []
-                coffee_count = 0
-                bean_count = 0
-                
-                for item in items:
-                    item_type = item.get('type', 'unknown')
-                    item_copy = item.copy()
-                    
-                    if not item_copy.get('image'):
-                        if item_type == 'coffee':
-                            item_copy['image'] = '/static/images/default-coffee.png'
-                        elif item_type == 'bean':
-                            item_copy['image'] = '/static/images/default-beans.png'
-                        else:
-                            item_copy['image'] = '/static/images/default-product.png'
-                    
-                    if item_type == 'coffee':
-                        coffee_items.append(item_copy)
-                        coffee_count += item_copy.get('quantity', 1)
-                    elif item_type == 'bean':
-                        bean_items.append(item_copy)
-                        bean_count += item_copy.get('quantity', 1)
-                    
-                    all_items.append(item_copy)
-                
-                has_coffee = len(coffee_items) > 0
-                has_beans = len(bean_items) > 0
-                items_count = 0
-                if has_coffee:
-                    items_count += 1
-                if has_beans:
-                    items_count += 1
-                
-                items_detail = []
-                if coffee_count > 0:
-                    items_detail.append(f"咖啡{coffee_count}杯")
-                if bean_count > 0:
-                    items_detail.append(f"咖啡豆{bean_count}包")
-                
-                items_display = f"{items_count}項商品"
-                if items_detail:
-                    items_display += f" - {', '.join(items_detail)}"
-                
-                total_price = order.total_price
-                if not total_price or total_price == '0.00':
-                    total_price = sum(float(item.get('total_price', 0) or 0) for item in all_items)
-                
-                created_at_hk = order.created_at.astimezone(hk_tz) if order.created_at.tzinfo else timezone.make_aware(order.created_at, hk_tz)
-                
-                picked_up_at_hk = None
-                if order.picked_up_at:
-                    pickup_time = order.picked_up_at
-                    if pickup_time.tzinfo is None:
-                        pickup_time = timezone.make_aware(pickup_time)
-                    picked_up_at_hk = pickup_time.astimezone(hk_tz)
-                
-                completed_data.append({
-                    'id': order.id,
-                    'order_id': order.id,
-                    'pickup_code': order.pickup_code or '',
-                    'name': order.name or '顾客',
-                    'phone': order.phone or '',
-                    'total_price': str(total_price),
-                    'items': all_items,
-                    'coffee_items': coffee_items,
-                    'bean_items': bean_items,
-                    'coffee_count': coffee_count,
-                    'bean_count': bean_count,
-                    'items_count': items_count,
-                    'items_detail': items_detail,
-                    'items_display': items_display,
-                    'has_coffee': has_coffee,
-                    'has_beans': has_beans,
-                    'is_mixed_order': has_coffee and has_beans,
-                    'is_beans_only': has_beans and not has_coffee,
-                    'completed_time': picked_up_at_hk.strftime('%H:%M') if picked_up_at_hk else '--:--',
-                    'picked_up_at': picked_up_at_hk.isoformat() if picked_up_at_hk else None,
-                    'payment_method': order.payment_method or '',
-                    'is_quick_order': order.is_quick_order,
-                    'created_at': created_at_hk.isoformat(),
-                    'pickup_time_info': pickup_time_info,
-                    'pickup_time_display': pickup_time_info['text'] if pickup_time_info else '--',
-                    'pickup_time_choice': order.pickup_time_choice if hasattr(order, 'pickup_time_choice') else None,
-                })
-                
-            except Exception as e:
-                logger.error(f"處理已提取訂單 {order.id} 失敗: {str(e)}")
-                continue
-        
-        completed_data.sort(key=lambda x: x.get('picked_up_at') or '', reverse=True)
-        return completed_data
-        
-    except Exception as e:
-        logger.error(f"處理已提取訂單數據失敗: {str(e)}")
-        return []
 
 
 # ==================== 队列操作API ====================
@@ -755,10 +223,33 @@ def mark_as_ready_api(request, order_id):
         
         if result.get('success'):
             logger.info(f"✅ 舊API: 訂單 #{order_id} 已通過OrderStatusManager標記為就緒")
-            return JsonResponse(result)
+            
+            # 修復：移除無法序列化的對象，只返回可序列化的數據
+            serializable_result = {
+                'success': True,
+                'order_id': order_id,
+                'message': f'訂單 #{order_id} 已標記為就緒',
+                'staff_name': staff_name,
+                'timestamp': timezone.now().isoformat()
+            }
+            
+            # 如果有隊列項信息，添加可序列化的部分
+            if 'queue_item' in result and result['queue_item']:
+                queue_item = result['queue_item']
+                serializable_result['queue_item'] = {
+                    'id': queue_item.id,
+                    'status': queue_item.status,
+                    'actual_completion_time': queue_item.actual_completion_time.isoformat() if queue_item.actual_completion_time else None
+                }
+            
+            return JsonResponse(serializable_result)
         else:
             logger.error(f"❌ 舊API: 標記訂單 #{order_id} 為就緒失敗: {result.get('error')}")
-            return JsonResponse(result, status=400)
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', '未知錯誤'),
+                'message': result.get('message', '標記失敗')
+            }, status=400)
             
     except Exception as e:
         logger.error(f"❌ 舊API處理失敗: {str(e)}", exc_info=True)
@@ -781,10 +272,24 @@ def mark_as_collected(request, order_id):
         
         if result.get('success'):
             logger.info(f"✅ 舊API: 訂單 #{order_id} 已通過OrderStatusManager標記為已提取")
-            return JsonResponse(result)
+            
+            # 修復：移除無法序列化的對象，只返回可序列化的數據
+            serializable_result = {
+                'success': True,
+                'order_id': order_id,
+                'message': f'訂單 #{order_id} 已標記為已提取',
+                'staff_name': staff_name,
+                'timestamp': timezone.now().isoformat()
+            }
+            
+            return JsonResponse(serializable_result)
         else:
             logger.error(f"❌ 舊API: 標記訂單 #{order_id} 為已提取失敗: {result.get('error')}")
-            return JsonResponse(result, status=400)
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', '未知錯誤'),
+                'message': result.get('message', '標記失敗')
+            }, status=400)
             
     except Exception as e:
         logger.error(f"❌ 舊API處理失敗: {str(e)}", exc_info=True)

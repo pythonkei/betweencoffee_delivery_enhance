@@ -616,8 +616,8 @@ class OrderStatusManager:
             # 記錄日誌
             logger.info(f"Order {order_id} marked as preparing by {barista_name or 'system'}")
             
-            # 觸發相關事件（如果需要）
-            cls._trigger_status_change_events(order, old_status, 'preparing', barista_name)
+            # 事件觸發已由其他方法處理，此處不再需要
+            # cls._trigger_status_change_events(order, old_status, 'preparing', barista_name)
             
             return {
                 'success': True,

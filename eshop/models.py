@@ -549,9 +549,11 @@ class OrderModel(models.Model):
                 display_item['total_price_formatted'] = f"HK$ {float(display_item.get('total_price', 0)):.2f}"
             
             # 添加商品類型顯示
-            if display_item.get('type') == 'coffee':
+            item_type = display_item.get('type', 'unknown')
+            
+            if item_type == 'coffee':
                 display_item['type_display'] = '咖啡'
-                # 構建設置顯示
+                # 構建設置顯示 - 只顯示杯型和牛奶選項
                 options = []
                 if display_item.get('cup_level_cn'):
                     options.append(f"杯型: {display_item['cup_level_cn']}")
@@ -559,15 +561,20 @@ class OrderModel(models.Model):
                     options.append(f"牛奶: {display_item['milk_level_cn']}")
                 display_item['options_display'] = " | ".join(options)
                 
-            elif display_item.get('type') == 'bean':
+            elif item_type == 'bean':
                 display_item['type_display'] = '咖啡豆'
-                # 構建設置顯示
+                # 構建設置顯示 - 顯示重量和研磨選項
                 options = []
-                if display_item.get('weight'):
+                if display_item.get('weight_cn'):
+                    options.append(f"重量: {display_item['weight_cn']}")
+                elif display_item.get('weight'):
                     options.append(f"重量: {display_item['weight']}")
                 if display_item.get('grinding_level_cn'):
                     options.append(f"研磨: {display_item['grinding_level_cn']}")
                 display_item['options_display'] = " | ".join(options)
+            else:
+                display_item['type_display'] = '其他商品'
+                display_item['options_display'] = ''
             
             display_items.append(display_item)
         
@@ -734,12 +741,37 @@ class OrderModel(models.Model):
             # 确保图片路径正确
             item['image'] = get_product_image_url(item)
             
-            if 'cup_level' in item:
-                item['cup_level_cn'] = self.translate_option('cup_level', item['cup_level'])
-            if 'milk_level' in item:
-                item['milk_level_cn'] = self.translate_option('milk_level', item['milk_level'])
-            if 'grinding_level' in item:
-                item['grinding_level_cn'] = self.translate_option('grinding_level', item['grinding_level'])
+            # 根据商品类型处理不同的选项
+            item_type = item.get('type', 'unknown')
+            
+            if item_type == 'coffee':
+                # 咖啡商品：只处理杯型和牛奶选项
+                if 'cup_level' in item:
+                    item['cup_level_cn'] = self.translate_option('cup_level', item['cup_level'])
+                if 'milk_level' in item:
+                    item['milk_level_cn'] = self.translate_option('milk_level', item['milk_level'])
+                # 咖啡商品不应该有重量选项，确保不显示
+                if 'weight' in item:
+                    # 记录调试信息但不显示重量选项
+                    logger.debug(f"咖啡商品 {item.get('name', '未知')} 包含重量选项: {item['weight']}")
+                    # 移除重量选项，避免前端显示
+                    item.pop('weight', None)
+                    
+            elif item_type == 'bean':
+                # 咖啡豆商品：处理研磨选项和重量
+                if 'grinding_level' in item:
+                    item['grinding_level_cn'] = self.translate_option('grinding_level', item['grinding_level'])
+                if 'weight' in item:
+                    # 将重量转换为中文显示
+                    item['weight_cn'] = self.translate_weight(item['weight'])
+            else:
+                # 其他类型商品：处理所有可能的选项
+                if 'cup_level' in item:
+                    item['cup_level_cn'] = self.translate_option('cup_level', item['cup_level'])
+                if 'milk_level' in item:
+                    item['milk_level_cn'] = self.translate_option('milk_level', item['milk_level'])
+                if 'grinding_level' in item:
+                    item['grinding_level_cn'] = self.translate_option('grinding_level', item['grinding_level'])
         
         return items
     
@@ -765,6 +797,36 @@ class OrderModel(models.Model):
             }
         }
         return mappings.get(option_type, {}).get(value, value)
+    
+    @staticmethod
+    def translate_weight(weight_value):
+        """静态方法：转换重量值为中文显示"""
+        if not weight_value:
+            return ''
+        
+        weight_str = str(weight_value).strip().lower()
+        
+        # 重量转换映射
+        weight_mappings = {
+            '200g': '200克',
+            '500g': '500克',
+            '200克': '200克',
+            '500克': '500克',
+            '200': '200克',
+            '500': '500克',
+        }
+        
+        # 尝试精确匹配
+        if weight_str in weight_mappings:
+            return weight_mappings[weight_str]
+        
+        # 尝试模糊匹配
+        for key, value in weight_mappings.items():
+            if weight_str in key or key in weight_str:
+                return value
+        
+        # 默认返回原值
+        return weight_value
     
     def get_display_time(self):
         """获取格式化的预计完成时间（香港时区）"""

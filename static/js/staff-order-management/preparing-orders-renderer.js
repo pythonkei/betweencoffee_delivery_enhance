@@ -750,7 +750,7 @@ class DynamicPreparingOrdersRenderer {
             await window.queueManager.markAsReady(orderId);
         } catch (error) {
             console.error(`标记订单 #${orderId} 为就绪失败:`, error);
-            this.showToast(`❌ 操作失败: ${error.message}`, 'error');
+            // 不再显示错误消息，由 queue-manager.js 统一处理
         }
     }
     
@@ -844,7 +844,15 @@ class DynamicPreparingOrdersRenderer {
     }
     
     showToast(message, type = 'info') {
-        if (window.orderManager && window.orderManager.showToast) {
+        // 优先使用统一的 toast-manager.js
+        if (window.toast) {
+            const toastType = type === 'success' ? 'success' : 
+                             type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 'info';
+            
+            window.toast[toastType](message);
+        } else if (window.orderManager && window.orderManager.showToast) {
+            // 备用方案：使用 orderManager 的 showToast
             window.orderManager.showToast(message, type);
         } else {
             // 简单实现
