@@ -376,20 +376,20 @@ class DynamicReadyOrdersRenderer {
         if (!items || items.length === 0) {
             return '<p class="text-muted">暫無商品信息</p>';
         }
-        
+
         let itemsHTML = '';
-        
+
         items.forEach(item => {
             const itemPrice = parseFloat(item.price || 0).toFixed(2);
             const itemTotal = parseFloat(item.total_price || 0).toFixed(2);
-            
+
             itemsHTML += `
                 <div class="d-flex align-items-center mb-3">
                     <div class="mr-3">
                         <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                            <img src="${item.image || '/static/images/default-product.png'}" 
-                                 alt="${item.name || '商品'}" 
-                                 class="img-fluid" 
+                            <img src="${item.image || '/static/images/default-product.png'}"
+                                 alt="${item.name || '商品'}"
+                                 class="img-fluid"
                                  style="max-height: 75px;">
                         </div>
                     </div>
@@ -400,6 +400,7 @@ class DynamicReadyOrdersRenderer {
                             ${item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : ''}
                             ${item.milk_level_cn ? ` | 牛奶: ${item.milk_level_cn}` : ''}
                             ${item.grinding_level_cn ? ` | 研磨: ${item.grinding_level_cn}` : ''}
+                            ${item.weight ? ` | 重量: ${item.weight}` : ''}
                         </div>
                     </div>
                     <div class="text-right">
@@ -409,7 +410,7 @@ class DynamicReadyOrdersRenderer {
                 </div>
             `;
         });
-        
+
         return itemsHTML;
     }
     
