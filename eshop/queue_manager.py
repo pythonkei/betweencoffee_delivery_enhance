@@ -459,7 +459,7 @@ class CoffeeQueueManager:
         """標記為已就緒"""
         try:
             order = queue_item.order
-            
+
             # 狀態轉換日誌
             self.logger.info(
                 f"🔄 訂單 #{order.id} 狀態轉換檢查: "
@@ -467,21 +467,23 @@ class CoffeeQueueManager:
                 f"隊列狀態: {queue_item.status}, "
                 f"目標狀態: ready"
             )
-            
+
             if order.status == 'ready':
                 self.logger.info(
                     f"ℹ️ 訂單 #{order.id} 已經是就緒狀態，無需再次標記"
                 )
                 return True
-            
+
             # 記錄狀態轉換前信息
             old_queue_status = queue_item.status
             old_order_status = order.status
-            
-            # 更新隊列項狀態
+            old_position = queue_item.position
+
+            # 更新隊列項狀態 - 關鍵修復：清理隊列位置
             queue_item.status = 'ready'
+            queue_item.position = 0  # ✅ 重要：清理隊列位置
             queue_item.actual_completion_time = unified_time_service.get_hong_kong_time()
-            
+
             if not queue_item.actual_start_time:
                 queue_item.actual_start_time = queue_item.actual_completion_time - timedelta(
                     minutes=queue_item.preparation_time_minutes
@@ -489,12 +491,13 @@ class CoffeeQueueManager:
                 self.logger.info(
                     f"⏰ 訂單 #{order.id} 補設實際開始時間: {queue_item.actual_start_time}"
                 )
-            
+
             queue_item.save()
-            
+
             self.logger.info(
                 f"✅ 訂單 #{order.id} 隊列項標記為就緒: "
                 f"隊列狀態: {old_queue_status} → ready, "
+                f"位置: {old_position} → 0, "
                 f"完成時間: {queue_item.actual_completion_time}"
             )
             
@@ -764,7 +767,7 @@ def get_queue_updates():
         }
         
     except Exception as e:
-        logger.error(f"獲取隊列更新失敗: {str(e)}")
+        queue_logger.error(f"獲取隊列更新失敗: {str(e)}")
         return {
             'success': False,
             'error': str(e),
@@ -780,14 +783,14 @@ def repair_queue_data():
         manager.sync_order_queue_status()
         return True
     except Exception as e:
-        logger.error(f"修復隊列數據失敗: {str(e)}")
+        queue_logger.error(f"修復隊列數據失敗: {str(e)}")
         return False
 
 
 def force_sync_queue_and_orders():
     """强制同步队列状态和订单状态"""
     try:
-        logger.info("=== 开始强制同步队列与订单状态 ===")
+        queue_logger.info("=== 开始强制同步队列与订单状态 ===")
         
         paid_orders = OrderModel.objects.filter(
             payment_status="paid",
@@ -800,7 +803,7 @@ def force_sync_queue_and_orders():
             has_coffee = any(item.get('type') == 'coffee' for item in items)
             
             if has_coffee and not CoffeeQueue.objects.filter(order=order).exists():
-                logger.info(f"强制添加订单 {order.id} 到队列")
+                queue_logger.info(f"强制添加订单 {order.id} 到队列")
                 
                 coffee_count = sum(
                     item.get('quantity', 1) 
@@ -812,10 +815,10 @@ def force_sync_queue_and_orders():
                     queue_status = 'waiting'
                     if order.status == 'preparing':
                         queue_status = 'preparing'
-                        logger.info(f"订单 {order.id} 状态为 preparing，队列项状态设为 preparing")
+                        queue_logger.info(f"订单 {order.id} 状态为 preparing，队列项状态设为 preparing")
                     elif order.status == 'ready':
                         queue_status = 'ready'
-                        logger.info(f"订单 {order.id} 状态为 ready，队列项状态设为 ready")
+                        queue_logger.info(f"订单 {order.id} 状态为 ready，队列项状态设为 ready")
                     
                     last_item = CoffeeQueue.objects.filter(status='waiting').order_by('-position').first()
                     position = last_item.position + 1 if last_item else 1
@@ -833,7 +836,7 @@ def force_sync_queue_and_orders():
                         actual_completion_time=order.ready_at if queue_status == 'ready' else None
                     )
                     added_count += 1
-                    logger.info(f"已创建队列项 {queue_item.id} 用于订单 {order.id}，状态: {queue_status}")
+                    queue_logger.info(f"已创建队列项 {queue_item.id} 用于订单 {order.id}，状态: {queue_status}")
         
         # 同步队列项和订单状态
         queue_items = CoffeeQueue.objects.all()
@@ -841,22 +844,22 @@ def force_sync_queue_and_orders():
             order = queue_item.order
             
             if queue_item.status == 'waiting' and order.status == 'ready':
-                logger.info(f"订单 {order.id} 队列状态与订单状态不一致，更新队列状态为ready")
+                queue_logger.info(f"订单 {order.id} 队列状态与订单状态不一致，更新队列状态为ready")
                 queue_item.status = 'ready'
                 queue_item.save()
             
             elif queue_item.status == 'preparing' and order.status == 'ready':
-                logger.info(f"订单 {order.id} 制作完成，更新队列状态为ready")
+                queue_logger.info(f"订单 {order.id} 制作完成，更新队列状态为ready")
                 queue_item.status = 'ready'
                 if not queue_item.actual_completion_time:
                     queue_item.actual_completion_time = unified_time_service.get_hong_kong_time()
                 queue_item.save()
         
-        logger.info(f"=== 同步完成，添加了 {added_count} 个订单到队列 ===")
+        queue_logger.info(f"=== 同步完成，添加了 {added_count} 个订单到队列 ===")
         return True
         
     except Exception as e:
-        logger.error(f"同步失败: {str(e)}")
+        queue_logger.error(f"同步失败: {str(e)}")
         return False
 
 
@@ -868,7 +871,7 @@ def get_hong_kong_time_now():
 def sync_ready_orders_timing():
     """同步已就绪订单的时间"""
     try:
-        logger.info("同步已就绪订单的时间...")
+        queue_logger.info("同步已就绪订单的时间...")
         
         # 獲取所有已就緒訂單
         ready_orders = OrderModel.objects.filter(
@@ -890,8 +893,8 @@ def sync_ready_orders_timing():
                     order.ready_at = order.updated_at
                     order.save()
         
-        logger.info("已就緒訂單時間同步完成")
+        queue_logger.info("已就緒訂單時間同步完成")
         return True
     except Exception as e:
-        logger.error(f"同步已就緒訂單時間失敗: {str(e)}")
+        queue_logger.error(f"同步已就緒訂單時間失敗: {str(e)}")
         return False

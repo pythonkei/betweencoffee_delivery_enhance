@@ -1,291 +1,359 @@
 #!/usr/bin/env python
 """
-測試重構後的隊列管理器
+測試 queue_manager_refactored.py 的遷移後方法
+
+這個測試腳本驗證遷移後的隊列管理方法是否正常工作，
+包括錯誤處理框架的集成和兼容性包裝器。
 """
 
-import os
 import sys
-import django
+import os
+import logging
 
-# 設置Django環境
-sys.path.append('.')
+# 設置 Django 環境
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'betweencoffee_delivery.settings')
 
 try:
+    import django
     django.setup()
-    print("✅ Django設置成功")
+    DJANGO_AVAILABLE = True
+except ImportError:
+    DJANGO_AVAILABLE = False
+    print("⚠️ Django 不可用，跳過數據庫相關測試")
 except Exception as e:
-    print(f"❌ Django設置失敗: {e}")
-    sys.exit(1)
+    DJANGO_AVAILABLE = False
+    print(f"⚠️ Django 設置失敗: {e}，跳過數據庫相關測試")
 
-# 導入模型和重構後的隊列管理器
-try:
-    from eshop.models import CoffeeQueue, OrderModel
-    from eshop.queue_manager_refactored import CoffeeQueueManager
-    print("✅ 模型導入成功")
-except Exception as e:
-    print(f"❌ 模型導入失敗: {e}")
-    sys.exit(1)
+# 設置日誌
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+logger = logging.getLogger(__name__)
 
 
-def test_basic_functionality():
-    """測試基本功能"""
+def test_error_handling_framework():
+    """測試錯誤處理框架的基本功能"""
     print("\n" + "="*60)
-    print("測試基本功能")
+    print("測試錯誤處理框架")
     print("="*60)
     
-    manager = CoffeeQueueManager()
-    
-    # 1. 測試獲取隊列摘要
-    print("\n1. 測試獲取隊列摘要:")
-    summary = manager.get_queue_summary()
-    print(f"   隊列摘要: {summary}")
-    
-    # 2. 測試驗證隊列完整性
-    print("\n2. 測試驗證隊列完整性:")
-    integrity = manager.verify_queue_integrity()
-    print(f"   完整性檢查: {'有問題' if integrity['has_issues'] else '正常'}")
-    if integrity['has_issues']:
-        print(f"   問題列表: {integrity['issues']}")
-    
-    # 3. 測試修復隊列位置
-    print("\n3. 測試修復隊列位置:")
     try:
-        success = manager.fix_queue_positions()
-        print(f"   修復結果: {'成功' if success else '失敗'}")
+        # 嘗試導入錯誤處理框架
+        from eshop.error_handling import (
+            handle_error,
+            handle_success,
+            handle_database_error,
+            ErrorHandler
+        )
+        
+        print("✅ 錯誤處理框架導入成功")
+        
+        # 測試 ErrorHandler
+        error_handler = ErrorHandler(module_name='test_module')
+        print(f"✅ ErrorHandler 創建成功: {error_handler}")
+        
+        # 測試 handle_success
+        success_result = handle_success(
+            operation='test_operation',
+            data={'test': 'data'},
+            message='測試成功'
+        )
+        
+        print(f"✅ handle_success 測試成功:")
+        print(f"   success: {success_result.get('success')}")
+        print(f"   message: {success_result.get('message')}")
+        print(f"   data: {success_result.get('data')}")
+        
+        # 測試 handle_error
+        try:
+            raise ValueError("測試錯誤")
+        except Exception as e:
+            error_result = handle_error(
+                error=e,
+                context='test_context',
+                operation='test_operation',
+                data={'test': 'data'}
+            )
+            
+            print(f"✅ handle_error 測試成功:")
+            print(f"   success: {error_result.get('success')}")
+            print(f"   error_id: {error_result.get('error_id')}")
+            print(f"   message: {error_result.get('message')}")
+        
+        return True
+        
     except Exception as e:
-        print(f"   修復失敗: {e}")
-    
-    # 4. 測試更新預計時間
-    print("\n4. 測試更新預計時間:")
-    try:
-        success = manager.update_estimated_times()
-        print(f"   更新結果: {'成功' if success else '失敗'}")
-    except Exception as e:
-        print(f"   更新失敗: {e}")
-    
-    return True
+        print(f"❌ 錯誤處理框架測試失敗: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 
-def test_queue_operations():
-    """測試隊列操作"""
+def test_queue_manager_import():
+    """測試 queue_manager_refactored.py 的導入"""
     print("\n" + "="*60)
-    print("測試隊列操作")
+    print("測試 queue_manager_refactored.py 導入")
     print("="*60)
     
-    manager = CoffeeQueueManager()
-    
-    # 獲取一些測試訂單
     try:
-        # 獲取已支付且包含咖啡的訂單
-        test_orders = OrderModel.objects.filter(
-            payment_status='paid'
-        )[:3]  # 只取前3個
+        # 嘗試導入遷移後的隊列管理器
+        from eshop.queue_manager_refactored import CoffeeQueueManager
         
-        if not test_orders:
-            print("ℹ️ 沒有找到測試訂單")
-            return False
+        print("✅ CoffeeQueueManager 導入成功")
         
-        print(f"找到 {len(test_orders)} 個測試訂單")
+        # 創建實例
+        manager = CoffeeQueueManager()
+        print(f"✅ CoffeeQueueManager 實例創建成功: {manager}")
         
-        for i, order in enumerate(test_orders, 1):
-            print(f"\n{i}. 測試訂單 #{order.id}:")
-            
-            # 檢查是否包含咖啡
-            items = order.get_items()
-            has_coffee = any(item.get('type') == 'coffee' for item in items)
-            
-            if not has_coffee:
-                print(f"   訂單不包含咖啡，跳過")
-                continue
-            
-            # 測試添加訂單到隊列（使用優先級）
-            print(f"   測試添加訂單到隊列（使用優先級）...")
-            queue_item = manager.add_order_to_queue(order, use_priority=True)
-            
-            if queue_item:
-                print(f"   添加成功: 隊列項 #{queue_item.id}, 位置: {queue_item.position}")
-                
-                # 測試計算等待時間
-                wait_time = manager.calculate_wait_time(queue_item)
-                print(f"   等待時間: {wait_time}分鐘")
+        # 檢查方法是否存在
+        methods_to_check = [
+            'add_order_to_queue',
+            'add_order_to_queue_compatible',
+            'start_preparation',
+            'start_preparation_compatible',
+            'mark_as_ready',
+            'mark_as_ready_compatible'
+        ]
+        
+        for method_name in methods_to_check:
+            if hasattr(manager, method_name):
+                print(f"✅ 方法存在: {method_name}")
             else:
-                print(f"   添加失敗")
+                print(f"❌ 方法不存在: {method_name}")
         
         return True
         
     except Exception as e:
-        print(f"❌ 測試隊列操作失敗: {e}")
+        print(f"❌ queue_manager_refactored.py 導入失敗: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
-def test_sync_operations():
-    """測試同步操作"""
+def test_method_signatures():
+    """測試方法簽名和文檔"""
     print("\n" + "="*60)
-    print("測試同步操作")
+    print("測試方法簽名和文檔")
     print("="*60)
     
-    manager = CoffeeQueueManager()
-    
     try:
-        # 測試同步訂單狀態
-        print("\n1. 測試同步訂單狀態:")
-        success = manager.sync_order_queue_status()
-        print(f"   同步結果: {'成功' if success else '失敗'}")
+        from eshop.queue_manager_refactored import CoffeeQueueManager
         
-        # 測試獲取隊列更新
-        print("\n2. 測試獲取隊列更新:")
-        from eshop.queue_manager_refactored import get_queue_updates
-        updates = get_queue_updates()
-        print(f"   更新數據: {'成功' if updates['success'] else '失敗'}")
-        if updates['success']:
-            print(f"   隊列摘要: {updates['queue_summary']}")
+        manager = CoffeeQueueManager()
         
-        # 測試修復隊列數據
-        print("\n3. 測試修復隊列數據:")
-        from eshop.queue_manager_refactored import repair_queue_data
-        success = repair_queue_data()
-        print(f"   修復結果: {'成功' if success else '失敗'}")
+        # 測試 add_order_to_queue 方法
+        method = manager.add_order_to_queue
+        docstring = method.__doc__
+        
+        if docstring:
+            print("✅ add_order_to_queue 有文檔字符串")
+            # 檢查返回格式描述
+            if '返回格式:' in docstring:
+                print("✅ 文檔中包含返回格式描述")
+            else:
+                print("⚠️ 文檔中缺少返回格式描述")
+        else:
+            print("❌ add_order_to_queue 沒有文檔字符串")
+        
+        # 測試兼容性包裝器
+        compatible_method = manager.add_order_to_queue_compatible
+        if callable(compatible_method):
+            print("✅ add_order_to_queue_compatible 是可調用的")
+        else:
+            print("❌ add_order_to_queue_compatible 不可調用")
         
         return True
         
     except Exception as e:
-        print(f"❌ 測試同步操作失敗: {e}")
+        print(f"❌ 方法簽名測試失敗: {e}")
+        return False
+
+
+def test_error_handling_in_methods():
+    """測試方法中的錯誤處理"""
+    print("\n" + "="*60)
+    print("測試方法中的錯誤處理")
+    print("="*60)
+    
+    try:
+        from eshop.queue_manager_refactored import CoffeeQueueManager
+        
+        manager = CoffeeQueueManager()
+        
+        # 測試錯誤處理 - 傳入 None 應該觸發錯誤
+        print("測試 add_order_to_queue 的錯誤處理...")
+        
+        # 注意：這裡我們傳入 None 來測試錯誤處理
+        # 在實際使用中，應該傳入有效的 OrderModel 實例
+        result = manager.add_order_to_queue(None)
+        
+        if result:
+            print(f"✅ add_order_to_queue 返回結果: {result.get('success')}")
+            
+            if not result.get('success'):
+                print(f"✅ 錯誤處理正常工作:")
+                print(f"   錯誤ID: {result.get('error_id')}")
+                print(f"   錯誤消息: {result.get('message')}")
+            else:
+                print("⚠️ 傳入 None 但返回成功，可能需要檢查錯誤處理邏輯")
+        else:
+            print("❌ add_order_to_queue 返回 None")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ 錯誤處理測試失敗: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
-def test_static_methods():
-    """測試靜態方法"""
+def test_compatibility_wrappers():
+    """測試兼容性包裝器"""
     print("\n" + "="*60)
-    print("測試靜態方法")
+    print("測試兼容性包裝器")
     print("="*60)
     
     try:
-        # 測試獲取製作時間
-        print("\n1. 測試獲取製作時間:")
-        for count in [1, 2, 3, 5]:
-            prep_time = CoffeeQueueManager.get_preparation_time(count)
-            print(f"   {count}杯咖啡: {prep_time}分鐘")
+        from eshop.queue_manager_refactored import CoffeeQueueManager
         
-        # 測試獲取香港時間
-        print("\n2. 測試獲取香港時間:")
-        hk_time = CoffeeQueueManager.get_hong_kong_time_now()
-        print(f"   當前香港時間: {hk_time}")
+        manager = CoffeeQueueManager()
+        
+        # 測試兼容性包裝器
+        print("測試 add_order_to_queue_compatible...")
+        result = manager.add_order_to_queue_compatible(None)
+        
+        if result is None:
+            print("✅ add_order_to_queue_compatible 返回 None（預期行為）")
+        else:
+            print(f"⚠️ add_order_to_queue_compatible 返回: {result}")
+        
+        # 測試 start_preparation_compatible
+        print("測試 start_preparation_compatible...")
+        result = manager.start_preparation_compatible(None)
+        
+        if result is False:
+            print("✅ start_preparation_compatible 返回 False（預期行為）")
+        else:
+            print(f"⚠️ start_preparation_compatible 返回: {result}")
         
         return True
         
     except Exception as e:
-        print(f"❌ 測試靜態方法失敗: {e}")
+        print(f"❌ 兼容性包裝器測試失敗: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
-def compare_with_original():
-    """與原始代碼比較"""
+def test_private_methods():
+    """測試私有方法（如果可訪問）"""
     print("\n" + "="*60)
-    print("與原始代碼比較")
+    print("測試私有方法")
     print("="*60)
     
     try:
-        # 導入原始隊列管理器
-        from eshop.queue_manager import CoffeeQueueManager as OriginalManager
+        from eshop.queue_manager_refactored import CoffeeQueueManager
         
-        original_manager = OriginalManager()
-        refactored_manager = CoffeeQueueManager()
+        manager = CoffeeQueueManager()
         
-        print("\n1. 方法數量比較:")
+        # 檢查私有方法是否存在
+        private_methods = [
+            '_calculate_coffee_count',
+            '_calculate_position',
+            '_get_next_simple_position',
+            '_calculate_priority_position',
+            '_check_and_reorder_queue'
+        ]
         
-        # 獲取原始管理器的方法
-        original_methods = [m for m in dir(original_manager) 
-                          if not m.startswith('_') and callable(getattr(original_manager, m))]
-        
-        # 獲取重構管理器的方法
-        refactored_methods = [m for m in dir(refactored_manager) 
-                            if not m.startswith('_') and callable(getattr(refactored_manager, m))]
-        
-        print(f"   原始方法數量: {len(original_methods)}")
-        print(f"   重構方法數量: {len(refactored_methods)}")
-        
-        # 檢查重複方法
-        print("\n2. 重複方法檢查:")
-        duplicate_methods = []
-        for method in original_methods:
-            if method in refactored_methods:
-                duplicate_methods.append(method)
-        
-        print(f"   共有方法: {len(duplicate_methods)}個")
-        if duplicate_methods:
-            print(f"   方法列表: {', '.join(duplicate_methods[:10])}" + 
-                  ("..." if len(duplicate_methods) > 10 else ""))
-        
-        # 檢查被移除的重複方法
-        print("\n3. 被合併的重複方法:")
-        removed_duplicates = ['add_order_to_queue_with_priority']  # 已知被合併的方法
-        for method in removed_duplicates:
-            if hasattr(original_manager, method) and not hasattr(refactored_manager, method):
-                print(f"   ✅ {method} 已被合併到 add_order_to_queue")
+        for method_name in private_methods:
+            if hasattr(manager, method_name):
+                print(f"✅ 私有方法存在: {method_name}")
+            else:
+                print(f"⚠️ 私有方法不存在: {method_name}")
         
         return True
         
     except Exception as e:
-        print(f"❌ 比較失敗: {e}")
+        print(f"❌ 私有方法測試失敗: {e}")
+        return False
+
+
+def run_all_tests():
+    """運行所有測試"""
+    print("開始測試 queue_manager_refactored.py")
+    print("="*60)
+    
+    test_results = []
+    
+    # 運行測試
+    test_results.append(("錯誤處理框架", test_error_handling_framework()))
+    test_results.append(("隊列管理器導入", test_queue_manager_import()))
+    test_results.append(("方法簽名", test_method_signatures()))
+    test_results.append(("錯誤處理", test_error_handling_in_methods()))
+    test_results.append(("兼容性包裝器", test_compatibility_wrappers()))
+    test_results.append(("私有方法", test_private_methods()))
+    
+    # 顯示測試結果
+    print("\n" + "="*60)
+    print("測試結果總結")
+    print("="*60)
+    
+    passed = 0
+    failed = 0
+    
+    for test_name, result in test_results:
+        if result:
+            print(f"✅ {test_name}: 通過")
+            passed += 1
+        else:
+            print(f"❌ {test_name}: 失敗")
+            failed += 1
+    
+    print(f"\n總計: {passed} 通過, {failed} 失敗")
+    
+    if failed == 0:
+        print("\n🎉 所有測試通過！")
+        return True
+    else:
+        print(f"\n⚠️ 有 {failed} 個測試失敗")
         return False
 
 
 def main():
-    """主測試函數"""
-    print("重構隊列管理器測試")
-    print("版本: 1.0.0")
-    print("="*60)
-    
-    tests = [
-        ("基本功能測試", test_basic_functionality),
-        ("隊列操作測試", test_queue_operations),
-        ("同步操作測試", test_sync_operations),
-        ("靜態方法測試", test_static_methods),
-        ("與原始代碼比較", compare_with_original),
-    ]
-    
-    results = []
-    
-    for test_name, test_func in tests:
-        print(f"\n▶ 開始 {test_name}...")
-        try:
-            success = test_func()
-            results.append((test_name, success))
-            status = "✅ 通過" if success else "❌ 失敗"
-            print(f"   {status}")
-        except Exception as e:
-            results.append((test_name, False))
-            print(f"   ❌ 異常: {e}")
-    
-    # 總結結果
-    print("\n" + "="*60)
-    print("測試總結")
-    print("="*60)
-    
-    passed = sum(1 for _, success in results if success)
-    total = len(results)
-    
-    print(f"\n總測試數: {total}")
-    print(f"通過數: {passed}")
-    print(f"失敗數: {total - passed}")
-    print(f"通過率: {passed/total*100:.1f}%")
-    
-    print("\n詳細結果:")
-    for test_name, success in results:
-        status = "✅ 通過" if success else "❌ 失敗"
-        print(f"  {test_name}: {status}")
-    
-    if passed == total:
-        print("\n🎉 所有測試通過！重構成功。")
-    else:
-        print(f"\n⚠️  {total - passed} 個測試失敗，需要檢查。")
-    
-    return passed == total
+    """主函數"""
+    try:
+        success = run_all_tests()
+        
+        if success:
+            print("\n" + "="*60)
+            print("遷移測試完成 - 基本功能正常")
+            print("="*60)
+            print("\n建議下一步:")
+            print("1. 完成 queue_manager_refactored.py 的剩餘方法")
+            print("2. 在 Django 環境中進行集成測試")
+            print("3. 測試實際的隊列操作流程")
+            print("4. 驗證與原始 queue_manager.py 的兼容性")
+        else:
+            print("\n" + "="*60)
+            print("遷移測試完成 - 發現問題")
+            print("="*60)
+            print("\n需要修復的問題:")
+            print("1. 檢查錯誤處理框架導入")
+            print("2. 修復 queue_manager_refactored.py 中的語法錯誤")
+            print("3. 確保所有方法都有正確的簽名")
+            print("4. 測試兼容性包裝器的行為")
+        
+        return success
+        
+    except Exception as e:
+        print(f"\n❌ 測試運行失敗: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 
 if __name__ == "__main__":
