@@ -19,11 +19,17 @@ from eshop.time_calculation import unified_time_service   # ✅ 唯一時間服�
 from eshop.order_status_manager import OrderStatusManager
 
 # 導入新的序列化和工具
-from eshop.serializers import OrderDataSerializer, ApiResponseFormatter
+from eshop.serializers import OrderDataSerializer
 from eshop.api_utils import BaseApiView, OrderApiMixin, staff_api_required
 
 # ✅ 導入統一的API響應格式
-from core.api_response import ApiResponse, api_response_format, api_success, api_error, api_paginated
+from core.api_response import api_success, api_error
+
+# ✅ 導入共用工具模塊
+from eshop.utils.common_utils import (
+    common_utils, get_hong_kong_time, format_time_display,
+    log_info, log_error
+)
 
 logger = logging.getLogger(__name__)
 

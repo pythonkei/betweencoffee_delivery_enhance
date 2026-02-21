@@ -4,12 +4,14 @@
 缓存常用查询，减少数据库负载
 """
 import logging
-from functools import wraps
-from django.core.cache import cache
-from django.utils import timezone
-from datetime import timedelta
+from eshop.utils.cache_optimizer import cache_optimizer
 
 logger = logging.getLogger(__name__)
+
+
+# 使用新的缓存优化器
+cached_query = cache_optimizer.optimized_cached_query
+
 
 class QueryOptimizer:
     """查询优化器"""
@@ -21,34 +23,6 @@ class QueryOptimizer:
         'order_status': 10,   # 10秒
         'quick_orders': 30,   # 30秒
     }
-    
-    @staticmethod
-    def cached_query(cache_key, timeout=None, force_refresh=False):
-        """查询缓存装饰器"""
-        def decorator(func):
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                # 构建完整的缓存键
-                full_cache_key = f"query_{cache_key}"
-                if args:
-                    full_cache_key += f"_{hash(str(args))}"
-                if kwargs:
-                    full_cache_key += f"_{hash(str(kwargs))}"
-                
-                # 强制刷新或缓存不存在
-                if force_refresh or not cache.get(full_cache_key):
-                    result = func(*args, **kwargs)
-                    cache_timeout = timeout or QueryOptimizer.CACHE_TIMEOUTS.get(cache_key, 30)
-                    cache.set(full_cache_key, result, cache_timeout)
-                    logger.debug(f"缓存查询结果: {full_cache_key}")
-                    return result
-                
-                # 返回缓存结果
-                cached_result = cache.get(full_cache_key)
-                logger.debug(f"使用缓存查询: {full_cache_key}")
-                return cached_result
-            return wrapper
-        return decorator
     
     @classmethod
     @cached_query('queue_summary', timeout=30)
@@ -100,13 +74,8 @@ class QueryOptimizer:
     @classmethod
     def invalidate_cache(cls, cache_key_prefix):
         """使缓存失效"""
-        keys_to_delete = []
-        for key in cache.keys(f"*{cache_key_prefix}*"):
-            keys_to_delete.append(key)
-        
-        if keys_to_delete:
-            cache.delete_many(keys_to_delete)
-            logger.info(f"已使缓存失效: {len(keys_to_delete)} 个键")
+        # 使用缓存优化器的方法
+        return cache_optimizer.invalidate_cache(cache_key_prefix)
     
     @classmethod
     def prefetch_order_relations(cls, queryset):
