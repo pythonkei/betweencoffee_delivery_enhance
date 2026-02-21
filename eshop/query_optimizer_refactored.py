@@ -74,7 +74,7 @@ class QueryOptimizer:
         """缓存的队列摘要 - 使用错误处理框架"""
         try:
             from .models import CoffeeQueue
-            from .queue_manager import CoffeeQueueManager
+            from .queue_manager_refactored import CoffeeQueueManager
             
             queue_manager = CoffeeQueueManager()
             summary = queue_manager.get_queue_summary()

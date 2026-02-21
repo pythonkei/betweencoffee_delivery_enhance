@@ -65,9 +65,9 @@ class OrderStatusManager:
                     logger.info(f"快速订单 #{order.id} 已计算取货时间")
                 
                 # 将订单加入队列
-                from .queue_manager import CoffeeQueueManager
+                from .queue_manager_refactored import CoffeeQueueManager
                 queue_manager = CoffeeQueueManager()
-                queue_item = queue_manager.add_order_to_queue(order)
+                queue_item = queue_manager.add_order_to_queue_compatible(order)
                 
                 if queue_item:
                     logger.info(f"订单 {order.id} 已加入制作队列，位置: {queue_item.position}")
@@ -78,9 +78,9 @@ class OrderStatusManager:
             
             # ✅ 修改：重新计算所有订单时间
             logger.info(f"🔄 订单 #{order_id} 支付成功，开始统一时间计算...")
-            from .queue_manager import CoffeeQueueManager
+            from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all_order_times_compatible()
             
             # ✅ 修改：如果有request，清空购物车
             if request:
@@ -190,11 +190,11 @@ class OrderStatusManager:
                     )
             
             # ✅ 重要：觸發統一時間計算
-            from .queue_manager import CoffeeQueueManager
+            from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
             
             logger.info(f"🔄 訂單狀態變化，開始統一時間計算...")
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all_order_times_compatible()
             
             if time_result.get('success'):
                 logger.info(f"✅ 訂單狀態變化後時間計算完成")
@@ -245,10 +245,10 @@ class OrderStatusManager:
             
             # 批量處理後統一計算時間（只計算一次）
             logger.info(f"🔄 批量處理完成，開始統一時間計算...")
-            from .queue_manager import CoffeeQueueManager
+            from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
             
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all_order_times_compatible()
             
             logger.info(f"✅ 批量處理完成，統一時間計算結果: {time_result.get('success')}")
             
@@ -504,9 +504,9 @@ class OrderStatusManager:
             order.save(update_fields=['payment_status', 'payment_method', 'paid_at', 'status'])
             
             # 創建或更新隊列項
-            from eshop.queue_manager import CoffeeQueueManager
+            from eshop.queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
-            queue_item = queue_manager.add_to_queue(order)
+            queue_item = queue_manager.add_order_to_queue_compatible(order)
             
             # 觸發相關事件
             cls._trigger_payment_success_events(order, payment_method)
@@ -591,7 +591,7 @@ class OrderStatusManager:
                 items = order.get_items()
                 coffee_count = sum(item.get('quantity', 1) for item in items if item.get('type') == 'coffee')
                 
-                from eshop.queue_manager import CoffeeQueueManager
+                from eshop.queue_manager_refactored import CoffeeQueueManager
                 queue_manager = CoffeeQueueManager()
                 
                 if coffee_count > 0:
@@ -621,9 +621,9 @@ class OrderStatusManager:
                 queue_item.save()
             
             # 更新隊列時間
-            from eshop.queue_manager import CoffeeQueueManager
+            from eshop.queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
-            queue_manager.update_estimated_times()
+            queue_manager.update_estimated_times_compatible()
             
             # 記錄日誌
             logger.info(f"Order {order_id} marked as preparing by {barista_name or 'system'}")

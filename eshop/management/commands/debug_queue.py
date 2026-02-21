@@ -1,7 +1,7 @@
 # eshop/management/commands/debug_queue.py
 from django.core.management.base import BaseCommand
 from eshop.models import OrderModel, CoffeeQueue
-from eshop.queue_manager import CoffeeQueueManager
+from eshop.queue_manager_refactored import CoffeeQueueManager
 
 class Command(BaseCommand):
     help = '调试队列系统'

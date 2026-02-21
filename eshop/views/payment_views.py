@@ -304,7 +304,7 @@ def alipay_callback(request):
                 # 5. 嘗試將訂單加入隊列
                 if has_coffee:
                     try:
-                        from eshop.queue_manager import CoffeeQueueManager
+                        from eshop.queue_manager_refactored import CoffeeQueueManager
                         queue_manager = CoffeeQueueManager()
                         queue_item = queue_manager.add_order_to_queue(order)
                         

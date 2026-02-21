@@ -891,8 +891,8 @@ class OrderModel(models.Model):
             return 0  # 純咖啡豆訂單無需製作
         
         # 使用統一的製作時間計算（與queue_manager一致）
-        from .queue_manager import CoffeeQueueManager
-        return CoffeeQueueManager.get_preparation_time(coffee_count)
+        from .queue_manager_refactored import CoffeeQueueManager
+        return CoffeeQueueManager.get_preparation_time_compatible(coffee_count)
     
     def should_be_in_queue_by_now(self):
         """檢查是否應該已經在隊列中（基於最晚開始時間）"""
@@ -1213,7 +1213,7 @@ class OrderModel(models.Model):
                 if manager.should_add_to_queue():
                     logger.info(f"订单 {self.id} 符合加入队列条件，尝试加入队列")
                     try:
-                        from .queue_manager import CoffeeQueueManager
+                        from .queue_manager_refactored import CoffeeQueueManager
                         queue_manager = CoffeeQueueManager()
                         
                         # 检查是否已经在队列中

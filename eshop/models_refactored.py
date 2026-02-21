@@ -383,7 +383,7 @@ class OrderModel(models.Model):
                     if manager.should_add_to_queue():
                         logger.info(f"訂單 {self.id} 符合加入隊列條件，嘗試加入隊列")
                         
-                        from .queue_manager import CoffeeQueueManager
+                        from .queue_manager_refactored import CoffeeQueueManager
                         from .models import CoffeeQueue
                         
                         queue_manager = CoffeeQueueManager()

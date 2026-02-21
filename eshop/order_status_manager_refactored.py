@@ -78,7 +78,7 @@ class OrderStatusManager:
                     logger.info(f"快速訂單 #{order.id} 已計算取貨時間")
                 
                 # 將訂單加入隊列
-                from .queue_manager import CoffeeQueueManager
+                from .queue_manager_refactored import CoffeeQueueManager
                 queue_manager = CoffeeQueueManager()
                 queue_item = queue_manager.add_order_to_queue(order)
                 
@@ -91,9 +91,9 @@ class OrderStatusManager:
             
             # ✅ 修改：重新計算所有訂單時間
             logger.info(f"🔄 訂單 #{order_id} 支付成功，開始統一時間計算...")
-            from .queue_manager import CoffeeQueueManager
+            from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all_order_times_compatible()
             
             # ✅ 修改：如果有request，清空購物車
             if request:
@@ -224,11 +224,11 @@ class OrderStatusManager:
                     )
             
             # ✅ 重要：觸發統一時間計算
-            from .queue_manager import CoffeeQueueManager
+            from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
             
             logger.info(f"🔄 訂單狀態變化，開始統一時間計算...")
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all_order_times_compatible()
             
             if time_result.get('success'):
                 logger.info(f"✅ 訂單狀態變化後時間計算完成")
@@ -291,10 +291,10 @@ class OrderStatusManager:
             
             # 批量處理後統一計算時間（只計算一次）
             logger.info(f"🔄 批量處理完成，開始統一時間計算...")
-            from .queue_manager import CoffeeQueueManager
+            from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
             
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all_order_times_compatible()
             
             logger.info(f"✅ 批量處理完成，統一時間計算結果: {time_result.get('success')}")
             
@@ -480,4 +480,4 @@ class OrderStatusManager:
             queue_message = '目前訂單較多，請耐心等候'
         
         # 剩餘時間顯示
-        remaining_display = f"(
+        remaining_display = f"(約{total_minutes}分鐘後)"

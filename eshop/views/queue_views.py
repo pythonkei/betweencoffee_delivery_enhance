@@ -16,7 +16,7 @@ from django.utils import timezone
 
 from eshop.models import OrderModel, CoffeeQueue
 from eshop.order_status_manager import OrderStatusManager
-from eshop.queue_manager import CoffeeQueueManager, force_sync_queue_and_orders
+from eshop.queue_manager_refactored import CoffeeQueueManager, force_sync_queue_and_orders
 from eshop.time_calculation import unified_time_service
 from eshop.views.queue_processors import (
     process_waiting_queues,

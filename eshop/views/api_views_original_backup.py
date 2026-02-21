@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
 from eshop.models import OrderModel, CoffeeQueue
-from eshop.queue_manager import CoffeeQueueManager
+from eshop.queue_manager_refactored import CoffeeQueueManager
 
 from eshop.time_calculation import unified_time_service   # ✅ 唯一時間服務
 from eshop.order_status_manager import OrderStatusManager
@@ -573,7 +573,7 @@ def health_check(request):
         # 檢查隊列系統
         queue_ok = True
         try:
-            from eshop.queue_manager import CoffeeQueueManager
+            from eshop.queue_manager_refactored import CoffeeQueueManager
             manager = CoffeeQueueManager()
             stats = manager.get_queue_stats()
             queue_stats = stats

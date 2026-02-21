@@ -496,3 +496,785 @@ class CoffeeQueueManager:
             # 如果失敗，返回False
             self.logger.error(f"標記為就緒失敗，返回False: {result.get('error_id', 'N/A')}")
             return False
+    
+    # ==================== 私有輔助方法 ====================
+    
+    def _calculate_coffee_count(self, order):
+        """計算訂單中的咖啡杯數"""
+        try:
+            items = order.get_items()
+            coffee_count = sum(
+                item.get('quantity', 1) 
+                for item in items 
+                if item.get('type') == 'coffee'
+            )
+            
+            self.logger.debug(f"訂單 #{order.id} 咖啡杯數計算: {coffee_count} 杯")
+            return coffee_count
+            
+        except Exception as e:
+            self.logger.error(f"計算咖啡杯數失敗: {str(e)}")
+            return 0
+    
+    def _calculate_position(self, order, coffee_count, use_priority):
+        """
+        計算隊列位置
+        
+        Args:
+            order: 訂單實例
+            coffee_count: 咖啡杯數
+            use_priority: 是否使用優先級
+        
+        Returns:
+            隊列位置
+        """
+        try:
+            if use_priority:
+                position = self._calculate_priority_position(order)
+            else:
+                position = self._get_next_simple_position()
+            
+            self.logger.debug(f"訂單 #{order.id} 位置計算: {position} (優先級: {use_priority})")
+            return position
+            
+        except Exception as e:
+            self.logger.error(f"計算位置失敗: {str(e)}")
+            return 1
+    
+    def _get_next_simple_position(self):
+        """獲取下一個簡單順序位置"""
+        try:
+            last_item = CoffeeQueue.objects.filter(status='waiting').order_by('-position').first()
+            position = last_item.position + 1 if last_item else 1
+            
+            self.logger.debug(f"簡單順序位置計算: {position}")
+            return position
+            
+        except Exception as e:
+            self.logger.error(f"獲取簡單位置失敗: {str(e)}")
+            return 1
+    
+    def _calculate_priority_position(self, order):
+        """
+        計算優先級位置
+        
+        優先級規則：
+        1. 所有快速訂單優先
+        2. 快速訂單內部按創建時間排序
+        3. 普通訂單按創建時間排序
+        """
+        try:
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('position')
+            
+            if not waiting_queues.exists():
+                self.logger.debug(f"訂單 #{order.id} 優先級位置: 1 (隊列為空)")
+                return 1
+            
+            # 快速訂單處理
+            if order.order_type == 'quick':
+                for queue in waiting_queues:
+                    if queue.order.order_type != 'quick':
+                        self.logger.debug(f"訂單 #{order.id} 優先級位置: {queue.position} (插入到普通訂單前)")
+                        return queue.position
+                    if order.created_at < queue.order.created_at:
+                        self.logger.debug(f"訂單 #{order.id} 優先級位置: {queue.position} (插入到較晚的快速訂單前)")
+                        return queue.position
+                
+                position = waiting_queues.last().position + 1
+                self.logger.debug(f"訂單 #{order.id} 優先級位置: {position} (添加到隊列末尾)")
+                return position
+            
+            # 普通訂單處理
+            else:
+                last_quick_position = 0
+                for queue in waiting_queues:
+                    if queue.order.order_type == 'quick':
+                        last_quick_position = max(last_quick_position, queue.position)
+                
+                if last_quick_position == 0:
+                    for queue in waiting_queues:
+                        if order.created_at < queue.order.created_at:
+                            self.logger.debug(f"訂單 #{order.id} 優先級位置: {queue.position} (插入到較晚的普通訂單前)")
+                            return queue.position
+                
+                position = last_quick_position + 1 if last_quick_position > 0 else len(waiting_queues) + 1
+                self.logger.debug(f"訂單 #{order.id} 優先級位置: {position} (添加到快速訂單後)")
+                return position
+                
+        except Exception as e:
+            self.logger.error(f"計算優先級位置失敗: {str(e)}")
+            return self._get_next_simple_position()
+    
+    def _check_and_reorder_queue(self):
+        """檢查並重新排序隊列"""
+        try:
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting')
+            
+            if not waiting_queues.exists():
+                self.logger.debug("隊列為空，無需重新排序")
+                return False
+            
+            # 收集信息並排序
+            queues_info = []
+            for queue in waiting_queues:
+                queues_info.append({
+                    'queue_id': queue.id,
+                    'order_id': queue.order.id,
+                    'order_type': queue.order.order_type,
+                    'current_position': queue.position,
+                    'created_at': queue.order.created_at.timestamp(),
+                })
+            
+            # 排序：快速訂單優先，然後按創建時間
+            queues_info.sort(key=lambda x: (0 if x['order_type'] == 'quick' else 1, x['created_at']))
+            
+            # 檢查是否需要重新排序
+            needs_reorder = any(
+                info['current_position'] != index + 1
+                for index, info in enumerate(queues_info)
+            )
+            
+            if not needs_reorder:
+                self.logger.debug("隊列順序正常，無需重新排序")
+                return False
+            
+            # 重新排序
+            self.logger.info("重新排序隊列...")
+            
+            # 暫時清除位置
+            for queue in waiting_queues:
+                queue.position = 0
+                queue.save()
+            
+            # 分配新位置
+            for index, info in enumerate(queues_info, start=1):
+                queue = CoffeeQueue.objects.get(id=info['queue_id'])
+                queue.position = index
+                queue.save()
+            
+            self.logger.info(f"隊列重新排序完成，共 {len(queues_info)} 個訂單")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"檢查隊列排序失敗: {str(e)}")
+            return False
+    
+    # ==================== 重要方法 ====================
+    
+    def recalculate_all_order_times(self):
+        """
+        統一重新計算所有訂單時間 - 使用錯誤處理框架
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'queue_reordered': True/False,
+                'quick_orders_updated': 0,
+                'urgent_orders_found': 0,
+                'total_quick_orders': 0,
+                'time_update_success': True/False,
+                'integrity_issues': 0,
+                'timestamp': '...'
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            self.logger.info("🔄 === 開始統一重新計算所有訂單時間 ===")
+            
+            # 1. 檢查並重新排序隊列
+            needs_reorder = self._check_and_reorder_queue()
+            
+            if needs_reorder:
+                self.logger.info("✅ 隊列已重新排序，準備更新時間")
+            else:
+                self.logger.info("✅ 隊列順序正常，繼續時間計算")
+            
+            # 2. 更新快速訂單的取貨時間
+            quick_orders_updated = 0
+            quick_orders = OrderModel.objects.filter(
+                order_type='quick', 
+                payment_status='paid'
+            ).exclude(status__in=['completed', 'cancelled'])
+            
+            for order in quick_orders:
+                try:
+                    if hasattr(order, 'pickup_time_choice') and order.pickup_time_choice:
+                        time_info = unified_time_service.calculate_quick_order_times(order)
+                        if time_info:
+                            order.estimated_ready_time = time_info['estimated_pickup_time']
+                            order.latest_start_time = time_info['latest_start_time']
+                            order.save()
+                            quick_orders_updated += 1
+                except Exception as e:
+                    self.logger.error(f"更新快速訂單 #{order.id} 時間失敗: {str(e)}")
+                    continue
+            
+            self.logger.info(f"✅ 已更新 {quick_orders_updated} 個快速訂單的取貨時間")
+            
+            # 3. 更新隊列預計時間
+            time_update_success = self.update_estimated_times()
+            
+            if time_update_success:
+                self.logger.info("✅ 隊列預計時間更新成功")
+            else:
+                self.logger.warning("⚠️ 隊列預計時間更新可能不完整")
+            
+            # 4. 檢查緊急訂單
+            urgent_orders_count = 0
+            for order in quick_orders:
+                try:
+                    if hasattr(order, 'should_be_in_queue_by_now') and order.should_be_in_queue_by_now():
+                        if hasattr(order, 'is_urgent'):
+                            if not order.is_urgent:
+                                order.is_urgent = True
+                                order.save()
+                                urgent_orders_count += 1
+                except Exception as e:
+                    self.logger.error(f"檢查訂單 #{order.id} 緊急狀態失敗: {str(e)}")
+                    continue
+            
+            self.logger.info(f"✅ 發現 {urgent_orders_count} 個緊急訂單需要立即處理")
+            
+            # 5. 驗證數據完整性
+            integrity_check_result = self.verify_queue_integrity()
+            
+            if integrity_check_result.get('success'):
+                integrity_data = integrity_check_result['data']
+                has_issues = integrity_data.get('has_issues', False)
+                issues = integrity_data.get('issues', [])
+                
+                if has_issues:
+                    self.logger.warning(f"⚠️ 隊列完整性檢查發現問題: {len(issues)} 個")
+                else:
+                    self.logger.info("✅ 隊列數據完整性驗證通過")
+            else:
+                self.logger.warning(f"⚠️ 隊列完整性檢查失敗: {integrity_check_result.get('message')}")
+                has_issues = True
+                issues = [f"完整性檢查失敗: {integrity_check_result.get('message')}"]
+            
+            # 返回統計信息
+            result = {
+                'success': True,
+                'message': '時間重新計算完成',
+                'details': {
+                    'queue_reordered': needs_reorder,
+                    'quick_orders_updated': quick_orders_updated,
+                    'urgent_orders_found': urgent_orders_count,
+                    'total_quick_orders': quick_orders.count(),
+                    'time_update_success': time_update_success,
+                    'integrity_issues': len(issues),
+                    'timestamp': unified_time_service.get_hong_kong_time().isoformat()
+                }
+            }
+            
+            self.logger.info(f"✅ === 統一時間計算完成 ===")
+            self.logger.info(f"📊 結果: {result}")
+            
+            return handle_success(
+                operation='recalculate_all_order_times',
+                data=result['details'],
+                message='時間重新計算完成'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ 統一重新計算訂單時間失敗: {str(e)}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+            
+            return handle_database_error(
+                error=e,
+                operation='recalculate_all_order_times',
+                query='重新計算所有訂單時間',
+                model='OrderModel'
+            )
+    
+    def recalculate_all_order_times_compatible(self):
+        """
+        兼容性包裝器 - 返回原始格式的字典
+        """
+        result = self.recalculate_all_order_times()
+        
+        if result.get('success'):
+            return result['data']
+        else:
+            # 如果失敗，返回錯誤字典
+            self.logger.error(f"重新計算時間失敗: {result.get('error_id', 'N/A')}")
+            return {
+                'success': False,
+                'error': result.get('message', '未知錯誤'),
+                'message': '時間重新計算失敗'
+            }
+    
+    def update_estimated_times(self):
+        """
+        更新隊列預計時間 - 使用錯誤處理框架
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'waiting_orders_updated': 0,
+                'current_time': '...',
+                'total_preparation_minutes': 0,
+                'timestamp': '...'
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            current_time = unified_time_service.get_hong_kong_time()
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('position')
+            
+            cumulative_time = timedelta(minutes=0)
+            waiting_orders_updated = 0
+            total_preparation_minutes = 0
+            
+            for queue in waiting_queues:
+                estimated_start = current_time + cumulative_time
+                queue.estimated_start_time = estimated_start
+                
+                prep_time = timedelta(minutes=queue.preparation_time_minutes)
+                queue.estimated_completion_time = estimated_start + prep_time
+                
+                queue.save()
+                cumulative_time += prep_time
+                waiting_orders_updated += 1
+                total_preparation_minutes += queue.preparation_time_minutes
+            
+            self.logger.info(
+                f"⏰ 更新隊列預計時間完成: "
+                f"更新了 {waiting_orders_updated} 個等待訂單, "
+                f"總製作時間: {total_preparation_minutes} 分鐘"
+            )
+            
+            return handle_success(
+                operation='update_estimated_times',
+                data={
+                    'waiting_orders_updated': waiting_orders_updated,
+                    'current_time': current_time.isoformat(),
+                    'total_preparation_minutes': total_preparation_minutes,
+                    'timestamp': current_time.isoformat()
+                },
+                message=f'更新了 {waiting_orders_updated} 個訂單的預計時間'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ 更新預計時間失敗: {str(e)}")
+            
+            return handle_database_error(
+                error=e,
+                operation='update_estimated_times',
+                query='更新隊列預計時間',
+                model='CoffeeQueue'
+            )
+    
+    def update_estimated_times_compatible(self):
+        """
+        兼容性包裝器 - 返回原始格式的布爾值
+        """
+        result = self.update_estimated_times()
+        
+        if result.get('success'):
+            return True
+        else:
+            # 如果失敗，返回False
+            self.logger.error(f"更新預計時間失敗: {result.get('error_id', 'N/A')}")
+            return False
+    
+    def verify_queue_integrity(self):
+        """
+        驗證隊列完整性 - 使用錯誤處理框架
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'has_issues': True/False,
+                'issues': [],
+                'waiting_count': 0,
+                'preparing_count': 0,
+                'ready_count': 0,
+                'total_count': 0,
+                'timestamp': '...'
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            issues = []
+            
+            # 檢查ready訂單位置
+            ready_with_position = CoffeeQueue.objects.filter(status='ready', position__gt=0)
+            if ready_with_position.exists():
+                issues.append(f"發現 {ready_with_position.count()} 個ready訂單有隊列位置")
+            
+            # 檢查waiting訂單連續性
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('position')
+            expected_pos = 1
+            for queue in waiting_queues:
+                if queue.position != expected_pos:
+                    issues.append(f"訂單 #{queue.order.id} 位置不連續: {queue.position} (期望: {expected_pos})")
+                expected_pos += 1
+            
+            # 檢查重複位置
+            from django.db.models import Count
+            duplicate_positions = CoffeeQueue.objects.filter(status='waiting') \
+                .values('position') \
+                .annotate(count=Count('position')) \
+                .filter(count__gt=1)
+            
+            for dup in duplicate_positions:
+                issues.append(f"位置 {dup['position']} 有 {dup['count']} 個訂單")
+            
+            waiting_count = waiting_queues.count()
+            preparing_count = CoffeeQueue.objects.filter(status='preparing').count()
+            ready_count = CoffeeQueue.objects.filter(status='ready').count()
+            total_count = waiting_count + preparing_count + ready_count
+            
+            has_issues = len(issues) > 0
+            
+            if has_issues:
+                self.logger.warning(
+                    f"⚠️ 隊列完整性檢查發現問題: {len(issues)} 個問題"
+                )
+                for issue in issues:
+                    self.logger.warning(f"  - {issue}")
+            else:
+                self.logger.info(
+                    f"✅ 隊列完整性檢查通過: "
+                    f"等待中: {waiting_count}, "
+                    f"製作中: {preparing_count}, "
+                    f"已就緒: {ready_count}, "
+                    f"總數: {total_count}"
+                )
+            
+            return handle_success(
+                operation='verify_queue_integrity',
+                data={
+                    'has_issues': has_issues,
+                    'issues': issues,
+                    'waiting_count': waiting_count,
+                    'preparing_count': preparing_count,
+                    'ready_count': ready_count,
+                    'total_count': total_count,
+                    'timestamp': unified_time_service.get_hong_kong_time().isoformat()
+                },
+                message=f'隊列完整性檢查完成，發現 {len(issues)} 個問題' if has_issues else '隊列完整性檢查通過'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ 驗證隊列完整性失敗: {str(e)}")
+            
+            return handle_database_error(
+                error=e,
+                operation='verify_queue_integrity',
+                query='驗證隊列完整性',
+                model='CoffeeQueue'
+            )
+    
+    def verify_queue_integrity_compatible(self):
+        """
+        兼容性包裝器 - 返回原始格式的字典
+        """
+        result = self.verify_queue_integrity()
+        
+        if result.get('success'):
+            return result['data']
+        else:
+            # 如果失敗，返回錯誤字典
+            self.logger.error(f"驗證隊列完整性失敗: {result.get('error_id', 'N/A')}")
+            return {
+                'has_issues': True,
+                'issues': [f"驗證失敗: {result.get('message', '未知錯誤')}"]
+            }
+    
+    def sync_order_queue_status(self):
+        """
+        同步訂單與隊列狀態 - 使用錯誤處理框架
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'orders_checked': 0,
+                'queue_items_added': 0,
+                'status_synced': 0,
+                'time_updated': True/False,
+                'timestamp': '...'
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            from django.db import transaction
+            
+            orders_checked = 0
+            queue_items_added = 0
+            status_synced = 0
+            
+            with transaction.atomic():
+                # 添加缺失的隊列項
+                preparing_orders = OrderModel.objects.filter(
+                    payment_status="paid",
+                    status='preparing'
+                )
+                
+                for order in preparing_orders:
+                    orders_checked += 1
+                    if not CoffeeQueue.objects.filter(order=order).exists():
+                        result = self.add_order_to_queue(order)
+                        if result.get('success'):
+                            queue_items_added += 1
+                
+                # 同步狀態
+                waiting_queues = CoffeeQueue.objects.filter(status='waiting')
+                for queue in waiting_queues:
+                    order = queue.order
+                    if order.status != 'preparing' and order.payment_status == 'paid':
+                        result = OrderStatusManager.mark_as_preparing_manually(
+                            order_id=order.id,
+                            barista_name="system_sync",
+                            preparation_minutes=queue.preparation_time_minutes or 5
+                        )
+                        if result.get('success'):
+                            status_synced += 1
+            
+            # 更新隊列時間
+            time_update_result = self.update_estimated_times()
+            time_updated = time_update_result.get('success', False)
+            
+            self.logger.info(
+                f"🔄 同步訂單與隊列狀態完成: "
+                f"檢查了 {orders_checked} 個訂單, "
+                f"添加了 {queue_items_added} 個隊列項, "
+                f"同步了 {status_synced} 個狀態, "
+                f"時間更新: {'成功' if time_updated else '失敗'}"
+            )
+            
+            return handle_success(
+                operation='sync_order_queue_status',
+                data={
+                    'orders_checked': orders_checked,
+                    'queue_items_added': queue_items_added,
+                    'status_synced': status_synced,
+                    'time_updated': time_updated,
+                    'timestamp': unified_time_service.get_hong_kong_time().isoformat()
+                },
+                message=f'同步完成: 檢查 {orders_checked} 訂單, 添加 {queue_items_added} 隊列項, 同步 {status_synced} 狀態'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ 同步狀態失敗: {str(e)}")
+            
+            return handle_database_error(
+                error=e,
+                operation='sync_order_queue_status',
+                query='同步訂單與隊列狀態',
+                model='OrderModel'
+            )
+    
+    def sync_order_queue_status_compatible(self):
+        """
+        兼容性包裝器 - 返回原始格式的布爾值
+        """
+        result = self.sync_order_queue_status()
+        
+        if result.get('success'):
+            return True
+        else:
+            # 如果失敗，返回False
+            self.logger.error(f"同步狀態失敗: {result.get('error_id', 'N/A')}")
+            return False
+    
+    def fix_queue_positions(self):
+        """
+        修復隊列位置 - 使用錯誤處理框架
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'ready_positions_reset': 0,
+                'waiting_positions_fixed': 0,
+                'time_updated': True/False,
+                'timestamp': '...'
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            # 重置ready訂單位置
+            ready_positions_reset = CoffeeQueue.objects.filter(status='ready', position__gt=0).update(position=0)
+            
+            # 重新分配waiting訂單位置
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('created_at')
+            waiting_positions_fixed = 0
+            
+            for index, queue in enumerate(waiting_queues, start=1):
+                if queue.position != index:
+                    queue.position = index
+                    queue.save()
+                    waiting_positions_fixed += 1
+            
+            # 更新隊列時間
+            time_update_result = self.update_estimated_times()
+            time_updated = time_update_result.get('success', False)
+            
+            self.logger.info(
+                f"🔧 修復隊列位置完成: "
+                f"重置了 {ready_positions_reset} 個ready訂單位置, "
+                f"修復了 {waiting_positions_fixed} 個waiting訂單位置, "
+                f"時間更新: {'成功' if time_updated else '失敗'}"
+            )
+            
+            return handle_success(
+                operation='fix_queue_positions',
+                data={
+                    'ready_positions_reset': ready_positions_reset,
+                    'waiting_positions_fixed': waiting_positions_fixed,
+                    'time_updated': time_updated,
+                    'timestamp': unified_time_service.get_hong_kong_time().isoformat()
+                },
+                message=f'修復完成: 重置 {ready_positions_reset} ready位置, 修復 {waiting_positions_fixed} waiting位置'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ 修復隊列位置失敗: {str(e)}")
+            
+            return handle_database_error(
+                error=e,
+                operation='fix_queue_positions',
+                query='修復隊列位置',
+                model='CoffeeQueue'
+            )
+    
+    def fix_queue_positions_compatible(self):
+        """
+        兼容性包裝器 - 返回原始格式的布爾值
+        """
+        result = self.fix_queue_positions()
+        
+        if result.get('success'):
+            return True
+        else:
+            # 如果失敗，返回False
+            self.logger.error(f"修復隊列位置失敗: {result.get('error_id', 'N/A')}")
+            return False
+
+
+# ==================== 輔助函數 ====================
+
+def force_sync_queue_and_orders():
+    """
+    强制同步队列状态和订单状态 - 兼容性函數
+    
+    這個函數用於保持與原始 queue_manager.py 的兼容性
+    它調用遷移後的隊列管理器來執行同步操作
+    """
+    try:
+        queue_logger.info("=== 开始强制同步队列与订单状态 ===")
+        
+        # 創建隊列管理器實例
+        manager = CoffeeQueueManager()
+        
+        # 執行同步操作
+        sync_result = manager.sync_order_queue_status()
+        
+        if sync_result.get('success'):
+            queue_logger.info("✅ 强制同步完成")
+            return True
+        else:
+            queue_logger.error(f"❌ 强制同步失败: {sync_result.get('message')}")
+            return False
+            
+    except Exception as e:
+        queue_logger.error(f"❌ 强制同步失败: {str(e)}")
+        return False
+
+
+def repair_queue_data():
+    """
+    修復隊列數據 - 兼容性函數
+    
+    這個函數用於保持與原始 queue_manager.py 的兼容性
+    它調用遷移後的隊列管理器來執行修復操作
+    """
+    try:
+        # 創建隊列管理器實例
+        manager = CoffeeQueueManager()
+        
+        # 執行修復操作
+        fix_result = manager.fix_queue_positions()
+        sync_result = manager.sync_order_queue_status()
+        
+        if fix_result.get('success') and sync_result.get('success'):
+            return True
+        else:
+            return False
+            
+    except Exception as e:
+        queue_logger.error(f"修復隊列數據失敗: {str(e)}")
+        return False
+
+
+def get_hong_kong_time_now():
+    """
+    獲取當前香港時間 - 兼容性函數
+    
+    這個函數用於保持與原始 queue_manager.py 的兼容性
+    """
+    from .time_calculation import unified_time_service
+    return unified_time_service.get_hong_kong_time()
+
+
+def sync_ready_orders_timing():
+    """
+    同步已就緒訂單的時間 - 兼容性函數
+    
+    這個函數用於保持與原始 queue_manager.py 的兼容性
+    """
+    try:
+        queue_logger.info("同步已就緒訂單的時間...")
+        
+        # 獲取所有已就緒訂單
+        ready_orders = OrderModel.objects.filter(
+            status='ready',
+            payment_status="paid"
+        )
+        
+        for order in ready_orders:
+            # 檢查對應的隊列項
+            try:
+                queue_item = CoffeeQueue.objects.get(order=order)
+                # 如果隊列項有完成時間，同步到訂單
+                if queue_item.actual_completion_time and not order.ready_at:
+                    order.ready_at = queue_item.actual_completion_time
+                    order.save()
+            except CoffeeQueue.DoesNotExist:
+                # 如果沒有隊列項，但訂單是就緒狀態，設置默認時間
+                if not order.ready_at and order.updated_at:
+                    order.ready_at = order.updated_at
+                    order.save()
+        
+        queue_logger.info("已就緒訂單時間同步完成")
+        return True
+    except Exception as e:
+        queue_logger.error(f"同步已就緒訂單時間失敗: {str(e)}")
+        return False

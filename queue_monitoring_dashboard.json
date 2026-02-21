@@ -1,25 +1,56 @@
 {
-  "timestamp": "2026-02-17T10:46:51.914243+00:00",
+  "timestamp": "2026-02-21T02:24:55.139848",
+  "system_status": "healthy",
   "summary": {
-    "total_orders": 1185,
-    "total_queue_items": 103,
-    "order_status_distribution": {
-      "waiting": 3,
-      "preparing": 89,
-      "ready": 16,
-      "completed": 882
+    "total_errors": 0,
+    "total_warnings": 0,
+    "total_successes": 4
+  },
+  "errors": [],
+  "warnings": [],
+  "successes": [
+    {
+      "timestamp": "2026-02-21T02:24:55.114676",
+      "check": "import_check",
+      "message": "queue_manager_refactored 導入成功"
     },
-    "queue_status_distribution": {
-      "waiting": 0,
-      "preparing": 89,
-      "ready": 14
+    {
+      "timestamp": "2026-02-21T02:24:55.114816",
+      "check": "original_file_check",
+      "message": "原始 queue_manager.py 已成功刪除"
+    },
+    {
+      "timestamp": "2026-02-21T02:24:55.114950",
+      "check": "error_handling_check",
+      "message": "錯誤處理框架正常工作"
+    },
+    {
+      "timestamp": "2026-02-21T02:24:55.139776",
+      "check": "queue_operations_check",
+      "message": "隊列統計獲取成功",
+      "data": {
+        "has_issues": false,
+        "issues": [],
+        "waiting_count": 0,
+        "preparing_count": 5,
+        "ready_count": 63,
+        "total_count": 68,
+        "timestamp": "2026-02-21T02:24:55.139539+08:00"
+      }
     }
+  ],
+  "stats": {
+    "waiting_count": 0,
+    "preparing_count": 5,
+    "ready_count": 63,
+    "total_count": 68,
+    "timestamp": "2026-02-21T02:24:55.139767"
   },
-  "issues": {
-    "total": 0,
-    "fixed": 0,
-    "deleted": 0,
-    "details": []
-  },
-  "health_score": 100
+  "recommendations": [
+    {
+      "priority": "low",
+      "action": "繼續監控系統狀態",
+      "details": "系統運行正常，建議定期監控"
+    }
+  ]
 }

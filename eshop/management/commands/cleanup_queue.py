@@ -115,7 +115,7 @@ class Command(BaseCommand):
         
         # 執行統一的隊列時間重新計算
         try:
-            from eshop.queue_manager import CoffeeQueueManager
+            from eshop.queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
             time_result = queue_manager.recalculate_all_order_times()
             
