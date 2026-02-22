@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """
-最終驗證測試 - 確認隊列修復完成
+最終驗證測試 - 修復版本，確保創建訂單時提供有效的 items 字段
 """
 
 import os
 import sys
 import logging
+import json
 
 # 設置 Django 環境
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'betweencoffee_delivery.settings')
@@ -14,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import django
 django.setup()
 
-from eshop.models import OrderModel, CoffeeQueue
+from eshop.models import OrderModel, CoffeeQueue, CoffeeItem, BeanItem
 from eshop.order_status_manager import OrderStatusManager
 from eshop.views.queue_views import start_preparation_api
 from django.test import RequestFactory
@@ -23,8 +24,8 @@ from django.contrib.auth.models import User
 logger = logging.getLogger(__name__)
 
 
-class FinalVerification:
-    """最終驗證測試"""
+class FinalVerificationFixed:
+    """最終驗證測試 - 修復版本"""
     
     def __init__(self):
         self.results = {}
@@ -55,6 +56,45 @@ class FinalVerification:
         except Exception as e:
             print(f"⚠️ 清理測試數據時出錯: {str(e)}")
     
+    def create_test_order(self, name, phone, pickup_code, payment_method='cash'):
+        """創建測試訂單 - 修復版本，確保 items 字段有效"""
+        try:
+            # 創建有效的 items 數據
+            items = [
+                {
+                    'type': 'coffee',
+                    'id': 1,  # 假設有咖啡項目ID為1
+                    'name': '測試咖啡',
+                    'price': 45.0,
+                    'quantity': 1,
+                    'cup_level': 'Medium',
+                    'milk_level': 'Medium',
+                    'image': '/static/images/default-coffee.png'
+                }
+            ]
+            
+            # 創建訂單
+            test_order = OrderModel.objects.create(
+                status='waiting',
+                payment_status='paid',
+                total_price=45.0,
+                name=name,
+                phone=phone,
+                pickup_code=pickup_code,
+                payment_method=payment_method,
+                items=json.dumps(items)  # 確保 items 是有效的 JSON 字符串
+            )
+            
+            self.test_orders.append(test_order.id)
+            print(f"✅ 創建測試訂單 #{test_order.id}: {name}")
+            return test_order
+            
+        except Exception as e:
+            print(f"❌ 創建測試訂單失敗: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
     def test_frontend_api_flow(self):
         """測試前端API流程"""
         print("\n=== 測試前端API流程 ===")
@@ -76,18 +116,21 @@ class FinalVerification:
                 test_user.save()
                 print(f"✅ 創建測試員工用戶: {test_user.username}")
             
-            # 創建一個測試訂單
-            test_order = OrderModel.objects.create(
-                status='waiting',
-                payment_status='paid',
-                total_price=45.0,
+            # 創建一個測試訂單（使用4位取餐碼）
+            test_order = self.create_test_order(
                 name='前端測試客戶',
                 phone='98765432',
-                pickup_code='FRONT123',
+                pickup_code='1234',
                 payment_method='cash'
             )
-            self.test_orders.append(test_order.id)
-            print(f"✅ 創建測試訂單 #{test_order.id}")
+            
+            if not test_order:
+                print(f"❌ 創建測試訂單失敗")
+                self.results['frontend_api'] = {
+                    'success': False,
+                    'error': '創建測試訂單失敗'
+                }
+                return None
             
             # 模擬前端API請求
             factory = RequestFactory()
@@ -217,17 +260,22 @@ class FinalVerification:
         print("\n=== 測試隊列集成 ===")
         
         try:
-            # 創建一個新的測試訂單
-            test_order = OrderModel.objects.create(
-                status='waiting',
-                payment_status='paid',
-                total_price=55.0,
+            # 創建一個新的測試訂單（使用4位取餐碼）
+            test_order = self.create_test_order(
                 name='隊列測試客戶',
                 phone='11223344',
-                pickup_code='QUEUE456',
+                pickup_code='5678',
                 payment_method='alipay'
             )
-            self.test_orders.append(test_order.id)
+            
+            if not test_order:
+                print(f"❌ 創建隊列測試訂單失敗")
+                self.results['queue_integration'] = {
+                    'success': False,
+                    'error': '創建測試訂單失敗'
+                }
+                return {}
+            
             print(f"✅ 創建隊列測試訂單 #{test_order.id}")
             
             # 測試OrderStatusManager
@@ -398,10 +446,10 @@ class FinalVerification:
 
 def main():
     """主測試函數"""
-    print("🔍 開始隊列修復最終驗證")
+    print("🔍 開始隊列修復最終驗證（修復版本）")
     print("="*60)
     
-    verifier = FinalVerification()
+    verifier = FinalVerificationFixed()
     
     try:
         # 執行測試

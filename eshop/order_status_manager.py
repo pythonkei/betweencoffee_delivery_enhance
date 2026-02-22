@@ -575,7 +575,6 @@ class OrderStatusManager:
             from datetime import timedelta
             
             # 獲取訂單
-            from eshop.models import OrderModel
             order = OrderModel.objects.get(id=order_id)
             
             # 檢查訂單狀態

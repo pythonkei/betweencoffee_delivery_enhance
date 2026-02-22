@@ -516,6 +516,23 @@ class CoffeeQueueManager:
             self.logger.error(f"計算咖啡杯數失敗: {str(e)}")
             return 0
     
+    def calculate_preparation_time(self, coffee_count):
+        """
+        計算製作時間 - 兼容性方法
+        
+        這個方法用於保持與原始代碼的兼容性
+        實際調用 unified_time_service.calculate_preparation_time
+        """
+        try:
+            preparation_minutes = unified_time_service.calculate_preparation_time(coffee_count)
+            self.logger.debug(f"計算製作時間: {coffee_count} 杯 -> {preparation_minutes} 分鐘")
+            return preparation_minutes
+            
+        except Exception as e:
+            self.logger.error(f"計算製作時間失敗: {str(e)}")
+            # 默認值：每杯咖啡5分鐘
+            return max(5, coffee_count * 5)
+    
     def _calculate_position(self, order, coffee_count, use_priority):
         """
         計算隊列位置
