@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試共用工具模塊</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .test-result {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .badge-quickorder {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .order-type-badge {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">測試共用工具模塊</h1>
+        
+        <div class="test-section">
+            <h3>1. 測試 CommonUtils 加載</h3>
+            <button id="test-load" class="btn btn-primary">測試加載</button>
+            <div id="load-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 測試訂單類型分析</h3>
+            <button id="test-analyze" class="btn btn-primary">測試分析</button>
+            <div id="analyze-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 測試徽章生成</h3>
+            <button id="test-badges" class="btn btn-primary">測試徽章</button>
+            <div id="badges-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. 測試時間格式化</h3>
+            <button id="test-time" class="btn btn-primary">測試時間</button>
+            <div id="time-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. 測試訂單項目渲染</h3>
+            <button id="test-items" class="btn btn-primary">測試項目渲染</button>
+            <div id="items-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>6. 測試防抖和節流</h3>
+            <button id="test-debounce" class="btn btn-primary">測試防抖</button>
+            <div id="debounce-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>7. 測試DOM創建</h3>
+            <button id="test-dom" class="btn btn-primary">測試DOM創建</button>
+            <div id="dom-result" class="test-result"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/staff-order-management/common-utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 測試1: CommonUtils 加載
+            document.getElementById('test-load').addEventListener('click', function() {
+                const result = document.getElementById('load-result');
+                if (window.CommonUtils) {
+                    result.innerHTML = '<span class="success">✅ CommonUtils 已成功加載！</span>';
+                    result.innerHTML += '<br>可用方法: ' + Object.keys(CommonUtils).join(', ');
+                } else {
+                    result.innerHTML = '<span class="error">❌ CommonUtils 未加載！</span>';
+                }
+            });
+            
+            // 測試2: 訂單類型分析
+            document.getElementById('test-analyze').addEventListener('click', function() {
+                const result = document.getElementById('analyze-result');
+                if (!window.CommonUtils) {
+                    result.innerHTML = '<span class="error">❌ CommonUtils 未加載！</span>';
+                    return;
+                }
+                
+                const testOrder = {
+                    coffee_count: 2,
+                    bean_count: 1,
+                    is_quick_order: true,
+                    is_mixed_order: true
+                };
+                
+                const typeInfo = CommonUtils.analyzeOrderType(testOrder);
+                result.innerHTML = '<span class="success">✅ 訂單類型分析成功！</span>';
+                result.innerHTML += '<br>分析結果: ' + JSON.stringify(typeInfo, null, 2);
+            });
+            
+            // 測試3: 徽章生成
+            document.getElementById('test-badges').addEventListener('click', function() {
+                const result = document.getElementById('badges-result');
+                if (!window.CommonUtils) {
+                    result.innerHTML = '<span class="error">❌ CommonUtils 未加載！</span>';
+                    return;
+                }
+                
+                const testOrder = {
+                    is_quick_order: true,
+                    coffee_count: 2,
+                    bean_count: 1
+                };
+                
+                const typeInfo = CommonUtils.analyzeOrderType(testOrder);
+                const orderTypeBadges = CommonUtils.generateOrderTypeBadges(testOrder, typeInfo);
+                const quantityBadges = CommonUtils.generateQuantityBadges(typeInfo);
+                
+                result.innerHTML = '<span class="success">✅ 徽章生成成功！</span>';
+                result.innerHTML += '<br>訂單類型徽章: ' + orderTypeBadges;
+                result.innerHTML += '<br>數量徽章: ' + quantityBadges;
+            });
+            
+            // 測試4: 時間格式化
+            document.getElementById('test-time').addEventListener('click', function() {
+                const result = document.getElementById('time-result');
+                if (!window.CommonUtils) {
+                    result.innerHTML = '<span class="error">❌ CommonUtils 未加載！</span>';
+                    return;
+                }
+                
+                const now = new Date().toISOString();
+                const formattedTime = CommonUtils.formatHKTime(now);
+                const formattedTimeOnly = CommonUtils.formatHKTimeOnly(now);
+                
+                result.innerHTML = '<span class="success">✅ 時間格式化成功！</span>';
+                result.innerHTML += '<br>原始時間: ' + now;
+                result.innerHTML += '<br>完整格式: ' + formattedTime;
+                result.innerHTML += '<br>僅時間: ' + formattedTimeOnly;
+            });
+            
+            // 測試5: 訂單項目渲染
+            document.getElementById('test-items').addEventListener('click', function() {
+                const result = document.getElementById('items-result');
+                if (!window.CommonUtils) {
+                    result.innerHTML = '<span class="error">❌ CommonUtils 未加載！</span>';
+                    return;
+                }
+                
+                const testItems = [
+                    {
+                        name: '美式咖啡',
+                        price: '35.00',
+                        total_price: '35.00',
+                        quantity: 1,
+                        cup_level_cn: '大杯',
+                        milk_level_cn: '無',
+                        type: 'coffee'
+                    },
+                    {
+                        name: '哥倫比亞咖啡豆',
+                        price: '120.00',
+                        total_price: '120.00',
+                        quantity: 1,
+                        weight: '200g',
+                        grinding_level_cn: '中度研磨',
+                        type: 'bean'
+                    }
+                ];
+                
+                const itemsHTML = CommonUtils.renderOrderItems(testItems);
+                result.innerHTML = '<span class="success">✅ 訂單項目渲染成功！</span>';
+                result.innerHTML += '<br>渲染結果:';
+                result.innerHTML += '<div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;">' + itemsHTML + '</div>';
+            });
+            
+            // 測試6: 防抖和節流
+            document.getElementById('test-debounce').addEventListener('click', function() {
+                const result = document.getElementById('debounce-result');
+                if (!window.CommonUtils) {
+                    result.innerHTML = '<span class="error">❌ CommonUtils 未加載！</span>';
+                    return;
+                }
+                
+                let count = 0;
+                const debouncedFunc = CommonUtils.debounce(() => {
+                    count++;
+                    result.innerHTML = `<span class="success">✅ 防抖函數執行第 ${count} 次</span>`;
+                }, 500);
+                
+                result.innerHTML = '<span class="success">✅ 防抖函數創建成功！</span>';
+                result.innerHTML += '<br>快速點擊按鈕測試防抖效果...';
+                
+                // 模擬快速點擊
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => debouncedFunc(), i * 100);
+                }
+            });
+            
+            // 測試7: DOM創建
+            document.getElementById('test-dom').addEventListener('click', function() {
+                const result = document.getElementById('dom-result');
+                if (!window.CommonUtils) {
+                    result.innerHTML = '<span class="error">❌ CommonUtils 未加載！</span>';
+                    return;
+                }
+                
+                const element = CommonUtils.createElement('div', {
+                    className: 'alert alert-success',
+                    textContent: '這是一個測試元素'
+                }, [
+                    CommonUtils.createElement('span', {
+                        className: 'badge badge-primary',
+                        textContent: '徽章'
+                    })
+                ]);
+                
+                result.innerHTML = '<span class="success">✅ DOM元素創建成功！</span>';
+                result.innerHTML += '<br>創建的元素:';
+                result.appendChild(element);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -111,7 +111,7 @@ ul ol  {
   margin-bottom: 0; }
 
 
-b,
+
 strong  { 
   font-weight: bolder; }
 
@@ -1544,32 +1544,6 @@ input[type="button"].btn-block  {
     border-top-right-radius: 0; }
 
 
-.nav-pills .nav-link  { 
-  border-radius: 0.25rem; }
-
-
-.nav-pills .nav-link.active,
-.nav-pills .show > .nav-link  { 
-  color: #fff;
-  background-color: #78d5ef; }
-
-
-.nav-fill .nav-item  { 
-  -webkit-box-flex: 1;
-  -ms-flex: 1 1 auto;
-  flex: 1 1 auto;
-  text-align: center; }
-
-
-.nav-justified .nav-item  { 
-  -ms-flex-preferred-size: 0;
-  flex-basis: 0;
-  -webkit-box-flex: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  text-align: center; }
-
-
 .tab-content > .tab-pane  { 
   display: none; }
 
@@ -1861,59 +1835,6 @@ input[type="button"].btn-block  {
 .accordion .card:last-of-type  { 
   border-top-left-radius: 0;
   border-top-right-radius: 0; }
-
-
-.page-link  { 
-  position: relative;
-  display: block;
-  padding: 0.5rem 0.75rem;
-  margin-left: -1px;
-  line-height: 1.25;
-  color: #78d5ef;
-  background-color: #fff;
-  border: 1px solid #dee2e6; }
-
-  .page-link:hover  { 
-    z-index: 2;
-    color: #34c0e7;
-    text-decoration: none;
-    background-color: #e9ecef;
-    border-color: #dee2e6; }
-
-  .page-link:focus  { 
-    z-index: 2;
-    outline: 0;
-    -webkit-box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.25);
-    box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.25); }
-
-  .page-link:not(:disabled):not(.disabled)  { 
-    cursor: pointer; }
-
-
-.page-item:first-child .page-link  { 
-  margin-left: 0;
-  border-top-left-radius: 0.25rem;
-  border-bottom-left-radius: 0.25rem; }
-
-
-.page-item:last-child .page-link  { 
-  border-top-right-radius: 0.25rem;
-  border-bottom-right-radius: 0.25rem; }
-
-
-.page-item.active .page-link  { 
-  z-index: 1;
-  color: #fff;
-  background-color: #78d5ef;
-  border-color: #78d5ef; }
-
-
-.page-item.disabled .page-link  { 
-  color: #6c757d;
-  pointer-events: none;
-  cursor: auto;
-  background-color: #fff;
-  border-color: #dee2e6; }
 
 
 .badge  { 
@@ -4414,8 +4335,7 @@ textarea.form-control {
 
 
 .img,
-.blog-img,
-.user-img  { 
+.blog-img  { 
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center; }
@@ -6065,10 +5985,6 @@ ul.entry-btns li a .entry-btn .arrow img  {
 .entry-popup-menu .line-area a .logo h3  { 
   font-size: 1.125em;
   color: #fff; 
-}
-
-.popup-menu.sogo  { 
-  margin-top: 60px; 
 }
 
 /* Infinite Scrolling Text | controll: main.js */
@@ -7947,180 +7863,3 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 /* 標籤圖標樣式 */
 
-/* 平板設備（768px-1198px）Accordion 修正 */
-@media all and (min-width: 768px) and (max-width: 1198px) {
-  /* 在平板設備上顯示 Accordion 按鈕 */
-  .Accordion {
-    display: block !important;
-    position: relative;
-    width: 100%;
-    margin: 0 0 0.5em 0;
-    padding: 12px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: rgba(0, 0, 0, 0.3);
-    color: #fff;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-  
-  .Accordion:hover,
-  .Accordion:focus {
-    background-color: rgba(196, 155, 99, 0.2);
-    border-color: #c49b63;
-    outline: none;
-  }
-  
-  /* 箭頭樣式調整 */
-  .Accordion .arrow {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s ease;
-  }
-  
-  .Accordion .arrow::before,
-  .Accordion .arrow::after {
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 2px;
-    background-color: #fff;
-    transition: all 0.3s ease;
-  }
-  
-  /* 關閉狀態（向下箭頭） */
-  .Accordion .arrow::before {
-    transform: rotate(46deg) translateY(3px);
-  }
-  
-  .Accordion .arrow::after {
-    transform: rotate(-46deg) translateY(3px);
-  }
-  
-  /* 打開狀態（關閉 X） */
-  .Accordion[aria-selected="true"] .arrow::before {
-    transform: rotate(135deg) translateY(0);
-  }
-  
-  .Accordion[aria-selected="true"] .arrow::after {
-    transform: rotate(-135deg) translateY(0);
-  }
-  
-  /* 在平板設備上隱藏桌面版表格行 */
-  .Rtable-cell--head {
-    display: none !important;
-  }
-  
-  /* 平板設備上的表格響應式調整 */
-  .Rtable {
-    display: block;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .Rtable-cell {
-    display: block;
-    width: 100%;
-    padding: 8px 12px;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: transparent;
-  }
-  
-  /* 隱藏桌面版表格頭 */
-  .Rtable--collapse > .Rtable-cell--head {
-    display: none;
-  }
-  
-  /* 平板設備上的訂單詳情顯示優化 */
-  .order-item-v2 {
-    margin-bottom: 16px;
-    padding: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-  
-  /* 確保 Accordion 內容在平板設備上正確顯示 */
-  .Accordion + .Rtable-cell {
-    display: none;
-  }
-  
-  .Accordion[aria-selected="true"] + .Rtable-cell {
-    display: block;
-    animation: fadeIn 0.3s ease;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
-/* 移動設備（小於768px）Accordion 修正 */
-@media all and (max-width: 767px) {
-  /* 在移動設備上確保 Accordion 正常顯示 */
-  .Accordion {
-    display: block !important;
-    position: relative;
-    width: 100%;
-    margin: 0 0 0.5em 0;
-    padding: 12px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: rgba(0, 0, 0, 0.3);
-    color: #fff;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-  
-  .Accordion:hover,
-  .Accordion:focus {
-    background-color: rgba(196, 155, 99, 0.2);
-    border-color: #c49b63;
-    outline: none;
-  }
-  
-  /* 移動設備上的箭頭位置調整 */
-  .Accordion .arrow {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-  }
-  
-  /* 移動設備上的表格調整 */
-  .Rtable {
-    display: block;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .Rtable-cell {
-    display: block;
-    width: 100%;
-    padding: 8px 12px;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: transparent;
-  }
-  
-  /* 隱藏桌面版表格頭 */
-  .Rtable--collapse > .Rtable-cell--head {
-    display: none;
-  }
-}
