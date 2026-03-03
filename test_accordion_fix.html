@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accordion 修復測試</title>
+    <style>
+        /* 從 style.css 複製相關樣式 */
+        .hiddenSmall { 
+            display: none !important; 
+        }
+        
+        @media all and (min-width: 1200px) { 
+            .hiddenLarge { display: none !important; }
+        }
+        
+        .Rtable {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 15px 15px 15px 0;
+            padding: 0;
+        }
+        
+        .Rtable-cell {
+            box-sizing: border-box;
+            flex-grow: 1;
+            width: 100%;
+            padding: 0.8em 1.2em;
+            overflow: hidden;
+            list-style: none;
+            border: solid 3px white;
+            background: rgba(112, 128, 144, 0.2);
+        }
+        
+        .Accordion {
+            position: relative;
+            left: -3px;
+            width: 100%;
+            margin: 0 0 0.5em 0;
+            padding: 0;
+            border: 0;
+            text-align: left;
+            background-color: transparent;
+            color: #fff;
+            text-decoration: none;
+            transition: background-color 0.1s;
+            cursor: pointer;
+            padding: 10px;
+            background: #c49b63;
+            border-radius: 4px;
+        }
+        
+        @media all and (min-width: 1199px) {
+            .Accordion { display: none; }
+        }
+        
+        .Accordion .arrow {
+            position: absolute;
+            left: 78px;
+            top: 38%;
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+        
+        .Accordion .arrow::before,
+        .Accordion .arrow::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 2px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .Accordion .arrow::before {
+            transform: rotate(46deg) translateY(3px);
+        }
+        
+        .Accordion .arrow::after {
+            transform: rotate(-46deg) translateY(3px);
+        }
+        
+        .Accordion[aria-selected="true"] .arrow::before {
+            transform: rotate(135deg) translateY(0);
+        }
+        
+        .Accordion[aria-selected="true"] .arrow::after {
+            transform: rotate(-135deg) translateY(0);
+        }
+        
+        .Accordion[aria-selected="true"] .arrow {
+            transform: translateY(12%) rotate(0deg);
+        }
+        
+        .Accordion[aria-selected="true"] .arrow::before, 
+        .Accordion[aria-selected="true"] .arrow::after {
+            content: '';
+            position: absolute;
+            width: 13px;
+            height: 2px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .test-content {
+            background: #333;
+            color: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .test-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body style="background: #151111; color: white; padding: 20px;">
+    <h1>Accordion 修復測試</h1>
+    <p>這個測試頁面模擬了 order_confirm.html 中的 Accordion 功能。</p>
+    
+    <div class="test-result">
+        <h3>測試狀態：<span id="test-status">進行中...</span></h3>
+        <div id="test-details"></div>
+    </div>
+    
+    <div class="hiddenLarge">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-7 Rtable Rtable--4cols Rtable--collapse js-RtableAccordions w-100">
+                    <div class="d-flex w-100 position-relative">
+                        <div class="w-50">
+                            <button class="Accordion fontsize-md" role="tab" aria-selected="false">訂單詳情<span class="arrow"></span></button>
+                        </div>
+                        <div class="w-50">
+                            <div class="total-price mb-5 text-right">
+                                <span class="h5">$120.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- table content -->
+                    <div class="Rtable-cell sidebar-box ftco-animate mt-6 hiddenSmall">
+                        <div class="test-content">
+                            <h4>測試內容區域</h4>
+                            <p>這是一個測試項目，應該在移動端初始時隱藏，點擊 Accordion 按鈕後顯示。</p>
+                            <ul>
+                                <li>項目 1: 測試咖啡 - $60.00</li>
+                                <li>項目 2: 測試豆子 - $60.00</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <h3>測試說明：</h3>
+        <ol>
+            <li>在移動端（寬度小於 1199px）應該看到 Accordion 按鈕</li>
+            <li>點擊 Accordion 按鈕應該展開/收起內容</li>
+            <li>箭頭圖標應該在展開/收起時旋轉</li>
+            <li>在桌面端（寬度大於 1199px）應該看不到 Accordion 按鈕</li>
+        </ol>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // 從 order_confirm.html 複製的修復後 JavaScript
+        (function ($) {
+            "use strict";
+            $.fn.responsiveTable = function() { 
+                var toggleColumns = function($table) {
+                    var isExpanded = $table.find(".Accordion").attr("aria-selected") === "true";
+                    $table.find(".Rtable-cell").toggleClass("hiddenSmall", !isExpanded);
+                };
+                
+                $(this).each(function(){ 
+                    toggleColumns($(this)); 
+                });
+        
+                $(this).find(".Accordion").click(function() {
+                    var $accordion = $(this);
+                    var isSelected = $accordion.attr("aria-selected") !== "true";
+                    $accordion.attr("aria-selected", isSelected);
+                    toggleColumns($accordion.parents(".Rtable"));
+                });
+            };
+        }(jQuery));
+        
+        // 初始化 - 確保DOM完全加載後執行
+        $(document).ready(function() {
+            // 初始化響應式表格
+            $(".js-RtableAccordions").responsiveTable();
+            
+            // 確保初始狀態正確（折疊狀態）
+            $(".js-RtableAccordions").each(function() {
+                var $table = $(this);
+                var $accordion = $table.find(".Accordion");
+                var $cells = $table.find(".Rtable-cell");
+                
+                // 初始設置為折疊狀態
+                $accordion.attr("aria-selected", "false");
+                $cells.addClass("hiddenSmall");
+                
+                // 添加點擊事件
+                $accordion.on('click', function() {
+                    var isSelected = $(this).attr("aria-selected") === "true";
+                    $(this).attr("aria-selected", !isSelected);
+                    $cells.toggleClass("hiddenSmall", isSelected);
+                    
+                    // 切換active類
+                    $(this).toggleClass("active", !isSelected);
+                    
+                    // 更新測試結果
+                    updateTestResult();
+                });
+            });
+            
+            // 運行測試
+            runTests();
+        });
+        
+        function runTests() {
+            var testDetails = $('#test-details');
+            var testStatus = $('#test-status');
+            var testsPassed = 0;
+            var totalTests = 4;
+            
+            // 測試 1: 檢查 Accordion 按鈕是否存在
+            var accordionExists = $('.Accordion').length > 0;
+            if (accordionExists) {
+                testDetails.append('<div class="success">✓ 測試 1 通過: Accordion 按鈕存在</div>');
+                testsPassed++;
+            } else {
+                testDetails.append('<div class="error">✗ 測試 1 失敗: Accordion 按鈕不存在</div>');
+            }
+            
+            // 測試 2: 檢查初始狀態是否為折疊
+            var isInitiallyCollapsed = $('.Accordion').attr('aria-selected') === 'false';
+            if (isInitiallyCollapsed) {
+                testDetails.append('<div class="success">✓ 測試 2 通過: Accordion 初始狀態為折疊</div>');
+                testsPassed++;
+            } else {
+                testDetails.append('<div class="error">✗ 測試 2 失敗: Accordion 初始狀態不正確</div>');
+            }
+            
+            // 測試 3: 檢查內容初始是否隱藏
+            var isContentInitiallyHidden = $('.Rtable-cell').hasClass('hiddenSmall');
+            if (isContentInitiallyHidden) {
+                testDetails.append('<div class="success">✓ 測試 3 通過: 內容初始時隱藏</div>');
+                testsPassed++;
+            } else {
+                testDetails.append('<div class="error">✗ 測試 3 失敗: 內容初始時未隱藏</div>');
+            }
+            
+            // 測試 4: 檢查 jQuery 是否加載
+            var isJQueryLoaded = typeof jQuery !== 'undefined';
+            if (isJQueryLoaded) {
+                testDetails.append('<div class="success">✓ 測試 4 通過: jQuery 已加載</div>');
+                testsPassed++;
+            } else {
+                testDetails.append('<div class="error">✗ 測試 4 失敗: jQuery 未加載</div>');
+            }
+            
+            // 更新測試狀態
+            if (testsPassed === totalTests) {
+                testStatus.text('所有測試通過').addClass('success');
+            } else {
+                testStatus.text(testsPassed + '/' + totalTests + ' 測試通過').addClass('error');
+            }
+        }
+        
+        function updateTestResult() {
+            var isExpanded = $('.Accordion').attr('aria-selected') === 'true';
+            var isContentVisible = !$('.Rtable-cell').hasClass('hiddenSmall');
+            
+            var testDetails = $('#test-details');
+            testDetails.append('<div>點擊測試: Accordion ' + (isExpanded ? '展開' : '折疊') + ', 內容 ' + (isContentVisible ? '可見' : '隱藏') + '</div>');
+        }
+    </script>
+</body>
+</html>

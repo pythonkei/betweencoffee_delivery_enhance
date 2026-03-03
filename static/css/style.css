@@ -3145,7 +3145,7 @@ h1, h2, h3, h4, h5,
   /* orginal ver @media (max-width: 991.98px) */
   @media (max-width: 991.98px)  { 
     .ftco-navbar-light  { 
-      background-color: rgba(255, 255, 255, 0.9) !important;
+      /* background-color: rgba(255, 255, 255, 0.9) !important; */
       /* position: relative; */ /* narbar fix */
       top: 0; }
 }
@@ -4153,7 +4153,7 @@ h1, h2, h3, h4, h5,
 .form-control {
   height: 58px;
   background: transparent; /* clear background */
-  background-color: rgba(255, 255, 255, 0.9); /* 修复缺少的属性名 */
+  /* background-color: rgba(255, 255, 255, 0.9); */
   font-size: 14px;
   border-radius: 0px;
   -webkit-box-shadow: none !important;
@@ -4626,6 +4626,9 @@ textarea.form-control {
   font-size: 15px;
   width: 100%;
   float: left;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
   @media screen and (max-width: 768px) { 
@@ -6842,7 +6845,7 @@ select.form-control:focus::-ms-value  {
 }
 
 @media all and (max-width: 1199px) { 
-  .hiddenSmall { display: none; }
+  .hiddenSmall { display: none !important; }
 }
 
 @media all and (min-width: 1200px) { 
@@ -6905,7 +6908,7 @@ select.form-control:focus::-ms-value  {
 .Accordion:focus {
   outline: none;
   filter: contrast(150%);
-  background-color: #f2f2f2;  /* 替换 darken(#fff, 5%) */
+  /* background-color: #f2f2f2;  替换 darken(#fff, 5%) */
 }
 
 
@@ -7947,180 +7950,3 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 /* 標籤圖標樣式 */
 
-/* 平板設備（768px-1198px）Accordion 修正 */
-@media all and (min-width: 768px) and (max-width: 1198px) {
-  /* 在平板設備上顯示 Accordion 按鈕 */
-  .Accordion {
-    display: block !important;
-    position: relative;
-    width: 100%;
-    margin: 0 0 0.5em 0;
-    padding: 12px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: rgba(0, 0, 0, 0.3);
-    color: #fff;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-  
-  .Accordion:hover,
-  .Accordion:focus {
-    background-color: rgba(196, 155, 99, 0.2);
-    border-color: #c49b63;
-    outline: none;
-  }
-  
-  /* 箭頭樣式調整 */
-  .Accordion .arrow {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s ease;
-  }
-  
-  .Accordion .arrow::before,
-  .Accordion .arrow::after {
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 2px;
-    background-color: #fff;
-    transition: all 0.3s ease;
-  }
-  
-  /* 關閉狀態（向下箭頭） */
-  .Accordion .arrow::before {
-    transform: rotate(46deg) translateY(3px);
-  }
-  
-  .Accordion .arrow::after {
-    transform: rotate(-46deg) translateY(3px);
-  }
-  
-  /* 打開狀態（關閉 X） */
-  .Accordion[aria-selected="true"] .arrow::before {
-    transform: rotate(135deg) translateY(0);
-  }
-  
-  .Accordion[aria-selected="true"] .arrow::after {
-    transform: rotate(-135deg) translateY(0);
-  }
-  
-  /* 在平板設備上隱藏桌面版表格行 */
-  .Rtable-cell--head {
-    display: none !important;
-  }
-  
-  /* 平板設備上的表格響應式調整 */
-  .Rtable {
-    display: block;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .Rtable-cell {
-    display: block;
-    width: 100%;
-    padding: 8px 12px;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: transparent;
-  }
-  
-  /* 隱藏桌面版表格頭 */
-  .Rtable--collapse > .Rtable-cell--head {
-    display: none;
-  }
-  
-  /* 平板設備上的訂單詳情顯示優化 */
-  .order-item-v2 {
-    margin-bottom: 16px;
-    padding: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-  
-  /* 確保 Accordion 內容在平板設備上正確顯示 */
-  .Accordion + .Rtable-cell {
-    display: none;
-  }
-  
-  .Accordion[aria-selected="true"] + .Rtable-cell {
-    display: block;
-    animation: fadeIn 0.3s ease;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
-/* 移動設備（小於768px）Accordion 修正 */
-@media all and (max-width: 767px) {
-  /* 在移動設備上確保 Accordion 正常顯示 */
-  .Accordion {
-    display: block !important;
-    position: relative;
-    width: 100%;
-    margin: 0 0 0.5em 0;
-    padding: 12px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: rgba(0, 0, 0, 0.3);
-    color: #fff;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-  
-  .Accordion:hover,
-  .Accordion:focus {
-    background-color: rgba(196, 155, 99, 0.2);
-    border-color: #c49b63;
-    outline: none;
-  }
-  
-  /* 移動設備上的箭頭位置調整 */
-  .Accordion .arrow {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-  }
-  
-  /* 移動設備上的表格調整 */
-  .Rtable {
-    display: block;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .Rtable-cell {
-    display: block;
-    width: 100%;
-    padding: 8px 12px;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: transparent;
-  }
-  
-  /* 隱藏桌面版表格頭 */
-  .Rtable--collapse > .Rtable-cell--head {
-    display: none;
-  }
-}

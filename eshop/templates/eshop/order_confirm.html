@@ -37,9 +37,8 @@
                         </div>
                     </div>
                 </div>
-            <!-- table content -->
-            <div class="row">
-                <div class="Rtable-cell sidebar-box ftco-animate mt-6">
+                <!-- table content -->
+                <div class="Rtable-cell sidebar-box ftco-animate mt-6 hiddenSmall">
                     {% for item in items %}
                         <div class="block-21 mb-5 d-flex">
                             <div class="blog-img mr-4">
@@ -105,9 +104,8 @@
                         </div>
                     {% endfor %}
                 </div>
+                <!-- table content -->
             </div>
-            <!-- table content -->
-        </div>
         </div>
     </div>
 </div>
@@ -456,12 +454,30 @@
     };
   }(jQuery));
   
-  // 初始化
-  $(".js-RtableAccordions").responsiveTable();
-
-  document.querySelectorAll('.Accordion').forEach(accordion => {
-    accordion.addEventListener('click', function() {
-      this.classList.toggle('active');
+  // 初始化 - 確保DOM完全加載後執行
+  $(document).ready(function() {
+    // 初始化響應式表格
+    $(".js-RtableAccordions").responsiveTable();
+    
+    // 確保初始狀態正確（折疊狀態）
+    $(".js-RtableAccordions").each(function() {
+      var $table = $(this);
+      var $accordion = $table.find(".Accordion");
+      var $cells = $table.find(".Rtable-cell");
+      
+      // 初始設置為折疊狀態
+      $accordion.attr("aria-selected", "false");
+      $cells.addClass("hiddenSmall");
+      
+      // 添加點擊事件
+      $accordion.on('click', function() {
+        var isSelected = $(this).attr("aria-selected") === "true";
+        $(this).attr("aria-selected", !isSelected);
+        $cells.toggleClass("hiddenSmall", isSelected);
+        
+        // 切換active類
+        $(this).toggleClass("active", !isSelected);
+      });
     });
   });
 </script>
