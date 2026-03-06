@@ -1027,13 +1027,13 @@ class EnhancedPreparingOrdersRenderer {
         const activeBadge = document.getElementById('countdown-active-badge');
         if (activeBadge) {
             activeBadge.textContent = this.countdownActiveOrders.size;
-            activeBadge.className = 'badge badge-info ml-2';
+            activeBadge.className = 'badge badge-red-active ml-2';
         }
-        
+
         const completedBadge = document.getElementById('countdown-completed-badge');
         if (completedBadge) {
             completedBadge.textContent = this.countdownCompletedOrders.size;
-            completedBadge.className = 'badge badge-warning ml-2';
+            completedBadge.className = 'badge badge-red-completed ml-2';
         }
     }
     

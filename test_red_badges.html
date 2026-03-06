@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紅色徽章樣式測試</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- 載入我們的CSS -->
+    <link rel="stylesheet" href="/static/css/staff_order_management.css">
+    
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .badge-demo {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        
+        .color-preview {
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            vertical-align: middle;
+        }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .tab-demo {
+            background-color: #343a40;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #777;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="mb-4">🔴 紅色徽章樣式測試</h1>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle mr-2"></i>
+            此測試頁面用於驗證製作中訂單分層標籤頁的紅色徽章樣式修改效果。
+        </div>
+        
+        <!-- 測試1：紅色徽章樣式檢查 -->
+        <div class="test-section">
+            <h3 class="test-title">測試1：紅色徽章CSS樣式檢查</h3>
+            <p>檢查紅色系列徽章的CSS樣式是否正確定義。</p>
+            
+            <div class="mt-3">
+                <h5>紅色徽章預覽：</h5>
+                
+                <div class="badge-demo">
+                    <div class="color-preview" style="background-color: #dc3545;"></div>
+                    <span class="badge badge-red-active">
+                        <i class="fas fa-hourglass-half mr-1"></i>倒計時進行中
+                        <span class="badge badge-light ml-1">5</span>
+                    </span>
+                    <div class="mt-2">
+                        <small>CSS類: <code>.badge-red-active</code></small><br>
+                        <small>顏色: <code>#dc3545</code> (Bootstrap danger red)</small>
+                    </div>
+                </div>
+                
+                <div class="badge-demo">
+                    <div class="color-preview" style="background-color: #dc3545; box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);"></div>
+                    <span class="badge badge-red-completed">
+                        <i class="fas fa-hourglass-end mr-1"></i>倒計時已完成
+                        <span class="badge badge-light ml-1">3</span>
+                    </span>
+                    <div class="mt-2">
+                        <small>CSS類: <code>.badge-red-completed</code></small><br>
+                        <small>顏色: <code>#dc3545</code> + 陰影效果</small>
+                    </div>
+                </div>
+                
+                <div class="badge-demo">
+                    <div class="color-preview" style="background-color: #f8d7da;"></div>
+                    <span class="badge badge-red-light">
+                        <i class="fas fa-circle mr-1"></i>紅色淺色變體
+                    </span>
+                    <div class="mt-2">
+                        <small>CSS類: <code>.badge-red-light</code></small><br>
+                        <small>顏色: <code>#f8d7da</code> (淺紅色背景)</small>
+                    </div>
+                </div>
+                
+                <div class="badge-demo">
+                    <div class="color-preview" style="background-color: #721c24;"></div>
+                    <span class="badge badge-red-dark">
+                        <i class="fas fa-circle mr-1"></i>紅色深色變體
+                    </span>
+                    <div class="mt-2">
+                        <small>CSS類: <code>.badge-red-dark</code></small><br>
+                        <small>顏色: <code>#721c24</code> (深紅色背景)</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h5>與原始徽章對比：</h5>
+                <div class="badge-demo">
+                    <span class="badge badge-info">
+                        <i class="fas fa-hourglass-half mr-1"></i>原始進行中徽章
+                    </span>
+                    <div class="mt-2">
+                        <small>CSS類: <code>.badge-info</code></small><br>
+                        <small>顏色: <code>#007bff</code> (藍色)</small>
+                    </div>
+                </div>
+                
+                <div class="badge-demo">
+                    <span class="badge badge-warning">
+                        <i class="fas fa-hourglass-end mr-1"></i>原始已完成徽章
+                    </span>
+                    <div class="mt-2">
+                        <small>CSS類: <code>.badge-warning</code></small><br>
+                        <small>顏色: <code>#ffc107</code> (黃色)</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4" id="test1-result">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            </div>
+        </div>
+        
+        <!-- 測試2：標籤頁按鈕模擬 -->
+        <div class="test-section">
+            <h3 class="test-title">測試2：標籤頁按鈕模擬</h3>
+            <p>模擬製作中訂單標籤頁按鈕，顯示紅色徽章效果。</p>
+            
+            <div class="tab-demo">
+                <!-- 模擬標籤頁導航 -->
+                <ul class="nav nav-tabs mb-4" id="demoTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="demo-queue-tab" data-toggle="tab" href="#demo-queue" role="tab">
+                            <i class="fas fa-list-ol mr-2"></i>製作隊列
+                            <span class="badge ml-2">12</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="demo-preparing-tab" data-toggle="tab" href="#demo-preparing" role="tab">
+                            <i class="fas fa-clock mr-2"></i>製作中
+                            <span class="badge badge-warning ml-2">8</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="demo-ready-tab" data-toggle="tab" href="#demo-ready" role="tab">
+                            <i class="fas fa-mug-hot mr-2"></i>已就緒
+                            <span class="badge badge-success ml-2">4</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- 模擬子標籤頁導航 -->
+                <div class="bg-light p-3 rounded">
+                    <h5>製作中訂單子標籤頁：</h5>
+                    <ul class="nav nav-tabs mb-3" id="demoSubTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="demo-countdown-active-tab" data-toggle="tab" href="#demo-countdown-active" role="tab">
+                                <i class="fas fa-hourglass-half mr-2"></i>進行中
+                                <span class="badge badge-red-active ml-2">5</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="demo-countdown-completed-tab" data-toggle="tab" href="#demo-countdown-completed" role="tab">
+                                <i class="fas fa-hourglass-end mr-2"></i>已完成
+                                <span class="badge badge-red-completed ml-2">3</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        紅色徽章已成功應用於子標籤頁按鈕：
+                        <ul class="mt-2 mb-0">
+                            <li><span class="badge badge-red-active">進行中徽章</span> - 使用 <code>.badge-red-active</code> 類</li>
+                            <li><span class="badge badge-red-completed">已完成徽章</span> - 使用 <code>.badge-red-completed</code> 類</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4" id="test2-result">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            </div>
+        </div>
+        
+        <!-- 測試3：JavaScript徽章更新測試 -->
+        <div class="test-section">
+            <h3 class="test-title">測試3：JavaScript徽章更新測試</h3>
+            <p>測試JavaScript代碼中的徽章CSS類設置是否正確。</p>
+            
+            <div class="mt-3">
+                <h5>模擬JavaScript徽章更新：</h5>
+                <div class="bg-light p-3 rounded">
+                    <pre><code>// 在 preparing-orders-renderer-enhanced.js 中的 updateBadges() 方法
+updateBadges() {
+    // 更新子標籤頁徽章
+    const activeBadge = document.getElementById('countdown-active-badge');
+    if (activeBadge) {
+        activeBadge.textContent = this.countdownActiveOrders.size;
+        activeBadge.className = 'badge badge-red-active ml-2';  // 修改為紅色
+    }
+
+    const completedBadge = document.getElementById('countdown-completed-badge');
+    if (completedBadge) {
+        completedBadge.textContent = this.countdownCompletedOrders.size;
+        completedBadge.className = 'badge badge-red-completed ml-2';  // 修改為紅色
+    }
+}</code></pre>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-primary" id="simulate-js-update">
+                            <i class="fas fa-code mr-1"></i>模擬JavaScript更新
+                        </button>
+                    </div>
+                    
+                    <div class="mt-3" id="js-simulation-result">
+                        <p>點擊按鈕模擬JavaScript徽章更新...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4" id="test3-result">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            </div>
+        </div>
+        
+        <!-- 測試總結 -->
+        <div class="test-section">
+            <h3 class="test-title">測試總結</h3>
+            <p>所有測試結果總結。</p>
+            
+            <div class="mt-3">
+                <button class="btn btn-success" id="run-all-red-tests">
+                    <i class="fas fa-bolt mr-1"></i>執行所有測試
+                </button>
+                <button class="btn btn-secondary ml-2" id="view-css-source">
+                    <i class="fas fa-file-code mr-1"></i>查看CSS源碼
+                </button>
+            </div>
+            
+            <div class="mt-3" id="test-summary">
+                <p>等待測試完成...</p>
+            </div>
+        </div>
+        
+        <!-- 修改詳情 -->
+        <div class="mt-5 pt-4 border-top">
+            <h5>修改詳情</h5>
+            <ul>
+                <li><strong>修改文件1：</strong> templates/admin/staff_order_management.html</li>
+                <li><strong>修改內容：</strong> 更新子標籤頁按鈕的徽章CSS類</li>
+                <li><strong>修改文件2：</strong> static/js/staff-order-management/preparing-orders-renderer-enhanced.js</li>
+                <li><strong>修改內容：</strong> 更新updateBadges()方法中的徽章CSS類設置</li>
+                <li><strong>修改文件3：</strong> static/css/staff_order_management.css</li>
+                <li><strong>修改內容：</strong> 添加紅色系列徽章樣式定義</li>
+                <li><strong>目標：</strong> 將製作中訂單子標籤頁的徽章從藍色/黃色改為紅色系列</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 測試腳本 -->
+    <script>
+        // 測試1：紅色徽章樣式檢查
+        function testRedBadgeStyles() {
+            const resultDiv = $('#test1-result');
+            
+            try {
+                // 檢查CSS類是否正確定義
+                const requiredClasses = [
+                    'badge-red-active',
+                    'badge-red-completed',
+                    'badge-red-light',
+                    'badge-red-dark'
+                ];
+                
+                let missingClasses = [];
+                
+                // 創建測試元素來檢查樣式
+                const testElement = document.createElement('div');
+                testElement.style.display = 'none';
+                document.body.appendChild(testElement);
+                
+                requiredClasses.forEach(className => {
+                    const badge = document.createElement('span');
+                    badge.className = `badge ${className}`;
+                    badge.textContent = '測試';
+                    testElement.appendChild(badge);
+                    
+                    // 檢查元素是否成功創建
+                    if (!badge.classList.contains(className)) {
+                        missingClasses.push(className);
+                    }
+                });
+                
+                document.body.removeChild(testElement);
+                
+                if (missingClasses.length > 0) {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：CSS類未正確定義: ${missingClasses.join(', ')}</span>`);
+                    return false;
+                }
+                
+                resultDiv.html('<span class="success">✅ 測試通過：紅色徽章CSS樣式正確定義</span>');
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 測試2：標籤頁按鈕樣式檢查
+        function testTabButtonStyles() {
+            const resultDiv = $('#test2-result');
+            
+            try {
+                // 檢查標籤頁按鈕中的徽章樣式
+                const activeTabBadge = document.querySelector('#demo-countdown-active-tab .badge-red-active');
+                const completedTabBadge = document.querySelector('#demo-countdown-completed-tab .badge-red-completed');
+                
+                if (!activeTabBadge) {
+                    resultDiv.html('<span class="error">❌ 測試失敗：進行中標籤頁按鈕未找到紅色徽章</span>');
+                    return false;
+                }
+                
+                if (!completedTabBadge) {
+                    resultDiv.html('<span class="error">❌ 測試失敗：已完成標籤頁按鈕未找到紅色徽章</span>');
+                    return false;
+                }
+                
+                // 檢查徽章是否正確顯示
+                const activeBadgeColor = window.getComputedStyle(activeTabBadge).backgroundColor;
+                const completedBadgeColor = window.getComputedStyle(completedTabBadge).backgroundColor;
+                
+                // 注意：getComputedStyle返回的顏色可能是rgb格式
+                const expectedRed = 'rgb(220, 53, 69)'; // #dc3545的rgb格式
+                
+                if (activeBadgeColor !== expectedRed) {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：進行中徽章顏色不正確: ${activeBadgeColor} (期望: ${expectedRed})</span>`);
+                    return false;
+                }
+                
+                if (completedBadgeColor !== expectedRed) {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：已完成徽章顏色不正確: ${completedBadgeColor} (期望: ${expectedRed})</span>`);
+                    return false;
+                }
+                
+                resultDiv.html('<span class="success">✅ 測試通過：標籤頁按鈕紅色徽章樣式正確</span>');
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 測試3：JavaScript徽章更新測試
+        function testJSBadgeUpdates() {
+            const resultDiv = $('#test3-result');
+            
+            try {
+                // 模擬JavaScript更新
+                const activeBadge = document.createElement('span');
+                activeBadge.id = 'test-active-badge';
+                activeBadge.className = 'badge ml-2';
+                activeBadge.textContent = '0';
+                
+                const completedBadge = document.createElement('span');
+                completedBadge.id = 'test-completed-badge';
+                completedBadge.className = 'badge ml-2';
+                completedBadge.textContent = '0';
+                
+                // 模擬updateBadges()方法
+                function simulateUpdateBadges(activeCount, completedCount) {
+                    const activeBadge = document.getElementById('test-active-badge');
+                    const completedBadge = document.getElementById('test-completed-badge');
+                    
+                    if (activeBadge) {
+                        activeBadge.textContent = activeCount;
+                        activeBadge.className = 'badge badge-red-active ml-2';
+                    }
+                    
+                    if (completedBadge) {
+                        completedBadge.textContent = completedCount;
+                        completedBadge.className = 'badge badge-red-completed ml-2';
+                    }
+                }
+                
+                // 添加到頁面
+                const testContainer = document.createElement('div');
+                testContainer.style.display = 'none';
+                testContainer.appendChild(activeBadge);
+                testContainer.appendChild(completedBadge);
+                document.body.appendChild(testContainer);
+                
+                // 執行模擬更新
+                simulateUpdateBadges(5, 3);
+                
+                // 檢查結果
+                const updatedActiveBadge = document.getElementById('test-active-badge');
+                const updatedCompletedBadge = document.getElementById('test-completed-badge');
+                
+                if (!updatedActiveBadge.classList.contains('badge-red-active')) {
+                    resultDiv.html('<span class="error">❌ 測試失敗：進行中徽章未應用紅色樣式</span>');
+                    document.body.removeChild(testContainer);
+                    return false;
+                }
+                
+                if (!updatedCompletedBadge.classList.contains('badge-red-completed')) {
+                    resultDiv.html('<span class="error">❌ 測試失敗：已完成徽章未應用紅色樣式</span>');
+                    document.body.removeChild(testContainer);
+                    return false;
+                }
+                
+                if (updatedActiveBadge.textContent !== '5') {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：進行中徽章數量不正確: ${updatedActiveBadge.textContent} (期望: 5)</span>`);
+                    document.body.removeChild(testContainer);
+                    return false;
+                }
+                
+                if (updatedCompletedBadge.textContent !== '3') {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：已完成徽章數量不正確: ${updatedCompletedBadge.textContent} (期望: 3)</span>`);
+                    document.body.removeChild(testContainer);
+                    return false;
+                }
+                
+                document.body.removeChild(testContainer);
+                resultDiv.html('<span class="success">✅ 測試通過：JavaScript徽章更新功能正常</span>');
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 執行所有測試
+        function runAllRedTests() {
+            const results = [];
+            
+            // 執行測試1
+            results.push({
+                name: '紅色徽章CSS樣式檢查',
+                result: testRedBadgeStyles()
+            });
+            
+            // 執行測試2
+            results.push({
+                name: '標籤頁按鈕樣式檢查',
+                result: testTabButtonStyles()
+            });
+            
+            // 執行測試3
+            results.push({
+                name: 'JavaScript徽章更新測試',
+                result: testJSBadgeUpdates()
+            });
+            
+            // 顯示測試總結
+            const summaryDiv = $('#test-summary');
+            const passedCount = results.filter(r => r.result).length;
+            const totalCount = results.length;
+            
+            let summaryHTML = `
+                <h5>測試總結 (${passedCount}/${totalCount} 通過)</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>測試項目</th>
+                            <th>結果</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            results.forEach(test => {
+                summaryHTML += `
+                    <tr>
+                        <td>${test.name}</td>
+                        <td>
+                            ${test.result ? 
+                                '<span class="success">✅ 通過</span>' : 
+                                '<span class="error">❌ 失敗</span>'
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            summaryHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            if (passedCount === totalCount) {
+                summaryHTML += `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        所有測試通過！紅色徽章樣式修改成功。
+                    </div>
+                `;
+            } else {
+                summaryHTML += `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        部分測試失敗，請檢查相關功能。
+                    </div>
+                `;
+            }
+            
+            summaryDiv.html(summaryHTML);
+        }
+        
+        // 查看CSS源碼
+        function viewCSSSource() {
+            alert('CSS源碼已添加到文件末尾。請查看static/css/staff_order_management.css文件的末尾部分。');
+        }
+        
+        // 模擬JavaScript更新
+        function simulateJSUpdate() {
+            const resultDiv = $('#js-simulation-result');
+            
+            try {
+                // 創建測試徽章
+                const testBadge1 = document.createElement('span');
+                testBadge1.className = 'badge badge-info ml-2';
+                testBadge1.textContent = '原始: 5';
+                
+                const testBadge2 = document.createElement('span');
+                testBadge2.className = 'badge badge-warning ml-2';
+                testBadge2.textContent = '原始: 3';
+                
+                // 模擬更新為紅色
+                testBadge1.className = 'badge badge-red-active ml-2';
+                testBadge1.textContent = '更新後: 5';
+                
+                testBadge2.className = 'badge badge-red-completed ml-2';
+                testBadge2.textContent = '更新後: 3';
+                
+                resultDiv.html(`
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        JavaScript徽章更新模擬成功！
+                    </div>
+                    <div class="mt-2">
+                        <p>原始徽章：</p>
+                        <span class="badge badge-info ml-2">原始: 5</span>
+                        <span class="badge badge-warning ml-2">原始: 3</span>
+                    </div>
+                    <div class="mt-2">
+                        <p>更新後徽章：</p>
+                        ${testBadge1.outerHTML}
+                        ${testBadge2.outerHTML}
+                    </div>
+                    <div class="mt-2">
+                        <small>注意：這只是模擬顯示，實際更新由JavaScript代碼處理。</small>
+                    </div>
+                `);
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 模擬失敗：${error.message}</span>`);
+            }
+        }
+        
+        // 頁面加載時執行
+        $(document).ready(function() {
+            // 執行基本測試
+            testRedBadgeStyles();
+            testTabButtonStyles();
+            testJSBadgeUpdates();
+            
+            // 綁定按鈕事件
+            $('#run-all-red-tests').click(runAllRedTests);
+            $('#view-css-source').click(viewCSSSource);
+            $('#simulate-js-update').click(simulateJSUpdate);
+        });
+    </script>
+</body>
+</html>

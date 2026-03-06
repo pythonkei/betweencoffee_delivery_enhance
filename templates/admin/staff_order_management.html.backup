@@ -138,14 +138,14 @@
                             <ul class="nav nav-tabs mb-4" id="preparingSubTabs" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <a class="nav-link active" id="countdown-active-tab" data-toggle="tab" href="#countdown-active" role="tab" aria-controls="countdown-active" aria-selected="true">
-                                        <i class="fas fa-hourglass-half mr-2"></i>進行中
-                                        <span class="badge badge-red-active ml-2" id="countdown-active-badge">0</span>
+                                        <i class="fas fa-hourglass-half mr-2"></i>倒計時進行中
+                                        <span class="badge badge-info ml-2" id="countdown-active-badge">0</span>
                                     </a>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <a class="nav-link" id="countdown-completed-tab" data-toggle="tab" href="#countdown-completed" role="tab" aria-controls="countdown-completed" aria-selected="false">
-                                        <i class="fas fa-hourglass-end mr-2"></i>已完成
-                                        <span class="badge badge-red-completed ml-2" id="countdown-completed-badge">0</span>
+                                        <i class="fas fa-hourglass-end mr-2"></i>倒計時已完成
+                                        <span class="badge badge-warning ml-2" id="countdown-completed-badge">0</span>
                                     </a>
                                 </li>
                             </ul>

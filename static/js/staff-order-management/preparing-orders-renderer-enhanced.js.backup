@@ -434,9 +434,9 @@ class EnhancedPreparingOrdersRenderer {
             `;
         }
         
-        // 構建訂單HTML
+        // 構建訂單HTML（修正版：統一布局結構）
         const orderDiv = document.createElement('div');
-        orderDiv.className = 'order-item mb-4 p-4 rounded selectable';
+        orderDiv.className = 'order-item mb-5 p-5 rounded selectable';
         orderDiv.setAttribute('data-order-id', orderId);
         orderDiv.setAttribute('data-status', 'preparing');
         orderDiv.setAttribute('data-sub-status', statusType);
@@ -444,30 +444,46 @@ class EnhancedPreparingOrdersRenderer {
         orderDiv.setAttribute('data-created', order.created_at_iso || order.created_at);
         orderDiv.setAttribute('data-estimated-ready', estimatedReadyTimeIso);
         
+        // 設置訂單類型屬性（與其他渲染器保持一致）
+        if (isMixedOrder) {
+            orderDiv.setAttribute('data-order-type', 'mixed');
+        } else {
+            orderDiv.setAttribute('data-order-type', 'single');
+        }
+
         orderDiv.innerHTML = `
-            <!-- 訂單類型徽章 -->
-            <div class="order-type-badges-container mb-2">
+            <!-- 訂單類型徽章（左上角） -->
+            <div class="order-type-badges-container">
                 ${orderTypeBadges}
-                ${statusBadge}
-                ${countdownDisplay}
             </div>
-            
-            <div class="d-flex justify-content-between mb-3">
+
+            <div class="d-flex justify-content-between mb-3 mt-4">
                 <div>
                     <h5>訂單編號: #${orderId}</h5>
-                    <p class="mb-1">
-                        <strong>取餐碼:</strong> <span class="h5 text-primary">${pickupCode}</span>
+                    <p class="mb-0">
+                        訂單時間: ${orderTime}
                     </p>
-                    <p class="mb-1">
-                        <strong>客戶:</strong> ${name} | <strong>電話:</strong> ${phone}
-                    </p>
-                    <p class="mb-2 text-muted">
-                        <i class="far fa-clock mr-1"></i>訂單時間: ${orderTime}
-                    </p>
+                    <div class="mt-2">
+                        ${statusBadge}
+                        ${countdownDisplay}
+                    </div>
                 </div>
                 <div class="text-right">
-                    <span class="h5">$${parseFloat(totalPrice).toFixed(2)}</span>
+                    <span class="h5 pr-2">$${parseFloat(totalPrice).toFixed(2)}</span>
                 </div>
+            </div>
+
+            <div class="mb-4">
+                <p class="mb-2">
+                    <strong>取餐碼:</strong> <span class="h5 text-primary">${pickupCode}</span> | 
+                    <strong>客戶:</strong> ${name}${phone ? ` | <strong>電話:</strong> ${phone}` : ''}
+                </p>
+                ${isMixedOrder ? `
+                <div hidden class="mt-2">
+                    <span class="badge badge-secondary">
+                        <i class="fas fa-info-circle mr-1"></i>此訂單包含咖啡飲品和咖啡豆商品
+                    </span>
+                </div>` : ''}
             </div>
             
             <!-- 商品項目 -->
