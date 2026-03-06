@@ -542,10 +542,19 @@ class QueueManager {
     
     async startPreparation(orderId) {
         try {
-            if (this.isLoading) return;
+            if (this.isLoading) {
+                console.log('⏳ 已有操作正在進行，跳過重複請求');
+                return;
+            }
             this.isLoading = true;
             
             const csrfToken = this.getCsrfToken();
+            if (!csrfToken) {
+                throw new Error('無法獲取安全令牌，請刷新頁面重試');
+            }
+            
+            console.log(`🚀 開始製作訂單 #${orderId}，CSRF token: ${csrfToken.substring(0, 20)}...`);
+            
             const response = await fetch(`/eshop/queue/start/${orderId}/`, {
                 method: 'POST',
                 headers: {
@@ -555,8 +564,12 @@ class QueueManager {
                 body: JSON.stringify({}),
             });
         
+            console.log(`📡 開始製作 API 響應: HTTP ${response.status} ${response.statusText}`);
+            
             if (response.ok) {
                 const data = await response.json();
+                console.log('📊 API 響應數據:', data);
+                
                 if (data.success) {
                     this.showToast('✅ 已開始製作訂單 #' + orderId, 'success');
                     
@@ -573,14 +586,38 @@ class QueueManager {
                         setTimeout(() => window.unifiedDataManager.loadUnifiedData(), 500);
                     }
                 } else {
-                    throw new Error(data.message || '操作失敗');
+                    throw new Error(data.message || data.error || '操作失敗');
+                }
+            } else if (response.status === 403) {
+                // 處理 403 Forbidden 錯誤
+                const errorText = await response.text();
+                console.error('❌ HTTP 403 Forbidden 錯誤詳情:', errorText);
+                
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(`權限不足: ${errorData.error || errorData.message || '請確認您有足夠權限執行此操作'}`);
+                } catch {
+                    throw new Error(`權限不足或安全令牌無效 (HTTP 403)`);
                 }
             } else {
+                const errorText = await response.text();
+                console.error(`❌ HTTP ${response.status} 錯誤詳情:`, errorText);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
         } catch (error) {
             console.error('開始製作失敗:', error);
-            this.showToast('❌ 操作失敗: ' + error.message, 'error');
+            
+            // 根據錯誤類型顯示不同的提示
+            let errorMessage = error.message;
+            if (errorMessage.includes('權限不足') || errorMessage.includes('403')) {
+                this.showToast('❌ 權限不足：請確認您已登錄並有足夠權限', 'error');
+            } else if (errorMessage.includes('安全令牌')) {
+                this.showToast('❌ 安全令牌錯誤：請刷新頁面重試', 'error');
+            } else if (errorMessage.includes('網絡')) {
+                this.showToast('❌ 網絡錯誤：請檢查網絡連接', 'error');
+            } else {
+                this.showToast('❌ 操作失敗: ' + errorMessage, 'error');
+            }
         } finally {
             this.isLoading = false;
         }
@@ -588,10 +625,19 @@ class QueueManager {
     
     async markAsReady(orderId) {
         try {
-            if (this.isLoading) return;
+            if (this.isLoading) {
+                console.log('⏳ 已有操作正在進行，跳過重複請求');
+                return;
+            }
             this.isLoading = true;
             
             const csrfToken = this.getCsrfToken();
+            if (!csrfToken) {
+                throw new Error('無法獲取安全令牌，請刷新頁面重試');
+            }
+            
+            console.log(`🚀 標記訂單 #${orderId} 為就緒，CSRF token: ${csrfToken.substring(0, 20)}...`);
+            
             const response = await fetch(`/eshop/queue/ready/${orderId}/`, {
                 method: 'POST',
                 headers: {
@@ -601,8 +647,12 @@ class QueueManager {
                 body: JSON.stringify({}),
             });
             
+            console.log(`📡 標記就緒 API 響應: HTTP ${response.status} ${response.statusText}`);
+            
             if (response.ok) {
                 const data = await response.json();
+                console.log('📊 API 響應數據:', data);
+                
                 if (data.success) {
                     this.showToast(`✅ 訂單 #${orderId} 已標記為就緒`, 'success');
                     
@@ -616,14 +666,38 @@ class QueueManager {
                         setTimeout(() => window.unifiedDataManager.loadUnifiedData(), 500);
                     }
                 } else {
-                    throw new Error(data.message || '操作失敗');
+                    throw new Error(data.message || data.error || '操作失敗');
+                }
+            } else if (response.status === 403) {
+                // 處理 403 Forbidden 錯誤
+                const errorText = await response.text();
+                console.error('❌ HTTP 403 Forbidden 錯誤詳情:', errorText);
+                
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(`權限不足: ${errorData.error || errorData.message || '請確認您有足夠權限執行此操作'}`);
+                } catch {
+                    throw new Error(`權限不足或安全令牌無效 (HTTP 403)`);
                 }
             } else {
+                const errorText = await response.text();
+                console.error(`❌ HTTP ${response.status} 錯誤詳情:`, errorText);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
         } catch (error) {
             console.error(`標記訂單 #${orderId} 為就緒失敗:`, error);
-            this.showToast(`❌ 操作失敗: ${error.message}`, 'error');
+            
+            // 根據錯誤類型顯示不同的提示
+            let errorMessage = error.message;
+            if (errorMessage.includes('權限不足') || errorMessage.includes('403')) {
+                this.showToast('❌ 權限不足：請確認您已登錄並有足夠權限', 'error');
+            } else if (errorMessage.includes('安全令牌')) {
+                this.showToast('❌ 安全令牌錯誤：請刷新頁面重試', 'error');
+            } else if (errorMessage.includes('網絡')) {
+                this.showToast('❌ 網絡錯誤：請檢查網絡連接', 'error');
+            } else {
+                this.showToast(`❌ 操作失敗: ${errorMessage}`, 'error');
+            }
         } finally {
             this.isLoading = false;
         }
@@ -631,10 +705,19 @@ class QueueManager {
     
     async markAsCollected(orderId) {
         try {
-            if (this.isLoading) return;
+            if (this.isLoading) {
+                console.log('⏳ 已有操作正在進行，跳過重複請求');
+                return;
+            }
             this.isLoading = true;
             
             const csrfToken = this.getCsrfToken();
+            if (!csrfToken) {
+                throw new Error('無法獲取安全令牌，請刷新頁面重試');
+            }
+            
+            console.log(`🚀 標記訂單 #${orderId} 為已提取，CSRF token: ${csrfToken.substring(0, 20)}...`);
+            
             const response = await fetch(`/eshop/queue/collected/${orderId}/`, {
                 method: 'POST',
                 headers: {
@@ -644,8 +727,12 @@ class QueueManager {
                 body: JSON.stringify({}),
             });
             
+            console.log(`📡 標記提取 API 響應: HTTP ${response.status} ${response.statusText}`);
+            
             if (response.ok) {
                 const data = await response.json();
+                console.log('📊 API 響應數據:', data);
+                
                 if (data.success) {
                     this.showToast(`✅ 訂單 #${orderId} 已標記為已提取`, 'success');
                     
@@ -659,14 +746,38 @@ class QueueManager {
                         setTimeout(() => window.unifiedDataManager.loadUnifiedData(), 500);
                     }
                 } else {
-                    throw new Error(data.message || '操作失敗');
+                    throw new Error(data.message || data.error || '操作失敗');
+                }
+            } else if (response.status === 403) {
+                // 處理 403 Forbidden 錯誤
+                const errorText = await response.text();
+                console.error('❌ HTTP 403 Forbidden 錯誤詳情:', errorText);
+                
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(`權限不足: ${errorData.error || errorData.message || '請確認您有足夠權限執行此操作'}`);
+                } catch {
+                    throw new Error(`權限不足或安全令牌無效 (HTTP 403)`);
                 }
             } else {
+                const errorText = await response.text();
+                console.error(`❌ HTTP ${response.status} 錯誤詳情:`, errorText);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
         } catch (error) {
             console.error(`標記訂單 #${orderId} 為已提取失敗:`, error);
-            this.showToast(`❌ 操作失敗: ${error.message}`, 'error');
+            
+            // 根據錯誤類型顯示不同的提示
+            let errorMessage = error.message;
+            if (errorMessage.includes('權限不足') || errorMessage.includes('403')) {
+                this.showToast('❌ 權限不足：請確認您已登錄並有足夠權限', 'error');
+            } else if (errorMessage.includes('安全令牌')) {
+                this.showToast('❌ 安全令牌錯誤：請刷新頁面重試', 'error');
+            } else if (errorMessage.includes('網絡')) {
+                this.showToast('❌ 網絡錯誤：請檢查網絡連接', 'error');
+            } else {
+                this.showToast(`❌ 操作失敗: ${errorMessage}`, 'error');
+            }
         } finally {
             this.isLoading = false;
         }
@@ -805,18 +916,63 @@ class QueueManager {
     }
     
     getCsrfToken() {
-        let cookieValue = null;
+        console.log('🔄 嘗試獲取 CSRF token...');
+        
+        // 方法1：從 cookie 獲取（原始方法）
+        let token = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
+                // 嘗試多種可能的 cookie 名稱
                 if (cookie.substring(0, 10) === 'csrftoken=') {
-                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    token = decodeURIComponent(cookie.substring(10));
+                    console.log('✅ 從 cookie (csrftoken) 獲取 token');
+                    break;
+                } else if (cookie.substring(0, 11) === 'csrf_token=') {
+                    token = decodeURIComponent(cookie.substring(11));
+                    console.log('✅ 從 cookie (csrf_token) 獲取 token');
+                    break;
+                } else if (cookie.substring(0, 8) === 'csrf=') {
+                    token = decodeURIComponent(cookie.substring(8));
+                    console.log('✅ 從 cookie (csrf) 獲取 token');
                     break;
                 }
             }
         }
-        return cookieValue;
+        
+        // 方法2：從 meta 標籤獲取（備用方案）
+        if (!token) {
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            if (metaToken) {
+                token = metaToken.getAttribute('content');
+                console.log('✅ 從 meta 標籤獲取 token');
+            }
+        }
+        
+        // 方法3：從表單輸入獲取（備用方案）
+        if (!token) {
+            const inputToken = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (inputToken) {
+                token = inputToken.value;
+                console.log('✅ 從表單輸入獲取 token');
+            }
+        }
+        
+        // 方法4：從 Django 模板變量獲取（如果可用）
+        if (!token && typeof django !== 'undefined' && django.csrf) {
+            token = django.csrf.getToken();
+            console.log('✅ 從 Django 模板變量獲取 token');
+        }
+        
+        if (token) {
+            console.log('✅ CSRF token 獲取成功');
+            return token;
+        } else {
+            console.error('❌ 無法獲取 CSRF token');
+            this.showToast('❌ 系統錯誤：無法獲取安全令牌，請刷新頁面重試', 'error');
+            return null;
+        }
     }
     
     showOrderDetails(orderId) {

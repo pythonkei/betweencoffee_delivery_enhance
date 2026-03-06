@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試增強版製作中訂單渲染器</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-result {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .order-item {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+        }
+        
+        .badge {
+            margin-right: 5px;
+        }
+        
+        .order-type-badges-container {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="mb-4">🧪 測試增強版製作中訂單渲染器</h1>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle mr-2"></i>
+            此測試頁面用於驗證增強版製作中訂單渲染器的功能，包括分層標籤頁系統和訂單狀態分類。
+        </div>
+        
+        <!-- 測試1：HTML結構檢查 -->
+        <div class="test-section">
+            <h3 class="test-title">測試1：HTML結構檢查</h3>
+            <p>檢查HTML結構是否正確包含子標籤頁系統。</p>
+            
+            <div class="test-result" id="test1-result">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            </div>
+        </div>
+        
+        <!-- 測試2：JavaScript類檢查 -->
+        <div class="test-section">
+            <h3 class="test-title">測試2：JavaScript類檢查</h3>
+            <p>檢查EnhancedPreparingOrdersRenderer類是否正確定義。</p>
+            
+            <div class="test-result" id="test2-result">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            </div>
+        </div>
+        
+        <!-- 測試3：訂單狀態分類邏輯 -->
+        <div class="test-section">
+            <h3 class="test-title">測試3：訂單狀態分類邏輯</h3>
+            <p>測試訂單狀態分類算法（倒計時進行中 vs 倒計時已完成）。</p>
+            
+            <div class="test-result" id="test3-result">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            </div>
+        </div>
+        
+        <!-- 測試4：模擬訂單數據 -->
+        <div class="test-section">
+            <h3 class="test-title">測試4：模擬訂單數據渲染</h3>
+            <p>使用模擬數據測試訂單渲染功能。</p>
+            
+            <button class="btn btn-primary mb-3" id="test4-btn">
+                <i class="fas fa-play mr-1"></i>執行測試
+            </button>
+            
+            <div class="test-result" id="test4-result">
+                <p>點擊按鈕開始測試...</p>
+            </div>
+            
+            <!-- 模擬訂單顯示區域 -->
+            <div id="test4-orders-display" class="mt-3" style="display: none;">
+                <h5>模擬訂單顯示：</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>倒計時進行中訂單：</h6>
+                        <div id="countdown-active-orders"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>倒計時已完成訂單：</h6>
+                        <div id="countdown-completed-orders"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 測試5：徽章更新測試 -->
+        <div class="test-section">
+            <h3 class="test-title">測試5：徽章更新測試</h3>
+            <p>測試訂單數量徽章更新功能。</p>
+            
+            <button class="btn btn-primary mb-3" id="test5-btn">
+                <i class="fas fa-play mr-1"></i>執行測試
+            </button>
+            
+            <div class="test-result" id="test5-result">
+                <p>點擊按鈕開始測試...</p>
+            </div>
+            
+            <!-- 徽章顯示區域 -->
+            <div id="test5-badges-display" class="mt-3" style="display: none;">
+                <h5>徽章顯示：</h5>
+                <div class="d-flex">
+                    <div class="mr-4">
+                        <span class="badge badge-warning">製作中總數: <span id="total-badge">0</span></span>
+                    </div>
+                    <div class="mr-4">
+                        <span class="badge badge-info">倒計時進行中: <span id="active-badge">0</span></span>
+                    </div>
+                    <div>
+                        <span class="badge badge-warning">倒計時已完成: <span id="completed-badge">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 測試總結 -->
+        <div class="test-section">
+            <h3 class="test-title">測試總結</h3>
+            <p>所有測試結果總結。</p>
+            
+            <div class="test-result" id="test-summary">
+                <p>等待測試完成...</p>
+            </div>
+            
+            <div class="mt-3">
+                <button class="btn btn-success" id="run-all-tests">
+                    <i class="fas fa-bolt mr-1"></i>執行所有測試
+                </button>
+                <button class="btn btn-secondary ml-2" id="reset-tests">
+                    <i class="fas fa-redo mr-1"></i>重置測試
+                </button>
+            </div>
+        </div>
+        
+        <!-- 開發者信息 -->
+        <div class="mt-5 pt-4 border-top">
+            <h5>開發者信息</h5>
+            <ul>
+                <li><strong>文件位置：</strong> static/js/staff-order-management/preparing-orders-renderer-enhanced.js</li>
+                <li><strong>版本：</strong> 2.0.0</li>
+                <li><strong>功能：</strong> 分層標籤頁系統，訂單狀態自動分類</li>
+                <li><strong>依賴：</strong> Bootstrap 4.6, jQuery, unified-data-manager.js</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 測試腳本 -->
+    <script>
+        // 模擬訂單數據
+        const mockOrders = [
+            {
+                id: 1001,
+                order_id: 1001,
+                pickup_code: 'A123',
+                name: '張先生',
+                phone: '9123-4567',
+                total_price: '85.00',
+                estimated_completion_time_iso: new Date(Date.now() + 15 * 60000).toISOString(), // 15分鐘後
+                created_at_iso: new Date().toISOString(),
+                coffee_count: 2,
+                bean_count: 0,
+                is_quick_order: false,
+                items: [
+                    {
+                        name: '美式咖啡',
+                        type: 'coffee',
+                        quantity: 1,
+                        price: '35.00',
+                        total_price: '35.00',
+                        cup_level_cn: '大杯',
+                        milk_level_cn: '無牛奶'
+                    },
+                    {
+                        name: '拿鐵咖啡',
+                        type: 'coffee',
+                        quantity: 1,
+                        price: '50.00',
+                        total_price: '50.00',
+                        cup_level_cn: '大杯',
+                        milk_level_cn: '全脂牛奶'
+                    }
+                ]
+            },
+            {
+                id: 1002,
+                order_id: 1002,
+                pickup_code: 'B456',
+                name: '李小姐',
+                phone: '9876-5432',
+                total_price: '120.00',
+                estimated_completion_time_iso: new Date(Date.now() - 5 * 60000).toISOString(), // 5分鐘前（已完成）
+                created_at_iso: new Date(Date.now() - 20 * 60000).toISOString(),
+                coffee_count: 1,
+                bean_count: 1,
+                is_quick_order: true,
+                items: [
+                    {
+                        name: '卡布奇諾',
+                        type: 'coffee',
+                        quantity: 1,
+                        price: '45.00',
+                        total_price: '45.00',
+                        cup_level_cn: '中杯',
+                        milk_level_cn: '低脂牛奶'
+                    },
+                    {
+                        name: '耶加雪菲咖啡豆',
+                        type: 'bean',
+                        quantity: 1,
+                        price: '75.00',
+                        total_price: '75.00',
+                        weight: '250g'
+                    }
+                ]
+            },
+            {
+                id: 1003,
+                order_id: 1003,
+                pickup_code: 'C789',
+                name: '王先生',
+                phone: '9123-8888',
+                total_price: '65.00',
+                estimated_completion_time_iso: new Date(Date.now() + 8 * 60000).toISOString(), // 8分鐘後
+                created_at_iso: new Date().toISOString(),
+                coffee_count: 3,
+                bean_count: 0,
+                is_quick_order: false,
+                items: [
+                    {
+                        name: '摩卡咖啡',
+                        type: 'coffee',
+                        quantity: 2,
+                        price: '55.00',
+                        total_price: '110.00',
+                        cup_level_cn: '大杯',
+                        milk_level_cn: '全脂牛奶'
+                    },
+                    {
+                        name: '濃縮咖啡',
+                        type: 'coffee',
+                        quantity: 1,
+                        price: '30.00',
+                        total_price: '30.00',
+                        cup_level_cn: '小杯'
+                    }
+                ]
+            }
+        ];
+        
+        // 測試1：HTML結構檢查
+        function testHTMLStructure() {
+            const resultDiv = $('#test1-result');
+            
+            try {
+                // 檢查必要的HTML元素
+                const requiredElements = [
+                    'preparing-tab',
+                    'countdown-active-tab',
+                    'countdown-completed-tab',
+                    'countdown-active-content',
+                    'countdown-completed-content',
+                    'countdown-active-empty',
+                    'countdown-completed-empty',
+                    'countdown-active-badge',
+                    'countdown-completed-badge'
+                ];
+                
+                let missingElements = [];
+                requiredElements.forEach(id => {
+                    if (!document.getElementById(id)) {
+                        missingElements.push(id);
+                    }
+                });
+                
+                if (missingElements.length > 0) {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：缺少HTML元素: ${missingElements.join(', ')}</span>`);
+                    return false;
+                }
+                
+                resultDiv.html('<span class="success">✅ 測試通過：HTML結構完整</span>');
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 測試2：JavaScript類檢查
+        function testJSClass() {
+            const resultDiv = $('#test2-result');
+            
+            try {
+                // 檢查類是否定義
+                if (typeof EnhancedPreparingOrdersRenderer === 'undefined') {
+                    resultDiv.html('<span class="error">❌ 測試失敗：EnhancedPreparingOrdersRenderer類未定義</span>');
+                    return false;
+                }
+                
+                // 檢查類的方法
+                const requiredMethods = [
+                    'constructor',
+                    'initialize',
+                    'processOrdersData',
+                    'checkOrderStatus',
+                    'renderAllOrders',
+                    'updateBadges'
+                ];
+                
+                const instance = new EnhancedPreparingOrdersRenderer();
+                let missingMethods = [];
+                
+                requiredMethods.forEach(method => {
+                    if (typeof instance[method] === 'undefined') {
+                        missingMethods.push(method);
+                    }
+                });
+                
+                if (missingMethods.length > 0) {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：缺少方法: ${missingMethods.join(', ')}</span>`);
+                    return false;
+                }
+                
+                resultDiv.html('<span class="success">✅ 測試通過：JavaScript類完整</span>');
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 測試3：訂單狀態分類邏輯
+        function testOrderStatusClassification() {
+            const resultDiv = $('#test3-result');
+            
+            try {
+                // 創建測試實例
+                const renderer = new EnhancedPreparingOrdersRenderer();
+                
+                // 測試數據
+                const testOrders = [
+                    {
+                        id: 1,
+                        estimated_completion_time_iso: new Date(Date.now() + 60000).toISOString() // 1分鐘後
+                    },
+                    {
+                        id: 2,
+                        estimated_completion_time_iso: new Date(Date.now() - 60000).toISOString() // 1分鐘前
+                    },
+                    {
+                        id: 3,
+                        estimated_completion_time_iso: '' // 無時間
+                    }
+                ];
+                
+                const results = testOrders.map(order => renderer.checkOrderStatus(order));
+                const expected = ['countdown_active', 'countdown_completed', 'countdown_active'];
+                
+                let errors = [];
+                results.forEach((result, index) => {
+                    if (result !== expected[index]) {
+                        errors.push(`訂單${testOrders[index].id}: 期望${expected[index]}, 實際${result}`);
+                    }
+                });
+                
+                if (errors.length > 0) {
+                    resultDiv.html(`<span class="error">❌ 測試失敗：${errors.join('; ')}</span>`);
+                    return false;
+                }
+                
+                resultDiv.html('<span class="success">✅ 測試通過：訂單狀態分類正確</span>');
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 測試4：模擬訂單數據渲染
+        function testOrderRendering() {
+            const resultDiv = $('#test4-result');
+            const displayDiv = $('#test4-orders-display');
+            
+            try {
+                // 清空顯示區域
+                $('#countdown-active-orders').empty();
+                $('#countdown-completed-orders').empty();
+                
+                // 創建渲染器實例
+                const renderer = new EnhancedPreparingOrdersRenderer();
+                
+                // 處理訂單數據
+                renderer.processOrdersData(mockOrders);
+                
+                // 獲取分類結果
+                const activeCount = renderer.countdownActiveOrders.size;
+                const completedCount = renderer.countdownCompletedOrders.size;
+                
+                // 顯示結果
+                resultDiv.html(`
+                    <span class="success">✅ 測試通過：訂單渲染測試完成</span>
+                    <div class="mt-2">
+                        <p>總訂單數: ${mockOrders.length}</p>
+                        <p>倒計時進行中: ${activeCount}</p>
+                        <p>倒計時已完成: ${completedCount}</p>
+                    </div>
+                `);
+                
+                // 顯示模擬訂單
+                displayDiv.show();
+                
+                // 渲染倒計時進行中訂單
+                const activeOrders = Array.from(renderer.countdownActiveOrders.values());
+                const completedOrders = Array.from(renderer.countdownCompletedOrders.values());
+                
+                // 顯示訂單
+                activeOrders.forEach(order => {
+                    const orderElement = renderer.createOrderElement(order, 'countdown_active');
+                    $('#countdown-active-orders').append(orderElement);
+                });
+                
+                completedOrders.forEach(order => {
+                    const orderElement = renderer.createOrderElement(order, 'countdown_completed');
+                    $('#countdown-completed-orders').append(orderElement);
+                });
+                
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 測試5：徽章更新測試
+        function testBadgeUpdates() {
+            const resultDiv = $('#test5-result');
+            const badgesDiv = $('#test5-badges-display');
+            
+            try {
+                // 創建渲染器實例
+                const renderer = new EnhancedPreparingOrdersRenderer();
+                
+                // 處理訂單數據
+                renderer.processOrdersData(mockOrders);
+                
+                // 手動更新徽章
+                renderer.updateBadges();
+                
+                // 顯示徽章
+                badgesDiv.show();
+                $('#total-badge').text(renderer.allPreparingOrders.size);
+                $('#active-badge').text(renderer.countdownActiveOrders.size);
+                $('#completed-badge').text(renderer.countdownCompletedOrders.size);
+                
+                resultDiv.html(`
+                    <span class="success">✅ 測試通過：徽章更新功能正常</span>
+                    <div class="mt-2">
+                        <p>徽章已成功更新並顯示</p>
+                    </div>
+                `);
+                
+                return true;
+            } catch (error) {
+                resultDiv.html(`<span class="error">❌ 測試失敗：${error.message}</span>`);
+                return false;
+            }
+        }
+        
+        // 執行所有測試
+        function runAllTests() {
+            const results = [];
+            
+            // 執行測試1
+            results.push({
+                name: 'HTML結構檢查',
+                result: testHTMLStructure()
+            });
+            
+            // 執行測試2
+            results.push({
+                name: 'JavaScript類檢查',
+                result: testJSClass()
+            });
+            
+            // 執行測試3
+            results.push({
+                name: '訂單狀態分類邏輯',
+                result: testOrderStatusClassification()
+            });
+            
+            // 執行測試4
+            results.push({
+                name: '模擬訂單數據渲染',
+                result: testOrderRendering()
+            });
+            
+            // 執行測試5
+            results.push({
+                name: '徽章更新測試',
+                result: testBadgeUpdates()
+            });
+            
+            // 顯示測試總結
+            const summaryDiv = $('#test-summary');
+            const passedCount = results.filter(r => r.result).length;
+            const totalCount = results.length;
+            
+            let summaryHTML = `
+                <h5>測試總結 (${passedCount}/${totalCount} 通過)</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>測試項目</th>
+                            <th>結果</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            results.forEach(test => {
+                summaryHTML += `
+                    <tr>
+                        <td>${test.name}</td>
+                        <td>
+                            ${test.result ? 
+                                '<span class="success">✅ 通過</span>' : 
+                                '<span class="error">❌ 失敗</span>'
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            summaryHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            if (passedCount === totalCount) {
+                summaryHTML += `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        所有測試通過！增強版製作中訂單渲染器功能正常。
+                    </div>
+                `;
+            } else {
+                summaryHTML += `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        部分測試失敗，請檢查相關功能。
+                    </div>
+                `;
+            }
+            
+            summaryDiv.html(summaryHTML);
+        }
+        
+        // 重置測試
+        function resetTests() {
+            // 重置測試結果顯示
+            $('#test1-result').html(`
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            `);
+            
+            $('#test2-result').html(`
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            `);
+            
+            $('#test3-result').html(`
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">測試中...</span>
+                </div>
+                <span class="ml-2">測試進行中...</span>
+            `);
+            
+            $('#test4-result').html('<p>點擊按鈕開始測試...</p>');
+            $('#test4-orders-display').hide();
+            $('#countdown-active-orders').empty();
+            $('#countdown-completed-orders').empty();
+            
+            $('#test5-result').html('<p>點擊按鈕開始測試...</p>');
+            $('#test5-badges-display').hide();
+            
+            $('#test-summary').html('<p>等待測試完成...</p>');
+        }
+        
+        // 頁面加載時執行基本測試
+        $(document).ready(function() {
+            // 加載增強版渲染器
+            const script = document.createElement('script');
+            script.src = '/static/js/staff-order-management/preparing-orders-renderer-enhanced.js';
+            script.onload = function() {
+                // 執行測試1-3
+                testHTMLStructure();
+                testJSClass();
+                testOrderStatusClassification();
+            };
+            document.head.appendChild(script);
+            
+            // 綁定測試按鈕事件
+            $('#test4-btn').click(testOrderRendering);
+            $('#test5-btn').click(testBadgeUpdates);
+            $('#run-all-tests').click(runAllTests);
+            $('#reset-tests').click(resetTests);
+        });
+    </script>
+</body>
+</html>

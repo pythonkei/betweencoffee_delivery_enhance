@@ -130,40 +130,93 @@
                         </div>
                     </div>
                     
-                    <!-- 製作中訂單標籤頁 -->
+                    <!-- 製作中訂單標籤頁 - 分層標籤頁系統 -->
                     <div class="tab-pane fade" id="preparing" role="tabpanel" aria-labelledby="preparing-tab">
                         <div class="order-section" data-status="preparing">
-                            <!-- 刪除加載指示器 -->
-                            <!-- 
-                            <div id="preparing-orders-loading" class="text-center py-5">
-                                <div class="spinner-border text-warning" role="status">
-                                    <span class="sr-only">加載中...</span>
+                            
+                            <!-- 子標籤頁導航 -->
+                            <ul class="nav nav-tabs mb-4" id="preparingSubTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="countdown-active-tab" data-toggle="tab" href="#countdown-active" role="tab" aria-controls="countdown-active" aria-selected="true">
+                                        <i class="fas fa-hourglass-half mr-2"></i>倒計時進行中
+                                        <span class="badge badge-info ml-2" id="countdown-active-badge">0</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="countdown-completed-tab" data-toggle="tab" href="#countdown-completed" role="tab" aria-controls="countdown-completed" aria-selected="false">
+                                        <i class="fas fa-hourglass-end mr-2"></i>倒計時已完成
+                                        <span class="badge badge-warning ml-2" id="countdown-completed-badge">0</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            <!-- 子標籤頁內容 -->
+                            <div class="tab-content" id="preparingSubTabsContent">
+                                
+                                <!-- 子標籤頁1：倒計時進行中 -->
+                                <div class="tab-pane fade show active" id="countdown-active" role="tabpanel" aria-labelledby="countdown-active-tab">
+                                    <div class="sub-order-section" data-sub-status="countdown-active">
+                                        
+                                        <!-- 訂單內容容器 -->
+                                        <div id="countdown-active-content" style="display: none;">
+                                            <!-- 動態內容將由JavaScript填充 -->
+                                        </div>
+                                        
+                                        <!-- 空狀態 -->
+                                        <div id="countdown-active-empty" class="text-center py-5" style="display: none;">
+                                            <div class="mb-4">
+                                                <i class="fas fa-hourglass-half fa-3x text-info"></i>
+                                            </div>
+                                            <h4>暫無倒計時進行中的訂單</h4>
+                                            <p class="text-muted">當前沒有正在倒計時的訂單</p>
+                                        </div>
+                                        
+                                        <!-- 狀態說明 -->
+                                        <div class="alert alert-info mb-3">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            <strong>倒計時進行中</strong>：訂單正在製作中，倒計時還在進行。請關注倒計時進度。
+                                        </div>
+                                        
+                                    </div>
                                 </div>
-                                <p class="mt-2">正在加載製作中訂單...</p>
-                            </div>
-                            -->
-                            
-                            <!-- 訂單內容容器 -->
-                            <div id="preparing-orders-content" style="display: none;">
-                                <!-- 動態內容將由JavaScript填充 -->
-                            </div>
-                            
-                            <!-- 空狀態 - 修改為默認隱藏 -->
-                            <div id="preparing-orders-empty" class="text-center py-5" style="display: none;">
-                                <div class="mb-4">
-                                    <i class="fas fa-coffee h1 text-muted"></i>
+                                
+                                <!-- 子標籤頁2：倒計時已完成 -->
+                                <div class="tab-pane fade" id="countdown-completed" role="tabpanel" aria-labelledby="countdown-completed-tab">
+                                    <div class="sub-order-section" data-sub-status="countdown-completed">
+                                        
+                                        <!-- 訂單內容容器 -->
+                                        <div id="countdown-completed-content" style="display: none;">
+                                            <!-- 動態內容將由JavaScript填充 -->
+                                        </div>
+                                        
+                                        <!-- 空狀態 -->
+                                        <div id="countdown-completed-empty" class="text-center py-5" style="display: none;">
+                                            <div class="mb-4">
+                                                <i class="fas fa-hourglass-end fa-3x text-warning"></i>
+                                            </div>
+                                            <h4>暫無倒計時已完成的訂單</h4>
+                                            <p class="text-muted">當前沒有等待確認的訂單</p>
+                                        </div>
+                                        
+                                        <!-- 狀態說明 -->
+                                        <div class="alert alert-warning mb-3">
+                                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                                            <strong>倒計時已完成</strong>：訂單倒計時已結束，需要手動確認到「已就緒」狀態。請及時處理！
+                                        </div>
+                                        
+                                    </div>
                                 </div>
-                                <h4>暫無製作中的訂單</h4>
-                                <p class="text-muted">當前沒有需要製作的訂單</p>
+                                
                             </div>
                             
-                            <!-- 刷新按鈕 -->
-                            <div class="text-center mt-3">
+                            <!-- 全局刷新按鈕 -->
+                            <div class="text-center mt-4">
                                 <button class="btn btn-outline-warning btn-sm" id="refresh-preparing-orders-btn">
                                     <i class="fas fa-sync-alt mr-1"></i> 刷新製作中訂單
                                 </button>
                                 <small class="text-muted d-block mt-1">最後更新: <span id="preparing-orders-last-update">-</span></small>
                             </div>
+                            
                         </div>
                     </div>
 
@@ -292,7 +345,7 @@
 <script src="{% static 'js/staff-order-management/order-manager.js' %}"></script>
 
 <!-- 5. 各标签页渲染器 -->
-<script src="{% static 'js/staff-order-management/preparing-orders-renderer.js' %}"></script>
+<script src="{% static 'js/staff-order-management/preparing-orders-renderer-enhanced.js' %}"></script>
 <script src="{% static 'js/staff-order-management/ready-orders-renderer.js' %}"></script>
 <script src="{% static 'js/staff-order-management/completed-orders-renderer.js' %}"></script>
 
