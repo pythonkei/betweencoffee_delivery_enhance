@@ -16,9 +16,19 @@ import logging
 import pytz
 from django.utils import timezone
 from datetime import timedelta
-from .models import CoffeeQueue, OrderModel
+from .models import CoffeeQueue, OrderModel, Barista
 from .time_calculation import unified_time_service
 from .order_status_manager import OrderStatusManager
+from .smart_allocation import (
+    get_smart_allocator,
+    get_workload_manager,
+    get_time_calculator,
+    initialize_smart_system,
+    allocate_new_order,
+    optimize_order_preparation,
+    get_recommendations_for_order,
+    update_barista_workload
+)
 
 from .error_handling import (
     handle_error,
@@ -1194,6 +1204,346 @@ class CoffeeQueueManager:
             # 如果失敗，返回False
             self.logger.error(f"修復隊列位置失敗: {result.get('error_id', 'N/A')}")
             return False
+    
+    # ==================== 智能分配方法 ====================
+    
+    def add_order_to_queue_with_smart_allocation(self, order, use_priority=True):
+        """
+        使用智能分配將訂單添加到隊列
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'queue_item_id': 0,
+                'order_id': 0,
+                'position': 0,
+                'coffee_count': 0,
+                'preparation_time_minutes': 0,
+                'status': 'waiting',
+                'queue_item': CoffeeQueue實例,
+                'smart_allocation': {
+                    'recommended_barista_id': 0,
+                    'recommended_barista_name': '名稱',
+                    'estimated_time': 0,
+                    'allocation_strategy': '策略',
+                    'optimization_suggestion': {...}
+                }
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            self.logger.info(f"🤖 使用智能分配處理訂單 #{order.id}")
+            
+            # 1. 首先執行標準的隊列添加
+            standard_result = self.add_order_to_queue(order, use_priority)
+            
+            if not standard_result.get('success'):
+                return standard_result
+            
+            # 2. 執行智能分配
+            allocation_result = allocate_new_order(order.id)
+            
+            # 3. 獲取優化建議
+            optimization_result = optimize_order_preparation(order.id)
+            
+            # 4. 合併結果
+            standard_data = standard_result['data']
+            
+            smart_data = {
+                'queue_item_id': standard_data['queue_item_id'],
+                'order_id': standard_data['order_id'],
+                'position': standard_data['position'],
+                'coffee_count': standard_data['coffee_count'],
+                'preparation_time_minutes': standard_data['preparation_time_minutes'],
+                'status': standard_data['status'],
+                'queue_item': standard_data['queue_item'],
+                'smart_allocation': {
+                    'allocation_result': allocation_result,
+                    'optimization_result': optimization_result
+                }
+            }
+            
+            # 如果有推薦的員工，更新隊列項
+            if (allocation_result.get('success') and 
+                allocation_result.get('recommended_barista_name')):
+                
+                queue_item = standard_data['queue_item']
+                queue_item.barista = allocation_result['recommended_barista_name']
+                queue_item.save()
+                
+                self.logger.info(
+                    f"✅ 智能分配完成: 訂單 #{order.id} 分配給 {allocation_result['recommended_barista_name']}"
+                )
+            
+            return handle_success(
+                operation='add_order_to_queue_with_smart_allocation',
+                data=smart_data,
+                message=f'訂單 #{order.id} 已使用智能分配加入隊列'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"智能分配失敗: {str(e)}")
+            
+            # 如果智能分配失敗，返回標準結果
+            if 'standard_result' in locals():
+                return standard_result
+            else:
+                return handle_database_error(
+                    error=e,
+                    operation='add_order_to_queue_with_smart_allocation',
+                    query=f"智能分配訂單到隊列: 訂單 #{order.id if order else 'None'}",
+                    model='CoffeeQueue'
+                )
+    
+    def start_preparation_with_smart_assignment(self, queue_item, barista_name=None):
+        """
+        使用智能分配開始製作
+        
+        如果沒有指定咖啡師，使用智能分配推薦
+        """
+        try:
+            self.logger.info(f"🤖 使用智能分配開始製作訂單 #{queue_item.order.id}")
+            
+            # 如果沒有指定咖啡師，嘗試智能分配
+            if not barista_name:
+                # 獲取智能建議
+                recommendations = get_recommendations_for_order(queue_item.order.id)
+                
+                if recommendations.get('success') and recommendations.get('recommendations'):
+                    # 查找分配建議
+                    for rec in recommendations['recommendations']:
+                        if rec['type'] == 'allocation' and rec.get('barista_name'):
+                            barista_name = rec['barista_name']
+                            self.logger.info(
+                                f"✅ 智能分配建議: 使用 {barista_name}"
+                            )
+                            break
+            
+            # 執行標準的開始製作
+            return self.start_preparation(queue_item, barista_name)
+            
+        except Exception as e:
+            self.logger.error(f"智能分配開始製作失敗: {str(e)}")
+            
+            # 如果智能分配失敗，使用標準方法
+            return self.start_preparation(queue_item, barista_name)
+    
+    def get_smart_recommendations(self, order_id):
+        """
+        獲取訂單的智能建議
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'order_id': 0,
+                'recommendations': [...],
+                'system_status': {...},
+                'optimization_suggestions': {...}
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            from .models import OrderModel
+            
+            order = OrderModel.objects.get(id=order_id)
+            
+            # 獲取智能建議
+            recommendations_result = get_recommendations_for_order(order_id)
+            
+            # 獲取系統狀態
+            allocator = get_smart_allocator()
+            system_status = allocator.get_system_status()
+            
+            # 獲取優化建議
+            optimization_result = optimize_order_preparation(order_id)
+            
+            data = {
+                'order_id': order_id,
+                'recommendations': recommendations_result.get('recommendations', []),
+                'system_status': system_status,
+                'optimization_suggestions': optimization_result.get('optimization', {}),
+                'total_recommendations': recommendations_result.get('total_recommendations', 0)
+            }
+            
+            return handle_success(
+                operation='get_smart_recommendations',
+                data=data,
+                message=f'訂單 #{order_id} 的智能建議已生成'
+            )
+            
+        except OrderModel.DoesNotExist:
+            return handle_error(
+                error=Exception(f"訂單 #{order_id} 不存在"),
+                context='CoffeeQueueManager.get_smart_recommendations',
+                operation='get_smart_recommendations',
+                data={'order_id': order_id}
+            )
+        except Exception as e:
+            self.logger.error(f"獲取智能建議失敗: {str(e)}")
+            
+            return handle_database_error(
+                error=e,
+                operation='get_smart_recommendations',
+                query=f"獲取訂單 #{order_id} 的智能建議",
+                model='OrderModel'
+            )
+    
+    def get_barista_workload_overview(self):
+        """
+        獲取員工工作負載概覽
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'total_baristas': 0,
+                'active_baristas': 0,
+                'total_capacity': 0,
+                'current_load': 0,
+                'available_capacity': 0,
+                'utilization_rate': 0,
+                'barista_details': [...]
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            # 初始化智能系統（如果尚未初始化）
+            initialize_smart_system()
+            
+            # 獲取系統狀態
+            allocator = get_smart_allocator()
+            system_status = allocator.get_system_status()
+            
+            return handle_success(
+                operation='get_barista_workload_overview',
+                data=system_status,
+                message='員工工作負載概覽已生成'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"獲取工作負載概覽失敗: {str(e)}")
+            
+            return handle_database_error(
+                error=e,
+                operation='get_barista_workload_overview',
+                query='獲取員工工作負載概覽',
+                model='Barista'
+            )
+    
+    def optimize_queue_with_smart_allocation(self):
+        """
+        使用智能分配優化整個隊列
+        
+        返回格式:
+        {
+            'success': True/False,
+            'message': '操作消息',
+            'data': {
+                'orders_optimized': 0,
+                'time_savings': 0,
+                'load_balanced': True/False,
+                'recommendations_generated': 0,
+                'system_status_before': {...},
+                'system_status_after': {...}
+            },
+            'details': {...},
+            'timestamp': '...',
+            'error_id': '...' (如果失敗)
+        }
+        """
+        try:
+            self.logger.info("🤖 開始智能隊列優化...")
+            
+            # 獲取優化前的系統狀態
+            allocator = get_smart_allocator()
+            system_status_before = allocator.get_system_status()
+            
+            # 獲取所有等待中的訂單
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting')
+            orders_optimized = 0
+            total_time_savings = 0
+            
+            # 為每個訂單生成優化建議
+            recommendations_generated = 0
+            
+            for queue in waiting_queues:
+                try:
+                    # 獲取優化建議
+                    optimization_result = optimize_order_preparation(queue.order.id)
+                    
+                    if optimization_result.get('success'):
+                        recommendations_generated += 1
+                        
+                        # 計算時間節省
+                        optimization = optimization_result.get('optimization', {})
+                        time_saving = optimization.get('time_saving', 0)
+                        total_time_savings += time_saving
+                        
+                        if time_saving > 0:
+                            orders_optimized += 1
+                            
+                except Exception as e:
+                    self.logger.error(f"優化訂單 #{queue.order.id} 失敗: {str(e)}")
+                    continue
+            
+            # 獲取優化後的系統狀態
+            system_status_after = allocator.get_system_status()
+            
+            # 檢查負載是否均衡
+            load_balanced = True
+            barista_details = system_status_after.get('barista_details', [])
+            
+            if len(barista_details) >= 2:
+                # 檢查兩個員工的負載差異
+                load_diff = abs(barista_details[0]['current_load'] - barista_details[1]['current_load'])
+                load_balanced = load_diff <= 2  # 負載差異不超過2杯
+            
+            data = {
+                'orders_optimized': orders_optimized,
+                'time_savings': round(total_time_savings, 1),
+                'load_balanced': load_balanced,
+                'recommendations_generated': recommendations_generated,
+                'system_status_before': system_status_before,
+                'system_status_after': system_status_after,
+                'total_waiting_orders': waiting_queues.count()
+            }
+            
+            self.logger.info(
+                f"✅ 智能隊列優化完成: "
+                f"優化了 {orders_optimized} 個訂單, "
+                f"節省 {total_time_savings:.1f} 分鐘, "
+                f"負載均衡: {'是' if load_balanced else '否'}"
+            )
+            
+            return handle_success(
+                operation='optimize_queue_with_smart_allocation',
+                data=data,
+                message=f'隊列優化完成: 優化 {orders_optimized} 訂單, 節省 {total_time_savings:.1f} 分鐘'
+            )
+            
+        except Exception as e:
+            self.logger.error(f"智能隊列優化失敗: {str(e)}")
+            
+            return handle_database_error(
+                error=e,
+                operation='optimize_queue_with_smart_allocation',
+                query='智能優化隊列',
+                model='CoffeeQueue'
+            )
 
 
 # ==================== 輔助函數 ====================

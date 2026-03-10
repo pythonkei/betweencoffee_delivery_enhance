@@ -241,6 +241,10 @@ class DynamicCompletedOrdersRenderer {
         const waitIcon = isBeansOnly ? 'fa-box' : 'fa-clock';
         const waitBadgeClass = isBeansOnly ? 'badge-warning' : 'badge-light';
         
+        // ====== 咖啡師信息 ======
+        const baristaName = order.barista || '未分配';
+        const baristaClass = order.barista ? 'badge-success text-white' : 'badge-secondary text-white';
+        
         // ====== 咖啡杯數徽章 ======
         let coffeeCountBadge = '';
         if (coffeeCount > 0) {
@@ -261,6 +265,23 @@ class DynamicCompletedOrdersRenderer {
             `;
         }
         
+        // ====== 合併徽章顯示 ======
+        let combinedBadge = '';
+        const extractedBadge = `
+            <span class="badge badge-info">
+                <i class="fas fa-check-double mr-1"></i>已提取 ${pickedTime}
+            </span>
+        `;
+        
+        combinedBadge = `
+            <div class="d-flex align-items-center mt-2">
+                ${extractedBadge}
+                <span class="badge ${baristaClass} ml-2">
+                    <i class="fas fa-user mr-1"></i>${baristaName}
+                </span>
+            </div>
+        `;
+        
         // ====== 构建订单HTML ======
         orderDiv.innerHTML = `
             <!-- 订单类型徽章（左上角） -->
@@ -275,9 +296,6 @@ class DynamicCompletedOrdersRenderer {
                         訂單時間: ${createdTime}
                     </p>
                     <div class="mt-2">
-                        <span class="badge badge-info">
-                            <i class="fas fa-check-double mr-1"></i>已提取 ${pickedTime}
-                        </span>
                         <span hidden class="badge ${waitBadgeClass} ml-1">
                             <i class="fas ${waitIcon} mr-1"></i>${waitDisplay}
                         </span>
@@ -296,6 +314,7 @@ class DynamicCompletedOrdersRenderer {
                     <strong>客戶:</strong> ${order.name || '顧客'} |
                     <strong>電話:</strong> ${order.phone || ''}
                 </p>
+                ${combinedBadge}
                 ${isBeansOnly ? `
                 <div class="mt-2">
                     <span class="badge badge-warning">

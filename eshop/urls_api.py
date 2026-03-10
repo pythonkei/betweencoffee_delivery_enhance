@@ -28,6 +28,16 @@ from .views.websocket_views import (
     websocket_reset_stats,      # 🔥 新增：重置統計數據（管理員用）
 )
 
+# ==================== 導入智能分配 API 視圖 ====================
+from .views_smart_allocation import (
+    barista_workload_api,
+    optimize_queue_api,
+    order_recommendations_api,
+    system_status_api,
+    assign_order_api,
+    update_barista_status_api,
+)
+
 urlpatterns = [
     # ==================== 訂單相關 API ====================
     path('orders/', UnifiedOrderAPI.as_view(), name='unified_orders'),
@@ -65,6 +75,25 @@ urlpatterns = [
     path('websocket/connections/', websocket_connections_api, name='websocket_connections'),
     path('websocket/broadcast-test/', websocket_broadcast_test, name='websocket_broadcast_test'),
     path('websocket/reset-stats/', websocket_reset_stats, name='websocket_reset_stats'),  # 🔥 新增
+    
+    # ==================== 🤖 智能分配 API（管理員專用）====================
+    # 員工工作負載查詢
+    path('queue/barista-workload/', barista_workload_api, name='barista_workload'),
+    
+    # 隊列優化操作
+    path('queue/optimize/', optimize_queue_api, name='optimize_queue'),
+    
+    # 訂單智能建議
+    path('orders/<int:order_id>/recommendations/', order_recommendations_api, name='order_recommendations'),
+    
+    # 系統狀態查詢
+    path('system/status/', system_status_api, name='system_status'),
+    
+    # 智能分配訂單
+    path('orders/<int:order_id>/assign/', assign_order_api, name='assign_order'),
+    
+    # 更新員工狀態
+    path('baristas/<int:barista_id>/update-status/', update_barista_status_api, name='update_barista_status'),
 ]
 
 # ==================== API 版本前綴（可選）====================

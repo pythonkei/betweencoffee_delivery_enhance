@@ -272,7 +272,7 @@ class DynamicReadyOrdersRenderer {
             }
             
             readyTimeBadgeHTML = `
-                <span class="badge badge-success ml-1">
+                <span class="badge badge-success text-white ml-1">
                     <i class="fas fa-clock mr-1"></i>已就緒: ${formattedTime}
                 </span>
             `;
@@ -291,6 +291,10 @@ class DynamicReadyOrdersRenderer {
                 </span>
             `;
         }
+        
+        // ====== 咖啡師信息 ======
+        const baristaName = order.barista || '未分配';
+        const baristaClass = order.barista ? 'badge-success text-white' : 'badge-secondary text-white';
         
         // ====== 咖啡杯數徽章 ======
         let coffeeCountBadge = '';
@@ -312,6 +316,27 @@ class DynamicReadyOrdersRenderer {
             `;
         }
         
+        // ====== 合併徽章顯示 ======
+        let combinedBadge = '';
+        if (readyTimeBadgeHTML) {
+            combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${readyTimeBadgeHTML}
+                    <span class="badge ${baristaClass} ml-2">
+                        <i class="fas fa-user mr-1"></i>${baristaName}
+                    </span>
+                </div>
+            `;
+        } else {
+            combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    <span class="badge ${baristaClass}">
+                        <i class="fas fa-user mr-1"></i>${baristaName}
+                    </span>
+                </div>
+            `;
+        }
+        
         // ====== 構建訂單HTML（徽章修正版） ======
         orderDiv.innerHTML = `
             <!-- 訂單類型徽章（左上角） -->
@@ -326,7 +351,6 @@ class DynamicReadyOrdersRenderer {
                         訂單時間: ${createdTime}
                     </p>
                     <div class="mt-2">
-                        ${readyTimeBadgeHTML}
                         ${coffeeCountBadge}
                         ${beanCountBadge}
                     </div>
@@ -342,9 +366,10 @@ class DynamicReadyOrdersRenderer {
                     <strong>客戶:</strong> ${order.name || '顧客'}
                     ${order.phone ? ` | <strong>電話:</strong> ${order.phone}` : ''}
                 </p>
+                ${combinedBadge}
                 ${isBeansOnly ? `
-                <div class="mt-2">
-                    <span hidden class="badge badge-info">
+                <div hidden class="mt-2">
+                    <span class="badge badge-info">
                         <i class="fas fa-info-circle mr-1"></i>此為咖啡豆現貨訂單，無需製作時間
                     </span>
                 </div>` : ''}

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>咖啡師顯示功能全面測試</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .order-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fff;
+        }
+        .badge {
+            font-size: 0.85em;
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+        .badge-dark {
+            background-color: #343a40;
+        }
+        .badge-secondary {
+            background-color: #6c757d;
+        }
+        .badge-success {
+            background-color: #28a745;
+        }
+        .badge-info {
+            background-color: #17a2b8;
+        }
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-quickorder {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .badge-primary {
+            background-color: #007bff;
+        }
+        .order-type-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
+        .order-item {
+            position: relative;
+            padding-top: 40px;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-preparing {
+            background-color: #ffc107;
+        }
+        .status-ready {
+            background-color: #28a745;
+        }
+        .status-completed {
+            background-color: #6c757d;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .test-pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4 text-center">咖啡師顯示功能全面測試</h1>
+        <p class="text-muted text-center mb-4">測試咖啡師信息在製作中、已就緒、已提取三個渲染器中的顯示效果</p>
+        
+        <!-- 測試說明 -->
+        <div class="test-section">
+            <h3 class="test-title">測試說明</h3>
+            <p>本測試驗證咖啡師顯示功能是否已成功整合到以下三個渲染器：</p>
+            <ol>
+                <li><strong>製作中訂單渲染器</strong> (preparing-orders-renderer-enhanced.js)</li>
+                <li><strong>已就緒訂單渲染器</strong> (ready-orders-renderer.js)</li>
+                <li><strong>已提取訂單渲染器</strong> (completed-orders-renderer.js)</li>
+            </ol>
+            <p>每個訂單卡片應顯示：</p>
+            <ul>
+                <li>咖啡師姓名徽章（已分配顯示黑色，未分配顯示灰色）</li>
+                <li>訂單類型徽章（快速訂單、混合訂單、普通訂單）</li>
+                <li>狀態相關信息（倒計時、就緒時間、提取時間）</li>
+            </ul>
+        </div>
+        
+        <!-- 測試數據 -->
+        <div class="test-section">
+            <h3 class="test-title">測試數據</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">製作中訂單</h5>
+                            <p class="card-text">模擬數據包含咖啡師信息</p>
+                            <pre id="preparing-data" class="bg-light p-2 rounded"></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">已就緒訂單</h5>
+                            <p class="card-text">模擬數據包含咖啡師信息</p>
+                            <pre id="ready-data" class="bg-light p-2 rounded"></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">已提取訂單</h5>
+                            <p class="card-text">模擬數據包含咖啡師信息</p>
+                            <pre id="completed-data" class="bg-light p-2 rounded"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 製作中訂單測試 -->
+        <div class="test-section">
+            <h3 class="test-title">製作中訂單渲染器測試</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>測試訂單 1: 已分配咖啡師</h5>
+                    <div id="preparing-order-1" class="order-card"></div>
+                </div>
+                <div class="col-md-6">
+                    <h5>測試訂單 2: 未分配咖啡師</h5>
+                    <div id="preparing-order-2" class="order-card"></div>
+                </div>
+            </div>
+            <div id="preparing-test-result" class="test-result test-info">
+                等待測試結果...
+            </div>
+        </div>
+        
+        <!-- 已就緒訂單測試 -->
+        <div class="test-section">
+            <h3 class="test-title">已就緒訂單渲染器測試</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>測試訂單 1: 已分配咖啡師</h5>
+                    <div id="ready-order-1" class="order-card"></div>
+                </div>
+                <div class="col-md-6">
+                    <h5>測試訂單 2: 未分配咖啡師</h5>
+                    <div id="ready-order-2" class="order-card"></div>
+                </div>
+            </div>
+            <div id="ready-test-result" class="test-result test-info">
+                等待測試結果...
+            </div>
+        </div>
+        
+        <!-- 已提取訂單測試 -->
+        <div class="test-section">
+            <h3 class="test-title">已提取訂單渲染器測試</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>測試訂單 1: 已分配咖啡師</h5>
+                    <div id="completed-order-1" class="order-card"></div>
+                </div>
+                <div class="col-md-6">
+                    <h5>測試訂單 2: 未分配咖啡師</h5>
+                    <div id="completed-order-2" class="order-card"></div>
+                </div>
+            </div>
+            <div id="completed-test-result" class="test-result test-info">
+                等待測試結果...
+            </div>
+        </div>
+        
+        <!-- 綜合測試結果 -->
+        <div class="test-section">
+            <h3 class="test-title">綜合測試結果</h3>
+            <div id="overall-test-result" class="test-result test-info">
+                正在執行測試...
+            </div>
+            <div class="mt-3">
+                <button id="run-tests-btn" class="btn btn-primary">
+                    <i class="fas fa-play mr-2"></i>執行所有測試
+                </button>
+                <button id="reset-tests-btn" class="btn btn-secondary ml-2">
+                    <i class="fas fa-redo mr-2"></i>重置測試
+                </button>
+            </div>
+        </div>
+        
+        <!-- 測試日誌 -->
+        <div class="test-section">
+            <h3 class="test-title">測試日誌</h3>
+            <div id="test-log" class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;">
+                <p class="text-muted mb-0">測試日誌將顯示在這裡...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 測試數據
+        const testData = {
+            preparing_orders: [
+                {
+                    id: 1001,
+                    status: "preparing",
+                    barista: "張三",
+                    is_quick_order: true,
+                    coffee_count: 2,
+                    bean_count: 0,
+                    has_coffee: true,
+                    has_beans: false,
+                    is_mixed_order: false,
+                    is_beans_only: false,
+                    name: "李先生",
+                    phone: "9123-4567",
+                    pickup_code: "A123",
+                    total_price: 85.50,
+                    created_at: "2026-03-10T14:30:00",
+                    estimated_ready_at: "2026-03-10T14:45:00",
+                    items: [
+                        { name: "美式咖啡", quantity: 1, price: 35.00, total_price: 35.00 },
+                        { name: "拿鐵咖啡", quantity: 1, price: 50.50, total_price: 50.50 }
+                    ],
+                    items_count: 2,
+                    items_display: "2項商品"
+                },
+                {
+                    id: 1002,
+                    status: "preparing",
+                    barista: null,
+                    is_quick_order: false,
+                    coffee_count: 1,
+                    bean_count: 1,
+                    has_coffee: true,
+                    has_beans: true,
+                    is_mixed_order: true,
+                    is_beans_only: false,
+                    name: "王小姐",
+                    phone: "9876-5432",
+                    pickup_code: "B456",
+                    total_price: 120.00,
+                    created_at: "2026-03-10T14:35:00",
+                    estimated_ready_at: "2026-03-10T15:00:00",
+                    items: [
+                        { name: "卡布奇諾", quantity: 1, price: 45.00, total_price: 45.00 },
+                        { name: "耶加雪菲咖啡豆", quantity: 1, price: 75.00, total_price: 75.00 }
+                    ],
+                    items_count: 2,
+                    items_display: "2項商品"
+                }
+            ],
+            ready_orders: [
+                {
+                    id: 2001,
+                    status: "ready",
+                    barista: "李四",
+                    is_quick_order: false,
+                    coffee_count: 3,
+                    bean_count: 0,
+                    has_coffee: true,
+                    has_beans: false,
+                    is_mixed_order: false,
+                    is_beans_only: false,
+                    name: "陳先生",
+                    phone: "9123-8888",
+                    pickup_code: "C789",
+                    total_price: 150.00,
+                    created_at: "2026-03-10T14:20:00",
+                    ready_at: "2026-03-10T14:40:00",
+                    items: [
+                        { name: "冰美式咖啡", quantity: 2, price: 40.00, total_price: 80.00 },
+                        { name: "熱拿鐵", quantity: 1, price: 70.00, total_price: 70.00 }
+                    ],
+                    items_count: 3,
+                    items_display: "3項商品"
+                },
+                {
+                    id: 2002,
+                    status: "ready",
+                    barista: null,
+                    is_quick_order: true,
+                    coffee_count: 0,
+                    bean_count: 2,
+                    has_coffee: false,
+                    has_beans: true,
+                    is_mixed_order: false,
+                    is_beans_only: true,
+                    name: "林小姐",
+                    phone: "9876-1111",
+                    pickup_code: "D012",
+                    total_price: 160.00,
+                    created_at: "2026-03-10T14:25:00",
+                    ready_at: "2026-03-10T14:30:00",
+                    items: [
+                        { name: "哥倫比亞咖啡豆", quantity: 2, price: 80.00, total_price: 160.00 }
+                    ],
+                    items_count: 1,
+                    items_display: "1項商品"
+                }
+            ],
+            completed_orders: [
+                {
+                    id: 3001,
+                    status: "completed",
+                    barista: "王五",
+                    is_quick_order: false,
+                    coffee_count: 1,
+                    bean_count: 0,
+                    has_coffee: true,
+                    has_beans: false,
+                    is_mixed_order: false,
+                    is_beans_only: false,
+                    name: "黃先生",
+                    phone: "9123-9999",
+                    pickup_code: "E345",
+                    total_price: 55.00,
+                    created_at: "2026-03-10T14:00:00",
+                    picked_up_at: "2026-03-10T14:25:00",
+                    wait_duration: "25分鐘",
+                    items: [
+                        { name: "摩卡咖啡", quantity: 1, price: 55.00, total_price: 55.00 }
+                    ],
+                    items_count: 1,
+                    items_display: "1項商品"
+                },
+                {
+                    id: 3002,
+                    status: "completed",
+                    barista: null,
+                    is_quick_order: true,
+                    coffee_count: 2,
+                    bean_count: 0,
+                    has_coffee: true,
+                    has_beans: false,
+                    is_mixed_order: false,
+                    is_beans_only: false,
+                    name: "鄭小姐",
+                    phone: "9876-2222",
+                    pickup_code: "F678",
+                    total_price: 90.00,
+                    created_at: "2026-03-10T14:10:00",
+                    picked_up_at: "2026-03-10T14:30:00",
+                    wait_duration: "20分鐘",
+                    items: [
+                        { name: "焦糖瑪奇朵", quantity: 2, price: 45.00, total_price: 90.00 }
+                    ],
+                    items_count: 1,
+                    items_display: "1項商品"
+                }
+            ]
+        };
+
+        // 顯示測試數據
+        document.getElementById('preparing-data').textContent = JSON.stringify(testData.preparing_orders, null, 2);
+        document.getElementById('ready-data').textContent = JSON.stringify(testData.ready_orders, null, 2);
+        document.getElementById('completed-data').textContent = JSON.stringify(testData.completed_orders, null, 2);
+
+        // 模擬 TimeUtils
+        window.TimeUtils = {
+            formatHKTime: function(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleString('zh-HK', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+            },
+            formatHKTimeOnly: function(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleTimeString('zh-HK', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+            }
+        };
+
+        // 測試日誌
+        function logTest(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString('zh-HK', { hour12: false });
+            const colorClass = type === 'error' ? 'text-danger' : type === 'success' ? 'text-success' : 'text-info';
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `mb-1 ${colorClass}`;
+            logEntry.innerHTML = `<small>[${timestamp}]</small> ${message}`;
+            
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 創建訂單元素（模擬製作中渲染器）
+        function createPreparingOrderElement(order) {
+            const orderDiv = document.createElement('div');
+            orderDiv.className = 'order-item mb-5 p-5 rounded selectable';
+            
+            // 訂單類型判斷
+            const coffeeCount = order.coffee_count || 0;
+            const beanCount = order.bean_count || 0;
+            const hasCoffee = order.has_coffee || coffeeCount > 0;
+            const hasBeans = order.has_beans || beanCount > 0;
+            const isMixedOrder = order.is_mixed_order || (hasCoffee && hasBeans);
+            const isBeansOnly = order.is_beans_only || (hasBeans && !hasCoffee);
+            
+            // 訂單類型徽章
+            let orderTypeBadges = '';
+            if (order.is_quick_order) {
+                orderTypeBadges = `
+                    <span class="badge badge-quickorder order-type-badge">
+                        <i class="fas fa-bolt mr-1"></i>快速訂單
+                    </span>
+                `;
+            } else if (isMixedOrder) {
+                orderTypeBadges = `
+                    <span class="badge badge-primary order-type-badge">
+                        <i class="fas fa-random mr-1"></i>混合訂單
+                    </span>
+                `;
+            } else {
+                orderTypeBadges = `
+                    <span class="badge badge-info order-type-badge">
+                        <i class="fas fa-shopping-bag mr-1"></i>普通訂單
+                    </span>
+                `;
+            }
+            
+            // 咖啡師信息
+            const baristaName = order.barista || '未分配';
+            const baristaClass = order.barista ? 'badge-dark' : 'badge-secondary';
+            
+            // 倒計時徽章
+            const countdownBadge = `
+                <span class="badge badge-warning">
+                    <i class="fas fa-clock mr-1"></i>倒計時: 15分鐘
+                </span>
+            `;
+            
+            // 合併徽章顯示
+            const combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${countdownBadge}
+                    <span class="badge ${baristaClass} ml-2">
+                        <i class="fas fa-user mr-1"></i>${baristaName}
+                    </span>
+                </div>
+            `;
+            
+            // 創建時間
+            const createdTime = window.TimeUtils.formatHKTime(order.created_at);
+            
+            // 構建HTML
+            orderDiv.innerHTML = `
+                <!-- 訂單類型徽章 -->
+                <div class="order-type-badges-container">
+                    ${orderTypeBadges}
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3 mt-4">
+                    <div>
+                        <h5>訂單編號: #${order.id}</h5>
+                        <p class="mb-0">
+                            訂單時間: ${createdTime}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <span class="h5 pr-2">$${parseFloat(order.total_price).toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="mb-2">
+                        <strong>取餐码:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
+                        <strong>客戶:</strong> ${order.name || '顧客'}
+                        ${order.phone ? ` | <strong>電話:</strong> ${order.phone}` : ''}
+                    </p>
+                    ${combinedBadge}
+                </div>
+                
+                <div class="order-items">
+                    ${renderOrderItems(order.items || [])}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <div>
+                        <span class="text-muted">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                    </div>
+                    <div>
+                        <span class="badge badge-warning">
+                            <i class="fas fa-clock mr-1"></i>製作中
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            return orderDiv;
+        }
+        
+        // 創建訂單元素（模擬已就緒渲染器）
+        function createReadyOrderElement(order) {
+            const orderDiv = document.createElement('div');
+            orderDiv.className = 'order-item mb-5 p-5 rounded selectable';
+            
+            // 訂單類型判斷
+            const coffeeCount = order.coffee_count || 0;
+            const beanCount = order.bean_count || 0;
+            const hasCoffee = order.has_coffee || coffeeCount > 0;
+            const hasBeans = order.has_beans || beanCount > 0;
+            const isMixedOrder = order.is_mixed_order || (hasCoffee && hasBeans);
+            const isBeansOnly = order.is_beans_only || (hasBeans && !hasCoffee);
+            
+            // 訂單類型徽章
+            let orderTypeBadges = '';
+            if (order.is_quick_order) {
+                orderTypeBadges = `
+                    <span class="badge badge-quickorder order-type-badge">
+                        <i class="fas fa-bolt mr-1"></i>快速訂單
+                    </span>
+                `;
+            } else if (isMixedOrder) {
+                orderTypeBadges = `
+                    <span class="badge badge-primary order-type-badge">
+                        <i class="fas fa-random mr-1"></i>混合訂單
+                    </span>
+                `;
+            } else {
+                orderTypeBadges = `
+                    <span class="badge badge-info order-type-badge">
+                        <i class="fas fa-shopping-bag mr-1"></i>普通訂單
+                    </span>
+                `;
+            }
+            
+            // 咖啡師信息
+            const baristaName = order.barista || '未分配';
+            const baristaClass = order.barista ? 'badge-dark' : 'badge-secondary';
+            
+            // 就緒時間徽章
+            let readyTimeBadgeHTML = '';
+            if (!isBeansOnly && order.ready_at) {
+                const formattedTime = window.TimeUtils.formatHKTimeOnly(order.ready_at);
+                readyTimeBadgeHTML = `
+                    <span class="badge badge-success ml-1">
+                        <i class="fas fa-clock mr-1"></i>已就緒: ${formattedTime}
+                    </span>
+                `;
+            } else if (isBeansOnly) {
+                readyTimeBadgeHTML = `
+                    <span class="badge badge-warning ml-1">
+                        <i class="fas fa-box mr-1"></i>現貨可取
+                    </span>
+                `;
+            } else {
+                readyTimeBadgeHTML = `
+                    <span class="badge badge-success ml-1">
+                        <i class="fas fa-check-circle mr-1"></i>已就緒
+                    </span>
+                `;
+            }
+            
+            // 合併徽章顯示
+            const combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${readyTimeBadgeHTML}
+                    <span class="badge ${baristaClass} ml-2">
+                        <i class="fas fa-user mr-1"></i>${baristaName}
+                    </span>
+                </div>
+            `;
+            
+            // 創建時間
+            const createdTime = window.TimeUtils.formatHKTime(order.created_at);
+            
+            // 構建HTML
+            orderDiv.innerHTML = `
+                <!-- 訂單類型徽章 -->
+                <div class="order-type-badges-container">
+                    ${orderTypeBadges}
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3 mt-4">
+                    <div>
+                        <h5>訂單編號: #${order.id}</h5>
+                        <p class="mb-0">
+                            訂單時間: ${createdTime}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <span class="h5 pr-2">$${parseFloat(order.total_price).toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="mb-2">
+                        <strong>取餐码:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
+                        <strong>客戶:</strong> ${order.name || '顧客'}
+                        ${order.phone ? ` | <strong>電話:</strong> ${order.phone}` : ''}
+                    </p>
+                    ${combinedBadge}
+                </div>
+                
+                <div class="order-items">
+                    ${renderOrderItems(order.items || [])}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <div>
+                        <span class="text-muted">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-info btn-sm">
+                            <i class="fas fa-check-double mr-1"></i>客戶已提取
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return orderDiv;
+        }
+        
+        // 創建訂單元素（模擬已提取渲染器）
+        function createCompletedOrderElement(order) {
+            const orderDiv = document.createElement('div');
+            orderDiv.className = 'order-item mb-5 p-5 rounded selectable';
+            
+            // 訂單類型判斷
+            const coffeeCount = order.coffee_count || 0;
+            const beanCount = order.bean_count || 0;
+            const hasCoffee = order.has_coffee || coffeeCount > 0;
+            const hasBeans = order.has_beans || beanCount > 0;
+            const isMixedOrder = order.is_mixed_order || (hasCoffee && hasBeans);
+            const isBeansOnly = order.is_beans_only || (hasBeans && !hasCoffee);
+            
+            // 訂單類型徽章
+            let orderTypeBadges = '';
+            if (order.is_quick_order) {
+                orderTypeBadges = `
+                    <span class="badge badge-quickorder order-type-badge">
+                        <i class="fas fa-bolt mr-1"></i>快速訂單
+                    </span>
+                `;
+            } else if (isMixedOrder) {
+                orderTypeBadges = `
+                    <span class="badge badge-primary order-type-badge">
+                        <i class="fas fa-random mr-1"></i>混合訂單
+                    </span>
+                `;
+            } else {
+                orderTypeBadges = `
+                    <span class="badge badge-info order-type-badge">
+                        <i class="fas fa-shopping-bag mr-1"></i>普通訂單
+                    </span>
+                `;
+            }
+            
+            // 咖啡師信息
+            const baristaName = order.barista || '未分配';
+            const baristaClass = order.barista ? 'badge-dark' : 'badge-secondary';
+            
+            // 提取時間
+            const pickedTime = window.TimeUtils.formatHKTimeOnly(order.picked_up_at);
+            const extractedBadge = `
+                <span class="badge badge-info">
+                    <i class="fas fa-check-double mr-1"></i>已提取 ${pickedTime}
+                </span>
+            `;
+            
+            // 合併徽章顯示
+            const combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${extractedBadge}
+                    <span class="badge ${baristaClass} ml-2">
+                        <i class="fas fa-user mr-1"></i>${baristaName}
+                    </span>
+                </div>
+            `;
+            
+            // 創建時間
+            const createdTime = window.TimeUtils.formatHKTimeOnly(order.created_at);
+            
+            // 構建HTML
+            orderDiv.innerHTML = `
+                <!-- 訂單類型徽章 -->
+                <div class="order-type-badges-container">
+                    ${orderTypeBadges}
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3 mt-4">
+                    <div>
+                        <h5>訂單編號: #${order.id}</h5>
+                        <p class="mb-0">
+                            訂單時間: ${createdTime}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <span class="h5 pr-2">$${parseFloat(order.total_price).toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="mb-2">
+                        <strong>取餐碼:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
+                        <strong>客戶:</strong> ${order.name || '顧客'} |
+                        <strong>電話:</strong> ${order.phone || ''}
+                    </p>
+                    ${combinedBadge}
+                </div>
+                
+                <div class="order-items">
+                    ${renderOrderItems(order.items || [])}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <div>
+                        <span class="text-muted">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                    </div>
+                    <div>
+                        <span class="badge badge-secondary">
+                            <i class="fas fa-check-circle mr-1"></i>訂單已完成
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            return orderDiv;
+        }
+        
+        // 渲染訂單項目
+        function renderOrderItems(items) {
+            if (!items || items.length === 0) {
+                return '<p class="text-muted">暫無商品信息</p>';
+            }
+
+            let itemsHTML = '';
+
+            items.forEach(item => {
+                const itemPrice = parseFloat(item.price || 0).toFixed(2);
+                const itemTotal = parseFloat(item.total_price || 0).toFixed(2);
+
+                itemsHTML += `
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="mr-3">
+                            <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <img src="/static/images/default-product.png"
+                                     alt="${item.name || '商品'}"
+                                     class="img-fluid"
+                                     style="max-height: 75px;">
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">${item.name || '商品'}</h6>
+                            <p class="mb-1 text-muted">數量: ${item.quantity || 1}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="h6">$${itemTotal}</span>
+                            <div class="text-muted small">$${itemPrice} / 單價</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return itemsHTML;
+        }
+        
+        // 執行測試
+        function runTests() {
+            logTest('開始執行咖啡師顯示功能全面測試...', 'info');
+            
+            let allTestsPassed = true;
+            const testResults = {
+                preparing: { passed: 0, total: 2, details: [] },
+                ready: { passed: 0, total: 2, details: [] },
+                completed: { passed: 0, total: 2, details: [] }
+            };
+            
+            // 測試製作中訂單渲染器
+            logTest('測試製作中訂單渲染器...', 'info');
+            testData.preparing_orders.forEach((order, index) => {
+                const containerId = `preparing-order-${index + 1}`;
+                const container = document.getElementById(containerId);
+                if (container) {
+                    const orderElement = createPreparingOrderElement(order);
+                    container.innerHTML = '';
+                    container.appendChild(orderElement);
+                    
+                    // 檢查咖啡師徽章是否存在
+                    const hasBaristaBadge = orderElement.innerHTML.includes('badge-dark') || orderElement.innerHTML.includes('badge-secondary');
+                    const hasBaristaName = orderElement.innerHTML.includes(order.barista || '未分配');
+                    
+                    if (hasBaristaBadge && hasBaristaName) {
+                        testResults.ready.passed++;
+                        testResults.ready.details.push(`訂單 #${order.id}: ✅ 咖啡師顯示正確`);
+                        logTest(`訂單 #${order.id}: 咖啡師顯示正確 (${order.barista || '未分配'})`, 'success');
+                    } else {
+                        testResults.ready.details.push(`訂單 #${order.id}: ❌ 咖啡師顯示錯誤`);
+                        logTest(`訂單 #${order.id}: 咖啡師顯示錯誤`, 'error');
+                        allTestsPassed = false;
+                    }
+                }
+            });
+            
+            // 測試已提取訂單渲染器
+            logTest('測試已提取訂單渲染器...', 'info');
+            testData.completed_orders.forEach((order, index) => {
+                const containerId = `completed-order-${index + 1}`;
+                const container = document.getElementById(containerId);
+                if (container) {
+                    const orderElement = createCompletedOrderElement(order);
+                    container.innerHTML = '';
+                    container.appendChild(orderElement);
+                    
+                    // 檢查咖啡師徽章是否存在
+                    const hasBaristaBadge = orderElement.innerHTML.includes('badge-dark') || orderElement.innerHTML.includes('badge-secondary');
+                    const hasBaristaName = orderElement.innerHTML.includes(order.barista || '未分配');
+                    
+                    if (hasBaristaBadge && hasBaristaName) {
+                        testResults.completed.passed++;
+                        testResults.completed.details.push(`訂單 #${order.id}: ✅ 咖啡師顯示正確`);
+                        logTest(`訂單 #${order.id}: 咖啡師顯示正確 (${order.barista || '未分配'})`, 'success');
+                    } else {
+                        testResults.completed.details.push(`訂單 #${order.id}: ❌ 咖啡師顯示錯誤`);
+                        logTest(`訂單 #${order.id}: 咖啡師顯示錯誤`, 'error');
+                        allTestsPassed = false;
+                    }
+                }
+            });
+            
+            // 顯示測試結果
+            displayTestResults(testResults, allTestsPassed);
+        }
+        
+        // 顯示測試結果
+        function displayTestResults(testResults, allTestsPassed) {
+            // 更新各部分的測試結果
+            const preparingResult = document.getElementById('preparing-test-result');
+            const readyResult = document.getElementById('ready-test-result');
+            const completedResult = document.getElementById('completed-test-result');
+            const overallResult = document.getElementById('overall-test-result');
+            
+            // 製作中訂單測試結果
+            const preparingPassRate = (testResults.preparing.passed / testResults.preparing.total) * 100;
+            preparingResult.className = `test-result ${preparingPassRate === 100 ? 'test-pass' : 'test-fail'}`;
+            preparingResult.innerHTML = `
+                <strong>製作中訂單渲染器測試結果:</strong><br>
+                ✅ 通過: ${testResults.preparing.passed}/${testResults.preparing.total}<br>
+                ${testResults.preparing.details.map(detail => `<small>${detail}</small><br>`).join('')}
+            `;
+            
+            // 已就緒訂單測試結果
+            const readyPassRate = (testResults.ready.passed / testResults.ready.total) * 100;
+            readyResult.className = `test-result ${readyPassRate === 100 ? 'test-pass' : 'test-fail'}`;
+            readyResult.innerHTML = `
+                <strong>已就緒訂單渲染器測試結果:</strong><br>
+                ✅ 通過: ${testResults.ready.passed}/${testResults.ready.total}<br>
+                ${testResults.ready.details.map(detail => `<small>${detail}</small><br>`).join('')}
+            `;
+            
+            // 已提取訂單測試結果
+            const completedPassRate = (testResults.completed.passed / testResults.completed.total) * 100;
+            completedResult.className = `test-result ${completedPassRate === 100 ? 'test-pass' : 'test-fail'}`;
+            completedResult.innerHTML = `
+                <strong>已提取訂單渲染器測試結果:</strong><br>
+                ✅ 通過: ${testResults.completed.passed}/${testResults.completed.total}<br>
+                ${testResults.completed.details.map(detail => `<small>${detail}</small><br>`).join('')}
+            `;
+            
+            // 綜合測試結果
+            const totalPassed = testResults.preparing.passed + testResults.ready.passed + testResults.completed.passed;
+            const totalTests = testResults.preparing.total + testResults.ready.total + testResults.completed.total;
+            const overallPassRate = (totalPassed / totalTests) * 100;
+            
+            overallResult.className = `test-result ${allTestsPassed ? 'test-pass' : 'test-fail'}`;
+            overallResult.innerHTML = `
+                <strong>綜合測試結果:</strong><br>
+                ✅ 總通過率: ${overallPassRate.toFixed(1)}% (${totalPassed}/${totalTests})<br>
+                <strong>詳細結果:</strong><br>
+                • 製作中訂單: ${testResults.preparing.passed}/${testResults.preparing.total} 通過<br>
+                • 已就緒訂單: ${testResults.ready.passed}/${testResults.ready.total} 通過<br>
+                • 已提取訂單: ${testResults.completed.passed}/${testResults.completed.total} 通過<br>
+                <br>
+                <strong>結論:</strong> ${allTestsPassed ? '✅ 所有測試通過！咖啡師顯示功能已成功整合到所有三個渲染器。' : '❌ 部分測試失敗，請檢查代碼實現。'}
+            `;
+            
+            logTest(`測試完成！總通過率: ${overallPassRate.toFixed(1)}% (${totalPassed}/${totalTests})`, 
+                   allTestsPassed ? 'success' : 'error');
+        }
+        
+        // 重置測試
+        function resetTests() {
+            // 清空所有訂單容器
+            for (let i = 1; i <= 2; i++) {
+                ['preparing', 'ready', 'completed'].forEach(type => {
+                    const container = document.getElementById(`${type}-order-${i}`);
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                });
+            }
+            
+            // 重置測試結果顯示
+            document.getElementById('preparing-test-result').className = 'test-result test-info';
+            document.getElementById('preparing-test-result').innerHTML = '等待測試結果...';
+            
+            document.getElementById('ready-test-result').className = 'test-result test-info';
+            document.getElementById('ready-test-result').innerHTML = '等待測試結果...';
+            
+            document.getElementById('completed-test-result').className = 'test-result test-info';
+            document.getElementById('completed-test-result').innerHTML = '等待測試結果...';
+            
+            document.getElementById('overall-test-result').className = 'test-result test-info';
+            document.getElementById('overall-test-result').innerHTML = '正在執行測試...';
+            
+            // 清空測試日誌
+            const logDiv = document.getElementById('test-log');
+            logDiv.innerHTML = '<p class="text-muted mb-0">測試日誌將顯示在這裡...</p>';
+            
+            logTest('測試已重置', 'info');
+        }
+        
+        // 綁定事件
+        document.getElementById('run-tests-btn').addEventListener('click', runTests);
+        document.getElementById('reset-tests-btn').addEventListener('click', resetTests);
+        
+        // 初始化
+        logTest('測試頁面已加載完成，點擊"執行所有測試"按鈕開始測試。', 'info');
+    </script>
+</body>
+</html>
+                    
+                    if (hasBaristaBadge && hasBaristaName) {
+                        testResults.preparing.passed++;
+                        testResults.preparing.details.push(`訂單 #${order.id}: ✅ 咖啡師顯示正確`);
+                        logTest(`訂單 #${order.id}: 咖啡師顯示正確 (${order.barista || '未分配'})`, 'success');
+                    } else {
+                        testResults.preparing.details.push(`訂單 #${order.id}: ❌ 咖啡師顯示錯誤`);
+                        logTest(`訂單 #${order.id}: 咖啡師顯示錯誤`, 'error');
+                        allTestsPassed = false;
+                    }
+                }
+            });
+            
+            // 測試已就緒訂單渲染器
+            logTest('測試已就緒訂單渲染器...', 'info');
+            testData.ready_orders.forEach((order, index) => {
+                const containerId = `ready-order-${index + 1}`;
+                const container = document.getElementById(containerId);
+                if (container) {
+                    const orderElement = createReadyOrderElement(order);
+                    container.innerHTML = '';
+                    container.appendChild(orderElement);
+                    
+                    // 檢查咖啡師徽章是否存在
+                    const hasBaristaBadge = orderElement.innerHTML.includes('badge-dark') || orderElement.innerHTML.includes('badge-secondary');
+                    const hasBaristaName = orderElement.innerHTML.includes(order.barista || '未分配');
+                    
+                   

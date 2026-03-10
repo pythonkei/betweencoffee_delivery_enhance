@@ -390,21 +390,9 @@ class EnhancedPreparingOrdersRenderer {
             `;
         }
         
-        // ====== 狀態徽章 ======
-        let statusBadge = '';
-        if (statusType === 'countdown_active') {
-            statusBadge = `
-                <span class="badge badge-info ml-1">
-                    <i class="fas fa-hourglass-half mr-1"></i>倒計時進行中
-                </span>
-            `;
-        } else {
-            statusBadge = `
-                <span class="badge badge-warning ml-1">
-                    <i class="fas fa-hourglass-end mr-1"></i>倒計時已完成
-                </span>
-            `;
-        }
+        // ====== 咖啡師信息 ======
+        const baristaName = order.barista || '未分配';
+        const baristaClass = order.barista ? 'badge-dark' : 'badge-secondary';
         
         // ====== 倒計時顯示 ======
         let countdownDisplay = '';
@@ -431,6 +419,27 @@ class EnhancedPreparingOrdersRenderer {
                 <span class="badge badge-success ml-1">
                     <i class="fas fa-check mr-1"></i>${completedTimeDisplay}
                 </span>
+            `;
+        }
+        
+        // ====== 合併徽章顯示 ======
+        let combinedBadge = '';
+        if (countdownDisplay) {
+            combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${countdownDisplay}
+                    <span class="badge ${baristaClass} ml-2">
+                        <i class="fas fa-user mr-1"></i>${baristaName}
+                    </span>
+                </div>
+            `;
+        } else {
+            combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    <span class="badge ${baristaClass}">
+                        <i class="fas fa-user mr-1"></i>${baristaName}
+                    </span>
+                </div>
             `;
         }
         
@@ -463,10 +472,6 @@ class EnhancedPreparingOrdersRenderer {
                     <p class="mb-0">
                         訂單時間: ${orderTime}
                     </p>
-                    <div class="mt-2">
-                        ${statusBadge}
-                        ${countdownDisplay}
-                    </div>
                 </div>
                 <div class="text-right">
                     <span class="h5 pr-2">$${parseFloat(totalPrice).toFixed(2)}</span>
@@ -478,6 +483,7 @@ class EnhancedPreparingOrdersRenderer {
                     <strong>取餐碼:</strong> <span class="h5 text-primary">${pickupCode}</span> | 
                     <strong>客戶:</strong> ${name}${phone ? ` | <strong>電話:</strong> ${phone}` : ''}
                 </p>
+                ${combinedBadge}
                 ${isMixedOrder ? `
                 <div hidden class="mt-2">
                     <span class="badge badge-secondary">

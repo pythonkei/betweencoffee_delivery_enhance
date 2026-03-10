@@ -299,6 +299,14 @@ class OrderItemProcessor:
             'preparation_time_minutes': queue_item.preparation_time_minutes,
         }
         
+        # 添加咖啡師信息
+        if hasattr(queue_item, 'barista') and queue_item.barista:
+            queue_info['barista'] = queue_item.barista
+        elif hasattr(queue_item.order, 'barista') and queue_item.order.barista:
+            queue_info['barista'] = queue_item.order.barista
+        else:
+            queue_info['barista'] = '未分配'
+        
         # 處理時間信息
         if now and hk_tz:
             # 估計完成時間
@@ -345,6 +353,7 @@ class OrderItemProcessor:
             就緒訂單數據字典
         """
         from django.utils import timezone
+        from eshop.models import CoffeeQueue
         
         # 使用基礎處理器準備數據
         order_data = OrderItemProcessor.prepare_order_data(
@@ -353,6 +362,22 @@ class OrderItemProcessor:
             hk_tz=hk_tz,
             include_queue_info=False
         )
+        
+        # 純咖啡豆訂單不顯示咖啡師（現貨商品）
+        if order_data.get('is_beans_only'):
+            order_data['barista'] = ''
+        else:
+            # 添加咖啡師信息 - 從 CoffeeQueue 記錄中獲取
+            try:
+                # 查找與此訂單相關的 CoffeeQueue 記錄
+                coffee_queue = CoffeeQueue.objects.filter(order=order).order_by('-id').first()
+                if coffee_queue and coffee_queue.barista:
+                    order_data['barista'] = coffee_queue.barista
+                else:
+                    order_data['barista'] = '未分配'
+            except Exception as e:
+                logger.warning(f"獲取訂單 {order.id} 的咖啡師信息失敗: {str(e)}")
+                order_data['barista'] = '未分配'
         
         # 添加就緒時間信息
         if order.ready_at and hk_tz:
@@ -387,6 +412,7 @@ class OrderItemProcessor:
             已完成訂單數據字典
         """
         from django.utils import timezone
+        from eshop.models import CoffeeQueue
         
         # 使用基礎處理器準備數據
         order_data = OrderItemProcessor.prepare_order_data(
@@ -395,6 +421,18 @@ class OrderItemProcessor:
             hk_tz=hk_tz,
             include_queue_info=False
         )
+        
+        # 添加咖啡師信息 - 從 CoffeeQueue 記錄中獲取
+        try:
+            # 查找與此訂單相關的 CoffeeQueue 記錄
+            coffee_queue = CoffeeQueue.objects.filter(order=order).order_by('-id').first()
+            if coffee_queue and coffee_queue.barista:
+                order_data['barista'] = coffee_queue.barista
+            else:
+                order_data['barista'] = '未分配'
+        except Exception as e:
+            logger.warning(f"獲取訂單 {order.id} 的咖啡師信息失敗: {str(e)}")
+            order_data['barista'] = '未分配'
         
         # 添加取餐時間信息
         if order.picked_up_at and hk_tz:

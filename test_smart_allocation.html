@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能分配系統測試</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h3 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-test {
+            margin: 5px;
+            min-width: 150px;
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success {
+            background-color: #28a745;
+        }
+        
+        .status-error {
+            background-color: #dc3545;
+        }
+        
+        .status-warning {
+            background-color: #ffc107;
+        }
+        
+        .status-info {
+            background-color: #17a2b8;
+        }
+        
+        .barista-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+        }
+        
+        .barista-card.active {
+            border-left: 5px solid #28a745;
+        }
+        
+        .barista-card.inactive {
+            border-left: 5px solid #dc3545;
+            opacity: 0.7;
+        }
+        
+        .progress-thin {
+            height: 8px;
+        }
+        
+        .suggestion-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #17a2b8;
+            background: #f8f9fa;
+        }
+        
+        .suggestion-item.high {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        
+        .suggestion-item.medium {
+            border-left-color: #ffc107;
+            background: #fff9e6;
+        }
+        
+        .suggestion-item.low {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 標題 -->
+        <div class="header text-center">
+            <h1><i class="fas fa-robot"></i> 智能分配系統測試</h1>
+            <p class="lead">測試員工工作負載顯示、智能分配和隊列優化功能</p>
+            <div class="mt-3">
+                <span class="badge bg-light text-dark me-2"><i class="fas fa-clock"></i> 實時更新</span>
+                <span class="badge bg-light text-dark me-2"><i class="fas fa-users"></i> 員工管理</span>
+                <span class="badge bg-light text-dark"><i class="fas fa-chart-line"></i> 性能優化</span>
+            </div>
+        </div>
+        
+        <!-- 系統狀態 -->
+        <div class="test-section">
+            <h3><i class="fas fa-chart-bar"></i> 系統狀態</h3>
+            <div class="row" id="system-status">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value" id="total-baristas">0</div>
+                        <div class="metric-label">總員工數</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value" id="active-baristas">0</div>
+                        <div class="metric-label">在崗員工</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value" id="utilization-rate">0%</div>
+                        <div class="metric-label">利用率</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value" id="available-capacity">0</div>
+                        <div class="metric-label">可用容量</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button class="btn btn-primary btn-test" onclick="loadSystemStatus()">
+                    <i class="fas fa-sync-alt"></i> 刷新系統狀態
+                </button>
+                <button class="btn btn-info btn-test" onclick="loadPerformanceMetrics()">
+                    <i class="fas fa-chart-line"></i> 性能指標
+                </button>
+            </div>
+            
+            <div class="result-box" id="system-status-result">
+                <p class="text-muted">點擊按鈕加載系統狀態...</p>
+            </div>
+        </div>
+        
+        <!-- 員工工作負載 -->
+        <div class="test-section">
+            <h3><i class="fas fa-users"></i> 員工工作負載</h3>
+            <div id="barista-list">
+                <p class="text-muted">加載中...</p>
+            </div>
+            
+            <div class="mt-3">
+                <button class="btn btn-success btn-test" onclick="loadBaristaWorkload()">
+                    <i class="fas fa-user-check"></i> 加載工作負載
+                </button>
+                <button class="btn btn-warning btn-test" onclick="simulateNewOrder()">
+                    <i class="fas fa-coffee"></i> 模擬新訂單
+                </button>
+            </div>
+            
+            <div class="result-box" id="workload-result">
+                <p class="text-muted">工作負載數據將顯示在這裡...</p>
+            </div>
+        </div>
+        
+        <!-- 智能建議 -->
+        <div class="test-section">
+            <h3><i class="fas fa-lightbulb"></i> 智能建議</h3>
+            <div id="suggestions-list">
+                <p class="text-muted">加載中...</p>
+            </div>
+            
+            <div class="mt-3">
+                <button class="btn btn-info btn-test" onclick="loadRecommendations()">
+                    <i class="fas fa-comments"></i> 獲取建議
+                </button>
+                <button class="btn btn-danger btn-test" onclick="optimizeQueue()">
+                    <i class="fas fa-magic"></i> 優化隊列
+                </button>
+            </div>
+            
+            <div class="result-box" id="recommendations-result">
+                <p class="text-muted">智能建議將顯示在這裡...</p>
+            </div>
+        </div>
+        
+        <!-- API測試 -->
+        <div class="test-section">
+            <h3><i class="fas fa-vial"></i> API測試</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">訂單ID</label>
+                        <input type="number" class="form-control" id="order-id" value="1" min="1">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">員工ID</label>
+                        <input type="number" class="form-control" id="barista-id" value="1" min="1">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button class="btn btn-primary btn-test" onclick="testAssignOrder()">
+                    <i class="fas fa-share"></i> 分配訂單
+                </button>
+                <button class="btn btn-secondary btn-test" onclick="testUpdateBaristaStatus()">
+                    <i class="fas fa-user-edit"></i> 更新員工狀態
+                </button>
+                <button class="btn btn-success btn-test" onclick="testAllAPIs()">
+                    <i class="fas fa-play-circle"></i> 運行所有測試
+                </button>
+            </div>
+            
+            <div class="result-box" id="api-test-result">
+                <p class="text-muted">API測試結果將顯示在這裡...</p>
+            </div>
+        </div>
+        
+        <!-- 日誌輸出 -->
+        <div class="test-section">
+            <h3><i class="fas fa-terminal"></i> 日誌輸出</h3>
+            <div class="result-box" id="log-output">
+                <div class="log-entry">
+                    <span class="status-indicator status-info"></span>
+                    <span class="text-muted">系統就緒，等待測試...</span>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button class="btn btn-outline-secondary btn-test" onclick="clearLogs()">
+                    <i class="fas fa-trash"></i> 清空日誌
+                </button>
+                <button class="btn btn-outline-primary btn-test" onclick="exportLogs()">
+                    <i class="fas fa-download"></i> 導出日誌
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 全局變量
+        let currentOrderId = 1;
+        let currentBaristaId = 1;
+        
+        // 日誌函數
+        function log(message, type = 'info') {
+            const logOutput = document.getElementById('log-output');
+            const timestamp = new Date().toLocaleTimeString('zh-TW');
+            
+            let statusClass = 'status-info';
+            let statusText = 'ℹ️';
+            
+            switch(type) {
+                case 'success':
+                    statusClass = 'status-success';
+                    statusText = '✅';
+                    break;
+                case 'error':
+                    statusClass = 'status-error';
+                    statusText = '❌';
+                    break;
+                case 'warning':
+                    statusClass = 'status-warning';
+                    statusText = '⚠️';
+                    break;
+            }
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="status-indicator ${statusClass}"></span>
+                <span class="text-muted">[${timestamp}]</span>
+                <span>${statusText} ${message}</span>
+            `;
+            
+            logOutput.prepend(logEntry);
+            
+            // 限制日誌數量
+            const entries = logOutput.querySelectorAll('.log-entry');
+            if (entries.length > 50) {
+                entries[entries.length - 1].remove();
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('log-output').innerHTML = `
+                <div class="log-entry">
+                    <span class="status-indicator status-info"></span>
+                    <span class="text-muted">日誌已清空</span>
+                </div>
+            `;
+            log('日誌已清空', 'info');
+        }
+        
+        function exportLogs() {
+            const logs = document.getElementById('log-output').innerText;
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'smart-allocation-logs.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            log('日誌已導出', 'success');
+        }
+        
+        // 獲取CSRF Token
+        function getCsrfToken() {
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1];
+            
+            return cookieValue || '';
+        }
+        
+        // API調用函數
+        async function callAPI(url, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                };
+                
+                if (data && (method === 'POST' || method === 'PUT')) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                log(`調用API: ${method} ${url}`, 'info');
+                
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log(`API響應: ${result.message || '成功'}`, result.success ? 'success' : 'error');
+                
+                return result;
+                
+            } catch (error) {
+                log(`API錯誤: ${error.message}`, 'error');
+                return {
+                    success: false,
+                    message: error.message,
+                    data: null
+                };
+            }
+        }
+        
+        // 系統狀態函數
+        async function loadSystemStatus() {
+            const result = await callAPI('/eshop/api/system/status/');
+            
+            if (result.success) {
+                const data = result.data;
+                document.getElementById('system-status-result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                // 更新指標
+                if (data.system_status) {
+                    const sys = data.system_status;
+                    document.getElementById('total-baristas').textContent = sys.total_baristas || 0;
+                    document.getElementById('active-baristas').textContent = sys.active_baristas || 0;
+                    document.getElementById('utilization-rate').textContent = 
+                        `${Math.round(sys.utilization_rate || 0)}%`;
+                    document.getElementById('available-capacity').textContent = 
+                        sys.available_capacity || 0;
+                }
+            }
+        }
+        
+        async function loadPerformanceMetrics() {
+            const result = await callAPI('/eshop/api/system/status/');
+            
+            if (result.success && result.data.performance_metrics) {
+                const metrics = result.data.performance_metrics;
+                let html = '<h5>性能指標</h5><ul>';
+                
+                html += `<li>平均製作時間: ${metrics.average_preparation_time} 分鐘</li>`;
+                html += `<li>每小時訂單數: ${metrics.orders_per_hour}</li>`;
+                html += `<li>趨勢: ${metrics.utilization_trend}</li>`;
+                html += `<li>等待訂單: ${metrics.waiting_orders}</li>`;
+                
+                if (metrics.bottlenecks && metrics.bottlenecks.length > 0) {
+                    html += `<li>瓶頸: ${metrics.bottlenecks.join(', ')}</li>`;
+                }
+                
+                html += '</ul>';
+                document.getElementById('system-status-result').innerHTML = html;
+            }
+        }
+        
+        // 員工工作負載函數
+        async function loadBaristaWorkload() {
+            const result = await callAPI('/eshop/api/queue/barista-workload/');
+            
+            if (result.success) {
+                const data = result.data;
+                document.getElementById('workload-result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                // 渲染員工列表
+                renderBaristaList(data.barista_details || []);
+                
+                // 渲染建議
+                renderSuggestions(data.recommendations || []);
+            }
+        }
+        
+        function renderBaristaList(baristas) {
+            const container = document.getElementById('barista-list');
+            
+            if (!baristas || baristas.length === 0) {
+                container.innerHTML = '<p class="text-muted">沒有員工數據</p>';
+                return;
+            }
+            
+            let html = '<div class="row">';
+            
+            baristas.forEach(barista => {
+                const loadPercent = Math.min(100, (barista.current_load / barista.max_concurrent) * 100);
+                const progressColor = loadPercent > 80 ? 'bg-danger' : loadPercent > 60 ? 'bg-warning' : 'bg-success';
+                const statusClass = barista.is_available ? 'active' : 'inactive';
+                const statusText = barista.is_available ? '在崗' : '離崗';
+                const statusColor = barista.is_available ? 'success' : 'danger';
+                
+                html += `
+                    <div class="col-md-6">
+                        <div class="barista-card ${statusClass}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user"></i> ${barista.name}
+                                </h5>
+                                <span class="badge bg-${statusColor}">${statusText}</span>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>工作負載</small>
+                                    <small>${barista.current_load}/${barista.max_concurrent} 杯</small>
+                                </div>
+                                <div class="progress progress-thin">
+                                    <div class="progress-bar ${progressColor}" 
+                                         role="progressbar" 
+                                         style="width: ${loadPercent}%"
+                                         aria-valuenow="${loadPercent}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <div class="text-muted small">可用容量</div>
+                                        <div class="h5 ${barista.available_slots > 0 ? 'text-success' : 'text-danger'}">
+                                            ${barista.available_slots}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <div class="text-muted small">效率因子</div>
+                                        <div class="h5">${barista.efficiency_factor.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${barista.current_orders && barista.current_orders.length > 0 ? `
+                                <div class="mt-2">
+                                    <small class="text-muted">當前訂單:</small>
+                                    <div class="mt-1">
+                                        ${barista.current_orders.map(order => `
+                                            <span class="badge bg-light text-dark me-1">
+                                                #${order.order_id} (${order.coffee_count}杯)
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function renderSuggestions(suggestions) {
+            const container = document.getElementById('suggestions-list');
+            
+            if (!suggestions || suggestions.length === 0) {
+                container.innerHTML = '<p class="text-muted">暫無建議</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            suggestions.forEach(suggestion => {
+                const priorityClass = suggestion.priority || 'low';
+                const icon = suggestion.priority === 'high' ? 'fa-exclamation-circle' : 
+                            suggestion.priority === 'medium' ? 'fa-info-circle' : 'fa-lightbulb';
+                
+                html += `
+                    <div class="suggestion-item ${priorityClass}">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="fas ${icon}"></i>
+                            </div>
+                            <div>
+                                <strong>${suggestion.title || '建議'}</strong>
+                                <p class="mb-1">${suggestion.message}</p>
+                                ${suggestion.barista_name ? `
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> 推薦: ${suggestion.barista_name}
+                                    </small>
+                                ` : ''}
+                                ${suggestion.estimated_time ? `
+                                    <small class="text-muted ms-2">
+                                        <i class="fas fa-clock"></i> 預計: ${suggestion.estimated_time}分鐘
+                                    </small>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 智能建議函數
+        async function loadRecommendations() {
+            const orderId = document.getElementById('order-id').value;
+            const result = await callAPI(`/eshop/api/orders/${orderId}/recommendations/`);
+            
+            if (result.success) {
+                const data = result.data;
+                document.getElementById('recommendations-result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                if (data.recommendations) {
+                    renderSuggestions(data.recommendations);
+                }
+            }
+        }
+        
+        async function optimizeQueue() {
+            const result = await callAPI('/eshop/api/queue/optimize/', 'POST');
+            
+            if (result.success) {
+                const data = result.data;
+                let html = '<h5>優化結果</h5><ul>';
+                
+                html += `<li>優化訂單數: ${data.orders_optimized}</li>`;
+                html += `<li>節省時間: ${data.time_savings} 分鐘</li>`;
+                html += `<li>負載均衡: ${data.load_balanced ? '是' : '否'}</li>`;
+                html += `<li>生成建議: ${data.recommendations_generated}</li>`;
+                
+                html += '</ul>';
+                document.getElementById('recommendations-result').innerHTML = html;
+                
+                // 重新加載工作負載
+                setTimeout(() => loadBaristaWorkload(), 1000);
+            }
+        }
+        
+        // 模擬新訂單
+        async function simulateNewOrder() {
+            log('模擬新訂單...', 'info');
+            
+            // 這裡可以擴展為實際創建測試訂單
+            // 目前只是顯示消息
+            document.getElementById('workload-result').innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    模擬訂單功能需要擴展以創建實際測試訂單。
+                    目前請使用現有訂單進行測試。
+                </div>
+            `;
+        }
+        
+        // API測試函數
+        async function testAssignOrder() {
+            const orderId = document.getElementById('order-id').value;
+            const baristaId = document.getElementById('barista-id').value;
+            
+            const result = await callAPI(`/eshop/api/orders/${orderId}/assign/`, 'POST', {
+                barista_id: parseInt(baristaId)
+            });
+            
+            if (result.success) {
+                const data = result.data;
+                let html = '<h5>分配結果</h5><ul>';
+                
+                html += `<li>訂單ID: ${data.order_id}</li>`;
+                html += `<li>推薦員工: ${data.recommended_barista_name}</li>`;
+                html += `<li>分配策略: ${data.allocation_strategy}</li>`;
+                html += `<li>預計時間: ${data.estimated_time}分鐘</li>`;
+                
+                html += '</ul>';
+                document.getElementById('api-test-result').innerHTML = html;
+            }
+        }
+        
+        async function testUpdateBaristaStatus() {
+            const baristaId = document.getElementById('barista-id').value;
+            
+            const result = await callAPI(`/eshop/api/baristas/${baristaId}/update-status/`, 'POST', {
+                is_active: true,
+                efficiency_factor: 0.95,
+                max_concurrent_orders: 2
+            });
+            
+            if (result.success) {
+                const data = result.data;
+                let html = '<h5>員工狀態更新結果</h5><ul>';
+                
+                html += `<li>員工ID: ${data.barista_id}</li>`;
+                html += `<li>姓名: ${data.name}</li>`;
+                html += `<li>在崗狀態: ${data.is_active ? '是' : '否'}</li>`;
+                html += `<li>效率因子: ${data.efficiency_factor}</li>`;
+                html += `<li>最大並行訂單: ${data.max_concurrent_orders}</li>`;
+                
+                html += '</ul>';
+                document.getElementById('api-test-result').innerHTML = html;
+            }
+        }
+        
+        async function testAllAPIs() {
+            log('開始運行所有API測試...', 'info');
+            
+            // 測試系統狀態
+            await loadSystemStatus();
+            
+            // 測試工作負載
+            await loadBaristaWorkload();
+            
+            // 測試優化隊列
+            await optimizeQueue();
+            
+            // 測試分配訂單
+            await testAssignOrder();
+            
+            log('所有API測試完成', 'success');
+        }
+        
+        // 頁面加載時自動運行一些測試
+        document.addEventListener('DOMContentLoaded', function() {
+            log('智能分配系統測試頁面已加載', 'success');
+            
+            // 自動加載系統狀態
+            setTimeout(() => {
+                loadSystemStatus();
+                loadBaristaWorkload();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

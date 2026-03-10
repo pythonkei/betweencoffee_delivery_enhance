@@ -174,6 +174,11 @@ class QueueManager {
                         ${this.formatRemainingTime(remainingSeconds)}
                     </td>
                     <td>
+                        <div class="barista-info mb-1">
+                            <span class="badge badge-info">
+                                <i class="fas fa-user"></i> ${order.barista || '未分配'}
+                            </span>
+                        </div>
                         <button class="btn btn-sm btn-success mark-ready-btn">
                             <i class="fas fa-check"></i> 已就緒
                         </button>

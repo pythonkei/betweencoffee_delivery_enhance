@@ -1,157 +1,81 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
-測試前端訊息顯示修復和日誌警告修復
+測試修正效果驗證腳本
 """
 
 import os
-import re
+import sys
+import django
 
-def check_frontend_fixes():
-    """檢查前端修復"""
-    print("🔍 檢查前端修復...")
+# 設置Django環境
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'betweencoffee_delivery.settings')
+django.setup()
+
+from eshop.models import OrderModel, CoffeeQueue
+from eshop.utils.order_item_processor import OrderItemProcessor
+import pytz
+from django.utils import timezone
+
+def test_fixes():
+    """測試修正效果"""
+    print("=== 測試修正效果 ===")
     
-    files_to_check = [
-        "static/js/staff-order-management/preparing-orders-renderer.js",
-        "static/js/staff-order-management/ready-orders-renderer.js"
-    ]
+    hk_tz = pytz.timezone('Asia/Hong_Kong')
+    now = timezone.now()
     
-    issues_found = []
+    # 查找一個純咖啡豆訂單
+    beans_only_order = OrderModel.objects.filter(
+        items__type='bean'
+    ).exclude(
+        items__type='coffee'
+    ).first()
     
-    for file_path in files_to_check:
-        if not os.path.exists(file_path):
-            print(f"❌ 文件不存在: {file_path}")
-            continue
-            
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-            
-        # 檢查是否還有 this.showToast() 調用
-        show_toast_patterns = [
-            r'this\.showToast\(`❌ 操作失敗',
-            r'this\.showToast\(`✅ 成功',
-            r'this\.showToast\(`🔄 刷新中'
-        ]
+    if beans_only_order:
+        print(f"1. 檢查純咖啡豆訂單 #{beans_only_order.id}:")
         
-        for pattern in show_toast_patterns:
-            matches = re.findall(pattern, content)
-            if matches:
-                issues_found.append(f"{file_path}: 發現 {len(matches)} 個 showToast() 調用")
-                
-        # 檢查是否有註釋說明
-        if "不再显示错误消息，由 queue-manager.js 统一处理" in content:
-            print(f"✅ {file_path}: 已添加修復註釋")
-        else:
-            issues_found.append(f"{file_path}: 缺少修復註釋")
-    
-    if issues_found:
-        print("❌ 前端修復問題:")
-        for issue in issues_found:
-            print(f"  - {issue}")
-        return False
+        # 使用處理器準備數據
+        order_data = OrderItemProcessor.prepare_ready_order_data(beans_only_order, now, hk_tz)
+        print(f"   是否為純咖啡豆訂單: {order_data.get('is_beans_only')}")
+        print(f"   咖啡師: '{order_data.get('barista')}' (應該為空字符串)")
     else:
-        print("✅ 前端修復檢查通過")
-        return True
-
-def check_models_logging_fix():
-    """檢查 models.py 日誌修復"""
-    print("\n🔍 檢查 models.py 日誌修復...")
+        print("1. 沒有找到純咖啡豆訂單")
     
-    file_path = "eshop/models.py"
+    print()
     
-    if not os.path.exists(file_path):
-        print(f"❌ 文件不存在: {file_path}")
-        return False
+    # 查找一個混合訂單（有咖啡的訂單）
+    mixed_order = OrderModel.objects.filter(
+        items__type='coffee'
+    ).first()
     
-    with open(file_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-    
-    # 檢查是否已將 logger.warning 改為 logger.debug
-    warning_pattern = r'logger\.warning\(f"咖啡商品.*包含重量选项'
-    debug_pattern = r'logger\.debug\(f"咖啡商品.*包含重量选项'
-    
-    warning_matches = re.findall(warning_pattern, content)
-    debug_matches = re.findall(debug_pattern, content)
-    
-    if warning_matches:
-        print(f"❌ 發現 {len(warning_matches)} 個 logger.warning() 調用")
-        return False
-    elif debug_matches:
-        print(f"✅ 已將 logger.warning() 改為 logger.debug()")
-        return True
+    if mixed_order:
+        print(f"2. 檢查混合訂單 #{mixed_order.id}:")
+        
+        # 使用處理器準備數據
+        order_data = OrderItemProcessor.prepare_ready_order_data(mixed_order, now, hk_tz)
+        print(f"   是否為純咖啡豆訂單: {order_data.get('is_beans_only')}")
+        print(f"   咖啡師: '{order_data.get('barista')}'")
     else:
-        print("⚠️ 未找到相關日誌調用，可能代碼已更改")
-        return True
-
-def check_queue_manager():
-    """檢查 queue-manager.js 是否保持不變"""
-    print("\n🔍 檢查 queue-manager.js...")
+        print("2. 沒有找到混合訂單")
     
-    file_path = "static/js/staff-order-management/queue-manager.js"
+    print()
+    print("=== CSS修正測試 ===")
+    print("已修正 staff_order_management.css 中的 .badge-success 規則:")
+    print("  修正前: background-color: #fff !important; color: black !important;")
+    print("  修正後: background-color: #28a745 !important; color: white !important;")
+    print()
+    print("現在'已就緒: 下午xx:xx'徽章應該顯示綠色背景白色文字")
     
-    if not os.path.exists(file_path):
-        print(f"⚠️ 文件不存在: {file_path}")
-        return True  # 可能在其他位置
-    
-    with open(file_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-    
-    # 檢查是否有 showToast 調用
-    show_toast_pattern = r'this\.showToast\('
-    matches = re.findall(show_toast_pattern, content)
-    
-    if matches:
-        print(f"✅ queue-manager.js 有 {len(matches)} 個 showToast() 調用（應該保持不變）")
-        return True
+    # 檢查CSS文件
+    css_file = "static/css/staff_order_management.css"
+    if os.path.exists(css_file):
+        with open(css_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+            if "background-color: #28a745 !important" in content:
+                print(f"✅ CSS文件 {css_file} 已正確修正")
+            else:
+                print(f"❌ CSS文件 {css_file} 可能未正確修正")
     else:
-        print("⚠️ queue-manager.js 沒有 showToast() 調用")
-        return True
-
-def create_test_scenario():
-    """創建測試場景"""
-    print("\n📋 測試場景:")
-    print("1. 前端訊息顯示修復:")
-    print("   - preparing-orders-renderer.js: handleMarkAsReady() 不再顯示錯誤訊息")
-    print("   - ready-orders-renderer.js: handleMarkAsCollected() 不再顯示錯誤訊息")
-    print("   - queue-manager.js: 統一處理所有訊息顯示")
-    
-    print("\n2. 日誌警告修復:")
-    print("   - models.py: logger.warning() 改為 logger.debug()")
-    print("   - 避免終端機無限輸出警告")
-    
-    print("\n3. 預期效果:")
-    print("   ✅ 點擊按鈕只顯示一個訊息（來自 queue-manager.js）")
-    print("   ✅ 不會出現多重訊息混亂")
-    print("   ✅ 終端機不再無限輸出警告")
-    print("   ✅ 所有核心功能正常")
-
-def main():
-    print("=== 前端訊息顯示和日誌警告修復測試 ===\n")
-    
-    # 檢查修復
-    frontend_ok = check_frontend_fixes()
-    logging_ok = check_models_logging_fix()
-    queue_manager_ok = check_queue_manager()
-    
-    # 創建測試場景
-    create_test_scenario()
-    
-    # 總結
-    print("\n=== 測試總結 ===")
-    
-    if frontend_ok and logging_ok and queue_manager_ok:
-        print("✅ 所有修復檢查通過")
-        print("\n🎉 修復完成！")
-        print("1. 前端訊息顯示已統一管理")
-        print("2. 日誌警告級別已調整")
-        print("3. 系統準備就緒")
-    else:
-        print("❌ 發現問題，需要進一步修復")
-        if not frontend_ok:
-            print("  - 前端修復不完整")
-        if not logging_ok:
-            print("  - 日誌修復不完整")
-        if not queue_manager_ok:
-            print("  - queue-manager.js 可能有問題")
+        print(f"⚠️ CSS文件 {css_file} 不存在")
 
 if __name__ == "__main__":
-    main()
+    test_fixes()

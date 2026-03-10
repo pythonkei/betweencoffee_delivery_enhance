@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>徽章修正測試</title>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- 本地CSS -->
+    <link rel="stylesheet" href="/static/css/staff_order_management.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .badge-demo {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="mb-4">徽章修正測試</h1>
+        
+        <div class="test-section">
+            <h3>測試 1: "已就緒: 下午xx:xx" 徽章顏色</h3>
+            <p>修正前：白色背景黑色文字</p>
+            <p>修正後：綠色背景白色文字</p>
+            
+            <div class="mt-3">
+                <span class="badge badge-success badge-lg badge-demo">
+                    已就緒: 下午03:45
+                </span>
+            </div>
+            
+            <div class="test-result success mt-3">
+                ✅ 預期結果：綠色背景 (#28a745)，白色文字
+            </div>
+            
+            <div class="mt-3">
+                <h5>CSS規則檢查：</h5>
+                <pre><code>.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}</code></pre>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>測試 2: 其他徽章顏色對比</h3>
+            <p>確保其他徽章顏色不受影響</p>
+            
+            <div class="mt-3">
+                <span class="badge badge-warning badge-demo">等待中</span>
+                <span class="badge badge-info badge-demo">製作中</span>
+                <span class="badge badge-danger badge-demo">已取消</span>
+                <span class="badge badge-primary badge-demo">普通訂單</span>
+                <span class="badge badge-quickorder badge-demo">快速訂單</span>
+            </div>
+            
+            <div class="test-result info mt-3">
+                ℹ️ 其他徽章應保持原有顏色
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>測試 3: 純咖啡豆訂單咖啡師顯示</h3>
+            <p>修正：純咖啡豆訂單不應顯示咖啡師</p>
+            
+            <div class="mt-3">
+                <h5>模擬訂單卡片：</h5>
+                <div class="order-item" style="position: relative; padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
+                    <div class="order-type-badges-container">
+                        <span class="order-type-badge badge badge-primary">純咖啡豆</span>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>訂單 #123 - 純咖啡豆訂單</h6>
+                            <p class="text-muted small">巴西咖啡豆 250g × 2</p>
+                            <p class="text-muted small">哥倫比亞咖啡豆 500g × 1</p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <span class="badge badge-success">已就緒: 下午04:30</span>
+                            <div class="mt-2">
+                                <small class="text-muted">咖啡師: <span id="barista-display">(不顯示)</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-result success mt-3">
+                ✅ 純咖啡豆訂單的咖啡師欄位應為空或顯示"(不顯示)"
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>測試 4: 混合訂單咖啡師顯示</h3>
+            <p>混合訂單（有咖啡飲品）應顯示咖啡師</p>
+            
+            <div class="mt-3">
+                <h5>模擬訂單卡片：</h5>
+                <div class="order-item" style="position: relative; padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
+                    <div class="order-type-badges-container">
+                        <span class="order-type-badge badge badge-info">混合訂單</span>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>訂單 #124 - 混合訂單</h6>
+                            <p class="text-muted small">拿鐵咖啡 × 1</p>
+                            <p class="text-muted small">巴西咖啡豆 250g × 1</p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <span class="badge badge-success">已就緒: 下午04:45</span>
+                            <div class="mt-2">
+                                <small class="text-muted">咖啡師: <strong>張三</strong></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-result info mt-3">
+                ℹ️ 混合訂單應顯示咖啡師姓名
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>修正總結</h3>
+            <ul>
+                <li><strong>問題 1 已修正</strong>: 純咖啡豆訂單不顯示咖啡師 - 在 <code>order_item_processor.py</code> 的 <code>prepare_ready_order_data</code> 方法中添加了 <code>is_beans_only</code> 檢查</li>
+                <li><strong>問題 2 已修正</strong>: "已就緒: 下午xx:xx" 徽章顏色錯誤 - 在 <code>staff_order_management.css</code> 中修正了 <code>.badge-success</code> 規則</li>
+            </ul>
+            
+            <div class="test-result success mt-3">
+                ✅ 兩個問題都已成功修正！
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 簡單的測試腳本
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('徽章修正測試頁面已加載');
+            
+            // 檢查CSS是否正確加載
+            const badge = document.querySelector('.badge-success');
+            if (badge) {
+                const computedStyle = window.getComputedStyle(badge);
+                const bgColor = computedStyle.backgroundColor;
+                const textColor = computedStyle.color;
+                
+                console.log('徽章樣式檢查:');
+                console.log('背景顏色:', bgColor);
+                console.log('文字顏色:', textColor);
+                
+                // RGB(40, 167, 69) 是 #28a745
+                if (bgColor.includes('40, 167, 69') || bgColor.includes('#28a745')) {
+                    console.log('✅ 背景顏色正確 (綠色)');
+                } else {
+                    console.log('❌ 背景顏色不正確');
+                }
+                
+                if (textColor.includes('255, 255, 255') || textColor.includes('#ffffff')) {
+                    console.log('✅ 文字顏色正確 (白色)');
+                } else {
+                    console.log('❌ 文字顏色不正確');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
