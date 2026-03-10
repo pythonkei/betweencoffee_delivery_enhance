@@ -825,7 +825,7 @@ pythonkei@gmail.com, Password_123
 china mobile:
 19168604470
 
-csdn account
+csdn account (wechat)
 id:heyeahheyeah
 
 
