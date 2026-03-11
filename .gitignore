@@ -55,4 +55,5 @@ local_settings.py
 .DS_Store
 
 # Windows
-Thumbs.db
+Thumbs.db.env.backup*
+.env
