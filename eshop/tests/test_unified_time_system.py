@@ -16,13 +16,97 @@ import django
 django.setup()
 
 from eshop.models import OrderModel
-from eshop.time_utils import (
-    get_pickup_time_display_from_choice,
-    get_minutes_from_pickup_choice,
-    format_pickup_time_for_order,
-    calculate_all_quick_order_times,
-    update_order_pickup_times
-)
+from eshop.time_calculation.unified_time_service import UnifiedTimeService
+
+# 創建時間服務實例
+time_service = UnifiedTimeService()
+
+# 定義兼容函數
+def get_pickup_time_display_from_choice(choice):
+    """從選擇獲取取貨時間顯示"""
+    choice_map = {
+        '5': '5分鐘後',
+        '10': '10分鐘後',
+        '15': '15分鐘後',
+        '20': '20分鐘後',
+        '30': '30分鐘後',
+    }
+    return choice_map.get(choice, '5分鐘後')
+
+def get_minutes_from_pickup_choice(choice):
+    """從選擇獲取分鐘數"""
+    choice_map = {
+        '5': 5,
+        '10': 10,
+        '15': 15,
+        '20': 20,
+        '30': 30,
+    }
+    return choice_map.get(choice, 5)
+
+def format_pickup_time_for_order(order):
+    """為訂單格式化取貨時間"""
+    return time_service.format_pickup_time_for_order(order)
+
+def calculate_all_quick_order_times():
+    """計算所有快速訂單時間"""
+    from eshop.models import OrderModel
+    from datetime import datetime, timedelta
+    import pytz
+    
+    hk_tz = pytz.timezone('Asia/Hong_Kong')
+    now = datetime.now().astimezone(hk_tz)
+    
+    # 獲取所有快速訂單
+    quick_orders = OrderModel.objects.filter(
+        is_quick_order=True,
+        status__in=['waiting', 'preparing']
+    )
+    
+    results = []
+    for order in quick_orders:
+        try:
+            time_info = time_service.calculate_quick_order_times(order)
+            results.append({
+                'order_id': order.id,
+                'estimated_pickup_time': time_info['estimated_pickup_time'],
+                'latest_start_time': time_info['latest_start_time'],
+                'preparation_minutes': time_info['preparation_minutes']
+            })
+        except Exception as e:
+            print(f"計算訂單 {order.id} 時間失敗: {e}")
+    
+    return {
+        'success': True,
+        'count': len(results),
+        'results': results,
+        'timestamp': now.isoformat()
+    }
+
+def update_order_pickup_times(order_ids):
+    """更新訂單取貨時間"""
+    from eshop.models import OrderModel
+    
+    updated_orders = []
+    for order_id in order_ids:
+        try:
+            order = OrderModel.objects.get(id=order_id)
+            if order.is_quick_order:
+                time_info = time_service.calculate_quick_order_times(order)
+                order.estimated_pickup_time = time_info['estimated_pickup_time']
+                order.latest_start_time = time_info['latest_start_time']
+                order.save()
+                updated_orders.append(order_id)
+        except OrderModel.DoesNotExist:
+            print(f"訂單 {order_id} 不存在")
+        except Exception as e:
+            print(f"更新訂單 {order_id} 失敗: {e}")
+    
+    return {
+        'success': True,
+        'updated_orders': updated_orders,
+        'count': len(updated_orders)
+    }
 try:
     from eshop.views.queue_views import (
         process_waiting_queues,

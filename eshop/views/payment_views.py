@@ -306,10 +306,16 @@ def alipay_callback(request):
                     try:
                         from eshop.queue_manager_refactored import CoffeeQueueManager
                         queue_manager = CoffeeQueueManager()
-                        queue_item = queue_manager.add_order_to_queue(order)
+                        # 使用兼容性包裝器，返回 CoffeeQueue 對象而不是字典
+                        queue_item = queue_manager.add_order_to_queue_compatible(order)
                         
                         if queue_item:
-                            logger.info(f"✅ 訂單 {order.id} 已加入製作隊列，位置: {queue_item.position}")
+                            # 修復：queue_item 可能是字典或對象，需要檢查類型
+                            if isinstance(queue_item, dict):
+                                position = queue_item.get('position', 0)
+                                logger.info(f"✅ 訂單 {order.id} 已加入製作隊列，位置: {position}")
+                            else:
+                                logger.info(f"✅ 訂單 {order.id} 已加入製作隊列，位置: {queue_item.position}")
                         else:
                             logger.warning(f"⚠️ 訂單 {order.id} 加入隊列失敗")
                     except Exception as queue_error:

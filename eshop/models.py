@@ -1224,7 +1224,12 @@ class OrderModel(models.Model):
                             # 将订单加入队列
                             queue_item = queue_manager.add_order_to_queue(self)
                             if queue_item:
-                                logger.info(f"订单 {self.id} 已加入制作队列，位置: {queue_item.position}")
+                                # 修复：queue_item可能是字典或对象，需要检查类型
+                                if isinstance(queue_item, dict):
+                                    position = queue_item.get('position', 0)
+                                    logger.info(f"订单 {self.id} 已加入制作队列，位置: {position}")
+                                else:
+                                    logger.info(f"订单 {self.id} 已加入制作队列，位置: {queue_item.position}")
                             else:
                                 logger.error(f"订单 {self.id} 加入队列失败")
                     except Exception as e:
