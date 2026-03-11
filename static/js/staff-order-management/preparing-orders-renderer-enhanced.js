@@ -366,6 +366,7 @@ class EnhancedPreparingOrdersRenderer {
         const hasCoffee = order.has_coffee || coffeeCount > 0;
         const hasBeans = order.has_beans || beanCount > 0;
         const isMixedOrder = order.is_mixed_order || (hasCoffee && hasBeans);
+        const isBeansOnly = order.is_beans_only || (hasBeans && !hasCoffee);
         
         // ====== 訂單類型徽章 ======
         let orderTypeBadges = '';
@@ -391,8 +392,21 @@ class EnhancedPreparingOrdersRenderer {
         }
         
         // ====== 咖啡師信息 ======
-        const baristaName = order.barista || '未分配';
-        const baristaClass = order.barista ? 'badge-dark' : 'badge-secondary';
+        // 純咖啡豆訂單不顯示咖啡師
+        let baristaName = '';
+        let baristaClass = '';
+        let baristaHTML = '';
+        
+        if (!isBeansOnly) {
+            // 非純咖啡豆訂單：顯示咖啡師
+            baristaName = order.barista || '未分配';
+            baristaClass = order.barista ? 'badge-barista' : 'badge-no-barista';
+            baristaHTML = `
+                <span class="badge ${baristaClass} ml-2">
+                    <i class="fas fa-user mr-1"></i>${baristaName}
+                </span>
+            `;
+        }
         
         // ====== 倒計時顯示 ======
         let countdownDisplay = '';
@@ -416,7 +430,7 @@ class EnhancedPreparingOrdersRenderer {
                 }
             }
             countdownDisplay = `
-                <span class="badge badge-success ml-1">
+                <span class="badge badge-completed ml-1">
                     <i class="fas fa-check mr-1"></i>${completedTimeDisplay}
                 </span>
             `;
@@ -424,21 +438,23 @@ class EnhancedPreparingOrdersRenderer {
         
         // ====== 合併徽章顯示 ======
         let combinedBadge = '';
-        if (countdownDisplay) {
+        if (countdownDisplay && baristaHTML) {
             combinedBadge = `
                 <div class="d-flex align-items-center mt-2">
                     ${countdownDisplay}
-                    <span class="badge ${baristaClass} ml-2">
-                        <i class="fas fa-user mr-1"></i>${baristaName}
-                    </span>
+                    ${baristaHTML}
                 </div>
             `;
-        } else {
+        } else if (countdownDisplay) {
             combinedBadge = `
                 <div class="d-flex align-items-center mt-2">
-                    <span class="badge ${baristaClass}">
-                        <i class="fas fa-user mr-1"></i>${baristaName}
-                    </span>
+                    ${countdownDisplay}
+                </div>
+            `;
+        } else if (baristaHTML) {
+            combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${baristaHTML}
                 </div>
             `;
         }
@@ -634,8 +650,8 @@ class EnhancedPreparingOrdersRenderer {
                 
                 countdownText.textContent = completedTimeDisplay;
                 badge.classList.remove('badge-secondary');
-                badge.classList.add('badge-success');
-                
+                badge.classList.add('badge-completed');
+
                 const icon = badge.querySelector('i');
                 if (icon) {
                     icon.className = 'fas fa-check mr-1';
@@ -690,7 +706,7 @@ class EnhancedPreparingOrdersRenderer {
             
             countdownText.textContent = completedTimeDisplay;
             badge.classList.remove('badge-secondary');
-            badge.classList.add('badge-success');
+            badge.classList.add('badge-completed');
             
             const icon = badge.querySelector('i');
             if (icon) {
@@ -721,7 +737,7 @@ class EnhancedPreparingOrdersRenderer {
                 
                 countdownText.textContent = completedTimeDisplay;
                 badge.classList.remove('badge-secondary');
-                badge.classList.add('badge-success');
+                badge.classList.add('badge-completed');
                 
                 const icon = badge.querySelector('i');
                 if (icon) {

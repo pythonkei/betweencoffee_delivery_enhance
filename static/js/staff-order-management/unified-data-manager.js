@@ -62,7 +62,9 @@ class UnifiedDataManager {
                 headers: {
                     'Cache-Control': 'no-cache',
                     'Pragma': 'no-cache'
-                }
+                },
+                // 添加超時設置
+                signal: AbortSignal.timeout(10000) // 10秒超時
             });
             
             if (!response.ok) {
@@ -115,15 +117,25 @@ class UnifiedDataManager {
             this.hasError = true;
             this.errorCount++;
             
-            // 觸發錯誤事件
-            this.dispatchGlobalEvent('error', {
-                error: error.message,
-                timestamp: new Date().toISOString(),
-                retryCount: retryCount,
-                errorCount: this.errorCount
-            });
+            // ✅ 新增：避免重複顯示相同錯誤訊息
+            const errorMessage = error.message;
+            const now = Date.now();
+            const lastErrorTime = this.lastErrorTime || 0;
+            const errorCooldown = 5000; // 5秒內不重複顯示相同錯誤
             
-            // ✅ 新增：智能重試機制
+            // 觸發錯誤事件（但避免重複）
+            if (now - lastErrorTime > errorCooldown || retryCount === 0) {
+                this.dispatchGlobalEvent('error', {
+                    error: errorMessage,
+                    timestamp: new Date().toISOString(),
+                    retryCount: retryCount,
+                    errorCount: this.errorCount,
+                    isNetworkError: errorMessage.includes('Network') || errorMessage.includes('timeout')
+                });
+                this.lastErrorTime = now;
+            }
+            
+            // ✅ 新增：智能重試機制（優化）
             if (retryCount < this.maxRetryCount) {
                 const delay = this.calculateRetryDelay(retryCount);
                 console.log(`🔄 ${delay/1000}秒後重試 (${retryCount + 1}/${this.maxRetryCount})`);
@@ -134,9 +146,16 @@ class UnifiedDataManager {
             } else {
                 console.error(`❌ 已達到最大重試次數 (${this.maxRetryCount})`);
                 this.dispatchGlobalEvent('max_retries_reached', {
-                    error: error.message,
+                    error: errorMessage,
                     retryCount: retryCount
                 });
+                
+                // 達到最大重試次數後，等待更長時間再重試
+                setTimeout(() => {
+                    console.log('🔄 長時間等待後重新嘗試連接...');
+                    this.errorCount = 0; // 重置錯誤計數
+                    this.loadUnifiedData(true);
+                }, 30000); // 30秒後再試
             }
             
             return false;
@@ -407,10 +426,22 @@ class UnifiedDataManager {
             }
         });
         
-        // 網絡狀態恢復
+        // 網絡狀態恢復（防抖處理）
+        let networkRecoveryTimeout = null;
         window.addEventListener('online', () => {
-            console.log('🌐 網絡恢復，刷新數據');
-            this.loadUnifiedData(true);
+            console.log('🌐 網絡恢復，準備刷新數據...');
+            
+            // 清除之前的定時器
+            if (networkRecoveryTimeout) {
+                clearTimeout(networkRecoveryTimeout);
+            }
+            
+            // 等待1秒確保網絡穩定，然後刷新數據
+            networkRecoveryTimeout = setTimeout(() => {
+                console.log('🔄 網絡穩定，開始刷新數據');
+                this.loadUnifiedData(true);
+                networkRecoveryTimeout = null;
+            }, 1000);
         });
     }
     
@@ -440,6 +471,7 @@ class UnifiedDataManager {
      */
     startAutoRefresh() {
         let refreshInterval = 10000; // 默認10秒
+        let autoRefreshTimer = null;
         
         const refreshFunction = () => {
             if (this.isLoading) {
@@ -466,11 +498,14 @@ class UnifiedDataManager {
         };
         
         // 使用setInterval但動態調整間隔
-        setInterval(() => {
+        autoRefreshTimer = setInterval(() => {
             refreshFunction();
         }, refreshInterval);
         
         console.log(`⏰ 啟動智能自動刷新：初始間隔 ${refreshInterval/1000}秒`);
+        
+        // 保存定時器引用以便清理
+        this.autoRefreshTimer = autoRefreshTimer;
     }
     
     /**
@@ -526,6 +561,14 @@ class UnifiedDataManager {
      */
     cleanup() {
         console.log('🔄 清理統一數據管理器...');
+        
+        // 清理自動刷新定時器
+        if (this.autoRefreshTimer) {
+            clearInterval(this.autoRefreshTimer);
+            this.autoRefreshTimer = null;
+            console.log('🗑️ 清理自動刷新定時器');
+        }
+        
         this.clearAllListeners();
         this.currentData = null;
         console.log('✅ 統一數據管理器已清理');

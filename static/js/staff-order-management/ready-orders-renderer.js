@@ -293,8 +293,21 @@ class DynamicReadyOrdersRenderer {
         }
         
         // ====== 咖啡師信息 ======
-        const baristaName = order.barista || '未分配';
-        const baristaClass = order.barista ? 'badge-success text-white' : 'badge-secondary text-white';
+        // 純咖啡豆訂單不顯示咖啡師
+        let baristaName = '';
+        let baristaClass = '';
+        let baristaHTML = '';
+        
+        if (!isBeansOnly) {
+            // 非純咖啡豆訂單：顯示咖啡師
+            baristaName = order.barista || '未分配';
+            baristaClass = order.barista ? 'badge-barista' : 'badge-no-barista';
+            baristaHTML = `
+                <span class="badge ${baristaClass} ml-2">
+                    <i class="fas fa-user mr-1"></i>${baristaName}
+                </span>
+            `;
+        }
         
         // ====== 咖啡杯數徽章 ======
         let coffeeCountBadge = '';
@@ -322,17 +335,13 @@ class DynamicReadyOrdersRenderer {
             combinedBadge = `
                 <div class="d-flex align-items-center mt-2">
                     ${readyTimeBadgeHTML}
-                    <span class="badge ${baristaClass} ml-2">
-                        <i class="fas fa-user mr-1"></i>${baristaName}
-                    </span>
+                    ${baristaHTML}
                 </div>
             `;
-        } else {
+        } else if (baristaHTML) {
             combinedBadge = `
                 <div class="d-flex align-items-center mt-2">
-                    <span class="badge ${baristaClass}">
-                        <i class="fas fa-user mr-1"></i>${baristaName}
-                    </span>
+                    ${baristaHTML}
                 </div>
             `;
         }

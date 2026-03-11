@@ -242,8 +242,21 @@ class DynamicCompletedOrdersRenderer {
         const waitBadgeClass = isBeansOnly ? 'badge-warning' : 'badge-light';
         
         // ====== 咖啡師信息 ======
-        const baristaName = order.barista || '未分配';
-        const baristaClass = order.barista ? 'badge-success text-white' : 'badge-secondary text-white';
+        // 純咖啡豆訂單不顯示咖啡師
+        let baristaName = '';
+        let baristaClass = '';
+        let baristaHTML = '';
+        
+        if (!isBeansOnly) {
+            // 非純咖啡豆訂單：顯示咖啡師
+            baristaName = order.barista || '未分配';
+            baristaClass = order.barista ? 'badge-barista' : 'badge-no-barista';
+            baristaHTML = `
+                <span class="badge ${baristaClass} ml-2">
+                    <i class="fas fa-user mr-1"></i>${baristaName}
+                </span>
+            `;
+        }
         
         // ====== 咖啡杯數徽章 ======
         let coffeeCountBadge = '';
@@ -273,14 +286,20 @@ class DynamicCompletedOrdersRenderer {
             </span>
         `;
         
-        combinedBadge = `
-            <div class="d-flex align-items-center mt-2">
-                ${extractedBadge}
-                <span class="badge ${baristaClass} ml-2">
-                    <i class="fas fa-user mr-1"></i>${baristaName}
-                </span>
-            </div>
-        `;
+        if (baristaHTML) {
+            combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${extractedBadge}
+                    ${baristaHTML}
+                </div>
+            `;
+        } else {
+            combinedBadge = `
+                <div class="d-flex align-items-center mt-2">
+                    ${extractedBadge}
+                </div>
+            `;
+        }
         
         // ====== 构建订单HTML ======
         orderDiv.innerHTML = `

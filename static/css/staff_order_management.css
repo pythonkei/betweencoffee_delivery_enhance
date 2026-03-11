@@ -240,6 +240,30 @@
     color: white !important;
 }
 
+/* 咖啡師徽章專用樣式 - 白色幼邊框無背景色，白色圖示和文字 */
+.badge-barista {
+    background-color: transparent !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    font-weight: 400 !important;
+}
+
+.badge-barista i {
+    color: white !important;
+}
+
+/* 未分配咖啡師徽章樣式 - 同樣使用白色邊框無背景色 */
+.badge-no-barista {
+    background-color: transparent !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    font-weight: 400 !important;
+}
+
+.badge-no-barista i {
+    color: white !important;
+}
+
 /* 確保訂單卡片有足夠的padding容納左上角徽章 */
 .order-item {
     padding-top: 1.5rem !important;
@@ -1201,4 +1225,21 @@ td:contains("杯") {
 .nav-tabs .nav-link .badge-red-active,
 .nav-tabs .nav-link .badge-red-completed {
     vertical-align: middle;
+}
+
+/* ==================== 已完成徽章樣式 ==================== */
+/* 製作中訂單的已完成子標籤頁徽章 - 白色背景、黑色圖示和文字 */
+.badge-completed {
+    background-color: white !important;
+    color: #212529 !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.badge-completed i {
+    color: #212529 !important;
+}
+
+.badge-completed:hover {
+    background-color: #f8f9fa !important;
+    border-color: #adb5bd !important;
 }
