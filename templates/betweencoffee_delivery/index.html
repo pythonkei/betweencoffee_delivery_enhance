@@ -217,8 +217,9 @@
                         <div class="name-corner-v1" style="display: none;">{{ coffee.name }}</div>
                         {% if coffee.get_index_image %}
                         <a href="{% url 'coffee' coffee.id %}" class="card-link" id="svg_over">
-                            <span id="svg_over_on"><img src="{% static 'images/product_hover.svg' %}" class="noise_animation"></span>
+                            
                             <canvas id="mouse_hit"></canvas>
+                            <span id="svg_over_on"><img src="{% static 'images/product_hover.svg' %}" class="noise_animation"></span>
                             <!-- 灵活的图片容器 -->
                             <div class="coffee-image-container">
                                 <img 

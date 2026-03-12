@@ -7251,7 +7251,7 @@ button.alert:hover {
   display: none;
   z-index: 2;
   position: absolute;
-  color: #fff;
+  color: #ffffff;
   opacity: 1;
   width: 80%;
   height: 80%;
@@ -7261,12 +7261,13 @@ button.alert:hover {
 }
 
 #svg_over:hover #svg_over_on {
-  display: block;
   width: 80%;
   height: 80%;
-  object-fit: contain;
-  align-items: center;
-  justify-self: center;
+  /* object-fit: contain; */
+  /* align-items: center; */
+  /* justify-self: center; */
+  margin: auto;
+  top: 0;
 }
 
 /* #svg_over:hover #svg_over_on img {
@@ -7532,7 +7533,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 }
 
 .card-link:hover .coffee-image-container img {
-  transform: scale(1.05);
+  /* transform: scale(1.05); */
   filter: drop-shadow(0 12px 25px rgba(0,0,0,0.15));
 }
 
@@ -7546,13 +7547,14 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 #svg_over {
   position: relative;
   display: block;
-  width: 100%;
-  height: 100%;
+  /* width: 100%; */
+  /* height: 100%; */
 }
 
 #svg_over_on {
-  position: absolute;
-  top: 50%;
+  /* position: absolute; */
+  width: 100%;
+  /* top: 50%; */
   left: 0;
   right: 0;
   bottom: 0;
@@ -7563,19 +7565,20 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  object-fit: contain;
+  /* object-fit: contain; */
+  height: 100%;
 }
 
 #svg_over_on img {
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  object-fit: contain;
-  align-items: center;
-  justify-self: center;
+  /* object-fit: contain; */
+  /* align-items: center; */
+  /* justify-self: center; */
 }
 
 #mouse_hit {
@@ -7786,7 +7789,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   
   .coffee-image-container {
     min-height: 240px;
-    max-height: 360px;
+    /* max-height: 360px; */
   }
   
   .asymmetric-grid-v1 .asymmetric-item:nth-child(3n+1),

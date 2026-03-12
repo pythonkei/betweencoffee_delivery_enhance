@@ -331,7 +331,7 @@ class DynamicCompletedOrdersRenderer {
                 <p class="mb-2">
                     <strong>取餐碼:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
                     <strong>客戶:</strong> ${order.name || '顧客'} |
-                    <strong>電話:</strong> ${order.phone || ''}
+                    <strong>電話:</strong> ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone || '') : (order.phone || '')}
                 </p>
                 ${combinedBadge}
                 ${isBeansOnly ? `

@@ -373,7 +373,7 @@ class DynamicReadyOrdersRenderer {
                 <p class="mb-2">
                     <strong>取餐码:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
                     <strong>客戶:</strong> ${order.name || '顧客'}
-                    ${order.phone ? ` | <strong>電話:</strong> ${order.phone}` : ''}
+                    ${order.phone ? ` | <strong>電話:</strong> ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone) : order.phone}` : ''}
                 </p>
                 ${combinedBadge}
                 ${isBeansOnly ? `

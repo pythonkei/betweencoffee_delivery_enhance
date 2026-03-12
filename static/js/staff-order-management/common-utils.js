@@ -307,6 +307,26 @@ class CommonUtils {
     }
     
     /**
+     * 格式化電話號碼，移除香港地區碼 (+852)
+     * @param {string} phone - 電話號碼
+     * @returns {string} 格式化後的電話號碼
+     */
+    static formatPhoneNumber(phone) {
+        if (!phone) return '';
+        
+        // 移除所有空格和特殊字符
+        let cleaned = phone.toString().trim();
+        
+        // 移除香港地區碼 (+852)
+        cleaned = cleaned.replace(/^\+852/, '');
+        cleaned = cleaned.replace(/^852/, '');
+        
+        // 如果電話號碼以0開頭，保持不變
+        // 如果電話號碼以其他數字開頭，保持不變
+        return cleaned;
+    }
+    
+    /**
      * 安全設置innerHTML（防止XSS）
      * @param {HTMLElement} element - 目標元素
      * @param {string} html - HTML內容

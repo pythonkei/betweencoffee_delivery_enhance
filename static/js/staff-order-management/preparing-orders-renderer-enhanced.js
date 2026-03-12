@@ -348,7 +348,7 @@ class EnhancedPreparingOrdersRenderer {
         const orderId = order.id || order.order_id;
         const pickupCode = order.pickup_code || '';
         const name = order.name || '顧客';
-        const phone = order.phone || '';
+        const phone = window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone || '') : (order.phone || '');
         const totalPrice = order.total_price || '0.00';
         
         // 預計完成時間

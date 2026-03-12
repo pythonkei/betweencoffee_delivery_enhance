@@ -431,7 +431,7 @@ class OrderManager {
                                 <h6>基本信息</h6>
                                 <p><strong>取餐碼:</strong> ${order.pickup_code || '無'}</p>
                                 <p><strong>顧客姓名:</strong> ${order.name || '未提供'}</p>
-                                <p><strong>電話:</strong> ${order.phone || '未提供'}</p>
+                                <p><strong>電話:</strong> ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone || '') : (order.phone || '未提供')}</p>
                                 <p><strong>總價:</strong> HKD ${order.total_price || '0.00'}</p>
                                 <p><strong>支付方式:</strong> ${order.payment_method_display || order.payment_method || '未指定'}</p>
                             </div>
