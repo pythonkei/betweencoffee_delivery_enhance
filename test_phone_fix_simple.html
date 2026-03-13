@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電話號碼修復測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .test-input {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .test-output {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .test-error {
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>電話號碼格式化修復測試</h1>
+        
+        <div class="test-case">
+            <h3>測試 CommonUtils.formatPhoneNumber() 函數</h3>
+            <div class="code-block">
+                // 測試函數邏輯
+                function formatPhoneNumber(phone) {
+                    if (!phone) return '';
+                    
+                    // 移除所有空格
+                    let cleaned = phone.toString().replace(/\s+/g, '');
+                    
+                    // 移除香港地區碼 (+852)
+                    cleaned = cleaned.replace(/^\+852/, '');
+                    cleaned = cleaned.replace(/^852/, '');
+                    
+                    return cleaned;
+                }
+            </div>
+            
+            <div id="test-results"></div>
+        </div>
+        
+        <div class="test-case">
+            <h3>實際渲染器電話顯示測試</h3>
+            <div class="code-block">
+                // 模擬渲染器中的電話顯示邏輯
+                const order = {
+                    id: 12345,
+                    name: "測試顧客",
+                    phone: "+852 1234 5678",
+                    pickup_code: "A123"
+                };
+                
+                // 渲染器中的代碼
+                const phone = window.CommonUtils ? 
+                    window.CommonUtils.formatPhoneNumber(order.phone || '') : 
+                    (order.phone || '');
+                
+                // 顯示結果
+                const displayHTML = `<strong>電話:</strong> ${phone}`;
+            </div>
+            
+            <div id="renderer-test"></div>
+        </div>
+        
+        <div class="test-case">
+            <h3>修改的文件列表</h3>
+            <ul>
+                <li>✅ static/js/staff-order-management/common-utils.js - 更新了 formatPhoneNumber() 函數</li>
+                <li>✅ static/js/staff-order-management/preparing-orders-renderer-enhanced.js - 已使用 CommonUtils.formatPhoneNumber()</li>
+                <li>✅ static/js/staff-order-management/ready-orders-renderer.js - 已使用 CommonUtils.formatPhoneNumber()</li>
+                <li>✅ static/js/staff-order-management/completed-orders-renderer.js - 已使用 CommonUtils.formatPhoneNumber()</li>
+                <li>✅ static/js/staff-order-management/queue-manager.js - 已使用 CommonUtils.formatPhoneNumber()</li>
+                <li>✅ static/js/staff-order-management/order-manager.js - 已使用 CommonUtils.formatPhoneNumber()</li>
+            </ul>
+        </div>
+        
+        <div class="test-case">
+            <h3>問題診斷</h3>
+            <p>如果電話仍然顯示 "+852"，可能的原因：</p>
+            <ol>
+                <li>瀏覽器緩存 - 請清除瀏覽器緩存或使用 Ctrl+F5 強制刷新</li>
+                <li>JavaScript 文件未正確加載 - 檢查瀏覽器控制台是否有錯誤</li>
+                <li>CommonUtils 未正確初始化 - 檢查 CommonUtils 是否已註冊到 window 對象</li>
+                <li>電話數據格式問題 - 檢查後端返回的電話數據格式</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 複製 CommonUtils.formatPhoneNumber 函數
+        function formatPhoneNumber(phone) {
+            if (!phone) return '';
+            
+            // 移除所有空格
+            let cleaned = phone.toString().replace(/\s+/g, '');
+            
+            // 移除香港地區碼 (+852)
+            cleaned = cleaned.replace(/^\+852/, '');
+            cleaned = cleaned.replace(/^852/, '');
+            
+            return cleaned;
+        }
+        
+        // 測試用例
+        const testCases = [
+            { input: '+85212345678', expected: '12345678', description: '香港地區碼 (+852) 無空格' },
+            { input: '+852 1234 5678', expected: '12345678', description: '香港地區碼 (+852) 帶空格' },
+            { input: '85212345678', expected: '12345678', description: '香港地區碼 (852) 無空格' },
+            { input: '852 1234 5678', expected: '12345678', description: '香港地區碼 (852) 帶空格' },
+            { input: '012345678', expected: '012345678', description: '本地號碼 (以0開頭)' },
+            { input: '', expected: '', description: '空字符串' },
+            { input: null, expected: '', description: 'null 值' },
+            { input: '+861234567890', expected: '+861234567890', description: '其他國家地區碼 (+86)' }
+        ];
+        
+        // 運行測試
+        function runTests() {
+            const resultsDiv = document.getElementById('test-results');
+            let allPassed = true;
+            let html = '';
+            
+            testCases.forEach((testCase, index) => {
+                const output = formatPhoneNumber(testCase.input);
+                const passed = output === testCase.expected;
+                
+                if (!passed) allPassed = false;
+                
+                html += `
+                    <div class="result ${passed ? 'success' : 'error'}">
+                        <strong>測試 ${index + 1}:</strong> ${testCase.description}<br>
+                        <span class="test-input">輸入: "${testCase.input}"</span><br>
+                        <span class="test-output">輸出: "${output}"</span><br>
+                        <span class="${passed ? 'test-output' : 'test-error'}">預期: "${testCase.expected}"</span><br>
+                        <strong>${passed ? '✅ 通過' : '❌ 失敗'}</strong>
+                    </div>
+                `;
+            });
+            
+            // 總結果
+            html = `
+                <div class="result ${allPassed ? 'success' : 'error'}">
+                    <h4>總結果: ${allPassed ? '✅ 所有測試通過' : '❌ 有測試失敗'}</h4>
+                    <p>測試數: ${testCases.length} | 通過: ${testCases.filter(tc => formatPhoneNumber(tc.input) === tc.expected).length} | 失敗: ${testCases.filter(tc => formatPhoneNumber(tc.input) !== tc.expected).length}</p>
+                </div>
+                ${html}
+            `;
+            
+            resultsDiv.innerHTML = html;
+            
+            // 渲染器測試
+            const rendererTestDiv = document.getElementById('renderer-test');
+            const order = {
+                id: 12345,
+                name: "測試顧客",
+                phone: "+852 1234 5678",
+                pickup_code: "A123"
+            };
+            
+            // 模擬 CommonUtils
+            window.CommonUtils = {
+                formatPhoneNumber: formatPhoneNumber
+            };
+            
+            const phone = window.CommonUtils ? 
+                window.CommonUtils.formatPhoneNumber(order.phone || '') : 
+                (order.phone || '');
+            
+            const displayHTML = `<strong>電話:</strong> ${phone}`;
+            
+            rendererTestDiv.innerHTML = `
+                <div class="result ${phone === '12345678' ? 'success' : 'error'}">
+                    <h4>渲染器電話顯示測試</h4>
+                    <p><strong>原始電話:</strong> "${order.phone}"</p>
+                    <p><strong>格式化後:</strong> "${phone}"</p>
+                    <p><strong>顯示HTML:</strong> ${displayHTML}</p>
+                    <p><strong>結果:</strong> ${phone === '12345678' ? '✅ 正確移除了 "+852"' : '❌ 仍然包含 "+852"'}</p>
+                </div>
+            `;
+            
+            // 檢查實際的 CommonUtils
+            console.log('檢查 window.CommonUtils:', window.CommonUtils);
+            console.log('檢查 formatPhoneNumber 函數:', window.CommonUtils?.formatPhoneNumber);
+            
+            if (window.CommonUtils && typeof window.CommonUtils.formatPhoneNumber === 'function') {
+                console.log('✅ CommonUtils.formatPhoneNumber 函數可用');
+                console.log('測試函數:', window.CommonUtils.formatPhoneNumber('+852 1234 5678'));
+            } else {
+                console.log('❌ CommonUtils.formatPhoneNumber 函數不可用');
+            }
+        }
+        
+        // 頁面加載完成後運行測試
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

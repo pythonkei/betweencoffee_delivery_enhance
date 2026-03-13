@@ -467,18 +467,40 @@ class UnifiedDataManager {
     // ==================== 輔助方法（新增功能） ====================
     
     /**
-     * 啟動智能自動刷新（根據系統負載調整）
+     * 啟動智能自動刷新（根據系統負載調整，離線時暫停）
      */
     startAutoRefresh() {
         let refreshInterval = 10000; // 默認10秒
         let autoRefreshTimer = null;
+        let consecutiveNetworkErrors = 0;
+        const maxNetworkErrors = 3; // 連續3次網絡錯誤後暫停刷新
         
         const refreshFunction = () => {
+            // 如果頁面不可見，暫停刷新
+            if (document.hidden) {
+                console.log('⏸️ 頁面不可見，暫停自動刷新');
+                return;
+            }
+            
+            // 如果正在加載中，跳過
             if (this.isLoading) {
                 console.log('⚠️ 跳過自動刷新：正在加載中');
                 return;
             }
             
+            // 檢查網絡狀態
+            if (!navigator.onLine) {
+                console.log('🌐 網絡離線，暫停自動刷新');
+                return;
+            }
+            
+            // 如果連續網絡錯誤太多，暫停刷新
+            if (consecutiveNetworkErrors >= maxNetworkErrors) {
+                console.log(`⚠️ 連續 ${consecutiveNetworkErrors} 次網絡錯誤，暫停自動刷新`);
+                return;
+            }
+            
+            // 根據錯誤情況調整刷新間隔
             if (this.errorCount > 2) {
                 // 錯誤較多時，延長刷新間隔
                 refreshInterval = Math.min(60000, refreshInterval * 2); // 最多1分鐘
@@ -486,12 +508,7 @@ class UnifiedDataManager {
             } else {
                 // 正常情況下恢復默認間隔
                 refreshInterval = 10000;
-            }
-            
-            // 如果頁面不可見，暫停刷新
-            if (document.hidden) {
-                console.log('⏸️ 頁面不可見，暫停自動刷新');
-                return;
+                consecutiveNetworkErrors = 0; // 重置連續錯誤計數
             }
             
             this.loadUnifiedData();
@@ -506,6 +523,18 @@ class UnifiedDataManager {
         
         // 保存定時器引用以便清理
         this.autoRefreshTimer = autoRefreshTimer;
+        
+        // 監聽網絡狀態變化
+        window.addEventListener('online', () => {
+            console.log('🌐 網絡恢復，重置錯誤計數');
+            consecutiveNetworkErrors = 0;
+            this.errorCount = 0;
+            this.hasError = false;
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('🌐 網絡離線，暫停自動刷新');
+        });
     }
     
     /**

@@ -314,8 +314,8 @@ class CommonUtils {
     static formatPhoneNumber(phone) {
         if (!phone) return '';
         
-        // 移除所有空格和特殊字符
-        let cleaned = phone.toString().trim();
+        // 移除所有空格
+        let cleaned = phone.toString().replace(/\s+/g, '');
         
         // 移除香港地區碼 (+852)
         cleaned = cleaned.replace(/^\+852/, '');

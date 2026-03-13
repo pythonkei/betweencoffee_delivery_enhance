@@ -186,21 +186,47 @@ class OrderManager {
     }
     
     /**
-     * 處理統一數據錯誤
+     * 處理統一數據錯誤（優化：避免重複顯示錯誤）
      */
     handleUnifiedDataError(error) {
         console.error('❌ 全局管理器收到統一數據錯誤:', error);
         
-        // 顯示錯誤提示
-        this.showError('數據加載失敗', error.message || '未知錯誤');
+        // 檢查是否為網絡錯誤
+        const isNetworkError = error.message.includes('Network') || 
+                               error.message.includes('timeout') ||
+                               error.message.includes('Failed to fetch');
         
-        // 嘗試自動重試（等待5秒）
+        // 避免重複顯示相同錯誤
+        const now = Date.now();
+        const lastErrorTime = this.lastErrorTime || 0;
+        const errorCooldown = 10000; // 10秒內不重複顯示相同錯誤
+        
+        // 如果是網絡錯誤且短時間內已經顯示過錯誤，則不重複顯示
+        if (isNetworkError && now - lastErrorTime < errorCooldown) {
+            console.log('⚠️ 短時間內已顯示過網絡錯誤，跳過重複顯示');
+            return;
+        }
+        
+        // 記錄最後錯誤時間
+        this.lastErrorTime = now;
+        
+        // 顯示錯誤提示（網絡錯誤顯示更友好的訊息）
+        if (isNetworkError) {
+            this.showError('網絡連接失敗', '無法連接到服務器，請檢查網絡連接');
+        } else {
+            this.showError('數據加載失敗', error.message || '未知錯誤');
+        }
+        
+        // 如果是網絡錯誤，延長重試時間
+        const retryDelay = isNetworkError ? 10000 : 5000; // 網絡錯誤10秒，其他錯誤5秒
+        
+        // 嘗試自動重試
         setTimeout(() => {
             if (window.unifiedDataManager) {
-                console.log('🔄 自動重試數據加載...');
+                console.log(`🔄 ${retryDelay/1000}秒後自動重試數據加載...`);
                 window.unifiedDataManager.loadUnifiedData();
             }
-        }, 5000);
+        }, retryDelay);
     }
     
     /**
