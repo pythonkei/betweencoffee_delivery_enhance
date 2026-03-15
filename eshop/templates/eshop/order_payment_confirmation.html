@@ -3,8 +3,10 @@
 {% load static %}
 
 {% block content %}
+{% with order_type=order.get_order_type_summary %}
 
 <section class="ftco-section-blank-small"></section>
+{% endwith %}
 
 <section class="ftco-subpage-section">
     <div class="container">
@@ -249,151 +251,201 @@
 <!-- 引入html2canvas用于保存图片 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- 引入訂單狀態更新器 -->
+<script src="{% static 'js/order_payment_confirmation.js' %}"></script>
+
 <script>
-document.getElementById('copy-pickup-code-btn')?.addEventListener('click', function() {
-    const pickupCodeElement = document.getElementById('pickup-code-display');
-    const pickupCode = pickupCodeElement ? pickupCodeElement.textContent.trim() : "";
-    
-    if (!pickupCode) {
-        window.toast.error('提取碼不存在');
-        return;
+// 所有JavaScript代碼都在DOMContentLoaded事件中執行，防止錯誤
+document.addEventListener('DOMContentLoaded', function() {
+    // 設置全局數據屬性供JavaScript使用
+    {% with order_type=order.get_order_type_summary %}
+    if (document.body) {
+        document.body.dataset.paymentStatus = '{{ order.payment_status }}';
+        document.body.dataset.orderType = '{{ order_type.order_type }}';
+        document.body.dataset.orderId = '{{ order.id }}';
+        document.body.dataset.isCoffeeOrder = '{{ order_type.has_coffee|yesno:"true,false" }}';
+        document.body.dataset.isBeansOnly = '{{ order_type.is_beans_only|yesno:"true,false" }}';
     }
-    
-    // 創建臨時文本區域
-    const textArea = document.createElement('textarea');
-    textArea.value = pickupCode;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    
-    try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-            window.toast.success(`提取碼 ${pickupCode} 已複製到剪貼簿`, '複製成功');
-        } else {
-            window.toast.error('複製失敗，請手動複製', '操作失敗');
+    {% endwith %}
+
+    // 複製提取碼功能
+    document.getElementById('copy-pickup-code-btn')?.addEventListener('click', function() {
+        const pickupCodeElement = document.getElementById('pickup-code-display');
+        const pickupCode = pickupCodeElement ? pickupCodeElement.textContent.trim() : "";
+        
+        if (!pickupCode) {
+            if (window.toast) {
+                window.toast.error('提取碼不存在');
+            } else {
+                alert('提取碼不存在');
+            }
+            return;
         }
-    } catch (err) {
-        console.error('複製失敗:', err);
-        window.toast.error('複製失敗，請手動複製', '操作失敗');
-    }
-    
-    document.body.removeChild(textArea);
-});
+        
+        // 創建臨時文本區域
+        const textArea = document.createElement('textarea');
+        textArea.value = pickupCode;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                if (window.toast) {
+                    window.toast.success(`提取碼 ${pickupCode} 已複製到剪貼簿`, '複製成功');
+                } else {
+                    alert(`提取碼 ${pickupCode} 已複製到剪貼簿`);
+                }
+            } else {
+                if (window.toast) {
+                    window.toast.error('複製失敗，請手動複製', '操作失敗');
+                } else {
+                    alert('複製失敗，請手動複製提取碼: ' + pickupCode);
+                }
+            }
+        } catch (err) {
+            console.error('複製失敗:', err);
+            if (window.toast) {
+                window.toast.error('複製失敗，請手動複製', '操作失敗');
+            } else {
+                alert('複製失敗，請手動複製提取碼: ' + pickupCode);
+            }
+        }
+        
+        document.body.removeChild(textArea);
+    });
 
-
-document.getElementById('save-image-btn')?.addEventListener('click', async function() {
-    const saveBtn = this;
-    
-    if (typeof html2canvas === 'undefined') {
-        window.toast.error('圖片保存功能不可用，請稍後重試', '功能不可用');
-        return;
-    }
-    
-    const screenshotArea = document.getElementById('screenshot-area');
-    if (!screenshotArea) {
-        window.toast.error('截圖區域不存在', '操作失敗');
-        return;
-    }
-    
-    // 禁用按鈕
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
-    saveBtn.disabled = true;
-    
-    try {
-        // 直接創建圖片元素，不在DOM中顯示
-        const img = new Image();
-        img.src = "data:image/png;base64,{{ order.qr_code }}";
+    // 保存圖片功能
+    document.getElementById('save-image-btn')?.addEventListener('click', async function() {
+        const saveBtn = this;
         
-        // 等待圖片加載
-        await new Promise((resolve) => {
-            img.onload = resolve;
-        });
+        if (typeof html2canvas === 'undefined') {
+            if (window.toast) {
+                window.toast.error('圖片保存功能不可用，請稍後重試', '功能不可用');
+            } else {
+                alert('圖片保存功能暫時不可用');
+            }
+            return;
+        }
         
-        // 創建一個離屏canvas
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const qrcodeSection = document.getElementById('qrcode-section');
+        if (!qrcodeSection) {
+            if (window.toast) {
+                window.toast.error('截圖區域不存在', '操作失敗');
+            } else {
+                alert('找不到保存區域');
+            }
+            return;
+        }
         
-        // 設置canvas大小
-        canvas.width = 400 * 3; // 3倍分辨率
-        canvas.height = 500 * 3;
+        // 禁用按鈕
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
+        saveBtn.disabled = true;
         
-        // 繪製白色背景
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 計算縮放比例
-        const scale = 3;
-        const padding = 30 * scale;
-        const contentWidth = (400 - 60) * scale; // 減去兩邊padding
-        const contentHeight = (500 - 60) * scale;
-        
-        // 繪製標題
-        ctx.fillStyle = '#333333';
-        ctx.font = `bold ${18 * scale}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.fillText('請向店員出示此二維碼提取', canvas.width / 2, 70 * scale);
-        
-        // 繪製二維碼（居中）
-        const qrSize = Math.min(contentWidth, contentHeight * 0.6);
-        const qrX = (canvas.width - qrSize) / 2;
-        const qrY = 100 * scale;
-        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
-        
-        // 繪製"提取碼"文字
-        ctx.fillStyle = '#333333';
-        ctx.font = `500 ${16 * scale}px Arial`;
-        ctx.fillText('- 提取碼 -', canvas.width / 2, qrY + qrSize + 25 * scale);
-        
-        // 繪製提取碼（居中對齊）
-        const pickupCode = "{{ order.pickup_code|default:'' }}";
-        ctx.fillStyle = '#333333';
-        ctx.font = `bold ${48 * scale}px Arial`;
-        ctx.fillText(pickupCode, canvas.width / 2, qrY + qrSize + 80 * scale);
-        
-        // 繪製提示文字
-        ctx.fillStyle = '#999999';
-        ctx.font = `${14 * scale}px Arial`;
-        ctx.fillText('請告知店員您的提取碼', canvas.width / 2, qrY + qrSize + 160 * scale);
-        
-        // 繪製底部信息
-        const orderId = "{{ order.id|default:'order' }}";
-        const orderTime = "{{ order.created_at|date:'H:i' }}";
-        ctx.fillText(`訂單編號: #${orderId} | 時間: ${orderTime}`, canvas.width / 2, qrY + qrSize + 200 * scale);
-        
-        // 創建下載鏈接（使用Blob避免彈出預覽）
-        canvas.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.download = pickupCode ? `提取碼_${pickupCode}.png` : `訂單_${orderId}.png`;
-            link.href = url;
+        try {
+            // 直接創建圖片元素，不在DOM中顯示
+            const img = new Image();
+            img.src = "data:image/png;base64,{{ order.qr_code }}";
             
-            // 使用隱藏的方式觸發下載
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // 等待圖片加載
+            await new Promise((resolve) => {
+                img.onload = resolve;
+            });
             
-            // 清理
-            setTimeout(() => URL.revokeObjectURL(url), 100);
+            // 創建一個離屏canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
             
-            // 恢復按鈕
+            // 設置canvas大小
+            canvas.width = 400 * 3; // 3倍分辨率
+            canvas.height = 500 * 3;
+            
+            // 繪製白色背景
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 計算縮放比例
+            const scale = 3;
+            const padding = 30 * scale;
+            const contentWidth = (400 - 60) * scale; // 減去兩邊padding
+            const contentHeight = (500 - 60) * scale;
+            
+            // 繪製標題
+            ctx.fillStyle = '#333333';
+            ctx.font = `bold ${18 * scale}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('請向店員出示此二維碼提取', canvas.width / 2, 70 * scale);
+            
+            // 繪製二維碼（居中）
+            const qrSize = Math.min(contentWidth, contentHeight * 0.6);
+            const qrX = (canvas.width - qrSize) / 2;
+            const qrY = 100 * scale;
+            ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+            
+            // 繪製"提取碼"文字
+            ctx.fillStyle = '#333333';
+            ctx.font = `500 ${16 * scale}px Arial`;
+            ctx.fillText('- 提取碼 -', canvas.width / 2, qrY + qrSize + 25 * scale);
+            
+            // 繪製提取碼（居中對齊）
+            const pickupCode = "{{ order.pickup_code|default:'' }}";
+            ctx.fillStyle = '#333333';
+            ctx.font = `bold ${48 * scale}px Arial`;
+            ctx.fillText(pickupCode, canvas.width / 2, qrY + qrSize + 80 * scale);
+            
+            // 繪製提示文字
+            ctx.fillStyle = '#999999';
+            ctx.font = `${14 * scale}px Arial`;
+            ctx.fillText('請告知店員您的提取碼', canvas.width / 2, qrY + qrSize + 160 * scale);
+            
+            // 繪製底部信息
+            const orderId = "{{ order.id|default:'order' }}";
+            const orderTime = "{{ order.created_at|date:'H:i' }}";
+            ctx.fillText(`訂單編號: #${orderId} | 時間: ${orderTime}`, canvas.width / 2, qrY + qrSize + 200 * scale);
+            
+            // 創建下載鏈接（使用Blob避免彈出預覽）
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = pickupCode ? `提取碼_${pickupCode}.png` : `訂單_${orderId}.png`;
+                link.href = url;
+                
+                // 使用隱藏的方式觸發下載
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 清理
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                
+                // 恢復按鈕
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                
+                if (window.toast) {
+                    window.toast.success('提取碼圖片已保存', '保存成功');
+                } else {
+                    alert('圖片保存成功');
+                }
+            }, 'image/png');
+            
+        } catch (error) {
+            console.error('生成圖片失敗:', error);
             saveBtn.innerHTML = originalText;
             saveBtn.disabled = false;
-            
-            window.toast.success('提取碼圖片已保存', '保存成功');
-        }, 'image/png');
-        
-    } catch (error) {
-        console.error('生成圖片失敗:', error);
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
-        window.toast.error('生成圖片失敗，請稍後重試', '保存失敗');
-    }
+            if (window.toast) {
+                window.toast.error('生成圖片失敗，請稍後重試', '保存失敗');
+            } else {
+                alert('生成圖片失敗，請稍後重試');
+            }
+        }
+    });
 });
 </script>
 

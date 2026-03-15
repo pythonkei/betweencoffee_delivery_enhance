@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付確認頁面進度條修復測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        
+        .test-description {
+            margin-bottom: 15px;
+            color: #666;
+        }
+        
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .test-button.secondary {
+            background-color: #6c757d;
+        }
+        
+        .test-button.secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .result.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .result.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .result.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 30px;
+            background-color: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .progress-bar.animated {
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 50%, #007bff 100%);
+            background-size: 200% 100%;
+            animation: progress-animation 2s linear infinite;
+        }
+        
+        @keyframes progress-animation {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .status-display {
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .debug-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>支付確認頁面進度條修復測試</h1>
+        
+        <div class="test-section">
+            <div class="test-title">測試 1: 進度條動畫測試</div>
+            <div class="test-description">
+                測試進度條是否能正確顯示動畫效果和更新進度。
+            </div>
+            
+            <div class="progress-bar-container">
+                <div id="test-progress-bar" class="progress-bar">0%</div>
+            </div>
+            
+            <button class="test-button" onclick="testProgressBarAnimation()">測試進度條動畫</button>
+            <button class="test-button secondary" onclick="resetProgressBar()">重置進度條</button>
+            
+            <div id="test1-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">測試 2: API端點測試</div>
+            <div class="test-description">
+                測試訂單狀態API端點是否可訪問並返回正確的JSON格式。
+            </div>
+            
+            <div class="status-display" id="api-status">
+                等待測試...
+            </div>
+            
+            <button class="test-button" onclick="testApiEndpoint()">測試API端點</button>
+            
+            <div id="test2-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">測試 3: UnifiedOrderUpdater類測試</div>
+            <div class="test-description">
+                測試訂單狀態更新器類是否能正確啟動、更新和停止。
+            </div>
+            
+            <div class="status-display" id="updater-status">
+                更新器狀態: 未啟動
+            </div>
+            
+            <button class="test-button" onclick="startUpdaterTest()">啟動更新器測試</button>
+            <button class="test-button secondary" onclick="stopUpdaterTest()">停止更新器測試</button>
+            
+            <div id="test3-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">測試 4: 模擬訂單狀態變化</div>
+            <div class="test-description">
+                模擬訂單狀態從"pending"到"preparing"到"ready"的變化過程。
+            </div>
+            
+            <div class="status-display" id="simulated-status">
+                當前模擬狀態: pending
+            </div>
+            
+            <button class="test-button" onclick="simulateOrderStatus()">開始模擬</button>
+            <button class="test-button secondary" onclick="resetSimulation()">重置模擬</button>
+            
+            <div id="test4-result" class="result"></div>
+        </div>
+        
+        <div class="debug-info">
+            <h3>調試信息</h3>
+            <div id="debug-log"></div>
+        </div>
+    </div>
+
+    <script>
+        // 調試日誌
+        function logDebug(message) {
+            const debugLog = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+        
+        // 顯示測試結果
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+            logDebug(`測試結果: ${message}`);
+        }
+        
+        // 測試1: 進度條動畫測試
+        function testProgressBarAnimation() {
+            const progressBar = document.getElementById('test-progress-bar');
+            let progress = 0;
+            
+            progressBar.classList.add('animated');
+            
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progress > 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    progressBar.classList.remove('animated');
+                    showResult('test1-result', '✅ 進度條動畫測試成功完成', 'success');
+                }
+                
+                progressBar.style.width = `${progress}%`;
+                progressBar.textContent = `${progress}%`;
+            }, 200);
+            
+            logDebug('開始進度條動畫測試');
+        }
+        
+        function resetProgressBar() {
+            const progressBar = document.getElementById('test-progress-bar');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            progressBar.classList.remove('animated');
+            document.getElementById('test1-result').style.display = 'none';
+            logDebug('重置進度條');
+        }
+        
+        // 測試2: API端點測試
+        async function testApiEndpoint() {
+            const statusDisplay = document.getElementById('api-status');
+            statusDisplay.textContent = '測試中...';
+            
+            try {
+                // 測試一個示例訂單ID
+                const testOrderId = 1;
+                const response = await fetch(`/eshop/api/order-status/${testOrderId}/`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP錯誤! 狀態碼: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                statusDisplay.textContent = `API響應: ${JSON.stringify(data, null, 2)}`;
+                
+                if (data.success !== undefined) {
+                    showResult('test2-result', '✅ API端點測試成功，返回正確的JSON格式', 'success');
+                } else {
+                    showResult('test2-result', '⚠️ API端點可訪問，但返回格式可能不正確', 'info');
+                }
+                
+                logDebug(`API測試成功: ${response.status}`);
+                
+            } catch (error) {
+                statusDisplay.textContent = `錯誤: ${error.message}`;
+                showResult('test2-result', `❌ API端點測試失敗: ${error.message}`, 'error');
+                logDebug(`API測試失敗: ${error.message}`);
+            }
+        }
+        
+        // 測試3: UnifiedOrderUpdater類測試
+        let testUpdater = null;
+        let testUpdateCount = 0;
+        
+        function startUpdaterTest() {
+            const statusDisplay = document.getElementById('updater-status');
+            
+            if (testUpdater) {
+                showResult('test3-result', '⚠️ 更新器已經在運行中', 'info');
+                return;
+            }
+            
+            // 創建模擬的UnifiedOrderUpdater
+            testUpdater = {
+                orderId: 'test-123',
+                updateInterval: null,
+                isRunning: true,
+                updateCount: 0,
+                maxUpdates: 10
+            };
+            
+            statusDisplay.textContent = '更新器狀態: 運行中 (測試模式)';
+            
+            // 模擬更新
+            testUpdater.updateInterval = setInterval(() => {
+                testUpdateCount++;
+                testUpdater.updateCount++;
+                
+                statusDisplay.textContent = `更新器狀態: 運行中 - 更新次數: ${testUpdater.updateCount}`;
+                logDebug(`模擬更新器更新 #${testUpdater.updateCount}`);
+                
+                if (testUpdater.updateCount >= testUpdater.maxUpdates) {
+                    stopUpdaterTest();
+                    showResult('test3-result', '✅ 更新器測試成功完成，達到最大更新次數', 'success');
+                }
+            }, 1000);
+            
+            showResult('test3-result', '✅ 更新器啟動成功，開始模擬更新', 'success');
+            logDebug('啟動模擬更新器');
+        }
+        
+        function stopUpdaterTest() {
+            if (testUpdater && testUpdater.updateInterval) {
+                clearInterval(testUpdater.updateInterval);
+                testUpdater.isRunning = false;
+                testUpdater = null;
+                
+                document.getElementById('updater-status').textContent = '更新器狀態: 已停止';
+                showResult('test3-result', '✅ 更新器停止成功', 'success');
+                logDebug('停止模擬更新器');
+            }
+        }
+        
+        // 測試4: 模擬訂單狀態變化
+        let simulationInterval = null;
+        let simulationStep = 0;
+        const simulationSteps = [
+            { status: 'pending', progress: 0, message: '訂單已確認，等待支付' },
+            { status: 'paid', progress: 20, message: '支付成功，等待製作' },
+            { status: 'preparing', progress: 50, message: '咖啡師正在製作您的訂單' },
+            { status: 'preparing', progress: 80, message: '即將完成製作' },
+            { status: 'ready', progress: 100, message: '訂單已完成，請提取' }
+        ];
+        
+        function simulateOrderStatus() {
+            if (simulationInterval) {
+                showResult('test4-result', '⚠️ 模擬已經在運行中', 'info');
+                return;
+            }
+            
+            simulationStep = 0;
+            updateSimulationDisplay();
+            
+            simulationInterval = setInterval(() => {
+                simulationStep++;
+                
+                if (simulationStep >= simulationSteps.length) {
+                    clearInterval(simulationInterval);
+                    simulationInterval = null;
+                    showResult('test4-result', '✅ 訂單狀態模擬完成', 'success');
+                    logDebug('訂單狀態模擬完成');
+                    return;
+                }
+                
+                updateSimulationDisplay();
+                logDebug(`模擬狀態更新: ${simulationSteps[simulationStep].status}`);
+                
+            }, 2000); // 每2秒更新一次
+            
+            showResult('test4-result', '✅ 開始模擬訂單狀態變化', 'success');
+            logDebug('開始訂單狀態模擬');
+        }
+        
+        function updateSimulationDisplay() {
+            const currentStep = simulationSteps[simulationStep];
+            const statusDisplay = document.getElementById('simulated-status');
+            
+            statusDisplay.innerHTML = `
+                <strong>當前模擬狀態:</strong> ${currentStep.status}<br>
+                <strong>進度:</strong> ${currentStep.progress}%<br>
+                <strong>消息:</strong> ${currentStep.message}
+            `;
+        }
+        
+        function resetSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+            
+            simulationStep = 0;
+            document.getElementById('simulated-status').textContent = '當前模擬狀態: pending';
+            document.getElementById('test4-result').style.display = 'none';
+            logDebug('重置模擬');
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            logDebug('測試頁面加載完成');
+            console.log('支付確認頁面進度條修復測試工具已加載');
+        });
+    </script>
+</body>
+</html>

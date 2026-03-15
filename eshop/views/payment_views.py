@@ -365,9 +365,33 @@ def alipay_callback(request):
                 # # WebSocket 發送暫時禁用，以確保支付流程穩定
                 
                 logger.info(f"✅ 支付寶回調處理成功，訂單: {out_trade_no}")
-                clear_payment_session(request, out_trade_no)
-                return safe_redirect_to_confirmation(out_trade_no)
+            
+                # 添加詳細調試日誌
+                logger.info(f"🔍 調試信息 - 訂單處理完成:")
+                logger.info(f"   訂單ID: {out_trade_no}")
+                logger.info(f"   支付狀態: {order.payment_status}")
+                logger.info(f"   訂單狀態: {order.status}")
+                logger.info(f"   支付方式: {order.payment_method}")
+                logger.info(f"   是否包含咖啡: {has_coffee}")
+                logger.info(f"   是否純咖啡豆: {has_beans}")
                 
+                # 清理session
+                clear_payment_session(request, out_trade_no)
+                
+                # 記錄重定向前的最後狀態
+                logger.info(f"🔄 準備重定向到支付確認頁面，訂單ID: {out_trade_no}")
+                
+                # 使用安全的重定向函數
+                redirect_response = safe_redirect_to_confirmation(out_trade_no)
+                
+                # 記錄重定向目標
+                if hasattr(redirect_response, 'url'):
+                    logger.info(f"📍 重定向目標URL: {redirect_response.url}")
+                else:
+                    logger.info(f"📍 重定向響應類型: {type(redirect_response)}")
+                
+                return redirect_response
+                    
             except Exception as direct_error:
                 logger.error(f"直接處理訂單失敗: {direct_error}")
                 return redirect_to_payment_failed(f"訂單處理失敗: {str(direct_error)}", out_trade_no)

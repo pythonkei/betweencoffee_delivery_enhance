@@ -729,12 +729,23 @@ def order_payment_confirmation(request, order_id=None):
         return render(request, 'eshop/order_payment_confirmation.html', context)
         
     except OrderModel.DoesNotExist:
-        return handle_order_error(
-            request,
-            f'訂單 #{order_id} 不存在',
-            redirect_url='eshop:order_detail',  # 改為訂單詳情（但訂單不存在，可能需要跳轉到列表）
-            error_type='order'
-        )
+        # 訂單不存在，顯示錯誤信息但不重定向到首頁
+        logger.error(f"訂單 #{order_id} 不存在，但用戶從支付回調訪問")
+        
+        # 創建一個友好的錯誤頁面上下文
+        context = {
+            'payment_status': 'error',
+            'error_message': f'訂單 #{order_id} 不存在或已被處理',
+            'order_id': order_id,
+            'suggested_action': '請聯繫客服或查看您的訂單歷史'
+        }
+        
+        # 記錄詳細信息用於調試
+        logger.info(f"支付回調訪問不存在的訂單: {order_id}")
+        logger.info(f"請求路徑: {request.path}")
+        logger.info(f"請求參數: {request.GET}")
+        
+        return render(request, 'eshop/order_payment_confirmation.html', context)
     except Exception as e:
         logger.error(f"訂單確認頁面錯誤: {e}", exc_info=True)
         # 如果訂單存在，跳轉到訂單詳情頁；否則跳轉到首頁
