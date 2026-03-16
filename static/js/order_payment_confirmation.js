@@ -199,7 +199,13 @@ class UnifiedOrderUpdater {
         this.updateCount++;
         
         try {
-            const response = await fetch(`/eshop/api/order-status/${this.orderId}/`);
+            // ✅ 修復：使用正確的 API 路徑
+            // 原路徑：/eshop/api/order-status/${this.orderId}/
+            // 正確路徑：/eshop/order/api/order-status/${this.orderId}/
+            const apiUrl = `/eshop/order/api/order-status/${this.orderId}/`;
+            console.log('調用 API:', apiUrl);
+            
+            const response = await fetch(apiUrl);
             
             if (!response.ok) {
                 throw new Error(`HTTP錯誤! 狀態碼: ${response.status}`);
@@ -278,8 +284,27 @@ class UnifiedOrderUpdater {
 function initOrderConfirmationPage() {
     console.log("初始化訂單確認頁面");
     
-    // 延遲執行，確保模板中的數據屬性已經設置
-    setTimeout(() => {
+    // 等待數據屬性設置的函數
+    function waitForDataAttributes() {
+        return new Promise((resolve) => {
+            const checkInterval = setInterval(() => {
+                const orderId = document.body.dataset.orderId;
+                if (orderId !== undefined) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 50);
+            
+            // 5秒後超時
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                resolve();
+            }, 5000);
+        });
+    }
+    
+    // 使用 Promise 等待數據屬性設置
+    waitForDataAttributes().then(() => {
         // 從數據屬性獲取訂單信息
         const orderId = document.body.dataset.orderId;
         const paymentStatus = document.body.dataset.paymentStatus;
@@ -314,20 +339,32 @@ function initOrderConfirmationPage() {
             console.log("保存按鈕事件綁定成功");
         }
         
-        // 啟動訂單狀態更新器（僅限已支付的咖啡訂單）
-        if (orderId && paymentStatus === 'paid' && isCoffeeOrder && !isBeansOnly) {
+        // 啟動訂單狀態更新器（放寬條件：允許 paid 或 pending 狀態）
+        const shouldStartUpdater = orderId && 
+            (paymentStatus === 'paid' || paymentStatus === 'pending') &&
+            isCoffeeOrder && !isBeansOnly;
+        
+        if (shouldStartUpdater) {
             console.log("啟動訂單狀態更新器，訂單ID:", orderId);
             window.orderUpdater = new UnifiedOrderUpdater(orderId);
             window.orderUpdater.start();
             
             // 添加調試信息
             console.log('訂單狀態更新器已啟動，將每10秒更新一次');
+            console.log('啟動條件:', {
+                orderId,
+                paymentStatus,
+                isCoffeeOrder,
+                isBeansOnly,
+                shouldStartUpdater
+            });
         } else {
             console.log('不啟動訂單狀態更新器，原因:', {
                 hasOrderId: !!orderId,
                 paymentStatus,
                 isCoffeeOrder,
-                isBeansOnly
+                isBeansOnly,
+                shouldStartUpdater
             });
         }
         
@@ -335,7 +372,9 @@ function initOrderConfirmationPage() {
         if (paymentStatus === 'pending') {
             startPaymentTimeoutCountdown();
         }
-    }, 100); // 延遲100ms確保數據屬性已設置
+    }).catch(error => {
+        console.error('等待數據屬性時發生錯誤:', error);
+    });
 }
 
 // ========== 支付超時倒計時 ==========

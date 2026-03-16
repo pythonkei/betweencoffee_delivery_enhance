@@ -248,6 +248,20 @@
 </section>
 
 
+<!-- 設置數據屬性（在JavaScript加載之前） -->
+{% with order_type=order.get_order_type_summary %}
+<script>
+// 立即設置數據屬性，確保JavaScript文件可以訪問
+if (document.body) {
+    document.body.dataset.paymentStatus = '{{ order.payment_status }}';
+    document.body.dataset.orderType = '{{ order_type.order_type }}';
+    document.body.dataset.orderId = '{{ order.id }}';
+    document.body.dataset.isCoffeeOrder = '{{ order_type.has_coffee|yesno:"true,false" }}';
+    document.body.dataset.isBeansOnly = '{{ order_type.is_beans_only|yesno:"true,false" }}';
+}
+</script>
+{% endwith %}
+
 <!-- 引入html2canvas用于保存图片 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -257,16 +271,6 @@
 <script>
 // 所有JavaScript代碼都在DOMContentLoaded事件中執行，防止錯誤
 document.addEventListener('DOMContentLoaded', function() {
-    // 設置全局數據屬性供JavaScript使用
-    {% with order_type=order.get_order_type_summary %}
-    if (document.body) {
-        document.body.dataset.paymentStatus = '{{ order.payment_status }}';
-        document.body.dataset.orderType = '{{ order_type.order_type }}';
-        document.body.dataset.orderId = '{{ order.id }}';
-        document.body.dataset.isCoffeeOrder = '{{ order_type.has_coffee|yesno:"true,false" }}';
-        document.body.dataset.isBeansOnly = '{{ order_type.is_beans_only|yesno:"true,false" }}';
-    }
-    {% endwith %}
 
     // 複製提取碼功能
     document.getElementById('copy-pickup-code-btn')?.addEventListener('click', function() {

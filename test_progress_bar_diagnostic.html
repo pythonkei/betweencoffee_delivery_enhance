@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>進度條診斷工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1>進度條實時更新診斷工具</h1>
+        <p>這個工具幫助診斷支付確認頁面進度條無法實時運行的問題。</p>
+    </div>
+
+    <div class="section">
+        <h2>1. 數據屬性檢查</h2>
+        <div id="data-attributes-test">
+            <p>檢查 <code>document.body.dataset</code> 中的訂單信息：</p>
+            <div id="data-attributes-result" class="test-result info">
+                正在檢查...
+            </div>
+            <button onclick="checkDataAttributes()">重新檢查數據屬性</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>2. API 端點測試</h2>
+        <div id="api-test">
+            <p>測試 <code>/eshop/api/order-status/{order_id}/</code> API：</p>
+            <div class="form-group">
+                <label for="order-id-input">訂單 ID：</label>
+                <input type="text" id="order-id-input" placeholder="輸入訂單ID" style="padding: 5px; margin: 0 10px;">
+                <button onclick="testApiEndpoint()">測試 API</button>
+            </div>
+            <div id="api-test-result" class="test-result info">
+                等待測試...
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. 訂單類型判斷</h2>
+        <div id="order-type-test">
+            <p>檢查訂單類型判斷邏輯：</p>
+            <div id="order-type-result" class="test-result info">
+                正在分析...
+            </div>
+            <button onclick="checkOrderType()">檢查訂單類型</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. 模擬進度條更新</h2>
+        <div id="progress-bar-test">
+            <p>模擬進度條更新功能：</p>
+            <div class="progress-bar">
+                <div id="demo-progress-fill" class="progress-fill"></div>
+            </div>
+            <div id="progress-text">0% 完成</div>
+            <button onclick="startProgressSimulation()">開始模擬更新</button>
+            <button onclick="stopProgressSimulation()">停止模擬</button>
+            <div id="progress-log" class="test-result info" style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                日誌將顯示在這裡...
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>5. JavaScript 錯誤檢查</h2>
+        <div id="js-error-test">
+            <p>檢查頁面中的 JavaScript 錯誤：</p>
+            <div id="js-error-result" class="test-result info">
+                正在檢查...
+            </div>
+            <button onclick="checkJSErrors()">檢查 JavaScript 錯誤</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>6. 診斷報告</h2>
+        <div id="diagnostic-report">
+            <p>綜合診斷結果：</p>
+            <div id="report-content" class="test-result info">
+                正在生成報告...
+            </div>
+            <button onclick="generateReport()">生成診斷報告</button>
+            <button onclick="copyReport()" style="background-color: #6c757d;">複製報告</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局變量
+        let progressInterval = null;
+        let currentProgress = 0;
+        const logElement = document.getElementById('progress-log');
+
+        // 添加日誌
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // 1. 檢查數據屬性
+        function checkDataAttributes() {
+            const resultElement = document.getElementById('data-attributes-result');
+            const dataset = document.body.dataset;
+            
+            let html = '<h3>數據屬性檢查結果：</h3>';
+            html += '<ul>';
+            
+            const requiredAttributes = ['orderId', 'paymentStatus', 'orderType', 'isCoffeeOrder', 'isBeansOnly'];
+            let allPresent = true;
+            
+            for (const attr of requiredAttributes) {
+                const value = dataset[attr];
+                if (value !== undefined) {
+                    html += `<li><strong>${attr}:</strong> ${value} ✅</li>`;
+                } else {
+                    html += `<li><strong>${attr}:</strong> 未設置 ❌</li>`;
+                    allPresent = false;
+                }
+            }
+            
+            html += '</ul>';
+            
+            if (allPresent) {
+                html += '<div class="success">✅ 所有必需的數據屬性都已設置</div>';
+                resultElement.className = 'test-result success';
+            } else {
+                html += '<div class="error">❌ 缺少必需的數據屬性</div>';
+                resultElement.className = 'test-result error';
+            }
+            
+            resultElement.innerHTML = html;
+            addLog('檢查了數據屬性', 'info');
+        }
+
+        // 2. 測試 API 端點
+        async function testApiEndpoint() {
+            const orderId = document.getElementById('order-id-input').value;
+            const resultElement = document.getElementById('api-test-result');
+            
+            if (!orderId) {
+                resultElement.innerHTML = '<div class="error">❌ 請輸入訂單 ID</div>';
+                resultElement.className = 'test-result error';
+                return;
+            }
+            
+            resultElement.innerHTML = '<div class="info">正在測試 API...</div>';
+            resultElement.className = 'test-result info';
+            
+            try {
+                const response = await fetch(`/eshop/api/order-status/${orderId}/`);
+                const data = await response.json();
+                
+                let html = '<h3>API 測試結果：</h3>';
+                html += `<p><strong>狀態碼：</strong> ${response.status}</p>`;
+                html += `<p><strong>成功：</strong> ${data.success ? '✅ 是' : '❌ 否'}</p>`;
+                
+                if (data.success) {
+                    html += '<div class="success">✅ API 端點正常工作</div>';
+                    html += '<h4>返回數據：</h4>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    resultElement.className = 'test-result success';
+                } else {
+                    html += `<div class="error">❌ API 返回錯誤：${data.error || '未知錯誤'}</div>`;
+                    resultElement.className = 'test-result error';
+                }
+                
+                resultElement.innerHTML = html;
+                addLog(`測試了 API 端點 (訂單ID: ${orderId})`, data.success ? 'success' : 'error');
+                
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        <h3>API 測試失敗：</h3>
+                        <p><strong>錯誤：</strong> ${error.message}</p>
+                        <p>請檢查：</p>
+                        <ul>
+                            <li>服務器是否正在運行</li>
+                            <li>API 端點路徑是否正確</li>
+                            <li>網絡連接是否正常</li>
+                        </ul>
+                    </div>
+                `;
+                resultElement.className = 'test-result error';
+                addLog(`API 測試失敗: ${error.message}`, 'error');
+            }
+        }
+
+        // 3. 檢查訂單類型
+        function checkOrderType() {
+            const resultElement = document.getElementById('order-type-result');
+            const dataset = document.body.dataset;
+            
+            const orderId = dataset.orderId;
+            const paymentStatus = dataset.paymentStatus;
+            const isCoffeeOrder = dataset.isCoffeeOrder === 'true';
+            const isBeansOnly = dataset.isBeansOnly === 'true';
+            
+            let html = '<h3>訂單類型分析：</h3>';
+            html += '<ul>';
+            html += `<li><strong>訂單 ID：</strong> ${orderId || '未設置'}</li>`;
+            html += `<li><strong>支付狀態：</strong> ${paymentStatus || '未設置'}</li>`;
+            html += `<li><strong>是咖啡訂單：</strong> ${isCoffeeOrder ? '✅ 是' : '❌ 否'}</li>`;
+            html += `<li><strong>純咖啡豆訂單：</strong> ${isBeansOnly ? '✅ 是' : '❌ 否'}</li>`;
+            html += '</ul>';
+            
+            // 檢查是否應該啟動更新器
+            const shouldStartUpdater = orderId && 
+                (paymentStatus === 'paid' || paymentStatus === 'pending') &&
+                isCoffeeOrder && !isBeansOnly;
+            
+            html += '<h4>更新器啟動條件：</h4>';
+            html += '<ul>';
+            html += `<li>訂單 ID 存在：${orderId ? '✅' : '❌'}</li>`;
+            html += `<li>支付狀態為 paid 或 pending：${paymentStatus === 'paid' || paymentStatus === 'pending' ? '✅' : '❌'}</li>`;
+            html += `<li>是咖啡訂單：${isCoffeeOrder ? '✅' : '❌'}</li>`;
+            html += `<li>不是純咖啡豆訂單：${!isBeansOnly ? '✅' : '❌'}</li>`;
+            html += '</ul>';
+            
+            if (shouldStartUpdater) {
+                html += '<div class="success">✅ 應該啟動訂單狀態更新器</div>';
+                resultElement.className = 'test-result success';
+            } else {
+                html += '<div class="warning">⚠️ 不滿足啟動更新器的條件</div>';
+                resultElement.className = 'test-result warning';
+            }
+            
+            resultElement.innerHTML = html;
+            addLog('檢查了訂單類型判斷邏輯', 'info');
+        }
+
+        // 4. 模擬進度條更新
+        function startProgressSimulation() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            
+            currentProgress = 0;
+            updateProgressBar();
+            
+            progressInterval = setInterval(() => {
+                currentProgress += 5;
+                if (currentProgress > 100) {
+                    currentProgress = 100;
+                    clearInterval(progressInterval);
+                    addLog('進度條模擬完成', 'success');
+                }
+                updateProgressBar();
+                addLog(`進度更新: ${currentProgress}%`, 'info');
+            }, 1000);
+            
+            addLog('開始進度條模擬更新', 'success');
+        }
+
+        function stopProgressSimulation() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+                addLog('停止進度條模擬', 'info');
+            }
+        }
+
+        function updateProgressBar() {
+            const progressFill = document.getElementById('demo-progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            progressFill.style.width = `${currentProgress}%`;
+            progressText.textContent = `${currentProgress}% 完成`;
+        }
+
+        // 5. 檢查 JavaScript 錯誤
+        function checkJSErrors() {
+            const resultElement = document.getElementById('js-error-result');
+            
+            // 嘗試執行一些可能出錯的操作來檢測錯誤
+            try {
+                // 檢查全局變量
+                if (typeof window.orderUpdater !== 'undefined') {
+                    addLog('window.orderUpdater 已定義', 'success');
+                } else {
+                    addLog('window.orderUpdater 未定義', 'warning');
+                }
+                
+                // 檢查函數是否存在
+                if (typeof initOrderConfirmationPage === 'function') {
+                    addLog('initOrderConfirmationPage 函數存在', 'success');
+                } else {
+                    addLog('initOrderConfirmationPage 函數不存在', 'error');
+                }
+                
+                resultElement.innerHTML = `
+                    <div class="success">
+                        <h3>JavaScript 檢查完成</h3>
+                        <p>未發現明顯的 JavaScript 錯誤</p>
+                        <p>請查看瀏覽器控制台獲取更多信息</p>
+                    </div>
+                `;
+                resultElement.className = 'test-result success';
+                
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        <h3>JavaScript 錯誤檢測到：</h3>
+                        <p><strong>錯誤：</strong> ${error.message}</p>
+                        <p><strong>堆棧：</strong> ${error.stack}</p>
+                    </div>
+                `;
+                resultElement.className = 'test-result error';
+            }
+            
+            addLog('檢查了 JavaScript 錯誤', 'info');
+        }
+
+        // 6. 生成診斷報告
+        function generateReport() {
+            const reportElement = document.getElementById('report-content');
+            const dataset = document.body.dataset;
+            
+            const orderId = dataset.orderId;
+            const paymentStatus = dataset.paymentStatus;
+            const isCoffeeOrder = dataset.isCoffeeOrder === 'true';
+            const isBeansOnly = dataset.isBeansOnly === 'true';
+            
+            const shouldStartUpdater = orderId && 
+                (paymentStatus === 'paid' || paymentStatus === 'pending') &&
+                isCoffeeOrder && !isBeansOnly;
+            
+            let report = '<h3>綜合診斷報告</h3>';
+            report += `<p><strong>生成時間：</strong> ${new Date().toLocaleString()}</p>`;
+            report += '<hr>';
+            
+            report += '<h4>1. 數據屬性狀態</h4>';
+            report += '<ul>';
+            report += `<li>訂單 ID: ${orderId || '未設置'}</li>`;
+            report += `<li>支付狀態: ${paymentStatus || '未設置'}</li>`;
+            report += `<li>是咖啡訂單: ${isCoffeeOrder ? '是' : '否'}</li>`;
+            report += `<li>純咖啡豆訂單: ${isBeansOnly ? '是' : '否'}</li>`;
+            report += '</ul>';
+            
+            report += '<h4>2. 更新器啟動條件分析</h4>';
+            report += '<ul>';
+            report += `<li>訂單 ID 存在: ${orderId ? '✅ 滿足' : '❌ 不滿足'}</li>`;
+            report += `<li>支付狀態合適: ${paymentStatus === 'paid' || paymentStatus === 'pending' ? '✅ 滿足' : '❌ 不滿足'}</li>`;
+            report += `<li>是咖啡訂單: ${isCoffeeOrder ? '✅ 滿足' : '❌ 不滿足'}</li>`;
+            report += `<li>不是純咖啡豆: ${!isBeansOnly ? '✅ 滿足' : '❌ 不滿足'}</li>`;
+            report += '</ul>';
+            
+            report += '<h4>3. 結論</h4>';
+            if (shouldStartUpdater) {
+                report += '<div class="success">✅ 應該啟動訂單狀態更新器，但可能由於以下原因未啟動：</div>';
+                report += '<ul>';
+                report += '<li>JavaScript 初始化時機問題</li>';
+                report += '<li>數據屬性設置延遲</li>';
+                report += '<li>JavaScript 錯誤阻止執行</li>';
+                report += '<li>API 端點訪問問題</li>';
+                report += '</ul>';
+            } else {
+                report += '<div class="warning">⚠️ 不滿足啟動更新器的條件</div>';
+                report += '<p>可能的原因：</p>';
+                report += '<ul>';
+                if (!orderId) report += '<li>訂單 ID 未設置</li>';
+                if (!(paymentStatus === 'paid' || paymentStatus === 'pending')) report += `<li>支付狀態不適合: ${paymentStatus}</li>`;
+                if (!isCoffeeOrder) report += '<li>不是咖啡訂單</li>';
+                if (isBeansOnly) report += '<li>是純咖啡豆訂單</li>';
+                report += '</ul>';
+            }
+            
+            report += '<h4>4. 建議修復方案</h4>';
+            report += '<ol>';
+            report += '<li>檢查瀏覽器控制台是否有 JavaScript 錯誤</li>';
+            report += '<li>確認數據屬性在 JavaScript 執行前已設置</li>';
+            report += '<li>測試 API 端點是否正常工作</li>';
+            report += '<li>簡化更新器啟動條件進行測試</li>';
+            report += '<li>添加調試日誌追蹤執行流程</li>';
+            report += '</ol>';
+            
+            reportElement.innerHTML = report;
+            reportElement.className = shouldStartUpdater ? 'test-result warning' : 'test-result info';
+            addLog('生成了診斷報告', 'info');
+        }
+
+        // 複製報告功能
+        function copyReport() {
+            const reportElement = document.getElementById('report-content');
+            const text = reportElement.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('診斷報告已複製到剪貼簿');
+                addLog('診斷報告已複製', 'success');
+            }).catch(err => {
+                console.error('複製失敗:', err);
+                alert('複製失敗，請手動複製');
+                addLog('複製診斷報告失敗', 'error');
+            });
+        }
+
+        // 頁面加載時自動運行一些檢查
+        document.addEventListener('DOMContentLoaded', function() {
+            checkDataAttributes();
+            checkOrderType();
+            addLog('頁面加載完成，開始診斷', 'info');
+        });
+    </script>
+</body>
+</html>
