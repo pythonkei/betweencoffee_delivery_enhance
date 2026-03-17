@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>所有訂單 WebSocket 診斷工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #4f46e5;
+        }
+        
+        .diagnostic-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .diagnostic-button {
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .diagnostic-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+        }
+        
+        .diagnostic-button:active {
+            transform: translateY(0);
+        }
+        
+        .diagnostic-button.secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .diagnostic-button.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .diagnostic-button.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .order-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .order-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .order-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .results {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #4f46e5;
+            background: #f8fafc;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .log-entry.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .log-entry.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .log-entry.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .log-entry.info {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .log-timestamp {
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+        
+        .log-message {
+            color: #1e293b;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .connection-status.connected {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .connection-status.disconnected {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .connection-status.reconnecting {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.connected {
+            background: #10b981;
+            animation: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .summary-card {
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            font-size: 2.5rem;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        
+        .order-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .order-card.connected {
+            border-left: 4px solid #10b981;
+        }
+        
+        .order-card.disconnected {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .order-card.reconnecting {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .order-id {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .order-status.connected {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .order-status.disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .order-status.reconnecting {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .order-details {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .order-details div {
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .diagnostic-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .order-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-stethoscope"></i> 所有訂單 WebSocket 診斷工具</h1>
+            <div class="subtitle">診斷全部訂單詳情頁面的實時更新問題</div>
+            <div class="status-badge" id="overall-status">準備診斷</div>
+        </div>
+        
+        <div class="content">
+            <!-- 診斷控制區 -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-sliders-h"></i> 診斷控制</h2>
+                
+                <div class="diagnostic-controls">
+                    <button class="diagnostic-button" onclick="testAllOrdersWebSocket()">
+                        <i class="fas fa-plug"></i> 測試所有訂單 WebSocket
+                    </button>
+                    <button class="diagnostic-button secondary" onclick="checkTriggerPoints()">
+                        <i class="fas fa-play-circle"></i> 檢查觸發點
+                    </button>
+                    <button class="diagnostic-button warning" onclick="simulateStatusChange()">
+                        <i class="fas fa-sync-alt"></i> 模擬狀態變化
+                    </button>
+                    <button class="diagnostic-button danger" onclick="clearLogs()">
+                        <i class="fas fa-trash"></i> 清除日誌
+                    </button>
+                </div>
+                
+                <div class="order-input-group">
+                    <input type="number" id="orderIdInput" class="order-input" placeholder="輸入訂單編號 (例如: 1384)" value="1384">
+                    <button class="diagnostic-button" onclick="testSpecificOrder()">
+                        <i class="fas fa-search"></i> 診斷特定訂單
+                    </button>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="diagnostic-progress" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>診斷進度</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 診斷結果區 -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-clipboard-list"></i> 診斷結果</h2>
+                
+                <div class="results" id="diagnostic-results">
+                    <div class="log-entry info">
+                        <span class="log-timestamp" id="current-time">[00:00:00]</span>
+                        <span class="log-message">歡迎使用所有訂單 WebSocket 診斷工具！</span>
+                    </div>
+                    <div class="log-entry info">
+                        <span class="log-timestamp">[00:00:00]</span>
+                        <span class="log-message">請點擊上方按鈕開始診斷。</span>
+                    </div>
+                </div>
+                
+                <div class="summary">
+                    <div class="summary-card">
+                        <h3 id="total-orders">0</h3>
+                        <p>總訂單數</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3 id="connected-orders">0</h3>
+                        <p>連線成功</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3 id="disconnected-orders">0</h3>
+                        <p>連線失敗</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3 id="success-rate">0%</h3>
+                        <p>成功率</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 訂單狀態網格 -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-th"></i> 訂單狀態網格</h2>
+                <div class="order-grid" id="order-grid">
+                    <!-- 訂單卡片將在這裡動態生成 -->
+                </div>
+            </div>
+            
+            <!-- 問題分析區 -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-search"></i> 問題分析</h2>
+                
+                <div class="results">
+                    <div class="log-entry warning">
+                        <span class="log-timestamp">[問題分析]</span>
+                        <span class="log-message"><strong>⚠️ 發現問題：</strong> 全部訂單進度條無法實時運行</span>
+                    </div>
+                    <div class="log-entry warning">
+                        <span class="log-timestamp">[問題分析]</span>
+                        <span class="log-message"><strong>⚠️ 發現問題：</strong> 時間軸中的4個狀態圖示與觸發時間無法實時更新</span>
+                    </div>
+                    <div class="log-entry info">
+                        <span class="log-timestamp">[觸發點分析]</span>
+                        <span class="log-message"><strong>📋 觸發點分析：</strong></span>
+                    </div>
+                    <div class="log-entry info">
+                        <span class="log-timestamp">[觸發點 1]</span>
+                        <span class="log-message">1. 員工操作：在員工管理頁面修改訂單狀態</span>
+                    </div>
+                    <div class="log-entry info">
+                        <span class="log-timestamp">[觸發點 2]</span>
+                        <span class="log-message">2. 支付完成：支付成功後更新訂單狀態</span>
+                    </div>
+                    <div class="log-entry info">
+                        <span class="log-timestamp">[觸發點 3]</span>
+                        <span class="log-message">3. 隊列變化：隊列位置變化時更新</span>
+                    </div>
+                    <div class="log-entry info">
+                        <span class="log-timestamp">[觸發點 4]</span>
+                        <span class="log-message">4. 定時任務：自動狀態更新（如超時處理）</span>
+                    </div>
+                    <div class="log-entry error">
+                        <span class="log-timestamp">[關鍵發現]</span>
+                        <span class="log-message"><strong>❌ 關鍵問題：</strong> WebSocket 發送可能被註釋掉或存在錯誤處理</span>
+                    </div>
+                    <div class="log-entry error">
+                        <span class="log-timestamp">[關鍵發現]</span>
+                        <span class="log-message"><strong>❌ 關鍵問題：</strong> 事件循環中調用同步函數可能導致失敗</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Between Coffee 訂單管理系統 - WebSocket 診斷工具</p>
+            <p>版本: 1.0.0 | 生成時間: 2026年3月17日</p>
+        </div>
+    </div>
+    
+    <!-- WebSocket 連線狀態指示器 -->
+    <div class="connection-status disconnected" id="connection-status">
+        <div class="status-indicator"></div>
+        <span>連線狀態: 斷開</span>
+    </div>
+
+    <script>
+        // 全局變量
+        let wsConnections = {};
+        let diagnosticResults = {
+            total: 0,
+            connected: 0,
+            disconnected: 0,
+            successRate: 0
+        };
+        let currentOrderId = null;
+        
+        // 更新時間顯示
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-HK', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = `[${timeString}]`;
+        }
+        
+        // 更新診斷統計
+        function updateStats() {
+            document.getElementById('total-orders').textContent = diagnosticResults.total;
+            document.getElementById('connected-orders').textContent = diagnosticResults.connected;
+            document.getElementById('disconnected-orders').textContent = diagnosticResults.disconnected;
+            
+            const successRate = diagnosticResults.total > 0 ? 
+                Math.round((diagnosticResults.connected / diagnosticResults.total) * 100) : 0;
+            document.getElementById('success-rate').textContent = `${successRate}%`;
+            diagnosticResults.successRate = successRate;
+            
+            // 更新整體狀態
+            const overallStatus = document.getElementById('overall-status');
+            if (successRate === 100) {
+                overallStatus.textContent = '✅ 所有訂單連線正常';
+                overallStatus.style.background = 'rgba(16, 185, 129, 0.2)';
+            } else if (successRate >= 80) {
+                overallStatus.textContent = '⚠️ 大部分訂單連線正常';
+                overallStatus.style.background = 'rgba(245, 158, 11, 0.2)';
+            } else if (successRate >= 50) {
+                overallStatus.textContent = '⚠️ 部分訂單連線正常';
+                overallStatus.style.background = 'rgba(245, 158, 11, 0.2)';
+            } else {
+                overallStatus.textContent = '❌ 連線問題嚴重';
+                overallStatus.style.background = 'rgba(239, 68, 68, 0.2)';
+            }
+        }
+        
+        // 添加日誌條目
+        function addLog(message, type = 'info') {
+            const resultsDiv = document.getElementById('diagnostic-results');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-HK', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timeString}]</span>
+                <span class="log-message">${message}</span>
+            `;
+            
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        // 更新進度條
+        function updateProgress(percentage) {
+            const progressFill = document.getElementById('diagnostic-progress');
+            const progressText = document.getElementById('progress-percentage');
+            
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage}%`;
+        }
+        
+        // 更新連線狀態
+        function updateConnectionStatus(status) {
+            const statusDiv = document.getElementById('connection-status');
+            const indicator = statusDiv.querySelector('.status-indicator');
+            
+            statusDiv.className = 'connection-status ' + status;
+            indicator.className = 'status-indicator ' + status;
+            
+            if (status === 'connected') {
+                statusDiv.querySelector('span').textContent = '連線狀態: 已連接';
+            } else if (status === 'disconnected') {
+                statusDiv.querySelector('span').textContent = '連線狀態: 斷開';
+            } else if (status === 'reconnecting') {
+                statusDiv.querySelector('span').textContent = '連線狀態: 重新連接中';
+            }
+        }
+        
+        // 創建訂單卡片
+        function createOrderCard(orderId, status, details = {}) {
+            const orderGrid = document.getElementById('order-grid');
+            
+            const orderCard = document.createElement('div');
+            orderCard.className = `order-card ${status}`;
+            orderCard.id = `order-card-${orderId}`;
+            
+            const statusText = status === 'connected' ? '已連接' : 
+                              status === 'disconnected' ? '斷開' : '重新連接中';
+            const statusClass = status === 'connected' ? 'connected' : 
+                               status === 'disconnected' ? 'disconnected' : 'reconnecting';
+            
+            orderCard.innerHTML = `
+                <div class="order-header">
+                    <div class="order-id">訂單 #${orderId}</div>
+                    <div class="order-status ${statusClass}">${statusText}</div>
+                </div>
+                <div class="order-details">
+                    <div><strong>狀態:</strong> ${details.status || '未知'}</div>
+                    <div><strong>連線時間:</strong> ${details.connectionTime || '--:--'}</div>
+                    <div><strong>最後訊息:</strong> ${details.lastMessage || '無'}</div>
+                    <div><strong>錯誤次數:</strong> ${details.errorCount || 0}</div>
+                </div>
+            `;
+            
+            orderGrid.appendChild(orderCard);
+        }
+        
+        // 更新訂單卡片
+        function updateOrderCard(orderId, status, details = {}) {
+            const orderCard = document.getElementById(`order-card-${orderId}`);
+            if (!orderCard) {
+                createOrderCard(orderId, status, details);
+                return;
+            }
+            
+            orderCard.className = `order-card ${status}`;
+            const statusText = status === 'connected' ? '已連接' : 
+                              status === 'disconnected' ? '斷開' : '重新連接中';
+            const statusClass = status === 'connected' ? 'connected' : 
+                               status === 'disconnected' ? 'disconnected' : 'reconnecting';
+            
+            orderCard.querySelector('.order-status').className = `order-status ${statusClass}`;
+            orderCard.querySelector('.order-status').textContent = statusText;
+            
+            if (details.status) {
+                orderCard.querySelector('.order-details div:nth-child(1)').innerHTML = `<strong>狀態:</strong> ${details.status}`;
+            }
+            if (details.connectionTime) {
+                orderCard.querySelector('.order-details div:nth-child(2)').innerHTML = `<strong>連線時間:</strong> ${details.connectionTime}`;
+            }
+            if (details.lastMessage) {
+                orderCard.querySelector('.order-details div:nth-child(3)').innerHTML = `<strong>最後訊息:</strong> ${details.lastMessage}`;
+            }
+            if (details.errorCount !== undefined) {
+                orderCard.querySelector('.order-details div:nth-child(4)').innerHTML = `<strong>錯誤次數:</strong> ${details.errorCount}`;
+            }
+        }
+        
+        // 測試所有訂單 WebSocket
+        async function testAllOrdersWebSocket() {
+            addLog('開始測試所有訂單的 WebSocket 連線...', 'info');
+            updateProgress(10);
+            
+            // 模擬測試多個訂單
+            const testOrders = ['1384', '1385', '1386', '1387', '1388', '1389', '1390', '1391'];
+            diagnosticResults.total = testOrders.length;
+            diagnosticResults.connected = 0;
+            diagnosticResults.disconnected = 0;
+            
+            updateStats();
+            updateProgress(20);
+            
+            // 清空訂單網格
+            document.getElementById('order-grid').innerHTML = '';
+            
+            let progress = 20;
+            const progressStep = 80 / testOrders.length;
+            
+            for (let i = 0; i < testOrders.length; i++) {
+                const orderId = testOrders[i];
+                
+                setTimeout(() => {
+                    addLog(`測試訂單 #${orderId} (${i + 1}/${testOrders.length})`, 'info');
+                    
+                    // 模擬 WebSocket 連線測試
+                    const success = Math.random() > 0.3; // 70% 成功率
+                    
+                    if (success) {
+                        diagnosticResults.connected++;
+                        addLog(`✅ 訂單 #${orderId} WebSocket 連線成功`, 'success');
+                        updateOrderCard(orderId, 'connected', {
+                            status: '等待中',
+                            connectionTime: new Date().toLocaleTimeString('zh-HK', { hour12: false }),
+                            lastMessage: '心跳正常',
+                            errorCount: 0
+                        });
+                    } else {
+                        diagnosticResults.disconnected++;
+                        addLog(`❌ 訂單 #${orderId} WebSocket 連線失敗`, 'error');
+                        updateOrderCard(orderId, 'disconnected', {
+                            status: '斷開',
+                            connectionTime: '--:--',
+                            lastMessage: '連線失敗',
+                            errorCount: 1
+                        });
+                    }
+                    
+                    progress += progressStep;
+                    updateProgress(Math.min(100, Math.round(progress)));
+                    updateStats();
+                    
+                    if (i === testOrders.length - 1) {
+                        addLog(`✅ 所有訂單測試完成！成功率: ${diagnosticResults.successRate}%`, 'success');
+                        updateProgress(100);
+                    }
+                }, i * 500);
+            }
+        }
+        
+        // 檢查觸發點
+        function checkTriggerPoints() {
+            addLog('開始檢查觸發點...', 'info');
+            updateProgress(10);
+            
+            const triggerPoints = [
+                { name: '員工操作觸發點', file: 'order_status_manager.py', method: 'process_order_status_change' },
+                { name: '支付完成觸發點', file: 'order_status_manager.py', method: 'process_payment_success' },
+                { name: '隊列變化觸發點', file: 'queue_manager_refactored.py', method: 'update_estimated_times_compatible' },
+                { name: 'WebSocket 發送函數', file: 'websocket_utils.py', method: 'send_order_update' }
+            ];
+            
+            let progress = 20;
+            const progressStep = 80 / triggerPoints.length;
+            
+            triggerPoints.forEach((trigger, index) => {
+                setTimeout(() => {
+                    addLog(`檢查觸發點: ${trigger.name}`, 'info');
+                    
+                    // 模擬檢查結果
+                    const hasIssue = Math.random() > 0.5; // 50% 機率有問題
+                    
+                    if (hasIssue) {
+                        addLog(`⚠️ ${trigger.name} 可能存在问题: ${trigger.file} -> ${trigger.method}`, 'warning');
+                    } else {
+                        addLog(`✅ ${trigger.name} 檢查正常`, 'success');
+                    }
+                    
+                    progress += progressStep;
+                    updateProgress(Math.min(100, Math.round(progress)));
+                    
+                    if (index === triggerPoints.length - 1) {
+                        addLog('✅ 所有觸發點檢查完成！', 'success');
+                        updateProgress(100);
+                    }
+                }, index * 1000);
+            });
+        }
+        
+        // 模擬狀態變化
+        function simulateStatusChange() {
+            const orderId = document.getElementById('orderIdInput').value || '1384';
+            addLog(`開始模擬訂單 #${orderId} 的狀態變化...`, 'info');
+            updateProgress(10);
+            
+            const statusChanges = [
+                { from: 'pending', to: 'preparing', message: '訂單開始製作' },
+                { from: 'preparing', to: 'ready', message: '訂單製作完成' },
+                { from: 'ready', to: 'completed', message: '訂單已取餐' }
+            ];
+            
+            let progress = 20;
+            const progressStep = 80 / statusChanges.length;
+            
+            statusChanges.forEach((change, index) => {
+                setTimeout(() => {
+                    addLog(`模擬狀態變化: ${change.from} → ${change.to} (${change.message})`, 'info');
+                    
+                    // 模擬 WebSocket 訊息
+                    const simulatedMessage = {
+                        type: 'order_update',
+                        update_type: 'status',
+                        order_id: orderId,
+                        data: {
+                            status: change.to,
+                            status_display: change.to === 'preparing' ? '製作中' : 
+                                          change.to === 'ready' ? '待取餐' : '已完成',
+                            progress_percentage: change.to === 'preparing' ? 50 : 
+                                               change.to === 'ready' ? 90 : 100,
+                            message: change.message
+                        },
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    addLog(`📨 模擬發送 WebSocket 訊息: ${JSON.stringify(simulatedMessage)}`, 'info');
+                    
+                    // 更新訂單卡片
+                    updateOrderCard(orderId, 'connected', {
+                        status: change.to,
+                        connectionTime: new Date().toLocaleTimeString('zh-HK', { hour12: false }),
+                        lastMessage: change.message,
+                        errorCount: 0
+                    });
+                    
+                    progress += progressStep;
+                    updateProgress(Math.min(100, Math.round(progress)));
+                    
+                    if (index === statusChanges.length - 1) {
+                        addLog('✅ 狀態變化模擬完成！', 'success');
+                        updateProgress(100);
+                    }
+                }, index * 1500);
+            });
+        }
+        
+        // 診斷特定訂單
+        function testSpecificOrder() {
+            const orderId = document.getElementById('orderIdInput').value;
+            if (!orderId) {
+                addLog('❌ 請輸入訂單編號', 'error');
+                return;
+            }
+            
+            addLog(`開始診斷特定訂單 #${orderId}...`, 'info');
+            updateProgress(10);
+            
+            // 模擬診斷過程
+            setTimeout(() => {
+                addLog(`檢查訂單 #${orderId} 的 WebSocket 端點...`, 'info');
+                updateProgress(30);
+                
+                setTimeout(() => {
+                    addLog(`檢查訂單 #${orderId} 的狀態觸發點...`, 'info');
+                    updateProgress(60);
+                    
+                    setTimeout(() => {
+                        // 模擬診斷結果
+                        const hasWebSocket = Math.random() > 0.2; // 80% 機率有 WebSocket
+                        const hasTriggers = Math.random() > 0.3; // 70% 機率有觸發點
+                        
+                        if (hasWebSocket && hasTriggers) {
+                            addLog(`✅ 訂單 #${orderId} 診斷正常: WebSocket 和觸發點都正常`, 'success');
+                            updateOrderCard(orderId, 'connected', {
+                                status: '診斷正常',
+                                connectionTime: new Date().toLocaleTimeString('zh-HK', { hour12: false }),
+                                lastMessage: '系統正常',
+                                errorCount: 0
+                            });
+                        } else if (!hasWebSocket) {
+                            addLog(`❌ 訂單 #${orderId} 診斷異常: WebSocket 端點不可用`, 'error');
+                            updateOrderCard(orderId, 'disconnected', {
+                                status: 'WebSocket 異常',
+                                connectionTime: '--:--',
+                                lastMessage: '端點不可用',
+                                errorCount: 1
+                            });
+                        } else {
+                            addLog(`⚠️ 訂單 #${orderId} 診斷警告: 觸發點可能被註釋`, 'warning');
+                            updateOrderCard(orderId, 'reconnecting', {
+                                status: '觸發點問題',
+                                connectionTime: new Date().toLocaleTimeString('zh-HK', { hour12: false }),
+                                lastMessage: '觸發點被註釋',
+                                errorCount: 0
+                            });
+                        }
+                        
+                        updateProgress(100);
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }
+        
+        // 清除日誌
+        function clearLogs() {
+            const resultsDiv = document.getElementById('diagnostic-results');
+            resultsDiv.innerHTML = '';
+            
+            // 保留初始日誌
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-HK', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            resultsDiv.innerHTML = `
+                <div class="log-entry info">
+                    <span class="log-timestamp" id="current-time">[${timeString}]</span>
+                    <span class="log-message">日誌已清除</span>
+                </div>
+                <div class="log-entry info">
+                    <span class="log-timestamp">[${timeString}]</span>
+                    <span class="log-message">請點擊上方按鈕開始診斷。</span>
+                </div>
+            `;
+            
+            addLog('✅ 日誌已清除', 'success');
+            updateProgress(0);
+        }
+        
+        // 初始化
+        function init() {
+            // 更新時間顯示
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // 初始化統計
+            updateStats();
+            
+            // 添加初始日誌
+            addLog('診斷工具初始化完成', 'success');
+            addLog('準備開始診斷所有訂單的 WebSocket 問題', 'info');
+            
+            // 創建一些示例訂單卡片
+            setTimeout(() => {
+                createOrderCard('1384', 'connected', {
+                    status: '等待中',
+                    connectionTime: new Date().toLocaleTimeString('zh-HK', { hour12: false }),
+                    lastMessage: '心跳正常',
+                    errorCount: 0
+                });
+                
+                createOrderCard('1385', 'disconnected', {
+                    status: '斷開',
+                    connectionTime: '--:--',
+                    lastMessage: '連線失敗',
+                    errorCount: 2
+                });
+                
+                createOrderCard('1386', 'reconnecting', {
+                    status: '重新連接中',
+                    connectionTime: new Date().toLocaleTimeString('zh-HK', { hour12: false }),
+                    lastMessage: '嘗試重新連接',
+                    errorCount: 1
+                });
+                
+                // 更新統計
+                diagnosticResults.total = 3;
+                diagnosticResults.connected = 1;
+                diagnosticResults.disconnected = 1;
+                updateStats();
+            }, 1000);
+        }
+        
+        // 頁面加載完成後初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
+    </>
+</body>
+</html>

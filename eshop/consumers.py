@@ -177,9 +177,19 @@ class OrderConsumer(BaseOrderConsumer):
         """主動發送當前訂單狀態給前端"""
         status_data = await self._get_order_status_data()
         if status_data:
+            # ✅ 修復：發送 order_update 類型以保持一致性
             await self._send_json({
-                'type': 'order_status',
-                'data': status_data,
+                'type': 'order_update',
+                'update_type': 'status',
+                'order_id': self.order_id,
+                'data': {
+                    'status': status_data.get('status'),
+                    'status_display': status_data.get('status_display'),
+                    'estimated_time': status_data.get('estimated_completion_time'),
+                    'queue_position': status_data.get('queue_position'),
+                    'remaining_seconds': status_data.get('remaining_seconds'),
+                    'progress_percentage': status_data.get('progress_percentage'),
+                },
                 'timestamp': timezone.now().isoformat()
             })
             logger.debug(f"📤 發送當前訂單狀態: {self.order_id}")
@@ -227,10 +237,12 @@ class OrderConsumer(BaseOrderConsumer):
                 event['remaining_seconds'] = status_data['remaining_seconds']
                 event['progress_percentage'] = status_data['progress_percentage']
         
+        # ✅ 修復：發送 order_update 類型以匹配 send_order_update 函數
         await self._send_json({
-            'type': 'order_status',
+            'type': 'order_update',
+            'update_type': 'status',
+            'order_id': event.get('order_id', self.order_id),
             'data': {
-                'order_id': event.get('order_id', self.order_id),
                 'status': event.get('status'),
                 'status_display': event.get('status_display'),
                 'estimated_time': event.get('estimated_time'),

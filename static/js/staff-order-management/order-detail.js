@@ -143,8 +143,12 @@ class OrderDetailTracker {
     handleMessage(data) {
         console.log('📨 收到訂單更新:', data);
 
-        if (data.type === 'order_update') {
-            // 統一處理 order_update
+        // ✅ 修復：支持後端發送的 'order_status' 類型
+        if (data.type === 'order_status') {
+            // 處理 order_status 類型（後端發送的格式）
+            this.updateOrderStatus(data.data);
+        } else if (data.type === 'order_update') {
+            // 統一處理 order_update（舊格式）
             switch (data.update_type) {
                 case 'status':
                     this.updateOrderStatus(data.data);
@@ -158,8 +162,15 @@ class OrderDetailTracker {
                 default:
                     console.log('❓ 未知更新類型:', data.update_type);
             }
+        } else if (data.type === 'queue_position') {
+            // 處理專門的隊列位置更新
+            this.updateQueuePosition(data.position);
+        } else if (data.type === 'estimated_time') {
+            // 處理專門的預計時間更新
+            this.updateEstimatedTime(data.estimated_time);
         } else if (data.type === 'pong') {
             // 心跳回應，忽略
+            console.log('❤️ 收到心跳回應');
         } else if (data.type === 'error') {
             console.error('伺服器錯誤:', data.message);
             this.showToast('❌ ' + data.message, 'error');
@@ -175,6 +186,8 @@ class OrderDetailTracker {
         const statusDisplay = data.status_display || this.getStatusDisplay(status);
         const updatedAt = data.updated_at || new Date().toISOString();
 
+        console.log('🔄 更新訂單狀態:', { status, statusDisplay, data });
+
         // 更新狀態文字
         document.getElementById('status-text').textContent = `訂單 ${statusDisplay}`;
         
@@ -184,13 +197,29 @@ class OrderDetailTracker {
         // 更新時間軸
         this.updateTimeline(status, updatedAt);
         
-        // 更新進度條
-        this.updateProgressBar(status);
+        // 更新進度條（優先使用後端提供的進度百分比）
+        if (data.progress_percentage !== undefined) {
+            this.updateProgressBarWithPercentage(data.progress_percentage);
+        } else {
+            this.updateProgressBar(status);
+        }
         
         // 顯示/隱藏排隊資訊
         const queueInfo = document.getElementById('queue-info');
         if (status === 'pending' || status === 'preparing') {
             queueInfo.classList.remove('d-none');
+            
+            // ✅ 更新隊列位置（如果後端提供）
+            if (data.queue_position !== undefined) {
+                this.updateQueuePosition(data.queue_position);
+            }
+            
+            // ✅ 更新預計時間（如果後端提供）
+            if (data.estimated_time !== undefined) {
+                this.updateEstimatedTime(data.estimated_time);
+            } else if (data.estimated_completion_time !== undefined) {
+                this.updateEstimatedTime(data.estimated_completion_time);
+            }
         } else {
             queueInfo.classList.add('d-none');
         }
@@ -277,6 +306,13 @@ class OrderDetailTracker {
             default: width = 0;
         }
         progressFill.style.width = width + '%';
+    }
+
+    updateProgressBarWithPercentage(percentage) {
+        const progressFill = document.getElementById('progress-fill');
+        const clampedPercentage = Math.max(0, Math.min(100, percentage));
+        progressFill.style.width = clampedPercentage + '%';
+        console.log(`📊 更新進度條: ${clampedPercentage}%`);
     }
 
     updateQueuePosition(position) {
