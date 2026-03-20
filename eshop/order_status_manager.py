@@ -201,17 +201,24 @@ class OrderStatusManager:
             else:
                 logger.warning(f"⚠️ 訂單狀態變化後時間計算有問題: {time_result.get('error')}")
             
-            # 發送WebSocket通知
+            # ============================================================
+            # 🔧 修復：發送WebSocket通知（統一使用 'status' 類型）
+            # 說明：前端 order-detail.js 中的 handleMessage 方法
+            #       期望接收 update_type 為 'status' 的消息
+            #       原本使用 'status_change' 導致前端無法正確處理
+            # ============================================================
             try:
                 from .websocket_utils import send_order_update
                 send_order_update(
                     order_id=order_id,
-                    update_type='status_change',
+                    update_type='status',  # ← 修復：改為 'status'，與前端一致
                     data={
                         'status': new_status,
+                        'status_display': order.get_status_display(),  # ← 新增
                         'message': f"訂單狀態已更新為 {new_status}"
                     }
                 )
+                logger.info(f"✅ 已發送訂單 #{order_id} 狀態更新 WebSocket 通知")
             except Exception as ws_error:
                 logger.error(f"發送WebSocket通知失敗: {str(ws_error)}")
             

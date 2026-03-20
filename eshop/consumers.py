@@ -139,6 +139,7 @@ class OrderConsumer(BaseOrderConsumer):
         """
         from .models import OrderModel, CoffeeQueue
         from .order_status_manager import OrderStatusManager
+        from django.utils import timezone
         
         try:
             order = OrderModel.objects.get(id=self.order_id)
@@ -149,10 +150,20 @@ class OrderConsumer(BaseOrderConsumer):
             queue_info = None
             try:
                 queue = CoffeeQueue.objects.get(order=order)
+                
+                # 🔧 修復：計算剩餘秒數（如果預計完成時間存在）
+                remaining_seconds = None
+                if queue.estimated_completion_time:
+                    now = timezone.now()
+                    if queue.estimated_completion_time > now:
+                        remaining_seconds = int((queue.estimated_completion_time - now).total_seconds())
+                    else:
+                        remaining_seconds = 0
+                
                 queue_info = {
                     'position': queue.position,
                     'estimated_time': queue.estimated_completion_time.isoformat() if queue.estimated_completion_time else None,
-                    'remaining_seconds': queue.remaining_seconds,
+                    'remaining_seconds': remaining_seconds,
                 }
             except CoffeeQueue.DoesNotExist:
                 pass
@@ -177,19 +188,9 @@ class OrderConsumer(BaseOrderConsumer):
         """主動發送當前訂單狀態給前端"""
         status_data = await self._get_order_status_data()
         if status_data:
-            # ✅ 修復：發送 order_update 類型以保持一致性
             await self._send_json({
-                'type': 'order_update',
-                'update_type': 'status',
-                'order_id': self.order_id,
-                'data': {
-                    'status': status_data.get('status'),
-                    'status_display': status_data.get('status_display'),
-                    'estimated_time': status_data.get('estimated_completion_time'),
-                    'queue_position': status_data.get('queue_position'),
-                    'remaining_seconds': status_data.get('remaining_seconds'),
-                    'progress_percentage': status_data.get('progress_percentage'),
-                },
+                'type': 'order_status',
+                'data': status_data,
                 'timestamp': timezone.now().isoformat()
             })
             logger.debug(f"📤 發送當前訂單狀態: {self.order_id}")
@@ -214,9 +215,62 @@ class OrderConsumer(BaseOrderConsumer):
     
     # ========== 訊息處理方法（由 channel_layer.group_send 觸發）==========
     
+    # ============================================================
+    # 🔧 修復：新增 order_update 方法
+    # 說明：websocket_utils.py 中的 broadcast_to_group 使用
+    #       message['type'] = 'order_update' 來路由消息
+    #       channel layer 會自動將 type 中的 '.' 替換為 '_'
+    #       所以需要定義 order_update 方法來接收這些消息
+    # ============================================================
+    async def order_update(self, event):
+        """
+        訂單更新路由器（來自 websocket_utils.send_order_update）
+        
+        此方法接收所有類型的訂單更新消息，並根據 update_type 分發處理
+        
+        event 格式：
+            {
+                'type': 'order_update',
+                'update_type': 'status' | 'status_change' | 'payment_status' | ...,
+                'order_id': 123,
+                'data': {...}
+            }
+        """
+        update_type = event.get('update_type', '')
+        
+        # 根據 update_type 分發到對應的處理方法
+        if update_type in ('status', 'status_change'):
+            # 狀態變更 → 調用 order_status_update
+            await self.order_status_update(event)
+        elif update_type == 'payment_status':
+            # 支付狀態 → 調用 payment_status_update
+            await self.payment_status_update(event)
+        elif update_type == 'queue_position':
+            # 排隊位置 → 調用 queue_position_update
+            await self.queue_position_update(event)
+        elif update_type == 'estimated_time':
+            # 預計時間 → 調用 estimated_time_update
+            await self.estimated_time_update(event)
+        elif update_type == 'staff_action':
+            # 員工操作 → 直接發送給前端
+            await self._send_json({
+                'type': 'staff_action',
+                'data': event.get('data', {}),
+                'timestamp': timezone.now().isoformat()
+            })
+        else:
+            # 未知類型：記錄日誌並直接轉發給前端
+            logger.warning(f"⚠️ 未知的 update_type: {update_type}")
+            await self._send_json({
+                'type': 'order_update',
+                'update_type': update_type,
+                'data': event.get('data', {}),
+                'timestamp': timezone.now().isoformat()
+            })
+
     async def order_status_update(self, event):
         """
-        訂單狀態更新（來自 send_order_update）
+        訂單狀態更新（來自 send_order_update 或 order_update 分發）
         event 應包含：
             - order_id
             - status
@@ -237,12 +291,10 @@ class OrderConsumer(BaseOrderConsumer):
                 event['remaining_seconds'] = status_data['remaining_seconds']
                 event['progress_percentage'] = status_data['progress_percentage']
         
-        # ✅ 修復：發送 order_update 類型以匹配 send_order_update 函數
         await self._send_json({
-            'type': 'order_update',
-            'update_type': 'status',
-            'order_id': event.get('order_id', self.order_id),
+            'type': 'order_status',
             'data': {
+                'order_id': event.get('order_id', self.order_id),
                 'status': event.get('status'),
                 'status_display': event.get('status_display'),
                 'estimated_time': event.get('estimated_time'),

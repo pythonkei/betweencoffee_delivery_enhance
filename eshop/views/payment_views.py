@@ -321,49 +321,48 @@ def alipay_callback(request):
                     except Exception as queue_error:
                         logger.error(f"加入隊列失敗: {queue_error}")
                 
-                # 6. 發送WebSocket通知
-                try:
-                    if WEBSOCKET_ENABLED:
-                        send_payment_update(
-                            order_id=order.id,
-                            payment_status='paid',
-                            data={
-                                'payment_method': 'alipay',
-                                'message': '支付宝支付成功'
-                            }
-                        )
-
-                        send_order_update(
-                            order_id=order.id,
-                            update_type='status',
-                            data={
-                                'status': order.status,
-                                'status_display': order.get_status_display(),
-                                'message': '支付成功，訂單已確認'
-                            }
-                        )
-                        
-                        # 如果有隊列項，發送隊列更新
-                        try:
-                            queue_item = CoffeeQueue.objects.get(order=order)
-                            send_queue_update(
-                                update_type='add',
-                                data={
-                                    'order_id': order.id,
-                                    'position': queue_item.position,
-                                    'queue_type': 'waiting',
-                                    'estimated_start': queue_item.estimated_start_time.isoformat() if queue_item.estimated_start_time else None,
-                                    'estimated_complete': queue_item.estimated_completion_time.isoformat() if queue_item.estimated_completion_time else None,
-                                    'coffee_count': queue_item.coffee_count,
-                                    'preparation_time': queue_item.preparation_time_minutes
-                                }
-                            )
-                        except CoffeeQueue.DoesNotExist:
-                            logger.info(f"訂單 {order.id} 沒有隊列項，可能不包含咖啡")
-                except Exception as ws_error:
-                    logger.error(f"發送WebSocket通知失敗: {ws_error}")
-                    
-                # WebSocket 發送啟用，確保訂單詳情頁面實時更新
+                # 6. 發送WebSocket通知（暫時註釋掉，以避免事件循環錯誤）
+                # try:
+                #     if WEBSOCKET_ENABLED:
+                #         send_payment_update(
+                #             order_id=order.id,
+                #             payment_status='paid',
+                #             data={
+                #                 'payment_method': 'alipay',
+                #                 'message': '支付宝支付成功'
+                #             }
+                #         )
+                #
+                #         send_order_update(
+                #             order_id=order.id,
+                #             update_type='status_change',
+                #             data={
+                #                 'status': order.status,
+                #                 'message': '支付成功，訂單已確認'
+                #             }
+                #         )
+                #         
+                #         # 如果有隊列項，發送隊列更新
+                #         try:
+                #             queue_item = CoffeeQueue.objects.get(order=order)
+                #             send_queue_update(
+                #                 update_type='add',
+                #                 data={
+                #                     'order_id': order.id,
+                #                     'position': queue_item.position,
+                #                     'queue_type': 'waiting',
+                #                     'estimated_start': queue_item.estimated_start_time.isoformat() if queue_item.estimated_start_time else None,
+                #                     'estimated_complete': queue_item.estimated_completion_time.isoformat() if queue_item.estimated_completion_time else None,
+                #                     'coffee_count': queue_item.coffee_count,
+                #                     'preparation_time': queue_item.preparation_time_minutes
+                #                 }
+                #             )
+                #         except CoffeeQueue.DoesNotExist:
+                #             logger.info(f"訂單 {order.id} 沒有隊列項，可能不包含咖啡")
+                # except Exception as ws_error:
+                #     logger.error(f"發送WebSocket通知失敗: {ws_error}")
+                #     
+                # # WebSocket 發送暫時禁用，以確保支付流程穩定
                 
                 logger.info(f"✅ 支付寶回調處理成功，訂單: {out_trade_no}")
             
@@ -514,29 +513,28 @@ def paypal_callback(request):
             # 清空購物車
             clear_user_cart_and_session(request)
             
-            # 發送WebSocket通知
-            try:
-                if WEBSOCKET_ENABLED:
-                    send_payment_update(
-                        order_id=order.id,
-                        payment_status='paid',
-                        data={
-                            'payment_method': 'paypal',
-                            'message': 'PayPal支付成功'
-                        }
-                    )
-
-                    send_order_update(
-                        order_id=order.id,
-                        update_type='status',
-                        data={
-                            'status': order.status,
-                            'status_display': order.get_status_display(),
-                            'message': '支付成功，訂單已確認'
-                        }
-                    )
-            except Exception as ws_error:
-                logger.error(f"發送WebSocket通知失敗: {ws_error}")
+            # 發送通知（暫時註釋掉，以避免事件循環錯誤）
+            # try:
+            #     if WEBSOCKET_ENABLED:
+            #         send_payment_update(
+            #             order_id=order.id,
+            #             payment_status='paid',
+            #             data={
+            #                 'payment_method': 'paypal',
+            #                 'message': 'PayPal支付成功'
+            #             }
+            #         )
+            #
+            #         send_order_update(
+            #             order_id=order.id,
+            #             update_type='status_change',
+            #             data={
+            #                 'status': order.status,
+            #                 'message': '支付成功，訂單已確認'
+            #             }
+            #         )
+            # except Exception as ws_error:
+            #     logger.error(f"發送WebSocket通知失敗: {ws_error}")
             
             # 清理session
             clear_payment_session(request, order_id)

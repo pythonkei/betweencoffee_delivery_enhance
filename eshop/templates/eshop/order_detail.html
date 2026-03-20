@@ -227,8 +227,13 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script src="{% static 'js/order-detail.js' %}"></script>
+{% block extra_scripts %}
+<!-- ============================================================
+🔧 修復：修正 JavaScript 文件路徑
+說明：原路徑 'js/order-detail.js' 不存在
+      正確路徑為 'js/staff-order-management/order-detail.js'
+============================================================ -->
+<script src="{% static 'js/staff-order-management/order-detail.js' %}"></script>
 <script>
     // 初始化訂單追蹤頁面
     document.addEventListener('DOMContentLoaded', function() {
@@ -236,8 +241,24 @@
         if (appContainer) {
             const orderId = appContainer.dataset.orderId;
             const token = appContainer.dataset.orderToken || '';
-            // OrderDetailTracker 已在 order-detail.js 中定義
-            window.orderTracker = new OrderDetailTracker(orderId, token);
+            
+            console.log('🔍 開始初始化訂單追蹤器 #' + orderId);
+            
+            // 檢查 OrderDetailTracker 是否已定義
+            if (typeof OrderDetailTracker === 'undefined') {
+                console.error('❌ OrderDetailTracker 未定義，請檢查 JavaScript 文件是否正確加載');
+                return;
+            }
+            
+            try {
+                // OrderDetailTracker 已在 order-detail.js 中定義
+                window.orderTracker = new OrderDetailTracker(orderId, token);
+                console.log('✅ 訂單追蹤器初始化成功');
+            } catch (error) {
+                console.error('❌ 訂單追蹤器初始化失敗:', error);
+            }
+        } else {
+            console.error('❌ 找不到 order-detail-app 容器');
         }
     });
 </script>

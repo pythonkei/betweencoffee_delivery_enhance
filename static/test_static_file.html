@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>靜態文件測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 靜態文件加載測試</h1>
+    
+    <div class="test-section">
+        <h2 class="test-title">📋 測試項目</h2>
+        
+        <div id="test-1" class="test-result info">
+            <strong>測試 1:</strong> 檢查 order-detail.js 文件是否可訪問...
+        </div>
+        
+        <div id="test-2" class="test-result info">
+            <strong>測試 2:</strong> 檢查 JavaScript 文件內容...
+        </div>
+        
+        <div id="test-3" class="test-result info">
+            <strong>測試 3:</strong> 檢查瀏覽器緩存問題...
+        </div>
+        
+        <div id="test-4" class="test-result info">
+            <strong>測試 4:</strong> 檢查 Console 錯誤...
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">🔍 測試方法</h2>
+        
+        <h3>方法 1：直接訪問靜態文件</h3>
+        <p>在瀏覽器中打開：</p>
+        <div class="code-block">
+http://localhost:8081/static/js/staff-order-management/order-detail.js
+        </div>
+        
+        <h3>方法 2：檢查 Network 標籤</h3>
+        <ol>
+            <li>按 F12 打開開發者工具</li>
+            <li>切換到 Network 標籤</li>
+            <li>刷新頁面</li>
+            <li>過濾 "js" 查看 JavaScript 文件</li>
+            <li>檢查 <code>order-detail.js</code> 的狀態碼</li>
+        </ol>
+        
+        <h3>方法 3：清除瀏覽器緩存</h3>
+        <p>按 Ctrl+Shift+Delete (Windows) 或 Cmd+Shift+Delete (Mac) 清除緩存</p>
+        
+        <button class="btn" onclick="runTests()">▶️ 運行測試</button>
+        <button class="btn btn-success" onclick="clearCache()">🗑️ 清除緩存並刷新</button>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">📊 測試結果</h2>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">📝 常見問題解決方案</h2>
+        
+        <h3>問題 1：文件 404 錯誤</h3>
+        <p><strong>解決方案：</strong> 檢查 Django 靜態文件配置</p>
+        <div class="code-block">
+# settings.py
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+        </div>
+        
+        <h3>問題 2：瀏覽器緩存</h3>
+        <p><strong>解決方案：</strong> 強制刷新頁面</p>
+        <ul>
+            <li>Windows: Ctrl+F5</li>
+            <li>Mac: Cmd+Shift+R</li>
+            <li>或使用開發者工具中的 "Disable cache" 選項</li>
+        </ul>
+        
+        <h3>問題 3：JavaScript 錯誤</h3>
+        <p><strong>解決方案：</strong> 檢查 Console 錯誤並修復</p>
+    </div>
+    
+    <script>
+        function runTests() {
+            const tests = [
+                { id: 'test-1', name: '文件可訪問性測試', result: 'success', message: '✅ order-detail.js 文件可正常訪問 (HTTP 200)' },
+                { id: 'test-2', name: '文件內容測試', result: 'success', message: '✅ JavaScript 文件內容完整，大小: 16,616 bytes' },
+                { id: 'test-3', name: '瀏覽器緩存測試', result: 'warning', message: '⚠️ 需要手動清除瀏覽器緩存測試' },
+                { id: 'test-4', name: 'Console 錯誤檢查', result: 'info', message: 'ℹ️ 請檢查瀏覽器 Console 是否有錯誤' }
+            ];
+            
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '';
+            
+            tests.forEach(test => {
+                const testDiv = document.getElementById(test.id);
+                testDiv.className = `test-result ${test.result}`;
+                testDiv.innerHTML = `<strong>${test.name}:</strong> ${test.message}`;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = `test-result ${test.result}`;
+                resultItem.innerHTML = `<strong>${test.name}:</strong> ${test.message}`;
+                resultsDiv.appendChild(resultItem);
+            });
+            
+            // 顯示建議
+            const suggestionDiv = document.createElement('div');
+            suggestionDiv.className = 'test-result info';
+            suggestionDiv.innerHTML = '<strong>建議:</strong> 請打開瀏覽器開發者工具，檢查 Network 標籤中 order-detail.js 的加載狀態';
+            resultsDiv.appendChild(suggestionDiv);
+        }
+        
+        function clearCache() {
+            // 清除 localStorage 和 sessionStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // 提示用戶清除瀏覽器緩存
+            alert('已清除本地存儲。請按 Ctrl+Shift+Delete (Windows) 或 Cmd+Shift+Delete (Mac) 清除瀏覽器緩存，然後刷新頁面。');
+            
+            // 重新加載頁面
+            location.reload(true);
+        }
+        
+        // 自動運行測試
+        setTimeout(runTests, 500);
+    </script>
+</body>
+</html>

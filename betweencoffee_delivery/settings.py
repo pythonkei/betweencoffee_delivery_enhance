@@ -216,18 +216,9 @@ WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 
 
-# Channels 層配置 - 使用 Redis 作為後端
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('localhost', 6379)],  # 開發環境
-        },
-    },
-}
-
-# 或在 Railway 上使用 URL 格式：
+# Channels 層配置 - 開發環境使用內存層，生產環境使用Redis
 if IS_RAILWAY:
+    # Railway環境使用Redis
     redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379')
     CHANNEL_LAYERS = {
         'default': {
@@ -240,6 +231,15 @@ if IS_RAILWAY:
             },
         },
     }
+    print("使用Redis Channel層進行生產環境")
+else:
+    # 開發環境使用內存層（無需Redis）
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+    print("使用內存Channel層進行開發")
 
 # ✅ 確認 ASGI 應用設定正確
 ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'

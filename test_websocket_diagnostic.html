@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 診斷工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .log-container {
+            background-color: #1e1e1e;
+            color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-time {
+            color: #6c757d;
+            font-size: 0.8em;
+        }
+        .log-info {
+            color: #17a2b8;
+        }
+        .log-success {
+            color: #28a745;
+        }
+        .log-error {
+            color: #dc3545;
+        }
+        .log-warning {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 WebSocket 診斷工具</h1>
+    
+    <div class="test-section">
+        <h2 class="test-title">📋 診斷測試</h2>
+        
+        <div class="form-group">
+            <label for="order-id">訂單 ID:</label>
+            <input type="number" id="order-id" value="1408" class="form-control" style="padding: 8px; width: 100%; margin: 10px 0;">
+        </div>
+        
+        <button class="btn" onclick="runDiagnostic()">▶️ 運行診斷</button>
+        <button class="btn btn-success" onclick="testWebSocket()">🔗 測試 WebSocket 連線</button>
+        <button class="btn btn-warning" onclick="testJavaScript()">📜 測試 JavaScript 加載</button>
+        <button class="btn" onclick="clearLogs()">🗑️ 清除日誌</button>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">📊 診斷結果</h2>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">📝 即時日誌</h2>
+        <div id="log-container" class="log-container"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">🔍 測試步驟</h2>
+        
+        <h3>步驟 1：測試 JavaScript 加載</h3>
+        <p>檢查 <code>order-detail.js</code> 文件是否正確加載，以及 <code>OrderDetailTracker</code> 類是否正確定義。</p>
+        
+        <h3>步驟 2：測試 WebSocket 路由</h3>
+        <p>檢查 WebSocket 路由 <code>/ws/order/{order_id}/</code> 是否可訪問。</p>
+        
+        <h3>步驟 3：測試 WebSocket 連線</h3>
+        <p>建立 WebSocket 連線，檢查連線狀態和消息接收。</p>
+        
+        <h3>步驟 4：測試自動更新</h3>
+        <p>在員工管理頁面操作訂單狀態，檢查客戶頁面是否自動更新。</p>
+    </div>
+    
+    <script>
+        let logs = [];
+        let ws = null;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = {
+                time: timestamp,
+                message: message,
+                type: type
+            };
+            
+            logs.push(logEntry);
+            
+            const logContainer = document.getElementById('log-container');
+            const logElement = document.createElement('div');
+            logElement.className = `log-entry log-${type}`;
+            logElement.innerHTML = `<span class="log-time">[${timestamp}]</span> ${message}`;
+            logContainer.appendChild(logElement);
+            
+            // 自動滾動到底部
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function clearLogs() {
+            logs = [];
+            document.getElementById('log-container').innerHTML = '';
+            log('日誌已清除', 'info');
+        }
+        
+        function runDiagnostic() {
+            const orderId = document.getElementById('order-id').value;
+            log(`開始診斷訂單 #${orderId}...`, 'info');
+            
+            // 清空之前的結果
+            document.getElementById('test-results').innerHTML = '';
+            
+            // 運行所有測試
+            testJavaScriptLoad();
+            testWebSocketRoute(orderId);
+            testOrderDetailTracker();
+        }
+        
+        function testJavaScriptLoad() {
+            log('測試 JavaScript 文件加載...', 'info');
+            
+            // 檢查 order-detail.js 文件
+            fetch('/static/js/staff-order-management/order-detail.js')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ order-detail.js 文件可訪問 (HTTP ' + response.status + ')', 'success');
+                        return response.text();
+                    } else {
+                        log('❌ order-detail.js 文件不可訪問 (HTTP ' + response.status + ')', 'error');
+                        throw new Error('文件不可訪問');
+                    }
+                })
+                .then(text => {
+                    log(`✅ JavaScript 文件內容完整，大小: ${text.length} bytes`, 'success');
+                    
+                    // 檢查 OrderDetailTracker 類定義
+                    if (text.includes('class OrderDetailTracker')) {
+                        log('✅ OrderDetailTracker 類在文件中定義', 'success');
+                    } else {
+                        log('❌ OrderDetailTracker 類未在文件中定義', 'error');
+                    }
+                })
+                .catch(error => {
+                    log('❌ JavaScript 文件加載失敗: ' + error.message, 'error');
+                });
+        }
+        
+        function testWebSocketRoute(orderId) {
+            log(`測試 WebSocket 路由 /ws/order/${orderId}/ ...`, 'info');
+            
+            // 嘗試建立 WebSocket 連線
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/order/${orderId}/`;
+            
+            log(`嘗試連線: ${wsUrl}`, 'info');
+            
+            try {
+                if (ws) {
+                    ws.close();
+                }
+                
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = () => {
+                    log('✅ WebSocket 連線成功', 'success');
+                    
+                    // 發送測試消息
+                    ws.send(JSON.stringify({ type: 'ping' }));
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`📨 收到 WebSocket 消息: ${JSON.stringify(data)}`, 'info');
+                    } catch (e) {
+                        log(`📨 收到 WebSocket 消息: ${event.data}`, 'info');
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    log('❌ WebSocket 連線錯誤: ' + error, 'error');
+                };
+                
+                ws.onclose = (event) => {
+                    log(`🔌 WebSocket 關閉: code=${event.code}, reason=${event.reason}`, 'warning');
+                };
+                
+            } catch (error) {
+                log('❌ 建立 WebSocket 連線失敗: ' + error.message, 'error');
+            }
+        }
+        
+        function testWebSocket() {
+            const orderId = document.getElementById('order-id').value;
+            testWebSocketRoute(orderId);
+        }
+        
+        function testJavaScript() {
+            testJavaScriptLoad();
+            testOrderDetailTracker();
+        }
+        
+        function testOrderDetailTracker() {
+            log('測試 OrderDetailTracker 類...', 'info');
+            
+            // 檢查 OrderDetailTracker 是否已定義
+            if (typeof OrderDetailTracker === 'undefined') {
+                log('❌ OrderDetailTracker 未定義', 'error');
+                
+                // 嘗試動態加載 JavaScript 文件
+                log('嘗試動態加載 order-detail.js...', 'info');
+                
+                const script = document.createElement('script');
+                script.src = '/static/js/staff-order-management/order-detail.js';
+                script.onload = () => {
+                    log('✅ order-detail.js 動態加載成功', 'success');
+                    
+                    if (typeof OrderDetailTracker !== 'undefined') {
+                        log('✅ OrderDetailTracker 現在已定義', 'success');
+                    } else {
+                        log('❌ OrderDetailTracker 仍然未定義', 'error');
+                    }
+                };
+                script.onerror = () => {
+                    log('❌ order-detail.js 動態加載失敗', 'error');
+                };
+                
+                document.head.appendChild(script);
+            } else {
+                log('✅ OrderDetailTracker 已定義', 'success');
+                
+                // 嘗試創建實例
+                try {
+                    const orderId = document.getElementById('order-id').value;
+                    const tracker = new OrderDetailTracker(orderId);
+                    log('✅ OrderDetailTracker 實例創建成功', 'success');
+                    
+                    // 檢查屬性
+                    log(`訂單 ID: ${tracker.orderId}`, 'info');
+                    log(`WebSocket 連線狀態: ${tracker.isConnected}`, 'info');
+                    
+                } catch (error) {
+                    log('❌ OrderDetailTracker 實例創建失敗: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // 頁面加載時自動運行基本測試
+        document.addEventListener('DOMContentLoaded', function() {
+            log('WebSocket 診斷工具已加載', 'info');
+            log('請輸入訂單 ID 並點擊「運行診斷」按鈕', 'info');
+        });
+    </script>
+</body>
+</html>

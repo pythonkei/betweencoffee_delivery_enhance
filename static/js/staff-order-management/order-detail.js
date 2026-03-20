@@ -140,17 +140,21 @@ class OrderDetailTracker {
 
     // ========== 訊息處理 ==========
 
+    // ============================================================
+    // 🔧 修復：增強消息處理邏輯
+    // 說明：1. 增加 'order_status' 類型支持（從 send_current_status 發送）
+    //       2. 同時支持 'status' 和 'status_change' update_type
+    //       3. 添加更多調試日誌
+    // ============================================================
     handleMessage(data) {
         console.log('📨 收到訂單更新:', data);
 
-        // ✅ 修復：支持後端發送的 'order_status' 類型
-        if (data.type === 'order_status') {
-            // 處理 order_status 類型（後端發送的格式）
-            this.updateOrderStatus(data.data);
-        } else if (data.type === 'order_update') {
-            // 統一處理 order_update（舊格式）
+        // 類型 1：order_update（來自 websocket_utils.send_order_update）
+        if (data.type === 'order_update') {
             switch (data.update_type) {
                 case 'status':
+                case 'status_change':  // ← 修復：同時支持 'status_change'
+                    console.log('✅ 處理狀態更新:', data.data);
                     this.updateOrderStatus(data.data);
                     break;
                 case 'queue_position':
@@ -159,23 +163,58 @@ class OrderDetailTracker {
                 case 'estimated_time':
                     this.updateEstimatedTime(data.data.estimated_time);
                     break;
+                case 'payment_status':
+                    console.log('✅ 處理支付狀態更新:', data.data);
+                    if (data.data && data.data.payment_status === 'paid') {
+                        this.updateOrderStatus(data.data);
+                    }
+                    break;
+                case 'staff_action':
+                    console.log('👨‍🍳 員工操作:', data.data);
+                    if (data.data && data.data.message) {
+                        this.showToast(data.data.message, 'info');
+                    }
+                    break;
                 default:
                     console.log('❓ 未知更新類型:', data.update_type);
             }
-        } else if (data.type === 'queue_position') {
-            // 處理專門的隊列位置更新
+        }
+        // 類型 2：order_status（來自 send_current_status）
+        else if (data.type === 'order_status') {
+            console.log('✅ 處理 order_status:', data.data);
+            this.updateOrderStatus(data.data);
+        }
+        // 類型 3：queue_position（隊列位置專用更新）
+        else if (data.type === 'queue_position') {
+            console.log('📊 處理排隊位置更新:', data);
             this.updateQueuePosition(data.position);
-        } else if (data.type === 'estimated_time') {
-            // 處理專門的預計時間更新
+            if (data.estimated_time) {
+                this.updateEstimatedTime(data.estimated_time);
+            }
+        }
+        // 類型 4：estimated_time（預計時間專用更新）
+        else if (data.type === 'estimated_time') {
+            console.log('⏰ 處理預計時間更新:', data);
             this.updateEstimatedTime(data.estimated_time);
-        } else if (data.type === 'pong') {
+        }
+        // 類型 5：order_ready（訂單就緒通知）
+        else if (data.type === 'order_ready') {
+            console.log('🔔 訂單就緒通知:', data);
+            this.showToast('🎉 您的訂單已準備就緒，請前往取餐！', 'success');
+            this.updateOrderStatus({ status: 'ready', status_display: '待取餐' });
+        }
+        // 類型 6：pong（心跳回應）
+        else if (data.type === 'pong') {
             // 心跳回應，忽略
-            console.log('❤️ 收到心跳回應');
-        } else if (data.type === 'error') {
+        }
+        // 類型 7：error（伺服器錯誤）
+        else if (data.type === 'error') {
             console.error('伺服器錯誤:', data.message);
             this.showToast('❌ ' + data.message, 'error');
-        } else {
-            console.log('❓ 未知訊息類型:', data.type);
+        }
+        // 其他未知類型
+        else {
+            console.log('❓ 未知訊息類型:', data.type, data);
         }
     }
 
@@ -186,8 +225,6 @@ class OrderDetailTracker {
         const statusDisplay = data.status_display || this.getStatusDisplay(status);
         const updatedAt = data.updated_at || new Date().toISOString();
 
-        console.log('🔄 更新訂單狀態:', { status, statusDisplay, data });
-
         // 更新狀態文字
         document.getElementById('status-text').textContent = `訂單 ${statusDisplay}`;
         
@@ -197,29 +234,13 @@ class OrderDetailTracker {
         // 更新時間軸
         this.updateTimeline(status, updatedAt);
         
-        // 更新進度條（優先使用後端提供的進度百分比）
-        if (data.progress_percentage !== undefined) {
-            this.updateProgressBarWithPercentage(data.progress_percentage);
-        } else {
-            this.updateProgressBar(status);
-        }
+        // 更新進度條
+        this.updateProgressBar(status);
         
         // 顯示/隱藏排隊資訊
         const queueInfo = document.getElementById('queue-info');
         if (status === 'pending' || status === 'preparing') {
             queueInfo.classList.remove('d-none');
-            
-            // ✅ 更新隊列位置（如果後端提供）
-            if (data.queue_position !== undefined) {
-                this.updateQueuePosition(data.queue_position);
-            }
-            
-            // ✅ 更新預計時間（如果後端提供）
-            if (data.estimated_time !== undefined) {
-                this.updateEstimatedTime(data.estimated_time);
-            } else if (data.estimated_completion_time !== undefined) {
-                this.updateEstimatedTime(data.estimated_completion_time);
-            }
         } else {
             queueInfo.classList.add('d-none');
         }
@@ -306,13 +327,6 @@ class OrderDetailTracker {
             default: width = 0;
         }
         progressFill.style.width = width + '%';
-    }
-
-    updateProgressBarWithPercentage(percentage) {
-        const progressFill = document.getElementById('progress-fill');
-        const clampedPercentage = Math.max(0, Math.min(100, percentage));
-        progressFill.style.width = clampedPercentage + '%';
-        console.log(`📊 更新進度條: ${clampedPercentage}%`);
     }
 
     updateQueuePosition(position) {
