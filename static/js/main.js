@@ -454,7 +454,7 @@ scrollers.forEach(scroller => {
 (function ($) {
 
     /*
-     * 現在時刻の表示
+     * 現在時刻的表示
      */
     function updateClock() {
         // 現在の日時を取得
@@ -473,15 +473,26 @@ scrollers.forEach(scroller => {
         // 時計の要素を取得
         const clockElement = document.getElementById("clock");
   
-        // 時計の要素に時刻を表示
-        clockElement.textContent = `${displayHours}:${displayMinutes}:${displaySeconds}`;
+        // 時計の要素に時刻を表示（如果元素存在）
+        if (clockElement) {
+            try {
+                clockElement.textContent = `${displayHours}:${displayMinutes}:${displaySeconds}`;
+            } catch (error) {
+                console.warn('時鐘更新失敗:', error);
+                // 停止時鐘更新
+                return;
+            }
+        }
   
         // 1秒後に再度更新
         setTimeout(updateClock, 1000);
     }
   
-    // 時計を開始
-    updateClock();
+    // 時計を開始（如果時鐘元素存在）
+    const clockElement = document.getElementById("clock");
+    if (clockElement) {
+        updateClock();
+    }
 
 
     // スクロールイベント

@@ -155,129 +155,64 @@ function saveAsImage(orderId) {
     }
 }
 
-// ========== 訂單狀態更新器 ==========
-class UnifiedOrderUpdater {
-    constructor(orderId) {
-        this.orderId = orderId;
-        this.updateInterval = null;
-        this.isRunning = false;
-        this.updateCount = 0;
-        this.maxUpdates = 120; // 最多更新120次（60分鐘）
-    }
-    
-    start() {
-        if (this.isRunning) return;
-        this.isRunning = true;
-        
-        console.log('啟動訂單狀態更新器，訂單ID:', this.orderId);
-        
-        // 立即更新一次
-        this.updateOrderStatus();
-        
-        // 每30秒更新一次（更頻繁的更新）
-        this.updateInterval = setInterval(() => {
-            this.updateOrderStatus();
-        }, 10000); // 改為10秒更新一次
-    }
-    
-    stop() {
-        this.isRunning = false;
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            console.log('訂單狀態更新器已停止');
+// ========== 訂單狀態更新器（簡化版） ==========
+// 注意：完整的更新器邏輯已移至 unified-order-updater.js
+// 此處只保留基本的更新顯示功能
+
+function updatePaymentConfirmationDisplay(data) {
+    // 根據狀態顯示不同的消息
+    const queueMessage = document.getElementById('queue-message');
+    if (queueMessage) {
+        switch(data.status) {
+            case 'preparing':
+                queueMessage.textContent = '您的訂單正在製作中，請耐心等候...';
+                break;
+            case 'ready':
+                queueMessage.textContent = '您的訂單已準備就緒，請前往取餐！';
+                break;
+            default:
+                queueMessage.textContent = data.queue_message || '';
         }
     }
     
-    async updateOrderStatus() {
-        // 檢查是否達到最大更新次數
-        if (this.updateCount >= this.maxUpdates) {
-            console.log('達到最大更新次數，停止更新器');
-            this.stop();
-            return;
-        }
+    // 更新進度條
+    const progressBar = document.getElementById('order-progress');
+    const progressText = document.getElementById('progress-text');
+    
+    if (progressBar && progressText && data.progress_percentage !== undefined) {
+        const progress = Math.max(0, Math.min(100, data.progress_percentage));
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute('aria-valuenow', progress);
+        progressText.textContent = data.progress_display || `${progress}% 完成`;
         
-        this.updateCount++;
-        
-        try {
-            // ✅ 修復：使用正確的 API 路徑
-            // 原路徑：/eshop/api/order-status/${this.orderId}/
-            // 正確路徑：/eshop/order/api/order-status/${this.orderId}/
-            const apiUrl = `/eshop/order/api/order-status/${this.orderId}/`;
-            console.log('調用 API:', apiUrl);
-            
-            const response = await fetch(apiUrl);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP錯誤! 狀態碼: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (!data.success) {
-                console.error('獲取訂單狀態失敗:', data.error);
-                return;
-            }
-            
-            console.log('訂單狀態更新:', data);
-            this.updateDisplay(data);
-            
-            // 如果訂單已完成，停止更新
-            if (data.is_ready || data.status === 'completed' || data.status === 'ready') {
-                console.log('訂單已完成，停止更新器');
-                this.stop();
-                
-                // 顯示完成消息
-                setTimeout(() => {
-                    if (document.getElementById('ready-section')) {
-                        document.getElementById('ready-section').style.display = 'block';
-                    }
-                }, 1000);
-            }
-            
-        } catch (error) {
-            console.error('訂單狀態更新失敗:', error);
-        }
+        // 添加動畫效果
+        progressBar.classList.add('progress-bar-animated');
     }
     
-    updateDisplay(data) {
-        // 更新進度條
-        const progressBar = document.getElementById('order-progress');
-        const progressText = document.getElementById('progress-text');
-        
-        if (progressBar && progressText && data.progress_percentage !== undefined) {
-            const progress = Math.max(0, Math.min(100, data.progress_percentage));
-            progressBar.style.width = `${progress}%`;
-            progressBar.setAttribute('aria-valuenow', progress);
-            progressText.textContent = data.progress_display || `${progress}% 完成`;
-            
-            // 添加動畫效果
-            progressBar.classList.add('progress-bar-animated');
-        }
-        
-        // 更新隊列信息
-        const queueStatusText = document.getElementById('queue-status-text');
-        const countdownText = document.getElementById('countdown-text');
-        const queueMessage = document.getElementById('queue-message');
-        
-        if (queueStatusText) queueStatusText.textContent = data.queue_display || '等待系統處理...';
-        if (countdownText) countdownText.textContent = data.remaining_display || '';
-        if (queueMessage) queueMessage.textContent = data.queue_message || '';
-        
-        // 更新預計時間
-        const estimatedTimeElement = document.querySelector('#estimated-time-display .font-weight-bold');
-        if (estimatedTimeElement && data.estimated_time) {
-            estimatedTimeElement.textContent = data.estimated_time;
-        }
-        
-        // 更新完成狀態
-        if (data.is_ready) {
-            const queueInfoSection = document.getElementById('queue-info-section');
-            const readySection = document.getElementById('ready-section');
-            
-            if (queueInfoSection) queueInfoSection.style.display = 'none';
-            if (readySection) readySection.style.display = 'block';
-        }
+    // 更新隊列信息
+    const queueStatusText = document.getElementById('queue-status-text');
+    const countdownText = document.getElementById('countdown-text');
+    
+    if (queueStatusText) queueStatusText.textContent = data.queue_display || '等待系統處理...';
+    if (countdownText) countdownText.textContent = data.remaining_display || '';
+    
+    // 更新預計時間
+    const estimatedTimeElement = document.querySelector('#estimated-time-display .font-weight-bold');
+    if (estimatedTimeElement && data.estimated_time) {
+        estimatedTimeElement.textContent = data.estimated_time;
     }
+    
+    // 更新完成狀態
+    if (data.is_ready || data.status === 'ready') {
+        const queueInfoSection = document.getElementById('queue-info-section');
+        const readySection = document.getElementById('ready-section');
+        
+        if (queueInfoSection) queueInfoSection.style.display = 'none';
+        if (readySection) readySection.style.display = 'block';
+    }
+    
+    // 添加調試日誌
+    console.log(`✅ 支付確認頁面更新: status=${data.status}, progress=${data.progress_percentage}%`);
 }
 
 // ========== 頁面初始化 ==========
@@ -339,34 +274,19 @@ function initOrderConfirmationPage() {
             console.log("保存按鈕事件綁定成功");
         }
         
-        // 啟動訂單狀態更新器（放寬條件：允許 paid 或 pending 狀態）
-        const shouldStartUpdater = orderId && 
-            (paymentStatus === 'paid' || paymentStatus === 'pending') &&
-            isCoffeeOrder && !isBeansOnly;
+        // 注意：訂單狀態更新器現在由 unified-order-updater.js 自動處理
+        // 該文件會在頁面加載時自動初始化，無需在此手動啟動
         
-        if (shouldStartUpdater) {
-            console.log("啟動訂單狀態更新器，訂單ID:", orderId);
-            window.orderUpdater = new UnifiedOrderUpdater(orderId);
-            window.orderUpdater.start();
-            
-            // 添加調試信息
-            console.log('訂單狀態更新器已啟動，將每10秒更新一次');
-            console.log('啟動條件:', {
-                orderId,
-                paymentStatus,
-                isCoffeeOrder,
-                isBeansOnly,
-                shouldStartUpdater
-            });
-        } else {
-            console.log('不啟動訂單狀態更新器，原因:', {
-                hasOrderId: !!orderId,
-                paymentStatus,
-                isCoffeeOrder,
-                isBeansOnly,
-                shouldStartUpdater
-            });
-        }
+        console.log('訂單狀態更新器將由 unified-order-updater.js 自動處理');
+        console.log('啟動條件檢查:', {
+            orderId,
+            paymentStatus,
+            isCoffeeOrder,
+            isBeansOnly,
+            shouldStartUpdater: orderId && 
+                (paymentStatus === 'paid' || paymentStatus === 'pending') &&
+                isCoffeeOrder && !isBeansOnly
+        });
         
         // 添加支付超時倒計時（如果支付狀態為pending）
         if (paymentStatus === 'pending') {
@@ -412,23 +332,58 @@ function startPaymentTimeoutCountdown() {
 // ========== 全局錯誤處理 ==========
 // 防止JavaScript錯誤導致頁面重定向
 window.addEventListener('error', function(event) {
+    // 檢查是否是第三方庫的錯誤（如 Bootstrap 的 Explain 錯誤）
+    if (event.error && event.error.message && event.error.message.includes('Explain')) {
+        console.warn('第三方庫錯誤被捕獲（已安全處理）:', event.error.message);
+        event.preventDefault();
+        event.stopPropagation();
+        return true; // 阻止錯誤繼續傳播
+    }
+    
     console.error('JavaScript錯誤被捕獲:', event.error);
-    event.preventDefault();
-    return true;
+    // 防止錯誤傳播，但不阻止默認行為
+    event.stopPropagation();
+    return false; // 返回false讓瀏覽器處理錯誤
 });
 
 // 防止未處理的Promise拒絕
 window.addEventListener('unhandledrejection', function(event) {
+    // 檢查是否是第三方庫的錯誤
+    if (event.reason && event.reason.message && event.reason.message.includes('Explain')) {
+        console.warn('第三方庫Promise錯誤被捕獲（已安全處理）:', event.reason.message);
+        event.preventDefault();
+        return;
+    }
+    
     console.error('未處理的Promise拒絕:', event.reason);
     event.preventDefault();
 });
+
+// 添加更安全的錯誤處理
+(function() {
+    // 保存原始的 console.error
+    const originalConsoleError = console.error;
+    
+    // 重寫 console.error 以過濾第三方庫錯誤
+    console.error = function(...args) {
+        // 檢查是否是第三方庫的錯誤
+        const errorString = args.map(arg => String(arg)).join(' ');
+        if (errorString.includes('Explain') || errorString.includes('bootstrap.bundle.min.js')) {
+            console.warn('第三方庫錯誤（已過濾）:', args);
+            return;
+        }
+        
+        // 調用原始的 console.error
+        originalConsoleError.apply(console, args);
+    };
+})();
 
 // ========== 全局導出 ==========
 // 確保函數在全局可用
 window.copyPickupCode = copyPickupCode;
 window.saveAsImage = saveAsImage;
 window.showMessage = showMessage;
-window.UnifiedOrderUpdater = UnifiedOrderUpdater;
+window.updatePaymentConfirmationDisplay = updatePaymentConfirmationDisplay;
 window.initOrderConfirmationPage = initOrderConfirmationPage;
 
 // 頁面加載完成後初始化

@@ -57,3 +57,44 @@ local_settings.py
 # Windows
 Thumbs.db.env.backup*
 .env
+
+# Backup directories created during cleanup
+backup/
+archive_backup_*.tar.gz
+
+# Test and temporary files
+test_*.html
+test_*.js
+test_*.py
+fix_*.py
+check_*.py
+verify_*.py
+final_verification*.py
+validate_fixes_simple.py
+performance_analysis.py
+queue_integrity_monitor.py
+queue_monitoring_dashboard.py
+security_demo.py
+cleanup_queue_data.py
+convert_images_to_webp.py
+generate_final_report.py
+precise_status_check.py
+analyze_js_dependencies.py
+
+# Report files
+*.md
+docs/reports/
+
+# Temporary directories
+tests/html_tests/
+tests/integration/
+tests/unit/
+
+# Log files
+*.log
+logs/
+
+# Cache directories
+.mypy_cache/
+.ruff_cache/
+__pycache__/

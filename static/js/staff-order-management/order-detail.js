@@ -225,8 +225,13 @@ class OrderDetailTracker {
         const statusDisplay = data.status_display || this.getStatusDisplay(status);
         const updatedAt = data.updated_at || new Date().toISOString();
 
-        // 更新狀態文字
-        document.getElementById('status-text').textContent = `訂單 ${statusDisplay}`;
+        // 更新狀態文字（增加存在性檢查）
+        const statusTextEl = document.getElementById('status-text');
+        if (statusTextEl) {
+            statusTextEl.textContent = `訂單 ${statusDisplay}`;
+        } else {
+            console.warn('⚠️ 找不到 status-text 元素');
+        }
         
         // 更新狀態圖示與背景
         this.updateStatusIcon(status);
@@ -239,16 +244,23 @@ class OrderDetailTracker {
         
         // 顯示/隱藏排隊資訊
         const queueInfo = document.getElementById('queue-info');
-        if (status === 'pending' || status === 'preparing') {
-            queueInfo.classList.remove('d-none');
+        if (queueInfo) {
+            if (status === 'pending' || status === 'preparing') {
+                queueInfo.classList.remove('d-none');
+            } else {
+                queueInfo.classList.add('d-none');
+            }
         } else {
-            queueInfo.classList.add('d-none');
+            console.warn('⚠️ 找不到 queue-info 元素');
         }
 
         // 若訂單已完成，停止自動重連（但保留連線）
         if (status === 'completed') {
             this.shouldReconnect = false; // 完成後不需重連
         }
+        
+        // 添加調試日誌
+        console.log(`✅ 更新訂單狀態為: ${status} (${statusDisplay})`);
     }
 
     updateStatusIcon(status) {
@@ -260,23 +272,23 @@ class OrderDetailTracker {
         
         switch (status) {
             case 'pending':
-                icon.className = 'fas fa-clock fa-lg';
+                icon.setAttribute('class', 'fas fa-clock fa-lg');
                 iconContainer.classList.add('bg-warning');
                 break;
             case 'preparing':
-                icon.className = 'fas fa-mug-hot fa-lg';
+                icon.setAttribute('class', 'fas fa-mug-hot fa-lg');
                 iconContainer.classList.add('bg-primary');
                 break;
             case 'ready':
-                icon.className = 'fas fa-bell fa-lg';
+                icon.setAttribute('class', 'fas fa-bell fa-lg');
                 iconContainer.classList.add('bg-success');
                 break;
             case 'completed':
-                icon.className = 'fas fa-check-double fa-lg';
+                icon.setAttribute('class', 'fas fa-check-double fa-lg');
                 iconContainer.classList.add('bg-secondary');
                 break;
             default:
-                icon.className = 'fas fa-check fa-lg';
+                icon.setAttribute('class', 'fas fa-check fa-lg');
                 iconContainer.classList.add('bg-success');
         }
     }

@@ -168,6 +168,73 @@
                     </div>
                 </div>
 
+                <!-- 即時狀態卡片（合併自 order_detail.html） -->
+                {% if order.payment_status == 'paid' %}
+                <div class="card shadow-sm mb-5" id="order-status-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="mr-3">
+                                <div id="status-icon" class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <i id="status-icon-symbol" class="fas fa-check fa-lg"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 id="status-text" class="mb-1">訂單 {{ order.get_status_display }}</h4>
+                                <p id="status-description" class="text-muted mb-0">
+                                    {% if order.status == 'pending' %}我們已收到您的訂單，即將開始製作。{% endif %}
+                                    {% if order.status == 'preparing' %}您的咖啡正在用心製作中，請稍候。{% endif %}
+                                    {% if order.status == 'ready' %}訂單已完成，請前往櫃檯取餐。{% endif %}
+                                    {% if order.status == 'completed' %}感謝您的惠顧，歡迎再次光臨。{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- 進度條 -->
+                        <div class="progress-bar-custom mt-3">
+                            <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                        
+                        <!-- 時間軸狀態 -->
+                        <div class="status-timeline mt-4">
+                            <div id="step-pending" class="status-step completed">
+                                <div class="icon"><i class="fas fa-check"></i></div>
+                                <div class="label">已下單</div>
+                                <div class="time" id="time-pending">{{ order.created_at|date:"H:i" }}</div>
+                            </div>
+                            <div id="step-preparing" class="status-step">
+                                <div class="icon"><i class="fas fa-mug-hot"></i></div>
+                                <div class="label">製作中</div>
+                                <div class="time" id="time-preparing">--:--</div>
+                            </div>
+                            <div id="step-ready" class="status-step">
+                                <div class="icon"><i class="fas fa-bell"></i></div>
+                                <div class="label">待取餐</div>
+                                <div class="time" id="time-ready">--:--</div>
+                            </div>
+                            <div id="step-completed" class="status-step">
+                                <div class="icon"><i class="fas fa-check-double"></i></div>
+                                <div class="label">已完成</div>
+                                <div class="time" id="time-completed">--:--</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 排隊資訊（僅 pending/preparing） -->
+                        <div id="queue-info" class="mt-4 p-3 bg-light rounded d-none">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">目前排隊位置</small>
+                                    <h3 id="queue-position" class="mb-0">-</h3>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">預計完成時間</small>
+                                    <h3 id="estimated-time" class="mb-0 text-primary">--:--</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- 訂單摘要信息 -->
                 {% with summary=order.order_summary_info %}
                 <div class="order-item-v2 mb-5 rounded">
@@ -265,7 +332,10 @@ if (document.body) {
 <!-- 引入html2canvas用于保存图片 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- 引入訂單狀態更新器 -->
+<!-- 引入統一的訂單狀態更新器 -->
+<script src="{% static 'js/unified-order-updater.js' %}"></script>
+
+<!-- 引入訂單支付確認功能 -->
 <script src="{% static 'js/order_payment_confirmation.js' %}"></script>
 
 <script>
@@ -453,8 +523,83 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- 进度条样式 -->
+<!-- 即時狀態卡片樣式 -->
 <style>
+.status-timeline {
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem 0;
+    position: relative;
+}
+.status-step {
+    text-align: center;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+}
+.status-step .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    border: 3px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    font-size: 24px;
+    color: #6c757d;
+}
+.status-step.active .icon {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+.status-step.completed .icon {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+.status-step .label {
+    font-weight: 600;
+    color: #495057;
+}
+.status-step .time {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+.progress-bar-custom {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin: 2rem 0;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #00d4ff);
+    transition: width 0.5s ease;
+}
+.connection-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+.connection-status.connected { background: #28a745; }
+.connection-status.disconnected { background: #dc3545; }
+.connection-status.reconnecting { background: #ffc107; color: #212529; }
+
+/* 进度条样式 */
 .progress-modern {
     height: 28px;
     border-radius: 12px;
