@@ -305,7 +305,10 @@ class UnifiedOrderUpdater {
      */
     updateStatusCard(data) {
         const status = data.status;
-        const statusDisplay = data.status_display || this.getStatusDisplay(status);
+        
+        // ✅ 修復：始終使用前端的 getStatusDisplay() 方法，忽略後端返回的 status_display
+        // 這樣可以確保狀態顯示的一致性，避免後端返回「等待制作」而前端顯示「等待製作」的問題
+        const statusDisplay = this.getStatusDisplay(status);
         
         // 更新狀態文字
         const statusTextEl = document.getElementById('status-text');
@@ -322,7 +325,12 @@ class UnifiedOrderUpdater {
             statusDescEl.textContent = this.getStatusDescription(status);
         }
         
-        console.log(`✅ 更新狀態卡片: ${status} (${statusDisplay})`);
+        console.log(`✅ 更新狀態卡片: ${status} (前端顯示: ${statusDisplay})`);
+        
+        // ✅ 新增：記錄後端返回的 status_display 以便調試
+        if (data.status_display && data.status_display !== statusDisplay) {
+            console.log(`ℹ️ 後端返回的 status_display: "${data.status_display}"，前端顯示: "${statusDisplay}"`);
+        }
     }
     
     /**
@@ -551,7 +559,7 @@ class UnifiedOrderUpdater {
     
     getStatusDisplay(status) {
         const map = {
-            'waiting': '處理中',      // waiting 對應到 pending 的顯示
+            'waiting': '等待製作',      // ✅ 修復：為 waiting 狀態提供獨立的顯示文本
             'pending': '處理中',
             'preparing': '製作中',
             'ready': '待取餐',
@@ -562,7 +570,7 @@ class UnifiedOrderUpdater {
     
     getStatusDescription(status) {
         const map = {
-            'waiting': '我們已收到您的訂單，即將開始製作。',  // waiting 對應到 pending 的描述
+            'waiting': '您的訂單已支付成功，正在等待咖啡師開始製作。',  // ✅ 修復：為 waiting 狀態提供獨立的描述
             'pending': '我們已收到您的訂單，即將開始製作。',
             'preparing': '您的咖啡正在用心製作中，請稍候。',
             'ready': '訂單已完成，請前往櫃檯取餐。',

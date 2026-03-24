@@ -1,55 +1,35 @@
 // static/js/order_payment_confirmation.js
+// ✅ 簡化版 - 移除過度複雜的錯誤處理和圖片保存功能
 
-// ========== 基礎工具函數 ==========
+// ========== 基礎工具函數（簡化版） ==========
 function showMessage(message, type = "info") {
-    console.log("顯示消息:", message, type);
+    console.log(`📢 ${type}: ${message}`);
     
-    // 移除現有消息
-    const existingAlert = document.querySelector('.custom-alert');
-    if (existingAlert) {
-        existingAlert.remove();
+    // 使用簡單的 alert 或 console 輸出
+    if (type === 'error') {
+        console.error(message);
+    } else if (type === 'success') {
+        console.log(message);
     }
     
-    // 確定 Bootstrap 類名
-    const alertClass = type === 'success' ? 'alert-success' : 
-                       type === 'error' ? 'alert-danger' : 'alert-info';
-    
-    // 創建消息元素
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `custom-alert alert ${alertClass} alert-dismissible fade show`;
-    alertDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    `;
-    
-    alertDiv.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
-            <span>${message}</span>
-        </div>
-        <button type="button" class="close" onclick="this.parentElement.remove()">
-            <span>&times;</span>
-        </button>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // 3秒後自動消失
-    setTimeout(function() {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 3000);
+    // 可以選擇性地顯示簡單的提示
+    if (window.toastr) {
+        // 如果有 toastr 庫，使用它
+        toastr[type === 'error' ? 'error' : type === 'success' ? 'success' : 'info'](message);
+    }
 }
 
-function fallbackCopyText(text) {
-    console.log("使用降級複製方案");
+function copyPickupCode(pickupCode) {
+    console.log("複製提取碼:", pickupCode);
+    
+    if (!pickupCode || pickupCode === 'None' || pickupCode === '') {
+        showMessage("提取碼不存在", "error");
+        return;
+    }
+    
+    // 使用簡單的複製方法
     const textArea = document.createElement("textarea");
-    textArea.value = text;
+    textArea.value = pickupCode;
     textArea.style.position = "fixed";
     textArea.style.left = "-999999px";
     textArea.style.top = "-999999px";
@@ -60,99 +40,16 @@ function fallbackCopyText(text) {
     try {
         const successful = document.execCommand('copy');
         if (successful) {
-            showMessage("✅ 提取碼已複製到剪貼簿", "success");
+            showMessage("提取碼已複製到剪貼簿", "success");
         } else {
-            showMessage("❌ 複製失敗，請手動複製提取碼: " + text, "error");
+            showMessage("複製失敗，請手動複製提取碼: " + pickupCode, "error");
         }
     } catch (err) {
-        console.error('降級複製失敗:', err);
-        showMessage("❌ 複製失敗，請手動複製提取碼: " + text, "error");
+        console.error('複製失敗:', err);
+        showMessage("複製失敗，請手動複製提取碼: " + pickupCode, "error");
     }
     
     document.body.removeChild(textArea);
-}
-
-// ========== 核心功能函數 ==========
-function copyPickupCode(pickupCode) {
-    console.log("copyPickupCode 被調用，提取碼:", pickupCode);
-    
-    if (!pickupCode || pickupCode === 'None' || pickupCode === '') {
-        showMessage("❌ 提取碼不存在", "error");
-        return;
-    }
-    
-    // 方法1: 使用現代的 Clipboard API
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(pickupCode).then(function() {
-            showMessage("✅ 提取碼已複製到剪貼簿", "success");
-        }).catch(function(err) {
-            console.error('Clipboard API 失敗:', err);
-            fallbackCopyText(pickupCode);
-        });
-    } else {
-        // 方法2: 降級方案
-        fallbackCopyText(pickupCode);
-    }
-}
-
-function saveAsImage(orderId) {
-    console.log("saveAsImage 被調用，訂單ID:", orderId);
-    
-    // 檢查 html2canvas 是否可用
-    if (typeof html2canvas === 'undefined') {
-        console.error("html2canvas 未定義");
-        showMessage("❌ 圖片保存功能暫時不可用", "error");
-        return;
-    }
-    
-    const qrcodeSection = document.getElementById('qrcode-section');
-    if (!qrcodeSection) {
-        console.error("找不到保存區域: qrcode-section");
-        showMessage("❌ 找不到保存區域", "error");
-        return;
-    }
-    
-    // 顯示保存中提示
-    const saveBtn = document.getElementById('save-image-btn');
-    if (saveBtn) {
-        const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>保存中...';
-        saveBtn.disabled = true;
-        
-        // 配置 html2canvas
-        const options = {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false
-        };
-        
-        html2canvas(qrcodeSection, options).then(function(canvas) {
-            console.log("截圖完成");
-            
-            // 創建下載鏈接
-            const link = document.createElement('a');
-            link.download = `between_coffee_order_${orderId}.png`;
-            link.href = canvas.toDataURL("image/png");
-            
-            // 觸發下載
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // 恢復按鈕狀態
-            saveBtn.innerHTML = originalText;
-            saveBtn.disabled = false;
-            
-            showMessage("✅ 圖片保存成功", "success");
-            
-        }).catch(function(error) {
-            console.error("截圖失敗:", error);
-            saveBtn.innerHTML = originalText;
-            saveBtn.disabled = false;
-            showMessage("❌ 圖片保存失敗，請稍後重試", "error");
-        });
-    }
 }
 
 // ========== 訂單狀態更新器（簡化版） ==========
@@ -256,9 +153,8 @@ function initOrderConfirmationPage() {
         // 獲取提取碼
         const pickupCode = document.getElementById('pickup-code-display')?.textContent?.trim() || '';
         
-        // 綁定按鈕事件
+        // 綁定複製按鈕事件
         const copyBtn = document.getElementById('copy-pickup-code-btn');
-        const saveBtn = document.getElementById('save-image-btn');
         
         if (copyBtn && pickupCode) {
             copyBtn.addEventListener('click', function() {
@@ -267,11 +163,11 @@ function initOrderConfirmationPage() {
             console.log("複製按鈕事件綁定成功");
         }
         
-        if (saveBtn && orderId) {
-            saveBtn.addEventListener('click', function() {
-                saveAsImage(orderId);
-            });
-            console.log("保存按鈕事件綁定成功");
+        // 移除圖片保存功能，因為它過於複雜且容易出錯
+        const saveBtn = document.getElementById('save-image-btn');
+        if (saveBtn) {
+            saveBtn.style.display = 'none'; // 隱藏保存按鈕
+            console.log("圖片保存按鈕已隱藏");
         }
         
         // 注意：訂單狀態更新器現在由 unified-order-updater.js 自動處理
@@ -329,59 +225,24 @@ function startPaymentTimeoutCountdown() {
     const countdownInterval = setInterval(updateCountdown, 1000);
 }
 
-// ========== 全局錯誤處理 ==========
-// 防止JavaScript錯誤導致頁面重定向
+// ========== 全局錯誤處理（簡化版） ==========
+// 只處理關鍵錯誤，避免過度防護
 window.addEventListener('error', function(event) {
-    // 檢查是否是第三方庫的錯誤（如 Bootstrap 的 Explain 錯誤）
-    if (event.error && event.error.message && event.error.message.includes('Explain')) {
-        console.warn('第三方庫錯誤被捕獲（已安全處理）:', event.error.message);
-        event.preventDefault();
-        event.stopPropagation();
-        return true; // 阻止錯誤繼續傳播
-    }
-    
+    // 只記錄錯誤，不阻止默認行為
     console.error('JavaScript錯誤被捕獲:', event.error);
-    // 防止錯誤傳播，但不阻止默認行為
     event.stopPropagation();
     return false; // 返回false讓瀏覽器處理錯誤
 });
 
 // 防止未處理的Promise拒絕
 window.addEventListener('unhandledrejection', function(event) {
-    // 檢查是否是第三方庫的錯誤
-    if (event.reason && event.reason.message && event.reason.message.includes('Explain')) {
-        console.warn('第三方庫Promise錯誤被捕獲（已安全處理）:', event.reason.message);
-        event.preventDefault();
-        return;
-    }
-    
     console.error('未處理的Promise拒絕:', event.reason);
     event.preventDefault();
 });
 
-// 添加更安全的錯誤處理
-(function() {
-    // 保存原始的 console.error
-    const originalConsoleError = console.error;
-    
-    // 重寫 console.error 以過濾第三方庫錯誤
-    console.error = function(...args) {
-        // 檢查是否是第三方庫的錯誤
-        const errorString = args.map(arg => String(arg)).join(' ');
-        if (errorString.includes('Explain') || errorString.includes('bootstrap.bundle.min.js')) {
-            console.warn('第三方庫錯誤（已過濾）:', args);
-            return;
-        }
-        
-        // 調用原始的 console.error
-        originalConsoleError.apply(console, args);
-    };
-})();
-
 // ========== 全局導出 ==========
 // 確保函數在全局可用
 window.copyPickupCode = copyPickupCode;
-window.saveAsImage = saveAsImage;
 window.showMessage = showMessage;
 window.updatePaymentConfirmationDisplay = updatePaymentConfirmationDisplay;
 window.initOrderConfirmationPage = initOrderConfirmationPage;

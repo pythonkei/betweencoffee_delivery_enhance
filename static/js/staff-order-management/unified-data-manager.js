@@ -640,3 +640,251 @@ if (typeof window !== 'undefined') {
     
     console.log('🌍 UnifiedDataManager 增強版已註冊到 window 對象');
 }
+
+// ==================== 全局防抖協調器 ====================
+/**
+ * 全局防抖協調器 - 確保所有組件的刷新邏輯協調一致
+ * 防止WebSocket推送和API輪詢同時觸發數據刷新
+ */
+class DebounceCoordinator {
+    constructor() {
+        console.log('🔄 初始化全局防抖協調器...');
+        
+        // 刷新任務隊列
+        this.refreshQueue = [];
+        this.isProcessing = false;
+        
+        // 防抖配置
+        this.debounceConfig = {
+            'websocket': 300,      // WebSocket事件：300ms
+            'api_polling': 1000,   // API輪詢：1秒
+            'manual': 500,         // 手動刷新：500ms
+            'tab_change': 500,     // 標籤頁切換：500ms
+            'network_recovery': 1000, // 網絡恢復：1秒
+            'default': 300         // 默認：300ms
+        };
+        
+        // 最後刷新時間記錄
+        this.lastRefreshTimes = {};
+        
+        // 初始化
+        this.init();
+    }
+    
+    init() {
+        console.log('✅ 全局防抖協調器初始化完成');
+        
+        // 監聽所有可能觸發刷新的事件
+        this.setupEventListeners();
+    }
+    
+    /**
+     * 設置事件監聽器
+     */
+    setupEventListeners() {
+        // WebSocket核心事件
+        const wsEvents = [
+            'queue_updated',
+            'order_status_changed', 
+            'new_order_created',
+            'payment_update',
+            'order_ready'
+        ];
+        
+        wsEvents.forEach(eventName => {
+            document.addEventListener(eventName, (event) => {
+                this.scheduleRefresh('websocket', eventName, event.detail);
+            });
+        });
+        
+        // 手動刷新事件
+        document.addEventListener('refresh_unified_data', (event) => {
+            this.scheduleRefresh('manual', 'refresh_unified_data', event.detail);
+        });
+        
+        // 標籤頁切換
+        document.addEventListener('tab_changed', (event) => {
+            this.scheduleRefresh('tab_change', 'tab_changed', event.detail);
+        });
+        
+        // 頁面可見性變化
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.scheduleRefresh('manual', 'visibilitychange', { visible: true });
+            }
+        });
+        
+        // 網絡恢復
+        window.addEventListener('online', () => {
+            this.scheduleRefresh('network_recovery', 'online', { network: 'restored' });
+        });
+        
+        console.log('✅ 全局防抖協調器事件監聽器已設置');
+    }
+    
+    /**
+     * 安排刷新任務（帶防抖）
+     */
+    scheduleRefresh(sourceType, eventName, eventData = {}) {
+        const now = Date.now();
+        const debounceTime = this.debounceConfig[sourceType] || this.debounceConfig.default;
+        const lastRefreshTime = this.lastRefreshTimes[sourceType] || 0;
+        
+        // 檢查是否需要防抖
+        if (now - lastRefreshTime < debounceTime) {
+            console.log(`⏸️ ${sourceType} 事件防抖中: ${eventName} (${now - lastRefreshTime}ms < ${debounceTime}ms)`);
+            return;
+        }
+        
+        // 更新最後刷新時間
+        this.lastRefreshTimes[sourceType] = now;
+        
+        // 添加任務到隊列
+        this.refreshQueue.push({
+            sourceType,
+            eventName,
+            eventData,
+            timestamp: now,
+            priority: this.getPriority(sourceType)
+        });
+        
+        console.log(`📋 安排刷新任務: ${sourceType} - ${eventName} (優先級: ${this.getPriority(sourceType)})`);
+        
+        // 觸發處理隊列
+        this.processQueue();
+    }
+    
+    /**
+     * 獲取任務優先級
+     */
+    getPriority(sourceType) {
+        const priorityMap = {
+            'websocket': 1,          // 最高優先級：實時事件
+            'manual': 2,             // 中優先級：手動操作
+            'tab_change': 3,         // 低優先級：UI變化
+            'network_recovery': 4,   // 低優先級：網絡恢復
+            'api_polling': 5         // 最低優先級：輪詢
+        };
+        return priorityMap[sourceType] || 10;
+    }
+    
+    /**
+     * 處理任務隊列
+     */
+    async processQueue() {
+        if (this.isProcessing || this.refreshQueue.length === 0) {
+            return;
+        }
+        
+        this.isProcessing = true;
+        
+        try {
+            // 按優先級排序（數字越小優先級越高）
+            this.refreshQueue.sort((a, b) => a.priority - b.priority);
+            
+            // 獲取最高優先級的任務
+            const task = this.refreshQueue.shift();
+            
+            console.log(`🔄 處理刷新任務: ${task.sourceType} - ${task.eventName} (延遲: ${Date.now() - task.timestamp}ms)`);
+            
+            // 執行刷新
+            await this.executeRefresh(task);
+            
+            // 清理過期任務（超過5秒的任務）
+            const now = Date.now();
+            this.refreshQueue = this.refreshQueue.filter(t => now - t.timestamp < 5000);
+            
+        } catch (error) {
+            console.error('❌ 處理刷新隊列失敗:', error);
+        } finally {
+            this.isProcessing = false;
+            
+            // 如果隊列中還有任務，繼續處理
+            if (this.refreshQueue.length > 0) {
+                setTimeout(() => this.processQueue(), 100);
+            }
+        }
+    }
+    
+    /**
+     * 執行刷新
+     */
+    async executeRefresh(task) {
+        try {
+            // 檢查 UnifiedDataManager 是否存在
+            if (!window.unifiedDataManager) {
+                console.warn('⚠️ UnifiedDataManager 未找到，跳過刷新');
+                return;
+            }
+            
+            // 根據任務類型執行不同的刷新邏輯
+            switch(task.sourceType) {
+                case 'websocket':
+                    // WebSocket事件：立即刷新
+                    await window.unifiedDataManager.loadUnifiedData();
+                    break;
+                    
+                case 'manual':
+                case 'tab_change':
+                case 'network_recovery':
+                    // 其他事件：強制刷新
+                    await window.unifiedDataManager.loadUnifiedData(true);
+                    break;
+                    
+                default:
+                    // 默認：普通刷新
+                    await window.unifiedDataManager.loadUnifiedData();
+            }
+            
+            console.log(`✅ 刷新任務完成: ${task.sourceType} - ${task.eventName}`);
+            
+        } catch (error) {
+            console.error(`❌ 執行刷新任務失敗 (${task.sourceType} - ${task.eventName}):`, error);
+        }
+    }
+    
+    /**
+     * 獲取協調器狀態
+     */
+    getStatus() {
+        return {
+            queueSize: this.refreshQueue.length,
+            isProcessing: this.isProcessing,
+            lastRefreshTimes: { ...this.lastRefreshTimes },
+            debounceConfig: { ...this.debounceConfig }
+        };
+    }
+    
+    /**
+     * 清理協調器
+     */
+    cleanup() {
+        this.refreshQueue = [];
+        this.isProcessing = false;
+        this.lastRefreshTimes = {};
+        console.log('🗑️ 全局防抖協調器已清理');
+    }
+}
+
+// ==================== 全局註冊防抖協調器 ====================
+
+if (typeof window !== 'undefined') {
+    // 創建全局實例
+    window.debounceCoordinator = new DebounceCoordinator();
+    
+    // 調試支持
+    window.debugDebounceCoordinator = function() {
+        const coordinator = window.debounceCoordinator;
+        if (!coordinator) {
+            console.error('❌ DebounceCoordinator 未找到');
+            return;
+        }
+        
+        console.group('🔍 DebounceCoordinator 調試信息');
+        console.log('📊 狀態:', coordinator.getStatus());
+        console.log('📋 隊列任務:', coordinator.refreshQueue);
+        console.groupEnd();
+    };
+    
+    console.log('🌍 DebounceCoordinator 已註冊到 window 對象');
+}

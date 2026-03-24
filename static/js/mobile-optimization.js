@@ -543,4 +543,6 @@
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initMobileOptimizations);
     } else {
-        setTimeout(initMobileOptim
+        setTimeout(initMobileOptimizations, 100);
+    }
+})();
