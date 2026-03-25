@@ -652,7 +652,7 @@ def fps_payment(request, order_id):
     except Exception as e:
         logger.error(f"FPS支付页面错误: {str(e)}")
         messages.error(request, f"FPS支付页面加载失败: {str(e)}")
-        return redirect('eshop:order_detail', order_id=order_id)
+        return redirect('eshop:order_payment_confirmation', order_id=order_id)
 
 # ==================== 现金支付视图 ====================
 
@@ -687,7 +687,7 @@ def cash_payment(request, order_id):
     except Exception as e:
         logger.error(f"现金支付页面错误: {str(e)}")
         messages.error(request, f"现金支付页面加载失败: {str(e)}")
-        return redirect('eshop:order_detail', order_id=order_id)
+        return redirect('eshop:order_payment_confirmation', order_id=order_id)
 
 
 
@@ -783,12 +783,12 @@ def cancel_timeout_payment(request, order_id):
             return redirect('eshop:index')
         else:
             messages.info(request, "訂單未超時或已支付")
-            return redirect('eshop:order_detail', order_id=order.id)
+            return redirect('eshop:order_payment_confirmation', order_id=order.id)
             
     except Exception as e:
         logger.error(f"取消超時支付錯誤: {str(e)}")
         messages.error(request, f"取消支付失敗: {str(e)}")
-        return redirect('eshop:order_detail', order_id=order_id)
+        return redirect('eshop:order_payment_confirmation', order_id=order_id)
     
 
 
@@ -801,7 +801,7 @@ def retry_payment(request, order_id):
         
         if order.payment_status == "paid":
             messages.info(request, "订单已支付")
-            return redirect('eshop:order_detail', order_id=order.id)
+            return redirect('eshop:order_payment_confirmation', order_id=order.id)
         
         # 重置支付超时时间
         order.set_payment_timeout(minutes=5)
@@ -820,7 +820,7 @@ def retry_payment(request, order_id):
     except Exception as e:
         logger.error(f"重新支付错误: {str(e)}")
         messages.error(request, f"重新支付失败: {str(e)}")
-        return redirect('eshop:order_detail', order_id=order_id)
+        return redirect('eshop:order_payment_confirmation', order_id=order_id)
 
 # ==================== 支付失败页面 ====================
 
@@ -1051,12 +1051,12 @@ def test_payment_cancel(request, order_id):
         else:
             messages.warning(request, "订单已支付，无法取消")
         
-        return redirect('eshop:order_detail', order_id=order.id)
+        return redirect('eshop:order_payment_confirmation', order_id=order.id)
         
     except Exception as e:
         logger.error(f"测试支付取消错误: {str(e)}")
         messages.error(request, f"测试失败: {str(e)}")
-        return redirect('eshop:order_detail', order_id=order_id)
+        return redirect('eshop:order_payment_confirmation', order_id=order_id)
 
 def simulate_alipay_cancel(request, order_id):
     """模拟支付宝取消支付（仅用于测试）"""
@@ -1070,9 +1070,9 @@ def simulate_alipay_cancel(request, order_id):
             # 这里可以记录测试日志
             logger.info(f"模拟支付宝取消支付: 订单 {order_id}")
             
-        return redirect('eshop:order_detail', order_id=order.id)
+        return redirect('eshop:order_payment_confirmation', order_id=order.id)
         
     except Exception as e:
         logger.error(f"模拟支付宝取消错误: {str(e)}")
         messages.error(request, f"模拟失败: {str(e)}")
-        return redirect('eshop:order_detail', order_id=order_id)
+        return redirect('eshop:order_payment_confirmation', order_id=order_id)

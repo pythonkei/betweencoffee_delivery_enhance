@@ -388,18 +388,18 @@ class OrderConfirm(View):
                     else:
                         logger.error(f"支付宝支付URL生成失败，订单: {order.id}")
                         messages.error(request, "支付宝支付暂时不可用，请选择其他支付方式")
-                        return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order.id}&payment_status=error')
+                        return redirect(reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order.id}) + '?payment_status=error')
                 except Exception as e:
                     logger.error(f"支付宝支付处理异常: {str(e)}")
                     messages.error(request, "支付宝支付暂时不可用，请选择其他支付方式")
-                    return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order.id}&payment_status=error')
+                    return redirect(reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order.id}) + '?payment_status=error')
                     
             elif payment_method == 'paypal':
                 try:
                     if 'create' not in payment_tools:
                         logger.error(f"PayPal支付工具缺失创建函数")
                         messages.error(request, "PayPal支付暂时不可用，请选择其他支付方式")
-                        return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order.id}&payment_status=error')
+                        return redirect(reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order.id}) + '?payment_status=error')
                     
                     paypal_url = payment_tools['create'](order, request)
                     if paypal_url:
@@ -410,11 +410,11 @@ class OrderConfirm(View):
                     else:
                         logger.error(f"PayPal支付创建失败，订单: {order.id}")
                         messages.error(request, "PayPal支付暂时不可用，请选择其他支付方式")
-                        return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order.id}&payment_status=error')
+                        return redirect(reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order.id}) + '?payment_status=error')
                 except Exception as e:
                     logger.error(f"PayPal支付处理异常: {str(e)}")
                     messages.error(request, "PayPal支付暂时不可用，请选择其他支付方式")
-                    return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order.id}&payment_status=error')
+                    return redirect(reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order.id}) + '?payment_status=error')
                     
             elif payment_method == 'fps':
                 return self.handle_fps_payment(request, order)
@@ -581,32 +581,13 @@ def clear_quick_order(request):
 
 
 def order_detail(request, order_id):
-    """订单详情页面"""
+    """订单详情页面 - 已重定向到支付确认页面"""
     try:
-        order = get_object_or_404(OrderModel, id=order_id)
-        
-        # 验证权限
-        if request.user.is_authenticated and order.user != request.user:
-            raise PermissionDenied("您无权查看此订单")
-        
-        items = order.get_items_with_chinese_options()
-        
-        # 获取队列信息（如果存在）
-        queue_info = None
-        try:
-            queue_info = CoffeeQueue.objects.get(order=order)
-        except CoffeeQueue.DoesNotExist:
-            pass
-        
-        context = {
-            'order': order,
-            'items': items,
-            'queue_info': queue_info,
-        }
-        return render(request, 'eshop/order_detail.html', context)
+        # 重定向到订单支付确认页面
+        return redirect('eshop:order_payment_confirmation', order_id=order_id)
         
     except Exception as e:
-        logger.error(f"订单详情页面错误: {str(e)}")
+        logger.error(f"订单详情页面重定向错误: {str(e)}")
         # ✅ 使用統一錯誤處理
         return handle_order_error(
             request, 
@@ -753,10 +734,10 @@ def order_payment_confirmation(request, order_id=None):
         return render(request, 'eshop/order_payment_confirmation.html', context)
     except Exception as e:
         logger.error(f"訂單確認頁面錯誤: {e}", exc_info=True)
-        # 如果訂單存在，跳轉到訂單詳情頁；否則跳轉到首頁
+        # 如果訂單存在，跳轉到訂單支付確認頁；否則跳轉到首頁
         try:
             order = OrderModel.objects.get(id=order_id)
-            redirect_url = reverse('eshop:order_detail', args=[order_id])
+            redirect_url = reverse('eshop:order_payment_confirmation', args=[order_id])
         except:
             redirect_url = '/'
         return handle_order_error(
@@ -823,7 +804,7 @@ def continue_payment(request, order_id):
         
         if order.status != 'pending':
             messages.warning(request, f"订单状态为 {order.status}，无需重新支付")
-            return redirect('eshop:order_detail', order_id=order.id)
+            return redirect('eshop:order_payment_confirmation', order_id=order.id)
         
         # 根据支付方式重定向
         if order.payment_method == 'alipay':
@@ -834,7 +815,7 @@ def continue_payment(request, order_id):
             return redirect('eshop:cash_payment', order_id=order.id)
         else:
             messages.error(request, "未知的支付方式")
-            return redirect('eshop:order_detail', order_id=order.id)
+            return redirect('eshop:order_payment_confirmation', order_id=order.id)
             
     except Exception as e:
         logger.error(f"继续支付错误: {str(e)}")
