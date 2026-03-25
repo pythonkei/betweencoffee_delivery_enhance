@@ -644,6 +644,11 @@ def order_status_api(request, order_id):
             'status': order.status,
             'payment_status': order.payment_status,
             
+            # ✅ 修復：添加時間戳字段，供前端時間軸使用
+            'created_at': order.created_at.isoformat() if order.created_at else None,
+            'updated_at': order.updated_at.isoformat() if hasattr(order, 'updated_at') and order.updated_at else None,
+            'paid_at': order.paid_at.isoformat() if order.paid_at else None,
+            
             # 進度條數據
             'progress_percentage': status_info['progress_percentage'],
             'progress_display': status_info['progress_display'],

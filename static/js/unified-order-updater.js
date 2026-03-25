@@ -19,8 +19,17 @@ class UnifiedOrderUpdater {
         this.updateCount = 0;
         this.maxUpdates = 180; // 最多更新180次（30分鐘）
         
+        // 緩存相關屬性
+        this.cache = {
+            lastData: null,
+            lastUpdateTime: 0,
+            cacheDuration: 5000, // 5秒緩存時間
+            statusCache: {} // 狀態緩存，用於檢測狀態變化
+        };
+        
         console.log(`🔧 創建統一的訂單更新器 #${orderId}`);
         console.log(`   WebSocket 支持: ${this.useWebSocket ? '✅ 是' : '❌ 否'}`);
+        console.log(`   緩存機制: ✅ 已啟用 (${this.cache.cacheDuration}ms)`);
     }
     
     // ========== 核心方法 ==========
@@ -187,6 +196,15 @@ class UnifiedOrderUpdater {
             return;
         }
         
+        // 檢查緩存：如果最近更新過且數據相同，跳過本次更新
+        const now = Date.now();
+        const timeSinceLastUpdate = now - this.cache.lastUpdateTime;
+        
+        if (timeSinceLastUpdate < this.cache.cacheDuration && this.cache.lastData) {
+            console.log(`⏭️ 跳過更新，緩存有效期內 (${timeSinceLastUpdate}ms < ${this.cache.cacheDuration}ms)`);
+            return;
+        }
+        
         this.updateCount++;
         
         try {
@@ -206,13 +224,24 @@ class UnifiedOrderUpdater {
                 return;
             }
             
-            console.log('✅ API 更新成功:', data);
-            this.handleUpdate(data);
-            
-            // 如果訂單已完成，停止更新
-            if (data.is_ready || data.status === 'completed' || data.status === 'ready') {
-                console.log('🎉 訂單已完成，停止更新器');
-                this.stop();
+            // 檢查數據是否有實際變化
+            if (this.hasDataChanged(data)) {
+                console.log('✅ API 更新成功（數據有變化）:', data);
+                this.handleUpdate(data);
+                
+                // 更新緩存
+                this.cache.lastData = data;
+                this.cache.lastUpdateTime = now;
+                
+                // 如果訂單已完成，停止更新
+                if (data.is_ready || data.status === 'completed' || data.status === 'ready') {
+                    console.log('🎉 訂單已完成，停止更新器');
+                    this.stop();
+                }
+            } else {
+                console.log('⏭️ 數據無變化，跳過界面更新');
+                // 仍然更新緩存時間，但不需要更新界面
+                this.cache.lastUpdateTime = now;
             }
             
         } catch (error) {
@@ -228,14 +257,20 @@ class UnifiedOrderUpdater {
     handleUpdate(data) {
         console.log('🔍 處理更新數據:', data);
         
+        // ✅ 修復：添加調試日誌，顯示完整的數據結構
+        console.log('📊 完整數據結構:', JSON.stringify(data, null, 2));
+        
         // 提取實際的訂單數據
         const orderData = this.extractOrderData(data);
+        console.log('📦 提取後的訂單數據:', orderData);
         
         // 驗證數據格式
         if (!this.validateData(orderData)) {
             console.error('❌ 數據格式無效:', orderData);
             return;
         }
+        
+        console.log('✅ 數據驗證通過，開始更新UI');
         
         // 更新狀態卡片
         this.updateStatusCard(orderData);
@@ -251,6 +286,8 @@ class UnifiedOrderUpdater {
         
         // 更新支付確認頁面的特定元素
         this.updatePaymentConfirmationElements(orderData);
+        
+        console.log('✅ UI更新完成');
     }
     
     /**
@@ -401,7 +438,29 @@ class UnifiedOrderUpdater {
      */
     updateTimeline(data) {
         const status = data.status;
-        const timestamp = data.updated_at || new Date().toISOString();
+        
+        // ✅ 修復：使用正確的時間戳
+        // 對於 waiting 狀態，應該使用訂單創建時間或支付時間，而不是 updated_at
+        // 優先級：created_at > paid_at > updated_at > 當前時間
+        let timestamp = data.created_at || data.paid_at || data.updated_at;
+        
+        // 如果沒有時間戳，根據狀態決定是否使用當前時間
+        if (!timestamp) {
+            // 對於初始狀態（waiting/pending），使用訂單創建時間或當前時間
+            if (status === 'waiting' || status === 'pending') {
+                // 嘗試從數據中獲取創建時間
+                if (data.created_at) {
+                    timestamp = data.created_at;
+                } else {
+                    // 如果沒有創建時間，使用當前時間（至少顯示有意義的時間）
+                    timestamp = new Date().toISOString();
+                }
+            } else {
+                // 對於其他狀態，使用當前時間作為備用
+                timestamp = new Date().toISOString();
+            }
+        }
+        
         const steps = ['pending', 'preparing', 'ready', 'completed'];
         
         // 定義狀態順序（支持 waiting 狀態映射到 pending）
@@ -416,7 +475,7 @@ class UnifiedOrderUpdater {
         // 確保狀態有效
         const currentStepIndex = statusOrder[status] !== undefined ? statusOrder[status] : 0;
         
-        console.log(`📊 更新時間軸: status=${status}, currentStepIndex=${currentStepIndex}`);
+        console.log(`📊 更新時間軸: status=${status}, currentStepIndex=${currentStepIndex}, timestamp=${timestamp}`);
         
         steps.forEach((step, index) => {
             const stepEl = document.getElementById(`step-${step}`);
@@ -437,8 +496,12 @@ class UnifiedOrderUpdater {
             } else if (index === currentStepIndex) {
                 // 當前步驟
                 stepEl.classList.add('active');
-                if (timeEl && timestamp) {
-                    timeEl.textContent = this.formatTime(timestamp);
+                if (timeEl) {
+                    if (timestamp) {
+                        timeEl.textContent = this.formatTime(timestamp);
+                    } else {
+                        timeEl.textContent = '--:--';
+                    }
                 }
                 console.log(`✅ 設置 step-${step} 為 active (當前，index=${index} = currentStepIndex=${currentStepIndex})`);
             } else {
@@ -555,6 +618,53 @@ class UnifiedOrderUpdater {
         indicator.innerHTML = icon + '<span>' + message + '</span>';
     }
     
+    // ========== 緩存相關方法 ==========
+    
+    /**
+     * 檢查數據是否有實際變化
+     */
+    hasDataChanged(newData) {
+        const oldData = this.cache.lastData;
+        
+        // 如果沒有緩存數據，視為有變化
+        if (!oldData) {
+            console.log('🆕 首次更新，視為有變化');
+            return true;
+        }
+        
+        // 檢查關鍵字段是否有變化
+        const keyFields = ['status', 'queue_position', 'progress_percentage', 'is_ready'];
+        
+        for (const field of keyFields) {
+            const oldValue = oldData[field];
+            const newValue = newData[field];
+            
+            // 如果字段存在且值不同
+            if (newValue !== undefined && oldValue !== newValue) {
+                console.log(`🔄 字段 "${field}" 有變化: ${oldValue} -> ${newValue}`);
+                return true;
+            }
+        }
+        
+        // 檢查時間戳是否有顯著變化（超過30秒）
+        const oldTimestamp = oldData.updated_at || oldData.timestamp;
+        const newTimestamp = newData.updated_at || newData.timestamp;
+        
+        if (oldTimestamp && newTimestamp) {
+            const oldTime = new Date(oldTimestamp).getTime();
+            const newTime = new Date(newTimestamp).getTime();
+            const timeDiff = Math.abs(newTime - oldTime);
+            
+            if (timeDiff > 30000) { // 30秒
+                console.log(`🕒 時間戳有顯著變化: ${timeDiff}ms`);
+                return true;
+            }
+        }
+        
+        console.log('✅ 數據無顯著變化');
+        return false;
+    }
+    
     // ========== 輔助方法 ==========
     
     getStatusDisplay(status) {
@@ -590,6 +700,98 @@ class UnifiedOrderUpdater {
             });
         } catch {
             return isoString;
+        }
+    }
+    
+    // ========== 診斷方法 ==========
+    
+    /**
+     * WebSocket診斷報告
+     */
+    diagnose() {
+        console.group('🔍 WebSocket診斷報告');
+        console.log('訂單ID:', this.orderId);
+        console.log('更新器運行狀態:', this.isRunning);
+        console.log('WebSocket支持:', this.useWebSocket);
+        console.log('WebSocket URL:', this.socket?.url || '無連接');
+        console.log('WebSocket連接狀態:', this.socket ? this.getWebSocketStateText(this.socket.readyState) : '無連接');
+        console.log('重試次數:', this.reconnectAttempts);
+        console.log('更新次數:', this.updateCount);
+        console.log('最後緩存時間:', this.cache.lastUpdateTime ? new Date(this.cache.lastUpdateTime).toLocaleTimeString() : '無');
+        console.log('最後緩存數據:', this.cache.lastData);
+        console.groupEnd();
+        
+        // 更新頁面顯示
+        this.updateDiagnosticDisplay();
+    }
+    
+    /**
+     * 獲取WebSocket狀態文本
+     */
+    getWebSocketStateText(state) {
+        switch(state) {
+            case 0: return '連接中 (CONNECTING)';
+            case 1: return '已連接 (OPEN)';
+            case 2: return '關閉中 (CLOSING)';
+            case 3: return '已關閉 (CLOSED)';
+            default: return `未知狀態 (${state})`;
+        }
+    }
+    
+    /**
+     * 更新診斷顯示
+     */
+    updateDiagnosticDisplay() {
+        const statusText = document.getElementById('connection-status-text');
+        if (statusText) {
+            if (this.socket) {
+                const stateText = this.getWebSocketStateText(this.socket.readyState);
+                statusText.textContent = `WebSocket: ${stateText}`;
+            } else {
+                statusText.textContent = 'API輪詢模式';
+            }
+        }
+        
+        const timestampEl = document.getElementById('last-update-timestamp');
+        if (timestampEl && this.cache.lastUpdateTime) {
+            timestampEl.textContent = new Date(this.cache.lastUpdateTime).toLocaleTimeString('zh-HK', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+    }
+    
+    /**
+     * 手動刷新訂單狀態
+     */
+    manualRefresh() {
+        console.log('🔄 手動刷新訂單狀態');
+        
+        // 強制清除緩存，確保獲取最新數據
+        this.cache.lastUpdateTime = 0;
+        this.cache.lastData = null;
+        
+        // 立即獲取訂單狀態
+        this.fetchOrderStatus();
+        
+        // 顯示提示
+        this.showManualRefreshToast();
+    }
+    
+    /**
+     * 顯示手動刷新提示
+     */
+    showManualRefreshToast() {
+        if (window.toast) {
+            window.toast.info('正在刷新訂單狀態...', '手動刷新');
+        }
+        
+        // 更新最後更新時間顯示
+        const timestampEl = document.getElementById('last-update-timestamp');
+        if (timestampEl) {
+            timestampEl.textContent = '刷新中...';
         }
     }
 }
@@ -633,6 +835,34 @@ function initUnifiedOrderUpdater() {
         window.orderUpdater = new UnifiedOrderUpdater(orderId);
         window.orderUpdater.start();
         
+        // 添加手動刷新按鈕事件監聽器
+        const manualRefreshBtn = document.getElementById('manual-refresh-btn');
+        if (manualRefreshBtn) {
+            manualRefreshBtn.addEventListener('click', () => {
+                if (window.orderUpdater) {
+                    window.orderUpdater.manualRefresh();
+                }
+            });
+        }
+        
+        // 添加診斷按鈕（開發環境）
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            const diagnoseBtn = document.createElement('button');
+            diagnoseBtn.id = 'diagnose-btn';
+            diagnoseBtn.className = 'btn btn-sm btn-outline-info mt-2';
+            diagnoseBtn.innerHTML = '<i class="fas fa-stethoscope mr-1"></i>診斷連線';
+            diagnoseBtn.addEventListener('click', () => {
+                if (window.orderUpdater) {
+                    window.orderUpdater.diagnose();
+                }
+            });
+            
+            const buttonContainer = document.querySelector('.mt-4.text-center');
+            if (buttonContainer) {
+                buttonContainer.appendChild(diagnoseBtn);
+            }
+        }
+        
         // 添加連接狀態指示器（如果不存在）
         if (!document.getElementById('ws-connection-status')) {
             const indicator = document.createElement('div');
@@ -656,6 +886,14 @@ function initUnifiedOrderUpdater() {
             indicator.innerHTML = '<i class="fas fa-circle mr-1" style="font-size: 10px;"></i><span>即時連線中</span>';
             document.body.appendChild(indicator);
         }
+        
+        // 初始診斷顯示
+        setTimeout(() => {
+            if (window.orderUpdater) {
+                window.orderUpdater.updateDiagnosticDisplay();
+            }
+        }, 1000);
+        
     } else {
         console.log('⏸️ 不啟動更新器，原因:', {
             hasOrderId: !!orderId,
@@ -687,11 +925,29 @@ if (document.readyState === 'loading') {
     }, 100);
 }
 
-// 全局錯誤處理
+// 全局錯誤處理（優化：過濾第三方庫錯誤）
 window.addEventListener('error', function(event) {
-    console.error('JavaScript錯誤被捕獲:', event.error);
-    event.preventDefault();
-    return true;
+    // ✅ 修復：過濾第三方庫錯誤（如 Bootstrap 的 Explain 錯誤）
+    const errorMessage = event.error ? event.error.toString() : '';
+    const errorStack = event.error ? event.error.stack : '';
+    
+    // 檢查是否為第三方庫錯誤
+    const isThirdPartyError = 
+        errorMessage.includes('Explain is not defined') ||
+        errorMessage.includes('bootstrap.bundle.min.js') ||
+        errorStack.includes('bootstrap.bundle.min.js');
+    
+    if (isThirdPartyError) {
+        // 第三方庫錯誤，只記錄警告，不影響用戶體驗
+        console.warn('⚠️ 第三方庫錯誤（已過濾）:', errorMessage);
+        event.preventDefault();
+        return true;
+    } else {
+        // 我們的代碼錯誤，記錄錯誤
+        console.error('❌ JavaScript錯誤被捕獲:', event.error);
+        event.preventDefault();
+        return true;
+    }
 });
 
 window.addEventListener('unhandledrejection', function(event) {

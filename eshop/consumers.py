@@ -291,6 +291,8 @@ class OrderConsumer(BaseOrderConsumer):
                 event['remaining_seconds'] = status_data['remaining_seconds']
                 event['progress_percentage'] = status_data['progress_percentage']
         
+        # ✅ 修復：發送兩種格式的消息以確保兼容性
+        # 格式1: 統一訂單更新器格式 {type: 'order_status', data: {...}}
         await self._send_json({
             'type': 'order_status',
             'data': {
@@ -305,6 +307,24 @@ class OrderConsumer(BaseOrderConsumer):
             },
             'timestamp': timezone.now().isoformat()
         })
+        
+        # 格式2: 直接狀態數據格式（兼容舊版客戶端）
+        await self._send_json({
+            'type': 'order_status_update',
+            'order_id': event.get('order_id', self.order_id),
+            'status': event.get('status'),
+            'status_display': event.get('status_display'),
+            'estimated_time': event.get('estimated_time'),
+            'queue_position': event.get('queue_position'),
+            'remaining_seconds': event.get('remaining_seconds'),
+            'progress_percentage': event.get('progress_percentage'),
+            'message': event.get('message', ''),
+            'timestamp': timezone.now().isoformat()
+        })
+        
+        order_id = event.get('order_id', self.order_id)
+        status = event.get('status')
+        logger.debug(f"📤 發送雙格式訂單狀態更新: 訂單 {order_id}, 狀態: {status}")
     
     async def queue_position_update(self, event):
         """隊列位置更新（專門針對排隊位置變化）"""
@@ -347,6 +367,69 @@ class OrderConsumer(BaseOrderConsumer):
             'customer_name': event.get('customer_name'),
             'timestamp': timezone.now().isoformat()
         })
+
+
+class TestConsumer(AsyncWebsocketConsumer):
+    """測試 WebSocket Consumer - 用於診斷工具測試"""
+    
+    async def connect(self):
+        """處理 WebSocket 連線"""
+        # 接受連線
+        await self.accept()
+        
+        logger.info(f"✅ 測試 Consumer 連線成功: {self.channel_name}")
+        
+        # 立即發送歡迎消息
+        await self.send(text_data=json.dumps({
+            'type': 'welcome',
+            'message': '測試 WebSocket 連接成功！',
+            'timestamp': timezone.now().isoformat()
+        }))
+    
+    async def disconnect(self, close_code):
+        """處理 WebSocket 斷線"""
+        logger.info(f"🔌 測試 Consumer 斷線: {self.channel_name}, code: {close_code}")
+    
+    async def receive(self, text_data):
+        """接收客戶端訊息"""
+        try:
+            data = json.loads(text_data)
+            msg_type = data.get('type')
+            
+            if msg_type == 'ping':
+                # 回應 ping
+                await self.send(text_data=json.dumps({
+                    'type': 'pong',
+                    'message': '收到 ping',
+                    'timestamp': timezone.now().isoformat()
+                }))
+                logger.debug(f"❤️ 測試 Consumer 收到 ping，回應 pong: {self.channel_name}")
+            
+            elif msg_type == 'echo':
+                # 回顯消息
+                message = data.get('message', '')
+                await self.send(text_data=json.dumps({
+                    'type': 'echo_response',
+                    'message': f"回顯: {message}",
+                    'original_message': message,
+                    'timestamp': timezone.now().isoformat()
+                }))
+            
+            else:
+                # 未知消息類型
+                await self.send(text_data=json.dumps({
+                    'type': 'unknown_message',
+                    'received': data,
+                    'timestamp': timezone.now().isoformat()
+                }))
+                
+        except json.JSONDecodeError:
+            logger.warning(f"⚠️ 測試 Consumer 無效的 JSON 格式: {text_data}")
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': '無效的 JSON 格式',
+                'timestamp': timezone.now().isoformat()
+            }))
 
 
 class QueueConsumer(BaseOrderConsumer):

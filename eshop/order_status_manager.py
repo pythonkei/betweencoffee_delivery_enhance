@@ -36,7 +36,8 @@ class OrderStatusManager:
             # ✅ 修复：更新支付状态为 'paid'
             if order.payment_status != 'paid':
                 order.payment_status = 'paid'
-                logger.info(f"✅ 订单 #{order_id} 支付状态更新为 paid")
+                order.paid_at = timezone.now()
+                logger.info(f"✅ 订单 #{order_id} 支付状态更新为 paid，设置支付时间")
             
             # ✅ 修复：确保订单状态正确
             if order.status == 'pending':
@@ -51,7 +52,7 @@ class OrderStatusManager:
             
             # ✅ 修复：保存所有更新
             order.save()
-            logger.info(f"✅ 订单 #{order_id} 保存成功: status={order.status}, payment_status={order.payment_status}")
+            logger.info(f"✅ 订单 #{order_id} 保存成功: status={order.status}, payment_status={order.payment_status}, paid_at={order.paid_at}")
             
             # ✅ 修改：加入队列逻辑
             queue_item = None

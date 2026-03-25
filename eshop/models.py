@@ -380,6 +380,9 @@ class OrderModel(models.Model):
     last_payment_attempt = models.DateTimeField(null=True, blank=True)
     payment_reminder_sent = models.BooleanField(default=False)
     
+    # ====== 支付时间字段 ======
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="支付时间")
+    
     # ====== 支付方式字段 ======
     PAYMENT_METHOD_CHOICES = [
         ('alipay', '支付宝'),
@@ -643,14 +646,13 @@ class OrderModel(models.Model):
     def set_payment_timeout(self, minutes=5):
         """设置支付超时时间"""
         from django.utils import timezone
-        self.payment_timeout = timezone.now() + timezone.timedelta(minutes=minutes)
+        self.payment_timeout = unified_time_service.get_hong_kong_time() + timedelta(minutes=minutes)
         self.save()
         return self.payment_timeout
     
     def is_payment_timeout(self):
         """检查是否支付超时"""
-        from django.utils import timezone
-        if self.payment_timeout and timezone.now() > self.payment_timeout:
+        if self.payment_timeout and unified_time_service.get_hong_kong_time() > self.payment_timeout:
             return True
         return False
     

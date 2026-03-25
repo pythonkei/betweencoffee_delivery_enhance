@@ -79,26 +79,35 @@ class CustomerWebSocketManager {
     handleMessage(event) {
         try {
             const data = JSON.parse(event.data);
-            console.log('📨 顧客收到消息:', data.type);
+            console.log('📨 顧客收到消息:', data.type, data);
             
+            // 支持多種消息類型格式
             switch(data.type) {
                 case 'order_status_update':
+                case 'order_status':  // ✅ 新增：支持統一更新器的消息類型
                     this.handleStatusUpdate(data);
                     break;
                 case 'queue_position_update':
+                case 'queue_position':  // ✅ 新增：支持隊列位置更新
                     this.handleQueueUpdate(data);
                     break;
                 case 'payment_status_update':
+                case 'payment_status':  // ✅ 新增：支持支付狀態更新
                     this.handlePaymentUpdate(data);
                     break;
                 case 'order_ready_notification':
+                case 'order_ready':  // ✅ 新增：支持訂單就緒通知
                     this.handleOrderReady(data);
                     break;
                 case 'heartbeat':
+                case 'pong':  // ✅ 新增：支持心跳回應
                     this.handleHeartbeat(data);
                     break;
+                case 'welcome':  // ✅ 新增：支持歡迎消息
+                    console.log('👋 收到歡迎消息:', data.message);
+                    break;
                 default:
-                    console.log('❓ 未知的顧客消息類型:', data.type);
+                    console.log('❓ 未知的顧客消息類型:', data.type, data);
             }
             
         } catch (error) {
@@ -107,19 +116,32 @@ class CustomerWebSocketManager {
     }
     
     handleStatusUpdate(data) {
-        console.log(`🔄 訂單狀態更新: ${data.status}`);
+        console.log(`🔄 訂單狀態更新:`, data);
+        
+        // ✅ 修復：處理不同格式的數據
+        let statusData = data;
+        
+        // 格式1: 統一訂單更新器格式 {type: 'order_status', data: {...}}
+        if (data.type === 'order_status' && data.data) {
+            console.log('📦 檢測到統一更新器格式，提取數據');
+            statusData = data.data;
+        }
+        
+        // 格式2: 直接狀態數據 {status: 'preparing', ...}
+        const status = statusData.status || data.status;
+        console.log(`📊 最終狀態: ${status}`);
         
         // 執行所有回調函數
         this.statusCallbacks.forEach(callback => {
             try {
-                callback(data);
+                callback(statusData);
             } catch (error) {
                 console.error('狀態回調執行失敗:', error);
             }
         });
         
         // 更新UI
-        this.updateStatusUI(data);
+        this.updateStatusUI(statusData);
     }
     
     handleQueueUpdate(data) {

@@ -233,7 +233,6 @@ def update_order_payment_status(order, payment_method, payment_data=None):
             logger.info(f"订单 {order.id} 已经是已支付状态")
             return True
         
-        order.payment_status="paid"
         order.payment_status = 'paid'
         order.payment_method = payment_method
         order.paid_at = timezone.now()
