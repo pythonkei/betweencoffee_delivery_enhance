@@ -15,6 +15,14 @@ class OrderStatusCardsManager {
         this.reconnectDelay = 3000;
         this.isConnected = false;
         
+        // 記錄每個狀態的實際時間
+        this.actualStatusTimes = {
+            'ordered': document.body.dataset.orderedTime || null,
+            'preparing': document.body.dataset.preparingTime || null,
+            'ready': document.body.dataset.readyTime || null,
+            'completed': document.body.dataset.completedTime || null
+        };
+        
         this.init();
     }
     
@@ -87,11 +95,11 @@ class OrderStatusCardsManager {
                 this.updateStatus('preparing');
                 break;
             case 'ready':
-            case 'completed':
                 this.updateStatus('ordered');
                 this.updateStatus('preparing');
                 this.updateStatus('ready');
                 break;
+            case 'completed':
             case 'picked_up':
             case 'delivered':
                 this.updateStatus('ordered');
@@ -102,6 +110,26 @@ class OrderStatusCardsManager {
             default:
                 this.updateStatus('ordered');
         }
+        
+        // 初始化所有狀態卡片的時間顯示
+        this.initializeStatusTimes();
+    }
+    
+    // 初始化狀態時間顯示
+    initializeStatusTimes() {
+        const statusOrder = ['ordered', 'preparing', 'ready', 'completed'];
+        
+        statusOrder.forEach(status => {
+            const actualTime = this.getActualStatusTime(status);
+            if (actualTime && this.statusTimes[status]) {
+                // 只顯示實際時間，不顯示"等待開始"或"等待完成"
+                if (actualTime !== '等待開始' && actualTime !== '等待完成') {
+                    this.statusTimes[status].textContent = actualTime;
+                }
+            }
+        });
+        
+        console.log("狀態時間初始化完成:", this.actualStatusTimes);
     }
     
     // 更新狀態
@@ -167,16 +195,36 @@ class OrderStatusCardsManager {
     
     // 更新狀態時間
     updateStatusTime(status) {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('zh-TW', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: false 
-        });
+        // 獲取該狀態的實際時間
+        let timeString = this.getActualStatusTime(status);
+        
+        // 如果沒有實際時間，使用當前時間（兼容舊邏輯）
+        if (!timeString || timeString === '等待開始' || timeString === '等待完成') {
+            const now = new Date();
+            timeString = now.toLocaleTimeString('zh-TW', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            
+            // 記錄這個時間作為實際時間
+            this.recordActualStatusTime(status, timeString);
+        }
         
         if (this.statusTimes[status]) {
             this.statusTimes[status].textContent = timeString;
         }
+    }
+    
+    // 獲取狀態的實際時間
+    getActualStatusTime(status) {
+        return this.actualStatusTimes[status] || null;
+    }
+    
+    // 記錄狀態的實際時間
+    recordActualStatusTime(status, timeString) {
+        this.actualStatusTimes[status] = timeString;
+        console.log(`記錄狀態 ${status} 的時間: ${timeString}`);
     }
     
     // 初始化WebSocket連接
@@ -292,6 +340,12 @@ class OrderStatusCardsManager {
     updateStatusFromServer(status) {
         console.log("根據服務器狀態更新卡片:", status);
         
+        // 處理 null 狀態
+        if (!status) {
+            console.warn("收到 null 狀態，跳過更新");
+            return;
+        }
+        
         // 根據狀態更新卡片
         switch(status) {
             case 'ordered':
@@ -305,11 +359,11 @@ class OrderStatusCardsManager {
                 this.updateStatus('preparing');
                 break;
             case 'ready':
-            case 'completed':
                 this.updateStatus('ordered');
                 this.updateStatus('preparing');
                 this.updateStatus('ready');
                 break;
+            case 'completed':
             case 'picked_up':
             case 'delivered':
                 this.updateStatus('ordered');

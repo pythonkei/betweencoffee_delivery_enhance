@@ -341,6 +341,13 @@ if (document.body) {
     document.body.dataset.orderId = '{{ order.id }}';
     document.body.dataset.isCoffeeOrder = '{{ order_type.has_coffee|yesno:"true,false" }}';
     document.body.dataset.isBeansOnly = '{{ order_type.is_beans_only|yesno:"true,false" }}';
+    document.body.dataset.orderStatus = '{{ order.status }}';
+    
+    // 設置每個狀態的實際時間
+    document.body.dataset.orderedTime = '{{ order.created_at|date:"H:i" }}';
+    document.body.dataset.preparingTime = '{% if order.preparation_started_at %}{{ order.preparation_started_at|date:"H:i" }}{% else %}等待開始{% endif %}';
+    document.body.dataset.readyTime = '{% if order.ready_at %}{{ order.ready_at|date:"H:i" }}{% else %}等待完成{% endif %}';
+    document.body.dataset.completedTime = '{% if order.picked_up_at %}{{ order.picked_up_at|date:"H:i" }}{% else %}等待完成{% endif %}';
 }
 </script>
 {% endwith %}
