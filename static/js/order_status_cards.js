@@ -389,15 +389,7 @@ class OrderStatusCardsManager {
         
         const message = statusMessages[status];
         if (message) {
-            // 使用瀏覽器通知（如果支持）
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('訂單狀態更新', {
-                    body: message,
-                    icon: '/static/images/favicon.ico'
-                });
-            }
-            
-            // 在頁面上顯示提示
+            // 只顯示Toast提示，移除瀏覽器通知以減少干擾
             this.showToast(message);
         }
     }
