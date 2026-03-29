@@ -246,9 +246,9 @@ class DynamicReadyOrdersRenderer {
             `;
         }
 
-        // 使用統一時間工具
+        // 使用統一的時間格式化工具
         const createdTime = window.TimeUtils ? 
-            window.TimeUtils.formatHKTime(order.created_at) : 
+            window.TimeUtils.formatOrderTime(order.created_at, false) : // 只顯示時間
             order.created_at;
         
         // ====== 修復：純咖啡豆訂單不顯示時間 ======

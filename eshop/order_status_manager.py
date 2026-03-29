@@ -576,8 +576,9 @@ class OrderStatusManager:
 
 
     @classmethod
-    def mark_as_preparing_manually(cls, order_id, barista_name=None, preparation_minutes=None):
-        """手動將訂單標記為製作中（員工操作）"""
+    def mark_as_preparing_manually(cls, order_id, barista_name=None,
+                                   preparation_minutes=None):
+        """手動將訂單標記為製作中（員工操作）- 優化版本"""
         try:
             from django.utils import timezone
             from datetime import timedelta
@@ -587,7 +588,8 @@ class OrderStatusManager:
             
             # 檢查訂單狀態
             if order.status not in ['waiting', 'pending', 'confirmed']:
-                raise ValueError(f"訂單狀態 {order.status} 不允許開始製作")
+                msg = f"訂單狀態 {order.status} 不允許開始製作"
+                raise ValueError(msg)
             
             # 檢查支付狀態
             if order.payment_status != "paid":
@@ -596,61 +598,126 @@ class OrderStatusManager:
             # 計算製作時間（如果未提供）
             if preparation_minutes is None:
                 items = order.get_items()
-                coffee_count = sum(item.get('quantity', 1) for item in items if item.get('type') == 'coffee')
+                coffee_count = sum(
+                    item.get('quantity', 1) 
+                    for item in items 
+                    if item.get('type') == 'coffee'
+                )
                 
                 from eshop.queue_manager_refactored import CoffeeQueueManager
                 queue_manager = CoffeeQueueManager()
                 
                 if coffee_count > 0:
-                    preparation_minutes = queue_manager.calculate_preparation_time(coffee_count)
+                    preparation_minutes = queue_manager.calculate_preparation_time(
+                        coffee_count
+                    )
                 else:
                     preparation_minutes = 5
             
-            # 更新訂單狀態
+            # ====== 階段1優化：立即更新數據庫並發送WebSocket通知 ======
             old_status = order.status
+            
+            # 1. 更新訂單狀態
             order.status = 'preparing'
             order.preparation_started_at = timezone.now()
             
             # 計算預計完成時間（使用新的時間服務）
-            order.estimated_ready_time = unified_time_service.get_hong_kong_time() + timedelta(minutes=preparation_minutes)
+            hk_time = unified_time_service.get_hong_kong_time()
+            order.estimated_ready_time = hk_time + timedelta(
+                minutes=preparation_minutes
+            )
             
-            order.save(update_fields=['status', 'preparation_started_at', 'estimated_ready_time'])
+            # 2. 立即保存訂單狀態
+            order.save(update_fields=[
+                'status', 'preparation_started_at', 'estimated_ready_time'
+            ])
+            logger.info(f"✅ 訂單 #{order_id} 狀態已更新: {old_status} → preparing")
             
-            # 更新隊列項
+            # 3. 立即發送WebSocket通知（不等待其他處理）
+            try:
+                from .websocket_utils import send_order_update
+                estimated_time = None
+                if order.estimated_ready_time:
+                    estimated_time = order.estimated_ready_time.isoformat()
+                
+                send_order_update(
+                    order_id=order_id,
+                    update_type='status',
+                    data={
+                        'status': 'preparing',
+                        'status_display': '製作中',
+                        'message': '咖啡正在製作中！',
+                        'timestamp': timezone.now().isoformat(),
+                        'estimated_ready_time': estimated_time
+                    }
+                )
+                logger.info(
+                    f"✅ 已立即發送訂單 #{order_id} 狀態更新 WebSocket 通知"
+                )
+            except Exception as ws_error:
+                logger.error(f"❌ 發送WebSocket通知失敗: {str(ws_error)}")
+            
+            # 4. 更新隊列項（在WebSocket通知後處理）
             from eshop.models import CoffeeQueue
             queue_item = CoffeeQueue.objects.filter(order=order).first()
             if queue_item:
                 queue_item.status = 'preparing'
                 queue_item.actual_start_time = timezone.now()
-                queue_item.estimated_completion_time = unified_time_service.get_hong_kong_time() + timedelta(minutes=preparation_minutes)
+                queue_item.estimated_completion_time = hk_time + timedelta(
+                    minutes=preparation_minutes
+                )
                 if barista_name:
                     queue_item.barista = barista_name
                 queue_item.save()
+                logger.info(f"✅ 訂單 #{order_id} 隊列項已更新")
             
-            # 更新隊列時間
-            from eshop.queue_manager_refactored import CoffeeQueueManager
-            queue_manager = CoffeeQueueManager()
-            queue_manager.update_estimated_times_compatible()
+            # 5. 更新隊列時間（異步處理，不阻塞響應）
+            try:
+                from eshop.queue_manager_refactored import CoffeeQueueManager
+                queue_manager = CoffeeQueueManager()
+                
+                # 使用線程異步處理隊列時間更新
+                import threading
+                
+                def async_update_queue_times():
+                    try:
+                        queue_manager.update_estimated_times_compatible()
+                        logger.info(
+                            f"✅ 訂單 #{order_id} 隊列時間已異步更新"
+                        )
+                    except Exception as e:
+                        logger.error(f"❌ 異步更新隊列時間失敗: {str(e)}")
+                
+                thread = threading.Thread(target=async_update_queue_times)
+                thread.daemon = True
+                thread.start()
+                
+            except Exception as queue_error:
+                logger.error(f"❌ 隊列時間更新失敗: {str(queue_error)}")
             
-            # 記錄日誌
-            logger.info(f"Order {order_id} marked as preparing by {barista_name or 'system'}")
-            
-            # 事件觸發已由其他方法處理，此處不再需要
-            # cls._trigger_status_change_events(order, old_status, 'preparing', barista_name)
+            # 6. 記錄日誌
+            logger.info(
+                f"✅ 訂單 #{order_id} 已開始製作，操作員: {barista_name or 'system'}"
+            )
             
             return {
                 'success': True,
                 'order': order,
                 'queue_item': queue_item,
                 'preparation_minutes': preparation_minutes,
-                'message': f'訂單 #{order_id} 已開始製作'
+                'message': f'訂單 #{order_id} 已開始製作',
+                'websocket_sent': True,
+                'timestamp': timezone.now().isoformat()
             }
             
         except OrderModel.DoesNotExist:
-            logger.error(f"訂單 {order_id} 不存在")
+            logger.error(f"❌ 訂單 {order_id} 不存在")
             return {'success': False, 'message': '訂單不存在'}
         except Exception as e:
-            logger.error(f"標記訂單 {order_id} 為製作中失敗: {str(e)}")
+            logger.error(
+                f"❌ 標記訂單 {order_id} 為製作中失敗: {str(e)}",
+                exc_info=True
+            )
             return {'success': False, 'message': str(e)}
 
 

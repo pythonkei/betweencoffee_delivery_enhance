@@ -13,30 +13,8 @@
     {% elif order_type.has_coffee %}
         <!-- 咖啡訂單（包含混合訂單） -->
         <div id="coffee-order-section">
-            <!-- 进度条 -->
-            <div class="mt-4">
-                <div class="progress progress-modern">
-                    <div id="order-progress" class="progress-bar progress-bar-striped progress-bar-animated progress-bar-modern" 
-                        role="progressbar" 
-                        style="width: {{ status_info.progress_percentage }}%;"
-                        aria-valuenow="{{ status_info.progress_percentage }}" 
-                        aria-valuemin="0" 
-                        aria-valuemax="100">
-                        <span id="progress-text">
-                            {{ status_info.progress_display }}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="d-flex justify-content-between mt-2 progress-labels">
-                    <span>訂單確認</span>
-                    <span>製作中</span>
-                    <span>完成</span>
-                </div>
-            </div>
-            
-            <!-- 队列信息 -->
-            <div class="mt-4 p-3 bg-theme rounded" id="queue-info-section">
+            <!-- 簡化狀態顯示（移除進度條） -->
+            <div class="mt-4 p-3 bg-theme rounded">
                 <div class="font-weight-normal text-white">
                     <div id="queue-status-display">
                         <i class="fas fa-clock mr-2"></i>

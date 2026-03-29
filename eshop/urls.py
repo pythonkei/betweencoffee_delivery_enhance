@@ -2,7 +2,8 @@
 from django.urls import path, include
 from eshop.views.test_views import (
     websocket_test_view,
-    websocket_diagnostic_view
+    websocket_diagnostic_view,
+    beans_only_status_test_view
 )
 
 app_name = 'eshop'
@@ -28,4 +29,8 @@ urlpatterns = [
          name='websocket_test'),
     path('test/websocket-diagnostic/', websocket_diagnostic_view,
          name='websocket_diagnostic'),
+    
+    # 纯咖啡豆订单状态测试路由
+    path('test/beans-only-status/', beans_only_status_test_view,
+         name='beans_only_status_test'),
 ]

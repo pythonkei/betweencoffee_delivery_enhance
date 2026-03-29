@@ -13,13 +13,15 @@
         <div class="row justify-content-center">
             <div class="col col-lg-8 mb-5">
                 
-                <!-- 在支付狀態顯示區之前添加調試信息（僅開發環境） -->
-                {% if debug %}
-                <div hidden class="alert alert-info small">
+                <!-- 在支付狀態顯示區之前添加調試信息（已隱藏，僅在URL參數包含debug=true時顯示） -->
+                {% if request.GET.debug == 'true' or debug %}
+                <div class="alert alert-info small" hidden>
                     <strong>調試信息：</strong><br>
                     訂單ID: {{ order.id }}<br>
                     支付狀態: {{ order.payment_status }}<br>
-                    訂單狀態: {{ order.status }}
+                    訂單狀態: {{ order.status }}<br>
+                    訂單類型: {{ order.get_order_type_summary.order_type }}<br>
+                    創建時間: {{ order.created_at|date:"Y-m-d H:i:s" }}
                 </div>
                 {% endif %}
 
@@ -67,6 +69,149 @@
                 <!-- ========== 支付成功時的額外內容 ========== -->
                 {% if order.payment_status == 'paid' %}
                 
+                <!-- ========== 訂單狀態卡片區 ========== -->
+                {% with order_type=order.get_order_type_summary %}
+                <div class="order-item-v2 mb-5 rounded">
+                    <h5 hidden class="mb-4 text-center">訂單狀態追蹤</h5>
+                    
+                    {% if order_type.is_beans_only %}
+                        <!-- 純咖啡豆訂單：簡化狀態卡片（3個狀態） -->
+                        <div class="status-cards-container beans-only">
+                            <div class="row justify-content-center">
+                                <!-- 卡片1: 已下單 -->
+                                <div class="col-6 col-md-4 status-card active" data-status="ordered" id="status-card-ordered">
+                                    <div class="status-icon">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </div>
+                                    <div class="status-title">已下單</div>
+                                    <div class="status-description">訂單已建立</div>
+                                    <div class="status-time" id="status-time-ordered">
+                                        {{ order.created_at|date:"H:i" }}
+                                    </div>
+                                </div>
+                                
+                                <!-- 卡片2: 待提取（跳過製作中） -->
+                                <div class="col-6 col-md-4 status-card" data-status="ready" id="status-card-ready">
+                                    <div class="status-icon">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div class="status-title">待提取</div>
+                                    <div class="status-description">咖啡豆已準備</div>
+                                    <div class="status-time" id="status-time-ready">
+                                        隨時可取
+                                    </div>
+                                </div>
+                                
+                                <!-- 卡片3: 已完成 -->
+                                <div class="col-6 col-md-4 status-card" data-status="completed" id="status-card-completed">
+                                    <div class="status-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <div class="status-title">已完成</div>
+                                    <div class="status-description">您已成功提取</div>
+                                    <div class="status-time" id="status-time-completed">
+                                        等待完成
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 狀態連接線（3個點） -->
+                        <div class="status-connector">
+                            <div class="connector-line"></div>
+                            <div class="connector-dots">
+                                <div class="connector-dot active" data-dot="1"></div>
+                                <div class="connector-dot" data-dot="2"></div>
+                                <div class="connector-dot" data-dot="3"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 純咖啡豆訂單提示 -->
+                        <div class="beans-order-notice mt-3 text-center">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>咖啡豆為現貨商品</strong> - 無需等待製作，隨時可取
+                            </div>
+                        </div>
+                    
+                    {% else %}
+                        <!-- 咖啡訂單：完整狀態卡片（4個狀態） -->
+                        <div class="status-cards-container coffee-order">
+                            <div class="row justify-content-center">
+                                <!-- 卡片1: 已下單 -->
+                                <div class="col-6 col-md-3 status-card active" data-status="ordered" id="status-card-ordered">
+                                    <div class="status-icon">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </div>
+                                    <div class="status-title">已下單</div>
+                                    <div class="status-description">訂單已建立</div>
+                                    <div class="status-time" id="status-time-ordered">
+                                        {{ order.created_at|date:"H:i" }}
+                                    </div>
+                                </div>
+                                
+                                <!-- 卡片2: 製作中 -->
+                                <div class="col-6 col-md-3 status-card" data-status="preparing" id="status-card-preparing">
+                                    <div class="status-icon">
+                                        <i class="fas fa-coffee"></i>
+                                    </div>
+                                    <div class="status-title">製作中</div>
+                                    <div class="status-description">咖啡師正在製作</div>
+                                    <div class="status-time" id="status-time-preparing">
+                                        等待開始
+                                    </div>
+                                </div>
+                                
+                                <!-- 卡片3: 待取餐 -->
+                                <div class="col-6 col-md-3 status-card" data-status="ready" id="status-card-ready">
+                                    <div class="status-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="status-title">待取餐</div>
+                                    <div class="status-description">咖啡已準備就緒</div>
+                                    <div class="status-time" id="status-time-ready">
+                                        等待完成
+                                    </div>
+                                </div>
+                                
+                                <!-- 卡片4: 已完成 -->
+                                <div class="col-6 col-md-3 status-card" data-status="completed" id="status-card-completed">
+                                    <div class="status-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <div class="status-title">已完成</div>
+                                    <div class="status-description">您已成功提取</div>
+                                    <div class="status-time" id="status-time-completed">
+                                        等待完成
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 狀態連接線（4個點） -->
+                        <div class="status-connector">
+                            <div class="connector-line"></div>
+                            <div class="connector-dots">
+                                <div class="connector-dot active" data-dot="1"></div>
+                                <div class="connector-dot" data-dot="2"></div>
+                                <div class="connector-dot" data-dot="3"></div>
+                                <div class="connector-dot" data-dot="4"></div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- 實時狀態指示器（已隱藏） -->
+                    <div class="real-time-status-indicator mt-4 text-center" hidden>
+                        <div class="d-inline-flex align-items-center">
+                            <div class="status-indicator-dot connected" id="websocket-status-dot"></div>
+                            <span class="ml-2" id="websocket-status-text">實時更新已連接</span>
+                        </div>
+                        <small class="d-block text-muted mt-1">狀態將自動更新，無需刷新頁面</small>
+                    </div>
+                </div>
+                {% endwith %}
+                <!-- ========== end 訂單狀態卡片區 ========== -->
+
                 <!-- 二維碼和提取碼區 -->
                 <div class="order-item mb-5 p-5 rounded text-center" id="qrcode-section">
                     <h5 class="mb-4">請向店員出示此二維碼提取</h5>
@@ -96,10 +241,7 @@
                     
                     <!-- 操作按钮 -->
                     <div class="d-flex justify-content-center gap-3 mt-4">
-                        <!-- 新增：查看訂單詳情按鈕 -->
-                        <a href="{% url 'eshop:order_detail' order.id %}" class="btn btn-outline-primary">
-                            <i class="fas fa-search mr-2"></i>查看訂單詳情
-                        </a>
+                        <!-- 已刪除：查看訂單詳情按鈕 -->
                         <button id="save-image-btn" class="btn btn-primary btn-outline-primary">
                             <i class="fas fa-download mr-2"></i>保存圖片
                         </button>
@@ -171,85 +313,6 @@
                 <!-- 刪除即時狀態卡片功能 -->
                 <!-- 原即時狀態卡片區域已移除 -->
                 <!-- 不再顯示狀態圖標、進度條、時間軸、排隊資訊和刷新按鈕 -->
-
-                <!-- ========== 訂單狀態卡片區 ========== -->
-                <div class="order-item-v2 mb-5 rounded">
-                    <h5 class="mb-4 text-center">訂單狀態追蹤</h5>
-                    
-                    <!-- 狀態卡片容器 -->
-                    <div class="status-cards-container">
-                        <div class="row justify-content-center">
-                            <!-- 卡片1: 已下單 -->
-                            <div class="col-6 col-md-3 status-card active" data-status="ordered" id="status-card-ordered">
-                                <div class="status-icon">
-                                    <i class="fas fa-clipboard-check"></i>
-                                </div>
-                                <div class="status-title">已下單</div>
-                                <div class="status-description">訂單已建立</div>
-                                <div class="status-time" id="status-time-ordered">
-                                    {{ order.created_at|date:"H:i" }}
-                                </div>
-                            </div>
-                            
-                            <!-- 卡片2: 製作中 -->
-                            <div class="col-6 col-md-3 status-card" data-status="preparing" id="status-card-preparing">
-                                <div class="status-icon">
-                                    <i class="fas fa-coffee"></i>
-                                </div>
-                                <div class="status-title">製作中</div>
-                                <div class="status-description">咖啡師正在製作</div>
-                                <div class="status-time" id="status-time-preparing">
-                                    等待開始
-                                </div>
-                            </div>
-                            
-                            <!-- 卡片3: 待取餐 -->
-                            <div class="col-6 col-md-3 status-card" data-status="ready" id="status-card-ready">
-                                <div class="status-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="status-title">待取餐</div>
-                                <div class="status-description">咖啡已準備就緒</div>
-                                <div class="status-time" id="status-time-ready">
-                                    等待完成
-                                </div>
-                            </div>
-                            
-                            <!-- 卡片4: 已完成 -->
-                            <div class="col-6 col-md-3 status-card" data-status="completed" id="status-card-completed">
-                                <div class="status-icon">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="status-title">已完成</div>
-                                <div class="status-description">您已成功提取</div>
-                                <div class="status-time" id="status-time-completed">
-                                    等待完成
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 狀態連接線 -->
-                    <div class="status-connector">
-                        <div class="connector-line"></div>
-                        <div class="connector-dots">
-                            <div class="connector-dot active" data-dot="1"></div>
-                            <div class="connector-dot" data-dot="2"></div>
-                            <div class="connector-dot" data-dot="3"></div>
-                            <div class="connector-dot" data-dot="4"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- 實時狀態指示器 -->
-                    <div class="real-time-status-indicator mt-4 text-center">
-                        <div class="d-inline-flex align-items-center">
-                            <div class="status-indicator-dot connected" id="websocket-status-dot"></div>
-                            <span class="ml-2" id="websocket-status-text">實時更新已連接</span>
-                        </div>
-                        <small class="d-block text-muted mt-1">狀態將自動更新，無需刷新頁面</small>
-                    </div>
-                </div>
-                <!-- ========== end 訂單狀態卡片區 ========== -->
 
                 <!-- 訂單摘要信息 -->
                 {% with summary=order.order_summary_info %}

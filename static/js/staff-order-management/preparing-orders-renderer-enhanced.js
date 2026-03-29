@@ -355,9 +355,9 @@ class EnhancedPreparingOrdersRenderer {
         const estimatedReadyTimeIso = order.estimated_completion_time_iso || order.estimated_ready_time_iso || '';
         const estimatedReadyTime = order.estimated_completion_time || order.estimated_ready_time || '--:--';
         
-        // 格式化香港時間
+        // 格式化香港時間 - 使用統一的 formatOrderTime 方法
         const orderTime = window.TimeUtils ? 
-            window.TimeUtils.formatHKTime(order.created_at_iso || order.created_at) : 
+            window.TimeUtils.formatOrderTime(order.created_at_iso || order.created_at, false) : // 只顯示時間
             (order.created_at_iso || order.created_at);
         
         // 訂單類型判斷

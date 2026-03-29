@@ -227,13 +227,13 @@ class DynamicCompletedOrdersRenderer {
             `;
         }
 
-        // ====== 关键修复：使用 window.TimeUtils 格式化香港时间 ======
+        // ====== 关键修复：使用统一的 window.TimeUtils.formatOrderTime 格式化香港时间 ======
         const createdTime = window.TimeUtils ? 
-            window.TimeUtils.formatHKTimeOnly(order.created_at) : 
+            window.TimeUtils.formatOrderTime(order.created_at, false) : // 只显示时间
             (order.created_at || '');
         
         const pickedTime = window.TimeUtils ? 
-            window.TimeUtils.formatHKTimeOnly(order.picked_up_at) : 
+            window.TimeUtils.formatOrderTime(order.picked_up_at, false) : // 只显示时间
             (order.picked_up_at || '');
         
         // ====== 关键修改：根据订单类型显示适当的等待时间 ======

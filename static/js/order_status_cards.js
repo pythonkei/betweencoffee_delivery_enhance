@@ -30,6 +30,10 @@ class OrderStatusCardsManager {
     init() {
         console.log("初始化訂單狀態卡片管理器，訂單ID:", this.orderId);
         
+        // 檢查訂單類型
+        this.isBeansOnly = document.body.dataset.isBeansOnly === 'true';
+        console.log("訂單類型:", this.isBeansOnly ? "純咖啡豆訂單" : "咖啡訂單");
+        
         // 收集所有狀態卡片
         this.collectStatusCards();
         
@@ -75,7 +79,7 @@ class OrderStatusCardsManager {
         const orderStatus = document.body.dataset.orderStatus || 'ordered';
         const paymentStatus = document.body.dataset.paymentStatus || 'paid';
         
-        console.log("訂單狀態:", orderStatus, "支付狀態:", paymentStatus);
+        console.log("訂單狀態:", orderStatus, "支付狀態:", paymentStatus, "純咖啡豆訂單:", this.isBeansOnly);
         
         // 如果支付未完成，只顯示已下單狀態
         if (paymentStatus !== 'paid') {
@@ -83,32 +87,56 @@ class OrderStatusCardsManager {
             return;
         }
         
-        // 根據訂單狀態設置卡片狀態
-        switch(orderStatus) {
-            case 'ordered':
-            case 'pending':
-                this.updateStatus('ordered');
-                break;
-            case 'preparing':
-            case 'in_progress':
-                this.updateStatus('ordered');
-                this.updateStatus('preparing');
-                break;
-            case 'ready':
-                this.updateStatus('ordered');
-                this.updateStatus('preparing');
-                this.updateStatus('ready');
-                break;
-            case 'completed':
-            case 'picked_up':
-            case 'delivered':
-                this.updateStatus('ordered');
-                this.updateStatus('preparing');
-                this.updateStatus('ready');
-                this.updateStatus('completed');
-                break;
-            default:
-                this.updateStatus('ordered');
+        // 根據訂單類型設置不同的狀態流程
+        if (this.isBeansOnly) {
+            // 純咖啡豆訂單：簡化狀態流程（跳過preparing）
+            switch(orderStatus) {
+                case 'ordered':
+                case 'pending':
+                    this.updateStatus('ordered');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    this.updateStatus('ordered');
+            }
+        } else {
+            // 咖啡訂單：完整狀態流程
+            switch(orderStatus) {
+                case 'ordered':
+                case 'pending':
+                    this.updateStatus('ordered');
+                    break;
+                case 'preparing':
+                case 'in_progress':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    this.updateStatus('ordered');
+            }
         }
         
         // 初始化所有狀態卡片的時間顯示
@@ -338,7 +366,7 @@ class OrderStatusCardsManager {
     
     // 根據服務器狀態更新卡片
     updateStatusFromServer(status) {
-        console.log("根據服務器狀態更新卡片:", status);
+        console.log("根據服務器狀態更新卡片:", status, "純咖啡豆訂單:", this.isBeansOnly);
         
         // 處理 null 狀態
         if (!status) {
@@ -346,33 +374,64 @@ class OrderStatusCardsManager {
             return;
         }
         
-        // 根據狀態更新卡片
-        switch(status) {
-            case 'ordered':
-            case 'pending':
-            case 'waiting':  // 新增：等待製作狀態
-                this.updateStatus('ordered');
-                break;
-            case 'preparing':
-            case 'in_progress':
-                this.updateStatus('ordered');
-                this.updateStatus('preparing');
-                break;
-            case 'ready':
-                this.updateStatus('ordered');
-                this.updateStatus('preparing');
-                this.updateStatus('ready');
-                break;
-            case 'completed':
-            case 'picked_up':
-            case 'delivered':
-                this.updateStatus('ordered');
-                this.updateStatus('preparing');
-                this.updateStatus('ready');
-                this.updateStatus('completed');
-                break;
-            default:
-                console.log("未知狀態:", status);
+        // 根據訂單類型設置不同的狀態流程
+        if (this.isBeansOnly) {
+            // 純咖啡豆訂單：簡化狀態流程（跳過preparing）
+            switch(status) {
+                case 'ordered':
+                case 'pending':
+                case 'waiting':  // 新增：等待製作狀態
+                    this.updateStatus('ordered');
+                    break;
+                case 'preparing':
+                case 'in_progress':
+                    // 純咖啡豆訂單不應該有preparing狀態，但如果有，跳過它
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    console.log("未知狀態:", status);
+            }
+        } else {
+            // 咖啡訂單：完整狀態流程
+            switch(status) {
+                case 'ordered':
+                case 'pending':
+                case 'waiting':  // 新增：等待製作狀態
+                    this.updateStatus('ordered');
+                    break;
+                case 'preparing':
+                case 'in_progress':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    console.log("未知狀態:", status);
+            }
         }
         
         // 顯示狀態更新通知

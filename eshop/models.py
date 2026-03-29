@@ -599,13 +599,13 @@ class OrderModel(models.Model):
         訂單摘要信息
         用於訂單確認頁面的頂部顯示
         """
-        # 格式化創建時間
-        created_at = self.created_at
-        if created_at.tzinfo is None:
-            hk_tz = pytz.timezone('Asia/Hong_Kong')
-            created_at = timezone.make_aware(created_at, hk_tz)
+        # 使用統一的時間服務格式化時間
+        from .time_calculation import unified_time_service
         
-        created_display = created_at.strftime('%Y-%m-%d %H:%M')
+        if self.created_at:
+            created_display = unified_time_service.format_time_for_display(self.created_at)
+        else:
+            created_display = "時間未知"
         
         return {
             'order_id': self.id,

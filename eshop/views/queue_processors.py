@@ -1,6 +1,6 @@
 """
-隊列處理器 - 統一處理隊列數據的共用模塊
-重構 queue_views.py 中的重複邏輯
+隊列處理器 - 統一處理隊列數據的共用模塊（優化版）
+重構 queue_views.py 中的重複邏輯，使用查詢優化器
 """
 
 import logging
@@ -15,6 +15,12 @@ from eshop.order_status_manager import OrderStatusManager
 from eshop.utils.order_item_processor import OrderItemProcessor
 from eshop.utils.time_formatter import TimeFormatter
 from eshop.time_calculation import unified_time_service
+from eshop.query_optimizer_enhanced import (
+    QueryOptimizer,
+    BatchOrderProcessor,
+    batch_prepare_orders,
+    batch_prepare_ready_orders
+)
 
 logger = logging.getLogger(__name__)
 

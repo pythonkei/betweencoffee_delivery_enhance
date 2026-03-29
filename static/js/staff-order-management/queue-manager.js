@@ -364,9 +364,9 @@ class QueueManager {
             `;
         }
         
-        // ====== 關鍵修復：使用 window.TimeUtils 格式化香港時間 ======
+        // ====== 關鍵修復：使用統一的 window.TimeUtils.formatOrderTime 格式化香港時間 ======
         const orderTime = window.TimeUtils ? 
-            window.TimeUtils.formatHKTimeOnly(order.created_at) : 
+            window.TimeUtils.formatOrderTime(order.created_at, false) : // 只顯示時間
             (order.created_at_display || '--:--');
         
         // ====== 咖啡豆數量徽章 ======
@@ -553,8 +553,23 @@ class QueueManager {
             }
             this.isLoading = true;
             
+            // ====== 階段1優化：樂觀更新 ======
+            // 1. 記錄開始時間用於性能監控
+            const startTime = Date.now();
+            
+            // 2. 立即更新UI（樂觀更新）
+            this.showImmediateFeedback(orderId, 'preparing');
+            
+            // 3. 記錄UI更新性能
+            if (window.recordUiUpdate) {
+                window.recordUiUpdate('queue-manager', 'showImmediateFeedback', 
+                    startTime, Date.now(), 1);
+            }
+            
             const csrfToken = this.getCsrfToken();
             if (!csrfToken) {
+                // 如果無法獲取token，回滾UI更新
+                this.rollbackImmediateFeedback(orderId);
                 throw new Error('無法獲取安全令牌，請刷新頁面重試');
             }
             
@@ -569,16 +584,31 @@ class QueueManager {
                 body: JSON.stringify({}),
             });
         
-            console.log(`📡 開始製作 API 響應: HTTP ${response.status} ${response.statusText}`);
+            // 計算HTTP請求耗時
+            const httpDuration = Date.now() - startTime;
+            console.log(`📡 開始製作 API 響應: HTTP ${response.status} ${response.statusText}, 耗時: ${httpDuration}ms`);
+            
+            // 記錄HTTP請求性能
+            if (window.recordHttpRequest) {
+                window.recordHttpRequest(
+                    `/eshop/queue/start/${orderId}/`,
+                    'POST',
+                    startTime,
+                    Date.now(),
+                    response.status,
+                    response.ok
+                );
+            }
             
             if (response.ok) {
                 const data = await response.json();
                 console.log('📊 API 響應數據:', data);
                 
                 if (data.success) {
+                    // 4. 請求成功，顯示成功提示
                     this.showToast('✅ 已開始製作訂單 #' + orderId, 'success');
                     
-                    // 觸發事件，讓統一數據管理器刷新數據
+                    // 5. 觸發事件，讓統一數據管理器刷新數據
                     document.dispatchEvent(new CustomEvent('order_started_preparing', {
                         detail: { 
                             order_id: orderId,
@@ -586,17 +616,37 @@ class QueueManager {
                         }
                     }));
                     
-                    // 觸發統一數據刷新
+                    // 6. 觸發統一數據刷新
                     if (window.unifiedDataManager) {
                         setTimeout(() => window.unifiedDataManager.loadUnifiedData(), 500);
                     }
+                    
+                    // 7. 記錄成功操作
+                    this.recordOperationSuccess('start_preparation', orderId, httpDuration);
+                    
+                    // 8. 記錄操作性能
+                    if (window.recordOperation) {
+                        window.recordOperation(
+                            'start_preparation',
+                            orderId,
+                            startTime,
+                            Date.now(),
+                            true,
+                            null
+                        );
+                    }
                 } else {
+                    // 9. 如果API返回失敗，回滾UI更新
+                    this.rollbackImmediateFeedback(orderId);
                     throw new Error(data.message || data.error || '操作失敗');
                 }
             } else if (response.status === 403) {
                 // 處理 403 Forbidden 錯誤
                 const errorText = await response.text();
                 console.error('❌ HTTP 403 Forbidden 錯誤詳情:', errorText);
+                
+                // 回滾UI更新
+                this.rollbackImmediateFeedback(orderId);
                 
                 try {
                     const errorData = JSON.parse(errorText);
@@ -607,10 +657,25 @@ class QueueManager {
             } else {
                 const errorText = await response.text();
                 console.error(`❌ HTTP ${response.status} 錯誤詳情:`, errorText);
+                
+                // 回滾UI更新
+                this.rollbackImmediateFeedback(orderId);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
         } catch (error) {
             console.error('開始製作失敗:', error);
+            
+            // 記錄操作失敗性能
+            if (window.recordOperation) {
+                window.recordOperation(
+                    'start_preparation',
+                    orderId,
+                    startTime,
+                    Date.now(),
+                    false,
+                    error.message
+                );
+            }
             
             // 根據錯誤類型顯示不同的提示
             let errorMessage = error.message;
@@ -623,6 +688,9 @@ class QueueManager {
             } else {
                 this.showToast('❌ 操作失敗: ' + errorMessage, 'error');
             }
+            
+            // 記錄操作失敗
+            this.recordOperationFailure('start_preparation', orderId, errorMessage);
         } finally {
             this.isLoading = false;
         }
@@ -985,6 +1053,152 @@ class QueueManager {
         alert(`訂單 #${orderId} 的詳細信息\n\n此功能待完善...`);
     }
     
+    // ==================== 樂觀更新輔助方法 ====================
+    
+    /**
+     * 顯示立即反饋（樂觀更新）
+     */
+    showImmediateFeedback(orderId, action) {
+        console.log(`⚡ 樂觀更新: 訂單 #${orderId} ${action}`);
+        
+        // 1. 禁用按鈕，防止重複點擊
+        const button = document.querySelector(`.start-preparation-btn[data-order-id="${orderId}"]`);
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>處理中...';
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-secondary');
+        }
+        
+        // 2. 顯示處理中提示
+        this.showToast(`正在處理訂單 #${orderId}...`, 'info');
+        
+        // 3. 記錄樂觀更新狀態
+        if (!this.optimisticUpdates) {
+            this.optimisticUpdates = new Map();
+        }
+        this.optimisticUpdates.set(orderId, {
+            action: action,
+            timestamp: Date.now(),
+            originalButtonState: button ? {
+                html: button.innerHTML,
+                disabled: button.disabled,
+                classes: button.className
+            } : null
+        });
+    }
+    
+    /**
+     * 回滾樂觀更新
+     */
+    rollbackImmediateFeedback(orderId) {
+        console.log(`↩️ 回滾樂觀更新: 訂單 #${orderId}`);
+        
+        if (!this.optimisticUpdates || !this.optimisticUpdates.has(orderId)) {
+            return;
+        }
+        
+        const updateInfo = this.optimisticUpdates.get(orderId);
+        
+        // 1. 恢復按鈕狀態
+        const button = document.querySelector(`.start-preparation-btn[data-order-id="${orderId}"]`);
+        if (button && updateInfo.originalButtonState) {
+            button.disabled = updateInfo.originalButtonState.disabled;
+            button.innerHTML = updateInfo.originalButtonState.html;
+            button.className = updateInfo.originalButtonState.classes;
+        }
+        
+        // 2. 從記錄中移除
+        this.optimisticUpdates.delete(orderId);
+        
+        // 3. 顯示回滾提示
+        this.showToast(`訂單 #${orderId} 操作已取消`, 'warning');
+    }
+    
+    /**
+     * 記錄操作成功
+     */
+    recordOperationSuccess(operation, orderId, duration) {
+        console.log(`✅ 操作成功: ${operation} 訂單 #${orderId}, 耗時: ${duration}ms`);
+        
+        // 清理樂觀更新記錄
+        if (this.optimisticUpdates && this.optimisticUpdates.has(orderId)) {
+            this.optimisticUpdates.delete(orderId);
+        }
+        
+        // 記錄性能數據
+        if (!this.performanceMetrics) {
+            this.performanceMetrics = [];
+        }
+        
+        this.performanceMetrics.push({
+            operation: operation,
+            orderId: orderId,
+            duration: duration,
+            success: true,
+            timestamp: new Date().toISOString()
+        });
+        
+        // 保持性能數據大小
+        if (this.performanceMetrics.length > 100) {
+            this.performanceMetrics = this.performanceMetrics.slice(-50);
+        }
+    }
+    
+    /**
+     * 記錄操作失敗
+     */
+    recordOperationFailure(operation, orderId, error) {
+        console.error(`❌ 操作失敗: ${operation} 訂單 #${orderId}, 錯誤: ${error}`);
+        
+        // 記錄性能數據
+        if (!this.performanceMetrics) {
+            this.performanceMetrics = [];
+        }
+        
+        this.performanceMetrics.push({
+            operation: operation,
+            orderId: orderId,
+            error: error,
+            success: false,
+            timestamp: new Date().toISOString()
+        });
+        
+        // 保持性能數據大小
+        if (this.performanceMetrics.length > 100) {
+            this.performanceMetrics = this.performanceMetrics.slice(-50);
+        }
+    }
+    
+    /**
+     * 獲取性能指標
+     */
+    getPerformanceMetrics() {
+        if (!this.performanceMetrics) {
+            return {
+                totalOperations: 0,
+                successRate: 0,
+                averageDuration: 0,
+                recentOperations: []
+            };
+        }
+        
+        const successfulOps = this.performanceMetrics.filter(m => m.success);
+        const failedOps = this.performanceMetrics.filter(m => !m.success);
+        const totalDuration = successfulOps.reduce((sum, m) => sum + (m.duration || 0), 0);
+        
+        return {
+            totalOperations: this.performanceMetrics.length,
+            successfulOperations: successfulOps.length,
+            failedOperations: failedOps.length,
+            successRate: this.performanceMetrics.length > 0 ? 
+                (successfulOps.length / this.performanceMetrics.length * 100).toFixed(1) : 0,
+            averageDuration: successfulOps.length > 0 ? 
+                Math.round(totalDuration / successfulOps.length) : 0,
+            recentOperations: this.performanceMetrics.slice(-10)
+        };
+    }
+    
     // ==================== 清理方法 ====================
     
     cleanup() {
@@ -993,6 +1207,11 @@ class QueueManager {
         // 清理所有計時器
         this.remainingTimers.forEach(timer => clearInterval(timer));
         this.remainingTimers.clear();
+        
+        // 清理樂觀更新記錄
+        if (this.optimisticUpdates) {
+            this.optimisticUpdates.clear();
+        }
         
         console.log('✅ 隊列管理器已清理');
     }

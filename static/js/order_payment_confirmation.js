@@ -35,6 +35,73 @@ function copyPickupCode(pickupCode) {
     document.body.removeChild(textArea);
 }
 
+// 保存二維碼圖片功能
+function saveQRCodeImage() {
+    console.log("開始保存二維碼圖片");
+    
+    // 檢查html2canvas是否可用
+    if (typeof html2canvas === 'undefined') {
+        alert('圖片保存功能暫時不可用，請稍後重試');
+        return;
+    }
+    
+    const qrcodeSection = document.getElementById('qrcode-section');
+    if (!qrcodeSection) {
+        alert('找不到保存區域');
+        return;
+    }
+    
+    // 獲取提取碼
+    const pickupCodeElement = document.getElementById('pickup-code-display');
+    const pickupCode = pickupCodeElement ? pickupCodeElement.textContent.trim() : "";
+    
+    // 禁用按鈕並顯示加載狀態
+    const saveBtn = document.getElementById('save-image-btn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
+    saveBtn.disabled = true;
+    
+    try {
+        // 使用html2canvas生成圖片
+        html2canvas(qrcodeSection, {
+            scale: 2, // 提高分辨率
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            logging: false
+        }).then(function(canvas) {
+            // 創建下載鏈接
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = pickupCode ? `提取碼_${pickupCode}.png` : '訂單二維碼.png';
+            link.href = image;
+            
+            // 觸發下載
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // 恢復按鈕狀態
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+            
+            alert('圖片保存成功！');
+            console.log("圖片保存成功");
+        }).catch(function(error) {
+            console.error('生成圖片失敗:', error);
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+            alert('生成圖片失敗，請稍後重試');
+        });
+        
+    } catch (error) {
+        console.error('保存圖片失敗:', error);
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        alert('保存圖片失敗，請稍後重試');
+    }
+}
+
 // ========== 頁面初始化 ==========
 function initOrderConfirmationPage() {
     console.log("初始化訂單確認頁面");
@@ -52,11 +119,13 @@ function initOrderConfirmationPage() {
         console.log("複製按鈕事件綁定成功");
     }
     
-    // 隱藏圖片保存按鈕（功能過於複雜）
+    // 綁定保存圖片按鈕事件
     const saveBtn = document.getElementById('save-image-btn');
     if (saveBtn) {
-        saveBtn.style.display = 'none';
-        console.log("圖片保存按鈕已隱藏");
+        saveBtn.addEventListener('click', function() {
+            saveQRCodeImage();
+        });
+        console.log("圖片保存按鈕事件綁定成功");
     }
     
     console.log("訂單確認頁面初始化完成");

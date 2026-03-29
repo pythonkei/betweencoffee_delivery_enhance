@@ -43,6 +43,38 @@ class TimeUtils {
         }
     }
     
+    // 新增：统一订单时间格式化方法
+    static formatOrderTime(dateString, showDate = false) {
+        if (!dateString) return '';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            
+            if (showDate) {
+                // 显示完整日期时间
+                return date.toLocaleString('zh-HK', {
+                    timeZone: 'Asia/Hong_Kong',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } else {
+                // 只显示时间（HH:MM）
+                return date.toLocaleTimeString('zh-HK', {
+                    timeZone: 'Asia/Hong_Kong',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        } catch (error) {
+            console.error('格式化订单时间错误:', error);
+            return dateString;
+        }
+    }
+    
     static formatRelativeTime(dateString) {
         if (!dateString) return '刚刚';
         
@@ -66,6 +98,7 @@ class TimeUtils {
             return '刚刚';
         }
     }
+    
     // 新增：格式化完成时间为中文格式（下午xx:xx:xx）
     static formatCompletedTime(dateString = null) {
         let date;
