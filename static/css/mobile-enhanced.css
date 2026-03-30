@@ -1,0 +1,596 @@
+/*
+ * mobile-enhanced.css
+ * 移動端增強樣式
+ * 採用漸進式增強策略，只添加移動端特定樣式
+ * 避免與style.css衝突，使用更高特異性選擇器
+ */
+
+/* ========== 移動端基礎優化 ========== */
+
+/* 移動端專用工具類 */
+.mobile-optimized {
+    /* 移動端優化容器 */
+}
+
+.mobile-touch-friendly {
+    /* 觸摸友好元素 */
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* 安全區域支持（iPhone X+） */
+@supports (padding: max(0px)) {
+    .safe-area-top {
+        padding-top: max(15px, env(safe-area-inset-top));
+    }
+    
+    .safe-area-bottom {
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+    }
+    
+    .safe-area-left {
+        padding-left: max(15px, env(safe-area-inset-left));
+    }
+    
+    .safe-area-right {
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+}
+
+/* ========== 響應式斷點優化 ========== */
+
+/* 手機設備 (≤ 767.98px) */
+@media (max-width: 767.98px) {
+    /* 基礎優化 */
+    body.mobile-optimized {
+        font-size: 14px;
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* 容器優化 */
+    .mobile-optimized .container,
+    .mobile-optimized .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* 卡片優化 */
+    .mobile-optimized .card {
+        margin-bottom: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mobile-optimized .card-body {
+        padding: 15px;
+    }
+    
+    /* 按鈕優化 */
+    .mobile-optimized .btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        min-height: 44px;
+        border-radius: 8px;
+    }
+    
+    /* 表單優化 */
+    .mobile-optimized .form-control,
+    .mobile-optimized .form-select {
+        font-size: 16px; /* 防止iOS自動縮放 */
+        height: 44px;
+        padding: 10px 15px;
+        border-radius: 8px;
+    }
+    
+    /* 導航欄優化 */
+    .mobile-optimized .navbar {
+        padding: 10px 0;
+    }
+    
+    .mobile-optimized .navbar-brand {
+        font-size: 18px;
+    }
+    
+    /* 表格優化 */
+    .mobile-optimized .table-responsive {
+        margin-bottom: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    /* 圖片優化 */
+    .mobile-optimized img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+    
+    /* 工具類 */
+    .mobile-optimized .d-mobile-none {
+        display: none !important;
+    }
+    
+    .mobile-optimized .d-mobile-block {
+        display: block !important;
+    }
+    
+    .mobile-optimized .d-mobile-flex {
+        display: flex !important;
+    }
+    
+    .mobile-optimized .d-mobile-grid {
+        display: grid !important;
+    }
+}
+
+/* 小屏幕手機優化 (≤ 576px) */
+@media (max-width: 576px) {
+    .mobile-optimized {
+        /* 更緊湊的佈局 */
+    }
+    
+    .mobile-optimized .row {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+    
+    .mobile-optimized .col,
+    .mobile-optimized [class*="col-"] {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    
+    /* 標題優化 */
+    .mobile-optimized h1 {
+        font-size: 24px;
+        line-height: 1.3;
+    }
+    
+    .mobile-optimized h2 {
+        font-size: 20px;
+        line-height: 1.3;
+    }
+    
+    .mobile-optimized h3 {
+        font-size: 18px;
+        line-height: 1.3;
+    }
+    
+    .mobile-optimized h4 {
+        font-size: 16px;
+        line-height: 1.3;
+    }
+    
+    /* 按鈕組優化 */
+    .mobile-optimized .btn-group-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .mobile-optimized .btn-group-mobile .btn {
+        width: 100%;
+    }
+    
+    /* 模態框優化 */
+    .mobile-optimized .modal-dialog {
+        margin: 10px;
+    }
+    
+    .mobile-optimized .modal-content {
+        border-radius: 12px;
+    }
+}
+
+/* 平板設備優化 (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .mobile-optimized .container {
+        max-width: 95%;
+    }
+    
+    /* 卡片佈局優化 */
+    .mobile-optimized .card-deck-tablet {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+}
+
+/* ========== 觸摸設備專用優化 ========== */
+
+@media (hover: none) and (pointer: coarse) {
+    /* 觸摸設備專用樣式 */
+    .mobile-optimized .btn:hover {
+        opacity: 1; /* 移除懸停效果 */
+        transform: none;
+    }
+    
+    /* 增加觸摸目標尺寸 */
+    .mobile-optimized .nav-link,
+    .mobile-optimized .dropdown-item,
+    .mobile-optimized .list-group-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+    }
+    
+    /* 觸摸友好的滾動 */
+    .mobile-optimized .scrollable-touch {
+        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+        scrollbar-width: none; /* Firefox */
+    }
+    
+    .mobile-optimized .scrollable-touch::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+    }
+}
+
+/* ========== 特定頁面移動端優化 ========== */
+
+/* 訂單支付確認頁面 */
+@media (max-width: 767.98px) {
+    .mobile-optimized #order-payment-confirmation {
+        padding: 15px;
+    }
+    
+    .mobile-optimized .status-cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .mobile-optimized .status-card {
+        padding: 15px;
+        border-radius: 10px;
+        background: #f8f9fa;
+    }
+    
+    .mobile-optimized .qrcode-section {
+        text-align: center;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    
+    .mobile-optimized .pickup-code-display {
+        font-size: 28px;
+        font-weight: bold;
+        color: #28a745;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .mobile-optimized .action-buttons-mobile {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .mobile-optimized .action-buttons-mobile .btn {
+        width: 100%;
+    }
+}
+
+/* 員工管理頁面 */
+@media (max-width: 767.98px) {
+    .mobile-optimized .staff-order-management {
+        padding: 10px;
+    }
+    
+    .mobile-optimized .order-card-mobile {
+        margin-bottom: 12px;
+        border-left: 4px solid #007bff;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mobile-optimized .order-actions-mobile {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-top: 12px;
+    }
+    
+    .mobile-optimized .queue-section-mobile {
+        margin-bottom: 20px;
+    }
+}
+
+/* 訂單詳情頁面 */
+@media (max-width: 767.98px) {
+    .mobile-optimized .order-detail-container {
+        padding: 15px;
+    }
+    
+    .mobile-optimized .order-items-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .mobile-optimized .order-item-card {
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .mobile-optimized .order-total-mobile {
+        font-size: 18px;
+        font-weight: bold;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
+}
+
+/* ========== 深色模式支持 ========== */
+
+@media (prefers-color-scheme: dark) {
+    .mobile-optimized {
+        --mobile-bg-color: #121212;
+        --mobile-text-color: #e0e0e0;
+        --mobile-card-bg: #1e1e1e;
+        --mobile-border-color: #333;
+        --mobile-primary-color: #007bff;
+    }
+    
+    .mobile-optimized body {
+        background-color: var(--mobile-bg-color);
+        color: var(--mobile-text-color);
+    }
+    
+    .mobile-optimized .card {
+        background-color: var(--mobile-card-bg);
+        border-color: var(--mobile-border-color);
+    }
+    
+    .mobile-optimized .modal-content {
+        background-color: var(--mobile-card-bg);
+    }
+    
+    .mobile-optimized .btn-primary {
+        background-color: var(--mobile-primary-color);
+        border-color: var(--mobile-primary-color);
+    }
+    
+    .mobile-optimized .table {
+        color: var(--mobile-text-color);
+    }
+    
+    .mobile-optimized .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* ========== 可訪問性優化 ========== */
+
+@media (prefers-contrast: high) {
+    .mobile-optimized .btn-primary {
+        background-color: #0056b3;
+        border-color: #0056b3;
+        color: white;
+    }
+    
+    .mobile-optimized .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+    
+    .mobile-optimized .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    
+    .mobile-optimized a {
+        text-decoration: underline;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mobile-optimized *,
+    .mobile-optimized *::before,
+    .mobile-optimized *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========== 性能優化類 ========== */
+
+.mobile-optimized .will-change-transform {
+    will-change: transform;
+}
+
+.mobile-optimized .will-change-opacity {
+    will-change: opacity;
+}
+
+.mobile-optimized .will-change-contents {
+    will-change: contents;
+}
+
+/* ========== 移動端專用組件 ========== */
+
+/* 移動端底部導航 */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+.mobile-bottom-nav-item.active {
+    color: #007bff;
+}
+
+.mobile-bottom-nav-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+/* 移動端浮動操作按鈕 */
+.mobile-fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    z-index: 1001;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-fab:active {
+    transform: scale(0.95);
+}
+
+/* 移動端下拉刷新 */
+.mobile-pull-to-refresh {
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-pull-to-refresh-indicator {
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+
+/* ========== 打印優化 ========== */
+
+@media print {
+    .mobile-optimized .no-print {
+        display: none !important;
+    }
+    
+    .mobile-optimized .print-only {
+        display: block !important;
+    }
+    
+    .mobile-optimized .container {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .mobile-optimized .card {
+        border: 1px solid #000;
+        box-shadow: none;
+        break-inside: avoid;
+    }
+}
+
+/* ========== 工具提示和彈出層優化 ========== */
+
+@media (max-width: 767.98px) {
+    .mobile-optimized .tooltip {
+        font-size: 12px;
+        max-width: 200px;
+    }
+    
+    .mobile-optimized .popover {
+        max-width: 250px;
+    }
+    
+    .mobile-optimized .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* ========== 加載狀態優化 ========== */
+
+.mobile-optimized .loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.mobile-optimized .spinner-mobile {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========== 錯誤狀態優化 ========== */
+
+.mobile-optimized .error-state-mobile {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.mobile-optimized .error-icon-mobile {
+    font-size: 48px;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.mobile-optimized .error-message-mobile {
+    font-size: 16px;
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+/* ========== 移動端優化完成 ========== */

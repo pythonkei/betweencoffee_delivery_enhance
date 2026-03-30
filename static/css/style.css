@@ -6110,6 +6110,16 @@ ul.entry-btns li a .entry-btn .arrow img  {
   gap: 1px;
 }
 
+.scroller[data-animated=true]  { 
+  overflow: hidden;
+}
+
+.scroller[data-animated=true] .scroller__inner  { 
+  width: fit-content;
+  flex-wrap: nowrap;
+  animation: scroll 60s linear infinite;
+}
+
 @keyframes scroll  { 
   to  { 
     transform: translate(calc(-50% - 0.1rem));

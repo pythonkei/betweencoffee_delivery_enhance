@@ -76,40 +76,51 @@
                     
                     {% if order_type.is_beans_only %}
                         <!-- 純咖啡豆訂單：簡化狀態卡片（3個狀態） -->
+                        <!-- 
+                        ID命名規範說明：
+                        1. 前綴規則：status-card-{orderType}-{status}
+                           - orderType: beans（純咖啡豆）或 coffee（咖啡訂單）
+                           - status: ordered, preparing, ready, completed
+                        2. 時間元素ID：status-time-{orderType}-{status}
+                        3. 數據屬性：data-status 用於JavaScript狀態管理
+                        
+                        修改原因：解決ID重複問題，確保每個ID在文檔中唯一
+                        修改時間：2026年3月
+                        -->
                         <div class="status-cards-container beans-only">
                             <div class="row justify-content-center">
                                 <!-- 卡片1: 已下單 -->
-                                <div class="col-6 col-md-4 status-card active" data-status="ordered" id="status-card-ordered">
+                                <div class="col-6 col-md-4 status-card active" data-status="ordered" id="status-card-beans-ordered">
                                     <div class="status-icon">
                                         <i class="fas fa-clipboard-check"></i>
                                     </div>
                                     <div class="status-title">已下單</div>
                                     <div class="status-description">訂單已建立</div>
-                                    <div class="status-time" id="status-time-ordered">
+                                    <div class="status-time" id="status-time-beans-ordered">
                                         {{ order.created_at|date:"H:i" }}
                                     </div>
                                 </div>
                                 
                                 <!-- 卡片2: 待提取（跳過製作中） -->
-                                <div class="col-6 col-md-4 status-card" data-status="ready" id="status-card-ready">
+                                <div class="col-6 col-md-4 status-card" data-status="ready" id="status-card-beans-ready">
                                     <div class="status-icon">
                                         <i class="fas fa-box"></i>
                                     </div>
                                     <div class="status-title">待提取</div>
                                     <div class="status-description">咖啡豆已準備</div>
-                                    <div class="status-time" id="status-time-ready">
+                                    <div class="status-time" id="status-time-beans-ready">
                                         隨時可取
                                     </div>
                                 </div>
                                 
                                 <!-- 卡片3: 已完成 -->
-                                <div class="col-6 col-md-4 status-card" data-status="completed" id="status-card-completed">
+                                <div class="col-6 col-md-4 status-card" data-status="completed" id="status-card-beans-completed">
                                     <div class="status-icon">
                                         <i class="fas fa-trophy"></i>
                                     </div>
                                     <div class="status-title">已完成</div>
                                     <div class="status-description">您已成功提取</div>
-                                    <div class="status-time" id="status-time-completed">
+                                    <div class="status-time" id="status-time-beans-completed">
                                         等待完成
                                     </div>
                                 </div>
@@ -136,52 +147,63 @@
                     
                     {% else %}
                         <!-- 咖啡訂單：完整狀態卡片（4個狀態） -->
+                        <!-- 
+                        ID命名規範說明：
+                        1. 前綴規則：status-card-{orderType}-{status}
+                           - orderType: beans（純咖啡豆）或 coffee（咖啡訂單）
+                           - status: ordered, preparing, ready, completed
+                        2. 時間元素ID：status-time-{orderType}-{status}
+                        3. 數據屬性：data-status 用於JavaScript狀態管理
+                        
+                        修改原因：解決ID重複問題，確保每個ID在文檔中唯一
+                        修改時間：2026年3月
+                        -->
                         <div class="status-cards-container coffee-order">
                             <div class="row justify-content-center">
                                 <!-- 卡片1: 已下單 -->
-                                <div class="col-6 col-md-3 status-card active" data-status="ordered" id="status-card-ordered">
+                                <div class="col-6 col-md-3 status-card active" data-status="ordered" id="status-card-coffee-ordered">
                                     <div class="status-icon">
                                         <i class="fas fa-clipboard-check"></i>
                                     </div>
                                     <div class="status-title">已下單</div>
                                     <div class="status-description">訂單已建立</div>
-                                    <div class="status-time" id="status-time-ordered">
+                                    <div class="status-time" id="status-time-coffee-ordered">
                                         {{ order.created_at|date:"H:i" }}
                                     </div>
                                 </div>
                                 
                                 <!-- 卡片2: 製作中 -->
-                                <div class="col-6 col-md-3 status-card" data-status="preparing" id="status-card-preparing">
+                                <div class="col-6 col-md-3 status-card" data-status="preparing" id="status-card-coffee-preparing">
                                     <div class="status-icon">
                                         <i class="fas fa-coffee"></i>
                                     </div>
                                     <div class="status-title">製作中</div>
                                     <div class="status-description">咖啡師正在製作</div>
-                                    <div class="status-time" id="status-time-preparing">
+                                    <div class="status-time" id="status-time-coffee-preparing">
                                         等待開始
                                     </div>
                                 </div>
                                 
                                 <!-- 卡片3: 待取餐 -->
-                                <div class="col-6 col-md-3 status-card" data-status="ready" id="status-card-ready">
+                                <div class="col-6 col-md-3 status-card" data-status="ready" id="status-card-coffee-ready">
                                     <div class="status-icon">
                                         <i class="fas fa-check-circle"></i>
                                     </div>
                                     <div class="status-title">待取餐</div>
                                     <div class="status-description">咖啡已準備就緒</div>
-                                    <div class="status-time" id="status-time-ready">
+                                    <div class="status-time" id="status-time-coffee-ready">
                                         等待完成
                                     </div>
                                 </div>
                                 
                                 <!-- 卡片4: 已完成 -->
-                                <div class="col-6 col-md-3 status-card" data-status="completed" id="status-card-completed">
+                                <div class="col-6 col-md-3 status-card" data-status="completed" id="status-card-coffee-completed">
                                     <div class="status-icon">
                                         <i class="fas fa-trophy"></i>
                                     </div>
                                     <div class="status-title">已完成</div>
                                     <div class="status-description">您已成功提取</div>
-                                    <div class="status-time" id="status-time-completed">
+                                    <div class="status-time" id="status-time-coffee-completed">
                                         等待完成
                                     </div>
                                 </div>
