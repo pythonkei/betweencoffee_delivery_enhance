@@ -345,7 +345,7 @@
                             <p class="mb-0">訂單時間: {{ summary.created_at }}</p>
                             
                             {% if summary.pickup_time_info %}
-                                <p class="mb-0 mt-0">
+                                <p class="mb-0 mt-0" hidden>
                                     <i class="fas {{ summary.pickup_time_info.icon }} mr-1"></i>
                                     提取時間: <span class="{{ summary.pickup_time_info.css_class }}">{{ summary.pickup_time_info.text }}</span>
                                 </p>

@@ -490,44 +490,61 @@ class OrderModel(models.Model):
         """
         獲取支付狀態顯示信息
         返回結構化的支付狀態信息
+        
+        根據用戶需求：
+        1. 已下單、製作中、待取餐這3個卡片狀態激活時，保持現在的訊息
+        2. 已完成卡片狀態激活時，修改為新的訊息
         """
-        status_map = {
-            'paid': {
+        # 根據訂單狀態決定顯示的訊息
+        if self.status in ['completed', 'picked_up']:
+            # 已完成狀態的訊息
+            return {
                 'status': 'paid',
-                'title': '支付成功！',
-                'message': '您的訂單我們已收到，感謝您的購買！',
-                'icon': 'fa-check-circle',
+                'title': '已完成！',
+                'message': '讓我們的咖啡保持您的節奏, 同步呼吸！',
+                'icon': 'fa-trophy',
                 'icon_color': 'text-success',
                 'icon_size': '3rem'
-            },
-            'pending': {
-                'status': 'pending',
-                'title': '支付處理中',
-                'message': '您的付款正在處理中，請稍後查看訂單狀態。',
-                'icon': 'fa-clock',
-                'icon_color': 'text-warning',
-                'icon_size': '3rem',
-                'timeout_message': f'若長時間未更新，請聯絡客服並提供訂單號碼: #{self.id}'
-            },
-            'unknown': {
-                'status': 'unknown',
-                'title': '支付狀態未知',
-                'message': '無法確定您的付款狀態，請檢查訂單歷史或聯絡客服。',
-                'icon': 'fa-question-circle',
-                'icon_color': 'text-info',
-                'icon_size': '3rem'
             }
-        }
-        
-        # 確定支付狀態
-        if self.payment_status == 'paid':
-            payment_key = 'paid'
-        elif self.payment_status == 'pending':
-            payment_key = 'pending'
         else:
-            payment_key = 'unknown'
-        
-        return status_map.get(payment_key, status_map['unknown'])
+            # 其他狀態的訊息
+            status_map = {
+                'paid': {
+                    'status': 'paid',
+                    'title': '支付成功！',
+                    'message': '您的訂單我們已收到，感謝您的購買！',
+                    'icon': 'fa-check-circle',
+                    'icon_color': 'text-success',
+                    'icon_size': '3rem'
+                },
+                'pending': {
+                    'status': 'pending',
+                    'title': '支付處理中',
+                    'message': '您的付款正在處理中，請稍後查看訂單狀態。',
+                    'icon': 'fa-clock',
+                    'icon_color': 'text-warning',
+                    'icon_size': '3rem',
+                    'timeout_message': f'若長時間未更新，請聯絡客服並提供訂單號碼: #{self.id}'
+                },
+                'unknown': {
+                    'status': 'unknown',
+                    'title': '支付狀態未知',
+                    'message': '無法確定您的付款狀態，請檢查訂單歷史或聯絡客服。',
+                    'icon': 'fa-question-circle',
+                    'icon_color': 'text-info',
+                    'icon_size': '3rem'
+                }
+            }
+            
+            # 確定支付狀態
+            if self.payment_status == 'paid':
+                payment_key = 'paid'
+            elif self.payment_status == 'pending':
+                payment_key = 'pending'
+            else:
+                payment_key = 'unknown'
+            
+            return status_map.get(payment_key, status_map['unknown'])
 
     def get_order_display_items(self):
         """

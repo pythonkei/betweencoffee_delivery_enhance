@@ -3,7 +3,7 @@
 <div class="mt-4">
     {% if order_type.is_beans_only %}
         <!-- 純咖啡豆訂單 -->
-        <div class="p-3 bg-theme rounded">
+        <div class="p-3 bg-theme rounded" hidden>
             <div class="font-weight-normal text-white h5">
                 <i class="fas fa-check-circle mr-1"></i>
                 您的咖啡豆已準備就緒，隨時可以提取！
@@ -14,16 +14,16 @@
         <!-- 咖啡訂單（包含混合訂單） -->
         <div id="coffee-order-section">
             <!-- 簡化狀態顯示（移除進度條） -->
-            <div class="mt-4 p-3 bg-theme rounded">
+            <div class="mt-4 p-3 bg-theme rounded" hidden>
                 <div class="font-weight-normal text-white">
-                    <div id="queue-status-display">
+                    <div id="queue-status-display" hidden>
                         <i class="fas fa-clock mr-2"></i>
                         <span id="queue-status-text">
                             {{ status_info.queue_display }}
                         </span>
                     </div>
                     
-                    <div class="mt-2" id="estimated-time-display">
+                    <div class="mt-2" id="estimated-time-display" hidden>
                         <i class="fas fa-hourglass-end mr-2"></i>
                         預計完成時間: 
                         <span class="font-weight-bold">
@@ -34,15 +34,14 @@
                         </span>
                     </div>
                     
-                    <div class="mt-2" id="queue-message">
+                    <div class="mt-2" id="queue-message" hidden>
                         {{ status_info.queue_message }}
                     </div>
                 </div>
             </div>
             
             <!-- 完成状态 -->
-            <div class="mt-4 p-3 bg-success rounded" id="ready-section" 
-                style="display: {% if status_info.is_ready %}block{% else %}none{% endif %};">
+            <div class="mt-4 p-3 bg-success rounded" id="ready-section" hidden>
                 <div class="font-weight-normal text-white h5">
                     <i class="fas fa-check-circle mr-1"></i>
                     {{ status_info.status_message }}
@@ -52,7 +51,7 @@
     
     {% else %}
         <!-- 其他商品訂單 -->
-        <div class="p-3 bg-theme rounded">
+        <div class="p-3 bg-theme rounded" hidden>
             <div class="font-weight-normal text-white h5">
                 <i class="fas fa-check-circle mr-1"></i>
                 您的商品已準備就緒，隨時可以提取！

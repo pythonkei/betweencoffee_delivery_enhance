@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-30T16:00:48.965Z",
+  "testName": "統一訂單更新器增強版測試",
+  "results": {
+    "passed": 1,
+    "failed": 6,
+    "total": 7
+  },
+  "environment": {
+    "nodeVersion": "v18.19.1",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "summary": "有測試失敗"
+}

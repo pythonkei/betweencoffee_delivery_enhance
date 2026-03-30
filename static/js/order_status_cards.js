@@ -597,6 +597,9 @@ class OrderStatusCardsManager {
         
         // 顯示狀態更新通知
         this.showStatusNotification(status);
+        
+        // 新增：更新支付狀態顯示區
+        this.updatePaymentDisplay(status);
     }
     
     // 顯示狀態更新通知
@@ -611,6 +614,58 @@ class OrderStatusCardsManager {
         if (message) {
             // 只顯示Toast提示，移除瀏覽器通知以減少干擾
             this.showToast(message);
+        }
+    }
+    
+    // 更新支付狀態顯示區
+    updatePaymentDisplay(status) {
+        console.log("更新支付狀態顯示區，狀態:", status);
+        
+        // 只在狀態為 completed 或 picked_up 時更新支付顯示
+        if (status === 'completed' || status === 'picked_up' || status === 'delivered') {
+            console.log("訂單已完成，更新支付狀態顯示區");
+            
+            // 查找支付狀態顯示區的元素
+            const paymentDisplay = document.querySelector('.shadow-sm.mb-5.rounded.text-center');
+            if (!paymentDisplay) {
+                console.warn("找不到支付狀態顯示區元素");
+                return;
+            }
+            
+            // 查找標題元素
+            const titleElement = paymentDisplay.querySelector('h3');
+            // 查找訊息元素
+            const messageElement = paymentDisplay.querySelector('h5');
+            // 查找圖示元素
+            const iconElement = paymentDisplay.querySelector('i.fas');
+            
+            if (titleElement) {
+                titleElement.textContent = '已完成！';
+                titleElement.className = 'text-success mb-3';
+                console.log("更新標題: 已完成！");
+            }
+            
+            if (messageElement) {
+                messageElement.textContent = '讓我們的咖啡保持您的節奏, 同步呼吸！';
+                console.log("更新訊息: 讓我們的咖啡保持您的節奏, 同步呼吸！");
+            }
+            
+            if (iconElement) {
+                // 更新圖示為獎盃
+                iconElement.className = 'fas fa-trophy text-success';
+                iconElement.style.fontSize = '3rem';
+                console.log("更新圖示: fa-trophy");
+            }
+            
+            // 添加動畫效果
+            paymentDisplay.classList.add('payment-display-updated');
+            setTimeout(() => {
+                paymentDisplay.classList.remove('payment-display-updated');
+            }, 1000);
+            
+            console.log("支付狀態顯示區更新完成");
+        } else {
+            console.log("訂單狀態不是已完成，不更新支付顯示:", status);
         }
     }
     
