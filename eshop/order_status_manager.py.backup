@@ -392,50 +392,27 @@ class OrderStatusManager:
     
 
     def _get_queue_display_text(self, queue_info):
-        """生成队列显示文本 - 增强版：利用新的队列信息"""
+        """生成队列显示文本"""
         if not queue_info:
             return '等待加入队列...', '系统正在处理您的订单', ''
         
         queue_position = queue_info['queue_position']
         wait_minutes = queue_info['queue_wait_minutes']
         total_minutes = queue_info['total_minutes']
-        has_preparing_items = queue_info.get('has_preparing_items', False)
-        waiting_items_count = queue_info.get('waiting_items_count', 0)
-        preparing_items_count = queue_info.get('preparing_items_count', 0)
         
-        # 队列状态文本 - 更详细的显示
-        if wait_minutes < 1:
-            wait_display = "即将开始"
-        else:
-            wait_display = f"{wait_minutes}分钟"
+        # 队列状态文本
+        queue_display = f"队列位置: #{queue_position} | 预计等待: {wait_minutes}分钟"
         
-        queue_display = f"队列位置: #{queue_position} | 预计等待: {wait_display}"
-        
-        # 队列消息 - 根据队列状态提供更准确的信息
+        # 队列消息
         if queue_position == 1:
-            if has_preparing_items:
-                queue_message = '当前订单正在制作中，即将轮到您！'
-            else:
-                queue_message = '下一个就轮到您了！'
+            queue_message = '下一个就轮到您了！'
         elif queue_position <= 3:
-            # 显示更详细的信息
-            if preparing_items_count > 0:
-                queue_message = f'前面有 {preparing_items_count} 个正在制作，{waiting_items_count} 个等待中'
-            else:
-                queue_message = f'前面还有 {queue_position - 1} 个订单等待中'
+            queue_message = f'前面还有 {queue_position - 1} 个订单'
         else:
-            if preparing_items_count > 0:
-                queue_message = f'目前有 {preparing_items_count} 个正在制作，{waiting_items_count} 个等待中'
-            else:
-                queue_message = '目前订单较多，请耐心等候'
+            queue_message = '目前订单较多，请耐心等候'
         
-        # 剩余时间显示 - 更准确的描述
-        if total_minutes < 1:
-            remaining_display = "(即将完成)"
-        elif total_minutes <= 5:
-            remaining_display = f"(约{total_minutes}分钟后完成)"
-        else:
-            remaining_display = f"(约{total_minutes}分钟后)"
+        # 剩余时间显示
+        remaining_display = f"(约{total_minutes}分钟后)"
         
         return queue_display, queue_message, remaining_display
     
@@ -824,7 +801,7 @@ class OrderStatusManager:
 
 
     def _get_queue_info(self):
-        """获取队列信息 - 增强版：考虑 preparing 状态的订单"""
+        """获取队列信息"""
         # 修复：使用 payment_status 而不是 is_paid
         if self.order.payment_status != 'paid':  # 修复这里
             return None
@@ -832,41 +809,32 @@ class OrderStatusManager:
         try:
             queue_item = CoffeeQueue.objects.get(order=self.order)
             
-            # 计算所有在制作中的订单（waiting + preparing）
-            active_items = CoffeeQueue.objects.filter(
-                status__in=['waiting', 'preparing'],
+            # 计算队列位置
+            waiting_before = CoffeeQueue.objects.filter(
+                status='waiting',
+                position__lt=queue_item.position
+            ).count()
+            
+            queue_position = waiting_before + 1
+            
+            # 计算等待时间
+            queue_wait_minutes = 0
+            waiting_items = CoffeeQueue.objects.filter(
+                status='waiting',
                 position__lt=queue_item.position
             ).order_by('position')
             
-            queue_position = active_items.count() + 1
-            
-            # 计算等待时间（考虑不同状态）
-            queue_wait_minutes = 0
-            for item in active_items:
-                if item.status == 'preparing':
-                    # 对于正在制作的订单，计算剩余时间
-                    if item.estimated_completion_time:
-                        now = timezone.now()
-                        remaining = (item.estimated_completion_time - now).total_seconds() / 60
-                        queue_wait_minutes += max(0, remaining)
-                    else:
-                        queue_wait_minutes += item.preparation_time_minutes or 5
-                else:
-                    # waiting 状态的订单
-                    queue_wait_minutes += item.preparation_time_minutes or 5
+            for item in waiting_items:
+                queue_wait_minutes += item.preparation_time_minutes or 5
             
             preparation_minutes = queue_item.preparation_time_minutes or 5
             total_minutes = queue_wait_minutes + preparation_minutes
             
             return {
                 'queue_position': queue_position,
-                'queue_wait_minutes': round(queue_wait_minutes, 1),
+                'queue_wait_minutes': queue_wait_minutes,
                 'preparation_minutes': preparation_minutes,
-                'total_minutes': round(total_minutes, 1),
-                'active_items_count': active_items.count(),
-                'has_preparing_items': active_items.filter(status='preparing').exists(),
-                'waiting_items_count': active_items.filter(status='waiting').count(),
-                'preparing_items_count': active_items.filter(status='preparing').count(),
+                'total_minutes': total_minutes,
             }
             
         except CoffeeQueue.DoesNotExist:

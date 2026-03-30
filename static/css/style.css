@@ -2889,8 +2889,9 @@ padding-right: 6rem !important; }
   .mb-md-4  { 
     margin-bottom: 1.5rem !important; }
 
-  .ml-md-4  { 
-    margin-left: 1.5rem !important; }
+  .ml-md-4  {
+    /* margin-left: 1.5rem !important; */
+    }
 
   .mb-md-5  { 
     margin-bottom: 3rem !important; }
@@ -7491,7 +7492,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .coffee-image-container {
   width: 100%;
   min-height: 280px;
-  max-height: 500px;
+  /* max-height: 500px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7764,13 +7765,13 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   }
   
   .coffee-image-container {
-    min-height: 220px;
-    max-height: 320px;
+    /* min-height: 220px; */
+    /* max-height: 320px; */
   }
   
   .coffee-image-container img {
-    max-width: 90%;
-    max-height: 90%;
+    /* max-width: 90%; */
+    /* max-height: 90%; */
   }
   
   .coffee-name-v1 {

@@ -166,8 +166,8 @@
                             <input type="hidden" name="email" 
                             {% if user.is_authenticated %}value="{{ user.email }}"{% endif %}>
                             
-                            <div class="d-md-flex">
-                                <div class="form-group">
+                            <div hidden class="d-md-flex">
+                                <div hidden class="form-group">
                                     <div class="select-wrap">
                                         <div class="icon"><span class="icon material-symbols-outlined">glass_cup</span></div>
                                         <select name="cup_size" id="" class="form-control" autocomplete="off" required>
