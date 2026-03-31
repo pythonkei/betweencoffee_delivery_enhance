@@ -56,8 +56,8 @@
                     </td>
 
                     <td class="cart-item__details">
-                        <a href="" class="cart-item__name cart-list break">
-                            <p hidden>
+                        <div class="cart-item__name cart-list break">
+                            <p hidden aria-hidden="true">
                                 {% if item.type == 'coffee' %}- 咖啡 -
                                 {% elif item.type == 'bean' %}- 咖啡豆 -
                                 {% endif %}
@@ -66,6 +66,7 @@
                             class="cart-item__name cart-list break">
                                 <h5>{{ item.name }}</h5>
                             </a>
+                        </div>
                             <div class="cart-option">
                                 ${{ item.price|floatformat:0 }}
                             </div>

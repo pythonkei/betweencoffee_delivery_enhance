@@ -218,6 +218,10 @@ class UnifiedTimeService:
         diff = target - now
         return max(0, int(diff.total_seconds() / 60))
     
+    def get_remaining_minutes(self, target_time):
+        """兼容性方法：計算剩餘分鐘數（別名）"""
+        return self.calculate_remaining_minutes(target_time)
+    
     def is_time_urgent(self, latest_start_time, buffer_minutes=5):
         """
         檢查時間是否緊急（需要立即處理）
