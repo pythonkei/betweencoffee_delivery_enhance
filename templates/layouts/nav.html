@@ -44,13 +44,13 @@
                             <div hidden class="dropdown-header">
                                 Signed in as <strong>{{ user.username }}</strong>
                             </div>
-                            <a class="dropdown-item" href="{% url 'profile' %}">
+                            <a class="dropdown-item" href="{% url 'socialuser:profile' %}">
                                 <i class="icon-user mr-2"></i> 個人資料
                             </a>
-                            <a class="dropdown-item" href="{% url 'profile-orders' %}">
+                            <a class="dropdown-item" href="{% url 'socialuser:profile-orders' %}">
                                 <i class="icon-cog mr-2"></i> 訂單記錄
                             </a>
-                            <a class="dropdown-item" href="{% url 'profile-settings' %}">
+                            <a class="dropdown-item" href="{% url 'socialuser:profile-settings' %}">
                                 <i class="icon-cog mr-2"></i> 設定
                             </a>
                             <a class="dropdown-item" href="{% url 'account_logout' %}">

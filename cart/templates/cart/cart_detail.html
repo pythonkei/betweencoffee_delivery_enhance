@@ -208,10 +208,27 @@
                 <div class="cart-wrap">
                     <div class="cart-total">
                         <h3 class="billing-heading mb-4">總計</h3>
-                        <p class="d-flex">
-                            <span style="text-align:left">優惠碼</span>
-                            <span style="text-align:right">不適用</span>
-                        </p>
+                        <!-- 優惠券輸入區域 -->
+                        <div class="coupon-section mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <span style="text-align:left; flex: 1;">優惠碼</span>
+                                <div style="text-align:right; flex: 2;">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" 
+                                               class="form-control coupon-input" 
+                                               id="coupon-code" 
+                                               placeholder="輸入優惠碼"
+                                               aria-label="優惠碼">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary apply-coupon-btn" type="button">
+                                                應用
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="coupon-message" class="small text-muted text-right" style="display: none;"></div>
+                        </div>
 
                         <!-- With authentication checks -->
                         {% if cart %}
@@ -394,6 +411,154 @@ JS 處理前端購物車的動態行為 - 與後端透過 AJAX通訊, 以更新�
                 totalAmountElement.textContent = '$' + text;
             }
         }
+
+        // 優惠券應用功能
+        const applyCouponBtn = document.querySelector('.apply-coupon-btn');
+        const couponInput = document.getElementById('coupon-code');
+        const couponMessage = document.getElementById('coupon-message');
+
+        if (applyCouponBtn && couponInput) {
+            applyCouponBtn.addEventListener('click', applyCoupon);
+            couponInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applyCoupon();
+                }
+            });
+        }
+
+        function applyCoupon() {
+            const couponCode = couponInput.value.trim();
+            if (!couponCode) {
+                showCouponMessage('請輸入優惠碼', 'danger');
+                return;
+            }
+
+            // 獲取當前購物車總價
+            const totalAmountElement = document.querySelector('.total-amount');
+            let totalAmountText = totalAmountElement.textContent || '';
+            let totalAmount = parseFloat(totalAmountText.replace(/[^\d.-]/g, '')) || 0;
+
+            // 顯示加載狀態
+            applyCouponBtn.disabled = true;
+            applyCouponBtn.textContent = '處理中...';
+            showCouponMessage('驗證優惠碼中...', 'info');
+
+            // 調用API應用優惠券
+            fetch('{% url "socialuser:apply_coupon" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    coupon_code: couponCode,
+                    order_amount: totalAmount
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新總價顯示
+                    if (totalAmountElement && data.final_amount) {
+                        let finalAmount = parseFloat(data.final_amount);
+                        totalAmountElement.textContent = '$' + finalAmount.toFixed(0);
+                    }
+                    
+                    // 顯示成功消息
+                    showCouponMessage(data.message, 'success');
+                    
+                    // 保存優惠券信息到session
+                    saveCouponToSession(couponCode, data.discount);
+                    
+                    // 禁用輸入框和按鈕
+                    couponInput.disabled = true;
+                    applyCouponBtn.disabled = true;
+                    applyCouponBtn.textContent = '已應用';
+                    applyCouponBtn.classList.remove('btn-outline-secondary');
+                    applyCouponBtn.classList.add('btn-success');
+                } else {
+                    showCouponMessage(data.message, 'danger');
+                    applyCouponBtn.disabled = false;
+                    applyCouponBtn.textContent = '應用';
+                }
+            })
+            .catch(error => {
+                console.error('優惠券應用失敗:', error);
+                showCouponMessage('系統錯誤，請稍後再試', 'danger');
+                applyCouponBtn.disabled = false;
+                applyCouponBtn.textContent = '應用';
+            });
+        }
+
+        function showCouponMessage(message, type) {
+            if (!couponMessage) return;
+            
+            couponMessage.textContent = message;
+            couponMessage.style.display = 'block';
+            
+            // 移除所有顏色類
+            couponMessage.classList.remove('text-success', 'text-danger', 'text-info', 'text-warning');
+            
+            // 添加對應的顏色類
+            if (type === 'success') {
+                couponMessage.classList.add('text-success');
+            } else if (type === 'danger') {
+                couponMessage.classList.add('text-danger');
+            } else if (type === 'info') {
+                couponMessage.classList.add('text-info');
+            } else if (type === 'warning') {
+                couponMessage.classList.add('text-warning');
+            }
+            
+            // 3秒後自動隱藏（除了成功消息）
+            if (type !== 'success') {
+                setTimeout(() => {
+                    couponMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function saveCouponToSession(couponCode, discount) {
+            // 保存優惠券信息到sessionStorage
+            sessionStorage.setItem('applied_coupon', JSON.stringify({
+                code: couponCode,
+                discount: discount,
+                applied_at: new Date().toISOString()
+            }));
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // 檢查是否有已應用的優惠券
+        function checkAppliedCoupon() {
+            const appliedCoupon = sessionStorage.getItem('applied_coupon');
+            if (appliedCoupon) {
+                try {
+                    const couponData = JSON.parse(appliedCoupon);
+                    // 可以在此處顯示已應用的優惠券信息
+                    console.log('已應用的優惠券:', couponData);
+                } catch (e) {
+                    console.error('解析優惠券數據失敗:', e);
+                }
+            }
+        }
+
+        // 頁面加載時檢查
+        checkAppliedCoupon();
     });
 </script>
 

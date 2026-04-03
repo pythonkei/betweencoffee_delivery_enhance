@@ -402,6 +402,20 @@ class OrderModel(models.Model):
     
     notification_sent = models.BooleanField(default=False)
     
+    # ====== 優惠券和折扣相關字段 ======
+    applied_coupon_code = models.CharField(max_length=50, blank=True, null=True, verbose_name='應用優惠碼')
+    coupon_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='優惠券折扣金額')
+    original_total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='原始總價')
+    
+    # ====== 會員折扣相關字段 ======
+    loyalty_discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=1.00, verbose_name='會員折扣率')
+    loyalty_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='會員折扣金額')
+    
+    # ====== 積分獎勵相關字段 ======
+    applied_reward_id = models.CharField(max_length=50, blank=True, null=True, verbose_name='應用獎勵ID')
+    applied_reward_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='應用獎勵名稱')
+    reward_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='獎勵折扣金額')
+    
     class Meta:
         indexes = [
             models.Index(fields=['payment_status', 'payment_timeout']),

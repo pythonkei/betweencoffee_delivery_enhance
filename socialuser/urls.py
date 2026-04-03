@@ -11,6 +11,8 @@ from .views import (
 # 導入強化會員系統視圖
 from . import views_enhanced
 
+app_name = 'socialuser'
+
 urlpatterns = [
     path('', profile_view, name="profile"),
     path('debug/', social_login_debug, name='social-login-debug'),

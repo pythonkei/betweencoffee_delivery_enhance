@@ -950,7 +950,7 @@ def handle_cart_error(request, error):
         return OrderErrorHandler.handle_json_error(error_message, status=400, error_type='cart')
     else:
         messages.error(request, '購物車操作失敗，請重新嘗試')
-        return redirect('cart:cart_detail')
+        return redirect('/cart/')
 
 
 # ==================== 上下文處理器 ====================

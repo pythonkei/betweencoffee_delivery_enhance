@@ -27,10 +27,108 @@ from eshop.view_utils import (
 
 from eshop.payment_utils import get_payment_tools
 from cart.cart import Cart
+from decimal import Decimal
 
 
 # 设置日志
 logger = logging.getLogger(__name__)
+
+
+# ==================== 優惠券和折扣處理函數 ====================
+
+def apply_coupon_discounts(request, original_total_price, items):
+    """
+    應用優惠券和折扣到訂單
+    返回處理後的訂單數據
+    """
+    coupon_code = request.POST.get('coupon_code', '').strip()
+    applied_coupon_code = None
+    coupon_discount = Decimal('0.00')
+    final_total_price = original_total_price
+    
+    # 1. 處理優惠券
+    if coupon_code:
+        # 這裡可以實現優惠券驗證邏輯
+        # 暫時使用簡單的測試優惠券
+        if coupon_code == 'TEST10':
+            coupon_discount = Decimal('10.00')
+            applied_coupon_code = coupon_code
+            final_total_price = max(Decimal('0.00'), original_total_price - coupon_discount)
+            logger.info(f"優惠券 {coupon_code} 應用成功，折扣: {coupon_discount}")
+        else:
+            logger.warning(f"無效的優惠券代碼: {coupon_code}")
+    
+    # 2. 處理會員折扣（如果用戶已登入）
+    loyalty_discount_rate = Decimal('1.00')  # 默認無折扣
+    loyalty_discount_amount = Decimal('0.00')
+    
+    if request.user.is_authenticated:
+        try:
+            # 嘗試從會員系統獲取折扣率
+            from socialuser.models_enhanced import CustomerLoyalty
+            loyalty = CustomerLoyalty.objects.filter(user=request.user).first()
+            
+            if loyalty:
+                # 使用會員系統的折扣率
+                loyalty_discount_rate = Decimal(str(loyalty.discount_rate))
+                loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
+                final_total_price = final_total_price * loyalty_discount_rate
+                logger.info(f"會員折扣應用成功，會員等級: {loyalty.get_tier_display()}, 折扣率: {loyalty_discount_rate}，折扣金額: {loyalty_discount_amount}")
+            else:
+                # 默認會員折扣（如果沒有會員記錄）
+                loyalty_discount_rate = Decimal('0.95')  # 95折
+                loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
+                final_total_price = final_total_price * loyalty_discount_rate
+                logger.info(f"默認會員折扣應用成功，折扣率: {loyalty_discount_rate}，折扣金額: {loyalty_discount_amount}")
+                
+        except ImportError:
+            # 如果會員系統不可用，使用固定折扣率
+            loyalty_discount_rate = Decimal('0.95')  # 95折
+            loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
+            final_total_price = final_total_price * loyalty_discount_rate
+            logger.info(f"會員系統不可用，使用默認折扣率: {loyalty_discount_rate}，折扣金額: {loyalty_discount_amount}")
+        except Exception as e:
+            logger.error(f"獲取會員折扣失敗: {str(e)}")
+            # 出錯時使用默認折扣率
+            loyalty_discount_rate = Decimal('0.95')
+            loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
+            final_total_price = final_total_price * loyalty_discount_rate
+    
+    # 3. 處理積分獎勵（如果用戶已登入）
+    applied_reward_id = None
+    applied_reward_name = None
+    reward_discount_amount = Decimal('0.00')
+    
+    if request.user.is_authenticated:
+        # 檢查是否有積分獎勵應用
+        reward_id = request.POST.get('applied_reward_id', '').strip()
+        if reward_id:
+            try:
+                # 這裡可以實現積分獎勵驗證邏輯
+                # 暫時使用簡單的測試獎勵
+                if reward_id == 'REWARD50':
+                    reward_discount_amount = Decimal('50.00')
+                    applied_reward_id = reward_id
+                    applied_reward_name = '50元積分獎勵'
+                    final_total_price = max(Decimal('0.00'), final_total_price - reward_discount_amount)
+                    logger.info(f"積分獎勵 {reward_id} 應用成功，折扣: {reward_discount_amount}")
+                else:
+                    logger.warning(f"無效的積分獎勵ID: {reward_id}")
+            except Exception as e:
+                logger.error(f"處理積分獎勵失敗: {str(e)}")
+    
+    return {
+        'original_total_price': original_total_price,
+        'final_total_price': final_total_price,
+        'applied_coupon_code': applied_coupon_code,
+        'coupon_discount': coupon_discount,
+        'loyalty_discount_rate': loyalty_discount_rate,
+        'loyalty_discount_amount': loyalty_discount_amount,
+        'applied_reward_id': applied_reward_id,
+        'applied_reward_name': applied_reward_name,
+        'reward_discount_amount': reward_discount_amount,
+        'total_discount': coupon_discount + loyalty_discount_amount + reward_discount_amount
+    }
 
 
 # ==================== 訂單確認視圖 ====================
@@ -278,9 +376,18 @@ class OrderConfirm(View):
                 field_errors = {'phone': '電話號碼格式不正確'}
                 return handle_validation_error(request, field_errors)
 
+            # 應用優惠券和折扣
+            discount_data = apply_coupon_discounts(request, Decimal(str(total_price)), items)
+            
+            # 更新總價為折扣後的價格
+            final_total_price = float(discount_data['final_total_price'])
+            original_total_price = float(discount_data['original_total_price'])
+            
+            logger.info(f"訂單價格計算: 原始總價={original_total_price}, 折扣後總價={final_total_price}, 總折扣={discount_data['total_discount']}")
+
             # 检查是否存在可重用的未支付订单
             existing_order = find_existing_pending_order(
-                request.user, items, total_price
+                request.user, items, final_total_price
             )
             
             if existing_order:
@@ -305,7 +412,8 @@ class OrderConfirm(View):
                     # 創建訂單時計算時間
                     order = OrderModel.objects.create(
                         user=request.user if request.user.is_authenticated else None,
-                        total_price=total_price,
+                        total_price=final_total_price,  # 使用折扣後的價格
+                        original_total_price=original_total_price,  # 保存原始總價
                         name=request.POST.get('name', ''),
                         email=request.POST.get('email', ''),
                         phone=formatted_phone,
@@ -316,9 +424,20 @@ class OrderConfirm(View):
                         status='pending',
                         payment_method=request.POST.get('payment_method', 'alipay'),
                         payment_status='pending',
+                        # 優惠券相關字段
+                        applied_coupon_code=discount_data['applied_coupon_code'],
+                        coupon_discount=float(discount_data['coupon_discount']),
+                        # 會員折扣相關字段
+                        loyalty_discount_rate=float(discount_data['loyalty_discount_rate']),
+                        loyalty_discount_amount=float(discount_data['loyalty_discount_amount']),
+                        # 積分獎勵相關字段
+                        applied_reward_id=discount_data['applied_reward_id'],
+                        applied_reward_name=discount_data['applied_reward_name'],
+                        reward_discount_amount=float(discount_data['reward_discount_amount']),
                     )
                     
                     logger.info(f"创建新订单，ID: {order.id}")
+                    logger.info(f"訂單折扣信息: 優惠券={discount_data['applied_coupon_code']}, 優惠券折扣={discount_data['coupon_discount']}, 會員折扣率={discount_data['loyalty_discount_rate']}, 會員折扣金額={discount_data['loyalty_discount_amount']}")
                     
                     # 計算取貨時間相關的時間
                     order.calculate_times_based_on_pickup_choice()

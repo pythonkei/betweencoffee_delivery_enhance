@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 監控儀表板 - Between Coffee</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        .health-score-excellent {
+            color: #28a745;
+        }
+        
+        .health-score-good {
+            color: #20c997;
+        }
+        
+        .health-score-fair {
+            color: #ffc107;
+        }
+        
+        .health-score-poor {
+            color: #fd7e14;
+        }
+        
+        .health-score-critical {
+            color: #dc3545;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .alert-card {
+            border-left: 5px solid;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .alert-critical {
+            border-left-color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.05);
+        }
+        
+        .alert-warning {
+            border-left-color: #ffc107;
+            background-color: rgba(255, 193, 7, 0.05);
+        }
+        
+        .alert-info {
+            border-left-color: #17a2b8;
+            background-color: rgba(23, 162, 184, 0.05);
+        }
+        
+        .connection-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-connected {
+            background-color: #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+        
+        .status-disconnected {
+            background-color: #dc3545;
+        }
+        
+        .status-connecting {
+            background-color: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .control-btn {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .data-table {
+            font-size: 0.9rem;
+        }
+        
+        .data-table th {
+            font-weight: 600;
+            color: #495057;
+            border-top: none;
+        }
+        
+        .refresh-indicator {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .tab-content {
+            padding-top: 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .badge-health {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+        
+        .progress {
+            height: 10px;
+            margin-top: 10px;
+        }
+        
+        .metric-breakdown {
+            margin-top: 15px;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .metric-name {
+            color: #6c757d;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+        }
+        
+        .connection-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .info-label {
+            color: #6c757d;
+        }
+        
+        .info-value {
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .stat-value {
+                font-size: 1.8rem;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .chart-container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 儀表板標頭 -->
+        <div class="dashboard-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-heartbeat me-2"></i> WebSocket 連接健康度監控</h1>
+                    <p class="mb-0">實時監控 WebSocket 連接狀態、性能和健康度</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="connection-status status-connected"></div>
+                    <span id="connectionStatusText">連接正常</span>
+                    <div class="refresh-indicator mt-2">
+                        <i class="fas fa-sync-alt me-1"></i>
+                        <span id="lastUpdateTime">剛剛更新</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制按鈕 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap">
+                    <button id="btnStartMonitoring" class="btn btn-success control-btn">
+                        <i class="fas fa-play me-1"></i> 開始監控
+                    </button>
+                    <button id="btnStopMonitoring" class="btn btn-danger control-btn">
+                        <i class="fas fa-stop me-1"></i> 停止監控
+                    </button>
+                    <button id="btnCheckHealth" class="btn btn-primary control-btn">
+                        <i class="fas fa-stethoscope me-1"></i> 檢查健康度
+                    </button>
+                    <button id="btnResetData" class="btn btn-warning control-btn">
+                        <i class="fas fa-redo me-1"></i> 重置數據
+                    </button>
+                    <button id="btnExportReport" class="btn btn-info control-btn">
+                        <i class="fas fa-download me-1"></i> 導出報告
+                    </button>
+                    <div class="ms-auto">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                            <label class="form-check-label" for="autoRefreshToggle">自動刷新</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主要統計卡片 -->
+        <div class="row mb-4">
+            <!-- 健康度評分 -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon text-center health-score-excellent">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="text-center">
+                        <div id="healthScoreValue" class="stat-value health-score-excellent">95</div>
+                        <div class="stat-label">健康度評分</div>
+                    </div>
+                    <div class="progress">
+                        <div id="healthScoreProgress" class="progress-bar bg-success" role="progressbar" style="width: 95%"></div>
+                    </div>
+                    <div class="metric-breakdown">
+                        <div class="metric-item">
+                            <span class="metric-name">穩定性</span>
+                            <span id="stabilityScore" class="metric-value health-score-excellent">95</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-name">可靠性</span>
+                            <span id="reliabilityScore" class="metric-value health-score-excellent">96</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-name">網絡質量</span>
+                            <span id="networkScore" class="metric-value health-score-good">88</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-name">資源使用</span>
+                            <span id="resourceScore" class="metric-value health-score-excellent">98</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 連接統計 -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon text-center text-primary">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div class="text-center">
+                        <div id="connectionDuration" class="stat-value">5m 32s</div>
+                        <div class="stat-label">連接持續時間</div>
+                    </div>
+                    <div class="connection-info">
+                        <div class="info-item">
+                            <span class="info-label">消息發送</span>
+                            <span id="messagesSent" class="info-value">1,245</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">消息接收</span>
+                            <span id="messagesReceived" class="info-value">1,238</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">平均延遲</span>
+                            <span id="avgLatency" class="info-value">42ms</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">重連次數</span>
+                            <span id="reconnectCount" class="info-value">2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 錯誤統計 -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon text-center text-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="text-center">
+                        <div id="errorRate" class="stat-value">0.5%</div>
+                        <div class="stat-label">錯誤率</div>
+                    </div>
+                    <div class="connection-info">
+                        <div class="info-item">
+                            <span class="info-label">總錯誤數</span>
+                            <span id="totalErrors" class="info-value">12</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">連接錯誤</span>
+                            <span id="connectionErrors" class="info-value">5</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">消息錯誤</span>
+                            <span id="messageErrors" class="info-value">7</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">最後錯誤</span>
+                            <span id="lastErrorTime" class="info-value">2分鐘前</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 性能統計 -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon text-center text-info">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="text-center">
+                        <div id="throughput" class="stat-value">245/秒</div>
+                        <div class="stat-label">消息吞吐量</div>
+                    </div>
+                    <div class="connection-info">
+                        <div class="info-item">
+                            <span class="info-label">發送速度</span>
+                            <span id="sendSpeed" class="info-value">120/秒</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">接收速度</span>
+                            <span id="receiveSpeed" class="info-value">125/秒</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">數據發送</span>
+                            <span id="dataSent" class="info-value">2.4MB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">數據接收</span>
+                            <span id="dataReceived" class="info-value">2.1MB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 圖表區域 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="chartTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="health-tab" data-bs-toggle="tab" data-bs-target="#health-charts" type="button">
+                            <i class="fas fa-heartbeat me-1"></i> 健康度趨勢
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance-charts" type="button">
+                            <i class="fas fa-chart-line me-1"></i> 性能指標
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="errors-tab" data-bs-toggle="tab" data-bs-target="#errors-charts" type="button">
+                            <i class="fas fa-exclamation-circle me-1"></i> 錯誤分析
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-charts" type="button">
+                            <i class="fas fa-info-circle me-1"></i> 詳細信息
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="chartTabsContent">
+                    <!-- 健康度圖表 -->
+                    <div class="tab-pane fade show active" id="health-charts" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-chart-line me-2"></i> 健康度評分趨勢</h5>
+                                    <canvas id="healthTrendChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-balance-scale me-2"></i> 健康度維度分布</h5>
+                                    <canvas id="healthBreakdownChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 性能圖表 -->
+                    <div class="tab-pane fade" id="performance-charts" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-exchange-alt me-2"></i> 消息吞吐量趨勢</h5>
+                                    <canvas id="throughputChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-tachometer-alt me-2"></i> 延遲分布趨勢</h5>
+                                    <canvas id="latencyChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 錯誤圖表 -->
+                    <div class="tab-pane fade" id="errors-charts" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-exclamation-circle me-2"></i> 錯誤率趨勢</h5>
+                                    <canvas id="errorRateChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-chart-pie me-2"></i> 錯誤類型分布</h5>
+                                    <canvas id="errorTypeChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 詳細信息 -->
+                    <div class="tab-pane fade" id="details-charts" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-database me-2"></i> 數據傳輸統計</h5>
+                                    <canvas id="dataTransferChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5><i class="fas fa-history me-2"></i> 重連時間分布</h5>
+                                    <canvas id="reconnectChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 警報區域 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h5><i class="fas fa-bell me-2"></i> 實時警報</h5>
+                    <div id="alertsContainer">
+                        <div class="alert-card alert-info">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-info-circle me-2"></i> 系統啟動</h6>
+                                    <p class="mb-0">WebSocket監控系統已啟動，開始收集數據。</p>
+                                </div>
+                                <small>剛剛</small>
+                            </div>
+                        </div>
+                        <div class="alert-card alert-warning">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-exclamation-triangle me-2"></i> 網絡延遲偏高</h6>
+                                    <p class="mb-0">檢測到平均延遲超過200ms，建議檢查網絡連接。</p>
+                                </div>
+                                <small>5分鐘前</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button id="btnClearAlerts" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-trash-alt me-1"></i> 清除所有警報
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 詳細數據表格 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h5><i class="fas fa-table me-2"></i> 詳細監控數據</h5>
+                    <div class="table-responsive">
+                        <table class="table data-table">
+                            <thead>
+                                <tr>
+                                    <th>時間</th>
+                                    <th>健康度</th>
+                                    <th>發送消息</th>
+                                    <th>接收消息</th>
+                                    <th>平均延遲</th>
+                                    <th>錯誤率</th>
+                                    <th>狀態</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monitoringDataTable">
+                                <tr>
+                                    <td>15:30:25</td>
+                                    <td><span class="badge bg-success">95</span></td>
+                                    <td>1,245</td>
+                                    <td>1,238</td>
+                                    <td>42ms</td>
+                                    <td>0.5%</td>
+                                    <td><span class="badge bg-success">正常</span></td>
+                                </tr>
+                                <tr>
+                                    <td>15:25:18</td>
+                                    <td><span class="badge bg-warning">72</span></td>
+                                    <td>1,120</td>
+                                    <td>1,115</td>
+                                    <td>215ms</td>
+                                    <td>1.2%</td>
+                                    <td><span class="badge bg-warning">警告</span></td>
+                                </tr>
+                                <tr>
+                                    <td>15:20:12</td>
+                                    <td><span class="badge bg-success">88</span></td>
+                                    <td>980</td>
+                                    <td>975</td>
+                                    <td>85ms</td>
+                                    <td>0.8%</td>
+                                    <td><span class="badge bg-success">正常</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 頁腳 -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <p class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    WebSocket監控系統 v1.0 | Between Coffee 系統 | 最後更新: <span id="systemVersion">2026-04-03</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 監控系統JS -->
+    <script src="/static/js/websocket-health-monitor-enhanced.js"></script>
+    <script src="/static/js/websocket-monitoring-adapter.js"></script>
+    <script src="/static/js/websocket-monitoring-visualizer.js"></script>
+    
+    <script>
+        // 全局變量
+        let healthMonitor = null;
+        let monitoringAdapter = null;
+        let visualizer = null;
+        let isMonitoring = false;
+        let updateInterval = null;
+        
+        // 初始化函數
+        function initializeMonitoringSystem() {
+            console.log("🔧 初始化WebSocket監控系統...");
+            
+            // 創建健康度監控器
+            healthMonitor = new WebSocketHealthMonitorEnhanced({
+                enableDetailedMonitoring: true,
+                enableHealthScoring: true,
+                enableAlerts: true,
+                debugMode: false,
+                logLevel: 'info'
+            });
+            
+            // 模擬WebSocket連接器（實際使用時應替換為真實連接器）
+            const mockWebSocketConnector = {
+                ws: {
+                    url: 'ws://localhost:8081/ws/orders/',
+                    addEventListener: function() {},
+                    removeEventListener: function() {}
+                },
+                send: function(data) {
+                    console.log('📤 模擬發送消息:', data);
+                },
+                close: function() {
+                    console.log('🔌 模擬關閉連接');
+                },
+                reconnect: function() {
+                    console.log('🔄 模擬重新連接');
+                }
+            };
+            
+            // 創建監控適配器
+            monitoringAdapter = new WebSocketMonitoringAdapter(mockWebSocketConnector, {
+                debugMode: false,
+                logLevel: 'info'
+            });
+            
+            // 創建可視化組件
+            visualizer = new WebSocketMonitoringVisualizer({
+                containerId: 'websocket-monitoring-visualizer',
+                autoCreateContainer: false,
+                enableHealthScoreChart: true,
+                enableMessageThroughputChart: true,
+                enableLatencyChart: true,
+                enableErrorChart: true,
+                updateInterval: 5000,
+                theme: 'light',
+                debugMode: false
+            });
+            
+            // 初始化圖表
+            initializeCharts();
+            
+            // 設置事件監聽
+            setupEventListeners();
+            
+            // 開始監控
+            startMonitoring();
+            
+            console.log("✅ WebSocket監控系統初始化完成");
+        }
+        
+        // 初始化圖表
+        function initializeCharts() {
+            // 健康度趨勢圖
+            const healthTrendCtx = document.getElementById('healthTrendChart').getContext('2d');
+            window.healthTrendChart = new Chart(healthTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['15:00', '15:05', '15:10', '15:15', '15:20', '15:25', '15:30'],
+                    datasets: [{
+                        label: '健康度評分',
+                        data: [85, 88, 82, 72, 88, 72, 95],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // 健康度維度分布圖
+            const healthBreakdownCtx = document.getElementById('healthBreakdownChart').getContext('2d');
+            window.healthBreakdownChart = new Chart(healthBreakdownCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['穩定性', '可靠性', '網絡質量', '資源使用', '響應時間'],
+                    datasets: [{
+                        label: '健康度維度',
+                        data: [95, 96, 88, 98, 92],
+                        backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                        borderColor: '#28a745',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // 其他圖表初始化（簡化版）
+            initializeSimplifiedCharts();
+        }
+        
+        // 初始化簡化圖表
+        function initializeSimplifiedCharts() {
+            const chartConfigs = [
+                { id: 'throughputChart', type: 'bar', labels: ['發送', '接收'], data: [120, 125] },
+                { id: 'latencyChart', type: 'line', labels: ['時間點'], data: [42, 85, 215, 65, 42] },
+                { id: 'errorRateChart', type: 'line', labels: ['時間點'], data: [0.8, 1.2, 0.5, 0.7, 0.5] },
+                { id: 'errorTypeChart', type: 'doughnut', labels: ['連接錯誤', '消息錯誤', '超時錯誤'], data: [5, 7, 2] },
+                { id: 'dataTransferChart', type: 'bar', labels: ['發送', '接收'], data: [2.4, 2.1] },
+                { id: 'reconnectChart', type: 'line', labels: ['重連1', '重連2'], data: [1200, 2500] }
+            ];
+            
+            chartConfigs.forEach(config => {
+                const ctx = document.getElementById(config.id).getContext('2d');
+                window[config.id] = new Chart(ctx, {
+                    type: config.type,
+                    data: {
+                        labels: config.labels,
+                        datasets: [{
+                            data: config.data,
+                            backgroundColor: getChartColors(config.id),
+                            borderColor: getChartBorderColors(config.id),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            });
+        }
+        
+        // 獲取圖表顏色
+        function getChartColors(chartId) {
+            const colorMap = {
+                throughputChart: ['#4299e1', '#ed8936'],
+                latencyChart: '#9f7aea',
+                errorRateChart: '#f56565',
+                errorTypeChart: ['#f56565', '#ed8936', '#ecc94b'],
+                dataTransferChart: ['#48bb78', '#38b2ac'],
+                reconnectChart: '#667eea'
+            };
+            
+            return colorMap[chartId] || '#4299e1';
+        }
+        
+        // 獲取圖表邊框顏色
+        function getChartBorderColors(chartId) {
+            const colorMap = {
+                throughputChart: ['#3182ce', '#dd6b20'],
+                latencyChart: '#805ad5',
+                errorRateChart: '#e53e3e',
+                errorTypeChart: ['#e53e3e', '#dd6b20', '#d69e2e'],
+                dataTransferChart: ['#38a169', '#319795'],
+                reconnectChart: '#5a67d8'
+            };
+            
+            return colorMap[chartId] || '#3182ce';
+        }
+        
+        // 設置事件監聽
+        function setupEventListeners() {
+            // 控制按鈕
+            document.getElementById('btnStartMonitoring').addEventListener('click', startMonitoring);
+            document.getElementById('btnStopMonitoring').addEventListener('click', stopMonitoring);
+            document.getElementById('btnCheckHealth').addEventListener('click', checkHealth);
+            document.getElementById('btnResetData').addEventListener('click', resetData);
+            document.getElementById('btnExportReport').addEventListener('click', exportReport);
+            document.getElementById('btnClearAlerts').addEventListener('click', clearAlerts);
+            
+            // 自動刷新切換
+            document.getElementById('autoRefreshToggle').addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+            
+            // 監聽自定義事件
+            document.addEventListener('websocket:monitoring_data', handleMonitoringData);
+            document.addEventListener('websocket:alert', handleAlert);
+        }
+        
+        // 開始監控
+        function startMonitoring() {
+            if (isMonitoring) {
+                alert('監控已經在運行中');
+                return;
+            }
+            
+            isMonitoring = true;
+            updateConnectionStatus('connected', '監控運行中');
+            
+            // 模擬數據更新
+            updateInterval = setInterval(updateMockData, 3000);
+            
+            // 開始自動刷新
+            startAutoRefresh();
+            
+            // 添加警報
+            addAlert('info', '監控系統已啟動', '開始收集WebSocket連接數據');
+            
+            console.log('▶️ 開始監控');
+        }
+        
+        // 停止監控
+        function stopMonitoring() {
+            if (!isMonitoring) {
+                alert('監控未在運行中');
+                return;
+            }
+            
+            isMonitoring = false;
+            clearInterval(updateInterval);
+            updateInterval = null;
+            updateConnectionStatus('disconnected', '監控已停止');
+            
+            // 停止自動刷新
+            stopAutoRefresh();
+            
+            // 添加
