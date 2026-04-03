@@ -53,6 +53,20 @@ def update_loyalty_on_order_paid(sender, instance, created, **kwargs):
     # 只處理已支付的訂單
     if instance.payment_status == 'paid' and instance.user:
         try:
+            # 檢查是否已經處理過這個訂單（防止重複計算）
+            # 通過檢查活動記錄來避免重複
+            existing_activities = CustomerActivity.objects.filter(
+                user=instance.user,
+                activity_type='points_earned',
+                metadata__contains={'order_id': instance.id}
+            )
+            
+            if existing_activities.exists():
+                logger.warning(
+                    f"訂單 #{instance.id} 已經處理過，跳過重複計算"
+                )
+                return
+            
             # 獲取或創建忠誠度記錄
             loyalty, _ = CustomerLoyalty.objects.get_or_create(
                 user=instance.user

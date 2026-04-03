@@ -3430,6 +3430,16 @@ h1, h2, h3, h4, h5,
     z-index: 0;
 }
 
+  .subpage-banner-h500 .svg-bg-2 .overlay  { 
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000;
+    opacity: .6;
+    z-index: 0;
+}
 
 
   @media (max-width: 1199.98px) { 
