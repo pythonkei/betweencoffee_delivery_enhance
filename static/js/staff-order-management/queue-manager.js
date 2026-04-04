@@ -422,55 +422,62 @@ class QueueManager {
                 ${orderTypeBadges}
             </div>
             
-            <div class="d-flex justify-content-between mb-3 mt-4">
+            <div class="d-flex justify-content-between mb-3 mt-3">
+                <div class="mt-2">
+                    <span hidden class="badge badge-warning">
+                        <i class="fas fa-clock mr-1"></i>等待中
+                    </span>
+                    ${queuePositionBadge}
+                    ${coffeeCountBadge}
+                    ${beanCountBadge}
+                    <!-- ${paymentMethodBadge} -->
+                </div>
+            </div>
+
+            <div class="order-items">
+                ${this.renderWaitingOrderItems(order)}
+                <div>
+                    <span class="card-text-md">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                </div>
+            </div>
+            
+            
+            <div class="d-flex justify-content-between align-items-center mt-5 mb-2 pt-4 border-top">
                 <div>
                     <h5>訂單編號: #${order.id}</h5>
                     <p class="mb-0">
-                        訂單時間: ${orderTime} | 
+                        訂單時間: ${orderTime} <span class="ml-3"></span>
                         預計等待: ${order.wait_display || '計算中...'}
                     </p>
-                    <div class="mt-2">
-                        <span hidden class="badge badge-warning">
-                            <i class="fas fa-clock mr-1"></i>等待中
-                        </span>
-                        ${queuePositionBadge}
-                        ${coffeeCountBadge}
-                        ${beanCountBadge}
-                        <!-- ${paymentMethodBadge} -->
-                    </div>
                 </div>
-                <div class="text-right">
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="mb-4 card-text-md">
+                <div class="mb-2">
+                    <span class="card-text-md badge badge-dark"><i class="fas fa-user mr-2"></i>取餐碼:${order.pickup_code || ''}</span>
+                </div>
+                    <p class="card-text-md mb-2">
+                        客戶: ${order.name || '顧客'} <span class="ml-3"></span>
+                        電話: ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone || '') : (order.phone || '')}
+                    </p>
+                    ${isMixedOrder ? `
+                    <div hidden class="mt-2">
+                        <span class="badge badge-secondary">
+                            <i class="fas fa-info-circle mr-1"></i>此訂單包含咖啡飲品和咖啡豆商品
+                        </span>
+                    </div>` : ''}
+                </div>
+                
+                <div class="d-flex justify-content-end">
                     <span class="h5 pr-2">$${totalPrice}</span>
                 </div>
             </div>
-            
-            <div class="mb-4">
-                <p class="mb-2">
-                    <strong>取餐碼:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
-                    <strong>客戶:</strong> ${order.name || '顧客'} | 
-                    <strong>電話:</strong> ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone || '') : (order.phone || '')}
-                </p>
-                ${isMixedOrder ? `
-                <div hidden class="mt-2">
-                    <span class="badge badge-secondary">
-                        <i class="fas fa-info-circle mr-1"></i>此訂單包含咖啡飲品和咖啡豆商品
-                    </span>
-                </div>` : ''}
-            </div>
-            
-            <div class="order-items">
-                ${this.renderWaitingOrderItems(order)}
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                <div>
-                    <span class="text-muted">${order.items_display || (order.items_count || 0) + '項商品'}</span>
-                </div>
-                <div>
+
+            <div class="d-flex justify-content-end align-items-center mt-3">
                     <button class="btn btn-primary btn-sm start-preparation-btn" data-order-id="${order.id}">
                         <i class="fas fa-play mr-1"></i>開始製作
                     </button>
-                </div>
             </div>
         `;
         
@@ -499,19 +506,19 @@ class QueueManager {
                 itemsHTML += `
                     <div class="d-flex align-items-center mb-3">
                         <div class="mr-3">
-                            <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 105px; height: 110px;">
                                 <img src="${itemImage}" 
                                     alt="${item.name || '商品'}" 
                                     class="img-fluid" 
-                                    style="max-height: 75px;">
+                                    style="max-height: 96px;">
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">${item.name || '商品'}</h6>
-                            <p class="mb-1 text-muted">
+                            <p class="h5 mb-1">${item.name || '商品'}</p>
+                            <p class="card-text-md mb-0">
                                 數量: ${item.quantity || 1} 
                             </p>
-                            <div class="text-muted">
+                            <div class="card-text-md">
                                 ${item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : ''}
                                 ${item.milk_level_cn ? ` | 牛奶: ${item.milk_level_cn}` : ''}
                                 ${item.grinding_level_cn ? ` 研磨: ${item.grinding_level_cn}` : ''}
