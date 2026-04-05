@@ -1,0 +1,29 @@
+{
+  "name": "betweencoffee_delivery_enhance",
+  "version": "1.0.0",
+  "description": "",
+  "main": "purgecss-aggressive.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pythonkei/betweencoffee_delivery_enhance.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pythonkei/betweencoffee_delivery_enhance/issues"
+  },
+  "homepage": "https://github.com/pythonkei/betweencoffee_delivery_enhance#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "axios": "^1.14.0",
+    "pg": "^8.20.0"
+  }
+}

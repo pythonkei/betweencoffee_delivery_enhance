@@ -353,6 +353,12 @@ class DynamicReadyOrdersRenderer {
                 ${orderTypeBadges}
             </div>
             
+            <div class="order-items">
+                <div>
+                    ${this.renderOrderItems(order.items || [])}
+                </div>
+            </div>
+
             <div class="d-flex justify-content-between mb-3 mt-4">
                 <div>
                     <h5>訂單編號: #${order.id}</h5>
@@ -369,11 +375,17 @@ class DynamicReadyOrdersRenderer {
                 </div>
             </div>
             
+
+
             <div class="mb-4">
                 <p class="mb-2">
-                    <strong>取餐码:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
-                    <strong>客戶:</strong> ${order.name || '顧客'}
-                    ${order.phone ? ` | <strong>電話:</strong> ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone) : order.phone}` : ''}
+                <div class="mb-2">
+                    <span class="card-text-md badge badge-dark"><i class="fas fa-user mr-2"></i>取餐碼:${order.pickup_code || ''}</span>
+                </div>
+                    <p class="card-text-md mb-2">
+                        客戶: ${order.name || '顧客'} <span class="ml-3"></span>
+                        電話: ${order.phone ? `${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone) : order.phone}` : ''}
+                    </p>
                 </p>
                 ${combinedBadge}
                 ${isBeansOnly ? `
@@ -384,9 +396,7 @@ class DynamicReadyOrdersRenderer {
                 </div>` : ''}
             </div>
             
-            <div class="order-items">
-                ${this.renderOrderItems(order.items || [])}
-            </div>
+
             
             <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                 <div>
