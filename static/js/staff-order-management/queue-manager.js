@@ -454,9 +454,9 @@ class QueueManager {
 
             <div class="d-flex justify-content-between align-items-center">
                 <div class="mb-4 card-text-md">
-                <div class="mb-2">
-                    <span class="card-text-md badge badge-dark"><i class="fas fa-user mr-2"></i>取餐碼:${order.pickup_code || ''}</span>
-                </div>
+                    <div class="mb-2">
+                        <span class="card-text-md badge badge-dark"><i class="fas fa-user mr-2"></i>取餐碼:${order.pickup_code || ''}</span>
+                    </div>
                     <p class="card-text-md mb-2">
                         客戶: ${order.name || '顧客'} <span class="ml-3"></span>
                         電話: ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone || '') : (order.phone || '')}
@@ -474,10 +474,10 @@ class QueueManager {
                 </div>
             </div>
 
-            <div class="d-flex justify-content-end align-items-center mt-3">
-                    <button class="btn btn-primary btn-sm start-preparation-btn" data-order-id="${order.id}">
-                        <i class="fas fa-play mr-1"></i>開始製作
-                    </button>
+            <div class="d-flex justify-content-end align-items-center mt-2">
+                <button class="btn btn-primary btn-sm start-preparation-btn" data-order-id="${order.id}">
+                    <i class="fas fa-play mr-1"></i>開始製作
+                </button>
             </div>
         `;
         

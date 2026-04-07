@@ -22,8 +22,12 @@
   },
   "homepage": "https://github.com/pythonkei/betweencoffee_delivery_enhance#readme",
   "dependencies": {
+    "@gongrzhe/server-redis-mcp": "^1.0.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "axios": "^1.14.0",
     "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "mcp-server-monitor": "^1.0.0"
   }
 }

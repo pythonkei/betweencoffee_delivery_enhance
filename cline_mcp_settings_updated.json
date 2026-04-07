@@ -1,0 +1,57 @@
+{
+    "mcpServers": {
+        "mcp-installer": {
+            "command": "npx",
+            "args": ["@anaisbetts/mcp-installer"]
+        },
+        "mcp-server-fetch": {
+            "command": "/home/kei/snap/code/229/.local/share/../bin/uvx",
+            "args": ["mcp-server-fetch"]
+        },
+        "simple-postgres": {
+            "command": "node",
+            "args": [
+                "/home/kei/Desktop/betweencoffee_delivery_enhance/simple-postgres-mcp-fixed-v2.js"
+            ],
+            "env": {
+                "POSTGRES_URL": "postgresql://postgres:111111@localhost:5432/betweencoffee_delivery_db",
+                "POSTGRES_USER": "postgres",
+                "POSTGRES_PASSWORD": "111111",
+                "POSTGRES_HOST": "localhost",
+                "POSTGRES_PORT": "5432",
+                "POSTGRES_DB": "betweencoffee_delivery_db"
+            }
+        },
+        "mcp-server-filesystem": {
+            "command": "npx",
+            "args": ["@modelcontextprotocol/server-filesystem", "/home/kei/Desktop/betweencoffee_delivery_enhance"]
+        },
+        "mcp-server-github": {
+            "command": "npx",
+            "args": ["@iflow-mcp/server-github"],
+            "env": {
+                "GITHUB_TOKEN": "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"
+            }
+        },
+        "simple-tavily-search": {
+            "command": "node",
+            "args": [
+                "/home/kei/Desktop/betweencoffee_delivery_enhance/simple-tavily-mcp-fixed.js"
+            ],
+            "env": {
+                "TAVILY_API_KEY": "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",
+                "PYTHONIOENCODING": "utf-8"
+            },
+            "inputs": {
+                "api_key": "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"
+            }
+        },
+        "redis-mcp": {
+            "command": "node",
+            "args": [
+                "/home/kei/Desktop/betweencoffee_delivery_enhance/node_modules/@gongrzhe/server-redis-mcp/build/index.js",
+                "redis://localhost:6379"
+            ]
+        }
+    }
+}

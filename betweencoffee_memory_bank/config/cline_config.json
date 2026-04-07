@@ -1,0 +1,86 @@
+{
+  "memory_bank": {
+    "name": "Between Coffee System Memory Bank",
+    "version": "1.0.0",
+    "created": "2026-04-05",
+    "last_updated": "2026-04-05",
+    "description": "持久化項目上下文和知識庫，為Cline AI助理提供完整的項目信息"
+  },
+  
+  "project": {
+    "name": "Between Coffee 咖啡店外帶網站與訂單製作管理系統",
+    "type": "電子商務系統 + 訂單管理系統",
+    "industry": "餐飲業 - 咖啡店外帶服務",
+    "status": "生產環境穩定運行",
+    "version": "v2.0+",
+    "repository": "https://github.com/pythonkei/betweencoffee_delivery_enhance"
+  },
+  
+  "technology_stack": {
+    "backend": ["Django 4.x", "Django Channels", "PostgreSQL", "Redis"],
+    "frontend": ["HTML5", "CSS3", "JavaScript", "Bootstrap 5", "jQuery"],
+    "deployment": ["Railway", "Docker (可選)"],
+    "payments": ["PayPal", "Alipay", "FPS", "現金支付"],
+    "authentication": ["django-allauth", "Google OAuth", "Facebook OAuth"]
+  },
+  
+  "core_modules": {
+    "eshop": "主要業務邏輯模塊（商品、訂單、支付、隊列）",
+    "cart": "購物車功能模塊",
+    "socialuser": "用戶管理模塊（社交登入、用戶資料）",
+    "restaurant": "餐廳管理模塊（員工、權限）",
+    "core": "核心工具和錯誤處理"
+  },
+  
+  "memory_bank_structure": {
+    "00_PROJECT_OVERVIEW.md": "項目總覽和業務背景",
+    "01_TECHNICAL_ARCHITECTURE.md": "技術架構和系統設計",
+    "02_BUSINESS_LOGIC.md": "業務邏輯和流程（待創建）",
+    "03_DEVELOPMENT_STANDARDS.md": "開發標準和最佳實踐",
+    "04_SYSTEM_STATE.md": "系統狀態和已知問題",
+    "05_PRIORITY_TASKS.md": "優先任務和實施計劃",
+    "06_DECISION_LOG.md": "技術決策記錄（待創建）",
+    "07_KNOWLEDGE_BASE.md": "知識庫和經驗總結（待創建）",
+    "08_WORKFLOW_TEMPLATES.md": "工作流模板（待創建）"
+  },
+  
+  "auto_load_config": {
+    "enabled": true,
+    "load_order": [
+      "00_PROJECT_OVERVIEW.md",
+      "01_TECHNICAL_ARCHITECTURE.md",
+      "04_SYSTEM_STATE.md",
+      "05_PRIORITY_TASKS.md",
+      "03_DEVELOPMENT_STANDARDS.md"
+    ],
+    "max_tokens_per_file": 8000,
+    "summarize_large_files": true,
+    "include_file_paths": true
+  },
+  
+  "validation": {
+    "required_files": [
+      "00_PROJECT_OVERVIEW.md",
+      "01_TECHNICAL_ARCHITECTURE.md",
+      "04_SYSTEM_STATE.md",
+      "05_PRIORITY_TASKS.md"
+    ],
+    "check_timestamps": true,
+    "max_file_age_days": 30,
+    "validate_structure": true
+  },
+  
+  "integration": {
+    "with_clinerules": true,
+    "with_existing_docs": true,
+    "update_frequency": "每次重要變更後",
+    "backup_before_update": true
+  },
+  
+  "usage_instructions": {
+    "for_cline": "每次任務開始時自動讀取Memory Bank建立項目上下文",
+    "for_developers": "參考Memory Bank了解項目狀態和開發標準",
+    "for_project_managers": "查看系統狀態和優先任務進行決策",
+    "maintenance": "定期更新以反映項目最新狀態"
+  }
+}
