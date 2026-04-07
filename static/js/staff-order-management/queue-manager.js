@@ -450,6 +450,9 @@ class QueueManager {
                         預計等待: ${order.wait_display || '計算中...'}
                     </p>
                 </div>
+                <div class="text-right">
+                    <span class="h5 pr-2">$${totalPrice}</span>
+                </div>
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
@@ -467,10 +470,6 @@ class QueueManager {
                             <i class="fas fa-info-circle mr-1"></i>此訂單包含咖啡飲品和咖啡豆商品
                         </span>
                     </div>` : ''}
-                </div>
-                
-                <div class="d-flex justify-content-end">
-                    <span class="h5 pr-2">$${totalPrice}</span>
                 </div>
             </div>
 

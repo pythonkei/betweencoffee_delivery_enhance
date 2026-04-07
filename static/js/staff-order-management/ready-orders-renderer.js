@@ -346,7 +346,7 @@ class DynamicReadyOrdersRenderer {
             `;
         }
         
-        // ====== 構建訂單HTML（徽章修正版） ======
+        // ====== 構建訂單HTML ======
         orderDiv.innerHTML = `
             <!-- 訂單類型徽章（左上角） -->
             <div class="order-type-badges-container">
@@ -355,9 +355,9 @@ class DynamicReadyOrdersRenderer {
             
             <div class="d-flex justify-content-between mb-3 mt-3">
                 <div class="mt-2">
-                        ${coffeeCountBadge}
-                        ${beanCountBadge}
-                        ${combinedBadge}
+                    ${coffeeCountBadge}
+                    ${beanCountBadge}
+                    ${combinedBadge}
                 </div>
             </div>
 
@@ -371,20 +371,29 @@ class DynamicReadyOrdersRenderer {
             </div>
 
 
-            <div class="d-flex justify-content-between align-items-center mt-5 mb-2 pt-4 border-top">
+            <div class="d-flex justify-content-between align-items-top mt-5 mb-2 pt-4 border-top">
                 <div>
                     <h5>訂單編號: #${order.id}</h5>
                     <p class="mb-0">
                         訂單時間: ${createdTime}
                     </p>
-                    <div class="mt-2">
+                    <div hidden class="mt-2">
                         ${coffeeCountBadge}
                         ${beanCountBadge}
+                        ${isBeansOnly ? `
+                        <div class="mt-2">
+                            <span class="badge badge-warning">
+                                <i class="fas fa-box mr-1"></i>咖啡豆現貨訂單
+                            </span>
+                        </div>` : ''}
                     </div>
+                </div>
+                <div class="text-right">
+                    <span class="h5 pr-2">$${parseFloat(order.total_price).toFixed(2)}</span>
                 </div>
             </div>
             
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-top">
                 <div class="mb-4 card-text-md">
                     <div class="mb-2">
                         <span class="card-text-md badge badge-dark"><i class="fas fa-user mr-2"></i>取餐碼:${order.pickup_code || ''}</span>
@@ -394,19 +403,8 @@ class DynamicReadyOrdersRenderer {
                         電話: ${order.phone ? `${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone) : order.phone}` : ''}
                     </p>
                 </div>
-                ${isBeansOnly ? `
-                <div hidden class="mt-2">
-                    <span class="badge badge-info">
-                        <i class="fas fa-info-circle mr-1"></i>此為咖啡豆現貨訂單，無需製作時間
-                    </span>
-                </div>` : ''}
-                
-                <div class="d-flex justify-content-end">
-                    <span class="h5 pr-2">$${parseFloat(order.total_price).toFixed(2)}</span>
-                </div>
-            </div>
-            
 
+            </div>
             
             <div class="d-flex justify-content-end align-items-center mt-2">
                 <button class="btn btn-info btn-sm mark-collected-btn" data-order-id="${order.id}">
@@ -443,7 +441,7 @@ class DynamicReadyOrdersRenderer {
                         </div>
                     </div>
                     <div class="flex-grow-1">
-                        <h6 class="mb-0">${item.name || '商品'}</h6>
+                        <p class="h5 mb-0">${item.name || '商品'}</p>
                         <p class="card-text-md mb-0">
                             數量: ${item.quantity || 1} 
                         </p>

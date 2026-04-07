@@ -301,7 +301,7 @@ class DynamicCompletedOrdersRenderer {
             `;
         }
         
-        // ====== 构建订单HTML ======
+        // ====== 構建訂單HTML ======
         orderDiv.innerHTML = `
             <!-- 订单类型徽章（左上角） -->
             <div class="order-type-badges-container">
@@ -350,11 +350,12 @@ class DynamicCompletedOrdersRenderer {
                 <div>
                     <span class="text-muted">${order.items_display || (order.items_count || 0) + '項商品'}</span>
                 </div>
-                <div>
-                    <span class="badge badge-secondary">
+                <div class="d-flex justify-content-end align-items-center mt-2">
+                    <p class="badge badge-success">
                         <i class="fas fa-check-circle mr-1"></i>訂單已完成
-                    </span>
+                    </p>
                 </div>
+                
             </div>
         `;
         
