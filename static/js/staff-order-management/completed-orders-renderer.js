@@ -301,63 +301,71 @@ class DynamicCompletedOrdersRenderer {
             `;
         }
         
-        // ====== 構建訂單HTML ======
-        orderDiv.innerHTML = `
-            <!-- 订单类型徽章（左上角） -->
-            <div class="order-type-badges-container">
-                ${orderTypeBadges}
-            </div>
-            
-            <div class="d-flex justify-content-between mb-3 mt-4">
-                <div>
-                    <h5>訂單編號: #${order.id}</h5>
-                    <p class="mb-0">
-                        訂單時間: ${createdTime}
-                    </p>
-                    <div class="mt-2">
-                        <span hidden class="badge ${waitBadgeClass} ml-1">
-                            <i class="fas ${waitIcon} mr-1"></i>${waitDisplay}
-                        </span>
-                        ${coffeeCountBadge}
-                        ${beanCountBadge}
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="h5 pr-2">$${parseFloat(order.total_price).toFixed(2)}</span>
-                </div>
-            </div>
-            
-            <div class="mb-4">
-                <p class="mb-2">
-                    <strong>取餐碼:</strong> <span class="h5 text-primary">${order.pickup_code || ''}</span> | 
-                    <strong>客戶:</strong> ${order.name || '顧客'} |
-                    <strong>電話:</strong> ${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone || '') : (order.phone || '')}
-                </p>
+    // ====== 構建訂單HTML ======
+    orderDiv.innerHTML = `
+        <!-- 訂單類型徽章（左上角） -->
+        <div class="order-type-badges-container">
+            ${orderTypeBadges}
+        </div>
+        
+        <div class="d-flex justify-content-between mb-3 mt-3">
+            <div class="mt-2">
+                ${coffeeCountBadge}
+                ${beanCountBadge}
                 ${combinedBadge}
-                ${isBeansOnly ? `
-                <div class="mt-2">
-                    <span class="badge badge-warning">
-                        <i class="fas fa-box mr-1"></i>咖啡豆現貨訂單
-                    </span>
-                </div>` : ''}
             </div>
-            
-            <div class="order-items">
+        </div>
+
+        <div class="order-items">
+            <div>
                 ${this.renderOrderItems(order.items || [])}
             </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                <div>
-                    <span class="text-muted">${order.items_display || (order.items_count || 0) + '項商品'}</span>
-                </div>
-                <div class="d-flex justify-content-end align-items-center mt-2">
-                    <p class="badge badge-success">
-                        <i class="fas fa-check-circle mr-1"></i>訂單已完成
-                    </p>
-                </div>
-                
+            <div>
+                <span class="card-text-md">${order.items_display || (order.items_count || 0) + '項商品'}</span>
             </div>
-        `;
+        </div>
+
+
+        <div class="d-flex justify-content-between align-items-top mt-5 mb-2 pt-4 border-top">
+            <div>
+                <h5>訂單編號: #${order.id}</h5>
+                <p class="mb-0">
+                    訂單時間: ${createdTime}
+                </p>
+                <div hidden class="mt-2">
+                    ${coffeeCountBadge}
+                    ${beanCountBadge}
+                    ${isBeansOnly ? `
+                    <div class="mt-2">
+                        <span class="badge badge-warning">
+                            <i class="fas fa-box mr-1"></i>咖啡豆現貨訂單
+                        </span>
+                    </div>` : ''}
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="h5 pr-2">$${parseFloat(order.total_price).toFixed(2)}</span>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-top">
+            <div class="mb-2 card-text-md">
+                <div class="mb-2">
+                    <span class="card-text-md badge badge-dark"><i class="fas fa-user mr-2"></i>取餐碼:${order.pickup_code || ''}</span>
+                </div>
+                <p class="card-text-md mb-2">
+                    客戶: ${order.name || '顧客'} <span class="ml-3"></span>
+                    電話: ${order.phone ? `${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone) : order.phone}` : ''}
+                </p>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end align-items-center">
+            <p class="badge-v2 badge-info">
+                <i class="fas fa-check-circle mr-1"></i>訂單已完成
+            </p>
+        </div>
+    `;
         
         return orderDiv;
     }
@@ -376,20 +384,22 @@ class DynamicCompletedOrdersRenderer {
             itemsHTML += `
                 <div class="d-flex align-items-center mb-3">
                     <div class="mr-3">
-                        <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 105px; height: 110px;">
                             <img src="${item.image || '/static/images/default-product.png'}"
                                  alt="${item.name || '商品'}"
                                  class="img-fluid"
-                                 style="max-height: 75px;">
+                                 style="max-height: 96px;">
                         </div>
                     </div>
                     <div class="flex-grow-1">
-                        <h6 class="mb-0">${item.name || '商品'}</h6>
-                        <p class="mb-1 text-muted">數量: ${item.quantity || 1}</p>
-                        <div class="text-muted">
+                        <p class="h5 mb-0">${item.name || '商品'}</p>
+                        <p class="card-text-md mb-0">
+                            數量: ${item.quantity || 1} 
+                        </p>
+                        <div class="card-text-md">
                             ${item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : ''}
                             ${item.milk_level_cn ? ` | 牛奶: ${item.milk_level_cn}` : ''}
-                            ${item.grinding_level_cn ? ` 研磨: ${item.grinding_level_cn}` : ''}
+                            ${item.grinding_level_cn ? ` | 研磨: ${item.grinding_level_cn}` : ''}
                             ${item.weight ? ` | 重量: ${item.weight}` : ''}
                         </div>
                     </div>

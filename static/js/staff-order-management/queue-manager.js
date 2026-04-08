@@ -456,7 +456,7 @@ class QueueManager {
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
-                <div class="mb-4 card-text-md">
+                <div class="mb-2 card-text-md">
                     <div class="mb-2">
                         <span class="card-text-md badge badge-dark"><i class="fas fa-user mr-2"></i>取餐碼:${order.pickup_code || ''}</span>
                     </div>
@@ -473,7 +473,7 @@ class QueueManager {
                 </div>
             </div>
 
-            <div class="d-flex justify-content-end align-items-center mt-2">
+            <div class="d-flex justify-content-end align-items-center">
                 <button class="btn btn-primary btn-sm start-preparation-btn" data-order-id="${order.id}">
                     <i class="fas fa-play mr-1"></i>開始製作
                 </button>
