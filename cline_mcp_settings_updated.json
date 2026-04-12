@@ -14,9 +14,9 @@
                 "/home/kei/Desktop/betweencoffee_delivery_enhance/simple-postgres-mcp-fixed-v2.js"
             ],
             "env": {
-                "POSTGRES_URL": "postgresql://postgres:111111@localhost:5432/betweencoffee_delivery_db",
+                "POSTGRES_URL": "postgresql://postgres:${POSTGRES_PASSWORD}@localhost:5432/betweencoffee_delivery_db",
                 "POSTGRES_USER": "postgres",
-                "POSTGRES_PASSWORD": "111111",
+                "POSTGRES_PASSWORD": "${POSTGRES_PASSWORD}",
                 "POSTGRES_HOST": "localhost",
                 "POSTGRES_PORT": "5432",
                 "POSTGRES_DB": "betweencoffee_delivery_db"
@@ -30,7 +30,7 @@
             "command": "npx",
             "args": ["@iflow-mcp/server-github"],
             "env": {
-                "GITHUB_TOKEN": "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"
+                "GITHUB_TOKEN": "${GITHUB_TOKEN}"
             }
         },
         "simple-tavily-search": {
@@ -39,11 +39,11 @@
                 "/home/kei/Desktop/betweencoffee_delivery_enhance/simple-tavily-mcp-fixed.js"
             ],
             "env": {
-                "TAVILY_API_KEY": "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",
+                "TAVILY_API_KEY": "${TAVILY_API_KEY}",
                 "PYTHONIOENCODING": "utf-8"
             },
             "inputs": {
-                "api_key": "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"
+                "api_key": "${TAVILY_API_KEY}"
             }
         },
         "redis-mcp": {
