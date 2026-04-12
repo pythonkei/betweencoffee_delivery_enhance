@@ -58,41 +58,9 @@ def apply_coupon_discounts(request, original_total_price, items):
         else:
             logger.warning(f"無效的優惠券代碼: {coupon_code}")
     
-    # 2. 處理會員折扣（如果用戶已登入）
-    loyalty_discount_rate = Decimal('1.00')  # 默認無折扣
+    # 2. 會員折扣已移除，所有用戶看到相同價格
+    loyalty_discount_rate = Decimal('1.00')  # 無折扣
     loyalty_discount_amount = Decimal('0.00')
-    
-    if request.user.is_authenticated:
-        try:
-            # 嘗試從會員系統獲取折扣率
-            from socialuser.models_enhanced import CustomerLoyalty
-            loyalty = CustomerLoyalty.objects.filter(user=request.user).first()
-            
-            if loyalty:
-                # 使用會員系統的折扣率
-                loyalty_discount_rate = Decimal(str(loyalty.discount_rate))
-                loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
-                final_total_price = final_total_price * loyalty_discount_rate
-                logger.info(f"會員折扣應用成功，會員等級: {loyalty.get_tier_display()}, 折扣率: {loyalty_discount_rate}，折扣金額: {loyalty_discount_amount}")
-            else:
-                # 默認會員折扣（如果沒有會員記錄）
-                loyalty_discount_rate = Decimal('0.95')  # 95折
-                loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
-                final_total_price = final_total_price * loyalty_discount_rate
-                logger.info(f"默認會員折扣應用成功，折扣率: {loyalty_discount_rate}，折扣金額: {loyalty_discount_amount}")
-                
-        except ImportError:
-            # 如果會員系統不可用，使用固定折扣率
-            loyalty_discount_rate = Decimal('0.95')  # 95折
-            loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
-            final_total_price = final_total_price * loyalty_discount_rate
-            logger.info(f"會員系統不可用，使用默認折扣率: {loyalty_discount_rate}，折扣金額: {loyalty_discount_amount}")
-        except Exception as e:
-            logger.error(f"獲取會員折扣失敗: {str(e)}")
-            # 出錯時使用默認折扣率
-            loyalty_discount_rate = Decimal('0.95')
-            loyalty_discount_amount = final_total_price * (Decimal('1.00') - loyalty_discount_rate)
-            final_total_price = final_total_price * loyalty_discount_rate
     
     # 3. 處理積分獎勵（如果用戶已登入）
     applied_reward_id = None

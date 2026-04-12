@@ -407,7 +407,7 @@ class OrderModel(models.Model):
     coupon_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='優惠券折扣金額')
     original_total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='原始總價')
     
-    # ====== 會員折扣相關字段 ======
+    # ====== 會員折扣相關字段（已棄用，所有用戶看到相同價格） ======
     loyalty_discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=1.00, verbose_name='會員折扣率')
     loyalty_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='會員折扣金額')
     

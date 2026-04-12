@@ -16,12 +16,26 @@ from .models_enhanced import (
 
 @login_required
 def loyalty_dashboard(request):
-    """會員忠誠度儀表板"""
+    """會員忠誠度儀表板 - 簡化版（專注積分系統）"""
     try:
         # 獲取忠誠度記錄
         loyalty, created = CustomerLoyalty.objects.get_or_create(
             user=request.user
         )
+        
+        # 檢查積分有效期
+        expired_points = loyalty.check_points_expiry()
+        if expired_points > 0:
+            messages.warning(
+                request, 
+                f"您的 {expired_points} 積分已過期，請及時使用積分"
+            )
+        
+        # 獲取積分摘要信息
+        points_summary = loyalty.get_points_summary()
+        
+        # 獲取會員基本信息
+        membership_info = loyalty.get_membership_info()
         
         # 獲取可用優惠券
         active_coupons = CustomerCoupon.objects.filter(
@@ -38,15 +52,13 @@ def loyalty_dashboard(request):
         # 獲取可兌換獎勵
         available_rewards = loyalty.get_available_rewards()
         
-        # 獲取等級信息
-        tier_info = loyalty.get_tier_info()
-        
         context = {
             'loyalty': loyalty,
+            'points_summary': points_summary,
+            'membership_info': membership_info,
             'active_coupons': active_coupons,
             'recent_activities': recent_activities,
             'available_rewards': available_rewards,
-            'tier_info': tier_info,
             'profile': getattr(request.user, 'profile', None),
         }
         
@@ -55,57 +67,6 @@ def loyalty_dashboard(request):
     except Exception as e:
         messages.error(request, f"加載儀表板失敗: {str(e)}")
         return redirect('profile')
-
-
-@login_required
-def rewards_list(request):
-    """獎勵列表頁面"""
-    try:
-        loyalty, _ = CustomerLoyalty.objects.get_or_create(user=request.user)
-        available_rewards = loyalty.get_available_rewards()
-        
-        # 所有可能的獎勵（包括不可兌換的）
-        all_rewards = [
-            {
-                'id': 'free_coffee',
-                'name': '免費咖啡一杯',
-                'points_required': 10,
-                'description': '兌換任意標準杯型咖啡一杯',
-                'icon': 'fa-mug-hot',
-                'color': 'success',
-                'available': loyalty.points >= 10
-            },
-            {
-                'id': 'free_upgrade',
-                'name': '免費升級大杯',
-                'points_required': 20,
-                'description': '免費升級任意咖啡至大杯',
-                'icon': 'fa-arrow-up',
-                'color': 'warning',
-                'available': loyalty.points >= 20
-            },
-            {
-                'id': 'birthday_gift',
-                'name': '生日驚喜禮包',
-                'points_required': 50,
-                'description': '生日當月免費咖啡+甜點',
-                'icon': 'fa-gift',
-                'color': 'danger',
-                'available': loyalty.points >= 50
-            },
-        ]
-        
-        context = {
-            'loyalty': loyalty,
-            'available_rewards': available_rewards,
-            'all_rewards': all_rewards,
-        }
-        
-        return render(request, 'socialuser/rewards_list.html', context)
-        
-    except Exception as e:
-        messages.error(request, f"加載獎勵列表失敗: {str(e)}")
-        return redirect('loyalty_dashboard')
 
 
 @login_required
@@ -189,8 +150,11 @@ def coupons_list(request):
         return render(request, 'socialuser/coupons_list.html', context)
         
     except Exception as e:
-        messages.error(request, f"加載優惠券列表失敗: {str(e)}")
-        return redirect('loyalty_dashboard')
+        # 記錄錯誤但不顯示消息，避免消息中間件問題
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"加載優惠券列表失敗: {str(e)}")
+        return redirect('socialuser:loyalty_dashboard')
 
 
 @login_required
@@ -282,67 +246,73 @@ def activity_history(request):
 
 
 @login_required
-def tier_info(request):
-    """會員等級詳細信息"""
+def points_summary(request):
+    """積分摘要信息頁面"""
     try:
         loyalty, _ = CustomerLoyalty.objects.get_or_create(user=request.user)
-        tier_info = loyalty.get_tier_info()
         
-        # 所有等級信息
-        all_tiers = [
+        # 獲取積分摘要信息
+        points_summary = loyalty.get_points_summary()
+        
+        # 獲取積分獲取規則
+        point_rules = [
             {
-                'id': 'bronze',
-                'name': '銅級會員',
-                'min_spent': 0,
-                'discount': '無折扣',
-                'benefits': ['積分累積'],
-                'color': '#CD7F32',
-                'icon': 'fa-star',
-                'is_current': loyalty.tier == 'bronze'
+                'type': '消費積分',
+                'description': '每消費 $10 可獲得 1 積分',
+                'icon': 'fa-shopping-cart',
+                'color': 'primary'
             },
             {
-                'id': 'silver',
-                'name': '銀級會員',
-                'min_spent': 500,
-                'discount': '95折',
-                'benefits': ['積分累積', '95折優惠'],
-                'color': '#C0C0C0',
-                'icon': 'fa-star-half-alt',
-                'is_current': loyalty.tier == 'silver'
+                'type': '推薦積分',
+                'description': '成功推薦好友註冊可獲得 50 積分',
+                'icon': 'fa-user-plus',
+                'color': 'success'
             },
             {
-                'id': 'gold',
-                'name': '金級會員',
-                'min_spent': 1000,
-                'discount': '9折',
-                'benefits': ['積分累積', '9折優惠', '免費升級杯型'],
-                'color': '#FFD700',
-                'icon': 'fa-star',
-                'is_current': loyalty.tier == 'gold'
+                'type': '活動積分',
+                'description': '參與店內活動可獲得額外積分',
+                'icon': 'fa-gift',
+                'color': 'warning'
             },
             {
-                'id': 'platinum',
-                'name': '白金會員',
-                'min_spent': 2000,
-                'discount': '85折',
-                'benefits': ['積分累積', '85折優惠', '免費升級杯型', '優先服務'],
-                'color': '#E5E4E2',
-                'icon': 'fa-crown',
-                'is_current': loyalty.tier == 'platinum'
+                'type': '生日積分',
+                'description': '生日當月消費可獲得雙倍積分',
+                'icon': 'fa-birthday-cake',
+                'color': 'danger'
             },
         ]
         
+        # 獲取積分有效期信息
+        expiry_info = None
+        if points_summary['days_until_expiry'] is not None:
+            if points_summary['days_until_expiry'] <= 7:
+                expiry_status = 'danger'
+                expiry_message = f"積分將在 {points_summary['days_until_expiry']} 天後過期"
+            elif points_summary['days_until_expiry'] <= 30:
+                expiry_status = 'warning'
+                expiry_message = f"積分將在 {points_summary['days_until_expiry']} 天後過期"
+            else:
+                expiry_status = 'success'
+                expiry_message = f"積分有效期剩餘 {points_summary['days_until_expiry']} 天"
+            
+            expiry_info = {
+                'status': expiry_status,
+                'message': expiry_message,
+                'expiry_date': points_summary['points_expiry_date'],
+                'days_remaining': points_summary['days_until_expiry']
+            }
+        
         context = {
             'loyalty': loyalty,
-            'tier_info': tier_info,
-            'all_tiers': all_tiers,
-            'progress_percentage': tier_info['progress'],
+            'points_summary': points_summary,
+            'point_rules': point_rules,
+            'expiry_info': expiry_info,
         }
         
-        return render(request, 'socialuser/tier_info.html', context)
+        return render(request, 'socialuser/points_summary.html', context)
         
     except Exception as e:
-        messages.error(request, f"加載等級信息失敗: {str(e)}")
+        messages.error(request, f"加載積分信息失敗: {str(e)}")
         return redirect('loyalty_dashboard')
 
 
@@ -352,16 +322,17 @@ def api_loyalty_status(request):
     try:
         loyalty, _ = CustomerLoyalty.objects.get_or_create(user=request.user)
         
+        # 獲取積分摘要信息
+        points_summary = loyalty.get_points_summary()
+        
         return JsonResponse({
             'success': True,
             'points': loyalty.points,
-            'tier': loyalty.tier,
-            'tier_display': loyalty.get_tier_display(),
             'total_spent': float(loyalty.total_spent),
             'total_orders': loyalty.total_orders,
-            'discount_rate': float(loyalty.discount_rate),
             'available_rewards': loyalty.get_available_rewards(),
-            'tier_info': loyalty.get_tier_info(),
+            'points_summary': points_summary,
+            'membership_info': loyalty.get_membership_info(),
         })
         
     except Exception as e:

@@ -1,0 +1,310 @@
+<!-- socialuser/templates/socialuser/coupons_list.html -->
+<!-- 優惠券列表頁面 -->
+{% extends "betweencoffee_delivery/base.html" %}
+{% load static %}
+
+{% block title %}我的優惠券 - Between Coffee{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- 頁面標題 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'socialuser:profile' %}">個人資料</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'socialuser:loyalty_dashboard' %}">會員積分</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">我的優惠券</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-ticket-alt text-warning me-2"></i>我的優惠券
+            </h1>
+            <p class="text-muted">查看和管理您的優惠券</p>
+        </div>
+    </div>
+
+    <!-- 優惠券統計 -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-success border-2">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-success">
+                        <i class="fas fa-check-circle me-2"></i>可用優惠券
+                    </h5>
+                    <h2 class="display-4 text-success">{{ active_coupons|length }}</h2>
+                    <p class="card-text">立即使用的優惠券</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-warning border-2">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-warning">
+                        <i class="fas fa-clock me-2"></i>已過期
+                    </h5>
+                    <h2 class="display-4 text-warning">{{ expired_coupons|length }}</h2>
+                    <p class="card-text">已過期的優惠券</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-secondary border-2">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-secondary">
+                        <i class="fas fa-history me-2"></i>已使用
+                    </h5>
+                    <h2 class="display-4 text-secondary">{{ used_coupons|length }}</h2>
+                    <p class="card-text">已使用的優惠券</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 可用優惠券 -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>可用優惠券
+                        <span class="badge bg-light text-success ms-2">{{ active_coupons|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if active_coupons %}
+                        <div class="row">
+                            {% for coupon in active_coupons %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100 border-success shadow-sm">
+                                    <div class="card-header bg-success text-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-ticket-alt me-2"></i>{{ coupon.get_coupon_type_display }}
+                                            </h6>
+                                            <span class="badge bg-light text-success">{{ coupon.code }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">
+                                            {% if coupon.coupon_type == 'percentage' %}
+                                                {{ coupon.value }}% 折扣
+                                            {% elif coupon.coupon_type == 'fixed' %}
+                                                ${{ coupon.value }} 減免
+                                            {% else %}
+                                                免費商品
+                                            {% endif %}
+                                        </h5>
+                                        <p class="card-text">{{ coupon.description|default:"無描述" }}</p>
+                                        <ul class="list-unstyled small">
+                                            <li class="mb-1">
+                                                <i class="fas fa-shopping-cart me-2 text-muted"></i>
+                                                最低消費: ${{ coupon.min_order_amount }}
+                                            </li>
+                                            <li class="mb-1">
+                                                <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                                                有效期至: {{ coupon.valid_to|date:"Y年m月d日" }}
+                                            </li>
+                                            <li>
+                                                <i class="fas fa-clock me-2 text-muted"></i>
+                                                剩餘: {{ coupon.valid_to|timeuntil }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-top-0">
+                                        <div class="d-grid">
+                                            <button class="btn btn-outline-success copy-coupon-btn" 
+                                                    data-coupon-code="{{ coupon.code }}">
+                                                <i class="fas fa-copy me-2"></i>複製優惠碼
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-ticket-alt fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">暫無可用優惠券</h5>
+                            <p class="text-muted">消費或參與活動可獲得優惠券</p>
+                            <a href="{% url 'socialuser:loyalty_dashboard' %}" class="btn btn-primary">
+                                <i class="fas fa-crown me-2"></i>查看積分獎勵
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 已過期優惠券 -->
+    {% if expired_coupons %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>已過期優惠券
+                        <span class="badge bg-light text-warning ms-2">{{ expired_coupons|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>優惠碼</th>
+                                    <th>優惠類型</th>
+                                    <th>優惠內容</th>
+                                    <th>過期時間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for coupon in expired_coupons %}
+                                <tr class="text-muted">
+                                    <td><code>{{ coupon.code }}</code></td>
+                                    <td>{{ coupon.get_coupon_type_display }}</td>
+                                    <td>
+                                        {% if coupon.coupon_type == 'percentage' %}
+                                            {{ coupon.value }}% 折扣
+                                        {% elif coupon.coupon_type == 'fixed' %}
+                                            ${{ coupon.value }} 減免
+                                        {% else %}
+                                            免費商品
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ coupon.valid_to|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 已使用優惠券 -->
+    {% if used_coupons %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>已使用優惠券
+                        <span class="badge bg-light text-secondary ms-2">{{ used_coupons|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>優惠碼</th>
+                                    <th>優惠類型</th>
+                                    <th>優惠內容</th>
+                                    <th>使用時間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for coupon in used_coupons %}
+                                <tr>
+                                    <td><code>{{ coupon.code }}</code></td>
+                                    <td>{{ coupon.get_coupon_type_display }}</td>
+                                    <td>
+                                        {% if coupon.coupon_type == 'percentage' %}
+                                            {{ coupon.value }}% 折扣
+                                        {% elif coupon.coupon_type == 'fixed' %}
+                                            ${{ coupon.value }} 減免
+                                        {% else %}
+                                            免費商品
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ coupon.used_at|date:"Y-m-d H:i"|default:"-" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 使用說明 -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>優惠券使用說明
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="fas fa-shopping-cart text-primary me-2"></i>如何使用優惠券</h6>
+                            <ol class="ps-3">
+                                <li class="mb-2">在購物車或結賬頁面找到「輸入優惠碼」欄位</li>
+                                <li class="mb-2">點擊「複製優惠碼」按鈕複製優惠碼</li>
+                                <li class="mb-2">貼上優惠碼並點擊「應用」按鈕</li>
+                                <li>系統會自動計算折扣金額</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6><i class="fas fa-exclamation-triangle text-warning me-2"></i>注意事項</h6>
+                            <ul class="ps-3">
+                                <li class="mb-2">每張優惠券只能使用一次</li>
+                                <li class="mb-2">優惠券有最低消費金額限制</li>
+                                <li class="mb-2">優惠券不能與其他優惠同時使用</li>
+                                <li>過期優惠券無法使用</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 複製優惠碼功能
+    $('.copy-coupon-btn').click(function() {
+        const couponCode = $(this).data('coupon-code');
+        const $button = $(this);
+        
+        // 複製到剪貼板
+        navigator.clipboard.writeText(couponCode).then(function() {
+            // 顯示成功提示
+            const originalText = $button.html();
+            $button.html('<i class="fas fa-check me-2"></i>已複製');
+            $button.removeClass('btn-outline-success').addClass('btn-success');
+            
+            // 3秒後恢復原狀
+            setTimeout(function() {
+                $button.html(originalText);
+                $button.removeClass('btn-success').addClass('btn-outline-success');
+            }, 3000);
+            
+            // 顯示通知
+            showToast('success', '優惠碼已複製到剪貼板', `優惠碼: ${couponCode}`);
+        }).catch(function(err) {
+            console.error('複製失敗:', err);
+            showToast('error', '複製失敗', '請手動複製優惠碼');
+        });
+    });
+    
+    // 顯示Toast通知
+    function showToast(type, title, message) {
+        // 這裡可以實現Toast通知功能
+        alert(`${title}: ${message}`);
+    }
+});
+</script>
+{% endblock %}

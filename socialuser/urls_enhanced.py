@@ -13,12 +13,7 @@ urlpatterns = [
         name='loyalty_dashboard'
     ),
     
-    # 獎勵相關
-    path(
-        'loyalty/rewards/',
-        views_enhanced.rewards_list,
-        name='rewards_list'
-    ),
+    # 獎勵相關（已整合到loyalty_dashboard中）
     path(
         'loyalty/redeem/',
         views_enhanced.redeem_reward,
@@ -44,12 +39,7 @@ urlpatterns = [
         name='activity_history'
     ),
     
-    # 等級信息
-    path(
-        'loyalty/tier-info/',
-        views_enhanced.tier_info,
-        name='tier_info'
-    ),
+    # 等級信息（已移除，會員等級機制已不需要）
     
     # API端點
     path(

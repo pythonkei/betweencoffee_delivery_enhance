@@ -1,7 +1,18 @@
 <!-- socialuser/templates/socialuser/loyalty_dashboard.html -->
+<!-- 簡化版忠誠度儀表板 - 專注積分系統 -->
 {% extends 'layouts/blank.html' %}
 {% load static %}
-{% block title %}Between Coffee - Order History{% endblock %}
+{% block title %}Between Coffee - 會員積分系統{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/loyalty-table.css' %}">
+{% endblock %}
+
+{% block extra_scripts %}
+{{ block.super }}
+<script src="{% static 'js/font-awesome-loader.js' %}"></script>
+{% endblock %}
 
 {% block content %}
 <!-- Header Banner-->
@@ -13,8 +24,8 @@
         <div class="row justify-content-center mt-5 p-2">
             <div class="col-lg-12 col-md-12 heading-section text-center">
               <span class="subheading">Explore<br>Between</span>
-              <h2 class="mb-3">&#65371;會員積分及記錄&#65373;</h2>
-              <p style="color:#ccc;">建構共同空間拉近彼此距離<br />細意品嚐</p>
+              <h2 class="mb-3">&#65371;會員積分&#65373;</h2>
+              <p style="color:#ccc;">專注積分累積與兌換<br />享受咖啡時光</p>
             </div>
         </div>
 
@@ -28,115 +39,181 @@
 
 <section class="ftco-subpage-section">
     <div class="container">
-        <div class="imgbox"></div>
-        
         <div class="row justify-content-center mt-5">
-            <div class="col col-lg-10 mb-5">
-                <!-- 會員等級和積分概覽 -->
-                <div class="row mb-5">
-                    <div class="col-md-4 mb-4">
-                        <div class="card loyalty-card shadow-sm">
-                            <div class="card-body text-center">
-                                <!-- 會員等級徽章 -->
-                                <div class="loyalty-badge loyalty-{{ loyalty.tier }} mb-3">
-                                    <i class="fas {{ tier_info.current.icon }} fa-2x"></i>
-                                    <h4 class="mt-2 mb-0">{{ tier_info.current.name }}</h4>
-                                </div>
-                                
-                                <!-- 積分顯示 -->
-                                <div class="points-display">
-                                    <h2 class="points-number">{{ loyalty.points }}</h2>
-                                    <p class="text-muted">當前積分</p>
-                                </div>
-                                
-                                <!-- 升級進度 -->
-                                {% if tier_info.next %}
-                                <div class="progress mt-3" style="height: 10px;">
-                                    <div class="progress-bar" 
-                                         role="progressbar" 
-                                         style="width: {{ tier_info.progress }}%;"
-                                         aria-valuenow="{{ tier_info.progress }}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                    </div>
-                                </div>
-                                <p class="text-muted small mt-2">
-                                    升級進度: {{ tier_info.progress }}%
-                                    <br>
-                                    還需消費 ${{ tier_info.next.points_needed|floatformat:0 }} 
-                                    升級至 {{ tier_info.next.name }}
-                                </p>
-                                {% else %}
-                                <p class="text-success small mt-3">
-                                    <i class="fas fa-crown"></i> 已達到最高等級！
-                                </p>
-                                {% endif %}
-                            </div>
+            <!-- 左側：會員導航菜單 -->
+            <div class="col-lg-4 mb-5">
+                {% include 'socialuser/includes/member_nav.html' %}
+                
+                <!-- 積分快速操作卡片 -->
+                <div hidden class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-bolt text-warning mr-2"></i>
+                            積分快速操作
+                        </h6>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'socialuser:coupons_list' %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-ticket-alt mr-1"></i> 我的優惠券
+                            </a>
+                            <a href="{% url 'coffee_menu' %}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-coffee mr-1"></i> 立即消費賺積分
+                            </a>
                         </div>
                     </div>
-                    
-                    <div class="col-md-8">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title">會員權益</h5>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled">
-                                            <li class="mb-2">
-                                                <i class="fas fa-percentage text-success mr-2"></i>
-                                                <strong>折扣優惠:</strong> 
-                                                {% if loyalty.discount_rate < 1 %}
-                                                    {{ loyalty.discount_rate|floatformat:0 }}折
-                                                {% else %}
-                                                    無折扣
-                                                {% endif %}
-                                            </li>
-                                            <li class="mb-2">
-                                                <i class="fas fa-arrow-up text-warning mr-2"></i>
-                                                <strong>免費升級:</strong> 
-                                                {% if loyalty.free_upgrade %}
-                                                    <span class="text-success">✓ 已啟用</span>
-                                                {% else %}
-                                                    <span class="text-muted">未啟用</span>
-                                                {% endif %}
-                                            </li>
-                                        </ul>
+                </div>
+                
+                <!-- 積分獲取指南 -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-lightbulb text-info mr-2"></i>
+                            積分獲取指南
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                每消費 $10 獲得 1 積分
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                生日當月消費雙倍積分
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                推薦好友獲得 50 積分
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                參與活動獲得額外積分
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右側：積分系統儀表板內容 -->
+            <div class="col-lg-8 mb-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-star text-warning mr-2"></i>
+                            會員積分概覽
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- 積分統計卡片 -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-primary shadow-sm">
+                                    <div class="card-body text-center">
+                                        <h2 class="display-4 text-primary">{{ loyalty.points }}</h2>
+                                        <p class="text-muted mb-0">當前積分</p>
+                                        <small class="text-muted">可用於兌換獎勵</small>
                                     </div>
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-success shadow-sm">
+                                    <div class="card-body text-center">
+                                        <h2 class="display-4 text-success">${{ points_summary.total_spent_amount|floatformat:0 }}</h2>
+                                        <p class="text-muted mb-0">累計消費</p>
+                                        <small class="text-muted">{{ points_summary.total_orders }} 筆訂單</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 積分有效期提醒（已移至會員信息卡片內） -->
+                        
+                        <!-- 積分統計詳情 -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-chart-line text-primary mr-2"></i>
+                                            積分統計
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
                                             <li class="mb-2">
-                                                <i class="fas fa-bolt text-danger mr-2"></i>
-                                                <strong>優先服務:</strong> 
-                                                {% if loyalty.priority_service %}
-                                                    <span class="text-success">✓ 已啟用</span>
-                                                {% else %}
-                                                    <span class="text-muted">未啟用</span>
-                                                {% endif %}
+                                                <span class="text-muted">累計獲得：</span>
+                                                <strong>{{ points_summary.total_earned }} 積分</strong>
                                             </li>
                                             <li class="mb-2">
-                                                <i class="fas fa-chart-line text-info mr-2"></i>
-                                                <strong>累計消費:</strong> 
-                                                ${{ loyalty.total_spent|floatformat:0 }}
+                                                <span class="text-muted">累計使用：</span>
+                                                <strong>{{ points_summary.total_spent }} 積分</strong>
+                                            </li>
+                                            <li class="mb-2">
+                                                <span class="text-muted">會員天數：</span>
+                                                <strong>{{ points_summary.membership_days }} 天</strong>
+                                            </li>
+                                            <li>
+                                                <span class="text-muted">平均消費：</span>
+                                                <strong>${{ points_summary.total_spent_amount|floatformat:2 }}</strong>
                                             </li>
                                         </ul>
                                     </div>
                                 </div>
-                                
-                                <!-- 快速統計 -->
-                                <div class="stats-grid mt-4">
-                                    <div class="stat-item text-center">
-                                        <div class="stat-number">{{ loyalty.total_orders }}</div>
-                                        <div class="stat-label">累計訂單</div>
-                                    </div>
-                                    <div class="stat-item text-center">
-                                        <div class="stat-number">{{ loyalty.points }}</div>
-                                        <div class="stat-label">當前積分</div>
-                                    </div>
-                                    <div class="stat-item text-center">
-                                        <div class="stat-number">
-                                            {{ loyalty.join_date|date:"Y-m-d" }}
-                                        </div>
-                                        <div class="stat-label">加入日期</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-user-check text-success mr-2"></i>
+                                            會員信息
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-2">
+                                                <span class="text-muted">會員編號：</span>
+                                                <strong>{{ membership_info.membership_number }}</strong>
+                                            </li>
+                                            <li class="mb-2">
+                                                <span class="text-muted">加入日期：</span>
+                                                <strong>{{ membership_info.join_date|date:"Y年m月d日" }}</strong>
+                                            </li>
+                                            <li class="mb-2">
+                                                <span class="text-muted">最後訂單：</span>
+                                                <strong>
+                                                    {% if loyalty.last_order_date %}
+                                                    {{ loyalty.last_order_date|date:"Y年m月d日" }}
+                                                    {% else %}
+                                                    尚未消費
+                                                    {% endif %}
+                                                </strong>
+                                            </li>
+                                            <li class="mb-2">
+                                                <span class="text-muted">用戶名：</span>
+                                                <strong>{{ membership_info.username }}</strong>
+                                            </li>
+                                            <li>
+                                                <span class="text-muted">積分有效期：</span>
+                                                <strong>
+                                                    {% if points_summary.days_until_expiry %}
+                                                        {% if points_summary.days_until_expiry <= 7 %}
+                                                        <span class="text-danger">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                            剩餘 {{ points_summary.days_until_expiry }} 天（即將過期）
+                                                        </span>
+                                                        {% elif points_summary.days_until_expiry <= 30 %}
+                                                        <span class="text-warning">
+                                                            <i class="fas fa-clock mr-1"></i>
+                                                            剩餘 {{ points_summary.days_until_expiry }} 天
+                                                        </span>
+                                                        {% else %}
+                                                        <span class="text-info">
+                                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                                            剩餘 {{ points_summary.days_until_expiry }} 天
+                                                        </span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted">
+                                                            <i class="fas fa-infinity mr-1"></i>
+                                                            永久有效
+                                                        </span>
+                                                    {% endif %}
+                                                </strong>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -145,89 +222,33 @@
                 </div>
                 
                 <!-- 可兌換獎勵 -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">可兌換獎勵</h5>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-gift text-danger mr-2"></i>
+                            可兌換獎勵
+                        </h4>
                     </div>
                     <div class="card-body">
                         {% if available_rewards %}
                         <div class="row">
                             {% for reward in available_rewards %}
                             <div class="col-md-4 mb-3">
-                                <div class="reward-card border rounded p-3 h-100">
-                                    <div class="reward-points badge badge-{{ reward.color }}">
-                                        {{ reward.points_required }} 積分
-                                    </div>
-                                    <h6 class="mt-2">
-                                        <i class="fas {{ reward.icon }} mr-2"></i>
-                                        {{ reward.name }}
-                                    </h6>
-                                    <p class="text-muted small">{{ reward.description }}</p>
-                                    <button class="btn btn-outline-{{ reward.color }} btn-sm btn-block redeem-btn"
-                                            data-reward-id="{{ reward.id }}"
-                                            data-reward-name="{{ reward.name }}">
-                                        立即兌換
-                                    </button>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-gift fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">積分不足，繼續消費賺取積分吧！</p>
-                            <a href="{% url 'coffee_menu' %}" class="btn btn-primary">
-                                瀏覽選單
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <!-- 我的優惠券 -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">我的優惠券</h5>
-                        <a href="{% url 'coupons_list' %}" class="btn btn-sm btn-outline-primary">
-                            查看全部
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        {% if active_coupons %}
-                        <div class="row">
-                            {% for coupon in active_coupons|slice:":3" %}
-                            <div class="col-md-4 mb-3">
-                                <div class="coupon-card border rounded p-3 h-100">
-                                    <div class="coupon-value text-center mb-2">
-                                        {% if coupon.coupon_type == 'percentage' %}
-                                        <span class="h4 text-success">
-                                            {{ coupon.value }}% OFF
-                                        </span>
-                                        {% elif coupon.coupon_type == 'fixed' %}
-                                        <span class="h4 text-warning">
-                                            ${{ coupon.value }} OFF
-                                        </span>
-                                        {% else %}
-                                        <span class="h4 text-info">
-                                            免費商品
-                                        </span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="coupon-details">
-                                        <h6 class="text-center">優惠碼: {{ coupon.code }}</h6>
-                                        <p class="text-muted small text-center mb-2">
-                                            有效期至: {{ coupon.valid_to|date:"Y-m-d" }}
-                                        </p>
-                                        {% if coupon.min_order_amount > 0 %}
-                                        <p class="text-muted small text-center">
-                                            最低消費: ${{ coupon.min_order_amount }}
-                                        </p>
-                                        {% endif %}
-                                    </div>
-                                    <div class="text-center mt-2">
-                                        <button class="btn btn-sm btn-outline-success copy-coupon-btn"
-                                                data-code="{{ coupon.code }}">
-                                            複製優惠碼
+                                <div class="card h-100 border-{{ reward.color }} shadow-sm">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <i class="fas {{ reward.icon }} fa-3x text-{{ reward.color }}"></i>
+                                        </div>
+                                        <h5 class="card-title">{{ reward.name }}</h5>
+                                        <p class="card-text text-muted small">{{ reward.description }}</p>
+                                        <div class="mt-3">
+                                            <span class="badge bg-{{ reward.color }} p-2">
+                                                <i class="fas fa-coins mr-1"></i> {{ reward.points_required }} 積分
+                                            </span>
+                                        </div>
+                                        <button class="btn btn-outline-{{ reward.color }} btn-sm mt-3 w-100 redeem-btn" 
+                                                data-reward-id="{{ reward.id }}">
+                                            <i class="fas fa-exchange-alt mr-1"></i> 立即兌換
                                         </button>
                                     </div>
                                 </div>
@@ -235,76 +256,100 @@
                             {% endfor %}
                         </div>
                         {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-ticket-alt fa-2x text-muted mb-2"></i>
-                            <p class="text-muted">暫無可用優惠券</p>
+                        <div class="text-center py-4">
+                            <i class="fas fa-gift fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">暫無可兌換獎勵</h5>
+                            <p class="text-muted">繼續消費累積積分，解鎖更多獎勵！</p>
+                            <a href="{% url 'coffee_menu' %}" class="btn btn-primary">
+                                <i class="fas fa-coffee mr-1"></i> 立即消費賺積分
+                            </a>
                         </div>
                         {% endif %}
                     </div>
                 </div>
                 
-                <!-- 近期活動 -->
+                <!-- 近期活動記錄 - 表格組件 -->
                 <div class="card shadow-sm">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">近期活動</h5>
-                        <a href="{% url 'activity_history' %}" class="btn btn-sm btn-outline-primary">
-                            查看全部
-                        </a>
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-history text-info mr-2"></i>
+                            近期活動記錄
+                        </h4>
                     </div>
                     <div class="card-body">
                         {% if recent_activities %}
-                        <div class="activity-timeline">
-                            {% for activity in recent_activities|slice:":5" %}
-                            <div class="activity-item d-flex mb-3">
-                                <div class="activity-icon mr-3">
-                                    <i class="fas 
-                                        {% if activity.activity_type == 'points_earned' %}fa-coins text-success
-                                        {% elif activity.activity_type == 'tier_upgraded' %}fa-arrow-up text-warning
-                                        {% elif activity.activity_type == 'reward_redeemed' %}fa-gift text-danger
-                                        {% elif activity.activity_type == 'coupon_used' %}fa-ticket-alt text-info
-                                        {% else %}fa-shopping-cart text-primary{% endif %}
-                                        fa-lg">
-                                    </i>
-                                </div>
-                                <div class="activity-content flex-grow-1">
-                                    <p class="mb-0">{{ activity.description }}</p>
-                                    <small class="text-muted">
-                                        {{ activity.created_at|timesince }}前
-                                        {% if activity.points_change != 0 %}
-                                        <span class="ml-2 {% if activity.points_change > 0 %}text-success{% else %}text-danger{% endif %}">
-                                            {% if activity.points_change > 0 %}+{% endif %}{{ activity.points_change }} 積分
-                                        </span>
-                                        {% endif %}
-                                    </small>
-                                </div>
-                            </div>
-                            {% endfor %}
+                        <div class="loyalty-table-container">
+                            <table class="loyalty-table">
+                                <thead>
+                                    <tr>
+                                        <th class="activity-description-cell">活動描述</th>
+                                        <th class="points-cell">積分變化</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for activity in recent_activities|slice:":10" %}
+                                    <tr>
+                                        <!-- 活動描述列（整合活動圖示） -->
+                                        <td class="activity-description-cell" data-label="活動描述">
+                                            <div class="activity-description-container">
+                                                <!-- 活動圖示 -->
+                                                <div class="activity-icon-container">
+                                                    {% if activity.activity_type == 'points_earned' %}
+                                                    <i class="fas fa-plus-circle activity-icon points-earned"></i>
+                                                    {% elif activity.activity_type == 'reward_redeemed' %}
+                                                    <i class="fas fa-gift activity-icon reward-redeemed"></i>
+                                                    {% elif activity.activity_type == 'coupon_used' %}
+                                                    <i class="fas fa-ticket-alt activity-icon coupon-used"></i>
+                                                    {% elif activity.activity_type == 'order_placed' %}
+                                                    <i class="fas fa-shopping-cart activity-icon order-placed"></i>
+                                                    {% else %}
+                                                    <i class="fas fa-history activity-icon other"></i>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <!-- 活動描述內容 -->
+                                                <div class="activity-description-content">
+                                                    <div class="activity-description">{{ activity.description }}</div>
+                                                    <div class="activity-time">
+                                                        <i class="far fa-clock time-icon"></i>
+                                                        {{ activity.created_at|timesince }}前
+                                                    </div>
+                                                    {% if activity.details %}
+                                                    <div class="activity-details">{{ activity.details }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- 積分變化列 -->
+                                        <td class="points-cell" data-label="積分變化">
+                                            {% if activity.points_change != 0 %}
+                                            <span class="points-badge {% if activity.points_change > 0 %}points-positive{% else %}points-negative{% endif %}">
+                                                {% if activity.points_change > 0 %}+{% endif %}{{ activity.points_change }} 積分
+                                            </span>
+                                            {% else %}
+                                            <span class="points-badge points-neutral">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <a href="{% url 'socialuser:activity_history' %}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-list mr-1"></i> 查看完整記錄
+                            </a>
                         </div>
                         {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-history fa-2x text-muted mb-2"></i>
-                            <p class="text-muted">暫無活動記錄</p>
+                        <!-- 空狀態 -->
+                        <div class="loyalty-table-empty">
+                            <i class="fas fa-history loyalty-table-empty-icon"></i>
+                            <h5 class="loyalty-table-empty-title">暫無活動記錄</h5>
+                            <p class="loyalty-table-empty-message">開始消費或兌換獎勵，記錄您的專屬時刻</p>
                         </div>
                         {% endif %}
-                    </div>
-                </div>
-                
-                <!-- 快速導航 -->
-                <div class="row mt-4">
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'rewards_list' %}" class="btn btn-outline-primary btn-block">
-                            <i class="fas fa-gift mr-2"></i>所有獎勵
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'coupons_list' %}" class="btn btn-outline-success btn-block">
-                            <i class="fas fa-ticket-alt mr-2"></i>優惠券列表
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'tier_info' %}" class="btn btn-outline-warning btn-block">
-                            <i class="fas fa-chart-line mr-2"></i>等級詳情
-                        </a>
                     </div>
                 </div>
             </div>
@@ -312,223 +357,87 @@
     </div>
 </section>
 
-<style>
-/* 會員等級徽章樣式 */
-.loyalty-badge {
-    padding: 20px;
-    border-radius: 10px;
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-}
-.loyalty-bronze { 
-    background: linear-gradient(135deg, #CD7F32, #8B4513); 
-    box-shadow: 0 4px 8px rgba(205, 127, 50, 0.3);
-}
-.loyalty-silver { 
-    background: linear-gradient(135deg, #C0C0C0, #A9A9A9); 
-    box-shadow: 0 4px 8px rgba(192, 192, 192, 0.3);
-}
-.loyalty-gold { 
-    background: linear-gradient(135deg, #FFD700, #DAA520); 
-    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
-}
-.loyalty-platinum { 
-    background: linear-gradient(135deg, #E5E4E2, #B0C4DE); 
-    box-shadow: 0 4px 8px rgba(229, 228, 226, 0.3);
-}
-
-/* 積分顯示 */
-.points-number {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #28a745;
-    margin: 0;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-}
-
-/* 統計網格 */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    text-align: center;
-}
-.stat-number {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #007bff;
-    margin: 0;
-}
-.stat-label {
-    font-size: 0.9rem;
-    color: #6c757d;
-    margin-top: 5px;
-}
-
-/* 獎勵卡片 */
-.reward-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid #dee2e6 !important;
-}
-.reward-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
-}
-.reward-points {
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-weight: bold;
-    display: inline-block;
-    font-size: 0.9rem;
-}
-
-/* 優惠券卡片 */
-.coupon-card {
-    transition: transform 0.2s;
-    border: 2px dashed #dee2e6 !important;
-}
-.coupon-card:hover {
-    transform: translateY(-3px);
-    border-color: #28a745 !important;
-}
-
-/* 活動時間線 */
-.activity-item {
-    padding: 10px;
-    border-left: 3px solid #007bff;
-    background: #f8f9fa;
-    border-radius: 0 5px 5px 0;
-}
-.activity-item:nth-child(2n) {
-    border-left-color: #28a745;
-    background: #f0f9f0;
-}
-.activity-item:nth-child(3n) {
-    border-left-color: #ffc107;
-    background: #fff9e6;
-}
-
-/* 進度條 */
-.progress {
-    background-color: #e9ecef;
-    border-radius: 5px;
-    overflow: hidden;
-}
-.progress-bar {
-    background: linear-gradient(90deg, #28a745, #20c997);
-    transition: width 0.6s ease;
-}
-</style>
-
+<!-- JavaScript for AJAX operations -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 兌換獎勵
+    // 兌換獎勵按鈕點擊事件
     document.querySelectorAll('.redeem-btn').forEach(button => {
         button.addEventListener('click', function() {
-            const rewardId = this.getAttribute('data-reward-id');
-            const rewardName = this.getAttribute('data-reward-name');
+            const rewardId = this.dataset.rewardId;
+            const button = this;
             
-            if (confirm(`確定要兌換「${rewardName}」嗎？`)) {
-                fetch('{% url "redeem_reward" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({ reward_id: rewardId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        location.reload();
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('兌換失敗，請稍後再試');
-                });
-            }
-        });
-    });
-    
-    // 複製優惠碼
-    document.querySelectorAll('.copy-coupon-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const code = this.getAttribute('data-code');
-            navigator.clipboard.writeText(code)
-                .then(() => {
-                    const originalText = this.textContent;
-                    this.textContent = '已複製！';
-                    this.classList.remove('btn-outline-success');
-                    this.classList.add('btn-success');
-                    
-                    setTimeout(() => {
-                        this.textContent = originalText;
-                        this.classList.remove('btn-success');
-                        this.classList.add('btn-outline-success');
-                    }, 2000);
-                })
-                .catch(err => {
-                    console.error('複製失敗:', err);
-                    alert('複製失敗，請手動複製優惠碼');
-                });
-        });
-    });
-    
-    // CSRF token helper
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
-    // 自動更新忠誠度狀態（每30秒）
-    function updateLoyaltyStatus() {
-        fetch('{% url "api_loyalty_status" %}')
+            // 顯示加載狀態
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> 兌換中...';
+            button.disabled = true;
+            
+            // 發送AJAX請求
+            fetch('{% url "socialuser:redeem_reward" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ reward_id: rewardId })
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // 更新積分顯示
-                    const pointsElement = document.querySelector('.points-number');
-                    if (pointsElement) {
+                    // 顯示成功消息
+                    showAlert('success', data.message);
+                    
+                    // 更新頁面上的積分顯示
+                    const pointsElement = document.querySelector('.display-4.text-primary');
+                    if (pointsElement && data.points !== undefined) {
                         pointsElement.textContent = data.points;
                     }
                     
-                    // 更新等級顯示
-                    const tierBadge = document.querySelector('.loyalty-badge');
-                    if (tierBadge && !tierBadge.classList.contains('loyalty-' + data.tier)) {
-                        // 移除舊的等級樣式
-                        tierBadge.classList.remove('loyalty-bronze', 'loyalty-silver', 'loyalty-gold', 'loyalty-platinum');
-                        // 添加新的等級樣式
-                        tierBadge.classList.add('loyalty-' + data.tier);
-                        
-                        // 更新等級名稱
-                        const tierName = tierBadge.querySelector('h4');
-                        if (tierName) {
-                            tierName.textContent = data.tier_display;
-                        }
-                    }
+                    // 重新加載頁面以更新獎勵列表
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    // 顯示錯誤消息
+                    showAlert('danger', data.message);
+                    button.innerHTML = '<i class="fas fa-exchange-alt mr-1"></i> 立即兌換';
+                    button.disabled = false;
                 }
             })
-            .catch(error => console.error('更新忠誠度狀態失敗:', error));
-    }
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('danger', '兌換失敗，請稍後再試');
+                button.innerHTML = '<i class="fas fa-exchange-alt mr-1"></i> 立即兌換';
+                button.disabled = false;
+            });
+        });
+    });
     
-    // 每30秒更新一次
-    setInterval(updateLoyaltyStatus, 30000);
+    // 顯示提示消息的函數
+    function showAlert(type, message) {
+        // 移除現有的提示
+        const existingAlert = document.querySelector('.ajax-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // 創建新的提示
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show ajax-alert position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // 5秒後自動移除
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
 });
 </script>
 
 {% endblock %}
-                       

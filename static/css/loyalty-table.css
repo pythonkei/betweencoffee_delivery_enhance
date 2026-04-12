@@ -1,0 +1,362 @@
+/* 
+ * Between Coffee 忠誠度表格組件樣式
+ * 設計理念：簡約、清晰、具設計感，符合黑色背景網站風格
+ */
+
+/* 表格容器 */
+.loyalty-table-container {
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border-radius: 8px;
+    background: transparent;
+}
+
+/* 表格主體 */
+.loyalty-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: var(--font-family-sans-serif);
+    font-size: 0.95rem;
+    background: transparent;
+}
+
+/* 表格標題行 */
+.loyalty-table thead th {
+    background-color: rgba(52, 58, 64, 0.2); /* 深灰色背景，符合黑色主題 */
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.25rem;
+    border: none;
+    border-bottom: 1px solid rgba(52, 58, 64, 0.3); /* 主品牌色調邊框 */
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+/* 表格標題列特定樣式 */
+.loyalty-table th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.loyalty-table th:last-child {
+    border-top-right-radius: 8px;
+}
+
+/* 表格數據行 */
+.loyalty-table tbody tr {
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+}
+
+/* 交替行背景色 - 非常輕微的對比 */
+.loyalty-table tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.loyalty-table tbody tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+/* 懸停效果 */
+.loyalty-table tbody tr:hover {
+    background-color: rgba(120, 213, 239, 0.08); /* 品牌色調的輕微懸停效果 */
+}
+
+/* 表格單元格 */
+.loyalty-table td {
+    padding: 1rem 1.25rem;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e9ecef;
+    vertical-align: middle;
+}
+
+/* 最後一行的底部邊框 */
+.loyalty-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 活動描述列（整合活動類型圖示） */
+.activity-description-cell {
+    min-width: 200px;
+}
+
+.activity-description-container {
+    display: flex;
+    align-items: center; /* 改為居中對齊 */
+}
+
+.activity-icon-container {
+    flex-shrink: 0;
+    margin-right: 20px;
+}
+
+.activity-icon {
+    font-size: 0.9rem; /* 圖示字體大小 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; /* 固定寬度 */
+    height: 28px; /* 固定高度 */
+    line-height: 1; /* 避免 line-height 導致的垂直偏移 */
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.05);
+    flex-shrink: 0; /* 防止圖示被壓縮 */
+    /* 初始狀態由 JavaScript 控制 */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 活動類型顏色 */
+.activity-icon.points-earned {
+    color: #28a745; /* 綠色 - 獲得積分 */
+}
+
+.activity-icon.reward-redeemed {
+    color: #dc3545; /* 紅色 - 兌換獎勵 */
+}
+
+.activity-icon.coupon-used {
+    color: #ffc107; /* 黃色 - 使用優惠券 */
+}
+
+.activity-icon.order-placed {
+    color: #78d5ef; /* 品牌藍色 - 下單 */
+}
+
+.activity-icon.other {
+    color: #17a2b8; /* 青色 - 其他活動 */
+}
+
+.activity-description-content {
+    flex: 1;
+}
+
+.activity-description {
+    font-weight: 500;
+    color: #f8f9fa;
+    margin-bottom: 0.25rem;
+}
+
+.activity-details {
+    font-size: 0.85rem;
+    color: #adb5bd;
+    margin-top: 0.25rem;
+}
+
+/* 活動時間（整合到活動描述中） */
+.activity-time {
+    font-size: 0.85rem;
+    color: #adb5bd;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.activity-time .time-icon {
+    margin-right: 0.5rem;
+    color: #6c757d;
+}
+
+/* 積分變化列 */
+.points-cell {
+    width: 120px; /* 增加寬度，避免文字換行 */
+    text-align: left; /* 改為左對齊，與欄位內容對齊 */
+    font-weight: 600;
+}
+
+.points-badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem; /* 增加水平內邊距 */
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-width: 90px; /* 增加最小寬度 */
+    text-align: center;
+    white-space: nowrap; /* 防止文字換行 */
+}
+
+.points-positive {
+    background-color: #28a745; /* 實色綠色 */
+    color: #ffffff; /* 白色文字 */
+    border: none; /* 取消邊框 */
+}
+
+.points-negative {
+    background-color: #dc3545; /* 實色紅色 */
+    color: #ffffff; /* 白色文字 */
+    border: none; /* 取消邊框 */
+}
+
+.points-neutral {
+    background-color: rgba(108, 117, 125, 0.15);
+    color: #adb5bd;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+/* 空狀態 */
+.loyalty-table-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.loyalty-table-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.loyalty-table-empty-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #adb5bd;
+}
+
+.loyalty-table-empty-message {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    color: #6c757d;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .loyalty-table-container {
+        border-radius: 6px;
+    }
+    
+    .loyalty-table {
+        font-size: 0.9rem;
+    }
+    
+    .loyalty-table thead th {
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .loyalty-table td {
+        padding: 0.75rem 1rem;
+    }
+    
+    .activity-icon {
+        font-size: 0.8rem; /* 圖示字體大小 */
+        width: 24px; /* 固定寬度 */
+        height: 24px; /* 固定高度 */
+        line-height: 1; /* 避免 line-height 導致的垂直偏移 */
+    }
+    
+    .points-cell {
+        width: 100px; /* 增加寬度，與桌面版保持一致比例 */
+    }
+    
+    .points-badge {
+        padding: 0.25rem 0.6rem; /* 增加水平內邊距 */
+        font-size: 0.8rem;
+        min-width: 75px; /* 增加最小寬度 */
+        white-space: nowrap; /* 防止文字換行 */
+    }
+}
+
+@media (max-width: 576px) {
+    /* 在小屏幕上切換為卡片視圖 */
+    .loyalty-table thead {
+        display: none;
+    }
+    
+    .loyalty-table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        background-color: rgba(52, 58, 64, 0.3);
+        border-radius: 6px;
+        padding: 1rem;
+    }
+    
+    .loyalty-table td {
+        display: block;
+        padding: 0.5rem 0;
+        border: none;
+        text-align: left;
+    }
+    
+    .loyalty-table td:before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: #adb5bd;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+    }
+    
+    .activity-description-container {
+        display: flex;
+        align-items: center; /* 移動端也居中對齊 */
+    }
+    
+    .activity-icon-container {
+        flex-shrink: 0;
+        margin-right: 0.75rem;
+    }
+    
+    .activity-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem; /* 圖示字體大小 */
+        width: 22px; /* 固定寬度 */
+        height: 22px; /* 固定高度 */
+        line-height: 1; /* 避免 line-height 導致的垂直偏移 */
+    }
+    
+    .points-cell {
+        width: auto;
+        text-align: left;
+    }
+    
+    .points-badge {
+        display: inline-block;
+    }
+    
+    /* 移除交替行背景色 */
+    .loyalty-table tbody tr:nth-child(even),
+    .loyalty-table tbody tr:nth-child(odd) {
+        background-color: rgba(52, 58, 64, 0.3);
+    }
+}
+
+/* 打印樣式 */
+@media print {
+    .loyalty-table-container {
+        border: 1px solid #ddd;
+        border-radius: 0;
+    }
+    
+    .loyalty-table thead th {
+        background-color: #f8f9fa !important;
+        color: #212529 !important;
+        border-bottom: 2px solid #dee2e6 !important;
+    }
+    
+    .loyalty-table td {
+        color: #212529 !important;
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+    
+    .loyalty-table tbody tr:nth-child(even) {
+        background-color: #f8f9fa !important;
+    }
+    
+    .points-positive {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        border: 1px solid #c3e6cb !important;
+    }
+    
+    .points-negative {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+        border: 1px solid #f5c6cb !important;
+    }
+}

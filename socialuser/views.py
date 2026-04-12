@@ -113,7 +113,7 @@ def profile_settings_view(request):
 def profile_edit_view(request):
     profile = request.user.profile
     
-    if request.path == reverse('profile-onboarding'):
+    if request.path == reverse('socialuser:profile-onboarding'):
         onboarding = True
     else:
         onboarding = False
@@ -128,7 +128,7 @@ def profile_edit_view(request):
             form.save()
             if onboarding:
                 return redirect('index')
-            return redirect('profile')
+            return redirect('socialuser:profile')
     else:
         form = ProfileForm(instance=profile)
     
@@ -152,18 +152,18 @@ def profile_emailchange(request):
             email = form.cleaned_data['email']
             if User.objects.filter(email=email).exclude(id=request.user.id).exists():
                 messages.error(request, f'{email} is already in use.')
-                return redirect('profile-settings')
+                return redirect('socialuser:profile-settings')
             
             form.save()
             send_email_confirmation(request, request.user)
             messages.success(request, 'Email updated successfully. Verification email sent.')
-            return redirect('profile-settings')
+            return redirect('socialuser:profile-settings')
         
         # If form is invalid
         messages.error(request, 'Please correct the errors below.')
         return render(request, 'socialuser/email_form.html', {'form': form})
     
-    return redirect('profile-settings')
+    return redirect('socialuser:profile-settings')
 
 
 
@@ -173,7 +173,7 @@ def profile_emailverify(request):
         user = request.user
         if not user.email:
             messages.error(request, "No email address is set for your account")
-            return redirect('profile-settings')
+            return redirect('socialuser:profile-settings')
         
         # Force create email address record if doesn't exist
         email_address, created = EmailAddress.objects.get_or_create(
@@ -192,11 +192,11 @@ def profile_emailverify(request):
         else:
             messages.info(request, "Email is already verified")
             
-        return redirect('profile-settings')
+        return redirect('socialuser:profile-settings')
     
     except Exception as e:
         messages.error(request, f"Email verification failed: {str(e)}")
-        return redirect('profile-settings')
+        return redirect('socialuser:profile-settings')
 
 
 
@@ -214,12 +214,12 @@ def profile_usernamechange(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Username updated successfully.')
-            return redirect('profile-settings')
+            return redirect('socialuser:profile-settings')
         else:
             messages.warning(request, 'Username not valid or already in use')
-            return redirect('profile-settings')
+            return redirect('socialuser:profile-settings')
     
-    return redirect('profile-settings')    
+    return redirect('socialuser:profile-settings')    
 
 
 # htmx : profile_settings.html
@@ -243,12 +243,12 @@ def profile_phonechange(request):
             profile.save()
             
             messages.success(request, '電話號碼更新成功')
-            return redirect('profile-settings')
+            return redirect('socialuser:profile-settings')
         else:
             messages.warning(request, '無效的電話號碼格式')
-            return redirect('profile-settings')
+            return redirect('socialuser:profile-settings')
     
-    return redirect('profile-settings')
+    return redirect('socialuser:profile-settings')
 
 
 @login_required
@@ -333,7 +333,7 @@ def test_email_view(request):
     except Exception as e:
         messages.error(request, f"Failed to send test email: {str(e)}")
     
-    return redirect('profile-settings')
+    return redirect('socialuser:profile-settings')
 
 
 # Login cancel route to localhost

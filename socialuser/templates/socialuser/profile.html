@@ -1,43 +1,159 @@
 <!-- socialuser/templates/socialuser/profile.html -->
 {% extends 'layouts/blank.html' %}
+{% load static %}
 
 {% block content %}
 <!-- blank header spacing-->
 <section class="ftco-section-blank"></section>
 
-
 <section class="ftco-subpage-section">
     <div class="container">
         <div class="row justify-content-center mt-5">
-            <div class="col col-lg-6 mb-5 ftco-animate">
-                <div class="profile-form">
-                    <div class="img-box">
-                        <img class="img-2 mb-4" src="{{ profile.avatar }}" />
+            <!-- 左側：會員導航菜單 -->
+            <div class="col-lg-4 mb-5">
+                {% include 'socialuser/includes/member_nav.html' %}
+                
+                <!-- 快速操作卡片 -->
+                <div hidden class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-bolt text-warning mr-2"></i>
+                            快速操作
+                        </h6>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'socialuser:profile-edit' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit mr-1"></i> 編輯個人資料
+                            </a>
+                            <a href="{% url 'coffee_menu' %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-coffee mr-1"></i> 立即點餐
+                            </a>
+                            <a href="{% url 'socialuser:loyalty_dashboard' %}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-crown mr-1"></i> 查看積分
+                            </a>
+                        </div>
                     </div>
-                    <div class="text-center mb-5 ">
-                        <h1 hidden>{{ profile.name }}</h1>
-                        <div class="h3 mb-2 -mt-3">
-                            <i class="icon-user"></i> {{ profile.user.username }}
-                        </div>
+                </div>
+            </div>
+            
+            <!-- 右側：個人資料內容 -->
+            <div class="col-lg-8 mb-5">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user-circle text-primary mr-2"></i>
+                            個人資料
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4 text-white">
+                            <div class="profile-avatar mb-3">
+                                <img class="img-fluid rounded-circle" src="{{ profile.avatar }}" 
+                                     style="width: 150px; height: 150px; object-fit: cover;" 
+                                     alt="{{ profile.user.username }}" />
+                            </div>
+                            
+                            <h3 class="mb-2">
+                                <i class="icon-user"></i> {{ profile.user.username }}
+                            </h3>
+                            
+                            <!-- 電話號碼顯示 -->
+                            {% if profile.hk_phone %}
+                            <div class="h5 mb-3">
+                                <i class="icon-phone mr-2"></i> {{ profile.hk_phone }}
+                            </div>
+                            {% endif %}
 
-                        <!-- Add phone number display -->
-                        {% if profile.hk_phone %}
-                        <div class="h3 mb-2 mt-4">
-                            <i class="icon-phone"></i> {{ profile.hk_phone }}
-                        </div>
-                        {% endif %}
+                            {% if profile.user.email %}
+                            <div class="h5 mb-2">
+                                <i class="fas fa-envelope mr-2"></i> {{ profile.user.email }}
+                            </div>
+                            {% endif %}
 
+                        </div>
+                        
+                        <!-- 個人簡介 -->
                         {% if profile.info %}
-                        <div class="mt-8 hyphens-auto">{{ profile.info|linebreaksbr }}</div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    個人簡介
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="hyphens-auto">{{ profile.info|linebreaksbr }}</div>
+                            </div>
+                        </div>
                         {% endif %}
-                    </div>
-                    <div hidden class="text-center">
-                        <a href="{% url 'profile-edit' %}" class="btn btn-primary btn-outline-primary">Edit Profile</a>
+                        
+                        <!-- 會員狀態 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    會員狀態
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="h4 text-primary mb-1">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="small text-muted">加入日期</div>
+                                        <div class="h5">{{ profile.user.date_joined|date:"Y年m月d日" }}</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="h4 text-success mb-1">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="small text-muted">最後登入</div>
+                                        <div class="h5">{{ profile.user.last_login|date:"Y年m月d日 H:i"|default:"從未登入" }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'socialuser:loyalty_dashboard' %}" class="btn btn-primary">
+                                        <i class="fas fa-crown mr-1"></i> 查看完整會員權益
+                                    </a>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'socialuser:profile-edit' %}"class="btn btn-primary">
+                                        <i class="fas fa-edit mr-1"></i> 編輯個人資料
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<style>
+.profile-avatar {
+    {% comment %} border: 5px solid #f8f9fa; {% endcomment %}
+    border-radius: 50%;
+    padding: 5px;
+    {% comment %} background: white; {% endcomment %}
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.hyphens-auto {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+</style>
 
 {% endblock %}

@@ -1,5 +1,6 @@
 # socialuser/models_enhanced.py
-# 會員系統強化 - 忠誠度計劃模型
+# 會員系統強化 - 簡化版忠誠度計劃模型
+# 移除會員升級邏輯和權益，專注於積分系統
 from datetime import timedelta
 from decimal import Decimal
 import logging
@@ -15,90 +16,98 @@ logger = logging.getLogger(__name__)
 
 
 class CustomerLoyalty(models.Model):
-    """客戶忠誠度計劃 - 新增模型"""
-    TIER_CHOICES = [
-        ('bronze', '銅級會員'),      # 新客戶
-        ('silver', '銀級會員'),      # 消費滿$500
-        ('gold', '金級會員'),        # 消費滿$1000
-        ('platinum', '白金會員'),    # 消費滿$2000
+    """客戶忠誠度計劃 - 簡化版模型（專注積分系統）"""
+    
+    # 積分類型選擇
+    POINT_TYPE_CHOICES = [
+        ('purchase', '消費積分'),      # 從消費獲得的積分
+        ('bonus', '獎勵積分'),         # 活動或獎勵獲得的積分
+        ('referral', '推薦積分'),      # 推薦好友獲得的積分
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='loyalty')
-    tier = models.CharField(max_length=20, choices=TIER_CHOICES, default='bronze')
-    points = models.IntegerField(default=0, verbose_name='積分')
+    
+    # 核心積分字段
+    points = models.IntegerField(default=0, verbose_name='當前積分')
+    total_points_earned = models.IntegerField(default=0, verbose_name='累計獲得積分')
+    total_points_spent = models.IntegerField(default=0, verbose_name='累計使用積分')
+    
+    # 消費統計
     total_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='累計消費')
     total_orders = models.IntegerField(default=0, verbose_name='累計訂單')
     last_order_date = models.DateTimeField(null=True, blank=True, verbose_name='最後訂單日期')
-    join_date = models.DateTimeField(auto_now_add=True, verbose_name='加入日期')
     
-    # 會員權益
-    discount_rate = models.DecimalField(max_digits=4, decimal_places=2, default=1.0, verbose_name='折扣率')
-    free_upgrade = models.BooleanField(default=False, verbose_name='免費升級杯型')
-    priority_service = models.BooleanField(default=False, verbose_name='優先服務')
+    # 積分有效期相關
+    points_expiry_date = models.DateTimeField(null=True, blank=True, verbose_name='積分到期日')
+    last_points_update = models.DateTimeField(auto_now=True, verbose_name='最後積分更新時間')
+    
+    # 會員信息
+    join_date = models.DateTimeField(auto_now_add=True, verbose_name='加入日期')
+    membership_number = models.CharField(max_length=20, blank=True, verbose_name='會員編號')
     
     class Meta:
         verbose_name = '客戶忠誠度'
         verbose_name_plural = '客戶忠誠度'
         indexes = [
-            models.Index(fields=['tier']),
+            models.Index(fields=['membership_number']),
+            models.Index(fields=['user']),
+        ]
+        indexes = [
             models.Index(fields=['points']),
             models.Index(fields=['total_spent']),
+            models.Index(fields=['points_expiry_date']),
+            models.Index(fields=['join_date']),
         ]
     
     def __str__(self):
-        return f"{self.user.username} - {self.get_tier_display()}"
+        return f"{self.user.username} - {self.points} 積分"
     
-    def update_tier(self):
-        """根據消費金額更新會員等級"""
-        if self.total_spent >= Decimal('2000'):
-            new_tier = 'platinum'
-            new_discount_rate = Decimal('0.85')  # 85折
-            new_free_upgrade = True
-            new_priority_service = True
-        elif self.total_spent >= Decimal('1000'):
-            new_tier = 'gold'
-            new_discount_rate = Decimal('0.90')  # 9折
-            new_free_upgrade = True
-            new_priority_service = False
-        elif self.total_spent >= Decimal('500'):
-            new_tier = 'silver'
-            new_discount_rate = Decimal('0.95')  # 95折
-            new_free_upgrade = False
-            new_priority_service = False
-        else:
-            new_tier = 'bronze'
-            new_discount_rate = Decimal('1.00')  # 無折扣
-            new_free_upgrade = False
-            new_priority_service = False
-        
-        # 檢查是否有變化
-        tier_changed = self.tier != new_tier
-        self.tier = new_tier
-        self.discount_rate = new_discount_rate
-        self.free_upgrade = new_free_upgrade
-        self.priority_service = new_priority_service
-        self.save()
-        
-        if tier_changed:
-            logger.info(f"用戶 {self.user.username} 升級為 {self.get_tier_display()}")
-        
-        return tier_changed
+    def get_membership_info(self):
+        """獲取會員基本信息"""
+        return {
+            'username': self.user.username,
+            'points': self.points,
+            'total_spent': float(self.total_spent),
+            'total_orders': self.total_orders,
+            'join_date': self.join_date,
+            'membership_number': self.membership_number or '未分配',
+            'points_expiry_date': self.points_expiry_date,
+            'points_earned': self.total_points_earned,
+            'points_spent': self.total_points_spent,
+            'points_balance': self.points,
+        }
     
     def add_points_from_order(self, order):
-        """從訂單添加積分"""
+        """從訂單添加積分 - 增強版"""
         try:
             # 每消費$10 = 1積分
             points_earned = int(float(order.total_price) / 10)
+            
+            # 更新積分統計
             self.points += points_earned
+            self.total_points_earned += points_earned
             self.total_spent += Decimal(str(order.total_price))
             self.total_orders += 1
             self.last_order_date = order.created_at
             
-            # 更新等級
-            self.update_tier()
+            # 設置積分有效期（1年）
+            expiry_date = timezone.now() + timedelta(days=365)
+            if not self.points_expiry_date or expiry_date > self.points_expiry_date:
+                self.points_expiry_date = expiry_date
+            
             self.save()
             
-            logger.info(f"用戶 {self.user.username} 訂單 #{order.id} 獲得 {points_earned} 積分")
+            # 記錄活動
+            from .models_enhanced import CustomerActivity
+            CustomerActivity.record_points_earned(
+                self.user, 
+                order.id, 
+                points_earned, 
+                order.total_price
+            )
+            
+            msg = f"用戶 {self.user.username} 訂單 #{order.id} 獲得 {points_earned} 積分"
+            logger.info(msg)
             return points_earned
             
         except Exception as e:
@@ -145,7 +154,7 @@ class CustomerLoyalty(models.Model):
         return rewards
     
     def redeem_reward(self, reward_id):
-        """兌換獎勵"""
+        """兌換獎勵 - 增強版"""
         rewards = self.get_available_rewards()
         reward = next((r for r in rewards if r['id'] == reward_id), None)
         
@@ -155,84 +164,127 @@ class CustomerLoyalty(models.Model):
         if self.points < reward['points_required']:
             return False, "積分不足"
         
-        # 扣除積分
+        # 扣除積分並更新統計
         self.points -= reward['points_required']
+        self.total_points_spent += reward['points_required']
         self.save()
+        
+        # 記錄活動
+        from .models_enhanced import CustomerActivity
+        CustomerActivity.record_reward_redeemed(
+            self.user,
+            reward['name'],
+            reward['points_required']
+        )
         
         logger.info(f"用戶 {self.user.username} 兌換獎勵: {reward['name']}, 消耗 {reward['points_required']} 積分")
         return True, f"成功兌換 {reward['name']}"
     
-    def get_tier_info(self):
-        """獲取會員等級詳細信息"""
-        tier_info = {
-            'bronze': {
-                'name': '銅級會員',
-                'min_spent': 0,
-                'discount': '無折扣',
-                'benefits': ['積分累積'],
-                'color': '#CD7F32',
-                'icon': 'fa-star'
-            },
-            'silver': {
-                'name': '銀級會員',
-                'min_spent': 500,
-                'discount': '95折',
-                'benefits': ['積分累積', '95折優惠'],
-                'color': '#C0C0C0',
-                'icon': 'fa-star-half-alt'
-            },
-            'gold': {
-                'name': '金級會員',
-                'min_spent': 1000,
-                'discount': '9折',
-                'benefits': ['積分累積', '9折優惠', '免費升級杯型'],
-                'color': '#FFD700',
-                'icon': 'fa-star'
-            },
-            'platinum': {
-                'name': '白金會員',
-                'min_spent': 2000,
-                'discount': '85折',
-                'benefits': ['積分累積', '85折優惠', '免費升級杯型', '優先服務'],
-                'color': '#E5E4E2',
-                'icon': 'fa-crown'
+    def add_bonus_points(self, points, point_type='bonus', description='獎勵積分'):
+        """添加獎勵積分"""
+        self.points += points
+        self.total_points_earned += points
+        
+        # 設置積分有效期（1年）
+        expiry_date = timezone.now() + timedelta(days=365)
+        if not self.points_expiry_date or expiry_date > self.points_expiry_date:
+            self.points_expiry_date = expiry_date
+        
+        self.save()
+        
+        # 記錄活動
+        from .models_enhanced import CustomerActivity
+        CustomerActivity.objects.create(
+            user=self.user,
+            activity_type='points_earned',
+            points_change=points,
+            description=f"{description}: 獲得 {points} 積分",
+            metadata={
+                'point_type': point_type,
+                'description': description,
+                'points': points
             }
-        }
+        )
         
-        current_tier = tier_info.get(self.tier, tier_info['bronze'])
-        next_tier = None
+        logger.info(f"用戶 {self.user.username} 獲得獎勵積分: {points} ({description})")
+        return points
+    
+    def check_points_expiry(self):
+        """檢查積分有效期，過期積分自動清除"""
+        if not self.points_expiry_date:
+            return 0
         
-        # 計算下一等級信息
-        if self.tier == 'bronze':
-            next_tier = tier_info['silver']
-            next_tier['points_needed'] = max(0, 500 - float(self.total_spent))
-        elif self.tier == 'silver':
-            next_tier = tier_info['gold']
-            next_tier['points_needed'] = max(0, 1000 - float(self.total_spent))
-        elif self.tier == 'gold':
-            next_tier = tier_info['platinum']
-            next_tier['points_needed'] = max(0, 2000 - float(self.total_spent))
+        now = timezone.now()
+        if now > self.points_expiry_date:
+            expired_points = self.points
+            self.points = 0
+            self.points_expiry_date = None
+            self.save()
+            
+            logger.info(f"用戶 {self.user.username} 積分已過期: {expired_points} 積分")
+            return expired_points
+        
+        return 0
+    
+    def get_points_summary(self):
+        """獲取積分摘要信息"""
+        days_until_expiry = None
+        if self.points_expiry_date:
+            delta = self.points_expiry_date - timezone.now()
+            days_until_expiry = max(0, delta.days)
         
         return {
-            'current': current_tier,
-            'next': next_tier,
-            'progress': self._calculate_tier_progress()
+            'current_points': self.points,
+            'total_earned': self.total_points_earned,
+            'total_spent': self.total_points_spent,
+            'points_expiry_date': self.points_expiry_date,
+            'days_until_expiry': days_until_expiry,
+            'total_spent_amount': float(self.total_spent),
+            'total_orders': self.total_orders,
+            'membership_days': (timezone.now() - self.join_date).days,
         }
     
-    def _calculate_tier_progress(self):
-        """計算升級進度"""
-        if self.tier == 'platinum':
-            return 100  # 最高等級
+    def generate_membership_number(self):
+        """生成會員編號"""
+        import secrets
+        import string
         
-        tier_thresholds = {
-            'bronze': 500,
-            'silver': 1000,
-            'gold': 2000
-        }
+        # 格式: BC-XXXXXX (BC代表Between Coffee)
+        prefix = "BC-"
         
-        next_threshold = tier_thresholds.get(self.tier, 500)
-        progress = min(100, (float(self.total_spent) / next_threshold) * 100)
-        return round(progress, 1)
+        # 生成6位隨機數字
+        while True:
+            number = ''.join(secrets.choice(string.digits) for _ in range(6))
+            membership_number = f"{prefix}{number}"
+            
+            # 檢查是否已存在
+            if not CustomerLoyalty.objects.filter(
+                membership_number=membership_number
+            ).exists():
+                return membership_number
+    
+    def assign_membership_number(self):
+        """分配會員編號（如果尚未分配）"""
+        if not self.membership_number:
+            self.membership_number = self.generate_membership_number()
+            self.save()
+            logger.info(f"為用戶 {self.user.username} 分配會員編號: {self.membership_number}")
+            return self.membership_number
+        return self.membership_number
+    
+    def should_assign_membership_number(self):
+        """判斷是否應該分配會員編號"""
+        # 條件：累計消費超過$100或累計訂單超過5筆
+        return (
+            float(self.total_spent) >= 100 or 
+            self.total_orders >= 5
+        )
+    
+    def check_and_assign_membership_number(self):
+        """檢查並分配會員編號（如果符合條件）"""
+        if not self.membership_number and self.should_assign_membership_number():
+            return self.assign_membership_number()
+        return self.membership_number or '未分配'
 
 
 class CustomerCoupon(models.Model):
@@ -366,7 +418,7 @@ class CustomerActivity(models.Model):
     """客戶活動記錄 - 新增模型"""
     ACTIVITY_TYPES = [
         ('points_earned', '獲得積分'),
-        ('tier_upgraded', '等級升級'),
+        ('tier_upgraded', '等級升級（已棄用）'),
         ('reward_redeemed', '兌換獎勵'),
         ('coupon_used', '使用優惠券'),
         ('order_placed', '下單成功'),

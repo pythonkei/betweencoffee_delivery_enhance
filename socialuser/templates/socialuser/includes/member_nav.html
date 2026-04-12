@@ -1,0 +1,142 @@
+<!-- socialuser/templates/socialuser/includes/member_nav.html -->
+<!-- 會員專區導航菜單組件 -->
+{% load static %}
+
+<div class="member-navigation mb-5">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-user-circle mr-2"></i>
+                會員專區
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                <!-- 個人資料 -->
+                <a href="{% url 'socialuser:profile' %}" 
+                   class="list-group-item list-group-item-action d-flex align-items-center {% if request.path == '/socialuser/' or 'profile' in request.path and 'loyalty' not in request.path and 'orders' not in request.path %}active{% endif %}">
+                    <div class="mr-3">
+                        <i class="fas fa-user fa-fw"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong>個人資料</strong>
+                        <div class="text-muted small">查看和編輯個人資訊</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+                
+                <!-- 訂單記錄 -->
+                <a href="{% url 'socialuser:profile-orders' %}" 
+                   class="list-group-item list-group-item-action d-flex align-items-center {% if 'orders' in request.path %}active{% endif %}">
+                    <div class="mr-3">
+                        <i class="fas fa-history fa-fw"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong>訂單記錄</strong>
+                        <div class="text-muted small">查看歷史訂單和狀態</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+                
+                <!-- 會員積分（忠誠度儀表板） -->
+                <a href="{% url 'socialuser:loyalty_dashboard' %}" 
+                   class="list-group-item list-group-item-action d-flex align-items-center {% if 'loyalty' in request.path %}active{% endif %}">
+                    <div class="mr-3">
+                        <i class="fas fa-crown fa-fw text-warning"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong>會員積分</strong>
+                        <div class="text-muted small">查看積分、等級和獎勵</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+                
+                <!-- 帳戶設定 -->
+                <a href="{% url 'socialuser:profile-settings' %}" 
+                   class="list-group-item list-group-item-action d-flex align-items-center {% if 'settings' in request.path %}active{% endif %}">
+                    <div class="mr-3">
+                        <i class="fas fa-cog fa-fw"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong>帳戶設定</strong>
+                        <div class="text-muted small">修改密碼和通知設定</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+                
+                <!-- 快速統計（僅在忠誠度頁面顯示） -->
+                {% if 'loyalty' in request.path and loyalty %}
+                <div hidden class="list-group-item">
+                    <div class="row text-center">
+                        <div class="col-4 mr-4">
+                            <div class="h5 mb-0 text-primary">{{ loyalty.points|default:0 }}</div>
+                            <div class="small text-muted">當前積分</div>
+                        </div>
+                        <div class="col-4 mr-4">
+                            <div class="h5 mb-0 text-success">{{ loyalty.total_orders|default:0 }}</div>
+                            <div class="small text-muted">累計訂單</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="h5 mb-0 text-warning">${{ loyalty.total_spent|default:0|floatformat:0 }}</div>
+                            <div class="small text-muted">累計消費</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.member-navigation .list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 1rem 1.25rem;
+    transition: all 0.2s;
+}
+
+.member-navigation .list-group-item:first-child {
+    border-top: none;
+}
+
+.member-navigation .list-group-item:last-child {
+    border-bottom: none;
+}
+
+.member-navigation .list-group-item:hover {
+    background-color: #222222;
+    {% comment %} transform: translateX(3px); {% endcomment %}
+}
+
+.member-navigation .list-group-item.active {
+    background-color: #c49b63;
+    border-color: #c49b63;
+    color: white;
+}
+
+.member-navigation .list-group-item.active .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.member-navigation .list-group-item.active i {
+    color: white;
+}
+
+.member-navigation .list-group-item i.fa-fw {
+    width: 1.5em;
+}
+
+.member-navigation .card-header {
+    border-bottom: 1px solid #3c3c3c;
+    padding: 1.2rem 1.5rem;
+}
+</style>

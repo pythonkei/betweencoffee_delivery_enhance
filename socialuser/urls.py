@@ -40,9 +40,6 @@ urlpatterns = [
     path('loyalty/dashboard/', 
          views_enhanced.loyalty_dashboard, 
          name='loyalty_dashboard'),
-    path('loyalty/rewards/', 
-         views_enhanced.rewards_list, 
-         name='rewards_list'),
     path('loyalty/redeem/', 
          views_enhanced.redeem_reward, 
          name='redeem_reward'),
@@ -55,9 +52,9 @@ urlpatterns = [
     path('loyalty/activities/', 
          views_enhanced.activity_history, 
          name='activity_history'),
-    path('loyalty/tier-info/', 
-         views_enhanced.tier_info, 
-         name='tier_info'),
+    path('loyalty/points-summary/', 
+         views_enhanced.points_summary, 
+         name='points_summary'),
     
     # API端點
     path('api/loyalty-status/', 

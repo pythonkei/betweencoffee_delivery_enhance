@@ -89,47 +89,13 @@ def update_loyalty_on_order_paid(sender, instance, created, **kwargs):
                     f"訂單 #{instance.id} 獲得 {points_earned} 積分"
                 )
             
-            # 檢查是否需要升級
-            old_tier = loyalty.tier
-            tier_changed = loyalty.update_tier()
-            
-            if tier_changed:
-                # 記錄等級升級活動
-                CustomerActivity.record_tier_upgrade(
-                    instance.user,
-                    old_tier,
-                    loyalty.tier
+            # 檢查並分配會員編號（如果符合條件）
+            membership_number = loyalty.check_and_assign_membership_number()
+            if membership_number and membership_number != '未分配':
+                logger.info(
+                    f"用戶 {instance.user.username} "
+                    f"獲得會員編號: {membership_number}"
                 )
-                
-                # 創建升級優惠券
-                try:
-                    coupon_code = CustomerCoupon.generate_coupon_code()
-                    valid_from = timezone.now()
-                    valid_to = valid_from + timezone.timedelta(days=60)
-                    
-                    coupon_value = 15.00 if loyalty.tier == 'platinum' else 10.00
-                    coupon_desc = (
-                        f"恭喜升級為{loyalty.get_tier_display()}！專屬優惠券"
-                    )
-                    
-                    CustomerCoupon.objects.create(
-                        user=instance.user,
-                        code=coupon_code,
-                        coupon_type='percentage',
-                        value=coupon_value,
-                        min_order_amount=0,
-                        valid_from=valid_from,
-                        valid_to=valid_to,
-                        description=coupon_desc
-                    )
-                    
-                    logger.info(
-                        f"為升級用戶 {instance.user.username} "
-                        f"創建優惠券: {coupon_code}"
-                    )
-                    
-                except Exception as e:
-                    logger.error(f"創建升級優惠券失敗: {str(e)}")
             
         except Exception as e:
             logger.error(f"更新忠誠度失敗: {str(e)}")

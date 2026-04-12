@@ -1,0 +1,956 @@
+// static/js/order_status_cards.js
+// 訂單狀態卡片管理器
+
+// ========== 狀態卡片管理器 ==========
+class OrderStatusCardsManager {
+    constructor() {
+        this.orderId = document.body.dataset.orderId;
+        this.currentStatus = null;
+        this.statusCards = {};
+        this.statusTimes = {};
+        this.connectorDots = {};
+        
+        // WebSocket增強連接器
+        this.websocketConnector = null;
+        this.isConnected = false;
+        
+        // 記錄每個狀態的實際時間
+        this.actualStatusTimes = {
+            'ordered': document.body.dataset.orderedTime || null,
+            'preparing': document.body.dataset.preparingTime || null,
+            'ready': document.body.dataset.readyTime || null,
+            'completed': document.body.dataset.completedTime || null
+        };
+        
+        this.init();
+    }
+    
+    // 初始化狀態卡片
+    init() {
+        console.log("初始化訂單狀態卡片管理器，訂單ID:", this.orderId);
+        
+        // 檢查訂單類型
+        this.isBeansOnly = document.body.dataset.isBeansOnly === 'true';
+        console.log("訂單類型:", this.isBeansOnly ? "純咖啡豆訂單" : "咖啡訂單");
+        
+        // 收集所有狀態卡片
+        this.collectStatusCards();
+        
+        // 收集連接點
+        this.collectConnectorDots();
+        
+        // 設置初始狀態
+        this.setInitialStatus();
+        
+        // 初始化WebSocket連接
+        this.initWebSocket();
+        
+        // 設置狀態指示器
+        this.setupStatusIndicator();
+        
+        // 設置定期狀態檢查
+        this.setupPeriodicCheck();
+    }
+    
+    // 收集狀態卡片
+    collectStatusCards() {
+        const cardElements = document.querySelectorAll('.status-card');
+        cardElements.forEach(card => {
+            const status = card.dataset.status;
+            const cardId = card.id;
+            
+            // 根據ID前綴判斷訂單類型並存儲卡片
+            // 支持兩種ID命名模式：
+            // 1. 新命名：status-card-{orderType}-{status} (如：status-card-beans-ordered)
+            // 2. 舊命名兼容：status-card-{status} (如：status-card-ordered)
+            
+            if (cardId) {
+                // 新命名模式檢測
+                if (cardId.startsWith('status-card-beans-') || cardId.startsWith('status-card-coffee-')) {
+                    // 提取狀態名稱（移除前綴）
+                    const statusFromId = cardId.replace(/^status-card-(beans|coffee)-/, '');
+                    
+                    // 確保狀態名稱與data-status一致
+                    if (statusFromId === status) {
+                        this.statusCards[status] = card;
+                        
+                        // 查找對應的時間元素
+                        const timeId = cardId.replace('status-card-', 'status-time-');
+                        this.statusTimes[status] = document.getElementById(timeId);
+                        
+                        console.log(`收集到狀態卡片 (新命名): ${cardId}, 狀態: ${status}`);
+                    }
+                } else if (cardId.startsWith('status-card-')) {
+                    // 舊命名模式（兼容性）
+                    this.statusCards[status] = card;
+                    this.statusTimes[status] = card.querySelector('.status-time');
+                    console.log(`收集到狀態卡片 (舊命名): ${cardId}, 狀態: ${status}`);
+                }
+            } else {
+                // 如果沒有ID，使用舊的查詢方式
+                this.statusCards[status] = card;
+                this.statusTimes[status] = card.querySelector('.status-time');
+                console.log(`收集到狀態卡片 (無ID): 狀態: ${status}`);
+            }
+        });
+        
+        console.log("收集到狀態卡片總數:", Object.keys(this.statusCards).length, "詳細:", this.statusCards);
+        
+        // 兼容性檢查：確保所有必要的狀態都有對應的卡片
+        this.ensureStatusCardsCompatibility();
+    }
+    
+    // 確保狀態卡片兼容性
+    ensureStatusCardsCompatibility() {
+        const requiredStatuses = this.isBeansOnly ? ['ordered', 'ready', 'completed'] : ['ordered', 'preparing', 'ready', 'completed'];
+        
+        requiredStatuses.forEach(status => {
+            if (!this.statusCards[status]) {
+                console.warn(`缺少狀態卡片: ${status}，嘗試查找備用元素`);
+                
+                // 嘗試通過其他方式查找
+                const fallbackCard = document.querySelector(`[data-status="${status}"]`);
+                if (fallbackCard) {
+                    this.statusCards[status] = fallbackCard;
+                    this.statusTimes[status] = fallbackCard.querySelector('.status-time');
+                    console.log(`找到備用狀態卡片: ${status}`);
+                }
+            }
+        });
+    }
+    
+    // 收集連接點
+    collectConnectorDots() {
+        const dotElements = document.querySelectorAll('.connector-dot');
+        dotElements.forEach(dot => {
+            const dotNum = dot.dataset.dot;
+            this.connectorDots[dotNum] = dot;
+        });
+    }
+    
+    // 設置初始狀態
+    setInitialStatus() {
+        // 從頁面數據獲取當前狀態
+        const orderStatus = document.body.dataset.orderStatus || 'ordered';
+        const paymentStatus = document.body.dataset.paymentStatus || 'paid';
+        
+        console.log("訂單狀態:", orderStatus, "支付狀態:", paymentStatus, "純咖啡豆訂單:", this.isBeansOnly);
+        
+        // 如果支付未完成，只顯示已下單狀態
+        if (paymentStatus !== 'paid') {
+            this.updateStatus('ordered');
+            return;
+        }
+        
+        // 根據訂單類型設置不同的狀態流程
+        if (this.isBeansOnly) {
+            // 純咖啡豆訂單：簡化狀態流程（跳過preparing）
+            switch(orderStatus) {
+                case 'ordered':
+                case 'pending':
+                    this.updateStatus('ordered');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    this.updateStatus('ordered');
+            }
+        } else {
+            // 咖啡訂單：完整狀態流程
+            switch(orderStatus) {
+                case 'ordered':
+                case 'pending':
+                    this.updateStatus('ordered');
+                    break;
+                case 'preparing':
+                case 'in_progress':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    this.updateStatus('ordered');
+            }
+        }
+        
+        // 初始化所有狀態卡片的時間顯示
+        this.initializeStatusTimes();
+    }
+    
+    // 初始化狀態時間顯示
+    initializeStatusTimes() {
+        const statusOrder = ['ordered', 'preparing', 'ready', 'completed'];
+        
+        statusOrder.forEach(status => {
+            const actualTime = this.getActualStatusTime(status);
+            if (actualTime && this.statusTimes[status]) {
+                // 只顯示實際時間，不顯示"等待開始"或"等待完成"
+                if (actualTime !== '等待開始' && actualTime !== '等待完成') {
+                    this.statusTimes[status].textContent = actualTime;
+                }
+            }
+        });
+        
+        console.log("狀態時間初始化完成:", this.actualStatusTimes);
+    }
+    
+    // 更新狀態
+    updateStatus(status) {
+        console.log("更新狀態:", status);
+        
+        // 更新卡片
+        if (this.statusCards[status]) {
+            // 移除所有卡片的active類
+            Object.values(this.statusCards).forEach(card => {
+                card.classList.remove('active', 'new-status');
+            });
+            
+            // 激活當前及之前的所有卡片
+            const statusOrder = ['ordered', 'preparing', 'ready', 'completed'];
+            const statusIndex = statusOrder.indexOf(status);
+            
+            for (let i = 0; i <= statusIndex; i++) {
+                const currentStatus = statusOrder[i];
+                if (this.statusCards[currentStatus]) {
+                    this.statusCards[currentStatus].classList.add('active');
+                    
+                    // 如果是新狀態，添加動畫
+                    if (currentStatus === status) {
+                        this.statusCards[currentStatus].classList.add('new-status');
+                        
+                        // 移除動畫類
+                        setTimeout(() => {
+                            this.statusCards[currentStatus].classList.remove('new-status');
+                        }, 3000);
+                    }
+                }
+            }
+            
+            this.currentStatus = status;
+        }
+        
+        // 更新連接點
+        this.updateConnectorDots(status);
+        
+        // 更新狀態時間
+        this.updateStatusTime(status);
+    }
+    
+    // 更新連接點
+    updateConnectorDots(status) {
+        const statusOrder = ['ordered', 'preparing', 'ready', 'completed'];
+        const statusIndex = statusOrder.indexOf(status);
+        
+        // 重置所有連接點
+        Object.values(this.connectorDots).forEach(dot => {
+            dot.classList.remove('active');
+        });
+        
+        // 激活當前及之前的所有連接點
+        for (let i = 0; i <= statusIndex; i++) {
+            const dotNum = (i + 1).toString();
+            if (this.connectorDots[dotNum]) {
+                this.connectorDots[dotNum].classList.add('active');
+            }
+        }
+    }
+    
+    // 更新狀態時間
+    updateStatusTime(status) {
+        // 獲取該狀態的實際時間
+        let timeString = this.getActualStatusTime(status);
+        
+        // 如果沒有實際時間，使用當前時間（兼容舊邏輯）
+        if (!timeString || timeString === '等待開始' || timeString === '等待完成') {
+            const now = new Date();
+            timeString = now.toLocaleTimeString('zh-TW', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            
+            // 記錄這個時間作為實際時間
+            this.recordActualStatusTime(status, timeString);
+        }
+        
+        if (this.statusTimes[status]) {
+            this.statusTimes[status].textContent = timeString;
+        }
+    }
+    
+    // 獲取狀態的實際時間
+    getActualStatusTime(status) {
+        return this.actualStatusTimes[status] || null;
+    }
+    
+    // 記錄狀態的實際時間
+    recordActualStatusTime(status, timeString) {
+        this.actualStatusTimes[status] = timeString;
+        console.log(`記錄狀態 ${status} 的時間: ${timeString}`);
+    }
+    
+    // 初始化WebSocket連接（使用增強連接器）
+    initWebSocket() {
+        try {
+            // 檢查WebSocket支持
+            if (!window.WebSocket) {
+                console.warn("瀏覽器不支持WebSocket");
+                this.setWebSocketStatus(false, "瀏覽器不支持實時更新");
+                return;
+            }
+            
+            // 檢查增強連接器是否可用
+            if (!window.EnhancedWebSocketConnector) {
+                console.warn("增強WebSocket連接器未加載，使用標準WebSocket");
+                this.initStandardWebSocket();
+                return;
+            }
+            
+            // 構建WebSocket URL
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws/order/${this.orderId}/`;
+            
+            console.log("使用增強WebSocket連接器:", wsUrl);
+            
+            // 創建增強連接器
+            this.websocketConnector = new EnhancedWebSocketConnector(wsUrl, {
+                reconnectOptions: {
+                    baseDelay: 1000,      // 1秒基礎延遲
+                    maxDelay: 30000,      // 30秒最大延遲
+                    maxRetries: 10,       // 最大重試10次
+                    jitterFactor: 0.2,    // ±20%抖動
+                    enableJitter: true
+                },
+                heartbeatEnabled: true,
+                heartbeatInterval: 30000,  // 30秒心跳間隔
+                heartbeatTimeout: 10000    // 10秒心跳超時
+            });
+            
+            // 設置事件監聽器
+            this.websocketConnector.addEventListener('open', (event) => {
+                console.log("✅ WebSocket連接成功（增強版）");
+                this.isConnected = true;
+                this.setWebSocketStatus(true, "實時更新已連接");
+                
+                // 顯示連接健康度
+                const status = this.websocketConnector.getConnectionStatus();
+                console.log("連接健康度:", status.reconnectStatus.healthScore, "分");
+            });
+            
+            this.websocketConnector.addEventListener('message', (event) => {
+                try {
+                    const data = event.data;
+                    console.log("收到WebSocket消息（增強版）:", data);
+                    
+                    // 處理不同格式的WebSocket消息
+                    if (data.type === 'order_status_update') {
+                        // 格式1: {type: 'order_status_update', order_id: 123, status: 'preparing', ...}
+                        this.handleOrderStatusUpdate(data);
+                    } else if (data.type === 'order_status') {
+                        // 格式2: {type: 'order_status', data: {status: 'preparing', ...}, ...}
+                        this.handleOrderStatusData(data);
+                    } else if (data.type === 'ping') {
+                        // 回應ping消息（增強連接器會自動處理）
+                        console.debug("收到ping消息，增強連接器會自動回應");
+                    } else {
+                        console.log("收到其他類型的WebSocket消息:", data.type);
+                    }
+                } catch (error) {
+                    console.error("解析WebSocket消息失敗:", error);
+                }
+            });
+            
+            this.websocketConnector.addEventListener('error', (event) => {
+                console.error("❌ WebSocket錯誤（增強版）:", event);
+                this.setWebSocketStatus(false, "連接錯誤");
+            });
+            
+            this.websocketConnector.addEventListener('close', (event) => {
+                console.log("🔌 WebSocket連接關閉（增強版）:", event.code, event.reason);
+                this.isConnected = false;
+                this.setWebSocketStatus(false, "連接已斷開");
+            });
+            
+            this.websocketConnector.addEventListener('reconnect', (event) => {
+                console.log(`🔄 正在嘗試重新連接（第 ${event.attempt}/${event.maxRetries} 次）`);
+                this.setWebSocketStatus(false, `正在重新連接... (${event.attempt}/${event.maxRetries})`);
+            });
+            
+            this.websocketConnector.addEventListener('healthChange', (event) => {
+                console.log("📊 連接健康度變化:", event.healthScore, "分");
+                
+                // 根據健康度更新狀態指示器
+                if (event.healthScore < 60) {
+                    this.setWebSocketStatus(false, "連接質量差，正在優化...");
+                } else if (event.healthScore < 80) {
+                    this.setWebSocketStatus(true, "連接正常（質量中等）");
+                } else {
+                    this.setWebSocketStatus(true, "連接良好");
+                }
+            });
+            
+            // 開始連接
+            this.websocketConnector.connect();
+            
+        } catch (error) {
+            console.error("初始化增強WebSocket失敗:", error);
+            this.setWebSocketStatus(false, "連接失敗");
+            
+            // 回退到標準WebSocket
+            this.initStandardWebSocket();
+        }
+    }
+    
+    // 初始化標準WebSocket（回退方案）
+    initStandardWebSocket() {
+        try {
+            // 構建WebSocket URL
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws/order/${this.orderId}/`;
+            
+            console.log("使用標準WebSocket（回退）:", wsUrl);
+            
+            this.websocket = new WebSocket(wsUrl);
+            
+            // WebSocket事件處理
+            this.websocket.onopen = () => {
+                console.log("WebSocket連接成功（標準版）");
+                this.isConnected = true;
+                this.reconnectAttempts = 0;
+                this.setWebSocketStatus(true, "實時更新已連接");
+            };
+            
+            this.websocket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log("收到WebSocket消息（標準版）:", data);
+                    
+                    // 處理不同格式的WebSocket消息
+                    if (data.type === 'order_status_update') {
+                        // 格式1: {type: 'order_status_update', order_id: 123, status: 'preparing', ...}
+                        this.handleOrderStatusUpdate(data);
+                    } else if (data.type === 'order_status') {
+                        // 格式2: {type: 'order_status', data: {status: 'preparing', ...}, ...}
+                        this.handleOrderStatusData(data);
+                    } else if (data.type === 'ping') {
+                        // 回應ping消息
+                        this.websocket.send(JSON.stringify({ type: 'pong' }));
+                    } else {
+                        console.log("收到其他類型的WebSocket消息:", data.type);
+                    }
+                } catch (error) {
+                    console.error("解析WebSocket消息失敗:", error);
+                }
+            };
+            
+            this.websocket.onerror = (error) => {
+                console.error("WebSocket錯誤（標準版）:", error);
+                this.setWebSocketStatus(false, "連接錯誤");
+            };
+            
+            this.websocket.onclose = (event) => {
+                console.log("WebSocket連接關閉（標準版）:", event.code, event.reason);
+                this.isConnected = false;
+                this.setWebSocketStatus(false, "連接已斷開");
+                
+                // 嘗試重新連接（簡單重試）
+                if (this.reconnectAttempts < 5) {
+                    this.reconnectAttempts++;
+                    console.log(`嘗試重新連接 (${this.reconnectAttempts}/5)...`);
+                    
+                    setTimeout(() => {
+                        this.initStandardWebSocket();
+                    }, 3000 * this.reconnectAttempts);
+                }
+            };
+            
+        } catch (error) {
+            console.error("初始化標準WebSocket失敗:", error);
+            this.setWebSocketStatus(false, "連接失敗");
+        }
+    }
+    
+    // 處理訂單狀態更新（格式1）
+    handleOrderStatusUpdate(data) {
+        const { order_id, status, timestamp } = data;
+        
+        if (order_id.toString() === this.orderId) {
+            console.log("訂單狀態更新（格式1）:", status);
+            
+            // 根據狀態更新卡片
+            this.updateStatusFromServer(status);
+        }
+    }
+    
+    // 處理訂單狀態數據（格式2）
+    handleOrderStatusData(data) {
+        const { data: statusData, timestamp } = data;
+        
+        if (!statusData) {
+            console.warn("無效的狀態數據格式:", data);
+            return;
+        }
+        
+        const orderId = statusData.order_id || statusData.orderId;
+        const status = statusData.status;
+        
+        if (orderId && orderId.toString() === this.orderId) {
+            console.log("訂單狀態更新（格式2）:", status);
+            
+            // 根據狀態更新卡片
+            this.updateStatusFromServer(status);
+        }
+    }
+    
+    // 根據服務器狀態更新卡片
+    updateStatusFromServer(status) {
+        console.log("根據服務器狀態更新卡片:", status, "純咖啡豆訂單:", this.isBeansOnly);
+        
+        // 處理 null 狀態
+        if (!status) {
+            console.warn("收到 null 狀態，跳過更新");
+            return;
+        }
+        
+        // 根據訂單類型設置不同的狀態流程
+        if (this.isBeansOnly) {
+            // 純咖啡豆訂單：簡化狀態流程（跳過preparing）
+            switch(status) {
+                case 'ordered':
+                case 'pending':
+                case 'waiting':  // 新增：等待製作狀態
+                    this.updateStatus('ordered');
+                    break;
+                case 'preparing':
+                case 'in_progress':
+                    // 純咖啡豆訂單不應該有preparing狀態，但如果有，跳過它
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    console.log("未知狀態:", status);
+            }
+        } else {
+            // 咖啡訂單：完整狀態流程
+            switch(status) {
+                case 'ordered':
+                case 'pending':
+                case 'waiting':  // 新增：等待製作狀態
+                    this.updateStatus('ordered');
+                    break;
+                case 'preparing':
+                case 'in_progress':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    break;
+                case 'ready':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    break;
+                case 'completed':
+                case 'picked_up':
+                case 'delivered':
+                    this.updateStatus('ordered');
+                    this.updateStatus('preparing');
+                    this.updateStatus('ready');
+                    this.updateStatus('completed');
+                    break;
+                default:
+                    console.log("未知狀態:", status);
+            }
+        }
+        
+        // 顯示狀態更新通知
+        this.showStatusNotification(status);
+        
+        // 新增：更新支付狀態顯示區
+        this.updatePaymentDisplay(status);
+    }
+    
+    // 顯示狀態更新通知
+    showStatusNotification(status) {
+        const statusMessages = {
+            'preparing': '您的咖啡正在製作中！',
+            'ready': '您的咖啡已準備就緒，請前往取餐！',
+            'completed': '您已成功提取咖啡，感謝您的光臨！'
+        };
+        
+        const message = statusMessages[status];
+        if (message) {
+            // 只顯示Toast提示，移除瀏覽器通知以減少干擾
+            this.showToast(message);
+        }
+    }
+    
+    // 更新支付狀態顯示區
+    updatePaymentDisplay(status) {
+        console.log("更新支付狀態顯示區，狀態:", status);
+        
+        // 只在狀態為 completed 或 picked_up 時更新支付顯示
+        if (status === 'completed' || status === 'picked_up' || status === 'delivered') {
+            console.log("訂單已完成，更新支付狀態顯示區");
+            
+            // 查找支付狀態顯示區的元素
+            const paymentDisplay = document.querySelector('.shadow-sm.mb-5.rounded.text-center');
+            if (!paymentDisplay) {
+                console.warn("找不到支付狀態顯示區元素");
+                return;
+            }
+            
+            // 查找標題元素
+            const titleElement = paymentDisplay.querySelector('h3');
+            // 查找訊息元素
+            const messageElement = paymentDisplay.querySelector('h5');
+            // 查找圖示元素
+            const iconElement = paymentDisplay.querySelector('i.fas');
+            
+            if (titleElement) {
+                titleElement.textContent = '已完成！';
+                titleElement.className = 'text-success mb-3';
+                console.log("更新標題: 已完成！");
+            }
+            
+            if (messageElement) {
+                messageElement.textContent = '讓我們的咖啡保持您的節奏, 同步呼吸！';
+                console.log("更新訊息: 讓我們的咖啡保持您的節奏, 同步呼吸！");
+            }
+            
+            if (iconElement) {
+                // 更新圖示為獎盃
+                iconElement.className = 'fas fa-trophy text-success';
+                iconElement.style.fontSize = '3rem';
+                console.log("更新圖示: fa-trophy");
+            }
+            
+            // 添加動畫效果
+            paymentDisplay.classList.add('payment-display-updated');
+            setTimeout(() => {
+                paymentDisplay.classList.remove('payment-display-updated');
+            }, 1000);
+            
+            console.log("支付狀態顯示區更新完成");
+        } else {
+            console.log("訂單狀態不是已完成，不更新支付顯示:", status);
+        }
+    }
+    
+    // 顯示Toast提示
+    showToast(message) {
+        // 創建Toast元素
+        const toast = document.createElement('div');
+        toast.className = 'status-toast';
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-bell mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // 添加樣式
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(196, 155, 99, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        `;
+        
+        // 添加動畫
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(toast);
+        
+        // 3秒後自動消失
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    // 設置WebSocket狀態指示器
+    setWebSocketStatus(connected, message) {
+        const statusDot = document.getElementById('websocket-status-dot');
+        const statusText = document.getElementById('websocket-status-text');
+        
+        if (statusDot) {
+            statusDot.className = 'status-indicator-dot ' + (connected ? 'connected' : 'disconnected');
+        }
+        
+        if (statusText) {
+            statusText.textContent = message;
+        }
+    }
+    
+    // 設置狀態指示器
+    setupStatusIndicator() {
+        const indicator = document.querySelector('.real-time-status-indicator');
+        if (indicator) {
+            // 添加點擊重新連接功能
+            indicator.addEventListener('click', () => {
+                console.log("手動重新連接WebSocket");
+                
+                if (this.websocketConnector) {
+                    // 使用增強連接器重新連接
+                    this.websocketConnector.disconnect();
+                    setTimeout(() => {
+                        this.websocketConnector.connect();
+                    }, 500);
+                } else if (this.websocket) {
+                    // 使用標準WebSocket重新連接
+                    this.websocket.close();
+                    this.reconnectAttempts = 0;
+                    setTimeout(() => {
+                        this.initStandardWebSocket();
+                    }, 500);
+                } else {
+                    // 重新初始化WebSocket
+                    this.initWebSocket();
+                }
+            });
+            
+            indicator.style.cursor = 'pointer';
+            indicator.title = '點擊重新連接';
+            
+            // 添加連接狀態監控面板（僅在開發模式下）
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                this.setupConnectionMonitor();
+            }
+        }
+    }
+    
+    // 設置連接監控面板（開發模式）
+    setupConnectionMonitor() {
+        const monitorPanel = document.createElement('div');
+        monitorPanel.id = 'websocket-monitor-panel';
+        monitorPanel.style.cssText = `
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9998;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+        `;
+        
+        const updateMonitor = () => {
+            if (this.websocketConnector) {
+                const status = this.websocketConnector.getConnectionStatus();
+                monitorPanel.innerHTML = `
+                    <div style="margin-bottom: 5px; font-weight: bold;">WebSocket監控面板</div>
+                    <div>狀態: ${status.readyStateText}</div>
+                    <div>連接時間: ${Math.round(status.connectionDuration / 1000)}秒</div>
+                    <div>消息數: ${status.messageCount}</div>
+                    <div>健康度: ${status.reconnectStatus.healthScore}分 (${status.reconnectStatus.healthStatus})</div>
+                    <div>成功率: ${status.reconnectStatus.successRate}</div>
+                    <div>重試次數: ${status.reconnectStatus.retryCount}/${status.reconnectStatus.maxRetries}</div>
+                    <div>心跳延遲: ${status.heartbeat.pingLatency ? status.heartbeat.pingLatency + 'ms' : 'N/A'}</div>
+                `;
+            } else if (this.websocket) {
+                monitorPanel.innerHTML = `
+                    <div style="margin-bottom: 5px; font-weight: bold;">WebSocket監控面板（標準版）</div>
+                    <div>狀態: ${this.websocket.readyState === 1 ? '已連接' : '未連接'}</div>
+                    <div>重試次數: ${this.reconnectAttempts || 0}/5</div>
+                `;
+            }
+        };
+        
+        // 每2秒更新一次監控面板
+        setInterval(updateMonitor, 2000);
+        updateMonitor();
+        
+        document.body.appendChild(monitorPanel);
+    }
+    
+    // 設置定期狀態檢查
+    setupPeriodicCheck() {
+        // 每30秒檢查一次訂單狀態
+        setInterval(() => {
+            this.checkOrderStatus();
+        }, 30000);
+    }
+    
+    // 檢查訂單狀態
+    async checkOrderStatus() {
+        try {
+            const response = await fetch(`/eshop/order/api/order-status/${this.orderId}/`);
+            if (response.ok) {
+                const data = await response.json();
+                this.handleOrderStatusUpdate(data);
+            }
+        } catch (error) {
+            console.error("檢查訂單狀態失敗:", error);
+        }
+    }
+    
+    // 清理資源
+    cleanup() {
+        // 清理增強連接器
+        if (this.websocketConnector) {
+            this.websocketConnector.disconnect();
+            this.websocketConnector = null;
+        }
+        
+        // 清理標準WebSocket
+        if (this.websocket) {
+            this.websocket.close();
+            this.websocket = null;
+        }
+        
+        // 清理監控面板
+        const monitorPanel = document.getElementById('websocket-monitor-panel');
+        if (monitorPanel) {
+            monitorPanel.remove();
+        }
+        
+        console.log("✅ WebSocket資源已清理");
+    }
+}
+
+// ========== 頁面初始化 ==========
+function initOrderStatusCards() {
+    console.log("初始化訂單狀態卡片");
+    
+    try {
+        // 檢查是否在訂單支付確認頁面
+        const orderId = document.body.dataset.orderId;
+        const paymentStatus = document.body.dataset.paymentStatus;
+        
+        if (!orderId) {
+            console.log("不在訂單頁面，跳過狀態卡片初始化");
+            return null;
+        }
+        
+        // 只有支付成功的訂單才顯示狀態卡片
+        if (paymentStatus !== 'paid') {
+            console.log("訂單未支付，跳過狀態卡片初始化");
+            return null;
+        }
+        
+        // 初始化狀態卡片管理器
+        const statusManager = new OrderStatusCardsManager();
+        
+        // 全局導出
+        window.orderStatusManager = statusManager;
+        
+        console.log("訂單狀態卡片初始化完成");
+        return statusManager;
+        
+    } catch (error) {
+        console.error("初始化訂單狀態卡片失敗:", error);
+        return null;
+    }
+}
+
+// ========== 全局錯誤處理 ==========
+window.addEventListener('error', function(event) {
+    const errorMessage = event.error ? event.error.toString() : '';
+    
+    // 過濾第三方庫錯誤
+    const isThirdPartyError = 
+        errorMessage.includes('Explain is not defined') ||
+        errorMessage.includes('bootstrap.bundle.min.js');
+    
+    if (isThirdPartyError) {
+        console.warn('⚠️ 第三方庫錯誤（已過濾）:', errorMessage);
+        event.stopPropagation();
+        return false;
+    }
+    
+    // 我們的代碼錯誤
+    console.error('❌ 狀態卡片錯誤被捕獲:', event.error);
+    event.stopPropagation();
+    return false;
+});
+
+// ========== 全局導出 ==========
+window.OrderStatusCardsManager = OrderStatusCardsManager;
+window.initOrderStatusCards = initOrderStatusCards;
+
+// ========== 頁面加載完成後初始化 ==========
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            initOrderStatusCards();
+        } catch (error) {
+            console.error('頁面加載時初始化狀態卡片失敗:', error);
+        }
+    });
+} else {
+    // 如果DOM已經加載完成，直接初始化
+    setTimeout(function() {
+        try {
+            initOrderStatusCards();
+        } catch (error) {
+            console.error('延遲初始化狀態卡片失敗:', error);
+        }
+    }, 100);
+}
+
+// ========== 頁面卸載時清理 ==========
+window.addEventListener('beforeunload', function() {
+    if (window.orderStatusManager) {
+        window.orderStatusManager.cleanup();
+    }
+});
