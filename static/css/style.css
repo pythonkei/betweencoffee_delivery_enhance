@@ -1772,7 +1772,7 @@ input[type="button"].btn-block  {
   flex-direction: column;
   min-width: 0;
   word-wrap: break-word;
-  background-color: rgba(0, 0, 0, 0.25);
+  /* background-color: rgba(0, 0, 0, 0.25); */
   background-clip: border-box;
   border: 1px solid rgba(0, 0, 0, 0.125);
   border-radius: 0.25rem; }
@@ -3005,11 +3005,11 @@ a.text-success:hover, a.text-success:focus  {
   color: #1e7e34 !important; }
 
 
-.text-info  { 
-  color: #17a2b8 !important; }
+.text-theme {
+  color: rgba(196,155,99, 1); !important; }
 
 
-a.text-info:hover, a.text-info:focus  { 
+a.text-theme:hover, a.text-theme:focus  { 
   color: #117a8b !important; }
 
 

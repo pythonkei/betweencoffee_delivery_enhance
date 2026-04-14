@@ -88,40 +88,22 @@
                         
                         <!-- 會員狀態 -->
                         <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-chart-line mr-2"></i>
-                                    會員狀態
-                                </h6>
-                            </div>
                             <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="h4 text-primary mb-1">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </div>
-                                        <div class="small text-muted">加入日期</div>
-                                        <div class="h5">{{ profile.user.date_joined|date:"Y年m月d日" }}</div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="h4 text-success mb-1">
-                                            <i class="fas fa-clock"></i>
-                                        </div>
-                                        <div class="small text-muted">最後登入</div>
-                                        <div class="h5">{{ profile.user.last_login|date:"Y年m月d日 H:i"|default:"從未登入" }}</div>
-                                    </div>
-                                </div>
+                                <div class="row justify-content-center">
+
+
                                 
-                                <div class="text-center mt-3">
-                                    <a href="{% url 'socialuser:loyalty_dashboard' %}" class="btn btn-primary">
-                                        <i class="fas fa-crown mr-1"></i> 查看完整會員權益
+                                <div class="text-center mr-3">
+                                    <a href="{% url 'socialuser:profile-settings' %}" class="btn btn-primary">
+                                        <i class="fas fa-setting mr-1"></i> 帳戶設定
                                     </a>
                                 </div>
-                                <div class="text-center mt-3">
+                                <div class="text-center mr-3">
                                     <a href="{% url 'socialuser:profile-edit' %}"class="btn btn-primary">
                                         <i class="fas fa-edit mr-1"></i> 編輯個人資料
                                     </a>
                                 </div>
+                                                                </div>
                             </div>
                         </div>
                     </div>
