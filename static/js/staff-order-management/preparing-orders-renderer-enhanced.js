@@ -529,7 +529,7 @@ class EnhancedPreparingOrdersRenderer {
                         電話: ${order.phone ? `${window.CommonUtils ? window.CommonUtils.formatPhoneNumber(order.phone) : order.phone}` : ''}
                     </p>
                     <div hidden>
-                    <strong>取餐碼:</strong> <span class="h5 text-primary">${pickupCode}</span>
+                    <strong>取餐碼:</strong> <span class="h5 pickup-code">${pickupCode}</span>
                     <strong>客戶:</strong> ${name}${phone ? ` | <strong>電話:</strong> ${phone}` : ''}
                     </div>
                 </div>

@@ -152,3 +152,285 @@ body {
         height: 200px;
     }
 }
+
+/* ========== 登入頁面專用樣式 ========== */
+
+/* 登入頁面背景容器 */
+.login-bg-container {
+    position: relative;
+    min-height: 100vh;
+    background-color: #000;
+    overflow: hidden;
+}
+
+.login-svg-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.2;
+    z-index: 1;
+}
+
+/* 登入內容容器 */
+.login-content-container {
+    position: relative;
+    z-index: 2;
+    padding: 4rem 0;
+}
+
+/* 社群登入按鈕樣式 - 簡約設計 */
+.social-login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+}
+
+.social-login-title {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.social-login-title p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    font-weight: 400;
+    margin-top: 0.5rem;
+}
+
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 2rem 0;
+}
+
+/* 簡約清晰風格社群登入按鈕 - 基於 index.html 設計 */
+.social-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 1.125rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-login-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.social-login-btn:active {
+    transform: translateY(-1px);
+    transition: all 0.1s ease;
+}
+
+.social-login-btn-google {
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.social-login-btn-google:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.social-login-btn-facebook {
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.social-login-btn-facebook:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.social-login-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.social-login-text {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.social-login-divider hr {
+    flex: 1;
+    border: none;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.social-login-divider span {
+    padding: 0 1rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+/* 傳統登入表單樣式 */
+.traditional-login-form {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(196, 155, 99, 0.2);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: #c49b63;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(196, 155, 99, 0.3);
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #c49b63;
+}
+
+.remember-me-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.remember-me-checkbox {
+    margin-right: 0.75rem;
+    width: 18px;
+    height: 18px;
+    accent-color: #c49b63;
+}
+
+.remember-me-label {
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.forgot-password-link {
+    display: block;
+    color: #c49b63;
+    font-size: 0.9rem;
+    text-decoration: none;
+    text-align: center;
+    margin-top: 1rem;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.login-submit-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 0;
+    background-color: #c49b63;
+    color: #000;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-submit-btn:hover {
+    background-color: #000;
+    color: #c49b63;
+    border: 2px solid #c49b63;
+}
+
+/* 登入頁面響應式設計 */
+@media (max-width: 768px) {
+    .login-content-container {
+        padding: 2rem 1rem;
+    }
+    
+    .social-login-container {
+        padding: 1.5rem;
+    }
+    
+    .social-login-title {
+        font-size: 1.25rem;
+    }
+    
+    .social-login-btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .social-login-container {
+        padding: 1rem;
+    }
+    
+    .social-login-title {
+        font-size: 1.1rem;
+    }
+    
+    .social-login-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .social-login-btn-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+    }
+}

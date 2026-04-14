@@ -8,7 +8,7 @@
 /* ===== 1. CSS變量定義 ===== */
 :root {
   /* 主色調 */
-  --primary-color: #78d5ef;
+  --primary-color: #c49b63;
   --primary-dark: #4ac7ea;
   --primary-light: #eaf8fd;
   
@@ -136,7 +136,7 @@ a:hover {
   text-decoration: underline;
 }
 
-.text-primary { color: var(--primary-color) !important; }
+.text-primary { color: var(--theme-color) !important; }
 .text-theme { color: var(--theme-color) !important; }
 .text-white { color: var(--white) !important; }
 .text-muted { color: var(--gray-600) !important; }

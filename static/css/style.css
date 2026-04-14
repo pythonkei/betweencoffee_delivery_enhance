@@ -18,7 +18,7 @@
   --white: #fff;
   --gray: #6c757d;
   --gray-dark: #343a40;
-  --primary: #78d5ef;
+  --primary: #c49b63;
   --secondary: #6c757d;
   --success: #28a745;
   --info: #17a2b8;
@@ -121,7 +121,7 @@ small  {
 
 
 a  { 
-  color: #78d5ef;
+  color: #c49b63;
   text-decoration: none;
   background-color: transparent;
   -webkit-text-decoration-skip: objects; }
@@ -752,8 +752,8 @@ a.btn.disabled  {
 
 .btn-primary  { 
   color: #212529;
-  background-color: #78d5ef;
-  border-color: #78d5ef; }
+  background-color: #c49b63;
+  border-color: #c49b63; }
 
   .btn-primary:hover  { 
     color: #212529;
@@ -766,8 +766,8 @@ a.btn.disabled  {
 
   .btn-primary.disabled, .btn-primary:disabled  { 
     color: #212529;
-    background-color: #78d5ef;
-    border-color: #78d5ef; }
+    background-color: #c49b63;
+    border-color: #c49b63; }
 
   .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
   .show > .btn-primary.dropdown-toggle  { 
@@ -968,29 +968,29 @@ a.btn.disabled  {
 
 
 .btn-outline-primary  { 
-  color: #78d5ef;
+  color: #c49b63;
   background-color: transparent;
   background-image: none;
-  border-color: #78d5ef; }
+  border-color: #c49b63; }
 
   .btn-outline-primary:hover  { 
     color: #212529;
-    background-color: #78d5ef;
-    border-color: #78d5ef; }
+    background-color: #c49b63;
+    border-color: #c49b63; }
 
   .btn-outline-primary:focus, .btn-outline-primary.focus  { 
     -webkit-box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5);
     box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5); }
 
   .btn-outline-primary.disabled, .btn-outline-primary:disabled  { 
-    color: #78d5ef;
+    color: #c49b63;
     background-color: transparent; }
 
   .btn-outline-primary:not(:disabled):not(.disabled):active, .btn-outline-primary:not(:disabled):not(.disabled).active,
   .show > .btn-outline-primary.dropdown-toggle  { 
     color: #212529;
-    background-color: #78d5ef;
-    border-color: #78d5ef; }
+    background-color: #c49b63;
+    border-color: #c49b63; }
 
     .btn-outline-primary:not(:disabled):not(.disabled):active:focus, .btn-outline-primary:not(:disabled):not(.disabled).active:focus,
     .show > .btn-outline-primary.dropdown-toggle:focus  { 
@@ -1265,7 +1265,7 @@ input[type="button"].btn-block  {
   .dropdown-item.active, .dropdown-item:active  { 
     color: #fff;
     text-decoration: none;
-    background-color: #78d5ef; }
+    background-color: #c49b63; }
 
   .dropdown-item.disabled, .dropdown-item:disabled  { 
     color: #6c757d;
@@ -1551,7 +1551,7 @@ input[type="button"].btn-block  {
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link  { 
   color: #fff;
-  background-color: #78d5ef; }
+  background-color: #c49b63; }
 
 
 .nav-fill .nav-item  { 
@@ -1876,7 +1876,7 @@ input[type="button"].btn-block  {
   padding: 0.5rem 0.75rem;
   margin-left: -1px;
   line-height: 1.25;
-  color: #78d5ef;
+  color: #c49b63;
   background-color: #fff;
   border: 1px solid #dee2e6; }
 
@@ -1911,8 +1911,8 @@ input[type="button"].btn-block  {
 .page-item.active .page-link  { 
   z-index: 1;
   color: #fff;
-  background-color: #78d5ef;
-  border-color: #78d5ef; }
+  background-color: #c49b63;
+  border-color: #c49b63; }
 
 
 .page-item.disabled .page-link  { 
@@ -1951,7 +1951,7 @@ input[type="button"].btn-block  {
 
 .badge-primary  { 
   color: #212529;
-  background-color: #78d5ef; }
+  background-color: #c49b63; }
 
   .badge-primary[href]:hover, .badge-primary[href]:focus  { 
     color: #212529;
@@ -2111,7 +2111,7 @@ input[type="button"].btn-block  {
   color: #fff;
   text-align: center;
   white-space: nowrap;
-  background-color: #78d5ef;
+  background-color: #c49b63;
   -webkit-transition: width 0.6s ease;
   -o-transition: width 0.6s ease;
   transition: width 0.6s ease; }
@@ -2185,8 +2185,8 @@ input[type="button"].btn-block  {
   .list-group-item.active  { 
     z-index: 2;
     color: #fff;
-    background-color: #78d5ef;
-    border-color: #78d5ef; }
+    background-color: #c49b63;
+    border-color: #c49b63; }
 
 
 .list-group-flush .list-group-item  { 
@@ -2978,16 +2978,15 @@ padding-right: 6rem !important; }
   font-weight: 700 !important; }
 
 
-.text-white  { 
+.text-white  {
   color: #fff !important; }
 
+.text-primary  {
+  color: #c49b63 !important; }
 
-.text-primary  { 
-  color: #78d5ef !important; }
 
-
-a.text-primary:hover, a.text-primary:focus  { 
-  color: #4ac7ea !important; }
+a.text-primary:hover, a.text-primary:focus  {
+  color: #e6c9a1 !important; }
 
 
 .text-secondary  { 
@@ -3135,10 +3134,6 @@ h1, h2, h3, h4, h5,
   color: #fff;
   font-weight: 400;
   font-family: "Josefin Sans", Arial, sans-serif; }
-
-
-.text-primary  { 
-  color: #c49b63 !important; }
 
 
 .ftco-navbar-light  { 
@@ -8313,7 +8308,324 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 /* 樣式化選項標籤 */
 
-/* 商品卡片樣式 */
+/* 基本样式 */
 
-/* 標籤圖標樣式 */
+.opacity-25 {
+  opacity: 0.25;
+}
 
+
+.hidden-box {
+    position: absolute;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    transition: bottom 0.3s ease;
+}
+
+.product-item:hover .hidden-box {
+    bottom: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+    .product-list-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .product-list-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .menu-wrap .img {
+        height: 200px;
+    }
+}
+
+/* ========== 登入頁面專用樣式 ========== */
+
+/* 登入頁面背景容器 */
+.login-bg-container {
+    position: relative;
+    min-height: 100vh;
+    background-color: #000;
+    overflow: hidden;
+}
+
+.login-svg-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.2;
+    z-index: 1;
+}
+
+/* 登入內容容器 */
+.login-content-container {
+    position: relative;
+    z-index: 2;
+    padding: 4rem 0;
+}
+
+/* 社群登入按鈕樣式 - 簡約設計 */
+.social-login-container {
+    /* max-width: 400px; */
+    margin: 0 auto;
+    padding: 2rem 4rem;
+    /* background-color: rgba(0, 0, 0, 0.8); */
+    /* border: 1px solid rgba(255, 255, 255, 0.1); */
+    border-radius: 0;
+}
+
+.social-login-title {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.social-login-title p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    font-weight: 400;
+    margin-top: 0.5rem;
+}
+
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /* margin: 1rem 0; */
+}
+
+/* 簡約清晰風格社群登入按鈕 - 基於 index.html 設計 */
+.social-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 1.125rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-login-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.social-login-btn:active {
+    transform: translateY(-1px);
+    transition: all 0.1s ease;
+}
+
+.social-login-btn-google {
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.social-login-btn-google:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.social-login-btn-facebook {
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.social-login-btn-facebook:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.social-login-icon {
+    width: 44px;
+    /* height: 24px; */
+    /* margin-right: 12px; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.social-login-text {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.social-login-divider hr {
+    flex: 1;
+    border: none;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.social-login-divider span {
+    padding: 0 1rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+/* 傳統登入表單樣式 */
+.traditional-login-form {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(196, 155, 99, 0.2);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: #c49b63;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(196, 155, 99, 0.3);
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #c49b63;
+}
+
+.remember-me-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.remember-me-checkbox {
+    margin-right: 0.75rem;
+    width: 18px;
+    height: 18px;
+    accent-color: #c49b63;
+}
+
+.remember-me-label {
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.forgot-password-link {
+    display: block;
+    color: #c49b63;
+    font-size: 0.9rem;
+    text-decoration: none;
+    text-align: center;
+    margin-top: 1rem;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.login-submit-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 0;
+    background-color: #c49b63;
+    color: #000;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-submit-btn:hover {
+    background-color: #000;
+    color: #c49b63;
+    border: 2px solid #c49b63;
+}
+
+/* 登入頁面響應式設計 */
+@media (max-width: 768px) {
+    .login-content-container {
+        padding: 2rem 1rem;
+    }
+    
+    .social-login-container {
+        padding: 1.5rem;
+    }
+    
+    .social-login-title {
+        font-size: 1.25rem;
+    }
+    
+    .social-login-btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .social-login-container {
+        padding: 1rem;
+    }
+    
+    .social-login-title {
+        font-size: 1.1rem;
+    }
+    
+    .social-login-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .social-login-btn-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+    }
+}

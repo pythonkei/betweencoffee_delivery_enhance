@@ -1,0 +1,359 @@
+<!-- account/login.html -->
+
+
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <title>Between Coffee</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="INVALID_EXPRESSION">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Gaegu&family=Mogra&family=Rubik+Vinyl&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href=/static/css/open-iconic-bootstrap.min.css />
+    <link rel="stylesheet" href=/static/css/style.css />
+    <link rel="stylesheet" href=/static/css/animate.css />
+    <link rel="stylesheet" href=/static/css/owl.carousel.min.css />
+    <link rel="stylesheet" href=/static/css/owl.theme.default.min.css />
+    <link rel="stylesheet" href=/static/css/magnific-popup.css />
+    <link rel="stylesheet" href=/static/css/aos.css />
+    <link rel="stylesheet" href=/static/css/blobs.css />
+    <link rel="stylesheet" href=/static/css/landing.css />
+    <link rel="stylesheet" href=/static/css/jquery.timepicker.min.css />
+    <link rel="stylesheet" href=/static/css/payment-methods.css />
+    <link rel="stylesheet" href=/static/css/select2.min.css />
+    <link rel="stylesheet" href=/static/css/fontawesome/css/all.css />
+    <link rel="stylesheet" href=/static/css/ionicons.min.css />
+    <link rel="stylesheet" href=/static/css/flaticon.css />
+    <link rel="stylesheet" href=/static/css/icomoon.css />
+    <link rel="stylesheet" href=/static/css/toast.css />
+    <!-- 移動端增強樣式（漸進式增強） -->
+    <link rel="stylesheet" href=/static/css/mobile-enhanced.css />
+
+    <link rel='stylesheet' href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    
+    
+    <!-- enable django htmx -->
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script> 
+    <script src="/static/django-htmx.js" data-debug="True" defer></script>
+    <!-- Use for layout extra_css -->
+    
+<style>
+.blank-container {
+    background: transparent;
+    padding-top: 24vh;  /* Changed from 'top' to 'padding-top' */
+}
+</style>
+
+</head>
+
+
+<!-- body -->
+<body>
+<!-- nav.html -->
+
+<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="/">&#65371; Between &#65373; </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">HOME</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Shop
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/coffee_menu/">咖啡</a>
+                        <a class="dropdown-item" href="/bean_menu/">烘焙豆</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about/">US</a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart/">
+                        <i class="icon-shopping-cart"></i>
+                        <span class="cart-count cart-amount-label cart-amount-label-pill">INVALID_EXPRESSION</span>
+                    </a>
+                </li>
+                
+                <!-- User Account Dropdown - Only shows icon for anonymous users -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="icon-user"></i>
+                        
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                        
+                            <a class="dropdown-item" href="/accounts/login/">
+                                <i class="icon-user mr-2"></i> 登入
+                            </a>
+                            <a hidden class="dropdown-item" href="/accounts/signup/">
+                                <i class="icon-user-plus mr-2"></i> 註冊
+                            </a>
+                        
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+
+<!-- Main content extend block -->
+
+    
+<!-- SVG 背景視覺元素 -->
+<section class="subpage-banner-h500 py-lg-4 mb-3">
+    <div class="ftco-subpage-banner" id="section-counter">
+        <div class="svg-bg ftco-counter noise_animation" style="background-image: url(/static/images/title_bg_img_01.svg);" data-stellar-background-ratio="0.73"></div>
+        
+        <div class="container">
+            <div class="row justify-content-center mt-5 p-2">
+                <div class="col-lg-12 col-md-12 heading-section text-center">
+                    <span class="subheading">Welcome<br>Back</span>
+                    <h2 class="mb-3">&#65371;歡迎&#65373;</h2>
+                    <p style="color:#ccc;">使用您的社群帳戶快速登入<br />享受 Between Coffee 的專屬服務</p>
+                </div>
+            </div>
+
+            <div hidden class="row justify-content-center mb-3">
+                <p class="icon_text"><a href="/"><i class="icon material-symbols-outlined icon_vert-align-middle">undo</i> 返回首頁</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End SVG 背景視覺元素 -->
+
+
+
+<!-- End Header Banner-->
+
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center mt-2">
+            <div class="col col-lg-8 mb-5">
+                
+                
+
+                <div class="social-login-container">
+                    <div class="social-login-title text-center mb-5">
+                        <h3 class="text-white mb-3">選擇登入方式</h3>
+                        <p class="text-muted mb-0">使用您的社群帳戶快速登入</p>
+                    </div>
+                    
+                    <div class="social-login-buttons">
+                        <!-- Google 登入按鈕 - 簡約清晰設計 -->
+                        <a href="/accounts/google/login/" class="social-login-btn social-login-btn-google">
+                            <div class="social-login-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                </svg>
+                            </div>
+                            <span class="social-login-text">使用 Google 帳戶登入</span>
+                        </a>
+                        
+                        <!-- Facebook 登入按鈕 - 簡約清晰設計 -->
+                        <a href="/accounts/facebook/login/" class="social-login-btn social-login-btn-facebook">
+                            <div class="social-login-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+                                </svg>
+                            </div>
+                            <span class="social-login-text">使用 Facebook 帳戶登入</span>
+                        </a>
+                    </div>
+                    
+                    <div class="social-login-divider my-5">
+                        <hr class="bg-light opacity-25">
+                        <span class="text-muted px-3">或</span>
+                        <hr class="bg-light opacity-25">
+                    </div>
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-3">沒有帳戶？</p>
+                        <a href="/accounts/signup/" class="btn btn-outline-light btn-lg px-4">立即註冊</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- end Main content extend block -->
+
+
+<!-- footer -->
+<footer class="ftco-footer ftco-section img" style="background-image: url('/static/images/footer_bg_v5.jpg'); background-position: bottom right; background-size:contain;">
+    <div hidden class="gifbox">
+        <img src= /static/images/cup_360.gif class="">
+    </div>
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-4 col-md-6 mb-5 mb-md-5">
+                <div class="ftco-footer-widget mb-4">
+                    <!-- scroller effect -->
+                    <div class="scroller-box">
+                        <div class="scroller">
+                            <ul class="tag-list scroller__inner">
+                            <li>BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN</li>
+                            <li>BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- end scroller effect -->
+                    <p>Hug in a Cup, Perfect to Go!</p>
+                    <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+                        <li class=""><a href="#"><span class="icon-whatsapp"></span></a></li>
+                        <li class=""><a href="#"><span class="icon-facebook"></span></a></li>
+                        <li class=""><a href="#"><span class="icon-instagram"></span></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div hidden class="col-lg-4 col-md-6 mb-5 mb-md-5">
+                <div class="ftco-footer-widget mb-4">
+                    <h2 class="ftco-heading-2">啡咖師的日常</h2>
+                    <div class="block-21 mb-4 d-flex">
+                        <a class="blog-img mr-4" style="background-image: url('/static/images/blog_02.jpg');"></a>
+                        <div class="text">
+                            <h3 class="heading"><a href="#">根據唱片是否適合搭配他的咖啡來挑選唱片</a></h3>
+                            <div class="meta">
+                                <div><a href="#"><span class="icon-calendar"></span> Jan 03, 2025</a></div>
+                                <div><a href="#"><span class="icon-person"></span> Ryan Roasters</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-21 mb-4 d-flex">
+                        <a class="blog-img mr-4" style="background-image: url('/static/images/blog_01.jpg');"></a>
+                        <div class="text">
+                            <h3 class="heading"><a href="#">發酵槽中進行 16 小時的乾燥發酵, 然後用大量的水清洗四次</a></h3>
+                            <div class="meta">
+                                <div><a href="#"><span class="icon-calendar"></span> Jan 12, 2025</a></div>
+                                <div><a href="#"><span class="icon-person"></span> Ryan Roasters</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved <i hidden class="icon-heart" aria-hidden="true"></i></p>
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- end footer -->
+ 
+<!-- noise active filter for noise_animation -->
+<div class="noise-filiter">
+	<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+		<defs>
+			<filter id="noise-0">
+				<feTurbulence id="turbulence_0_desktop" baseFrequency="0.02" numOctaves="2" result="noise" seed="0" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-1">
+				<feTurbulence id="turbulence_1_desktop" baseFrequency="0.04" numOctaves="1" result="noise" seed="1" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"></feDisplacementMap>
+			</filter>
+			<filter id="noise-2">
+				<feTurbulence id="turbulence_2_desktop" baseFrequency="0.02" numOctaves="3" result="noise" seed="2" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="2.4"></feDisplacementMap>
+			</filter>
+			<filter id="noise-3">
+				<feTurbulence id="turbulence_3_desktop" baseFrequency="0.04" numOctaves="1" result="noise" seed="3" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-4">
+				<feTurbulence id="turbulence_4_desktop" baseFrequency="0.02" numOctaves="3" result="noise" seed="4" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"></feDisplacementMap>
+			</filter>
+		</defs>
+	</svg>
+	<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+		<defs>
+			<filter id="noise-5">
+				<feTurbulence id="turbulence_0_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="0"></feTurbulence>
+				<feDisplacementMap id="displacement_smart" in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-6">
+				<feTurbulence id="turbulence_1_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="1"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-7">
+				<feTurbulence id="turbulence_2_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="2"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-8">
+				<feTurbulence id="turbulence_3_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="3"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-9">
+				<feTurbulence id="turbulence_4_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="4"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+		</defs> 
+	</svg>
+</div>
+<!-- end noise active filter for noise_animation -->
+
+
+<!-- js -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+    <!-- For Toast -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Local -->
+    <script src=/static/js/jquery-migrate-3.0.1.min.js></script>
+    <script src=/static/js/jquery.timepicker.min.js></script>
+    <script src=/static/js/bootstrap.bundle.min.js></script>
+    
+    <script src=/static/js/jquery.easing.1.3.js></script>
+    <script src=/static/js/jquery.waypoints.min.js></script>
+    <script src=/static/js/jquery.stellar.min.js></script>
+    <script src=/static/js/owl.carousel.min.js></script>
+    <script src=/static/js/jquery.magnific-popup.min.js></script>
+    <script src=/static/js/aos.js></script>
+    <script src=/static/js/pro.js></script>
+    <script src=/static/js/jquery.animateNumber.min.js></script>
+    <script src=/static/js/bootstrap-datepicker.js></script>
+    <script src=/static/js/scrollax.min.js></script>
+    <script src=/static/js/select2.min.js></script>
+    <!-- 全局 Toast 管理器 -->
+    <script src=/static/js/toast-manager.js></script>
+    <!-- 移動端優化增強腳本 -->
+    <script src=/static/js/mobile-optimization-enhanced.js></script>
+    <!-- delivery tut -->
+    
+    <script src=/static/js/main.js></script>
+
+
+<!-- end bloock js -->
+
+<!-- 額外的腳本區塊用於隊列管理 -->
+
+
+</body>
+<!-- end body -->
+
+</html>

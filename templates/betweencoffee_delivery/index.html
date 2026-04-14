@@ -201,7 +201,7 @@
             <img hidden src="{% static 'images/section_bg_01.svg' %}" class="section-bg-img">
         </div>
         <div class="row justify-content-center mb-5 pb-3">
-            <div class="col-md-7 heading-section ftco-animate text-center">
+            <div class="col-md-7 heading-section text-center">
                 <span class="subheading">Between<br>Selections</span>
                 <h2 class="mb-4">&#65371;最強人氣&#65373;</h2>
                 <p>上班上到打恰睡 @@<br>來一杯續命啡! 立即充滿能量!</p>
@@ -209,7 +209,7 @@
         </div>
 
         <!-- 方案1 -->
-        <div class="asymmetric-grid asymmetric-grid-v1 ftco-animate">
+        <div class="asymmetric-grid asymmetric-grid-v1">
             {% for coffee in shop_hot_coffees %}
             <div class="asymmetric-item">
                 <div class="modern-card-v1">
@@ -241,7 +241,7 @@
                     <div class="card-content-v1">
                         <h3 class="coffee-name-v1">{{ coffee.name }}</h3>
                         <p class="introduction-text-v1">{{ coffee.introduction }}</p>
-                        <p class="price-v1">{{ coffee.price|floatformat:"-2"|default:"0" }}</p>
+                        <p hidden class="price-v1">{{ coffee.price|floatformat:"-2"|default:"0" }}</p>
                         <a href="{% url 'coffee' coffee.id %}" class="btn asymmetric-btn-v1">落單</a>
                     </div>
                 </div>

@@ -8,7 +8,7 @@
 
 {% block content %}
 <!-- SVG 背景視覺元素 -->
-<section class="subpage-banner-h500 py-lg-4 mb-4">
+<section class="subpage-banner-h500 py-lg-4 mb-3">
     <div class="ftco-subpage-banner" id="section-counter">
         <div class="svg-bg ftco-counter noise_animation" style="background-image: url({% static 'images/title_bg_img_01.svg' %});" data-stellar-background-ratio="0.73"></div>
         
@@ -30,25 +30,14 @@
 <!-- End SVG 背景視覺元素 -->
 
 
-<section class="ftco-subpage-section">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col col-lg-8 text-center">
-                <span class="subheading"><h1>登入</h1></span>
-                <p class="h5 pt-2">請使用社交帳戶登入
-                <a hidden href="{% url 'account_signup' %}?next={% url 'socialuser:profile-edit' %}">立即註冊</a>
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
+
 <!-- End Header Banner-->
 
 
 <section class="ftco-subpage-section">
     <div class="container">
-        <div class="row justify-content-center mt-2">
-            <div class="col col-lg-8 mb-5">
+        <div class="row justify-content-center">
+            <div class="col col-md-6 col-lg-6 mb-5">
                 {% url 'account_login' as login_url %}
                 {% comment %}
                 {% element form form=form method="post" action=login_url tags="entrance,login" %}
@@ -76,13 +65,13 @@
                 {% endcomment %}
 
                 <div class="social-login-container">
-                    <div class="social-login-title text-center mb-4">
-                        <h3 class="text-white">選擇登入方式</h3>
+                    <div hidden class="social-login-title text-center mb-5">
+                        <h3 class="text-white mb-3">選擇登入方式</h3>
                         <p class="text-muted mb-0">使用您的社群帳戶快速登入</p>
                     </div>
                     
                     <div class="social-login-buttons">
-                        <!-- Google 登入按鈕 -->
+                        <!-- Google 登入按鈕 - 簡約清晰設計 -->
                         <a href="/accounts/google/login/" class="social-login-btn social-login-btn-google">
                             <div class="social-login-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -94,8 +83,12 @@
                             </div>
                             <span class="social-login-text">使用 Google 帳戶登入</span>
                         </a>
-                        
-                        <!-- Facebook 登入按鈕 -->
+                        <div class="social-login-divider my-6">
+                            <hr class="bg-light opacity-25">
+                            <span class="text-muted px-3">或</span>
+                            <hr class="bg-light opacity-25">
+                            </div>
+                        <!-- Facebook 登入按鈕 - 簡約清晰設計 -->
                         <a href="/accounts/facebook/login/" class="social-login-btn social-login-btn-facebook">
                             <div class="social-login-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -106,15 +99,11 @@
                         </a>
                     </div>
                     
-                    <div class="social-login-divider my-4">
-                        <hr class="bg-light opacity-25">
-                        <span class="text-muted px-3">或</span>
-                        <hr class="bg-light opacity-25">
-                    </div>
+
                     
-                    <div class="text-center">
-                        <p class="text-muted mb-2">沒有帳戶？</p>
-                        <a href="{% url 'account_signup' %}" class="btn btn-outline-light btn-sm">立即註冊</a>
+                    <div hidden class="text-center">
+                        <p class="text-muted mb-3">沒有帳戶？</p>
+                        <a href="{% url 'account_signup' %}" class="btn btn-outline-light btn-lg px-4">立即註冊</a>
                     </div>
                 </div>
             </div>

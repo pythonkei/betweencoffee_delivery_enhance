@@ -286,7 +286,7 @@
 }
 
 /* 取餐碼樣式 */
-.text-primary {
+.pickup-code {
     color: #007bff !important;
     font-weight: 600;
 }
