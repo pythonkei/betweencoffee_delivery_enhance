@@ -111,7 +111,7 @@
 
 /* 活動類型顏色 */
 .activity-icon.points-earned {
-    color: #28a745; /* 綠色 - 獲得積分 */
+    color: #c49b63; /* 綠色 - 獲得積分 */
 }
 
 .activity-icon.reward-redeemed {
@@ -179,7 +179,7 @@
 }
 
 .points-positive {
-    background-color: #28a745; /* 實色綠色 */
+    background-color: #c49b63; /* 實色綠色 */
     color: #ffffff; /* 白色文字 */
     border: none; /* 取消邊框 */
 }
