@@ -221,6 +221,15 @@
                     {% endfor %}
                 </div>
                 
+                <!-- 載入更多按鈕 -->
+                {% if has_more %}
+                <div class="text-center mt-4 mb-5" id="load-more-container">
+                    <button id="load-more-btn" class="btn btn-primary">
+                        <i class="fas fa-arrow-down mr-2"></i>載入更多訂單
+                    </button>
+                </div>
+                {% endif %}
+                
                 {% else %}
                 <div class="text-center py-5">
                     <div class="mb-4">
@@ -289,28 +298,70 @@
     color: #fff;
 }
 
+/* 載入更多按鈕樣式 */
+#load-more-btn {
+    padding: 10px 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+#load-more-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#load-more-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+#load-more-btn .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 沒有更多訂單訊息 */
+#load-more-container p.text-muted {
+    font-size: 1rem;
+    color: #6c757d;
+    padding: 15px 0;
+}
+
+/* 錯誤訊息樣式 */
+#load-more-container .alert-warning {
+    margin-top: 15px;
+    border-radius: 8px;
+    border: 1px solid #ffeaa7;
+}
 
 </style>
 
 <script>
-// 自动显示提醒
+// 自动显示提醒 - 暫時禁用，因為API端點不存在
 function checkAndShowPaymentReminders() {
-    fetch('/eshop/api/pending-orders/')
-        .then(response => response.json())
-        .then(data => {
-            if (data.has_urgent) {
-                const urgentOrder = data.orders.find(order => order.minutes_remaining <= 5);
-                if (urgentOrder && window.paymentReminder) {
-                    // 延迟2秒显示，让页面完全加载
-                    setTimeout(() => {
-                        window.paymentReminder.showReminder(urgentOrder);
-                    }, 2000);
-                }
-            }
-        });
+    // 暫時禁用此功能，因為API端點不存在
+    // fetch('/eshop/api/pending-orders/')
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         if (data.has_urgent) {
+    //             const urgentOrder = data.orders.find(order => order.minutes_remaining <= 5);
+    //             if (urgentOrder && window.paymentReminder) {
+    //                 // 延迟2秒显示，让页面完全加载
+    //                 setTimeout(() => {
+    //                     window.paymentReminder.showReminder(urgentOrder);
+    //                 }, 2000);
+    //             }
+    //         }
+    //     });
 }
 
-// 制作中订单实时倒计时
+// 制作中订单实时倒计时 - 暫時禁用，因為API端點不存在
 class PreparingCountdown {
     constructor() {
         this.timers = new Map();
@@ -318,6 +369,12 @@ class PreparingCountdown {
     }
 
     start() {
+        console.log('制作中订单倒计时监控已禁用（API端點不存在）');
+        // 暫時禁用此功能
+        return;
+        
+        // 以下代碼暫時註釋掉
+        /*
         console.log('启动制作中订单倒计时监控');
         
         // 立即更新所有制作中订单
@@ -327,18 +384,28 @@ class PreparingCountdown {
         setInterval(() => {
             this.updateAllPreparingOrders();
         }, this.updateInterval);
+        */
     }
 
     updateAllPreparingOrders() {
+        // 暫時禁用此功能
+        return;
+        
+        /*
         const preparingBadges = document.querySelectorAll('.preparing-countdown');
         
         preparingBadges.forEach(badge => {
             const orderId = badge.getAttribute('data-order-id');
             this.updateOrderCountdown(orderId, badge);
         });
+        */
     }
 
     async updateOrderCountdown(orderId, badgeElement) {
+        // 暫時禁用此功能
+        return;
+        
+        /*
         try {
             const response = await fetch(`/eshop/countdown/${orderId}/`);
             
@@ -359,9 +426,14 @@ class PreparingCountdown {
         } catch (error) {
             console.error(`订单 ${orderId} 倒计时更新失败:`, error);
         }
+        */
     }
 
     updateBadgeDisplay(badgeElement, data) {
+        // 暫時禁用此功能
+        return;
+        
+        /*
         const countdownElement = badgeElement.querySelector('.countdown-minutes');
         
         if (!countdownElement) {
@@ -397,6 +469,7 @@ class PreparingCountdown {
             
             countdownElement.textContent = displayText;
         }
+        */
     }
 }
 
@@ -423,10 +496,244 @@ function calculateCompletedOrders() {
     return completedCount;
 }
 
+// 載入更多訂單功能
+class OrderLoader {
+    constructor() {
+        // 從頁面中獲取當前顯示的訂單數量
+        this.currentOffset = document.querySelectorAll('.order-item').length;
+        this.limit = 10;
+        this.isLoading = false;
+        this.loadMoreBtn = document.getElementById('load-more-btn');
+        this.loadMoreContainer = document.getElementById('load-more-container');
+        this.orderList = document.querySelector('.order-list');
+    }
+
+    init() {
+        if (this.loadMoreBtn) {
+            this.loadMoreBtn.addEventListener('click', () => this.loadMoreOrders());
+        }
+    }
+
+    async loadMoreOrders() {
+        if (this.isLoading) return;
+        
+        this.isLoading = true;
+        this.loadMoreBtn.disabled = true;
+        this.loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>載入中...';
+        
+        try {
+            // 使用當前頁面的 URL 並添加查詢參數
+            const url = new URL(window.location.href);
+            url.searchParams.set('limit', this.limit);
+            url.searchParams.set('offset', this.currentOffset);
+            
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.orders && data.orders.length > 0) {
+                // 添加新訂單到列表
+                data.orders.forEach(order => this.addOrderToDOM(order));
+                
+                // 更新偏移量
+                this.currentOffset += data.orders.length;
+                
+                // 檢查是否還有更多訂單
+                if (!data.has_more) {
+                    this.showNoMoreOrders();
+                } else {
+                    this.resetLoadMoreButton();
+                }
+            } else {
+                this.showNoMoreOrders();
+            }
+            
+        } catch (error) {
+            console.error('載入訂單失敗:', error);
+            this.showError('載入失敗，請稍後再試');
+            this.resetLoadMoreButton();
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    addOrderToDOM(order) {
+        const orderItem = this.createOrderItem(order);
+        this.orderList.appendChild(orderItem);
+        
+        // 重新計算已完成訂單數量
+        calculateCompletedOrders();
+    }
+
+    createOrderItem(order) {
+        const orderItem = document.createElement('div');
+        orderItem.className = 'order-item mb-4 p-4 rounded border';
+        orderItem.innerHTML = this.getOrderHTML(order);
+        return orderItem;
+    }
+
+    getOrderHTML(order) {
+        // 生成訂單狀態徽章
+        const statusBadge = this.getStatusBadge(order);
+        
+        // 生成訂單項目HTML
+        const itemsHTML = order.items.map(item => this.getItemHTML(item)).join('');
+        
+        // 生成操作按鈕
+        const actionButtons = this.getActionButtons(order);
+        
+        return `
+            <div class="d-flex justify-content-between mb-3">
+                <div>
+                    <h5>訂單編號: #${order.id}</h5>
+                    <p class="text-muted mb-0">
+                        訂單時間: ${order.created_at}
+                    </p>
+                    <p class="mb-0">
+                        <strong>取餐码:</strong> 
+                        <span class="h5 color-theme">${order.pickup_code}</span>
+                    </p>
+                    <div class="mt-2">
+                        ${statusBadge}
+                        ${order.is_quick_order ? '<span class="badge badge-success ml-1" style="display: none;"><i class="fas fa-bolt mr-1"></i>快速訂單</span>' : ''}
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="h5 pr-2">$${order.total_price.toFixed(2)}</span>
+                </div>
+            </div>
+            
+            <div class="order-items">
+                ${itemsHTML}
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <div>
+                    <span class="text-muted">${order.items.length} 項商品</span>
+                </div>
+                <div>
+                    ${actionButtons}
+                    <a href="/eshop/order/${order.id}/" 
+                       class="btn btn-outline-secondary btn-sm ml-2" style="display: none;">
+                        <i class="fas fa-info-circle mr-1"></i>詳情
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    getStatusBadge(order) {
+        if (order.payment_status === 'paid') {
+            if (order.status === 'preparing') {
+                return `<span class="badge badge-orange preparing-countdown" data-order-id="${order.id}">
+                    <i class="fas fa-check-circle mr-1"></i>已支付 - 製作中: 
+                    <span class="countdown-minutes">即將完成</span>
+                </span>`;
+            } else if (order.status === 'ready') {
+                return `<span class="badge badge-success">
+                    <i class="fas fa-mug-hot mr-1"></i>已就绪，请取餐
+                </span>`;
+            } else if (order.status === 'completed') {
+                return `<span class="badge badge-success">
+                    <i class="fas fa-check-double mr-1"></i>${order.status_display}
+                </span>`;
+            } else {
+                return `<span class="badge badge-secondary">${order.status_display}</span>`;
+            }
+        } else {
+            if (order.payment_status === 'pending' && !order.is_payment_timeout) {
+                return `<span class="badge badge-warning payment-countdown">
+                    <i class="fas fa-hourglass-half mr-1"></i>
+                    待支付 - 剩余: <span class="countdown-text">15分鐘</span>
+                </span>`;
+            } else if (order.is_payment_timeout || order.payment_status === 'cancelled') {
+                return `<span class="badge badge-danger">
+                    <i class="fas fa-times-circle mr-1"></i>订单已取消/超时
+                </span>`;
+            } else {
+                return `<span class="badge badge-secondary">${order.payment_status_display}</span>`;
+            }
+        }
+    }
+
+    getItemHTML(item) {
+        const imageSrc = item.image || '/static/images/default-product.png';
+        const options = [];
+        if (item.cup_level_cn) options.push(`杯型: ${item.cup_level_cn}`);
+        if (item.milk_level_cn) options.push(`牛奶: ${item.milk_level_cn}`);
+        if (item.grinding_level_cn) options.push(`研磨: ${item.grinding_level_cn}`);
+        
+        return `
+            <div class="d-flex align-items-center mb-3">
+                <div class="mr-3">
+                    <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <img src="${imageSrc}" alt="${item.name}" class="img-fluid" style="max-height: 75px;" onerror="this.src='/static/images/default-product.png'">
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="mb-0">${item.name}</h6>
+                    <p class="mb-1 text-muted">數量: ${item.quantity}</p>
+                    <div class="text-muted">${options.join(' | ')}</div>
+                </div>
+                <div class="text-right">
+                    <span class="h6">$${item.total_price.toFixed(2)}</span>
+                    <div class="text-muted small">$${item.price.toFixed(2)} / 單價</div>
+                </div>
+            </div>
+        `;
+    }
+
+    getActionButtons(order) {
+        if (order.payment_status === 'paid' && order.status === 'completed') {
+            return '<span class="text-success" style="display: none;"><i class="fas fa-check-circle mr-1"></i>订单已完成</span>';
+        } else if (order.payment_status === 'paid' && order.status === 'ready') {
+            return '<span class="text-success" style="display: none;"><i class="fas fa-mug-hot mr-1"></i>已就绪，请取餐</span>';
+        } else if (order.payment_status === 'paid' && order.status === 'preparing') {
+            return '<span class="text-warning" style="display: none;"><i class="fas fa-clock mr-1"></i>制作中，请稍候</span>';
+        } else if (order.payment_status === 'pending' && !order.is_payment_timeout) {
+            return `<a href="/eshop/continue-payment/${order.id}/" class="btn btn-primary btn-sm">
+                <i class="fas fa-credit-card mr-1"></i>繼續支付
+            </a>`;
+        } else {
+            return '<span class="text-danger small" style="display: none;"><i class="fas fa-times-circle mr-1"></i>订单已取消/超时</span>';
+        }
+    }
+
+    showNoMoreOrders() {
+        if (this.loadMoreContainer) {
+            this.loadMoreContainer.innerHTML = '<p class="text-muted">沒有更多訂單顯示</p>';
+        }
+    }
+
+    showError(message) {
+        if (this.loadMoreContainer) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-warning mt-3';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
+            this.loadMoreContainer.appendChild(errorDiv);
+        }
+    }
+
+    resetLoadMoreButton() {
+        if (this.loadMoreBtn) {
+            this.loadMoreBtn.disabled = false;
+            this.loadMoreBtn.innerHTML = '<i class="fas fa-arrow-down mr-2"></i>載入更多訂單';
+        }
+    }
+}
+
 // 页面加载后执行
 document.addEventListener('DOMContentLoaded', function() {
-    // 支付提醒检查
-    checkAndShowPaymentReminders();
+    // 支付提醒检查 - 暫時禁用
+    // checkAndShowPaymentReminders();
     
     // 修改：将待支付倒计时中的minutes替换为分鐘
     function updateCountdownText() {
@@ -447,13 +754,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // 计算已完成订单
     calculateCompletedOrders();
     
-    // 启动制作中订单倒计时
-    const preparingCountdown = new PreparingCountdown();
-    preparingCountdown.start();
+    // 启动制作中订单倒计时 - 暫時禁用
+    // const preparingCountdown = new PreparingCountdown();
+    // preparingCountdown.start();
     
-    // 每30秒检查一次支付提醒和更新倒计时文本
+    // 初始化載入更多功能
+    const orderLoader = new OrderLoader();
+    orderLoader.init();
+    
+    // 每30秒更新倒计时文本
     setInterval(() => {
-        checkAndShowPaymentReminders();
+        // checkAndShowPaymentReminders(); // 暫時禁用
         updateCountdownText();
         // 重新计算已完成订单（状态可能已更新）
         calculateCompletedOrders();

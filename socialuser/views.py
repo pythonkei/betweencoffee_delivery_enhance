@@ -278,8 +278,72 @@ def profile_delete_view(request):
 
 @login_required
 def order_history(request):
-    orders = OrderModel.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'socialuser/order_history.html', {'orders': orders})
+    """顯示訂單歷史，支持分頁"""
+    # 獲取分頁參數
+    limit = int(request.GET.get('limit', 10))
+    offset = int(request.GET.get('offset', 0))
+    
+    # 獲取訂單總數
+    total_orders = OrderModel.objects.filter(user=request.user).count()
+    
+    # 獲取分頁訂單
+    orders = OrderModel.objects.filter(user=request.user).order_by('-created_at')[offset:offset+limit]
+    
+    # 檢查是否還有更多訂單
+    has_more = (offset + limit) < total_orders
+    
+    # 如果是AJAX請求，返回JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        from django.core import serializers
+        from django.http import JsonResponse
+        
+        orders_data = []
+        for order in orders:
+            # 確保所有值都是可序列化的
+            order_data = {
+                'id': order.id,
+                'created_at': order.created_at.strftime('%Y-%m-%d %H:%M'),
+                'total_price': float(order.total_price),
+                'pickup_code': order.pickup_code,
+                'payment_status': order.payment_status,
+                'status': order.status,
+                'status_display': str(order.get_status_display()),  # 轉換為字符串
+                'payment_status_display': str(order.get_payment_status_display()),  # 轉換為字符串
+                'is_payment_timeout': bool(order.is_payment_timeout),
+                'is_quick_order': bool(order.is_quick_order),
+                'items': []
+            }
+            
+            # 獲取訂單項目
+            for item in order.get_items_with_chinese_options():
+                item_data = {
+                    'name': str(item.get('name', '')),
+                    'quantity': int(item.get('quantity', 0)),
+                    'price': float(item.get('price', 0)),
+                    'total_price': float(item.get('total_price', 0)),
+                    'image': str(item.get('image', '')) if item.get('image') else None,
+                    'cup_level_cn': str(item.get('cup_level_cn', '')),
+                    'milk_level_cn': str(item.get('milk_level_cn', '')),
+                    'grinding_level_cn': str(item.get('grinding_level_cn', '')),
+                }
+                order_data['items'].append(item_data)
+            
+            orders_data.append(order_data)
+        
+        return JsonResponse({
+            'orders': orders_data,
+            'has_more': bool(has_more),
+            'total_orders': int(total_orders),
+            'offset': int(offset),
+            'limit': int(limit)
+        })
+    
+    # 普通請求，渲染模板
+    return render(request, 'socialuser/order_history.html', {
+        'orders': orders,
+        'has_more': has_more,
+        'total_orders': total_orders
+    })
 
 
 def reactivate_account(request):
