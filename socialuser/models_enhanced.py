@@ -140,17 +140,6 @@ class CustomerLoyalty(models.Model):
                 'color': 'warning'
             })
         
-        # 生日驚喜禮包 (50積分)
-        if self.points >= 50:
-            rewards.append({
-                'id': 'birthday_gift',
-                'name': '生日驚喜禮包',
-                'points_required': 50,
-                'description': '生日當月免費咖啡+甜點',
-                'icon': 'fa-gift',
-                'color': 'danger'
-            })
-        
         return rewards
     
     def redeem_reward(self, reward_id):
@@ -390,27 +379,6 @@ class CustomerCoupon(models.Model):
         )
         
         logger.info(f"為新用戶 {user.username} 創建歡迎優惠券: {code}")
-        return coupon
-    
-    @classmethod
-    def create_birthday_coupon(cls, user):
-        """創建生日優惠券"""
-        code = cls.generate_coupon_code()
-        valid_from = timezone.now()
-        valid_to = valid_from + timedelta(days=30)  # 生日月有效
-        
-        coupon = cls.objects.create(
-            user=user,
-            code=code,
-            coupon_type='fixed',
-            value=Decimal('20.00'),  # $20優惠
-            min_order_amount=Decimal('50.00'),
-            valid_from=valid_from,
-            valid_to=valid_to,
-            description='生日快樂！$20優惠券'
-        )
-        
-        logger.info(f"為用戶 {user.username} 創建生日優惠券: {code}")
         return coupon
 
 

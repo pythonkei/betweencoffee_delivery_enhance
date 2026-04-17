@@ -72,16 +72,7 @@
                             <div class="order-item mb-4 p-4 rounded border">
                                 <div class="d-flex justify-content-between mb-3">
                                     <div>
-                                        <h5>訂單編號: #{{ order.id }}</h5>
-                                        <p class="text-muted mb-0">
-                                            訂單時間: {{ order.created_at|date:"Y-m-d H:i" }}
-                                        </p>
-                                        <!-- 添加取餐码信息 -->
-                                        <p class="mb-0">
-                                            <strong>取餐码:</strong> 
-                                            <span class="h5 color-theme">{{ order.pickup_code }}</span>
-                                        </p>
-                                        <!-- 统一的订单状态显示 -->
+                                        <!-- 統一的訂單狀態顯示 -->
                                         <div class="mt-2">
                                             {% if order.payment_status == 'paid' %}
                                                 {% if order.status == 'preparing' %}
@@ -99,7 +90,7 @@
                                             </span>
                                         {% elif order.status == 'ready' %}
                                             <span class="badge badge-success">
-                                                <i class="fas fa-mug-hot mr-1"></i>已就绪，请取餐
+                                                <i class="fas fa-mug-hot mr-1"></i>已就緒，請取餐
                                             </span>
                                         {% elif order.status == 'completed' %}
                                             <span class="badge badge-success">
@@ -115,12 +106,12 @@
                                             <!-- 修改：待支付徽章中的minutes改为分鐘 -->
                                             <span class="badge badge-warning payment-countdown">
                                                 <i class="fas fa-hourglass-half mr-1"></i>
-                                                待支付 - 剩余: <span class="countdown-text">{{ order.payment_timeout|timeuntil }}</span>
+                                                待支付 - 剩餘: <span class="countdown-text">{{ order.payment_timeout|timeuntil }}</span>
                                             </span>
                                         {% elif order.is_payment_timeout or order.payment_status == 'cancelled' %}
                                             <!-- 恢复显示取消/超时徽章 -->
                                             <span class="badge badge-danger">
-                                                <i class="fas fa-times-circle mr-1"></i>订单已取消/超时
+                                                <i class="fas fa-times-circle mr-1"></i>訂單已取消/逾時
                                             </span>
                                         {% else %}
                                             <span class="badge badge-secondary">
@@ -129,28 +120,31 @@
                                         {% endif %}
                                     {% endif %}
                                     
-                                    <!-- 隐藏快速订单徽章，但保留逻辑 -->
                                     {% if order.is_quick_order %}
                                     <span class="badge badge-success ml-1" style="display: none;">
                                         <i class="fas fa-bolt mr-1"></i>快速訂單
                                     </span>
                                     {% endif %}
+                                    <!-- 添加取餐码信息 -->
+                                    <p hidden class="mt-2">
+                                        <strong>取餐码:</strong> 
+                                        <span class="h5 color-theme">{{ order.pickup_code }}</span>
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="text-right">
+                            <div class="text-right mt-2">
                                 <span class="h5 pr-2">${{ order.total_price|floatformat:2 }}</span>
                             </div>
                         </div>
                         
-                        <div class="order-items">
+                        <div class="order-items mb-4">
                             {% for item in order.get_items_with_chinese_options %}
-                            <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center mb-4">
                                 <div class="mr-3">
-                                    <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                                        <!-- 修改：确保图片路径正确 -->
+                                    <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
                                         {% if item.image %}
-                                            <img src="{{ item.image }}" alt="{{ item.name }}" class="img-fluid" style="max-height: 75px;" onerror="this.src='/static/images/default-product.png'">
+                                            <img src="{{ item.image }}" alt="{{ item.name }}" class="img-fluid" style="max-height: 84px;" onerror="this.src='/static/images/default-product.png'">
                                         {% else %}
                                             <img src="/static/images/default-product.png" alt="{{ item.name }}" class="img-fluid" style="max-height: 75px;">
                                         {% endif %}
@@ -172,29 +166,31 @@
                                     <div class="text-muted small">${{ item.price|floatformat:2 }} / 單價</div>
                                 </div>
                             </div>
+                            <div>
+                            <h6 class="text-white">訂單編號: #{{ order.id }}</h6>
+                                <p class="text-muted mb-0">
+                                    訂單時間: {{ order.created_at|date:"Y-m-d H:i" }}
+                                </p>
+                            </div>
                             {% endfor %}
                         </div>
                         
                         <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                             <div>
-                                <!-- 保留商品数量信息文本，但取消badge样式 -->
                                 <span class="text-muted">{{ order.get_items|length }} 項商品</span>
                             </div>
 
-                            <!-- 订单操作按钮 -->
+                            <!-- 訂單操作按鈕 -->
                             <div>
                                 {% if order.payment_status == 'paid' and order.status == 'completed' %}
-                                    <!-- 隐藏"订单已完成"信息文本，但保留逻辑 -->
                                     <span class="text-success" style="display: none;">
                                         <i class="fas fa-check-circle mr-1"></i>订单已完成
                                     </span>
                                 {% elif order.payment_status == 'paid' and order.status == 'ready' %}
-                                    <!-- 隐藏"已就绪，请取餐"信息文本，但保留逻辑 -->
                                     <span class="text-success" style="display: none;">
                                         <i class="fas fa-mug-hot mr-1"></i>已就绪，请取餐
                                     </span>
                                 {% elif order.payment_status == 'paid' and order.status == 'preparing' %}
-                                    <!-- 隐藏"制作中，请稍候"信息文本，但保留逻辑 -->
                                     <span class="text-warning" style="display: none;">
                                         <i class="fas fa-clock mr-1"></i>制作中，请稍候
                                     </span>
@@ -204,13 +200,11 @@
                                         <i class="fas fa-credit-card mr-1"></i>繼續支付
                                     </a>
                                 {% else %}
-                                    <!-- 隐藏取消/超时文本，但保留逻辑 -->
                                     <span class="text-danger small" style="display: none;">
                                         <i class="fas fa-times-circle mr-1"></i>订单已取消/超时
                                     </span>
                                 {% endif %}
                                 
-                                <!-- 隐藏详情按钮，但保留逻辑 -->
                                 <a href="{% url 'eshop:order_detail' order.id %}" 
                                    class="btn btn-outline-secondary btn-sm ml-2" style="display: none;">
                                     <i class="fas fa-info-circle mr-1"></i>詳情

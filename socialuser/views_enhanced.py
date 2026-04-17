@@ -84,20 +84,25 @@ def redeem_reward(request):
             })
         
         loyalty, _ = CustomerLoyalty.objects.get_or_create(user=request.user)
+        
+        # 先獲取獎勵信息，然後再兌換
+        available_rewards = loyalty.get_available_rewards()
+        reward_info = next((r for r in available_rewards if r['id'] == reward_id), None)
+        
+        if not reward_info:
+            return JsonResponse({
+                'success': False,
+                'message': '獎勵不存在或不可兌換'
+            })
+        
         success, message = loyalty.redeem_reward(reward_id)
         
         if success:
             # 記錄活動
-            reward_name = next(
-                (r['name'] for r in loyalty.get_available_rewards() 
-                 if r['id'] == reward_id),
-                reward_id
-            )
             CustomerActivity.record_reward_redeemed(
                 request.user,
-                reward_name,
-                next(r['points_required'] for r in loyalty.get_available_rewards() 
-                     if r['id'] == reward_id)
+                reward_info['name'],
+                reward_info['points_required']
             )
             
             return JsonResponse({
@@ -273,13 +278,7 @@ def points_summary(request):
                 'description': '參與店內活動可獲得額外積分',
                 'icon': 'fa-gift',
                 'color': 'warning'
-            },
-            {
-                'type': '生日積分',
-                'description': '生日當月消費可獲得雙倍積分',
-                'icon': 'fa-birthday-cake',
-                'color': 'danger'
-            },
+            }
         ]
         
         # 獲取積分有效期信息

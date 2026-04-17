@@ -8523,8 +8523,8 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
     padding: 0.75rem 1rem;
     border: 1px solid rgba(196, 155, 99, 0.3);
     border-radius: 0;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    /* background-color: rgba(0, 0, 0, 0.8); */
+    /* color: #fff; */
     font-size: 1rem;
     transition: border-color 0.3s ease;
 }
