@@ -6,7 +6,7 @@
 <!-- Header Banner-->
 <section class="subpage-banner-h500 py-lg-4">
   <div class="ftco-subpage-banner" id="section-counter">
-    <div class="svg-bg ftco-counter noise_animation" style="background-image: url({% static 'images/owl_title_bg_01_v2.svg' %});" data-stellar-background-ratio="0.73" ></div>
+    <div class="svg-bg-3 ftco-counter noise_animation" style="background-image: url({% static 'images/owl_title_bg_01_v2.svg' %});" data-stellar-background-ratio="0.73" ></div>
 
       <div class="container">
         <div class="row justify-content-center mt-5 p-2">
@@ -66,19 +66,18 @@
                     </div>
                     <div class="card-body">
                         <div class="text-center mb-4 text-white">
-                            <div class="profile-avatar mb-3">
+                            <div class="profile-avatar mb-4 mt-2">
                                 <img class="img-fluid rounded-circle" src="{{ profile.avatar }}" 
                                      style="width: 150px; height: 150px; object-fit: cover;" 
                                      alt="{{ profile.user.username }}" />
                             </div>
                             
-                            <h3 class="mb-2">
+                            <h3 class="mb-4">
                                 <i class="icon-user"></i> {{ profile.user.username }}
                             </h3>
                             
-                            <!-- 電話號碼顯示 -->
                             {% if profile.hk_phone %}
-                            <div class="h5 mb-3">
+                            <div class="h5 mb-2">
                                 <i class="icon-phone mr-2"></i> {{ profile.hk_phone }}
                             </div>
                             {% endif %}
