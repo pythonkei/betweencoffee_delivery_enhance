@@ -29,6 +29,14 @@ from eshop.payment_utils import get_payment_tools
 from cart.cart import Cart
 from decimal import Decimal
 
+# 忠誠度系統導入
+try:
+    from socialuser.models_enhanced import CustomerLoyalty, CustomerActivity
+    LOYALTY_SYSTEM_AVAILABLE = True
+except ImportError:
+    LOYALTY_SYSTEM_AVAILABLE = False
+    logger.warning("忠誠度系統模組不可用，積分功能將被禁用")
+
 
 # 设置日志
 logger = logging.getLogger(__name__)
@@ -768,7 +776,9 @@ def order_payment_confirmation(request, order_id=None):
         order = get_object_or_404(OrderModel, id=order_id)
         
         # ✅ 修復：直接使用 order.payment_status 的值
-        logger.info(f"訂單 {order.id} 當前狀態: status={order.status}, payment_status={order.payment_status}, payment_method={order.payment_method}")
+        logger.info(f"訂單 {order.id} 當前狀態: status={order.status}, "
+                   f"payment_status={order.payment_status}, "
+                   f"payment_method={order.payment_method}")
         
         # 檢查支付狀態
         if order.payment_status == 'paid':
@@ -790,14 +800,59 @@ def order_payment_confirmation(request, order_id=None):
         if not order.pickup_code:
             order.save()  # 這會觸發取餐碼生成
         
+        # 計算本次訂單獲得的積分（僅在支付成功且用戶已登入時）
+        earned_points = 0
+        loyalty_info = None
+        
+        if (payment_status_for_template == 'paid' and 
+            request.user.is_authenticated and 
+            LOYALTY_SYSTEM_AVAILABLE):
+            
+            try:
+                # 計算積分：每消費 $10 獲得 1 積分
+                earned_points = int(float(order.total_price) / 10)
+                
+                # 獲取用戶的忠誠度記錄
+                loyalty, created = CustomerLoyalty.objects.get_or_create(
+                    user=request.user
+                )
+                
+                # 添加積分到用戶帳戶
+                loyalty.add_points_from_order(order)
+                
+                # 記錄活動
+                CustomerActivity.record_points_earned(
+                    user=request.user,
+                    order_id=order.id,
+                    points_earned=earned_points,
+                    order_amount=float(order
+                )
+                
+                loyalty_info = {
+                    'earned_points': earned_points,
+                    'total_points': loyalty.points,
+                    'membership_number': loyalty.membership_number or '未分配',
+                }
+                
+                logger.info(f"用戶 {request.user.username} 從訂單 {order.id} "
+                           f"獲得 {earned_points} 積分，總積分: {loyalty.points}")
+                
+            except Exception as e:
+                logger.error(f"計算積分時發生錯誤: {str(e)}")
+                # 不影響主要功能，繼續顯示頁面
+        
         context = {
             'order': order,
             'payment_status': payment_status_for_template,
             'order_type': order_type,
             'status_info': status_info,
+            'earned_points': earned_points,
+            'loyalty_info': loyalty_info,
         }
 
-        logger.info(f"訂單確認頁面 - 訂單ID: {order.id}, 支付狀態: {payment_status_for_template}")
+        logger.info(f"訂單確認頁面 - 訂單ID: {order.id}, "
+                   f"支付狀態: {payment_status_for_template}, "
+                   f"獲得積分: {earned_points}")
         
         return render(request, 'eshop/order_payment_confirmation.html', context)
         

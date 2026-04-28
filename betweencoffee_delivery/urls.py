@@ -40,6 +40,7 @@ urlpatterns = [
     path('', Index.as_view(), name='index'),  # find own app html file
     path('__debug__/', include('debug_toolbar.urls')),
     path('profile/', include('socialuser.urls')),
+    path('profile/', include('socialuser.urls_enhanced')),  # 添加增強會員系統URL
     path('@<username>/', profile_view, name="user_profile"),
 
     path('eshop/', include('eshop.urls', namespace="eshop")),  # Include eshop URLs

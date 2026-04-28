@@ -884,13 +884,19 @@ def redirect_to_confirmation(order_id):
     except Exception as ws_error:
         logger.error(f"发送WebSocket通知失败: {ws_error}")
     
-    # ✅ 修復：使用 order_id 參數，而不是不存在的 order 變數
+    # ✅ 修復：確保正確構建URL
     try:
         # 嘗試使用帶參數的版本
         return redirect(reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order_id}))
-    except:
-        # 備用方案：使用無參數版本 + GET參數
-        return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order_id}')
+    except Exception as e:
+        logger.error(f"使用帶參數版本重定向失敗: {str(e)}")
+        try:
+            # 備用方案：使用無參數版本 + GET參數
+            return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order_id}')
+        except Exception as e2:
+            logger.error(f"所有重定向方法都失敗: {str(e2)}")
+            # 最後的備用方案：直接構建URL
+            return redirect(f'/eshop/order/payment-confirmation/{order_id}/')
 
 
 def handle_payment_by_order_id(request, order_id):
@@ -898,14 +904,14 @@ def handle_payment_by_order_id(request, order_id):
     try:
         if not order_id:
             from django.urls import reverse
-            return redirect('eshop:order_payment_confirmation_with_id', order_id=order.id)
+            # 如果沒有訂單ID，重定向到首頁
+            return redirect('index')
         
         order = OrderModel.objects.get(id=order_id)
         if order.payment_status == "paid":
             return redirect_to_confirmation(order_id)
         else:
             # 即使回调有问题，也标记为已支付（因为手机端显示已扣款）
-            order.payment_status="paid"
             order.payment_status = 'paid'
             # ✅ 已修復：使用 OrderStatusManager
             from eshop.order_status_manager import OrderStatusManager
@@ -921,8 +927,8 @@ def handle_payment_by_order_id(request, order_id):
             
     except OrderModel.DoesNotExist:
         logger.error(f"订单不存在: {order_id}")
-        from django.urls import reverse
-        return redirect('eshop:order_payment_confirmation_with_id', order_id=order.id)
+        # 訂單不存在，重定向到首頁
+        return redirect('index')
 
 # ==================== 支付宝配置检查 ====================
 
