@@ -146,10 +146,10 @@ class BadgeManager {
                 element.classList.remove('has-items');
                 element.classList.add('no-items');
                 
-                // 添加淡色內聯樣式
+                // 添加淡色內聯樣式（無邊框，保持與有訂單狀態一致）
                 element.style.backgroundColor = this.getLightBackground(badgeType);
                 element.style.color = this.getLightTextColor(badgeType);
-                element.style.border = '1px solid #dee2e6';
+                element.style.border = 'none';
             }
         }
         

@@ -364,7 +364,7 @@
 .badge-light {
     background-color: transparent;
     color: #ddd;
-    border: 1px solid #9d9d9d;
+    /* border: 1px solid #9d9d9d; */
 }
 
 

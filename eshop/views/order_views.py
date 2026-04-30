@@ -825,7 +825,7 @@ def order_payment_confirmation(request, order_id=None):
                     user=request.user,
                     order_id=order.id,
                     points_earned=earned_points,
-                    order_amount=float(order
+                    order_amount=float(order.total_price),
                 )
                 
                 loyalty_info = {

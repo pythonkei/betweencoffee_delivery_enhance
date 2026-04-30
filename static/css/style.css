@@ -7694,8 +7694,8 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 }
 
 #svg_over_on img {
-  width: 100%;
-  height: 100%;
+  /* width: 100%; */ 
+  /* height: 100%; */
   top: 0;
   left: 0;
   right: 0;
@@ -7806,7 +7806,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0;
+  padding: 1rem 0;
 }
 
 .price-v1 {
