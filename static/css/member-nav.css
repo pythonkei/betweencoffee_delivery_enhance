@@ -1,0 +1,75 @@
+/* 
+ * member-nav.css - 會員導航標籤頁樣式
+ * 僅包含 member-nav 相關樣式，無基礎重置或變數定義
+ * 用於 profile.html, order_history.html, loyalty_dashboard.html
+ * 
+ * 使用 a.member-nav-item 提高 specificity，
+ * 確保不受 style.css 的 a { color: #c49b63; } 影響
+ */
+
+.member-nav-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.member-nav-container {
+    display: inline-flex;
+    background-color: #c49b63;
+    border-radius: 50px;
+    padding: 4px;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(196, 155, 99, 0.3);
+}
+
+a.member-nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 46px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #ffffff;
+    text-decoration: none;
+    transition: none;
+    white-space: nowrap;
+}
+
+a.member-nav-item:hover {
+    color: #ffffff;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+a.member-nav-item.active {
+    background-color: #ffffff;
+    color: #c49b63;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+a.member-nav-item.active i {
+    color: #c49b63;
+}
+
+a.member-nav-item i {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 響應式：手機版保持水平排列，按鈕稍微縮小 */
+@media (max-width: 576px) {
+    .member-nav-container {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    a.member-nav-item {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+    
+    a.member-nav-item i {
+        font-size: 0.9rem;
+    }
+}

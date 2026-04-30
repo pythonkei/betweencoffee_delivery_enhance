@@ -2,6 +2,11 @@
 {% extends 'layouts/blank.html' %}
 {% load static %}
 
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/member-nav.css' %}">
+{% endblock %}
+
 {% block content %}
 <!-- Header Banner-->
 <section class="subpage-banner-h500 py-lg-4">
@@ -11,13 +16,13 @@
       <div class="container">
         <div class="row justify-content-center mt-5 p-2">
             <div class="col-lg-12 col-md-12 heading-section text-center">
-              <span class="subheading">Explore<br>Between</span>
+              <span class="subheading">Member<br>Between</span>
               <h2 class="mb-3">&#65371;帳戶資料&#65373;</h2>
               <p style="color:#ccc;">建構共同空間拉近彼此距離<br />細意品嚐</p>
             </div>
         </div>
 
-        <div class="row justify-content-center mb-3">
+        <div hidden class="row justify-content-center mb-3">
           <p class="icon_text"><a href="{% url 'index' %}"><i class="icon material-symbols-outlined icon_vert-align-middle">undo</i> 首頁</a></p>
         </div>
       </div>
@@ -29,33 +34,12 @@
 <section class="ftco-subpage-section">
     <div class="container">
         <div class="row justify-content-center mt-5">
-            <!-- 左側：會員導航菜單 -->
-            <div class="col-lg-4 mb-5">
+            <!-- 會員導航菜單（水平置中） -->
+            <div class="col-12 mb-4">
                 {% include 'socialuser/includes/member_nav.html' %}
-                
-                <!-- 快速操作卡片 -->
-                <div hidden class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h6 class="card-title">
-                            <i class="fas fa-bolt text-warning mr-2"></i>
-                            快速操作
-                        </h6>
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'socialuser:profile-edit' %}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-edit mr-1"></i> 編輯帳戶資料
-                            </a>
-                            <a href="{% url 'coffee_menu' %}" class="btn btn-outline-success btn-sm">
-                                <i class="fas fa-coffee mr-1"></i> 立即點餐
-                            </a>
-                            <a href="{% url 'socialuser:loyalty_dashboard' %}" class="btn btn-outline-warning btn-sm">
-                                <i class="fas fa-crown mr-1"></i> 查看積分
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </div>
             
-            <!-- 右側：個人資料內容 -->
+            <!-- 個人資料內容 -->
             <div class="col-lg-8 mb-5">
                 <div class="card shadow-sm">
                     <div class="card-header">
