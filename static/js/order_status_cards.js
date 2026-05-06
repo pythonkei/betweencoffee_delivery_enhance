@@ -14,6 +14,10 @@ class OrderStatusCardsManager {
         this.websocketConnector = null;
         this.isConnected = false;
         
+        // 記錄最後一次從服務器收到的狀態（用於去重，防止輪詢重複彈 Toast）
+        this.lastServerStatus = null;
+
+        
         // 記錄每個狀態的實際時間
         this.actualStatusTimes = {
             'ordered': document.body.dataset.orderedTime || null,
@@ -219,7 +223,14 @@ class OrderStatusCardsManager {
     updateStatus(status) {
         console.log("更新狀態:", status);
         
+        // 去重：如果狀態未變化，跳過更新（防止輪詢和重連重複觸發 Toast）
+        if (this.currentStatus === status) {
+            console.log("狀態未變化，跳過更新:", status);
+            return;
+        }
+        
         // 更新卡片
+
         if (this.statusCards[status]) {
             // 移除所有卡片的active類
             Object.values(this.statusCards).forEach(card => {
@@ -535,7 +546,16 @@ class OrderStatusCardsManager {
             return;
         }
         
+        // 服務器層級去重：如果服務器返回的狀態和上次相同，跳過整個更新流程
+        // 這是防止輪詢和 WebSocket 重連重複彈 Toast 的關鍵
+        if (this.lastServerStatus === status) {
+            console.log("服務器狀態未變化，跳過更新:", status);
+            return;
+        }
+        this.lastServerStatus = status;
+        
         // 根據訂單類型設置不同的狀態流程
+
         if (this.isBeansOnly) {
             // 純咖啡豆訂單：簡化狀態流程（跳過preparing）
             switch(status) {
@@ -767,63 +787,11 @@ class OrderStatusCardsManager {
             indicator.style.cursor = 'pointer';
             indicator.title = '點擊重新連接';
             
-            // 添加連接狀態監控面板（僅在開發模式下）
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                this.setupConnectionMonitor();
-            }
         }
     }
     
-    // 設置連接監控面板（開發模式）
-    setupConnectionMonitor() {
-        const monitorPanel = document.createElement('div');
-        monitorPanel.id = 'websocket-monitor-panel';
-        monitorPanel.style.cssText = `
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 9998;
-            max-width: 300px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-        `;
-        
-        const updateMonitor = () => {
-            if (this.websocketConnector) {
-                const status = this.websocketConnector.getConnectionStatus();
-                monitorPanel.innerHTML = `
-                    <div style="margin-bottom: 5px; font-weight: bold;">WebSocket監控面板</div>
-                    <div>狀態: ${status.readyStateText}</div>
-                    <div>連接時間: ${Math.round(status.connectionDuration / 1000)}秒</div>
-                    <div>消息數: ${status.messageCount}</div>
-                    <div>健康度: ${status.reconnectStatus.healthScore}分 (${status.reconnectStatus.healthStatus})</div>
-                    <div>成功率: ${status.reconnectStatus.successRate}</div>
-                    <div>重試次數: ${status.reconnectStatus.retryCount}/${status.reconnectStatus.maxRetries}</div>
-                    <div>心跳延遲: ${status.heartbeat.pingLatency ? status.heartbeat.pingLatency + 'ms' : 'N/A'}</div>
-                `;
-            } else if (this.websocket) {
-                monitorPanel.innerHTML = `
-                    <div style="margin-bottom: 5px; font-weight: bold;">WebSocket監控面板（標準版）</div>
-                    <div>狀態: ${this.websocket.readyState === 1 ? '已連接' : '未連接'}</div>
-                    <div>重試次數: ${this.reconnectAttempts || 0}/5</div>
-                `;
-            }
-        };
-        
-        // 每2秒更新一次監控面板
-        setInterval(updateMonitor, 2000);
-        updateMonitor();
-        
-        document.body.appendChild(monitorPanel);
-    }
-    
     // 設置定期狀態檢查
+
     setupPeriodicCheck() {
         // 每30秒檢查一次訂單狀態
         setInterval(() => {
@@ -856,12 +824,6 @@ class OrderStatusCardsManager {
         if (this.websocket) {
             this.websocket.close();
             this.websocket = null;
-        }
-        
-        // 清理監控面板
-        const monitorPanel = document.getElementById('websocket-monitor-panel');
-        if (monitorPanel) {
-            monitorPanel.remove();
         }
         
         console.log("✅ WebSocket資源已清理");
