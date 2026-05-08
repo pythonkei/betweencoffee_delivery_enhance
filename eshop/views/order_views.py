@@ -817,16 +817,8 @@ def order_payment_confirmation(request, order_id=None):
                     user=request.user
                 )
                 
-                # 添加積分到用戶帳戶
+                # 添加積分到用戶帳戶（內部已自動記錄活動）
                 loyalty.add_points_from_order(order)
-                
-                # 記錄活動
-                CustomerActivity.record_points_earned(
-                    user=request.user,
-                    order_id=order.id,
-                    points_earned=earned_points,
-                    order_amount=float(order.total_price),
-                )
                 
                 loyalty_info = {
                     'earned_points': earned_points,

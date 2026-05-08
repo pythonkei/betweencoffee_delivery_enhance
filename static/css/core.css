@@ -700,7 +700,18 @@ label {
   white-space: nowrap;
 }
 
-/* ===== 20. 自定義滾動條 ===== */
+/* ===== 20. 積分獎勵橫幅 ===== */
+.points-earned-banner {
+  background-color: var(--theme-color, #c49b63);
+  border-radius: 12px;
+  width: 100%;
+}
+
+.points-earned-banner .points-number {
+  font-size: 1.3rem;
+}
+
+/* ===== 21. 自定義滾動條 ===== */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

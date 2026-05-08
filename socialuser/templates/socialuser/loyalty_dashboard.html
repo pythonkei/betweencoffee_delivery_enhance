@@ -68,31 +68,6 @@
                                         </div>
                                         <h1 class="display-4 text-primary mb-3">{{ loyalty.points }}</h1>
                                         <p class="card-text-md mb-0">當前積分</p>
-                                        <p class="card-text-md mb-1">有效期：
-                                            {% if points_summary.days_until_expiry %}
-                                                {% if points_summary.days_until_expiry <= 7 %}
-                                                <span class="text-danger">
-                                                    <i hidden class="fas fa-exclamation-triangle mr-1"></i>
-                                                    剩餘 {{ points_summary.days_until_expiry }} 天（即將過期）
-                                                </span>
-                                                {% elif points_summary.days_until_expiry <= 30 %}
-                                                <span class="text-warning">
-                                                    <i class="fas fa-clock mr-1"></i>
-                                                    剩餘 {{ points_summary.days_until_expiry }} 天
-                                                </span>
-                                                {% else %}
-                                                <span class="text-theme">
-                                                    <i hidden class="fas fa-calendar-alt mr-1"></i>
-                                                    剩餘 {{ points_summary.days_until_expiry }} 天
-                                                </span>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted">
-                                                    <i class="fas fa-infinity mr-1"></i>
-                                                    永久有效
-                                                </span>
-                                            {% endif %}
-                                            </p>
                                         <p class="text-muted"><i>每消費 $10 獲得 1 積分</i></p>
                                     </div>
                                 </div>
@@ -173,34 +148,6 @@
                                             <li class="mb-2">
                                                 <span class="text-muted">用戶名：</span>
                                                 <strong>{{ membership_info.username }}</strong>
-                                            </li>
-                                            <li>
-                                                <span class="text-muted">積分有效期：</span>
-                                                <strong>
-                                                    {% if points_summary.days_until_expiry %}
-                                                        {% if points_summary.days_until_expiry <= 7 %}
-                                                        <span class="text-danger">
-                                                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                            剩餘 {{ points_summary.days_until_expiry }} 天（即將過期）
-                                                        </span>
-                                                        {% elif points_summary.days_until_expiry <= 30 %}
-                                                        <span class="text-warning">
-                                                            <i class="fas fa-clock mr-1"></i>
-                                                            剩餘 {{ points_summary.days_until_expiry }} 天
-                                                        </span>
-                                                        {% else %}
-                                                        <span class="text-info">
-                                                            <i class="fas fa-calendar-alt mr-1"></i>
-                                                            剩餘 {{ points_summary.days_until_expiry }} 天
-                                                        </span>
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <span class="text-muted">
-                                                            <i class="fas fa-infinity mr-1"></i>
-                                                            永久有效
-                                                        </span>
-                                                    {% endif %}
-                                                </strong>
                                             </li>
                                         </ul>
                                     </div>
@@ -299,9 +246,13 @@
                                                 <!-- 活動描述內容 -->
                                                 <div class="activity-description-content">
                                                     <div class="activity-description">{{ activity.description }}</div>
-                                                    <div class="activity-time">
-                                                        訂單時間: {{ activity.created_at|date:"Y-m-d H:i" }}
-                                                    </div>
+                                                <div class="activity-time">
+                                                    {% if activity.metadata.order_created_at %}
+                                                    訂單時間: {{ activity.metadata.order_created_at|slice:":16"|cut:"T"|cut:" " }}
+                                                    {% else %}
+                                                    記錄時間: {{ activity.created_at|date:"Y-m-d H:i" }}
+                                                    {% endif %}
+                                                </div>
                                                     {% if activity.details %}
                                                     <div class="activity-details">{{ activity.details }}</div>
                                                     {% endif %}

@@ -1,7 +1,6 @@
 # socialuser/models_enhanced.py
 # 會員系統強化 - 簡化版忠誠度計劃模型
 # 移除會員升級邏輯和權益，專注於積分系統
-from datetime import timedelta
 from decimal import Decimal
 import logging
 
@@ -90,10 +89,7 @@ class CustomerLoyalty(models.Model):
             self.total_orders += 1
             self.last_order_date = order.created_at
             
-            # 設置積分有效期（1年）
-            expiry_date = timezone.now() + timedelta(days=365)
-            if not self.points_expiry_date or expiry_date > self.points_expiry_date:
-                self.points_expiry_date = expiry_date
+            # 積分永久有效，不設置有效期
             
             self.save()
             
@@ -174,10 +170,7 @@ class CustomerLoyalty(models.Model):
         self.points += points
         self.total_points_earned += points
         
-        # 設置積分有效期（1年）
-        expiry_date = timezone.now() + timedelta(days=365)
-        if not self.points_expiry_date or expiry_date > self.points_expiry_date:
-            self.points_expiry_date = expiry_date
+        # 積分永久有效，不設置有效期
         
         self.save()
         
@@ -199,35 +192,18 @@ class CustomerLoyalty(models.Model):
         return points
     
     def check_points_expiry(self):
-        """檢查積分有效期，過期積分自動清除"""
-        if not self.points_expiry_date:
-            return 0
-        
-        now = timezone.now()
-        if now > self.points_expiry_date:
-            expired_points = self.points
-            self.points = 0
-            self.points_expiry_date = None
-            self.save()
-            
-            logger.info(f"用戶 {self.user.username} 積分已過期: {expired_points} 積分")
-            return expired_points
-        
+        """檢查積分有效期（已棄用 - 積分永久有效）"""
+        # 積分永久有效，不再執行過期清除
         return 0
     
     def get_points_summary(self):
         """獲取積分摘要信息"""
-        days_until_expiry = None
-        if self.points_expiry_date:
-            delta = self.points_expiry_date - timezone.now()
-            days_until_expiry = max(0, delta.days)
-        
         return {
             'current_points': self.points,
             'total_earned': self.total_points_earned,
             'total_spent': self.total_points_spent,
-            'points_expiry_date': self.points_expiry_date,
-            'days_until_expiry': days_until_expiry,
+            'points_expiry_date': None,
+            'days_until_expiry': None,
             'total_spent_amount': float(self.total_spent),
             'total_orders': self.total_orders,
             'membership_days': (timezone.now() - self.join_date).days,
@@ -414,15 +390,26 @@ class CustomerActivity(models.Model):
     @classmethod
     def record_points_earned(cls, user, order_id, points_earned, order_amount):
         """記錄獲得積分"""
+        # 嘗試獲取訂單的實際創建時間
+        order_created_at = None
+        try:
+            from eshop.models import OrderModel
+            order = OrderModel.objects.filter(id=order_id).first()
+            if order:
+                order_created_at = order.created_at.isoformat()
+        except Exception:
+            pass
+        
         activity = cls.objects.create(
             user=user,
             activity_type='points_earned',
             points_change=points_earned,
-            description=f"訂單 #{order_id} 消費 ${order_amount}，獲得 {points_earned} 積分",
+            description=f"訂單 #{order_id} 消費 ${float(order_amount):.2f}，獲得 {points_earned} 積分",
             metadata={
                 'order_id': order_id,
                 'order_amount': float(order_amount),
-                'points_earned': points_earned
+                'points_earned': points_earned,
+                'order_created_at': order_created_at,
             }
         )
         return activity
@@ -479,7 +466,7 @@ class CustomerActivity(models.Model):
             user=user,
             activity_type='order_placed',
             points_change=0,
-            description=f"下單成功 #${order_id}，金額 ${order_amount}",
+            description=f"下單成功 #{order_id}，金額 ${float(order_amount):.2f}",
             metadata={
                 'order_id': order_id,
                 'order_amount': float(order_amount)

@@ -362,7 +362,22 @@
                 </div>
                 {% endwith %}
 
-                <!-- 積分獎勵顯示區（已移除） -->
+                <!-- ========== 積分獎勵顯示區 ========== -->
+                {% if earned_points > 0 and loyalty_info %}
+                <div class="row justify-content-center mb-4">
+                    <div class="col-12">
+                        <div class="d-flex align-items-center justify-content-center py-3 px-4" style="background-color: #c49b63; width: 100%; border-radius: 50px;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-star text-white mr-3" style="font-size: 1.5rem;"></i>
+                                <span class="text-white font-weight-bold" style="font-size: 1.1rem;">
+                                    獲得 <span style="font-size: 1.3rem;">{{ earned_points }}</span> 積分
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- ========== end 積分獎勵顯示區 ========== -->
 
                 <!-- 商品明细 -->
                 <div class=" mb-5 p-4 rounded">
