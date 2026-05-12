@@ -61,26 +61,26 @@
                         <!-- 積分統計卡片 -->
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3">
-                                <div class="card border-primary shadow-sm">
-                                    <div class="card-body text-center">
-                                        <div class="h4 text-primary mb-2">
-                                            <i class="fas fa-chart-line"></i>
+                                <div class="stats-card">
+                                    <div class="stats-card-body text-center">
+                                        <div class="stats-card-icon">
+                                            <i class="fas fa-coins"></i>
                                         </div>
-                                        <h1 class="display-4 text-primary mb-3">{{ loyalty.points }}</h1>
-                                        <p class="card-text-md mb-0">當前積分</p>
-                                        <p class="text-muted"><i>每消費 $10 獲得 1 積分</i></p>
+                                        <h1 class="stats-card-number">{{ loyalty.points }}</h1>
+                                        <p class="stats-card-label">當前積分</p>
+                                        <p class="stats-card-hint">每消費 $10 獲得 1 積分</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="card border-success shadow-sm">
-                                    <div class="card-body text-center">
-                                        <div class="h4 text-primary mb-2">
-                                            <i class="fas fa-chart-line text-theme"></i>
+                                <div class="stats-card">
+                                    <div class="stats-card-body text-center">
+                                        <div class="stats-card-icon">
+                                            <i class="fas fa-shopping-bag"></i>
                                         </div>
-                                        <h2 class="display-4 text-theme mb-3">${{ points_summary.total_spent_amount|floatformat:0 }}</h2>
-                                        <p class="card-text-md mb-0">累計消費 : </p>
-                                        <p class="card-text-md mb-0">共 {{ points_summary.total_orders }} 筆訂單</p>
+                                        <h2 class="stats-card-number stats-card-number-lg">${{ points_summary.total_spent_amount|floatformat:0 }}</h2>
+                                        <p class="stats-card-label">累計消費</p>
+                                        <p class="stats-card-label-sub">共 {{ points_summary.total_orders }} 筆訂單</p>
                                     </div>
                                 </div>
                             </div>
@@ -167,26 +167,25 @@
                     </div>
                     <div class="card-body">
                         {% if available_rewards %}
-                        <div class="row">
+                        <div class="reward-coupon-list">
                             {% for reward in available_rewards %}
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100 border-{{ reward.color }} shadow-sm">
-                                    <div class="card-body text-center">
-                                        <div class="mb-3">
-                                            <i class="fas {{ reward.icon }} fa-3x text-{{ reward.color }}"></i>
-                                        </div>
-                                        <h5 class="card-title">{{ reward.name }}</h5>
-                                        <p class="card-text text-muted small">{{ reward.description }}</p>
-                                        <div class="mt-3">
-                                            <span class="badge bg-{{ reward.color }} p-2">
-                                                <i class="fas fa-coins mr-1"></i> {{ reward.points_required }} 積分
-                                            </span>
-                                        </div>
-                                        <button class="btn btn-outline-{{ reward.color }} btn-sm mt-3 w-100 redeem-btn" 
-                                                data-reward-id="{{ reward.id }}">
-                                            <i class="fas fa-exchange-alt mr-1"></i> 立即兌換
-                                        </button>
+                            <div class="reward-coupon-item">
+                                <div class="reward-coupon-left">
+                                    <div class="reward-coupon-icon">
+                                        <i class="fas {{ reward.icon }}"></i>
                                     </div>
+                                    <div class="reward-coupon-points">
+                                        <span class="reward-points-number">{{ reward.points_required }}</span>
+                                        <span class="reward-points-label">積分</span>
+                                    </div>
+                                </div>
+                                <div class="reward-coupon-divider"></div>
+                                <div class="reward-coupon-right">
+                                    <h5 class="reward-coupon-name">{{ reward.name }}</h5>
+                                    <p class="reward-coupon-desc">{{ reward.description }}</p>
+                                    <button class="reward-coupon-btn redeem-btn" data-reward-id="{{ reward.id }}">
+                                        <i class="fas fa-exchange-alt mr-1"></i> 立即兌換
+                                    </button>
                                 </div>
                             </div>
                             {% endfor %}

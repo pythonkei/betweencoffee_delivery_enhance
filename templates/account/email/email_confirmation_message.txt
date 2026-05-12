@@ -1,6 +1,6 @@
 Hello {{ user.username }},
 
-Thank you for registering with {{ site_name }}!
+Thank you for registering with {{ current_site.name }}!
 
 To verify your email address, please click the following link:
 {{ activate_url }}
@@ -8,4 +8,4 @@ To verify your email address, please click the following link:
 If you didn't request this, please ignore this email.
 
 Best regards,
-The {{ site_name }} Team
+The {{ current_site.name }} Team

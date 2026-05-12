@@ -43,7 +43,8 @@
             
             <!-- 個人資料內容 -->
             <div class="col-lg-8 mb-5">
-                <div class="card shadow-sm">
+                <!-- 標題（與 loyalty_dashboard 風格一致，在卡片外部） -->
+                <div class="card shadow-sm mb-4">
                     <div class="card-header">
                         <h4 class="mb-0">
                             <i class="fas fa-user-circle mr-1"></i>
@@ -51,65 +52,52 @@
                         </h4>
                     </div>
                     <div class="card-body">
-                        <div class="text-center mb-4 text-white">
-                            <div class="profile-avatar mb-4 mt-2">
-                                <img class="img-fluid rounded-circle" src="{{ profile.avatar }}" 
-                                     style="width: 150px; height: 150px; object-fit: cover;" 
+                        <!-- 頭像置中 -->
+                        <div class="text-center mb-4">
+                            <div class="profile-avatar d-inline-block">
+                                <img class="profile-avatar-img" src="{{ profile.avatar }}" 
                                      alt="{{ profile.user.username }}" />
                             </div>
-                            
-                            <h3 class="mb-4">
-                                <i class="icon-user"></i> {{ profile.user.username }}
-                            </h3>
+                        </div>
+                        
+                        <!-- 用戶資訊置中 -->
+                        <div class="text-center mb-4">
+                            <h3 class="profile-username">{{ profile.user.username }}</h3>
                             
                             {% if profile.hk_phone %}
-                            <div class="h5 mb-2">
-                                <i class="icon-phone mr-2"></i> {{ profile.hk_phone }}
+                            <div class="profile-detail-item">
+                                <i class="fas fa-phone mr-2"></i> {{ profile.hk_phone }}
                             </div>
                             {% endif %}
 
                             {% if profile.user.email %}
-                            <div class="h5 mb-2">
+                            <div class="profile-detail-item">
                                 <i class="fas fa-envelope mr-2"></i> {{ profile.user.email }}
                             </div>
                             {% endif %}
-
                         </div>
                         
                         <!-- 個人簡介 -->
                         {% if profile.info %}
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    個人簡介
-                                </h6>
+                        <div class="profile-section">
+                            <div class="profile-section-title">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                個人簡介
                             </div>
-                            <div class="card-body">
-                                <div class="hyphens-auto">{{ profile.info|linebreaksbr }}</div>
+                            <div class="profile-section-content">
+                                {{ profile.info|linebreaksbr }}
                             </div>
                         </div>
                         {% endif %}
                         
-                        <!-- 會員狀態 -->
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row justify-content-center">
-
-
-                                
-                                <div class="text-center mr-3">
-                                    <a href="{% url 'socialuser:profile-settings' %}" class="btn btn-primary">
-                                        <i class="fas fa-setting mr-1"></i> 帳戶設定
-                                    </a>
-                                </div>
-                                <div class="text-center mr-3">
-                                    <a href="{% url 'socialuser:profile-edit' %}"class="btn btn-primary">
-                                        <i class="fas fa-edit mr-1"></i> 編輯個人資料
-                                    </a>
-                                </div>
-                                                                </div>
-                            </div>
+                        <!-- 操作按鈕 -->
+                        <div class="profile-actions">
+                            <a href="{% url 'socialuser:profile-settings' %}" class="profile-btn">
+                                <i class="fas fa-cog mr-1"></i> 帳戶設定
+                            </a>
+                            <a href="{% url 'socialuser:profile-settings' %}" class="profile-btn">
+                                <i class="fas fa-edit mr-1"></i> 編輯個人資料
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -117,30 +105,4 @@
         </div>
     </div>
 </section>
-
-<style>
-.profile-avatar {
-    {% comment %} border: 5px solid #f8f9fa; {% endcomment %}
-    border-radius: 50%;
-    padding: 5px;
-    {% comment %} background: white; {% endcomment %}
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.card {
-    border: none;
-    border-radius: 10px;
-}
-
-.card-header {
-    border-radius: 10px 10px 0 0 !important;
-}
-
-.hyphens-auto {
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    -ms-hyphens: auto;
-}
-</style>
-
 {% endblock %}

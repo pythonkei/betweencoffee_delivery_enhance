@@ -207,7 +207,7 @@ TEMPLATES = [
                 'cart.context_processors.cart_count',
                 'eshop.view_utils.error_context_processor',
             ],
-            'string_if_invalid': 'INVALID_EXPRESSION' if DEBUG else '',
+            'string_if_invalid': '',
         },
     },
 ]
@@ -481,7 +481,7 @@ def get_social_providers():
 SOCIALACCOUNT_PROVIDERS = get_social_providers()
 
 # allauth 关键配置
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_ADAPTER = 'socialuser.adapters.NoNewUsersAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'socialuser.adapters.SocialAccountAdapter'
 
@@ -563,7 +563,14 @@ PHONENUMBER_DB_FORMAT = "NATIONAL"
 
 # ==================== 邮箱配置 ====================
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # 简化邮箱配置
+# Gmail SMTP 郵件配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Between Coffee <pythonkei@gmail.com>')
 
 # ==================== 日志配置 ====================
 

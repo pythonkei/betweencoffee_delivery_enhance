@@ -63,6 +63,15 @@ class PhoneForm(ModelForm):
         return phone
 
 
+class AvatarForm(ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['image']
+        widgets = {
+            'image': forms.FileInput(),
+        }
+
+
 class EmailForm(ModelForm):
     email = forms.EmailField(required=True)
     class Meta:

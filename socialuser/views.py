@@ -1,6 +1,6 @@
 # socialuser/views.py
 import os
-from .forms import ProfileForm, PhoneForm, EmailForm, UsernameForm
+from .forms import ProfileForm, PhoneForm, EmailForm, UsernameForm, AvatarForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from allauth.account.utils import send_email_confirmation
@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
+
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -105,7 +106,22 @@ def profile_view(request, username=None):
 
 @login_required
 def profile_settings_view(request):
-    return render(request, 'socialuser/profile_settings.html')
+    profile = request.user.profile
+    
+    if request.method == 'POST':
+        form = AvatarForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '頭像更新成功')
+            return redirect('socialuser:profile-settings')
+        else:
+            messages.error(request, '頭像上傳失敗，請確認檔案格式正確')
+    else:
+        form = AvatarForm(instance=profile)
+    
+    return render(request, 'socialuser/profile_settings.html', {
+        'form': form,
+    })
 
 
 
@@ -169,9 +185,15 @@ def profile_emailchange(request):
 
 @login_required
 def profile_emailverify(request):
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
         user = request.user
+        logger.info(f"=== Email verify requested by user {user.id} ({user.email}) ===")
+        
         if not user.email:
+            logger.warning(f"User {user.id} has no email address")
             messages.error(request, "No email address is set for your account")
             return redirect('socialuser:profile-settings')
         
@@ -184,17 +206,26 @@ def profile_emailverify(request):
                 'verified': False
             }
         )
+        logger.info(f"EmailAddress record: {email_address.email}, verified={email_address.verified}, created={created}")
         
         # Resend confirmation if not verified
         if not email_address.verified:
-            email_address.send_confirmation(request)
-            messages.success(request, f"Verification email sent to {user.email}")
+            logger.info(f"Attempting to send confirmation email to {user.email}")
+            try:
+                email_address.send_confirmation(request)
+                logger.info(f"Confirmation email sent successfully to {user.email}")
+                messages.success(request, f"Verification email sent to {user.email}")
+            except Exception as send_err:
+                logger.error(f"Failed to send confirmation email: {send_err}", exc_info=True)
+                messages.error(request, f"Failed to send email: {send_err}")
         else:
+            logger.info(f"Email {user.email} is already verified")
             messages.info(request, "Email is already verified")
             
         return redirect('socialuser:profile-settings')
     
     except Exception as e:
+        logger.error(f"Email verification error: {e}", exc_info=True)
         messages.error(request, f"Email verification failed: {str(e)}")
         return redirect('socialuser:profile-settings')
 

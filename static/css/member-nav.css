@@ -57,6 +57,155 @@ a.member-nav-item i {
     color: rgba(255, 255, 255, 0.9) !important;
 }
 
+/* ===== 個人資料頁面樣式 ===== */
+
+.profile-avatar-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(196, 155, 99, 0.3);
+}
+
+.profile-username {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #f8f9fa;
+    margin: 0 0 0.75rem 0;
+}
+
+.profile-detail-item {
+    font-size: 0.95rem;
+    color: #adb5bd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.35rem;
+}
+
+.profile-detail-item i {
+    color: #c49b63;
+    width: 1.2rem;
+    text-align: center;
+}
+
+/* 個人簡介區塊 */
+.profile-section {
+    border-top: 1px solid rgba(196, 155, 99, 0.15);
+    padding-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #c49b63;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.75rem;
+}
+
+.profile-section-content {
+    font-size: 0.95rem;
+    color: #ced4da;
+    line-height: 1.6;
+}
+
+/* 操作按鈕 */
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-top: 1px solid rgba(196, 155, 99, 0.15);
+    padding-top: 1.5rem;
+}
+
+.profile-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #c49b63;
+    background: transparent;
+    border: 1px solid #c49b63;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.profile-btn:hover {
+    background: #c49b63;
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.profile-btn i {
+    margin-right: 0.35rem;
+}
+
+/* ===== 頭像上傳區塊（方案 B） ===== */
+
+.avatar-upload-wrapper {
+    display: inline-block;
+}
+
+.avatar-upload-trigger {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.avatar-upload-img {
+    display: block;
+    transition: filter 0.3s ease;
+}
+
+.avatar-upload-trigger:hover .avatar-upload-img {
+    filter: brightness(0.6);
+}
+
+.avatar-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(196, 155, 99, 0.7);
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
+}
+
+.avatar-upload-trigger:hover .avatar-upload-overlay {
+    opacity: 1;
+}
+
+.avatar-upload-overlay i {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.avatar-upload-overlay span {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.avatar-upload-hint {
+    font-size: 0.85rem;
+    color: #adb5bd;
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+}
+
 /* 響應式：手機版保持水平排列，按鈕稍微縮小 */
 @media (max-width: 576px) {
     .member-nav-container {

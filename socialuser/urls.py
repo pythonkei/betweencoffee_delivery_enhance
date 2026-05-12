@@ -17,7 +17,6 @@ urlpatterns = [
     path('', profile_view, name="profile"),
     path('debug/', social_login_debug, name='social-login-debug'),
     path('onboarding/', profile_edit_view, name="profile-onboarding"),
-    path('edit/', profile_edit_view, name="profile-edit"),
     path('settings/', profile_settings_view, name="profile-settings"),
     path('emailchange/', profile_emailchange, name="profile-emailchange"),
     path('usernamechange/', profile_usernamechange, 
