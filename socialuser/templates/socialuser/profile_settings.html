@@ -1,10 +1,66 @@
 <!-- socialuser/templates/socialuser/profile_settings.html -->
 {% extends 'layouts/blank.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block extra_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/member-nav.css' %}">
+<style>
+/* 行內編輯表單樣式 */
+.inline-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.inline-form input[type="text"],
+.inline-form input[type="email"] {
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    font-size: 0.95rem;
+    min-width: 180px;
+}
+.inline-form input:focus {
+    border-color: var(--primary-color, #c49b6c);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(196, 155, 108, 0.25);
+}
+.inline-form .btn {
+    padding: 6px 16px;
+    font-size: 0.9rem;
+}
+.inline-form .btn-cancel {
+    background: transparent;
+    border: 1px solid #6c757d;
+    color: #6c757d;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+.inline-form .btn-cancel:hover {
+    background: #6c757d;
+    color: #fff;
+}
+.inline-form .error-msg {
+    color: #dc3545;
+    font-size: 0.85rem;
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* 錨點偏移：讓頁面滾動到錨點時保留上方空間 */
+#section-email,
+#section-username,
+#section-phone {
+    scroll-margin-top: 380px;
+}
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -62,7 +118,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group avatar-file-input" hidden>
-                                        {{ form.image }}
+                                        {{ avatar_form.image }}
                                     </div>
                                 </div>
                                 <p class="avatar-upload-hint">點擊頭像更換照片</p>
@@ -75,20 +131,39 @@
                         <!-- 帳戶設定表格 -->
                         <table class="table-responsive-lg w-100">
                             <tbody>
-                                <tr>
+                                <!-- ===== 電子郵件行 ===== -->
+                                <tr id="section-email">
                                     <th scope="row" class="pt-4 pb-1">電子郵件</th>
                                     <td id="email-address" class="pt-4 pb-1 pl-4">
-                                        {% if user.email %}{{ user.email }}{% else %}無電子郵件{% endif %}
+                                        {% if edit_mode == 'email' %}
+                                            {# 行內編輯模式：Email 表單 #}
+                                            <form action="{% url 'socialuser:profile-emailchange' %}" method="post" class="inline-form" autocomplete="off">
+                                                {% csrf_token %}
+                                                {{ email_form.email }}
+                                                {% if email_form.email.errors %}
+                                                    <div class="error-msg">
+                                                        {% for error in email_form.email.errors %}
+                                                            {{ error|escape }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                                <button class="btn" type="submit">{% trans "Submit" %}</button>
+                                                <a href="{% url 'socialuser:profile-settings' %}#section-email" class="btn-cancel">{% trans "Cancel" %}</a>
+                                            </form>
+                                        {% else %}
+                                            {% if user.email %}{{ user.email }}{% else %}無電子郵件{% endif %}
+                                        {% endif %}
                                     </td>
                                     <td class="pt-4 pb-1 pl-4">
-                                        <a id="email-edit" class="btn"
-                                            hx-get="{% url 'socialuser:profile-emailchange' %}"
-                                            hx-target="#email-address"
-                                            hx-swap="innerHTML">
-                                            修改
-                                        </a>
+                                        {% if edit_mode != 'email' %}
+                                            <a id="email-edit" class="btn"
+                                                href="{% url 'socialuser:profile-settings' %}?edit=email#section-email">
+                                                修改
+                                            </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
+
 
                                 <!-- Email verification -->
                                 <tr class="border-b">
@@ -124,40 +199,70 @@
                                     </td>
                                 </tr>
 
-                                <tr class="border-b">
+                                <!-- ===== 你的名稱行 ===== -->
+                                <tr id="section-username" class="border-b">
                                     <th scope="row" class="py-4">你的名稱</th>
                                     <td id="username" class="py-4 pl-4">
-                                        {{ user.username }}
-                                    </td>
-                                    <td class="py-4 pl-4">
-                                        <a id="username-edit" class="btn"
-                                            hx-get="{% url 'socialuser:profile-usernamechange' %}"
-                                            hx-target="#username"
-                                            hx-swap="innerHTML">
-                                            修改
-                                        </a>
-                                    </td>
-                                </tr>
-
-                                <tr class="border-b">
-                                    <th scope="row" class="py-4">手機號碼</th>
-                                    <td id="phone-number" class="py-4 pl-4">
-                                        {% if user.profile.hk_phone %}
-                                            {{ user.profile.hk_phone }}
+                                        {% if edit_mode == 'username' %}
+                                            {# 行內編輯模式：Username 表單 #}
+                                            <form action="{% url 'socialuser:profile-usernamechange' %}" method="post" class="inline-form" autocomplete="off">
+                                                {% csrf_token %}
+                                                {{ username_form.username }}
+                                                <button class="btn" type="submit">確認</button>
+                                                <a href="{% url 'socialuser:profile-settings' %}#section-username" class="btn-cancel">取消</a>
+                                            </form>
                                         {% else %}
-                                            未設定
+                                            {{ user.username }}
                                         {% endif %}
                                     </td>
                                     <td class="py-4 pl-4">
-                                        <a id="phone-edit" class="btn"
-                                            hx-get="{% url 'socialuser:profile-phonechange' %}"
-                                            hx-target="#phone-number"
-                                            hx-swap="innerHTML">
-                                            修改
-                                        </a>
+                                        {% if edit_mode != 'username' %}
+                                            <a id="username-edit" class="btn"
+                                                href="{% url 'socialuser:profile-settings' %}?edit=username#section-username">
+                                                修改
+                                            </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
 
+
+                                <!-- ===== 手機號碼行 ===== -->
+                                <tr id="section-phone" class="border-b">
+                                    <th scope="row" class="py-4">手機號碼</th>
+                                    <td id="phone-number" class="py-4 pl-4">
+                                        {% if edit_mode == 'phone' %}
+                                            {# 行內編輯模式：Phone 表單 #}
+                                            <form action="{% url 'socialuser:profile-phonechange' %}" method="post" class="inline-form" autocomplete="off">
+                                                {% csrf_token %}
+                                                {{ phone_form.phone }}
+                                                {% if phone_form.phone.errors %}
+                                                    <div class="error-msg">
+                                                        {{ phone_form.phone.errors|join:", " }}
+                                                    </div>
+                                                {% endif %}
+                                                <button class="btn" type="submit">確認</button>
+                                                <a href="{% url 'socialuser:profile-settings' %}#section-phone" class="btn-cancel">取消</a>
+                                            </form>
+                                        {% else %}
+                                            {% if user.profile.hk_phone %}
+                                                {{ user.profile.hk_phone }}
+                                            {% else %}
+                                                未設定
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-4 pl-4">
+                                        {% if edit_mode != 'phone' %}
+                                            <a id="phone-edit" class="btn"
+                                                href="{% url 'socialuser:profile-settings' %}?edit=phone#section-phone">
+                                                修改
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+
+
+                                <!-- ===== 刪除帳戶行 ===== -->
                                 <tr class="">
                                     <th scope="row" class="py-4">刪除帳戶</th>
                                     <td class="py-4 pl-4">
@@ -179,12 +284,11 @@
 <div class="flexable-vh-20"></div>
 
 <script>
-    // 點擊頭像觸發檔案選擇
+    // ===== 頭像上傳功能 =====
     document.querySelector('.avatar-upload-trigger').addEventListener('click', function() {
         document.getElementById('id_image').click();
     });
     
-    // 預覽選擇的圖片
     document.getElementById('id_image').addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
             var reader = new FileReader();
@@ -195,5 +299,7 @@
         }
     });
 </script>
+
+
 
 {% endblock %}

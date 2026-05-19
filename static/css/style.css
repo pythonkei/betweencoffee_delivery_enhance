@@ -5459,7 +5459,7 @@ optgroup  {
   height: 100%;
   background: url('/static/images/sticker_v1.png') center top no-repeat;
   animation-name: spin;
-  animation-duration: 8s; /* speed */
+  animation-duration: 2s; /* speed */
   animation-iteration-count: infinite;
   animation-timing-function: linear;
   z-index: 100;

@@ -12,8 +12,9 @@ ENV/
 env.bak/
 venv.bak/
 
-# Virtual Environment
-betweencoffee_delivery/
+# Virtual Environment (if placed inside project directory)
+# betweencoffee_delivery/  ← 這是 Django 專案目錄，不是虛擬環境
+# 虛擬環境已移至其他位置，取消忽略 Django 專案目錄
 
 # Django
 *.log

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebP圖片回退方案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .example {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebP圖片回退方案示例</h1>
+    
+    <div class="example">
+        <h2>方法1: picture元素 (推薦)</h2>
+        <picture>
+            <source srcset="/media/coffee_images/coffee_01.webp" type="image/webp">
+            <source srcset="/media/coffee_images/coffee_01.png" type="image/png">
+            <img src="/media/coffee_images/coffee_01.png" alt="咖啡圖片" loading="lazy">
+        </picture>
+        <p>瀏覽器會優先加載WebP格式，如果不支持則回退到PNG格式。</p>
+    </div>
+    
+    <div class="example">
+        <h2>方法2: JavaScript檢測</h2>
+        <img src="/media/coffee_images/coffee_01.png" 
+             data-webp="/media/coffee_images/coffee_01.webp"
+             alt="咖啡圖片" 
+             class="webp-fallback"
+             loading="lazy">
+        <p>使用JavaScript檢測瀏覽器是否支持WebP，並動態替換圖片源。</p>
+    </div>
+    
+    <script>
+        // WebP支持檢測
+        function supportsWebP() {
+            const canvas = document.createElement('canvas');
+            if (canvas.getContext && canvas.getContext('2d')) {
+                return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+            }
+            return false;
+        }
+        
+        // 替換WebP圖片
+        if (supportsWebP()) {
+            document.querySelectorAll('.webp-fallback').forEach(img => {
+                const webpSrc = img.getAttribute('data-webp');
+                if (webpSrc) {
+                    img.src = webpSrc;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
