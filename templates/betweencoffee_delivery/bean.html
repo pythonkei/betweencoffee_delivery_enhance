@@ -71,24 +71,28 @@
                         <li><span class="icon material-symbols-outlined">Home_storage</span><span class="text">烘焙水平 :</span></li>
                         <div class="roastrange-field" style="padding-bottom: 4vh;">
                             <div class="roastrange">
-                                <div class="roastrange-item">
-                                    <div class="roastrange-label"><span>浅</span></div>
+                                {% with level=bean.roast_level|default:'medium' %}
+                                <div class="roastrange-item{% if level == 'light' %} roast{% endif %}">
+                                    <div class="roastrange-label"><span{% if level == 'light' %} style="color:#c49b63;"{% endif %}>浅</span></div>
                                 </div>
-                                <div class="roastrange-item here">
-                                    <div class="roastrange-label"><span style="color:#c49b63;">中浅</span></div>
+                                <div class="roastrange-item{% if level == 'medium_light' %} roast{% endif %}">
+                                    <div class="roastrange-label"><span{% if level == 'medium_light' %} style="color:#c49b63;"{% endif %}>中浅</span></div>
                                 </div>
-                                <div class="roastrange-item">
-                                    <div class="roastrange-label"><span>中</span></div>
+                                <div class="roastrange-item{% if level == 'medium' %} roast{% endif %}">
+                                    <div class="roastrange-label"><span{% if level == 'medium' %} style="color:#c49b63;"{% endif %}>中</span></div>
                                 </div>
-                                <div class="roastrange-item">
-                                    <div class="roastrange-label"><span>中深</span></div>
+                                <div class="roastrange-item{% if level == 'medium_dark' %} roast{% endif %}">
+                                    <div class="roastrange-label"><span{% if level == 'medium_dark' %} style="color:#c49b63;"{% endif %}>中深</span></div>
                                 </div>
-                                <div class="roastrange-item">
-                                    <div class="roastrange-label"><span>深</div>
+                                <div class="roastrange-item{% if level == 'dark' %} roast{% endif %}">
+                                    <div class="roastrange-label"><span{% if level == 'dark' %} style="color:#c49b63;"{% endif %}>深</span></div>
                                 </div>
+                                {% endwith %}
                             </div>
                         </div>
                         <!-- end roast level -->
+
+
                         <li><span class="icon material-icons">coffee</span><span class="text">風味 :<span class="pl-3">{{ bean.flavor }}</span></span></li>
                     </ul>
                 </div>

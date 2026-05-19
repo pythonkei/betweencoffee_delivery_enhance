@@ -345,13 +345,13 @@ class CoffeeItemAdmin(admin.ModelAdmin):
 
 # BeanItem Admin
 class BeanItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price_200g', 'price_500g', 'is_published', 'is_shop_hot_item', 'image_preview', 'index_image_preview')
-    list_filter = ('is_published', 'is_shop_hot_item', 'list_date')
+    list_display = ('name', 'price_200g', 'price_500g', 'roast_level', 'is_published', 'is_shop_hot_item', 'image_preview', 'index_image_preview')
+    list_filter = ('is_published', 'is_shop_hot_item', 'roast_level', 'list_date')
     search_fields = ('name', 'introduction', 'description')
     list_editable = ('is_published', 'is_shop_hot_item')  # 允许直接编辑排序字段
     fieldsets = (
         ('基本信息', {
-            'fields': ('name', 'introduction', 'description', 'price_200g', 'price_500g', 'origin', 'flavor')
+            'fields': ('name', 'introduction', 'description', 'price_200g', 'price_500g', 'origin', 'roast_level', 'flavor')
         }),
         ('图片管理', {
             'fields': ('image', 'image_index'),

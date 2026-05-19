@@ -94,6 +94,15 @@ class BeanItem(models.Model):
     price_500g = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     origin = models.CharField(max_length=50, blank=True)
     
+    ROAST_LEVEL_CHOICES = [
+        ('light', '浅'),
+        ('medium_light', '中浅'),
+        ('medium', '中'),
+        ('medium_dark', '中深'),
+        ('dark', '深'),
+    ]
+    roast_level = models.CharField(max_length=20, choices=ROAST_LEVEL_CHOICES, default='medium')
+    
     GRINDING_LEVEL_CHOICES = [
         ('Non', '免研磨'),
         ('Light', '細研磨'),
@@ -101,6 +110,7 @@ class BeanItem(models.Model):
         ('Deep', '粗研磨'),
     ]
     grinding_level = models.CharField(max_length=10, choices=GRINDING_LEVEL_CHOICES, default='Non') 
+
     flavor = models.TextField(max_length=200, blank=True)
     list_date = models.DateTimeField(default=timezone.now,blank=True)
     is_published = models.BooleanField(default=True)
