@@ -66,7 +66,7 @@
 
                 <div class="block-23 mb-3">
                     <ul>
-                        <li><span class="cell-fas-icon fa-solid fa-coffee-bean"></span><span class="text">產地 :<span class="pl-3">{{ coffee.origin }}</span></span></li>
+                        <li><span class="icon material-icons">pin_drop</span><span class="text">產地 :<span class="pl-3">{{ coffee.origin }}</span></span></li>
                         <li><span class="icon material-icons">coffee</span><span class="text">風味 :<span class="pl-3">{{ coffee.flavor }}</span></span></li>
                     </ul>
                 </div>
@@ -149,31 +149,36 @@
 
 <!-- Add to Cart Toast Popup - 重新設計（含商品資訊 + 懸停保持） -->
 <div id="cart-popup" class="cart-popup">
-    <!-- 左：購物車圖示與標籤（移至最前） -->
-    <div class="popup-cart-summary">
-        <span class="popup-cart-icon-wrap">
-            <span class="icon material-icons">shopping_cart</span>
-            <span class="popup-cart-badge" id="popup-cart-count">0</span>
-        </span>
-        <span class="popup-total-price">
-            <span id="popup-total-price">$0</span>
-        </span>
-    </div>
-    <!-- 垂直分隔線 -->
-    <span class="popup-divider"></span>
-    <!-- 中：最近加入的商品資訊 -->
-    <div class="popup-product-info">
-        <img id="popup-product-image" src="" alt="" class="popup-product-img" style="display:none;">
-        <div class="popup-product-details">
-            <span id="popup-product-name" class="popup-product-name"></span>
-            <span id="popup-product-price" class="popup-product-price"></span>
-            <span id="popup-product-qty" class="popup-product-qty"></span>
+    <!-- 左側區塊：主題色背景 -->
+    <div class="popup-left">
+        <!-- 購物車圖示與標籤 -->
+        <div class="popup-cart-summary">
+            <span class="popup-cart-icon-wrap">
+                <span class="icon material-icons">shopping_cart</span>
+                <span class="popup-cart-badge" id="popup-cart-count">0</span>
+            </span>
+            <span class="popup-total-price">
+                <span id="popup-total-price">$0</span>
+            </span>
+        </div>
+        <!-- 垂直分隔線 -->
+        <span class="popup-divider"></span>
+        <!-- 最近加入的商品資訊 -->
+        <div class="popup-product-info">
+            <img id="popup-product-image" src="" alt="" class="popup-product-img" style="display:none;">
+            <div class="popup-product-details">
+                <span id="popup-product-name" class="popup-product-name"></span>
+                <span id="popup-product-price" class="popup-product-price"></span>
+                <span id="popup-product-qty" class="popup-product-qty"></span>
+            </div>
         </div>
     </div>
-    <!-- 右：前往結帳按鈕 -->
-    <button onclick="window.location.href='{% url 'cart:cart_detail' %}'" class="popup-checkout-btn">
-        前往結帳
-    </button>
+    <!-- 右側區塊：白色背景 -->
+    <div class="popup-right">
+        <button onclick="window.location.href='{% url 'cart:cart_detail' %}'" class="popup-checkout-btn">
+            前往結帳
+        </button>
+    </div>
 </div>
 
 <section class="ftco-section-blank-small"></section>
@@ -279,7 +284,7 @@
             nameEl.textContent = product.name;
         }
         if (product.quantity) {
-            qtyEl.textContent = 'x' + product.quantity;
+            qtyEl.textContent = 'x ' + product.quantity;
         }
         if (product.image) {
             imgEl.src = product.image;

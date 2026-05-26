@@ -169,6 +169,20 @@ def update_cart(request):
 
 
 @require_POST
+def clear_cart(request):
+    """清空購物車"""
+    try:
+        cart = Cart(request)
+        cart.clear()
+        messages.success(request, "購物車已清空")
+        return redirect('cart:cart_detail')
+    except Exception as e:
+        logger.error(f"清空購物車錯誤: {str(e)}")
+        messages.error(request, "清空購物車時發生錯誤")
+        return redirect('cart:cart_detail')
+
+
+@require_POST
 def create_order(request):
     """從購物車創建訂單"""
     try:

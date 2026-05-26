@@ -7806,19 +7806,20 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   width: auto;
   max-width: 92vw;
   min-width: 600px;
-  background: #2a2a2a;
+  background: transparent;
   border-radius: 14px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.4);
   z-index: 9999;
-  padding: 16px 32px;
+  padding: 0;
   display: flex;
-  align-items: center;
-  gap: 24px;
+  align-items: stretch;
+  gap: 0;
   opacity: 0;
   visibility: hidden;
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   text-decoration: none;
   color: inherit;
+  overflow: hidden;
 }
 
 .cart-popup.show {
@@ -7832,6 +7833,29 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   visibility: hidden;
   transform: translateX(-50%) translateY(100px);
   transition: all 0.3s ease;
+}
+
+/* 左側區塊：主題色背景 */
+.cart-popup .popup-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 32px;
+  background: #c49b63;
+  border-radius: 14px 0 0 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 右側區塊：白色背景 */
+.cart-popup .popup-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 32px;
+  background: #fff;
+  border-radius: 0 14px 14px 0;
+  flex-shrink: 0;
 }
 
 /* 中：最近加入的商品資訊 */
@@ -7863,7 +7887,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 .cart-popup .popup-product-name {
   color: #fff;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -7873,7 +7897,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 .cart-popup .popup-product-qty {
   color: #fff;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
@@ -7893,30 +7917,30 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
 }
 
 .cart-popup .popup-cart-icon-wrap .icon {
-  color: #c49b63;
-  font-size: 24px;
+  color: #fff;
+  font-size: 30px;
 }
 
 .cart-popup .popup-cart-badge {
   position: absolute;
   top: -4px;
-  right: -8px;
+  right: -10px;
   background: #fff;
   color: #c49b63;
-  font-size: 11px;
-  font-weight: 700;
-  min-width: 18px;
-  height: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9px;
-  padding: 0 4px;
+  border-radius: 11px;
+  padding: 0 5px;
   line-height: 1;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
@@ -7934,29 +7958,29 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 }
 
 .cart-popup .popup-total-price span {
-  color: #c49b63;
+  color: #fff;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 
-/* 右：前往結帳（容器右側，融入背景無框架） */
+/* 右：前往結帳（白色背景區域，無邊框） */
 .cart-popup .popup-checkout-btn {
   background: transparent;
   color: #c49b63;
   border: none;
-  padding: 6px 18px;
+  padding: 8px 24px;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 700;
+  font-size: 16px;
   white-space: nowrap;
-  margin-left: auto;
   flex-shrink: 0;
-  transition: color 0.2s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.cart-popup:hover .popup-checkout-btn {
-  color: #fff;
+.cart-popup .popup-checkout-btn:hover {
+  color: #b8894d;
 }
 
 @keyframes pulse {
