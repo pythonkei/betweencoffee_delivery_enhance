@@ -89,6 +89,7 @@ def add_to_cart(request, product_id, product_type):
         return JsonResponse({
             'success': True,
             'cart_count': len(cart),
+            'cart_total_price': format_price(cart.get_total_price()),
             'product_name': product.name,
             'product_price': format_price(unit_price),
             'quantity': quantity,

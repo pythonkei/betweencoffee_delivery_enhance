@@ -3006,7 +3006,7 @@ a.text-success:hover, a.text-success:focus  {
 
 
 .text-theme {
-  color: rgba(196,155,99, 1); !important; }
+  color: rgba(196,155,99, 1) !important; }
 
 
 a.text-theme:hover, a.text-theme:focus  { 
@@ -3848,6 +3848,9 @@ h1, h2, h3, h4, h5,
     text-transform: uppercase;
     padding-right:12rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
     }
 
 
@@ -4208,6 +4211,13 @@ h1, h2, h3, h4, h5,
   .menu-wrap .text h3  { 
     font-size: 20px;
     text-transform: uppercase; }
+
+  .menu-wrap .text h5  { 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block; }
 
     .menu-wrap .text h3 a  { 
       color: #fff; }
@@ -6338,180 +6348,7 @@ ul.entry-btns li a .entry-btn .arrow img  {
   }
 }
 
-/* Add to Cart Popup */
-
-/* Popup Content */
-
-/* Popup Message */
-
-/* Popup Buttons */
-
-/* Use existing button styles */
-
-.cart-popup {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 340px;
-  background: #c49b63;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  padding: 16px;
-  z-index: 1000;
-  display: block; /* Change from none to block */
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(20px);
-  transition: all 0.5s ease;
-}
-
-.cart-popup.show {
-  visibility: visible;
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.cart-popup.hide {
-  animation: fadeOut 0.5s ease forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-}
-
-/* Popup Content */
-.popup-content  { 
-  background: transparent;
-  padding: 12px;
-  text-align: center;
-  max-width: 360px;
-  width: 100%;
-}
-
-/* Popup Message */
-
-/* Popup Buttons */
-
-/* Use existing button styles */
-
-.popup-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.popup-header p {
-  font-size: 17px;
-  color: white;
-  margin-bottom: 0;
-}
-
-.popup-header .icon {
-  color: white;
-  font-size: 24px;
-  margin-right: 10px;
-}
-
-.popup-content {
-  display: flex;
-  gap: 15px;
-}
-
-.popup-image {
-  width: 52px;
-  height: 52px;
-  object-fit: cover;
-  /* object-position: 65% 65%; */
-  transform: scale(1) translateX(-8px) translateY(3px);
-}
-
-.popup-image-circle-mask {
-  clip-path: circle(36px at center);
-}
-
-.popup-details {
-  flex: 1;
-  text-align: left;
-  color: white;
-}
-
-.popup-header-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.popup-product-name {
-  max-width: 70%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-}
-
-.popup-quantity {
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  margin-left: auto;
-  padding-left: 10px;
-}
-
-.popup-meta {
-  margin-bottom: 12px;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.popup-meta span {
-  font-size: 14px;
-  color: white;
-}
-
-.popup-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.popup-checkout-btn {
-  background: white;          /* 修正：原先为 #white */
-  color: #c49b63;
-  border: none;
-  padding: 8px 32px;
-  border-radius: 1px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  font-weight: 500;
-}
-
-.popup-checkout-btn:hover {
-  background: black;
-}
-
-.popup-checkout-btn:after {
-  border: none;
-}
+/* ===== 舊版 cart-popup 樣式已遷移至 Toast 風格（見下方） ===== */
 
 #js-fixedbtn {
   opacity: 0;
@@ -7960,102 +7797,166 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 }
 
 /* 支付提醒popup样式 */
+/* ===== Toast 風格購物車彈窗（底部滑入）- 重新設計 ===== */
 .cart-popup {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 320px;
-  background: linear-gradient(135deg, #c49b63, #8a6430);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  width: auto;
+  max-width: 92vw;
+  min-width: 600px;
+  background: #2a2a2a;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
   z-index: 9999;
-  transform: translateX(400px);
-  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  overflow: hidden;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  text-decoration: none;
+  color: inherit;
 }
 
 .cart-popup.show {
-  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 .cart-popup.hide {
-  transform: translateX(400px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(100px);
+  transition: all 0.3s ease;
 }
 
-.popup-header {
-  background: rgba(0,0,0,0.2);
-  padding: 15px 20px;
+/* 中：最近加入的商品資訊 */
+.cart-popup .popup-product-info {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: white;
+  flex-shrink: 0;
+  max-width: 260px;
+  border-radius: 10px;
 }
 
-.popup-header .icon {
+.cart-popup .popup-product-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.cart-popup .popup-product-details {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  border-radius: 10px;
+}
+
+.cart-popup .popup-product-name {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.cart-popup .popup-product-qty {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 中：購物車摘要（圖示 + 總金額） */
+.cart-popup .popup-cart-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.cart-popup .popup-cart-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.cart-popup .popup-cart-icon-wrap .icon {
+  color: #c49b63;
+  font-size: 24px;
+}
+
+.cart-popup .popup-cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: #fff;
+  color: #c49b63;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  padding: 0 4px;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* 垂直分隔線 */
+.cart-popup .popup-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.cart-popup .popup-total-price {
+  text-align: left;
+}
+
+.cart-popup .popup-total-price span {
+  color: #c49b63;
   font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-.popup-header p {
-  margin: 0;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.popup-content {
-  padding: 20px;
-}
-
-.popup-details {
-  color: white;
-}
-
-.popup-header-line {
-  display: flex;
-  justify-content: space-between; /* 修正 between → space-between */
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.popup-product-name {
-  font-weight: 600;
-  font-size: 16px;
-  flex: 1;
-}
-
-.popup-quantity {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.popup-meta {
-  font-size: 14px;
-  opacity: 0.9;
-  margin-bottom: 15px;
-}
-
-.popup-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.popup-checkout-btn {
-  flex: 1;
-  padding: 10px 15px;
+/* 右：前往結帳（容器右側，融入背景無框架） */
+.cart-popup .popup-checkout-btn {
+  background: transparent;
+  color: #c49b63;
   border: none;
+  padding: 6px 18px;
   border-radius: 8px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
-  color: #ff6b6b;
+  font-size: 13px;
+  white-space: nowrap;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
 }
 
-.popup-checkout-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+.cart-popup:hover .popup-checkout-btn {
+  color: #fff;
 }
 
 @keyframes pulse {

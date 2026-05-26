@@ -171,30 +171,33 @@
 <!-- end for loop int:bean_pk -->
 
 
-<!-- Add to Cart Popup by default: hidden -->
+<!-- Add to Cart Toast Popup - 重新設計（含商品資訊 + 懸停保持） -->
 <div id="cart-popup" class="cart-popup">
-    <div class="popup-header">
-        <span class="icon material-icons">check_circle</span>
-        <p>已加入購物車</p>
+    <!-- 左：購物車圖示與標籤（移至最前） -->
+    <div class="popup-cart-summary">
+        <span class="popup-cart-icon-wrap">
+            <span class="icon material-icons">shopping_cart</span>
+            <span class="popup-cart-badge" id="popup-cart-count">0</span>
+        </span>
+        <span class="popup-total-price">
+            <span id="popup-total-price">$0</span>
+        </span>
     </div>
-    <div class="popup-content">
-        <img id="popup-product-image" class="popup-image popup-image-circle-mask" src="" alt="Product">
-        <div class="popup-details">
-            <div class="popup-header-line">
-                <span class="popup-product-name" id="popup-product-name"></span>
-                <span class="popup-quantity" id="popup-quantity"></span>
-            </div>
-            <div class="popup-meta">
-                <span id="popup-price"></span>
-            </div>
-            <div class="popup-actions">
-                <button onclick="window.location.href='{% url 'cart:cart_detail' %}'" 
-                        class="popup-checkout-btn">
-                    立即結算
-                </button>
-            </div>
+    <!-- 垂直分隔線 -->
+    <span class="popup-divider"></span>
+    <!-- 中：最近加入的商品資訊 -->
+    <div class="popup-product-info">
+        <img id="popup-product-image" src="" alt="" class="popup-product-img" style="display:none;">
+        <div class="popup-product-details">
+            <span id="popup-product-name" class="popup-product-name"></span>
+            <span id="popup-product-price" class="popup-product-price"></span>
+            <span id="popup-product-qty" class="popup-product-qty"></span>
         </div>
     </div>
+    <!-- 右：前往結帳按鈕 -->
+    <button onclick="window.location.href='{% url 'cart:cart_detail' %}'" class="popup-checkout-btn">
+        前往結帳
+    </button>
 </div>
 
 <section class="ftco-section-blank-small"></section>
@@ -292,18 +295,18 @@
             .then(data => {
                 console.log('Response data:', data);
                 if (data.success) {
+                    // 显示弹窗 - 傳入購物車總數量與總金額
                     showPopup({
                         name: data.product_name,
                         price: totalPrice.toFixed(0), // 使用计算的总价
                         quantity: data.quantity,
-                        image: data.image_url
+                        image: data.image_url,
+                        cart_count: data.cart_count,
+                        cart_total: data.cart_total_price
                     });
                     document.querySelectorAll('.cart-count').forEach(element => {
                         element.textContent = data.cart_count;
                     });
-                    
-                    // 移除自动跳转代码，只显示弹窗
-                    // 不添加 setTimeout 跳转代码
                 } else {
                     alert('加入購物車失敗: ' + data.message);
                 }
@@ -314,39 +317,88 @@
         });
     });
 
-    // Popup 
+    // Popup - 更新商品資訊 + 購物車總數量與總金額 + 懸停保持
     function showPopup(product) {
         const popup = document.getElementById('cart-popup');
         
         // Clear any existing animations
         popup.classList.remove('show', 'hide');
         
-        // Set product details
-        document.getElementById('popup-product-image').src = product.image;
-        document.getElementById('popup-product-name').textContent = product.name;
-        document.getElementById('popup-quantity').textContent = product.quantity;
-        let price = product.price.toString();
-        if (price.endsWith('.00')) {
-            price = price.slice(0, -3);
+        // 更新最近加入的商品資訊
+        const nameEl = document.getElementById('popup-product-name');
+        const qtyEl = document.getElementById('popup-product-qty');
+        const imgEl = document.getElementById('popup-product-image');
+        
+        if (product.name) {
+            nameEl.textContent = product.name;
         }
-        document.getElementById('popup-price').textContent = '$' + price;
+        if (product.quantity) {
+            qtyEl.textContent = 'x' + product.quantity;
+        }
+        if (product.image) {
+            imgEl.src = product.image;
+            imgEl.style.display = 'inline';
+        } else {
+            imgEl.style.display = 'none';
+        }
+        
+        // 更新購物車總數量與總金額
+        const cartCountEl = document.getElementById('popup-cart-count');
+        const totalPriceEl = document.getElementById('popup-total-price');
+        
+        if (product.cart_count !== undefined) {
+            cartCountEl.textContent = product.cart_count;
+        }
+        if (product.cart_total !== undefined) {
+            let total = product.cart_total.toString();
+            if (total.endsWith('.00')) {
+                total = total.slice(0, -3);
+            }
+            totalPriceEl.textContent = '$' + total;
+        }
+        
+        // 清除舊的計時器
+        if (popup._hideTimer) {
+            clearTimeout(popup._hideTimer);
+        }
         
         // Show popup with fade-in
         popup.classList.add('show');
         
-        // Set up auto-hide
-        const hideTimer = setTimeout(() => {
-            popup.classList.add('hide');
-            
-            // Remove visibility after animation
-            popup.addEventListener('animationend', function handler() {
-                popup.classList.remove('show', 'hide');
-                popup.removeEventListener('animationend', handler);
-            });
-        }, 6000);
-    
-        // Clear timer if new item added before previous timeout
-        popup._hideTimer = hideTimer;
+        // 設定自動隱藏（6秒後）
+        function startHideTimer() {
+            popup._hideTimer = setTimeout(() => {
+                popup.classList.add('hide');
+                popup.addEventListener('animationend', function handler() {
+                    popup.classList.remove('show', 'hide');
+                    popup.removeEventListener('animationend', handler);
+                });
+            }, 6000);
+        }
+        
+        startHideTimer();
+        
+        // 懸停保持顯示：滑鼠進入 popup 時清除計時器
+        popup.onmouseenter = function() {
+            if (popup._hideTimer) {
+                clearTimeout(popup._hideTimer);
+                popup._hideTimer = null;
+            }
+        };
+        
+        // 滑鼠離開 popup 時重新啟動計時器（3秒後隱藏）
+        popup.onmouseleave = function() {
+            if (popup._hideTimer) {
+                clearTimeout(popup._hideTimer);
+            }
+            popup._hideTimer = setTimeout(() => {
+                popup.classList.add('hide');
+                popup.addEventListener('animationend', function handler() {
+                    popup.classList.remove('show', 'hide');
+                    popup.removeEventListener('animationend', handler);
+                });
+            }, 3000);
+        };
     }
 
 </script>
