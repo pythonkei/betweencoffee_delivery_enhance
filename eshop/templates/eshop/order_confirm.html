@@ -222,95 +222,167 @@
 
                         <div class="w-100"></div>
 
-                        <!-- 付款方式選擇 -->
+                        <!-- ========== 積分獎勵選擇區塊（方案B：簡約列表式） ========== -->
+                        {% if user.is_authenticated and available_rewards %}
+                        <div class="col-md-12 px-0 mb-4">
+                            <div class="form-group">
+                                <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
+                                    <i class="fas fa-gift" style="color: #c49b63;"></i> 積分兌換
+                                    <span class="badge badge-theme ml-2" style="font-size: 0.75rem; vertical-align: middle;">
+                                        {{ user.loyalty.points|default:"0" }} 積分
+
+                                    </span>
+                                </label>
+                                <div class="reward-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                                    {% for reward in available_rewards %}
+                                    <div class="reward-item d-flex align-items-center justify-content-between px-3 py-3 {% if not forloop.last %}" style="border-bottom: 1px solid rgba(255,255,255,0.06);{% else %}"{% endif %}>
+                                        <div class="d-flex align-items-center">
+                                            <div class="reward-checkbox-wrapper mr-3">
+                                                <input type="checkbox" name="use_reward" value="{{ reward.reward_id }}"
+                                                       id="reward-{{ reward.reward_id }}"
+                                                       data-discount="{{ reward.discount }}"
+                                                       data-reward-name="{{ reward.reward_name }}"
+                                                       class="reward-checkbox-input"
+                                                       style="display: none;">
+                                                <label for="reward-{{ reward.reward_id }}" class="reward-checkbox-label mb-0" style="cursor: pointer; width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                                                    <i class="fas fa-check" style="color: #fff; font-size: 12px; opacity: 0; transition: opacity 0.2s ease;"></i>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <div class="reward-name" style="color: #fff; font-size: 0.95rem; font-weight: 500;">{{ reward.reward_name }}</div>
+                                                <div class="reward-points" style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">
+                                                    <i class="fas fa-star" style="color: #c49b63; font-size: 0.7rem;"></i> 消耗 {{ reward.points_required }} 積分
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="reward-discount font-weight-bold" style="color: #28a745; font-size: 1.05rem;">
+                                            -${{ reward.discount|floatformat:"2" }}
+                                        </span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                                    <small style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">
+                                        <i class="fas fa-info-circle"></i> 勾選後提交訂單即自動兌換
+                                    </small>
+                                    <small style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">
+                                        積分折扣: -$<span id="reward-discount-amount" style="color: #28a745; font-weight: 600;">0.00</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <!-- ========== end 積分獎勵選擇區塊 ========== -->
+
+
+                        <!-- 付款方式選擇（方案B：簡約列表式） -->
                         <div class="col-md-12 px-0 mb-4 pt-4">
                             <div class="form-group">
-                                <label for="payment_method" class="mb-3">支付方式</label>
-                                
-                                <!-- 方案1: 现代卡片式设计 -->
-                                <div class="payment-scheme active" id="scheme-modern">
-                                    <div class="payment-methods-modern">
-                                        <!-- 支付宝 -->
-                                        <div class="payment-modern-card">
-                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="alipay-modern" value="alipay" checked>
-                                            <label class="payment-modern-label" for="alipay-modern">
-                                                <div class="payment-modern-header">
-                                                    <div class="payment-modern-info">
-                                                        <img src="{% static 'images/alipay-logo.png' %}" alt="支付宝" class="payment-modern-logo">
-                                                        <span class="payment-modern-name">支付宝支付</span>
+                                <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
+                                    <i class="fas fa-credit-card" style="color: #c49b63;"></i> 支付方式
+                                </label>
+                                <div class="payment-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                                    <!-- 支付宝 -->
+                                    <div class="payment-item" data-payment="alipay">
+                                        <input type="radio" name="payment_method" id="pay-alipay" value="alipay" checked
+                                               style="display: none;">
+                                        <label for="pay-alipay" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fab fa-alipay" style="color: #c49b63; margin-right: 6px;"></i> Alipay HK 支付宝
                                                     </div>
-                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
                                                 </div>
-                                            </label>
-                                            <div class="payment-modern-details">
-                                                <p class="text-muted small mb-0">使用支付宝扫码支付，快速安全</p>
+                                            </div>
+                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
+                                        </label>
+                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
+                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0;">使用支付宝扫码支付，快速安全</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- PayPal -->
+                                    <div class="payment-item" data-payment="paypal">
+                                        <input type="radio" name="payment_method" id="pay-paypal" value="paypal"
+                                               style="display: none;">
+                                        <label for="pay-paypal" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fab fa-paypal" style="color: #c49b63; margin-right: 6px;"></i> PayPal 支付
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
+                                        </label>
+                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
+                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0;">使用PayPal账户或信用卡支付</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- FPS轉數快 -->
+                                    <div class="payment-item" data-payment="fps">
+                                        <input type="radio" name="payment_method" id="pay-fps" value="fps"
+                                               style="display: none;">
+                                        <label for="pay-fps" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fas fa-mobile-alt" style="color: #c49b63; margin-right: 6px;"></i> FPS 轉數快
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
+                                        </label>
+                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
+                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0.5rem;">使用香港手機銀行App掃碼支付</p>
+                                            <div class="fps-qrcode-container mt-2 mb-2 text-center">
+                                                <img src="{% static 'images/fps_qrcode_v2.png' %}" 
+                                                     alt="FPS 轉數快 QR Code" 
+                                                     class="fps-qrcode-img"
+                                                     style="max-width: 180px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; background-color: rgba(255,255,255,0.9);">
+                                                <p style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 0.5rem; line-height: 1.4;">
+                                                    請使用手機銀行App掃描此QR code進行支付
+                                                </p>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <!-- PayPal -->
-                                        <div class="payment-modern-card">
-                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="paypal-modern" value="paypal">
-                                            <label class="payment-modern-label" for="paypal-modern">
-                                                <div class="payment-modern-header">
-                                                    <div class="payment-modern-info">
-                                                        <img src="{% static 'images/paypal-logo.png' %}" alt="PayPal" class="payment-modern-logo">
-                                                        <span class="payment-modern-name">PayPal支付</span>
+                                    <!-- 现金支付 -->
+                                    <div class="payment-item" data-payment="cash">
+                                        <input type="radio" name="payment_method" id="pay-cash" value="cash"
+                                               style="display: none;">
+                                        <label for="pay-cash" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fas fa-money-bill-wave" style="color: #c49b63; margin-right: 6px;"></i> 現金支付
                                                     </div>
-                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
-                                                </div>
-                                            </label>
-                                            <div class="payment-modern-details">
-                                                <p class="text-muted small mb-0">使用PayPal账户或信用卡支付</p>
-                                            </div>
-                                        </div>
-
-                                        <!-- FPS轉數快 -->
-                                        <div class="payment-modern-card">
-                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="fps-modern" value="fps">
-                                            <label class="payment-modern-label" for="fps-modern">
-                                                <div class="payment-modern-header">
-                                                    <div class="payment-modern-info">
-                                                        <i class="fas fa-mobile-alt payment-modern-icon fps-icon"></i>
-                                                        <span class="payment-modern-name">FPS 轉數快</span>
-                                                    </div>
-                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
-                                                </div>
-                                            </label>
-                                            <div class="payment-modern-details">
-                                                <p class="text-muted small mb-0">使用香港手機銀行App掃碼支付</p>
-                                                <!-- 添加 QR code 圖片 -->
-                                                <div class="fps-qrcode-container mt-3 text-center">
-                                                    <img src="{% static 'images/fps_qrcode_v2.png' %}" 
-                                                         alt="FPS 轉數快 QR Code" 
-                                                         class="fps-qrcode-img img-fluid w-100"
-                                                         style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: white; display: block; margin: 0 auto;">
-                                                    <p class="text-muted small mt-2" style="line-height: 1.4; word-break: break-word;">
-                                                        請使用手機銀行App<br>掃描此QR code進行支付
-                                                    </p>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <!-- 现金支付 -->
-                                        <div class="payment-modern-card">
-                                            <input class="payment-modern-radio" type="radio" name="payment_method" id="cash-modern" value="cash">
-                                            <label class="payment-modern-label" for="cash-modern">
-                                                <div class="payment-modern-header">
-                                                    <div class="payment-modern-info">
-                                                        <i class="fas fa-money-bill-wave payment-modern-icon cash-icon"></i>
-                                                        <span class="payment-modern-name">现金支付</span>
-                                                    </div>
-                                                    <i class="fas fa-chevron-down payment-modern-arrow"></i>
-                                                </div>
-                                            </label>
-                                            <div class="payment-modern-details">
-                                                <p class="text-muted small mb-0">到店取货时支付现金，如有訂單相關問題，我們會連絡您</p>
-                                            </div>
+                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
+                                        </label>
+                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
+                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0;">到店取貨時支付現金，如有訂單相關問題，我們會聯絡您</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
 
 
 
@@ -520,289 +592,117 @@
     @media all and (min-width: 1200px) { 
     .hiddenLarge {display: none; }
     }
-
-    .payment-options {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 20px;
-        background-color: transparent;
-    }
-
-    .payment-options .form-check {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-    }
-
-    .payment-options .form-check:last-child {
-        border-bottom: none;
-    }
 </style>
 
 
+
 <script>
-// 支付方式折叠交互
+// 支付方式交互（方案B：簡約列表式）- 自定義 radio + 展開/收起
 document.addEventListener('DOMContentLoaded', function() {
-    const paymentRadios = document.querySelectorAll('.payment-radio');
-    const paymentLabels = document.querySelectorAll('.payment-label');
+    const paymentItems = document.querySelectorAll('.payment-item');
     
-    // 初始显示第一个支付方式的详情
-    const firstPaymentDetails = document.querySelector('.payment-radio:checked + .payment-label + .payment-details');
-    if (firstPaymentDetails) {
-        firstPaymentDetails.style.maxHeight = firstPaymentDetails.scrollHeight + 'px';
+    function updatePaymentStyle(item) {
+        const radio = item.querySelector('input[type="radio"]');
+        const circle = item.querySelector('.payment-radio-circle');
+        const dot = item.querySelector('.payment-radio-dot');
+        const label = item.querySelector('.payment-label');
+        const arrow = item.querySelector('.payment-arrow');
+        const details = item.querySelector('.payment-details');
+        
+        if (radio.checked) {
+            // 選中樣式：金色 radio + 背景高亮
+            if (circle) {
+                circle.style.borderColor = '#c49b63';
+            }
+            if (dot) {
+                dot.style.background = '#c49b63';
+            }
+            if (label) {
+                label.style.background = 'rgba(196,155,99,0.08)';
+            }
+            // 展開詳情
+            if (details) {
+                details.style.maxHeight = details.scrollHeight + 50 + 'px';
+                details.style.padding = '0.75rem 3rem';
+            }
+            if (arrow) {
+                arrow.style.transform = 'rotate(180deg)';
+                arrow.style.color = '#c49b63';
+            }
+        } else {
+            // 未選中樣式
+            if (circle) {
+                circle.style.borderColor = 'rgba(255,255,255,0.3)';
+            }
+            if (dot) {
+                dot.style.background = 'transparent';
+            }
+            if (label) {
+                label.style.background = 'transparent';
+            }
+            // 收起詳情
+            if (details) {
+                details.style.maxHeight = '0';
+                details.style.padding = '0 3rem';
+            }
+            if (arrow) {
+                arrow.style.transform = 'rotate(0deg)';
+                arrow.style.color = 'rgba(255,255,255,0.3)';
+            }
+        }
     }
     
-    // 点击支付选项时切换显示
-    paymentLabels.forEach(label => {
-        label.addEventListener('click', function() {
-            const radio = this.previousElementSibling;
-            const details = this.nextElementSibling;
-            
-            // 关闭所有其他支付方式的详情
-            document.querySelectorAll('.payment-details').forEach(detail => {
-                if (detail !== details) {
-                    detail.style.maxHeight = '0';
-                    detail.style.padding = '0 20px';
-                }
-            });
-            
-            // 重置所有箭头
-            document.querySelectorAll('.payment-arrow').forEach(arrow => {
-                if (arrow !== this.querySelector('.payment-arrow')) {
-                    arrow.style.transform = 'rotate(0deg)';
-                }
-            });
-            
-            // 切换当前支付方式的详情
-            if (radio.checked) {
-                if (details.style.maxHeight && details.style.maxHeight !== '0px') {
-                    details.style.maxHeight = '0';
-                    details.style.padding = '0 20px';
-                    this.querySelector('.payment-arrow').style.transform = 'rotate(0deg)';
-                } else {
-                    details.style.maxHeight = details.scrollHeight + 'px';
-                    details.style.padding = '10px 20px 15px';
-                    this.querySelector('.payment-arrow').style.transform = 'rotate(180deg)';
-                }
-            }
-        });
+    // 初始化：預設選中第一個
+    paymentItems.forEach(item => {
+        const radio = item.querySelector('input[type="radio"]');
+        if (radio && radio.checked) {
+            updatePaymentStyle(item);
+        }
     });
     
-    // 表单提交前验证支付方式
+    // 點擊 label 時切換
+    paymentItems.forEach(item => {
+        const label = item.querySelector('.payment-label');
+        const radio = item.querySelector('input[type="radio"]');
+        
+        if (label && radio) {
+            label.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 如果已經選中，不做任何事（保持展開）
+                if (radio.checked) return;
+                
+                // 取消所有其他選中
+                paymentItems.forEach(other => {
+                    const otherRadio = other.querySelector('input[type="radio"]');
+                    if (otherRadio && otherRadio !== radio) {
+                        otherRadio.checked = false;
+                        updatePaymentStyle(other);
+                    }
+                });
+                
+                // 選中當前
+                radio.checked = true;
+                updatePaymentStyle(item);
+            });
+        }
+    });
+    
+    // 表單提交前驗證
     const paymentForm = document.getElementById('payment-form');
     if (paymentForm) {
         paymentForm.addEventListener('submit', function(e) {
             const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
             if (!selectedPayment) {
                 e.preventDefault();
-                alert('请选择支付方式');
+                alert('請選擇支付方式');
                 return false;
-            }
-            
-            // 显示加载状态
-            const submitButton = document.getElementById('payment-button');
-            if (submitButton) {
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
             }
         });
     }
 });
 </script>
 
-
-
-
-<!-- 修复后的支付方案切换脚本 -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 方案切换功能
-    const schemeButtons = document.querySelectorAll('[data-scheme]');
-    const schemes = document.querySelectorAll('.payment-scheme');
-    
-    schemeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const scheme = this.dataset.scheme;
-            
-            // 更新按钮状态
-            schemeButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 显示对应方案
-            schemes.forEach(schemeEl => {
-                schemeEl.style.display = 'none';
-                schemeEl.classList.remove('active');
-            });
-            
-            const targetScheme = document.getElementById(`scheme-${scheme}`);
-            if (targetScheme) {
-                targetScheme.style.display = 'block';
-                targetScheme.classList.add('active');
-                
-                // 重新初始化当前方案的交互
-                setTimeout(() => initPaymentInteractions(), 10);
-            }
-        });
-    });
-
-    // 统一的支付方式交互逻辑 - 修复版本
-    function initPaymentInteractions() {
-        const activeScheme = document.querySelector('.payment-scheme.active');
-        if (!activeScheme) return;
-
-        const paymentRadios = activeScheme.querySelectorAll('input[type="radio"]');
-        const paymentLabels = activeScheme.querySelectorAll('label[class*="payment-"]');
-        
-        // 初始显示第一个支付方式的详情
-        const firstPayment = activeScheme.querySelector('input[type="radio"]:checked');
-        if (firstPayment) {
-            const firstDetails = firstPayment.parentElement.querySelector('[class*="details"]');
-            if (firstDetails) {
-                firstDetails.classList.add('open');
-            }
-        }
-
-        // 点击支付选项时切换显示
-        paymentLabels.forEach(label => {
-            label.addEventListener('click', function(e) {
-                const radio = this.previousElementSibling;
-                if (!radio || radio.type !== 'radio') return;
-                
-                const details = this.nextElementSibling;
-                if (!details || !details.classList.contains('payment-modern-details') && 
-                    !details.classList.contains('payment-minimal-details') && 
-                    !details.classList.contains('payment-gradient-details')) {
-                    return;
-                }
-
-                // 如果点击的是当前选中的支付方式，则切换展开/收起
-                if (radio.checked) {
-                    const isOpening = !details.classList.contains('open');
-                    
-                    // 关闭所有其他支付方式的详情
-                    activeScheme.querySelectorAll('[class*="details"].open').forEach(detail => {
-                        if (detail !== details) {
-                            detail.classList.remove('open');
-                        }
-                    });
-
-                    // 重置所有箭头
-                    activeScheme.querySelectorAll('[class*="arrow"]').forEach(arrow => {
-                        if (arrow !== this.querySelector('[class*="arrow"]')) {
-                            arrow.style.transform = 'rotate(0deg)';
-                        }
-                    });
-
-                    // 切换当前支付方式的详情
-                    if (isOpening) {
-                        details.classList.add('open');
-                        this.querySelector('[class*="arrow"]').style.transform = 'rotate(180deg)';
-                    } else {
-                        details.classList.remove('open');
-                        this.querySelector('[class*="arrow"]').style.transform = 'rotate(0deg)';
-                    }
-                } else {
-                    // 如果点击的是其他支付方式，选中它并展开详情
-                    radio.checked = true;
-                    
-                    // 关闭所有其他支付方式的详情
-                    activeScheme.querySelectorAll('[class*="details"].open').forEach(detail => {
-                        detail.classList.remove('open');
-                    });
-
-                    // 重置所有箭头
-                    activeScheme.querySelectorAll('[class*="arrow"]').forEach(arrow => {
-                        arrow.style.transform = 'rotate(0deg)';
-                    });
-
-                    // 展开当前支付方式的详情
-                    details.classList.add('open');
-                    this.querySelector('[class*="arrow"]').style.transform = 'rotate(180deg)';
-                }
-            });
-        });
-
-        // 监听radio变化
-        paymentRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.checked) {
-                    const label = this.nextElementSibling;
-                    const details = label.nextElementSibling;
-                    const arrow = label.querySelector('[class*="arrow"]');
-                    
-                    // 关闭所有其他支付方式的详情
-                    activeScheme.querySelectorAll('[class*="details"].open').forEach(detail => {
-                        if (detail !== details) {
-                            detail.classList.remove('open');
-                        }
-                    });
-
-                    // 重置所有箭头
-                    activeScheme.querySelectorAll('[class*="arrow"]').forEach(arr => {
-                        if (arr !== arrow) {
-                            arr.style.transform = 'rotate(0deg)';
-                        }
-                    });
-
-                    // 展开当前支付方式的详情
-                    if (details) {
-                        details.classList.add('open');
-                    }
-                    if (arrow) {
-                        arrow.style.transform = 'rotate(180deg)';
-                    }
-                }
-            });
-        });
-    }
-
-    // 初始化支付交互
-    initPaymentInteractions();
-
-    // 监听方案切换，重新初始化交互
-    schemeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            setTimeout(initPaymentInteractions, 50);
-        });
-    });
-
-    // 表单提交验证
-    const paymentForm = document.getElementById('payment-form');
-    if (paymentForm) {
-        paymentForm.addEventListener('submit', function(e) {
-            const activeScheme = document.querySelector('.payment-scheme.active');
-            const selectedPayment = activeScheme.querySelector('input[name="payment_method"]:checked');
-            
-            if (!selectedPayment) {
-                e.preventDefault();
-                alert('请选择支付方式');
-                return false;
-            }
-            
-            // 显示加载状态
-            const submitButton = document.getElementById('payment-button');
-            if (submitButton) {
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
-            }
-        });
-    }
-
-    // 修复：确保页面加载时正确初始化所有状态
-    setTimeout(() => {
-        const activeScheme = document.querySelector('.payment-scheme.active');
-        if (activeScheme) {
-            // 确保只有一个支付方式展开
-            const openDetails = activeScheme.querySelectorAll('[class*="details"].open');
-            if (openDetails.length > 1) {
-                // 关闭除第一个外的所有
-                for (let i = 1; i < openDetails.length; i++) {
-                    openDetails[i].classList.remove('open');
-                }
-            }
-        }
-    }, 100);
-});
-</script>
 
 
 <script>
@@ -1027,6 +927,78 @@ function cancelPayment(orderId) {
 </script>
 
 <script>
+// 積分獎勵選擇（方案B：簡約列表式）- 自定義 checkbox 交互 + 即時更新總價
+document.addEventListener('DOMContentLoaded', function() {
+    const rewardCheckboxes = document.querySelectorAll('.reward-checkbox-input');
+    const rewardDiscountSpan = document.getElementById('reward-discount-amount');
+    const totalPriceElement = document.querySelector('.total-price .h4:last-child');
+    const originalTotalPrice = {{ total_price }};
+    
+    if (rewardCheckboxes.length > 0) {
+        rewardCheckboxes.forEach(cb => {
+            // 自定義 checkbox 樣式切換
+            const label = cb.nextElementSibling;
+            const checkIcon = label ? label.querySelector('.fa-check') : null;
+            
+            function updateCheckboxStyle(checkbox) {
+                const lbl = checkbox.nextElementSibling;
+                const icon = lbl ? lbl.querySelector('.fa-check') : null;
+                if (checkbox.checked) {
+                    if (lbl) {
+                        lbl.style.borderColor = '#c49b63';
+                        lbl.style.backgroundColor = '#c49b63';
+                    }
+                    if (icon) icon.style.opacity = '1';
+                } else {
+                    if (lbl) {
+                        lbl.style.borderColor = 'rgba(255,255,255,0.3)';
+                        lbl.style.backgroundColor = 'transparent';
+                    }
+                    if (icon) icon.style.opacity = '0';
+                }
+            }
+            
+            // 點擊 label 時切換 checkbox
+            if (label) {
+                label.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    cb.checked = !cb.checked;
+                    cb.dispatchEvent(new Event('change'));
+                });
+            }
+            
+            cb.addEventListener('change', function() {
+                // 限制只能選一個獎勵
+                rewardCheckboxes.forEach(other => {
+                    if (other !== this) {
+                        other.checked = false;
+                        updateCheckboxStyle(other);
+                    }
+                });
+                
+                updateCheckboxStyle(this);
+                
+                // 計算折扣
+                const discount = this.checked ? parseFloat(this.dataset.discount) : 0;
+                rewardDiscountSpan.textContent = discount.toFixed(2);
+                
+                // 更新總價
+                const newTotal = Math.max(0, originalTotalPrice - discount);
+                if (totalPriceElement) {
+                    totalPriceElement.textContent = '$' + newTotal.toFixed(2);
+                }
+                
+                console.log('獎勵選擇:', this.checked ? this.dataset.rewardName : '無', 
+                            '折扣:', discount, '新總價:', newTotal);
+            });
+            
+            // 初始化樣式
+            updateCheckboxStyle(cb);
+        });
+    }
+});
+
+
 // 在 order_confirm.html 的 JavaScript 部分添加
 document.addEventListener('DOMContentLoaded', function() {
     // 检查是否有未支付的订单

@@ -72,22 +72,15 @@ def update_loyalty_on_order_paid(sender, instance, created, **kwargs):
                 user=instance.user
             )
             
-            # 添加積分
+            # 添加積分（add_points_from_order 內部已自動記錄 CustomerActivity）
             points_earned = loyalty.add_points_from_order(instance)
             
             if points_earned > 0:
-                # 記錄獲得積分活動
-                CustomerActivity.record_points_earned(
-                    instance.user,
-                    instance.id,
-                    points_earned,
-                    instance.total_price
-                )
-                
                 logger.info(
                     f"用戶 {instance.user.username} "
                     f"訂單 #{instance.id} 獲得 {points_earned} 積分"
                 )
+
             
             # 檢查並分配會員編號（如果符合條件）
             membership_number = loyalty.check_and_assign_membership_number()

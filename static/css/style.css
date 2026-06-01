@@ -6460,7 +6460,7 @@ cart-items {
 
 .cart-item__name {
   text-decoration: none;
-  display: block;
+  /* display: block; */
 }
 
 .cart-item__name:hover {

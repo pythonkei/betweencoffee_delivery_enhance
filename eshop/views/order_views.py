@@ -70,26 +70,52 @@ def apply_coupon_discounts(request, original_total_price, items):
     loyalty_discount_rate = Decimal('1.00')  # 無折扣
     loyalty_discount_amount = Decimal('0.00')
     
-    # 3. 處理積分獎勵（如果用戶已登入）
+    # 3. 處理積分獎勵（如果用戶已登入）- 用戶手動選擇是否使用
+    #    支援兩種模式：
+    #    a) 直接從積分兌換（reward_id 格式如 'voucher_30'）
+
+    #    b) 使用已兌換的 RedeemedReward（reward_id 為數字 ID）
     applied_reward_id = None
     applied_reward_name = None
     reward_discount_amount = Decimal('0.00')
     
     if request.user.is_authenticated:
-        # 檢查是否有積分獎勵應用
-        reward_id = request.POST.get('applied_reward_id', '').strip()
-        if reward_id:
+        use_reward_id = request.POST.get('use_reward', '').strip()
+        if use_reward_id:
             try:
-                # 這裡可以實現積分獎勵驗證邏輯
-                # 暫時使用簡單的測試獎勵
-                if reward_id == 'REWARD50':
-                    reward_discount_amount = Decimal('50.00')
-                    applied_reward_id = reward_id
-                    applied_reward_name = '50元積分獎勵'
-                    final_total_price = max(Decimal('0.00'), final_total_price - reward_discount_amount)
-                    logger.info(f"積分獎勵 {reward_id} 應用成功，折扣: {reward_discount_amount}")
+                from socialuser.models_enhanced import RedeemedReward
+                
+                # 先嘗試當作直接兌換（reward_id 是字串如 'voucher_30'）
+
+                if use_reward_id in ('voucher_30', 'voucher_5'):
+
+                    success, discount, reward_name = RedeemedReward.apply_reward_at_checkout(
+                        request.user, use_reward_id
+                    )
+                    if success and discount > 0:
+                        reward_discount_amount = discount
+                        applied_reward_id = use_reward_id
+                        applied_reward_name = reward_name
+                        final_total_price = max(Decimal('0.00'), final_total_price - discount)
+                        logger.info(f"用戶直接兌換並使用獎勵 {reward_name}，折扣: ${discount}")
+                    else:
+                        logger.warning(f"直接兌換獎勵失敗: {use_reward_id}")
                 else:
-                    logger.warning(f"無效的積分獎勵ID: {reward_id}")
+                    # 傳統模式：使用已兌換的 RedeemedReward 記錄
+                    reward = RedeemedReward.objects.get(
+                        id=use_reward_id,
+                        user=request.user,
+                        is_used=False
+                    )
+                    discount = RedeemedReward.get_reward_discount_amount(reward.reward_id)
+                    if discount > 0:
+                        reward_discount_amount = discount
+                        applied_reward_id = reward.reward_id
+                        applied_reward_name = reward.reward_name
+                        final_total_price = max(Decimal('0.00'), final_total_price - discount)
+                        logger.info(f"用戶選擇使用已兌換獎勵 {reward.reward_name}，折扣: ${discount}")
+            except RedeemedReward.DoesNotExist:
+                logger.warning(f"無效的獎勵ID: {use_reward_id}")
             except Exception as e:
                 logger.error(f"處理積分獎勵失敗: {str(e)}")
     
@@ -224,12 +250,22 @@ class OrderConfirm(View):
                 messages.error(request, "没有待处理的订单")
                 return redirect('cart:cart_detail')
 
+            # 查詢用戶在結帳時可直接使用的獎勵（基於積分，無需預先兌換）
+            available_rewards = []
+            if request.user.is_authenticated:
+                try:
+                    from socialuser.models_enhanced import RedeemedReward
+                    available_rewards = RedeemedReward.get_available_rewards_for_checkout(request.user)
+                except Exception as e:
+                    logger.error(f"查詢可用獎勵失敗: {str(e)}")
+
             context = {
                 'items': items,
                 'total_price': total_price,
                 'user': request.user,
                 'initial_data': initial_data,
-                'is_quick_order': is_quick_order
+                'is_quick_order': is_quick_order,
+                'available_rewards': available_rewards,
             }
             return render(request, self.template_name, context)
         
@@ -414,6 +450,18 @@ class OrderConfirm(View):
                     
                     logger.info(f"创建新订单，ID: {order.id}")
                     logger.info(f"訂單折扣信息: 優惠券={discount_data['applied_coupon_code']}, 優惠券折扣={discount_data['coupon_discount']}, 會員折扣率={discount_data['loyalty_discount_rate']}, 會員折扣金額={discount_data['loyalty_discount_amount']}")
+                    
+                    # 如果應用了獎勵，將已兌換獎勵標記為已使用
+                    if discount_data['applied_reward_id'] and request.user.is_authenticated:
+                        try:
+                            from socialuser.models_enhanced import RedeemedReward
+                            unused_rewards = RedeemedReward.get_unused_rewards(request.user)
+                            for reward in unused_rewards:
+                                if reward.reward_id == discount_data['applied_reward_id']:
+                                    reward.mark_as_used(order_id=order.id)
+                                    logger.info(f"獎勵 {reward.reward_name} 已標記為在訂單 #{order.id} 中使用")
+                        except Exception as e:
+                            logger.error(f"標記獎勵為已使用失敗: {str(e)}")
                     
                     # 計算取貨時間相關的時間
                     order.calculate_times_based_on_pickup_choice()
@@ -812,13 +860,10 @@ def order_payment_confirmation(request, order_id=None):
                 # 計算積分：每消費 $10 獲得 1 積分
                 earned_points = int(float(order.total_price) / 10)
                 
-                # 獲取用戶的忠誠度記錄
+                # 獲取用戶的忠誠度記錄（積分由 signal 自動處理，此處僅讀取顯示）
                 loyalty, created = CustomerLoyalty.objects.get_or_create(
                     user=request.user
                 )
-                
-                # 添加積分到用戶帳戶（內部已自動記錄活動）
-                loyalty.add_points_from_order(order)
                 
                 loyalty_info = {
                     'earned_points': earned_points,
@@ -826,12 +871,13 @@ def order_payment_confirmation(request, order_id=None):
                     'membership_number': loyalty.membership_number or '未分配',
                 }
                 
-                logger.info(f"用戶 {request.user.username} 從訂單 {order.id} "
-                           f"獲得 {earned_points} 積分，總積分: {loyalty.points}")
+                logger.info(f"用戶 {request.user.username} 訂單 {order.id} "
+                           f"當前總積分: {loyalty.points}")
                 
             except Exception as e:
-                logger.error(f"計算積分時發生錯誤: {str(e)}")
+                logger.error(f"讀取積分信息時發生錯誤: {str(e)}")
                 # 不影響主要功能，繼續顯示頁面
+
         
         context = {
             'order': order,

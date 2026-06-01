@@ -98,14 +98,9 @@ def redeem_reward(request):
         success, message = loyalty.redeem_reward(reward_id)
         
         if success:
-            # 記錄活動
-            CustomerActivity.record_reward_redeemed(
-                request.user,
-                reward_info['name'],
-                reward_info['points_required']
-            )
-            
+            # redeem_reward() 內部已自動記錄 CustomerActivity，此處不再重複記錄
             return JsonResponse({
+
                 'success': True,
                 'message': message,
                 'points': loyalty.points

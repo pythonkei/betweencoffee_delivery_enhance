@@ -114,32 +114,34 @@ class CustomerLoyalty(models.Model):
         """獲取可兌換獎勵"""
         rewards = []
         
-        # 免費咖啡一杯 (10積分)
-        if self.points >= 10:
+        # $30 現金券 (300積分)
+        if self.points >= 300:
             rewards.append({
-                'id': 'free_coffee',
-                'name': '免費咖啡一杯',
-                'points_required': 10,
-                'description': '兌換任意標準杯型咖啡一杯',
-                'icon': 'fa-mug-hot',
+                'id': 'voucher_30',
+                'name': '$30 現金券',
+                'points_required': 300,
+                'description': '兌換 $30 現金券折扣',
+                'icon': 'fa-ticket-alt',
                 'color': 'success'
             })
         
-        # 免費升級大杯 (20積分)
-        if self.points >= 20:
+        # $5 現金券 (30積分)
+        if self.points >= 30:
             rewards.append({
-                'id': 'free_upgrade',
-                'name': '免費升級大杯',
-                'points_required': 20,
-                'description': '免費升級任意咖啡至大杯',
-                'icon': 'fa-arrow-up',
-                'color': 'warning'
+                'id': 'voucher_5',
+                'name': '$5 現金券',
+                'points_required': 30,
+                'description': '兌換 $5 現金券折扣',
+                'icon': 'fa-ticket-alt',
+                'color': 'success'
             })
+
+
         
         return rewards
     
     def redeem_reward(self, reward_id):
-        """兌換獎勵 - 增強版"""
+        """兌換獎勵 - 增強版（創建兌換記錄，供訂單自動套用）"""
         rewards = self.get_available_rewards()
         reward = next((r for r in rewards if r['id'] == reward_id), None)
         
@@ -154,6 +156,15 @@ class CustomerLoyalty(models.Model):
         self.total_points_spent += reward['points_required']
         self.save()
         
+        # 創建兌換記錄（供訂單自動套用）
+        RedeemedReward.objects.create(
+            user=self.user,
+            reward_id=reward['id'],
+            reward_name=reward['name'],
+            points_spent=reward['points_required'],
+            is_used=False,
+        )
+        
         # 記錄活動
         from .models_enhanced import CustomerActivity
         CustomerActivity.record_reward_redeemed(
@@ -163,7 +174,7 @@ class CustomerLoyalty(models.Model):
         )
         
         logger.info(f"用戶 {self.user.username} 兌換獎勵: {reward['name']}, 消耗 {reward['points_required']} 積分")
-        return True, f"成功兌換 {reward['name']}"
+        return True, f"成功兌換 {reward['name']}，將在下次下單時自動套用"
     
     def add_bonus_points(self, points, point_type='bonus', description='獎勵積分'):
         """添加獎勵積分"""
@@ -473,4 +484,156 @@ class CustomerActivity(models.Model):
             }
         )
         return activity
+
+
+class RedeemedReward(models.Model):
+    """已兌換獎勵記錄 - 供訂單自動套用折扣"""
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='redeemed_rewards')
+    reward_id = models.CharField(max_length=50, verbose_name='獎勵ID')
+    reward_name = models.CharField(max_length=100, verbose_name='獎勵名稱')
+    points_spent = models.IntegerField(default=0, verbose_name='消耗積分')
+    is_used = models.BooleanField(default=False, verbose_name='已使用')
+    redeemed_at = models.DateTimeField(auto_now_add=True, verbose_name='兌換時間')
+    used_at = models.DateTimeField(null=True, blank=True, verbose_name='使用時間')
+    applied_order_id = models.IntegerField(null=True, blank=True, verbose_name='應用訂單ID')
+    
+    class Meta:
+        verbose_name = '已兌換獎勵'
+        verbose_name_plural = '已兌換獎勵'
+        indexes = [
+            models.Index(fields=['user', 'is_used']),
+            models.Index(fields=['reward_id']),
+        ]
+        ordering = ['-redeemed_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.reward_name} ({'已使用' if self.is_used else '未使用'})"
+    
+    def mark_as_used(self, order_id=None):
+        """標記獎勵為已使用"""
+        self.is_used = True
+        self.used_at = timezone.now()
+        if order_id:
+            self.applied_order_id = order_id
+        self.save()
+        logger.info(f"獎勵 {self.reward_name} 已在訂單 #{order_id} 中使用")
+    
+    @classmethod
+    def get_unused_rewards(cls, user):
+        """獲取用戶未使用的獎勵"""
+        return cls.objects.filter(user=user, is_used=False)
+    
+    @classmethod
+    def get_reward_discount_amount(cls, reward_id):
+        """根據獎勵ID獲取折扣金額"""
+        # $30 現金券：減去 $30
+        if reward_id == 'voucher_30':
+            return Decimal('30.00')
+        # $5 現金券：減去 $5
+        elif reward_id == 'voucher_5':
+            return Decimal('5.00')
+
+        return Decimal('0.00')
+
+    
+    @classmethod
+    def get_available_rewards_for_checkout(cls, user):
+        """
+        獲取用戶在結帳頁面可直接使用的獎勵（無需預先兌換）
+        返回獎勵列表，每個獎勵包含 id, name, discount, points_required
+        """
+        available = []
+        try:
+            loyalty = CustomerLoyalty.objects.get(user=user)
+            # $30 現金券：積分 >= 300 即可使用
+            if loyalty.points >= 300:
+                available.append({
+                    'id': 'voucher_30',
+                    'reward_id': 'voucher_30',
+                    'reward_name': '$30 現金券',
+                    'discount': float(cls.get_reward_discount_amount('voucher_30')),
+                    'points_required': 300,
+                    'description': '兌換 $30 現金券折扣',
+                })
+            # $5 現金券：積分 >= 30 即可使用
+            if loyalty.points >= 30:
+                available.append({
+                    'id': 'voucher_5',
+                    'reward_id': 'voucher_5',
+                    'reward_name': '$5 現金券',
+                    'discount': float(cls.get_reward_discount_amount('voucher_5')),
+                    'points_required': 30,
+                    'description': '兌換 $5 現金券折扣',
+                })
+
+
+        except CustomerLoyalty.DoesNotExist:
+            pass
+        except Exception as e:
+            logger.error(f"獲取結帳可用獎勵失敗: {str(e)}")
+        return available
+    
+    @classmethod
+    def apply_reward_at_checkout(cls, user, reward_id, order_id=None):
+        """
+        在結帳時直接兌換並使用獎勵（無需預先兌換）
+        1. 扣除積分
+        2. 創建 RedeemedReward 記錄
+        3. 標記為已使用
+        返回 (成功與否, 折扣金額, 獎勵名稱)
+        """
+        try:
+            loyalty = CustomerLoyalty.objects.get(user=user)
+            reward_info = cls.get_reward_discount_amount(reward_id)
+            
+            # 檢查獎勵是否存在
+            if reward_id == 'voucher_30':
+                points_needed = 300
+                reward_name = '$30 現金券'
+            elif reward_id == 'voucher_5':
+                points_needed = 30
+                reward_name = '$5 現金券'
+
+
+            else:
+                return False, Decimal('0.00'), ''
+            
+            # 檢查積分是否足夠
+            if loyalty.points < points_needed:
+                logger.warning(f"用戶 {user.username} 積分不足，無法使用 {reward_name}")
+                return False, Decimal('0.00'), ''
+            
+            # 扣除積分
+            loyalty.points -= points_needed
+            loyalty.total_points_spent += points_needed
+            loyalty.save()
+            
+            # 創建兌換記錄並立即標記為已使用
+            redeemed = cls.objects.create(
+                user=user,
+                reward_id=reward_id,
+                reward_name=reward_name,
+                points_spent=points_needed,
+                is_used=True,
+                used_at=timezone.now(),
+                applied_order_id=order_id,
+            )
+            
+            # 記錄活動
+            try:
+                from .models_enhanced import CustomerActivity
+                CustomerActivity.record_reward_redeemed(user, reward_name, points_needed)
+            except Exception:
+                pass
+            
+            logger.info(f"用戶 {user.username} 在結帳時使用 {reward_name}，消耗 {points_needed} 積分，折扣 ${reward_info}")
+            return True, reward_info, reward_name
+            
+        except CustomerLoyalty.DoesNotExist:
+            logger.warning(f"用戶 {user.username} 沒有忠誠度記錄")
+            return False, Decimal('0.00'), ''
+        except Exception as e:
+            logger.error(f"結帳時應用獎勵失敗: {str(e)}")
+            return False, Decimal('0.00'), ''
            
