@@ -415,6 +415,45 @@
                         </div>
                         {% endfor %}
                     </div>
+                    
+                    <!-- ========== 折扣小計（合併在商品明細中） ========== -->
+                    {% if order.reward_discount_amount > 0 or order.coupon_discount > 0 %}
+                    <!-- 小計（折扣前） -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 mt-3" style="border-top: 1px solid rgba(255,255,255,0.08);">
+                        <span style="color: rgba(255,255,255,0.7); font-size: 1.05rem;">小計</span>
+                        <span style="color: rgba(255,255,255,0.9); font-size: 1.05rem;">HK$ {{ order.original_total_price|floatformat:"2" }}</span>
+                    </div>
+                    
+                    <!-- 獎勵折扣 -->
+                    {% if order.reward_discount_amount > 0 %}
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span style="color: rgba(255,255,255,0.7); font-size: 1.05rem;">
+                            <i class="fas fa-gift mr-1" style="color: #c49b63;"></i>
+                            {{ order.applied_reward_name|default:'積分兌換' }}
+                        </span>
+                        <span style="color: #28a745; font-size: 1.05rem;">-HK$ {{ order.reward_discount_amount|floatformat:"2" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- 優惠券折扣 -->
+                    {% if order.coupon_discount > 0 %}
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span style="color: rgba(255,255,255,0.7); font-size: 1.05rem;">
+                            <i class="fas fa-ticket-alt mr-1" style="color: #c49b63;"></i>
+                            優惠券 ({{ order.applied_coupon_code|default:'優惠碼' }})
+                        </span>
+                        <span style="color: #28a745; font-size: 1.05rem;">-HK$ {{ order.coupon_discount|floatformat:"2" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- 合計（折扣後） -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,0.15);">
+                        <span style="color: #fff; font-weight: 600; font-size: 1.15rem;">合計</span>
+                        <span style="color: #fff; font-weight: 700; font-size: 1.25rem;">HK$ {{ order.total_price|floatformat:"2" }}</span>
+                    </div>
+                    {% endif %}
+                    <!-- ========== end 折扣小計 ========== -->
+                    
                 </div>
                 
                 {% endif %}

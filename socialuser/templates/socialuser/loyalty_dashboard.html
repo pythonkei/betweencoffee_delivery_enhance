@@ -60,7 +60,7 @@
                     <div class="card-body">
                         <!-- 積分統計卡片 -->
                         <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <div class="stats-card">
                                     <div class="stats-card-body text-center">
                                         <div class="stats-card-icon">
@@ -72,7 +72,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3" style="display: none;">
                                 <div class="stats-card">
                                     <div class="stats-card-body text-center">
                                         <div class="stats-card-icon">
@@ -246,11 +246,7 @@
                                                 <div class="activity-description-content">
                                                     <div class="activity-description">{{ activity.description }}</div>
                                                 <div class="activity-time">
-                                                    {% if activity.metadata.order_created_at %}
-                                                    訂單時間: {{ activity.metadata.order_created_at|slice:":16"|cut:"T"|cut:" " }}
-                                                    {% else %}
                                                     記錄時間: {{ activity.created_at|date:"Y-m-d H:i" }}
-                                                    {% endif %}
                                                 </div>
                                                     {% if activity.details %}
                                                     <div class="activity-details">{{ activity.details }}</div>

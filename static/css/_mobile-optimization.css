@@ -34,7 +34,6 @@
     .btn {
         padding: 10px 15px;
         font-size: 14px;
-        min-height: 44px; /* 觸摸友好尺寸 */
     }
     
     /* 表單優化 */
@@ -156,7 +155,6 @@
     
     /* 增加觸摸目標尺寸 */
     .nav-link, .dropdown-item {
-        min-height: 44px;
         display: flex;
         align-items: center;
     }
@@ -420,12 +418,6 @@
 
 /* 最後的移動端優化 */
 @media (max-width: 768px) {
-    /* 確保所有交互元素足夠大 */
-    a, button, input, select, textarea, label {
-        min-height: 44px;
-        min-width: 44px;
-    }
-    
     /* 防止文字過小 */
     small, .small {
         font-size: 12px;

@@ -415,7 +415,7 @@ class CustomerActivity(models.Model):
             user=user,
             activity_type='points_earned',
             points_change=points_earned,
-            description=f"訂單 #{order_id} 消費 ${float(order_amount):.2f}，獲得 {points_earned} 積分",
+            description=f"訂單 #{order_id} 消費 ${float(order_amount):.2f}",
             metadata={
                 'order_id': order_id,
                 'order_amount': float(order_amount),
@@ -447,7 +447,7 @@ class CustomerActivity(models.Model):
             user=user,
             activity_type='reward_redeemed',
             points_change=-points_used,
-            description=f"兌換獎勵: {reward_name}，消耗 {points_used} 積分",
+            description=f"兌換獎勵: {reward_name}",
             metadata={
                 'reward_name': reward_name,
                 'points_used': points_used
