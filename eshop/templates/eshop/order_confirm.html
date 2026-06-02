@@ -117,8 +117,6 @@
         <div class="row">
             <!-- info from -->
             <div class="col-xl-7">
-                <h3 class="mb-4 billing-heading">聯絡方式</h3>
-                <!-- 恢复为原始action -->
                 <form method="POST" action="{% url 'eshop:order_confirm' %}" class="billing-form" id="payment-form" onsubmit="return validateForm()">
                     {% csrf_token %}
 
@@ -133,50 +131,99 @@
 
                     <!-- 输入info -->
                     <div class="row">
-                        <div class="col-md-8 px-0 mb-3">
-                            <div class="form-group">
-                                <label for="name">名稱</label>
-                                <input required class="form-control" type="text" name="name" placeholder="Ricky" autocomplete="off" value="{% if initial_data.name %}{{ initial_data.name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"/>
-                            </div>
-                        </div>
 
-                        <div class="w-100"></div>
-
-                        <div class="col-md-6 px-0 mb-3">
-                            <div class="form-group">
-                                <label for="phone">電話 / Whatsapp</label>
-                                <input required class="form-control mb-2" type="text" name="phone" 
-                                    placeholder="98092384" autocomplete="off"
-                                    pattern="[0-9]{8}" 
-                                    title="請輸入8位數字香港電話號碼"
-                                    value="{% if initial_data.phone %}{{ initial_data.phone }}{% elif user.is_authenticated and user.profile.phone %}{{ user.profile.hk_phone }}{% endif %}"/>
-                                <caption class="">默認以 WhatsApp 通知</caption>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="email">電郵</label>
-                                <input class="form-control" type="email" name="email" placeholder="mark_yeung@gmail.com" autocomplete="off" value="{% if initial_data.email %}{{ initial_data.email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}"/>
-                            </div>
-                        </div>
-
-                        <div class="w-100"></div>
-
-                        <!-- 取貨時間選項部分 -->
-                        <div class="col-md-6 px-0">
-                            <!-- 方案1：完全隱藏整個取貨時間區域 -->
+                        <!-- 取貨時間選項部分（方案A：按鈕組式 radio 列表） -->
+                        <div class="col-md-12 px-0 mb-4">
                             {% if is_quick_order %}
                             <div class="form-group">
-                                <label for="pickup_time">取貨時間</label>
-                                <select name="pickup_time" class="form-control" required>
-                                    <option value="5" {% if initial_data.pickup_time == "5" %}selected{% endif %}>5 分鐘後</option>
-                                    <option value="10" {% if initial_data.pickup_time == "10" %}selected{% endif %}>10 分鐘後</option>
-                                    <option value="15" {% if initial_data.pickup_time == "15" %}selected{% endif %}>15 分鐘後</option>
-                                    <option value="20" {% if initial_data.pickup_time == "20" %}selected{% endif %}>20 分鐘後</option>
-                                    <option value="30" {% if initial_data.pickup_time == "30" %}selected{% endif %}>30 分鐘後</option>
-                                </select>
-                                <small class="form-text text-muted">您可以修改取貨時間</small>
+                                <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
+                                    <i class="fas fa-clock" style="color: #c49b63;"></i> 取貨時間
+                                </label>
+                                <div class="pickup-time-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                                    <div class="pickup-time-item" data-time="5">
+                                        <input type="radio" name="pickup_time" id="pickup-5" value="5" {% if initial_data.pickup_time == "5" %}checked{% endif %} style="display: none;">
+                                        <label for="pickup-5" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fas fa-bolt" style="color: #c49b63; margin-right: 6px;"></i> 5 分鐘後
+                                                    </div>
+                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">快速取貨</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="pickup-time-item" data-time="10">
+                                        <input type="radio" name="pickup_time" id="pickup-10" value="10" {% if initial_data.pickup_time == "10" %}checked{% endif %} style="display: none;">
+                                        <label for="pickup-10" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fas fa-mug-hot" style="color: #c49b63; margin-right: 6px;"></i> 10 分鐘後
+                                                    </div>
+                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">標準</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="pickup-time-item" data-time="15">
+                                        <input type="radio" name="pickup_time" id="pickup-15" value="15" {% if initial_data.pickup_time == "15" %}checked{% endif %} style="display: none;">
+                                        <label for="pickup-15" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fas fa-coffee" style="color: #c49b63; margin-right: 6px;"></i> 15 分鐘後
+                                                    </div>
+                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">從容</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="pickup-time-item" data-time="20">
+                                        <input type="radio" name="pickup_time" id="pickup-20" value="20" {% if initial_data.pickup_time == "20" %}checked{% endif %} style="display: none;">
+                                        <label for="pickup-20" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fas fa-hourglass-half" style="color: #c49b63; margin-right: 6px;"></i> 20 分鐘後
+                                                    </div>
+                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">悠閒</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="pickup-time-item" data-time="30">
+                                        <input type="radio" name="pickup_time" id="pickup-30" value="30" {% if initial_data.pickup_time == "30" %}checked{% endif %} style="display: none;">
+                                        <label for="pickup-30" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; display: flex !important;">
+                                            <div class="d-flex align-items-center">
+                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                </span>
+                                                <div>
+                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                        <i class="fas fa-star" style="color: #c49b63; margin-right: 6px;"></i> 30 分鐘後
+                                                    </div>
+                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">最舒適</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted mt-2" style="color: rgba(255,255,255,0.4) !important;">
+                                    <i class="fas fa-info-circle mr-1"></i>您可以修改取貨時間
+                                </small>
                             </div>
                             {% else %}
                             <!-- 普通訂單：完全隱藏取貨時間選擇 -->
@@ -385,6 +432,40 @@
 
 
 
+
+                        <!-- ========== 聯絡方式（置於最底部，隱藏） ========== -->
+                        <div class="col-md-12 px-0 mb-3" style="display: none;">
+                            <h3 class="mb-4 billing-heading">聯絡方式</h3>
+                        </div>
+                        <div class="col-md-8 px-0 mb-3" style="display: none;">
+                            <div class="form-group">
+                                <label for="name">名稱</label>
+                                <input required class="form-control" type="text" name="name" placeholder="Ricky" autocomplete="off" value="{% if initial_data.name %}{{ initial_data.name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"/>
+                            </div>
+                        </div>
+
+                        <div class="w-100"></div>
+
+                        <div class="col-md-6 px-0 mb-3" style="display: none;">
+                            <div class="form-group">
+                                <label for="phone">電話 / Whatsapp</label>
+                                <input required class="form-control mb-2" type="text" name="phone" 
+                                    placeholder="98092384" autocomplete="off"
+                                    pattern="[0-9]{8}" 
+                                    title="請輸入8位數字香港電話號碼"
+                                    value="{% if initial_data.phone %}{{ initial_data.phone }}{% elif user.is_authenticated and user.profile.phone %}{{ user.profile.hk_phone }}{% endif %}"/>
+                                <caption class="">默認以 WhatsApp 通知</caption>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" style="display: none;">
+                            <div class="form-group">
+                                <label for="email">電郵</label>
+                                <input class="form-control" type="email" name="email" placeholder="mark_yeung@gmail.com" autocomplete="off" value="{% if initial_data.email %}{{ initial_data.email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}"/>
+                            </div>
+                        </div>
+
+                        <div class="w-100"></div>
 
                         <div hidden class="col-md-12 px-0">
                             <div class="form-group mt-2">
@@ -700,6 +781,60 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+});
+
+// 取貨時間交互（方案A：按鈕組式 radio 列表）
+document.addEventListener('DOMContentLoaded', function() {
+    const pickupItems = document.querySelectorAll('.pickup-time-item');
+    
+    function updatePickupStyle(item) {
+        const radio = item.querySelector('input[type="radio"]');
+        const circle = item.querySelector('.pickup-radio-circle');
+        const dot = item.querySelector('.pickup-radio-dot');
+        const label = item.querySelector('.pickup-time-label');
+        
+        if (radio.checked) {
+            if (circle) circle.style.borderColor = '#c49b63';
+            if (dot) dot.style.background = '#c49b63';
+            if (label) label.style.background = 'rgba(196,155,99,0.08)';
+        } else {
+            if (circle) circle.style.borderColor = 'rgba(255,255,255,0.3)';
+            if (dot) dot.style.background = 'transparent';
+            if (label) label.style.background = 'transparent';
+        }
+    }
+    
+    // 初始化：預設選中
+    pickupItems.forEach(item => {
+        const radio = item.querySelector('input[type="radio"]');
+        if (radio && radio.checked) {
+            updatePickupStyle(item);
+        }
+    });
+    
+    // 點擊 label 時切換
+    pickupItems.forEach(item => {
+        const label = item.querySelector('.pickup-time-label');
+        const radio = item.querySelector('input[type="radio"]');
+        
+        if (label && radio) {
+            label.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (radio.checked) return;
+                
+                pickupItems.forEach(other => {
+                    const otherRadio = other.querySelector('input[type="radio"]');
+                    if (otherRadio && otherRadio !== radio) {
+                        otherRadio.checked = false;
+                        updatePickupStyle(other);
+                    }
+                });
+                
+                radio.checked = true;
+                updatePickupStyle(item);
+            });
+        }
+    });
 });
 </script>
 
