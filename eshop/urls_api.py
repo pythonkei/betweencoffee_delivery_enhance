@@ -5,7 +5,9 @@ API URL 配置 - 包含 WebSocket 監控 API
 """
 
 from django.urls import path
+from .views.payment_views import check_pending_orders, api_cancel_order
 from .views.api_views import (
+
     CountdownAPI,
     UnifiedOrderAPI,
     UnifiedQueueAPI,
@@ -68,6 +70,14 @@ urlpatterns = [
     
     # ==================== 健康檢查 API ====================
     path('health/', health_check, name='health_check'),
+    
+    # ==================== 支付狀態檢查 API ====================
+    path('check-pending-orders/', check_pending_orders, name='check_pending_orders'),
+    
+    # ==================== 取消訂單 API ====================
+    path('cancel-order/<int:order_id>/', api_cancel_order, name='api_cancel_order'),
+
+
     
     # ==================== 🔥 WebSocket 監控 API（管理員專用）====================
     # 這些端點需要 staff_member_required 權限，已在視圖中處理

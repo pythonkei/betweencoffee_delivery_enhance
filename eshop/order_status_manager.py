@@ -484,13 +484,13 @@ class OrderStatusManager:
                 return {'success': False, 'message': f'訂單已{old_status}，無法取消'}
             
             order.status = 'cancelled'
-            order.cancelled_at = timezone.now()
             order.payment_status = 'cancelled'
             
-            if reason:
-                order.cancellation_reason = reason
-                
-            order.save(update_fields=['status', 'cancelled_at', 'payment_status', 'cancellation_reason'])
+            # 注意：OrderModel 沒有 cancelled_at 和 cancellation_reason 欄位
+            # 取消時間可從 updated_at 欄位推斷（auto_now=True）
+            
+            order.save(update_fields=['status', 'payment_status'])
+
             
             # 更新隊列項
             queue_item = CoffeeQueue.objects.filter(order=order).first()

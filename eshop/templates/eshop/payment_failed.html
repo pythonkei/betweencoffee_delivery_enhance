@@ -26,12 +26,34 @@
                         {% else %}{{ order.payment_method }}{% endif %}
                     </p>
                     
+                    <!-- ====== 支付狀態自動檢測區域 ====== -->
+                    <div id="payment-status-check" class="mt-3 mb-3" style="display:none;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span id="status-check-message">正在檢查支付狀態...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- ====== 支付成功提示（隱藏，由JS控制顯示） ====== -->
+                    <div id="payment-success-alert" class="mt-3 mb-3" style="display:none;">
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>支付成功！</strong>
+                            <p class="mb-0 mt-1">我們已確認您的付款，正在跳轉到訂單確認頁面...</p>
+                        </div>
+                    </div>
+                    
                     <div class="mt-4">
                         {% if can_retry %}
                         <button id="retry-payment" class="btn btn-primary mr-2">
                             <i class="fas fa-redo"></i> 重新支付
                         </button>
                         {% endif %}
+                        
+                        <!-- ====== 手動檢查支付狀態按鈕 ====== -->
+                        <button id="check-status-btn" class="btn btn-info mr-2" {% if not order %}style="display:none;"{% endif %}>
+                            <i class="fas fa-search"></i> 檢查支付狀態
+                        </button>
                         
                         <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-secondary mr-2">
                             <i class="fas fa-shopping-cart"></i> 返回购物车
@@ -61,10 +83,23 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    {% if order %}
+    // ====== 自動檢測支付狀態 ======
+    autoCheckPaymentStatus({{ order.id }});
+    
+    // ====== 手動檢查按鈕 ======
+    const checkStatusBtn = document.getElementById('check-status-btn');
+    if (checkStatusBtn) {
+        checkStatusBtn.addEventListener('click', function() {
+            manualCheckPaymentStatus({{ order.id }});
+        });
+    }
+    {% endif %}
+    
+    // ====== 重新支付按鈕 ======
     const retryButton = document.getElementById('retry-payment');
     if (retryButton) {
         retryButton.addEventListener('click', function() {
-            // 检查 order 是否存在
             {% if order %}
             // 显示加载状态
             retryButton.disabled = true;
@@ -100,5 +135,154 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+/**
+ * 自動檢測支付狀態 - 頁面加載時自動執行
+ * 用於處理：支付成功但回調失敗的情況
+ */
+function autoCheckPaymentStatus(orderId) {
+    const statusCheckDiv = document.getElementById('payment-status-check');
+    const statusMessage = document.getElementById('status-check-message');
+    
+    if (!statusCheckDiv || !statusMessage) return;
+    
+    // 顯示檢查中
+    statusCheckDiv.style.display = 'block';
+    statusMessage.textContent = '正在確認支付狀態...';
+    
+    fetch('/eshop/api/check-pending-orders/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.has_pending_orders) {
+            // 訂單仍在 pending 狀態
+            const currentOrder = data.orders.find(o => o.id === orderId);
+            if (currentOrder) {
+                if (currentOrder.is_timeout) {
+                    statusMessage.textContent = '訂單已超時，請重新下單。';
+                    statusCheckDiv.className = 'mt-3 mb-3';
+                    statusCheckDiv.querySelector('.alert').className = 'alert alert-warning';
+                } else {
+                    statusMessage.textContent = '訂單尚未支付，請點擊「重新支付」繼續。';
+                    statusCheckDiv.className = 'mt-3 mb-3';
+                    statusCheckDiv.querySelector('.alert').className = 'alert alert-warning';
+                }
+            } else {
+                // 訂單不在 pending 列表中，可能已支付
+                checkOrderDirectly(orderId);
+            }
+        } else {
+            // 沒有 pending 訂單，直接查詢該訂單
+            checkOrderDirectly(orderId);
+        }
+    })
+    .catch(error => {
+        console.error('自動檢查支付狀態失敗:', error);
+        statusCheckDiv.style.display = 'none';
+    });
+}
+
+/**
+ * 直接查詢訂單狀態
+ */
+function checkOrderDirectly(orderId) {
+    const statusCheckDiv = document.getElementById('payment-status-check');
+    const statusMessage = document.getElementById('status-check-message');
+    const successAlert = document.getElementById('payment-success-alert');
+    
+    if (!statusCheckDiv || !statusMessage) return;
+    
+    statusMessage.textContent = '正在直接查詢訂單狀態...';
+    
+    fetch('/eshop/payment/check-status/' + orderId + '/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.payment_status === 'paid') {
+            // 支付成功！顯示成功訊息並跳轉
+            statusCheckDiv.style.display = 'none';
+            successAlert.style.display = 'block';
+            
+            // 延遲跳轉到訂單確認頁
+            setTimeout(function() {
+                window.location.href = '/eshop/order/payment-confirmation/' + orderId + '/';
+            }, 2000);
+        } else {
+            // 支付未成功
+            statusMessage.textContent = '支付尚未完成，請點擊「重新支付」繼續。';
+            statusCheckDiv.querySelector('.alert').className = 'alert alert-warning';
+        }
+    })
+    .catch(error => {
+        console.error('直接查詢訂單狀態失敗:', error);
+        statusCheckDiv.style.display = 'none';
+    });
+}
+
+/**
+ * 手動檢查支付狀態 - 用戶點擊按鈕時執行
+ */
+function manualCheckPaymentStatus(orderId) {
+    const checkBtn = document.getElementById('check-status-btn');
+    const statusCheckDiv = document.getElementById('payment-status-check');
+    const statusMessage = document.getElementById('status-check-message');
+    const successAlert = document.getElementById('payment-success-alert');
+    
+    if (!checkBtn || !statusCheckDiv || !statusMessage) return;
+    
+    // 禁用按鈕，顯示載入中
+    checkBtn.disabled = true;
+    checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 檢查中...';
+    
+    // 顯示檢查區域
+    statusCheckDiv.style.display = 'block';
+    statusMessage.textContent = '正在檢查支付狀態...';
+    statusCheckDiv.querySelector('.alert').className = 'alert alert-info';
+    successAlert.style.display = 'none';
+    
+    fetch('/eshop/payment/check-status/' + orderId + '/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.payment_status === 'paid') {
+            // 支付成功！
+            statusCheckDiv.style.display = 'none';
+            successAlert.style.display = 'block';
+            
+            // 延遲跳轉
+            setTimeout(function() {
+                window.location.href = '/eshop/order/payment-confirmation/' + orderId + '/';
+            }, 2000);
+        } else {
+            // 支付未成功
+            statusMessage.textContent = '支付尚未完成，請點擊「重新支付」繼續。';
+            statusCheckDiv.querySelector('.alert').className = 'alert alert-warning';
+        }
+        
+        // 恢復按鈕
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i class="fas fa-search"></i> 檢查支付狀態';
+    })
+    .catch(error => {
+        console.error('手動檢查支付狀態失敗:', error);
+        statusMessage.textContent = '檢查失敗，請稍後再試。';
+        statusCheckDiv.querySelector('.alert').className = 'alert alert-danger';
+        
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i class="fas fa-search"></i> 檢查支付狀態';
+    });
+}
 </script>
 {% endblock %}

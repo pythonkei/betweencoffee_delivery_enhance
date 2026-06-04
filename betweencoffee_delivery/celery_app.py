@@ -1,11 +1,14 @@
-# your_project/celery.py
+# betweencoffee_delivery/celery_app.py
+"""
+Celery 配置 - 處理異步任務和定時任務
+"""
 import os
 from celery import Celery
 from celery.schedules import crontab
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'betweencoffee_delivery.settings')
 
-app = Celery('your_project')
+app = Celery('betweencoffee_delivery')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # 自動發現任務

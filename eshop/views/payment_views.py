@@ -693,6 +693,69 @@ def cash_payment(request, order_id):
 
 # ==================== 支付状态检查视图 ====================
 
+def check_pending_orders(request):
+    """
+    檢查當前用戶是否有未支付的訂單
+    用於 order_confirm.html 頁面加載時檢測
+    """
+    try:
+        pending_orders = []
+        
+        if request.user.is_authenticated:
+            # 已登入用戶：查詢該用戶的未支付訂單
+            orders = OrderModel.objects.filter(
+                user=request.user,
+                payment_status='pending',
+                status='pending'
+            ).order_by('-created_at')[:5]
+            
+            for order in orders:
+                pending_orders.append({
+                    'id': order.id,
+                    'total_price': float(order.total_price),
+                    'created_at': order.created_at.isoformat() if order.created_at else None,
+                    'payment_method': order.payment_method,
+                    'is_timeout': order.is_payment_timeout(),
+                })
+        else:
+            # 訪客用戶：從 session 中獲取最近訂單ID
+            last_order_id = request.session.get('last_order_id')
+            pending_paypal_id = request.session.get('pending_paypal_order_id')
+            
+            order_ids = set()
+            if last_order_id:
+                order_ids.add(last_order_id)
+            if pending_paypal_id:
+                order_ids.add(pending_paypal_id)
+            
+            for oid in order_ids:
+                try:
+                    order = OrderModel.objects.get(id=oid)
+                    if order.payment_status == 'pending' and order.status == 'pending':
+                        pending_orders.append({
+                            'id': order.id,
+                            'total_price': float(order.total_price),
+                            'created_at': order.created_at.isoformat() if order.created_at else None,
+                            'payment_method': order.payment_method,
+                            'is_timeout': order.is_payment_timeout(),
+                        })
+                except OrderModel.DoesNotExist:
+                    continue
+        
+        return JsonResponse({
+            'has_pending_orders': len(pending_orders) > 0,
+            'orders': pending_orders,
+        })
+        
+    except Exception as e:
+        logger.error(f"檢查未支付訂單失敗: {str(e)}")
+        return JsonResponse({
+            'has_pending_orders': False,
+            'orders': [],
+            'error': str(e)
+        })
+
+
 def check_and_update_payment_status(request, order_id):
     """检查和更新支付状态"""
     try:
@@ -764,35 +827,88 @@ def check_payment_timeout(request, order_id):
         })
 
 def cancel_timeout_payment(request, order_id):
-    """取消超時支付 - 使用 OrderStatusManager"""
+    """取消支付 - 使用 OrderStatusManager（支援舊訂單手動取消）"""
     try:
         order = OrderModel.objects.get(id=order_id)
         
-        if order.is_payment_timeout() and order.payment_status != 'paid':
-            result = OrderStatusManager.mark_as_cancelled_manually(
-                order_id=order_id,
-                staff_name='system',
-                reason='支付超時'
-            )
-            
-            if result['success']:
-                messages.warning(request, "支付超時，訂單已取消")
-            else:
-                messages.error(request, f"取消訂單失敗: {result['message']}")
-                
-            return redirect('eshop:index')
+        # 已支付的訂單不能取消
+        if order.payment_status == 'paid':
+            messages.info(request, "訂單已支付，無法取消")
+            return redirect('eshop:order_payment_confirmation_with_id', order_id=order.id)
+        
+        # 判斷取消原因
+        if order.is_payment_timeout():
+            reason = '支付超時'
         else:
-            messages.info(request, "訂單未超時或已支付")
-            return redirect('eshop:order_payment_confirmation', order_id=order.id)
+            reason = '用戶手動取消'
+        
+        result = OrderStatusManager.mark_as_cancelled_manually(
+            order_id=order_id,
+            staff_name='system',
+            reason=reason
+        )
+        
+        if result['success']:
+            messages.warning(request, f"訂單已取消（{reason}）")
+        else:
+            messages.error(request, f"取消訂單失敗: {result['message']}")
+            
+        return redirect('eshop:order_confirm')
             
     except Exception as e:
-        logger.error(f"取消超時支付錯誤: {str(e)}")
+        logger.error(f"取消支付錯誤: {str(e)}")
         messages.error(request, f"取消支付失敗: {str(e)}")
-        return redirect('eshop:order_payment_confirmation', order_id=order_id)
-    
+        return redirect('eshop:order_payment_confirmation_with_id', order_id=order_id)
+
+
+def api_cancel_order(request, order_id):
+    """API: 取消訂單（返回 JSON，供 order_confirm.html 前端調用）"""
+    try:
+        order = OrderModel.objects.get(id=order_id)
+        
+        if order.payment_status == 'paid':
+            return JsonResponse({
+                'success': False,
+                'error': '訂單已支付，無法取消'
+            })
+        
+        if order.is_payment_timeout():
+            reason = '支付超時'
+        else:
+            reason = '用戶手動取消'
+        
+        result = OrderStatusManager.mark_as_cancelled_manually(
+            order_id=order_id,
+            staff_name='system',
+            reason=reason
+        )
+        
+        if result['success']:
+            return JsonResponse({
+                'success': True,
+                'message': f'訂單已取消（{reason}）'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result.get('message', '取消訂單失敗')
+            })
+            
+    except OrderModel.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': '訂單不存在'
+        })
+    except Exception as e:
+        logger.error(f"API取消訂單錯誤: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'取消訂單失敗: {str(e)}'
+        })
 
 
 # ==================== 重新支付视图 ====================
+
 
 def retry_payment(request, order_id):
     """重新尝试支付"""

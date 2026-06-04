@@ -65,6 +65,23 @@
                             </div>
                             <small class="d-block mt-1">请在时间内完成支付，超时订单将自动取消</small>
                         </div>
+                        
+                        <!-- ====== 返回支付按鈕 ====== -->
+                        <div class="mt-4">
+                            <a href="{% url 'eshop:order_confirm' %}" class="btn btn-primary mr-2">
+                                <i class="fas fa-credit-card"></i> 返回支付
+                            </a>
+                            <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-home"></i> 返回首页
+                            </a>
+                        </div>
+                        
+                        <!-- ====== 自動輪詢支付狀態（隱藏） ====== -->
+                        <div id="pending-polling-area" style="display:none;">
+                            <div class="alert alert-info mt-3" id="pending-polling-message">
+                                <i class="fas fa-spinner fa-spin"></i> 正在確認支付狀態...
+                            </div>
+                        </div>
                     
                     {% else %}
                         <!-- 支付狀態未知 -->
@@ -505,6 +522,74 @@ if (document.body) {
 <script>
 // 所有JavaScript代碼都在DOMContentLoaded事件中執行，防止錯誤
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ========== 倒數計時功能 ==========
+    const countdownEl = document.getElementById('payment-timeout-countdown');
+    if (countdownEl) {
+        const paymentTimeout = '{{ order.payment_timeout|date:"Y-m-d H:i:s"|default:"" }}';
+        if (paymentTimeout) {
+            const endTime = new Date(paymentTimeout).getTime();
+            
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const diff = endTime - now;
+                
+                if (diff <= 0) {
+                    countdownEl.textContent = '00:00';
+                    const parentDiv = countdownEl.closest('.bg-warning');
+                    if (parentDiv) {
+                        parentDiv.classList.remove('bg-warning', 'text-dark');
+                        parentDiv.classList.add('bg-danger', 'text-white');
+                    }
+                    return;
+                }
+                
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+    }
+
+    // ========== 取消支付功能 ==========
+    const cancelBtn = document.getElementById('cancel-payment-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!confirm('確定要取消此訂單支付嗎？')) return;
+            
+            const orderId = '{{ order.id }}';
+            const csrfToken = '{{ csrf_token }}';
+            
+            // 禁用按鈕防止重複點擊
+            cancelBtn.disabled = true;
+            cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>取消中...';
+            
+            fetch(`/eshop/order/cancel-timeout/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.error('取消支付失敗:', error);
+                cancelBtn.disabled = false;
+                cancelBtn.innerHTML = '<i class="fas fa-times mr-1"></i>取消支付';
+                alert('取消支付失敗，請稍後重試');
+            });
+        });
+    }
 
     // 複製提取碼功能
     document.getElementById('copy-pickup-code-btn')?.addEventListener('click', function() {

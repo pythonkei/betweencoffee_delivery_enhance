@@ -341,7 +341,7 @@
                                                 </span>
                                                 <div>
                                                     <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fab fa-alipay" style="color: #c49b63; margin-right: 6px;"></i> Alipay HK 支付宝
+                                                        <i class="fab fa-alipay" style="color: #c49b63; margin-right: 6px;"></i> Alipay 支付宝
                                                     </div>
                                                 </div>
                                             </div>
@@ -392,15 +392,13 @@
                                             <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
                                         </label>
                                         <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
-                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0.5rem;">使用香港手機銀行App掃碼支付</p>
+                                            <p>使用香港手機銀行App掃碼支付</p>
                                             <div class="fps-qrcode-container mt-2 mb-2 text-center">
                                                 <img src="{% static 'images/fps_qrcode_v2.png' %}" 
                                                      alt="FPS 轉數快 QR Code" 
                                                      class="fps-qrcode-img"
-                                                     style="max-width: 180px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; background-color: rgba(255,255,255,0.9);">
-                                                <p style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 0.5rem; line-height: 1.4;">
-                                                    請使用手機銀行App掃描此QR code進行支付
-                                                </p>
+                                                     style="max-width: 320px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; background-color: rgba(255,255,255,0.9);">
+
                                             </div>
                                         </div>
                                     </div>
@@ -1160,29 +1158,150 @@ function checkPendingOrders() {
 
 function showPendingOrderWarning(orders) {
     const warningHtml = `
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>發現未完成的訂單</strong> - 您有 ${orders.length} 個未支付的訂單。
-            <div class="mt-2">
+        <div class="pending-order-warning-card" style="
+            background: linear-gradient(135deg, rgba(196,155,99,0.12) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid rgba(196,155,99,0.35);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        ">
+            <!-- 關閉按鈕 -->
+            <button type="button" onclick="this.parentElement.remove()" style="
+                position: absolute; top: 12px; right: 16px;
+                background: none; border: none; color: rgba(255,255,255,0.4);
+                font-size: 1.4rem; cursor: pointer; padding: 0; line-height: 1;
+            ">&times;</button>
+
+            <!-- 標題 -->
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                <div style="
+                    width: 36px; height: 36px;
+                    background: rgba(196,155,99,0.2);
+                    border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center;
+                    flex-shrink: 0;
+                ">
+                    <i class="fas fa-exclamation-triangle" style="color: #c49b63; font-size: 1rem;"></i>
+                </div>
+                <div>
+                    <div style="color: #c49b63; font-weight: 600; font-size: 1rem;">
+                        發現未完成的訂單
+                    </div>
+                    <div style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">
+                        您有 ${orders.length} 個訂單尚未完成支付
+                    </div>
+                </div>
+            </div>
+
+            <!-- 訂單列表 -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
                 ${orders.map(order => `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>訂單 #${order.id} - $${order.total_price}</span>
-                        <button class="btn btn-sm btn-outline-primary" onclick="useExistingOrder(${order.id})">
-                            使用此訂單
-                        </button>
+                    <div id="pending-order-${order.id}" style="
+                        display: flex; align-items: center; justify-content: space-between;
+                        background: rgba(255,255,255,0.04);
+                        border: 1px solid rgba(255,255,255,0.08);
+                        border-radius: 8px;
+                        padding: 10px 14px;
+                        transition: background 0.2s;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                            <span style="
+                                width: 8px; height: 8px;
+                                background: #ffc107;
+                                border-radius: 50%;
+                                flex-shrink: 0;
+                                animation: pendingPulse 1.5s ease-in-out infinite;
+                            "></span>
+                            <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem; white-space: nowrap;">
+                                訂單 #${order.id}
+                            </span>
+                            <span style="color: rgba(255,255,255,0.4); font-size: 0.85rem;">
+                                $${parseFloat(order.total_price).toFixed(2)}
+                            </span>
+                            <span style="
+                                font-size: 0.75rem;
+                                color: #ffc107;
+                                background: rgba(255,193,7,0.12);
+                                padding: 2px 8px;
+                                border-radius: 10px;
+                                white-space: nowrap;
+                            ">待支付</span>
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                            <a href="/eshop/order/payment-confirmation/?order_id=${order.id}" style="
+                                display: inline-flex; align-items: center; gap: 6px;
+                                background: #c49b63; color: #1a1a2e;
+                                border: none; border-radius: 6px;
+                                padding: 6px 14px;
+                                font-size: 0.85rem; font-weight: 600;
+                                text-decoration: none;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                                white-space: nowrap;
+                            " onmouseover="this.style.background='#d4ab73'" onmouseout="this.style.background='#c49b63'">
+                                <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i> 前往支付
+                            </a>
+                            <button type="button" onclick="cancelPendingOrder(${order.id})" style="
+                                display: inline-flex; align-items: center; gap: 4px;
+                                background: transparent; color: rgba(255,255,255,0.5);
+                                border: 1px solid rgba(255,255,255,0.15);
+                                border-radius: 6px;
+                                padding: 6px 10px;
+                                font-size: 0.8rem;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                                white-space: nowrap;
+                            " onmouseover="this.style.borderColor='rgba(220,53,69,0.5)';this.style.color='#dc3545'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='rgba(255,255,255,0.5)'">
+                                <i class="fas fa-times" style="font-size: 0.7rem;"></i> 取消
+                            </button>
+                        </div>
                     </div>
                 `).join('')}
+
             </div>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+
+            <!-- 底部操作 -->
+            <div style="
+                display: flex; align-items: center; justify-content: space-between;
+                margin-top: 14px; padding-top: 12px;
+                border-top: 1px solid rgba(255,255,255,0.06);
+            ">
+                <span style="color: rgba(255,255,255,0.35); font-size: 0.8rem;">
+                    <i class="fas fa-info-circle"></i> 完成支付後即可繼續新訂單
+                </span>
+                <div style="display: flex; gap: 8px;">
+                    <a href="/" style="
+                        color: rgba(255,255,255,0.5); font-size: 0.85rem;
+                        text-decoration: none; padding: 4px 10px;
+                        border: 1px solid rgba(255,255,255,0.15);
+                        border-radius: 6px;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">
+                        返回首頁
+                    </a>
+                </div>
+            </div>
         </div>
+        <style>
+            @keyframes pendingPulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.4; }
+            }
+        </style>
     `;
 
-    // 在页面顶部插入警告
-    const container = document.querySelector('.container');
-    if (container) {
-        container.insertAdjacentHTML('afterbegin', warningHtml);
+    // 插入到支付表單之前（正確的佈局位置）
+    const paymentForm = document.getElementById('payment-form');
+    if (paymentForm) {
+        paymentForm.insertAdjacentHTML('beforebegin', warningHtml);
+    } else {
+        // fallback: 插入到第一個 container
+        const container = document.querySelector('.container');
+        if (container) {
+            container.insertAdjacentHTML('afterbegin', warningHtml);
+        }
     }
 }
 
@@ -1199,7 +1318,57 @@ function useExistingOrder(orderId) {
     form.submit();
 }
 
+// 取消未完成訂單（在 order_confirm.html 中直接操作，無需跳轉到 payment-confirmation）
+function cancelPendingOrder(orderId) {
+    if (!confirm('確定要取消訂單 #' + orderId + ' 嗎？')) return;
+    
+    const orderEl = document.getElementById('pending-order-' + orderId);
+    const csrfToken = '{{ csrf_token }}';
+    
+    fetch('/eshop/api/cancel-order/' + orderId + '/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 移除該訂單項目
+            if (orderEl) {
+                orderEl.style.transition = 'all 0.3s ease';
+                orderEl.style.opacity = '0';
+                orderEl.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    orderEl.remove();
+                    
+                    // 檢查是否還有其他訂單
+                    const remainingOrders = document.querySelectorAll('[id^="pending-order-"]');
+                    if (remainingOrders.length === 0) {
+                        // 沒有剩餘訂單，移除整個警告卡片
+                        const warningCard = document.querySelector('.pending-order-warning-card');
+                        if (warningCard) {
+                            warningCard.style.transition = 'all 0.3s ease';
+                            warningCard.style.opacity = '0';
+                            warningCard.style.transform = 'translateY(-10px)';
+                            setTimeout(() => warningCard.remove(), 300);
+                        }
+                    }
+                }, 300);
+            }
+        } else {
+            alert('取消訂單失敗: ' + (data.error || '未知錯誤'));
+        }
+    })
+    .catch(error => {
+        console.error('取消訂單失敗:', error);
+        alert('取消訂單失敗，請稍後重試');
+    });
+}
+
 </script>
+
 {% endblock content %}
 
 
