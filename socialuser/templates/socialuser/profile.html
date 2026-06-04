@@ -1,108 +1,468 @@
 <!-- socialuser/templates/socialuser/profile.html -->
+<!-- 設計風格：完全仿 order_confirm 深色主題 -->
 {% extends 'layouts/blank.html' %}
 {% load static %}
 
 {% block extra_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/member-nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
 <!-- Header Banner-->
 <section class="subpage-banner-h500 py-lg-4">
-        <div class="svg-bg-container">
-            <div class=" noise_animation"><img class="svg-bg-5" src= {% static 'images/owl_title_bg_01_v2.svg' %} ></div>
-        </div>
-
-<div class="ftco-subpage-banner" id="">
-    <div class="container">
-        <div class="row justify-content-center mt-5 p-2">
-            <div class="col-lg-12 col-md-12 heading-section text-center">
-            <span class="subheading">Member<br>Between</span>
-            <h2 class="mb-3">&#65371;會員積分&#65373;</h2>
-            <p style="color:#ccc;">建構共同空間拉近彼此距離<br />細意品嚐</p>
+    <div class="svg-bg-container">
+        <div class="noise_animation"><img class="svg-bg-5" src="{% static 'images/owl_title_bg_01_v2.svg' %}"></div>
+    </div>
+    <div class="ftco-subpage-banner" id="">
+        <div class="container">
+            <div class="row justify-content-center mt-5 p-2">
+                <div class="col-lg-12 col-md-12 heading-section text-center">
+                    <span class="subheading">Member<br>Between</span>
+                    <h2 class="mb-3">&#65371;個人資料&#65373;</h2>
+                    <p style="color:#ccc;">建構共同空間拉近彼此距離<br />細意品嚐</p>
+                </div>
+            </div>
+            <div hidden class="row justify-content-center mb-3">
+                <p class="icon_text"><a href="{% url 'index' %}"><i class="icon material-symbols-outlined icon_vert-align-middle">undo</i> 首頁</a></p>
             </div>
         </div>
-
-        <div hidden class="row justify-content-center mb-3">
-        <p class="icon_text"><a href="{% url 'index' %}"><i class="icon material-symbols-outlined icon_vert-align-middle">undo</i> 首頁</a></p>
-        </div>
-    </div>
     </div>
 </section>
 <!-- End Header Banner-->
 
-
 <section class="ftco-subpage-section">
     <div class="container">
         <div class="row justify-content-center mt-5">
-            <!-- 會員導航菜單（水平置中） -->
+            <!-- 會員導航菜單 -->
             <div class="col-12 mb-4">
                 {% include 'socialuser/includes/member_nav.html' %}
             </div>
             
-            <!-- 個人資料內容 -->
+            <!-- 個人資料卡片（深色主題，仿 order_confirm） -->
             <div class="col-lg-8 mb-5">
-                <!-- 標題（與 loyalty_dashboard 風格一致，在卡片外部） -->
-                <div class="card shadow-sm mb-4">
                     <div class="card-header">
                         <h4 class="mb-0">
                             <i class="fas fa-user-circle mr-1"></i>
                             個人帳戶資料
                         </h4>
                     </div>
+                <div class="card profile-card shadow-sm">
                     <div class="card-body">
-                        <!-- 頭像置中 -->
-                        <div class="text-center mb-4">
-                            <div class="profile-avatar d-inline-block">
-                                <img class="profile-avatar-img" src="{{ profile.avatar }}" 
-                                     alt="{{ profile.user.username }}" />
-                            </div>
+                        <!-- ===== 頭像區域 ===== -->
+                        <div class="profile-avatar-section">
+                            <form method="POST" enctype="multipart/form-data" id="avatar-form" data-ajax="true" data-url="{% url 'socialuser:profile-avatar-ajax' %}">
+                                {% csrf_token %}
+                                <div class="profile-avatar-wrapper">
+                                    <img id="avatar-preview" class="profile-avatar-img" 
+                                         src="{{ profile.avatar }}" alt="{{ profile.user.username }}" />
+                                    <div class="profile-avatar-overlay">
+                                        <i class="fas fa-camera"></i>
+                                        <span>更換照片</span>
+                                    </div>
+                                </div>
+                                <div style="position:absolute;width:0;height:0;overflow:hidden;">{{ avatar_form.image }}</div>
+                            </form>
+                            <p class="profile-avatar-hint mt-2">點擊頭像更換照片</p>
                         </div>
                         
-                        <!-- 用戶資訊置中 -->
-                        <div class="text-center mb-4">
-                            <h3 class="profile-username">{{ profile.user.username }}</h3>
+                        <!-- ===== 資訊列表（完全仿 order_confirm 列表風格） ===== -->
+                        <label class="profile-section-label">
+                            <i class="fas fa-id-card"></i> 基本資訊
+                        </label>
+                        <ul class="profile-info-list">
                             
-                            {% if profile.hk_phone %}
-                            <div class="profile-detail-item">
-                                <i class="fas fa-phone mr-2"></i> {{ profile.hk_phone }}
-                            </div>
-                            {% endif %}
-
-                            {% if profile.user.email %}
-                            <div class="profile-detail-item">
-                                <i class="fas fa-envelope mr-2"></i> {{ profile.user.email }}
-                            </div>
-                            {% endif %}
+                            <!-- 用戶名 -->
+                            <li class="profile-info-item" id="field-username">
+                                <span class="profile-info-icon"><i class="fas fa-user"></i></span>
+                                <span class="profile-info-label">用戶名稱</span>
+                                <span class="profile-info-value" id="val-username">{{ profile.user.username }}</span>
+                                <button type="button" class="profile-edit-btn" data-field="username" title="編輯用戶名稱">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <!-- 行內編輯表單（隱藏） -->
+                                <div class="profile-inline-form" id="edit-username">
+                                    <input type="text" id="input-username" value="{{ profile.user.username }}" />
+                                    <button type="button" class="btn-confirm" data-field="username">確認</button>
+                                    <button type="button" class="btn-cancel" data-field="username">取消</button>
+                                    <div class="error-msg" id="error-username"></div>
+                                </div>
+                            </li>
+                            
+                            <!-- 電子郵件 -->
+                            <li class="profile-info-item" id="field-email">
+                                <span class="profile-info-icon"><i class="fas fa-envelope"></i></span>
+                                <span class="profile-info-label">電子郵件</span>
+                                <span class="profile-info-value" id="val-email">
+                                    {% if profile.user.email %}{{ profile.user.email }}{% else %}無電子郵件{% endif %}
+                                </span>
+                                <button type="button" class="profile-edit-btn" data-field="email" title="編輯電子郵件">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <!-- 行內編輯表單（隱藏） -->
+                                <div class="profile-inline-form" id="edit-email">
+                                    <input type="email" id="input-email" value="{{ profile.user.email }}" />
+                                    <button type="button" class="btn-confirm" data-field="email">確認</button>
+                                    <button type="button" class="btn-cancel" data-field="email">取消</button>
+                                    <div class="error-msg" id="error-email"></div>
+                                </div>
+                            </li>
+                            
+                            <!-- 手機號碼 -->
+                            <li class="profile-info-item" id="field-phone">
+                                <span class="profile-info-icon"><i class="fas fa-phone"></i></span>
+                                <span class="profile-info-label">手機號碼</span>
+                                <span class="profile-info-value" id="val-phone">
+                                    {% if profile.hk_phone %}{{ profile.hk_phone }}{% else %}未設定{% endif %}
+                                </span>
+                                <button type="button" class="profile-edit-btn" data-field="phone" title="編輯手機號碼">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <!-- 行內編輯表單（隱藏） -->
+                                <div class="profile-inline-form" id="edit-phone">
+                                    <input type="text" id="input-phone" value="{{ profile.hk_phone|default:'' }}" 
+                                           placeholder="91234567" pattern="[0-9]{8}" title="請輸入8位數字電話號碼" />
+                                    <button type="button" class="btn-confirm" data-field="phone">確認</button>
+                                    <button type="button" class="btn-cancel" data-field="phone">取消</button>
+                                    <div class="error-msg" id="error-phone"></div>
+                                </div>
+                            </li>
+                            
+                            <!-- 個人簡介 -->
+                            <li class="profile-info-item" id="field-info">
+                                <span class="profile-info-icon"><i class="fas fa-edit"></i></span>
+                                <span class="profile-info-label">個人簡介</span>
+                                <span class="profile-info-value" id="val-info">
+                                    {% if profile.info %}{{ profile.info|linebreaksbr }}{% else %}未設定{% endif %}
+                                </span>
+                                <button type="button" class="profile-edit-btn" data-field="info" title="編輯個人簡介">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <!-- 行內編輯表單（隱藏） -->
+                                <div class="profile-inline-form" id="edit-info">
+                                    <textarea id="input-info" rows="2" style="flex:1;min-width:200px;padding:8px 12px;border:1.5px solid #c49b63;border-radius:6px;font-size:0.95rem;background:rgba(255,255,255,0.1);color:#fff;">{{ profile.info|default:'' }}</textarea>
+                                    <button type="button" class="btn-confirm" data-field="info">確認</button>
+                                    <button type="button" class="btn-cancel" data-field="info">取消</button>
+                                    <div class="error-msg" id="error-info"></div>
+                                </div>
+                            </li>
+                            
+                        </ul>
+                        
+                        <!-- ===== 驗證狀態區塊 ===== -->
+                        <div style="margin-top: 1.5rem;">
+                            <label class="profile-section-label">
+                                <i class="fas fa-shield-alt"></i> 帳戶安全
+                            </label>
+                            <ul class="profile-info-list">
+                                <!-- Email 驗證狀態 -->
+                                <li class="profile-info-item">
+                                    <span class="profile-info-icon"><i class="fas fa-shield-alt"></i></span>
+                                    <span class="profile-info-label">驗證狀態</span>
+                                    <span class="profile-info-value">
+                                        {% with email_addr=profile.user.emailaddress_set.first %}
+                                            {% if email_addr and email_addr.verified %}
+                                                <span class="profile-verify-badge verified">
+                                                    <i class="fas fa-check-circle"></i> 已驗證
+                                                </span>
+                                            {% else %}
+                                                <span class="profile-verify-badge unverified">
+                                                    <i class="fas fa-exclamation-triangle"></i> 未驗證
+                                                </span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </span>
+                                    <span class="profile-info-action" style="flex:0 0 auto;">
+                                        {% with email_addr=profile.user.emailaddress_set.first %}
+                                            {% if not email_addr or not email_addr.verified %}
+                                                <button type="button" class="profile-verify-btn" id="btn-verify-email">
+                                                    <i class="fas fa-paper-plane"></i> 驗證
+                                                </button>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </span>
+                                </li>
+                            </ul>
                         </div>
                         
-                        <!-- 個人簡介 -->
-                        {% if profile.info %}
-                        <div class="profile-section">
-                            <div class="profile-section-title">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                個人簡介
-                            </div>
-                            <div class="profile-section-content">
-                                {{ profile.info|linebreaksbr }}
-                            </div>
+                        <!-- ===== 底部操作區 ===== -->
+                        <div class="profile-actions mt-5">
+                            <a href="{% url 'socialuser:profile-delete' %}" class="profile-delete-btn">
+                                <i class="fas fa-trash-alt"></i> 刪除帳戶
+                            </a>
                         </div>
-                        {% endif %}
                         
-                        <!-- 操作按鈕 -->
-                        <div class="profile-actions">
-                            <a href="{% url 'socialuser:profile-settings' %}" class="profile-btn">
-                                <i class="fas fa-cog mr-1"></i> 帳戶設定
-                            </a>
-                            <a href="{% url 'socialuser:profile-settings' %}" class="profile-btn">
-                                <i class="fas fa-edit mr-1"></i> 編輯個人資料
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<div class="flexable-vh-20"></div>
+
+<!-- CSRF Token for AJAX -->
+<form method="post" id="csrf-form">{% csrf_token %}</form>
+
+<script>
+(function() {
+    'use strict';
+    
+    // ===== 獲取 CSRF Token =====
+    function getCSRFToken() {
+        var form = document.getElementById('csrf-form');
+        if (form) {
+            var input = form.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (input) return input.value;
+        }
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.startsWith('csrftoken=')) {
+                return cookie.substring('csrftoken='.length);
+            }
+        }
+        return '';
+    }
+    
+    // ===== Toast 提示 =====
+    function showToast(message, type) {
+        type = type || 'success';
+        var existing = document.querySelector('.profile-toast');
+        if (existing) existing.remove();
+        
+        var toast = document.createElement('div');
+        toast.className = 'profile-toast ' + type;
+        toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i>' +
+                          '<span>' + message + '</span>' +
+                          '<button class="toast-close">&times;</button>';
+        document.body.appendChild(toast);
+        
+        toast.querySelector('.toast-close').addEventListener('click', function() {
+            toast.remove();
+        });
+        
+        setTimeout(function() {
+            if (toast.parentNode) toast.remove();
+        }, 4000);
+    }
+    
+    // ===== 行內編輯切換（懸浮編輯模式） =====
+    var editButtons = document.querySelectorAll('.profile-edit-btn');
+    
+    editButtons.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var field = this.getAttribute('data-field');
+            var valueEl = document.getElementById('val-' + field);
+            var editEl = document.getElementById('edit-' + field);
+            
+            valueEl.style.display = 'none';
+            this.style.display = 'none';
+            editEl.style.display = 'flex';
+            
+            var input = document.getElementById('input-' + field);
+            if (input) setTimeout(function() { input.focus(); }, 100);
+        });
+    });
+    
+    // ===== 取消編輯 =====
+    var cancelButtons = document.querySelectorAll('.btn-cancel');
+    
+    cancelButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var field = this.getAttribute('data-field');
+            var valueEl = document.getElementById('val-' + field);
+            var editEl = document.getElementById('edit-' + field);
+            var editBtn = valueEl.parentNode.querySelector('.profile-edit-btn');
+            var errorEl = document.getElementById('error-' + field);
+            
+            editEl.style.display = 'none';
+            valueEl.style.display = 'inline';
+            if (editBtn) editBtn.style.display = 'inline-flex';
+            if (errorEl) errorEl.textContent = '';
+        });
+    });
+    
+    // ===== 確認編輯（AJAX 提交） =====
+    var confirmButtons = document.querySelectorAll('.btn-confirm');
+    
+    confirmButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var field = this.getAttribute('data-field');
+            var input = document.getElementById('input-' + field);
+            var valueEl = document.getElementById('val-' + field);
+            var editEl = document.getElementById('edit-' + field);
+            var editBtn = valueEl.parentNode.querySelector('.profile-edit-btn');
+            var errorEl = document.getElementById('error-' + field);
+            var value = input ? input.value.trim() : '';
+            
+            if (errorEl) errorEl.textContent = '';
+            
+            this.disabled = true;
+            this.textContent = '處理中...';
+            
+            var url = '';
+            var postData = new URLSearchParams();
+            postData.append('csrfmiddlewaretoken', getCSRFToken());
+            
+            if (field === 'email') {
+                url = '{% url "socialuser:profile-emailchange" %}';
+                postData.append('email', value);
+            } else if (field === 'username') {
+                url = '{% url "socialuser:profile-usernamechange" %}';
+                postData.append('username', value);
+            } else if (field === 'phone') {
+                url = '{% url "socialuser:profile-phonechange" %}';
+                postData.append('phone', value);
+            } else if (field === 'info') {
+                url = '{% url "socialuser:profile-info-ajax" %}';
+                postData.append('info', value);
+            }
+            
+            if (!url) {
+                showToast('未知的編輯欄位', 'error');
+                this.disabled = false;
+                this.textContent = '確認';
+                return;
+            }
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: postData.toString()
+            })
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    return { status: response.status, data: data };
+                });
+            })
+            .then(function(result) {
+                if (result.data.success) {
+                    if (field === 'email') {
+                        valueEl.textContent = result.data.email || value;
+                    } else if (field === 'username') {
+                        valueEl.textContent = result.data.username || value;
+                    } else if (field === 'phone') {
+                        valueEl.textContent = result.data.phone || value;
+                    } else if (field === 'info') {
+                        valueEl.textContent = value || '未設定';
+                    }
+                    
+                    showToast(result.data.message || '更新成功', 'success');
+                    
+                    editEl.style.display = 'none';
+                    valueEl.style.display = 'inline';
+                    if (editBtn) editBtn.style.display = 'inline-flex';
+                } else {
+                    if (errorEl) errorEl.textContent = result.data.message || '更新失敗';
+                    showToast(result.data.message || '更新失敗', 'error');
+                }
+            })
+            .catch(function(err) {
+                if (errorEl) errorEl.textContent = '網絡錯誤，請稍後再試';
+                showToast('網絡錯誤，請稍後再試', 'error');
+            })
+            .finally(function() {
+                this.disabled = false;
+                this.textContent = '確認';
+            }.bind(this));
+        });
+    });
+    
+    // ===== 頭像上傳 =====
+    // 點擊頭像包裝區觸發 file input
+    var avatarWrapper = document.querySelector('.profile-avatar-wrapper');
+    var avatarInput = document.querySelector('#avatar-form input[type="file"]');
+    
+    if (avatarWrapper && avatarInput) {
+        avatarWrapper.addEventListener('click', function(e) {
+            e.preventDefault();
+            avatarInput.click();
+        });
+        
+        avatarInput.addEventListener('change', function() {
+            var form = document.getElementById('avatar-form');
+            var file = this.files[0];
+            if (!file) return;
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatar-preview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            var formData = new FormData(form);
+            
+            fetch(form.getAttribute('data-url') || '{% url "socialuser:profile-avatar-ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: formData
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    showToast(data.message || '頭像更新成功', 'success');
+                    if (data.avatar_url) {
+                        document.getElementById('avatar-preview').src = data.avatar_url;
+                    }
+                } else {
+                    showToast(data.message || '頭像上傳失敗', 'error');
+                }
+            })
+            .catch(function() {
+                showToast('頭像上傳失敗', 'error');
+            });
+        });
+    }
+    
+    // ===== Email 驗證 =====
+    var verifyBtn = document.getElementById('btn-verify-email');
+    if (verifyBtn) {
+        verifyBtn.addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = '發送中...';
+            
+            fetch('{% url "socialuser:profile-emailverify" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: 'csrfmiddlewaretoken=' + encodeURIComponent(getCSRFToken())
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    showToast(data.message || '驗證郵件已發送', 'success');
+                } else {
+                    showToast(data.message || '發送失敗', 'error');
+                }
+            })
+            .catch(function() {
+                showToast('發送驗證郵件失敗', 'error');
+            })
+            .finally(function() {
+                this.disabled = false;
+                this.textContent = '驗證';
+            }.bind(this));
+        });
+    }
+    
+})();
+</script>
 {% endblock %}
+

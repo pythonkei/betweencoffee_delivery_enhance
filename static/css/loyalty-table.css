@@ -59,10 +59,11 @@
     background-color: rgba(255, 255, 255, 0.01);
 }
 
-/* 懸停效果 */
+/* 懸停效果（已禁用） */
 .loyalty-table tbody tr:hover {
-    background-color: rgba(120, 213, 239, 0.08); /* 品牌色調的輕微懸停效果 */
+    background-color: transparent;
 }
+
 
 /* 表格單元格 */
 .loyalty-table td {
@@ -104,10 +105,9 @@
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.05);
     flex-shrink: 0; /* 防止圖示被壓縮 */
-    /* 初始狀態由 JavaScript 控制 */
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    opacity: 1;
 }
+
 
 /* 活動類型顏色 */
 .activity-icon.points-earned {

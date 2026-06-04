@@ -1,0 +1,466 @@
+/* ============================================
+   profile.css - 個人資料頁面樣式
+   設計風格：完全仿 order_confirm 深色主題
+   Between Coffee 會員系統
+   ============================================ */
+
+/* --- 個人資料卡片 --- */
+.profile-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    background: rgba(255,255,255,0.00);
+}
+
+.profile-card .card-header {
+    background: linear-gradient(135deg, #2c1810 0%, #4a2c1a 100%);
+    color: #d4a574;
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+}
+
+.profile-card .card-header h4 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.profile-card .card-body {
+    padding: 2rem 1.5rem;
+}
+
+/* --- 頭像區域（隱藏） --- */
+.profile-avatar-section {
+    display: none;
+}
+
+
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.profile-avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #c49b63;
+    transition: opacity 0.3s ease;
+}
+
+.profile-avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: #fff;
+}
+
+.profile-avatar-overlay i {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.profile-avatar-overlay span {
+    font-size: 0.75rem;
+}
+
+.profile-avatar-wrapper:hover .profile-avatar-img {
+    opacity: 0.8;
+}
+
+.profile-avatar-wrapper:hover .profile-avatar-overlay {
+    opacity: 1;
+}
+
+.profile-avatar-hint {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    margin-top: 0.5rem;
+}
+
+/* ============================================
+   仿 order_confirm 深色列表風格（完全一致）
+   ============================================ */
+
+/* --- 區塊標籤（仿 order_confirm label 風格） --- */
+.profile-section-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+
+.profile-section-label i {
+    color: #c49b63;
+    margin-right: 8px;
+}
+
+/* --- 資訊列表容器（透明背景） --- */
+.profile-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+
+/* --- 資訊行（完全仿 order_confirm payment-item） --- */
+.profile-info-item {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    min-height: 52px;
+    transition: background 0.2s ease;
+    position: relative;
+    cursor: default;
+}
+
+.profile-info-item:last-child {
+    border-bottom: none;
+}
+
+/* hover 時顯示淺金色背景（完全仿 order_confirm 選中效果） */
+.profile-info-item:hover {
+    background: rgba(196,155,99,0.08);
+}
+
+/* --- 資訊行圖示（金色，仿 order_confirm） --- */
+.profile-info-icon {
+    flex: 0 0 36px;
+    font-size: 1.25rem;
+    color: #c49b63;
+    text-align: center;
+}
+
+/* --- 資訊標籤（仿 order_confirm 次要文字） --- */
+.profile-info-label {
+    flex: 0 0 80px;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+}
+
+/* --- 資訊值（仿 order_confirm 主要文字 #fff） --- */
+.profile-info-value {
+    flex: 1;
+    font-size: 1.05rem;
+    color: #fff;
+    padding: 0 0.75rem;
+    word-break: break-word;
+}
+
+
+/* --- 懸浮編輯按鈕（金色圓形，仿 order_confirm 金色風格） --- */
+.profile-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+    color: #c49b63;
+    background: transparent;
+    border: 1.5px solid #c49b63;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    opacity: 0;
+    flex-shrink: 0;
+}
+
+/* hover 資訊行時顯示編輯按鈕 */
+.profile-info-item:hover .profile-edit-btn {
+    opacity: 0.7;
+}
+
+.profile-edit-btn:hover {
+    opacity: 1 !important;
+    background: #c49b63;
+    color: #fff;
+}
+
+/* 手機上永遠顯示編輯按鈕 */
+@media (hover: none) and (pointer: coarse) {
+    .profile-edit-btn {
+        opacity: 0.7;
+    }
+}
+
+/* --- 行內編輯表單 --- */
+.profile-inline-form {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 4px 0;
+}
+
+.profile-inline-form input[type="text"],
+.profile-inline-form input[type="email"] {
+    padding: 8px 12px;
+    border: 1.5px solid #c49b63;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.95rem;
+    min-width: 200px;
+    flex: 1;
+    transition: box-shadow 0.2s ease;
+}
+
+.profile-inline-form input:focus {
+    border-color: #c49b63;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(196, 155, 99, 0.2);
+}
+
+.profile-inline-form .btn-confirm {
+    padding: 8px 18px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: #c49b63;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.profile-inline-form .btn-confirm:hover {
+    background: #b08a52;
+}
+
+.profile-inline-form .btn-cancel {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.6);
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.profile-inline-form .btn-cancel:hover {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+}
+
+.profile-inline-form .error-msg {
+    color: #dc3545;
+    font-size: 0.8rem;
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* --- 驗證狀態徽章（仿 order_confirm badge 風格） --- */
+.profile-verify-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.profile-verify-badge.verified {
+    background: rgba(40, 167, 69, 0.15);
+    color: #4caf50;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.profile-verify-badge.unverified {
+    background: rgba(255, 152, 0, 0.15);
+    color: #ff9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+/* --- 驗證按鈕（仿 order_confirm 金色風格） --- */
+.profile-verify-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: transparent;
+    border: 1.5px solid #c49b63;
+    color: #c49b63;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.profile-verify-btn:hover {
+    background: rgba(196, 155, 99, 0.15);
+    color: #d4a574;
+}
+
+/* --- 底部操作區 --- */
+.profile-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.profile-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    color: #dc3545;
+    background: transparent;
+    border: 1px solid #dc3545;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.profile-delete-btn:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* --- AJAX Toast 提示 --- */
+.profile-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    max-width: 450px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideInRight 0.3s ease;
+}
+
+.profile-toast.success {
+    background: #1b5e20;
+    color: #a5d6a7;
+    border-left: 4px solid #4caf50;
+}
+
+.profile-toast.error {
+    background: #b71c1c;
+    color: #ef9a9a;
+    border-left: 4px solid #f44336;
+}
+
+.profile-toast .toast-close {
+    margin-left: auto;
+    cursor: pointer;
+    opacity: 0.6;
+    font-size: 1.1rem;
+    background: none;
+    border: none;
+    padding: 0 4px;
+    color: inherit;
+}
+
+.profile-toast .toast-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* --- 加載狀態 --- */
+.profile-inline-form .btn-confirm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- 響應式 --- */
+@media (max-width: 576px) {
+    .profile-card .card-body {
+        padding: 1.25rem 0.75rem;
+    }
+    
+    .profile-info-item {
+        padding: 0.7rem 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .profile-info-icon {
+        flex: 0 0 28px;
+        font-size: 1rem;
+    }
+    
+    .profile-info-label {
+        flex: 0 0 65px;
+        font-size: 0.8rem;
+    }
+    
+    .profile-info-value {
+        font-size: 0.88rem;
+        padding: 0 0.5rem;
+    }
+    
+    .profile-inline-form input[type="text"],
+    .profile-inline-form input[type="email"] {
+        min-width: 120px;
+        font-size: 0.88rem;
+    }
+    
+    .profile-avatar-img {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .profile-toast {
+        min-width: auto;
+        left: 10px;
+        right: 10px;
+        font-size: 0.85rem;
+    }
+    
+    .profile-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .profile-actions a,
+    .profile-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+}

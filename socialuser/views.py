@@ -101,7 +101,23 @@ def profile_view(request, username=None):
             profile = request.user.profile
         except:
             return redirect_to_login(request.get_full_path())
-    return render(request, 'socialuser/profile.html', {'profile':profile})
+    
+    # 準備行內編輯表單（用於 AJAX 原地編輯）
+    from .forms import EmailForm, UsernameForm, PhoneForm, AvatarForm
+    
+    email_form = EmailForm(instance=request.user)
+    username_form = UsernameForm(instance=request.user)
+    initial_phone = profile.hk_phone() or ""
+    phone_form = PhoneForm(instance=profile, initial={'phone': initial_phone})
+    avatar_form = AvatarForm(instance=profile)
+    
+    return render(request, 'socialuser/profile.html', {
+        'profile': profile,
+        'email_form': email_form,
+        'username_form': username_form,
+        'phone_form': phone_form,
+        'avatar_form': avatar_form,
+    })
 
 
 @login_required
@@ -172,13 +188,42 @@ def profile_edit_view(request):
 
 
 
-# htmx : profile_settings.html
+# htmx / AJAX : profile.html
 @login_required
 def profile_emailchange(request):
+    from django.http import JsonResponse
+    
+    # AJAX 請求處理
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.method == 'POST':
+            form = EmailForm(request.POST, instance=request.user)
+            if form.is_valid():
+                email = form.cleaned_data['email']
+                if User.objects.filter(email=email).exclude(id=request.user.id).exists():
+                    return JsonResponse({'success': False, 'message': '此電子郵件已被使用'})
+                
+                form.save()
+                send_email_confirmation(request, request.user)
+                return JsonResponse({
+                    'success': True,
+                    'message': '電子郵件更新成功，驗證郵件已發送',
+                    'email': email
+                })
+            
+            # 表單驗證失敗
+            errors = []
+            for field_errors in form.errors.values():
+                errors.extend(field_errors)
+            return JsonResponse({'success': False, 'message': '; '.join(errors) if errors else '請輸入有效的電子郵件'})
+        
+        return JsonResponse({'success': False, 'message': '僅支援 POST 請求'})
+    
+    # htmx 處理（向後兼容）
     if request.htmx:
         form = EmailForm(instance=request.user)
         return render(request, 'socialuser/email_form.html', {'form': form})
     
+    # 原始 POST 處理（向後兼容）
     if request.method == 'POST':
         form = EmailForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -192,7 +237,6 @@ def profile_emailchange(request):
             messages.success(request, 'Email updated successfully. Verification email sent.')
             return redirect(reverse('socialuser:profile-settings') + '#section-email')
         
-        # If form is invalid
         messages.error(request, 'Please correct the errors below.')
         return render(request, 'socialuser/email_form.html', {'form': form})
     
@@ -207,6 +251,30 @@ def profile_emailverify(request):
     import logging
     logger = logging.getLogger(__name__)
     
+    # AJAX 請求處理
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        from django.http import JsonResponse
+        try:
+            user = request.user
+            if not user.email:
+                return JsonResponse({'success': False, 'message': '請先設定電子郵件地址'})
+            
+            email_address, created = EmailAddress.objects.get_or_create(
+                user=user,
+                email=user.email,
+                defaults={'primary': True, 'verified': False}
+            )
+            
+            if not email_address.verified:
+                email_address.send_confirmation(request)
+                return JsonResponse({'success': True, 'message': f'驗證郵件已發送至 {user.email}'})
+            else:
+                return JsonResponse({'success': True, 'message': '電子郵件已驗證'})
+        except Exception as e:
+            logger.error(f"Email verification AJAX error: {e}", exc_info=True)
+            return JsonResponse({'success': False, 'message': f'發送失敗: {str(e)}'})
+    
+    # 原始 POST 處理（向後兼容）
     try:
         user = request.user
         logger.info(f"=== Email verify requested by user {user.id} ({user.email}) ===")
@@ -252,16 +320,33 @@ def profile_emailverify(request):
 
 
 
-# htmx : profile_settings.html
+# AJAX / htmx : profile.html
 @login_required
 def profile_usernamechange(request):
+    from django.http import JsonResponse
+    
+    # AJAX 請求處理
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.method == 'POST':
+            form = UsernameForm(request.POST, instance=request.user)
+            if form.is_valid():
+                form.save()
+                return JsonResponse({
+                    'success': True,
+                    'message': '用戶名稱更新成功',
+                    'username': request.user.username
+                })
+            return JsonResponse({'success': False, 'message': '用戶名稱無效或已被使用'})
+        return JsonResponse({'success': False, 'message': '僅支援 POST 請求'})
+    
+    # htmx 處理（向後兼容）
     if request.htmx:
         form = UsernameForm(instance=request.user)
         return render(request, 'socialuser/username_form.html', {'form':form})
     
+    # 原始 POST 處理（向後兼容）
     if request.method == 'POST':
         form = UsernameForm(request.POST, instance=request.user)
-        
         if form.is_valid():
             form.save()
             messages.success(request, 'Username updated successfully.')
@@ -274,26 +359,41 @@ def profile_usernamechange(request):
 
 
 
-# htmx : profile_settings.html
-# socialuser/views.py
+# AJAX / htmx : profile.html
 @login_required
 def profile_phonechange(request):
+    from django.http import JsonResponse
+    
+    # AJAX 請求處理
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.method == 'POST':
+            profile = request.user.profile
+            form = PhoneForm(request.POST, instance=profile)
+            if form.is_valid():
+                profile.phone = form.cleaned_data['phone']
+                profile.save()
+                return JsonResponse({
+                    'success': True,
+                    'message': '電話號碼更新成功',
+                    'phone': profile.hk_phone()
+                })
+            return JsonResponse({'success': False, 'message': '無效的電話號碼格式，請輸入8位數字'})
+        return JsonResponse({'success': False, 'message': '僅支援 POST 請求'})
+    
+    # htmx 處理（向後兼容）
     if request.htmx:
         profile = request.user.profile
-        # Convert to string for initial value (without country code)
         initial_phone = profile.hk_phone() or ""
         form = PhoneForm(instance=profile, initial={'phone': initial_phone})
         return render(request, 'socialuser/phone_form.html', {'form': form})
     
+    # 原始 POST 處理（向後兼容）
     if request.method == 'POST':
         profile = request.user.profile
         form = PhoneForm(request.POST, instance=profile)
-        
         if form.is_valid():
-            # No need to convert to string here as the form handles it
             profile.phone = form.cleaned_data['phone']
             profile.save()
-            
             messages.success(request, '電話號碼更新成功')
             return redirect(reverse('socialuser:profile-settings') + '#section-phone')
         else:
@@ -302,6 +402,45 @@ def profile_phonechange(request):
     
     return redirect('socialuser:profile-settings')
 
+
+
+@login_required
+def profile_avatar_ajax(request):
+    """AJAX 頭像上傳"""
+    from django.http import JsonResponse
+    
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        profile = request.user.profile
+        form = AvatarForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({
+                'success': True,
+                'message': '頭像更新成功',
+                'avatar_url': profile.avatar
+            })
+        return JsonResponse({'success': False, 'message': '頭像上傳失敗，請確認檔案格式正確'})
+    
+    return JsonResponse({'success': False, 'message': '僅支援 AJAX POST 請求'})
+
+
+@login_required
+def profile_info_ajax(request):
+    """AJAX 個人簡介更新"""
+    from django.http import JsonResponse
+    
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        profile = request.user.profile
+        info = request.POST.get('info', '').strip()
+        profile.info = info
+        profile.save()
+        return JsonResponse({
+            'success': True,
+            'message': '個人簡介更新成功',
+            'info': info
+        })
+    
+    return JsonResponse({'success': False, 'message': '僅支援 AJAX POST 請求'})
 
 
 @login_required

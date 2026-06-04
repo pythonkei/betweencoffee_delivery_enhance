@@ -5,7 +5,8 @@ from .views import (
     profile_emailchange, profile_usernamechange, profile_phonechange,
     profile_emailverify, profile_delete_view, order_history, 
     reactivate_account, test_email_view, social_login_status, 
-    social_login_debug, CustomLoginCancelledView
+    social_login_debug, CustomLoginCancelledView,
+    profile_avatar_ajax, profile_info_ajax,
 )
 
 # 導入強化會員系統視圖
@@ -24,6 +25,8 @@ urlpatterns = [
     path('phonechange/', profile_phonechange, name="profile-phonechange"),
     path('emailverify/', profile_emailverify, name="profile-emailverify"),
     path('delete/', profile_delete_view, name="profile-delete"),
+    path('avatar-ajax/', profile_avatar_ajax, name="profile-avatar-ajax"),
+    path('info-ajax/', profile_info_ajax, name="profile-info-ajax"),
     path('orders/', order_history, name="profile-orders"),
     path('test-email/', test_email_view, name='test-email'),
     path('reactivate/', reactivate_account, name='reactivate-account'),
