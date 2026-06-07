@@ -146,18 +146,17 @@ class DebugMiddleware:
         return response
 
 
-# # 检查daphne是否已安装
-# try:
-#     import daphne
-#     DAPHNE_INSTALLED = True
-# except ImportError:
-#     DAPHNE_INSTALLED = False
+# 检查daphne是否已安装（Render等无ASGI环境不需要）
+try:
+    import daphne
+    DAPHNE_INSTALLED = True
+except ImportError:
+    DAPHNE_INSTALLED = False
 
 
 # ==================== 应用定义 ====================
 
 INSTALLED_APPS = [
-    'daphne',  # 必须放在最前面
     'channels',
     'eshop',
     'cart',
@@ -184,6 +183,10 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_htmx',
 ]
+
+# daphne 必须放在 channels 前面，但只在已安装时添加
+if DAPHNE_INSTALLED:
+    INSTALLED_APPS.insert(0, 'daphne')
 
 SITE_ID = 1
 
