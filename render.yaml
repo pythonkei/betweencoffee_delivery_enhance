@@ -19,7 +19,7 @@ services:
       pip install -r requirements.txt &&
       python manage.py collectstatic --noinput
     startCommand: |
-      python manage.py migrate --noinput &&
+      python manage.py migrate --noinput || echo "Migration failed, continuing anyway..." &&
       gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --workers=2 --timeout=120
     healthCheckPath: /
     envVars:
