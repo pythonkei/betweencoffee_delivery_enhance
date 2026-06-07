@@ -1,5 +1,9 @@
-# Render 一鍵部署配置
+# Render 一鍵部署配置（Blueprint）
 # 用於 Between Coffee 咖啡店外帶網站
+#
+# ⚠️ 注意：Render Blueprint 僅支援 web service 類型
+# PostgreSQL 和 Cron Job 需手動建立（請參考部署指南）
+#
 # 詳細部署指南：docs/guides/RENDER_DEPLOY_GUIDE.md
 
 services:
@@ -28,17 +32,16 @@ services:
         value: "False"
       - key: IS_RENDER
         value: "True"
+      # DATABASE_URL 需手動設定（建立 PostgreSQL 後取得 Internal Database URL）
       - key: DATABASE_URL
-        fromDatabase:
-          name: betweencoffee-db
-          property: connectionString
+        sync: false
       - key: RENDER_EXTERNAL_HOSTNAME
         value: onrender.com
-      # === 郵件配置（Gmail SMTP）===
+      # === 郵件配置（Gmail SMTP，可選）===
       - key: EMAIL_HOST_USER
-        sync: false  # 手動設定
+        sync: false
       - key: EMAIL_HOST_PASSWORD
-        sync: false  # 手動設定
+        sync: false
       - key: DEFAULT_FROM_EMAIL
         value: "Between Coffee <pythonkei@gmail.com>"
       # === 支付配置（可選，展示用可留空）===
@@ -57,36 +60,3 @@ services:
         sync: false
       - key: OAUTH_FACEBOOK_SECRET
         sync: false
-
-  # ==================== PostgreSQL 資料庫 ====================
-  - type: postgresql
-    name: betweencoffee-db
-    plan: free
-    region: singapore
-    databaseName: betweencoffee_delivery_db
-    ipAllowList: []  # 僅允許 Render 內部網路存取
-
-  # ==================== Cron Job（替代 Celery Beat） ====================
-  # 每 5 分鐘檢查未支付訂單
-  - type: cron
-    name: monitor-pending-payments
-    plan: free
-    region: singapore
-    schedule: "*/5 * * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python manage.py cancel_expired_pending_orders
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: DJANGO_SETTINGS_MODULE
-        value: betweencoffee_delivery.settings
-      - key: SECRET_KEY
-        generateValue: true
-      - key: DEBUG
-        value: "False"
-      - key: IS_RENDER
-        value: "True"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: betweencoffee-db
-          property: connectionString
