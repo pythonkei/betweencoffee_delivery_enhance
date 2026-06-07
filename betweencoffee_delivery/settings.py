@@ -43,6 +43,12 @@ logger = logging.getLogger(__name__)
 # Railway 环境检测
 IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None
 
+# Render 环境检测
+IS_RENDER = os.environ.get('IS_RENDER') == 'True' or os.environ.get('RENDER') is not None
+
+# 通用生产环境检测
+IS_PRODUCTION = IS_RAILWAY or IS_RENDER
+
 # ==================== 安全配置 ====================
 
 def get_secret_key():
@@ -62,8 +68,8 @@ def get_secret_key():
 
 SECRET_KEY = get_secret_key()
 
-# DEBUG 配置 - 在 Railway 上强制设为 False
-if IS_RAILWAY:
+# DEBUG 配置 - 在生产环境上强制设为 False
+if IS_PRODUCTION:
     DEBUG = False
 else:
     DEBUG = env.bool('DEBUG', default=True)
@@ -81,6 +87,13 @@ def get_allowed_hosts():
         else:
             logger.warning("RAILWAY_PUBLIC_DOMAIN not set, using fallback hosts")
             return ['.railway.app'] + default_hosts
+    elif IS_RENDER:
+        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+        if render_domain:
+            return [render_domain, '.onrender.com'] + default_hosts
+        else:
+            logger.warning("RENDER_EXTERNAL_HOSTNAME not set, using fallback hosts")
+            return ['.onrender.com'] + default_hosts
     else:
         return default_hosts
 
@@ -96,6 +109,12 @@ def get_csrf_trusted_origins():
             return [f'https://{railway_domain}', 'https://*.railway.app']
         else:
             return ['https://*.railway.app']
+    elif IS_RENDER:
+        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+        if render_domain:
+            return [f'https://{render_domain}', 'https://*.onrender.com']
+        else:
+            return ['https://*.onrender.com']
     else:
         return ['http://localhost:8081', 'http://127.0.0.1:8081']
 
@@ -423,6 +442,9 @@ def get_social_providers():
     if IS_RAILWAY:
         railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
         base_domain = railway_domain
+    elif IS_RENDER:
+        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
+        base_domain = render_domain
     else:
         base_domain = 'localhost:8081'
     
@@ -506,6 +528,10 @@ def setup_site_config():
         domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
         name = 'Between Coffee - Railway'
         protocol = 'https'
+    elif IS_RENDER:
+        domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
+        name = 'Between Coffee - Render'
+        protocol = 'https'
     else:
         domain = 'localhost:8081'
         name = 'Between Coffee - Local'
@@ -547,6 +573,12 @@ def get_social_callback_urls():
             base_url = f'https://{railway_domain}'
         else:
             base_url = 'https://*.railway.app'
+    elif IS_RENDER:
+        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+        if render_domain:
+            base_url = f'https://{render_domain}'
+        else:
+            base_url = 'https://*.onrender.com'
     else:
         base_url = 'http://localhost:8081'
     

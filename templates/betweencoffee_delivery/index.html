@@ -240,8 +240,8 @@
                     </div>
                     <div class="card-content-v1">
                         <h3 class="coffee-name-v1">{{ coffee.name }}</h3>
-                        <p class="introduction-text-v1">{{ coffee.introduction }}</p>
-                        <p hidden class="price-v1">{{ coffee.price|floatformat:"-2"|default:"0" }}</p>
+                        <p class="introduction-text-v1 mb-3">{{ coffee.introduction }}</p>
+                        <p hidden class="price-v1 pt-2">{{ coffee.price|floatformat:"-2"|default:"0" }}</p>
                         <a href="{% url 'coffee' coffee.id %}" class="btn asymmetric-btn-v1">落單</a>
                     </div>
                 </div>

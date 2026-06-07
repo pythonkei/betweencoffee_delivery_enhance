@@ -728,12 +728,13 @@ table td:nth-child(3) {
 }
 
 .toast-content {
-    padding: 12px 20px;
-    border-radius: 4px;
+    padding: 16px 28px;
+    border-radius: 12px;
     color: white;
-    font-weight: 500;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 200px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    min-width: 280px;
     text-align: center;
 }
 

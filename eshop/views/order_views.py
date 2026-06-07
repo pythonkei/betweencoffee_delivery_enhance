@@ -948,10 +948,9 @@ def check_order_status(request, order_id):
         except CoffeeQueue.DoesNotExist:
             pass
         
-        # ✅ 修復：移除了錯誤的導入語句
-        # 检查是否需要重试支付
+        # 检查是否需要重试支付（適用所有支付方式）
         needs_retry = (
-            order.payment_method == 'alipay' and 
+            order.payment_status == 'pending' and 
             order.created_at < timezone.now() - timedelta(minutes=5)
         )
         
@@ -993,6 +992,23 @@ def continue_payment(request, order_id):
             return redirect('eshop:fps_payment', order_id=order.id)
         elif order.payment_method == 'cash':
             return redirect('eshop:cash_payment', order_id=order.id)
+        elif order.payment_method == 'paypal':
+            # PayPal 需要重新建立支付連結
+            try:
+                from eshop.paypal_utils import create_paypal_payment
+                paypal_url = create_paypal_payment(order, request)
+                if paypal_url:
+                    request.session['pending_paypal_order_id'] = order.id
+                    logger.info(f"PayPal繼續支付成功，訂單: {order.id}")
+                    return redirect(paypal_url)
+                else:
+                    logger.error(f"PayPal繼續支付創建失敗，訂單: {order.id}")
+                    messages.error(request, "PayPal支付暫時不可用，請稍後再試")
+                    return redirect('eshop:order_payment_confirmation', order_id=order.id)
+            except Exception as e:
+                logger.error(f"PayPal繼續支付異常: {str(e)}")
+                messages.error(request, "PayPal支付暫時不可用，請稍後再試")
+                return redirect('eshop:order_payment_confirmation', order_id=order.id)
         else:
             messages.error(request, "未知的支付方式")
             return redirect('eshop:order_payment_confirmation', order_id=order.id)

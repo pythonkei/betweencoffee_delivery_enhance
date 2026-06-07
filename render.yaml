@@ -1,0 +1,92 @@
+# Render 一鍵部署配置
+# 用於 Between Coffee 咖啡店外帶網站
+# 詳細部署指南：docs/guides/RENDER_DEPLOY_GUIDE.md
+
+services:
+  # ==================== Web 服務 ====================
+  - type: web
+    name: betweencoffee
+    env: python
+    region: singapore  # 新加坡節點，亞洲訪問最快
+    plan: free
+    branch: main
+    buildCommand: |
+      pip install --upgrade pip &&
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate
+    startCommand: gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --workers=2 --timeout=120
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: betweencoffee_delivery.settings
+      - key: SECRET_KEY
+        generateValue: true  # Render 自動生成
+      - key: DEBUG
+        value: "False"
+      - key: IS_RENDER
+        value: "True"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: betweencoffee-db
+          property: connectionString
+      - key: RENDER_EXTERNAL_HOSTNAME
+        value: onrender.com
+      # === 郵件配置（Gmail SMTP）===
+      - key: EMAIL_HOST_USER
+        sync: false  # 手動設定
+      - key: EMAIL_HOST_PASSWORD
+        sync: false  # 手動設定
+      - key: DEFAULT_FROM_EMAIL
+        value: "Between Coffee <pythonkei@gmail.com>"
+      # === 支付配置（可選，展示用可留空）===
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: ALIPAY_APP_ID
+        sync: false
+      # === 社交登入配置（可選）===
+      - key: OAUTH_GOOGLE_CLIENT_ID
+        sync: false
+      - key: OAUTH_GOOGLE_SECRET
+        sync: false
+      - key: OAUTH_FACEBOOK_CLIENT_ID
+        sync: false
+      - key: OAUTH_FACEBOOK_SECRET
+        sync: false
+
+  # ==================== PostgreSQL 資料庫 ====================
+  - type: postgresql
+    name: betweencoffee-db
+    plan: free
+    region: singapore
+    databaseName: betweencoffee_delivery_db
+    ipAllowList: []  # 僅允許 Render 內部網路存取
+
+  # ==================== Cron Job（替代 Celery Beat） ====================
+  # 每 5 分鐘檢查未支付訂單
+  - type: cron
+    name: monitor-pending-payments
+    plan: free
+    region: singapore
+    schedule: "*/5 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py cancel_expired_pending_orders
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: betweencoffee_delivery.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: IS_RENDER
+        value: "True"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: betweencoffee-db
+          property: connectionString

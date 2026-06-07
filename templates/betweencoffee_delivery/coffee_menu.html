@@ -58,7 +58,7 @@
                 <div class="text text-center">
                   <h5 class="mt-3 text-uppercase">{{ coffee.name }}</h5>
                   <p class="price"><span>$ {{ coffee.price|floatformat:"-2"|default:"0" }}</span></p>
-                  <p class="m-4">{{ coffee.description }}</p>
+                  <p>{{ coffee.description }}</p>
                   <form action="{% url 'coffee' coffee.id %}" method="post" class="pt-2">
                     {% csrf_token %}
                     <a href="{% url 'coffee' coffee.id %}" class="btn btn-primary btn-outline-primary">落單</a>
