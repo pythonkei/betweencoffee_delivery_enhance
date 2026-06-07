@@ -75,32 +75,3 @@ class Command(BaseCommand):
         self.stdout.write('-' * 90)
 
         for order in expired_orders:
-            created_str = order.created_at.strftime('%Y-%m-%d %H:%M:%S')
-            username = order.user.username if order.user else '訪客'
-            self.stdout.write(
-                f'{order.id:>6} | {username:<15} | '
-                f'${order.total_price:>6.2f} | {created_str:<25}'
-            )
-
-        self.stdout.write('-' * 90)
-        self.stdout.write(f'總計: {total_count} 筆訂單\n')
-
-        # 預覽模式
-        if dry_run:
-            self.stdout.write(
-                self.style.WARNING('⚠️ 預覽模式 -- 未執行任何操作')
-            )
-            return
-
-        # 實際執行取消
-        self.stdout.write('🔄 開始自動取消過期訂單...')
-
-        success_count = 0
-        fail_count = 0
-        failed_ids = []
-
-        for order in expired_orders:
-            try:
-                with transaction.atomic():
-                    result = OrderStatusManager.mark_as_cancelled_manually(
-                        order_id=order.id,
