@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libpq-dev \
     gcc \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 複製專案檔案
