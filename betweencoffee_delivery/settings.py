@@ -425,7 +425,11 @@ WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # 媒体文件
-MEDIA_URL = '/media/'
+# 注意：MEDIA_URL 設為 /static/media/ 以確保在本地開發和生產環境中，
+# image.url 都返回 /static/media/... 路徑。這是因為 media 檔案在生產環境中
+# 會被複製到 staticfiles/media/ 目錄下，由 Whitenoise 提供服務。
+# 本地開發時，Django 的 static() helper 會將 /static/media/ 路由到 MEDIA_ROOT。
+MEDIA_URL = '/static/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

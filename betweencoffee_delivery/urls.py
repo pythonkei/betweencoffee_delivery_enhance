@@ -70,9 +70,10 @@ urlpatterns = [
 # 注意：在生產環境中（DEBUG=False），Django 的 static() helper 不會自動加入路由
 # 因此我們手動加入 media 檔案路由，確保產品圖片在 Render 上能正常顯示
 # 優先使用 staticfiles/media/（Whitenoise 提供），否則使用 media/ 目錄
+# MEDIA_URL 已設為 /static/media/，所以 static() helper 的路由前綴是 /static/media/
 if settings.DEBUG:
+    # 開發環境：直接從 media/ 目錄提供服務
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 else:
     # 生產環境：使用 staticfiles/media/（由 render.yaml 的 build 命令複製）
     urlpatterns += static(settings.MEDIA_URL, document_root=os.path.join(settings.STATIC_ROOT, 'media'))
