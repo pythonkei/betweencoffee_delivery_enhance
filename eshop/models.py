@@ -58,25 +58,23 @@ class CoffeeItem(models.Model):
     # 获取图片方法 - 优先返回首页图片
     def get_index_image(self):
         """获取首页专用图片，如果没有则返回默认图片"""
-        if self.image_index:
-            return self.image_index.url
-        elif self.image:
-            return self.image.url
+        if self.image_index and hasattr(self.image_index, 'name') and self.image_index.name:
+            return f'/static/media/{self.image_index.name}'
+        elif self.image and hasattr(self.image, 'name') and self.image.name:
+            return f'/static/media/{self.image.name}'
         else:
             return '/static/images/default-coffee-index.png'
 
     def get_detail_image(self):
         """获取详情页图片 - 修复版本"""
-        # 检查 image 字段是否存在且有文件
-        if self.image and hasattr(self.image, 'url'):
+        if self.image and hasattr(self.image, 'name') and self.image.name:
             try:
-                # 尝试获取URL，如果文件不存在会抛出异常
-                return self.image.url
+                # 在生產環境中，media 檔案已被複製到 staticfiles/media/
+                # 所以直接使用 /static/media/ 路徑
+                return f'/static/media/{self.image.name}'
             except (ValueError, AttributeError):
-                # 文件不存在，返回默认图片
                 return '/static/images/default-coffee-detail.png'
         else:
-            # 没有图片，返回默认图片
             return '/static/images/default-coffee-detail.png'
 
     class Meta:
@@ -124,18 +122,20 @@ class BeanItem(models.Model):
     # 获取图片方法 - 优先返回首页图片
     def get_index_image(self):
         """获取首页专用图片，如果没有则返回默认图片"""
-        if self.image_index:
-            return self.image_index.url
-        elif self.image:
-            return self.image.url
+        if self.image_index and hasattr(self.image_index, 'name') and self.image_index.name:
+            return f'/static/media/{self.image_index.name}'
+        elif self.image and hasattr(self.image, 'name') and self.image.name:
+            return f'/static/media/{self.image.name}'
         else:
             return '/static/images/default-bean-index.png'
 
     def get_detail_image(self):
         """获取详情页图片 - 修复版本"""
-        if self.image and hasattr(self.image, 'url'):
+        if self.image and hasattr(self.image, 'name') and self.image.name:
             try:
-                return self.image.url
+                # 在生產環境中，media 檔案已被複製到 staticfiles/media/
+                # 所以直接使用 /static/media/ 路徑
+                return f'/static/media/{self.image.name}'
             except (ValueError, AttributeError):
                 return '/static/images/default-bean-detail.png'
         else:
@@ -228,13 +228,19 @@ class CartItem(models.Model):
                     try:
                         if item['type'] == 'coffee':
                             product = CoffeeItem.objects.get(id=item['id'])
+                            if product.image and hasattr(product.image, 'name') and product.image.name:
+                                item['image'] = f'/static/media/{product.image.name}'
+                            else:
+                                item['image'] = '/static/images/default-coffee.png'
                         elif item['type'] == 'bean':
                             product = BeanItem.objects.get(id=item['id'])
+                            if product.image and hasattr(product.image, 'name') and product.image.name:
+                                item['image'] = f'/static/media/{product.image.name}'
+                            else:
+                                item['image'] = '/static/images/default-bean.png'
                         else:
                             product = None
-                            
-                        if product:
-                            item['image'] = product.image.url
+                            item['image'] = '/static/images/default-product.png'
                     except:
                         item['image'] = '/static/images/default-product.png'
             except (TypeError, ValueError, KeyError) as e:
@@ -757,14 +763,18 @@ class OrderModel(models.Model):
                     try:
                         if item['type'] == 'coffee':
                             product = CoffeeItem.objects.get(id=item['id'])
+                            if product.image and hasattr(product.image, 'name') and product.image.name:
+                                item['image'] = f'/static/media/{product.image.name}'
+                            else:
+                                item['image'] = '/static/images/default-coffee.png'
                         elif item['type'] == 'bean':
                             product = BeanItem.objects.get(id=item['id'])
+                            if product.image and hasattr(product.image, 'name') and product.image.name:
+                                item['image'] = f'/static/media/{product.image.name}'
+                            else:
+                                item['image'] = '/static/images/default-bean.png'
                         else:
                             product = None
-                            
-                        if product:
-                            item['image'] = product.image.url
-                        else:
                             item['image'] = '/static/images/default-product.png'
                     except:
                         item['image'] = '/static/images/default-product.png'
@@ -1570,10 +1580,14 @@ def get_product_image_url(item_data):
     try:
         if item_data.get('type') == 'coffee':
             coffee = CoffeeItem.objects.get(id=item_data['id'])
-            return coffee.image.url if coffee.image else '/static/images/default-coffee.png'
+            if coffee.image and hasattr(coffee.image, 'name') and coffee.image.name:
+                return f'/static/media/{coffee.image.name}'
+            return '/static/images/default-coffee.png'
         elif item_data.get('type') == 'bean':
             bean = BeanItem.objects.get(id=item_data['id'])
-            return bean.image.url if bean.image else '/static/images/default-bean.png'
+            if bean.image and hasattr(bean.image, 'name') and bean.image.name:
+                return f'/static/media/{bean.image.name}'
+            return '/static/images/default-bean.png'
     except (CoffeeItem.DoesNotExist, BeanItem.DoesNotExist):
         pass
     

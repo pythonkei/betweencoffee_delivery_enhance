@@ -29,7 +29,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: RENDER_EXTERNAL_HOSTNAME
-        value: onrender.com
+        value: betweencoffee-delivery-enhance-v1.onrender.com
       # === 郵件配置（Gmail SMTP，可選）===
       - key: EMAIL_HOST_USER
         sync: false
