@@ -20,7 +20,7 @@ venv.bak/
 *.log
 local_settings.py
 db.sqlite3
-/media/          # ← 只忽略根目录的 media（用户上传文件）
+# /media/          # ← 暫時取消忽略，讓 Render 可以取得產品圖片
 
 # IDE
 .vscode/
