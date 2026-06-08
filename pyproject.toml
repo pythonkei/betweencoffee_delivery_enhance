@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "betweencoffee-delivery"
+version = "1.0.0"
+description = "Between Coffee 咖啡店外帶網站與訂單製作管理系統"
+authors = ["Between Coffee Team"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
