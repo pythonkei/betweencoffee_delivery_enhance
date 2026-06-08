@@ -5,6 +5,7 @@ WORKDIR /app
 # 安裝系統依賴
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 複製專案檔案
