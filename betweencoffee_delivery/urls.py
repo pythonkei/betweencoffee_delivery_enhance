@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+import os
 from .views import Index, About, CoffeeMenu, Coffee, BeanMenu, Bean, CoffeeMenuSearch, BeanMenuSearch # use own views render index and about
 # from eshop.views import OrderConfirm
 from socialuser.views import profile_view
@@ -68,8 +69,11 @@ urlpatterns = [
 # static sources: css and image file root
 # 注意：在生產環境中（DEBUG=False），Django 的 static() helper 不會自動加入路由
 # 因此我們手動加入 media 檔案路由，確保產品圖片在 Render 上能正常顯示
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+# 優先使用 staticfiles/media/（Whitenoise 提供），否則使用 media/ 目錄
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # 生產環境：使用 staticfiles/media/（由 render.yaml 的 build 命令複製）
+    urlpatterns += static(settings.MEDIA_URL, document_root=os.path.join(settings.STATIC_ROOT, 'media'))
 

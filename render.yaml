@@ -21,7 +21,10 @@ services:
       mkdir -p $CARGO_HOME $CARGO_TARGET_DIR &&
       pip install --upgrade pip &&
       pip install -r requirements.txt &&
-      python manage.py collectstatic --noinput
+      python manage.py collectstatic --noinput &&
+      # 將 media 檔案複製到 staticfiles 目錄，確保產品圖片在生產環境中可存取
+      mkdir -p staticfiles/media &&
+      cp -r media/* staticfiles/media/ 2>/dev/null || echo "No media files to copy"
     startCommand: |
       python manage.py migrate --noinput || echo "Migration failed, continuing anyway..." &&
       gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --workers=2 --timeout=120
