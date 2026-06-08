@@ -20,6 +20,12 @@ services:
       export PATH="$HOME/.cargo/bin:$PATH" &&
       export CARGO_HOME="$HOME/.cargo" &&
       pip install --upgrade pip &&
+      # 下載 maturin pre-built binary（rpds-py 的 build backend）
+      curl -L https://github.com/PyO3/maturin/releases/download/v1.7.4/maturin-x86_64-unknown-linux-gnu.tar.gz -o /tmp/maturin.tar.gz 2>&1 &&
+      tar xzf /tmp/maturin.tar.gz -C /tmp 2>&1 &&
+      export PATH="/tmp:$PATH" &&
+      # 安裝 rpds-py（使用 --no-build-isolation 以使用我們安裝的 Rust 和 maturin）
+      CARGO_HOME="$HOME/.cargo" pip install --no-build-isolation rpds-py==0.18.0 2>&1 &&
       pip install -r requirements.txt &&
       python manage.py collectstatic --noinput &&
       # 將 media 檔案複製到 staticfiles 目錄，確保產品圖片在生產環境中可存取
