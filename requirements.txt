@@ -61,8 +61,8 @@ psycopg2-binary==2.9.10
 pycodestyle==2.12.1  # 保持这个版本
 pycparser==2.21
 pycryptodomex==3.21.0
-pydantic==2.11.1  # 升級以支援 Python 3.14（有預編譯 wheel）
-pydantic_core==2.33.1  # 升級以支援 Python 3.14（有預編譯 wheel）
+# pydantic==2.11.1  # 展示用不需要（openai 的依賴）
+# pydantic_core==2.33.1  # 展示用不需要（需要 Rust 編譯）
 pyflakes==3.1.0
 PyJWT==2.8.0
 pyOpenSSL==25.0.0
