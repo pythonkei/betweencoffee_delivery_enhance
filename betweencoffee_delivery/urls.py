@@ -66,7 +66,10 @@ urlpatterns = [
 ]
 
 # static sources: css and image file root
+# 注意：在生產環境中（DEBUG=False），Django 的 static() helper 不會自動加入路由
+# 因此我們手動加入 media 檔案路由，確保產品圖片在 Render 上能正常顯示
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
