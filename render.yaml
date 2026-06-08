@@ -15,6 +15,9 @@ services:
     plan: free
     branch: main
     buildCommand: |
+      # 安裝 Rust 工具鏈（用於編譯需要 Rust 的套件）
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &&
+      export PATH="$HOME/.cargo/bin:$PATH" &&
       pip install --upgrade pip &&
       pip install -r requirements.txt &&
       python manage.py collectstatic --noinput
