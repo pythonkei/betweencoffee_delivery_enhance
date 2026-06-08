@@ -38,6 +38,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: POETRY_VERSION
+        value: "false"  # 禁用 Poetry，使用 pip 安裝依賴
       - key: DJANGO_SETTINGS_MODULE
         value: betweencoffee_delivery.settings
       - key: SECRET_KEY
