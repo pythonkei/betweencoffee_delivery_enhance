@@ -1,6 +1,19 @@
 {% extends 'betweencoffee_delivery/base.html' %}
 {% comment %} Config account/sigup.html {% endcomment %}
 {% block class %}allauth{% endblock %}
-    {% include 'layouts/blank.html' %}
+
 {% block content %}
+<div class="blank-container">
+    {{ block.super }}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.blank-container {
+    background: transparent;
+    padding-top: 24vh;
+    min-height: 60vh;
+}
+</style>
 {% endblock %}
