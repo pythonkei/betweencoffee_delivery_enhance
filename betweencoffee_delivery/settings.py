@@ -425,11 +425,14 @@ WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # 媒体文件
-# MEDIA_URL 保持為 /media/，因為 Django 不允許 MEDIA_URL 在 STATIC_URL 路徑內。
-# 在生產環境中，media 檔案會被複製到 staticfiles/media/ 目錄下。
-# 圖片 URL 的修正由 eshop/models.py 中的 get_media_url() 工具函數處理，
-# 它會根據 DEBUG 模式自動返回正確的路徑。
-MEDIA_URL = '/media/'
+# MEDIA_URL 根據環境動態設置：
+# - 本地開發（DEBUG=True）：/media/ → Django static() helper 提供服務
+# - 生產環境（DEBUG=False）：/static/media/ → Whitenoise 從 staticfiles/media/ 提供服務
+# 這樣 image.url 在所有環境中都返回正確的路徑，無需額外的 get_media_url() 轉換。
+if IS_PRODUCTION:
+    MEDIA_URL = '/static/media/'
+else:
+    MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -67,10 +67,11 @@ urlpatterns = [
 ]
 
 # static sources: css and image file root
-# 注意：在生產環境中（DEBUG=False），Django 的 static() helper 不會自動加入路由
-# 因此我們手動加入 media 檔案路由，確保產品圖片在 Render 上能正常顯示
-# 優先使用 staticfiles/media/（Whitenoise 提供），否則使用 media/ 目錄
-# MEDIA_URL 保持為 /media/，圖片 URL 的修正由 eshop/models.py 中的工具函數處理
+# MEDIA_URL 已根據環境動態設置：
+# - 本地開發：/media/ → Django static() helper 路由到 MEDIA_ROOT
+# - 生產環境：/static/media/ → Whitenoise 從 staticfiles/media/ 提供服務
+# 注意：在生產環境中（DEBUG=False），Django 的 static() helper 不會自動加入路由，
+# 因此我們手動加入 media 檔案路由，確保產品圖片在 Render 上能正常顯示。
 if settings.DEBUG:
     # 開發環境：直接從 media/ 目錄提供服務
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

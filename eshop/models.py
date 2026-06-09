@@ -22,37 +22,30 @@ from .time_calculation import unified_time_service
 logger = logging.getLogger(__name__)
 
 
-def get_media_url(image_field):
+def get_image_url(image_field, default=None):
     """
     統一的圖片 URL 獲取工具函數。
     
-    在本地開發環境中，MEDIA_URL 為 /media/，image.url 返回 /media/xxx.jpg，
-    Django 的 static() helper 會將 /media/ 路由到 MEDIA_ROOT。
+    MEDIA_URL 已根據環境動態設置（settings.py）：
+    - 本地開發：MEDIA_URL = /media/ → image.url 返回 /media/xxx.jpg
+    - 生產環境：MEDIA_URL = /static/media/ → image.url 返回 /static/media/xxx.jpg
     
-    在生產環境中（Render/Railway），media 檔案被複製到 staticfiles/media/ 目錄下，
-    由 Whitenoise 提供服務。但 image.url 仍然返回 /media/xxx.jpg，
-    所以需要將路徑轉換為 /static/media/xxx.jpg。
+    因此 image.url 在所有環境中都返回正確的路徑，無需額外轉換。
     
     Args:
         image_field: Django ImageField 實例（或任何有 .url 屬性的物件）
+        default: 當 image_field 為空時的默認路徑
         
     Returns:
         str: 正確的圖片 URL 路徑
     """
     if not image_field:
-        return None
+        return default
     
     try:
-        url = image_field.url
+        return image_field.url
     except (ValueError, AttributeError):
-        return None
-    
-    # 在生產環境中，將 /media/ 路徑轉換為 /static/media/
-    if not settings.DEBUG:
-        if url.startswith('/media/'):
-            url = '/static/' + url.lstrip('/')
-    
-    return url
+        return default
 
 
 # Shop Item
@@ -92,9 +85,9 @@ class CoffeeItem(models.Model):
     def get_index_image(self):
         """获取首页专用图片，如果没有则返回默认图片"""
         if self.image_index and hasattr(self.image_index, 'name') and self.image_index.name:
-            return get_media_url(self.image_index) or '/static/images/default-coffee-index.png'
+            return get_image_url(self.image_index, '/static/images/default-coffee-index.png')
         elif self.image and hasattr(self.image, 'name') and self.image.name:
-            return get_media_url(self.image) or '/static/images/default-coffee-index.png'
+            return get_image_url(self.image, '/static/images/default-coffee-index.png')
         else:
             return '/static/images/default-coffee-index.png'
 
@@ -102,7 +95,7 @@ class CoffeeItem(models.Model):
         """获取详情页图片"""
         if self.image and hasattr(self.image, 'name') and self.image.name:
             try:
-                return get_media_url(self.image) or '/static/images/default-coffee-detail.png'
+                return get_image_url(self.image, '/static/images/default-coffee-detail.png')
             except (ValueError, AttributeError):
                 return '/static/images/default-coffee-detail.png'
         else:
@@ -154,9 +147,9 @@ class BeanItem(models.Model):
     def get_index_image(self):
         """获取首页专用图片，如果没有则返回默认图片"""
         if self.image_index and hasattr(self.image_index, 'name') and self.image_index.name:
-            return get_media_url(self.image_index) or '/static/images/default-bean-index.png'
+            return get_image_url(self.image_index, '/static/images/default-bean-index.png')
         elif self.image and hasattr(self.image, 'name') and self.image.name:
-            return get_media_url(self.image) or '/static/images/default-bean-index.png'
+            return get_image_url(self.image, '/static/images/default-bean-index.png')
         else:
             return '/static/images/default-bean-index.png'
 
@@ -164,7 +157,7 @@ class BeanItem(models.Model):
         """获取详情页图片"""
         if self.image and hasattr(self.image, 'name') and self.image.name:
             try:
-                return get_media_url(self.image) or '/static/images/default-bean-detail.png'
+                return get_image_url(self.image, '/static/images/default-bean-detail.png')
             except (ValueError, AttributeError):
                 return '/static/images/default-bean-detail.png'
         else:
@@ -258,13 +251,13 @@ class CartItem(models.Model):
                         if item['type'] == 'coffee':
                             product = CoffeeItem.objects.get(id=item['id'])
                             if product.image and hasattr(product.image, 'name') and product.image.name:
-                                item['image'] = get_media_url(product.image) or '/static/images/default-coffee.png'
+                                item['image'] = get_image_url(product.image, '/static/images/default-coffee.png')
                             else:
                                 item['image'] = '/static/images/default-coffee.png'
                         elif item['type'] == 'bean':
                             product = BeanItem.objects.get(id=item['id'])
                             if product.image and hasattr(product.image, 'name') and product.image.name:
-                                item['image'] = get_media_url(product.image) or '/static/images/default-bean.png'
+                                item['image'] = get_image_url(product.image, '/static/images/default-bean.png')
                             else:
                                 item['image'] = '/static/images/default-bean.png'
                         else:
@@ -793,13 +786,13 @@ class OrderModel(models.Model):
                         if item['type'] == 'coffee':
                             product = CoffeeItem.objects.get(id=item['id'])
                             if product.image and hasattr(product.image, 'name') and product.image.name:
-                                item['image'] = get_media_url(product.image) or '/static/images/default-coffee.png'
+                                item['image'] = get_image_url(product.image, '/static/images/default-coffee.png')
                             else:
                                 item['image'] = '/static/images/default-coffee.png'
                         elif item['type'] == 'bean':
                             product = BeanItem.objects.get(id=item['id'])
                             if product.image and hasattr(product.image, 'name') and product.image.name:
-                                item['image'] = get_media_url(product.image) or '/static/images/default-bean.png'
+                                item['image'] = get_image_url(product.image, '/static/images/default-bean.png')
                             else:
                                 item['image'] = '/static/images/default-bean.png'
                         else:
@@ -1601,9 +1594,9 @@ def get_product_image_url(item_data):
     """
     根据商品数据获取正确的图片URL
     
-    使用 get_media_url() 工具函數，確保在本地開發和生產環境中都能正確顯示。
+    MEDIA_URL 已根據環境動態設置（settings.py），image.url 在所有環境中都返回正確的路徑。
     本地開發：image.url 返回 /media/xxx.jpg，由 Django static() helper 提供服務。
-    生產環境：get_media_url() 將 /media/ 轉換為 /static/media/，由 Whitenoise 提供服務。
+    生產環境：image.url 返回 /static/media/xxx.jpg，由 Whitenoise 提供服務。
     """
     # 如果已经有图片URL，直接返回
     if item_data.get('image'):
@@ -1614,12 +1607,12 @@ def get_product_image_url(item_data):
         if item_data.get('type') == 'coffee':
             coffee = CoffeeItem.objects.get(id=item_data['id'])
             if coffee.image and hasattr(coffee.image, 'name') and coffee.image.name:
-                return get_media_url(coffee.image) or '/static/images/default-coffee.png'
+                return get_image_url(coffee.image, '/static/images/default-coffee.png')
             return '/static/images/default-coffee.png'
         elif item_data.get('type') == 'bean':
             bean = BeanItem.objects.get(id=item_data['id'])
             if bean.image and hasattr(bean.image, 'name') and bean.image.name:
-                return get_media_url(bean.image) or '/static/images/default-bean.png'
+                return get_image_url(bean.image, '/static/images/default-bean.png')
             return '/static/images/default-bean.png'
     except (CoffeeItem.DoesNotExist, BeanItem.DoesNotExist):
         pass
