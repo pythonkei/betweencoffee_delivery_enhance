@@ -1,41 +1,177 @@
 {% extends "socialaccount/base_entrance.html" %}
 {% load i18n %}
 {% load allauth %}
+{% load static %}
+
 {% block head_title %}
     {% trans "Signup" %}
 {% endblock head_title %}
+
 {% block content %}
-<div class="blank-container">
-    {% element h1 %}
-        {% trans "Sign Up" %}
-    {% endelement %}
-    {% element p %}
-        {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your {{provider_name}} account to login to
-{{site_name}}. As a final step, please complete the following form:{% endblocktrans %}
-    {% endelement %}
-    {% url 'socialaccount_signup' as action_url %}
-    {% element form form=form method="post" action=action_url %}
-        {% slot body %}
-            {% csrf_token %}
-            {% element fields form=form unlabeled=True %}
-            {% endelement %}
-            {{ redirect_field }}
-        {% endslot %}
-        {% slot actions %}
-            {% element button type="submit" %}
-                {% trans "Sign Up" %}
-            {% endelement %}
-        {% endslot %}
-    {% endelement %}
-</div>
+<!-- SVG 背景視覺元素 -->
+<section class="subpage-banner-h500 py-lg-4 mb-3">
+    <div class="ftco-subpage-banner" id="section-counter">
+        <div class="svg-bg ftco-counter noise_animation" style="background-image: url({% static 'images/title_bg_img_01.svg' %});" data-stellar-background-ratio="0.73"></div>
+        
+        <div class="container">
+            <div class="row justify-content-center mt-5 p-2">
+                <div class="col-lg-12 col-md-12 heading-section text-center">
+                    <span class="subheading">Welcome</span>
+                    <h2 class="mb-3">&#65371;綁定帳號&#65373;</h2>
+                    <p style="color:#ccc;">
+                        使用您的 {{ account.get_provider.name }} 帳戶<br />
+                        完成 Between Coffee 帳號綁定
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End SVG 背景視覺元素 -->
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col col-md-8 col-lg-6 mb-5">
+                <div class="social-signup-card">
+                    <div class="social-signup-card-body">
+                        {% element p %}
+                            {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+                            You are about to use your {{provider_name}} account to login to
+                            {{site_name}}. As a final step, please complete the following form:
+                            {% endblocktrans %}
+                        {% endelement %}
+
+                        {% url 'socialaccount_signup' as action_url %}
+                        {% element form form=form method="post" action=action_url %}
+                            {% slot body %}
+                                {% csrf_token %}
+                                {% element fields form=form unlabeled=True %}
+                                {% endelement %}
+                                {{ redirect_field }}
+                            {% endslot %}
+                            {% slot actions %}
+                                <div class="form-actions text-center mt-4">
+                                    {% element button type="submit" %}
+                                        {% trans "Sign Up" %}
+                                    {% endelement %}
+                                </div>
+                            {% endslot %}
+                        {% endelement %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock content %}
 
 {% block extra_css %}
 <style>
-.blank-container {
-    background: transparent;
-    padding-top: 24vh;
-    min-height: 60vh;
+.social-signup-card {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.social-signup-card-body {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.social-signup-card-body p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* allauth element form styling */
+.social-signup-card form {
+    width: 100%;
+}
+
+.social-signup-card input[type="text"],
+.social-signup-card input[type="email"],
+.social-signup-card input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+}
+
+.social-signup-card input:focus {
+    outline: none;
+    border-color: #c49b63;
+    box-shadow: 0 0 0 2px rgba(196, 155, 99, 0.2);
+}
+
+.social-signup-card label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+
+/* allauth button override */
+.social-signup-card button[type="submit"] {
+    display: inline-block;
+    padding: 0.85rem 2.5rem;
+    background: #c49b63;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+}
+
+.social-signup-card button[type="submit"]:hover {
+    background: #d4ab73;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(196, 155, 99, 0.3);
+}
+
+/* Error messages */
+.social-signup-card .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+}
+
+.social-signup-card .errorlist li {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+}
+
+/* Help text */
+.social-signup-card .helptext {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* allauth field rows */
+.social-signup-card [class*="field-"] {
+    margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .social-signup-card {
+        padding: 1.5rem 1rem;
+    }
 }
 </style>
 {% endblock %}
