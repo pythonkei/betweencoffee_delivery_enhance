@@ -120,41 +120,6 @@ def profile_view(request, username=None):
     })
 
 
-@login_required
-def profile_settings_view(request):
-    profile = request.user.profile
-    
-    if request.method == 'POST':
-        form = AvatarForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, '頭像更新成功')
-            return redirect('socialuser:profile-settings')
-        else:
-            messages.error(request, '頭像上傳失敗，請確認檔案格式正確')
-    else:
-        form = AvatarForm(instance=profile)
-    
-    # 判斷編輯模式（從 GET 參數讀取）
-    edit_mode = request.GET.get('edit', '')
-    valid_modes = ['email', 'username', 'phone']
-    if edit_mode not in valid_modes:
-        edit_mode = ''
-    
-    # 準備各表單實例（用於行內編輯）
-    email_form = EmailForm(instance=request.user)
-    username_form = UsernameForm(instance=request.user)
-    initial_phone = profile.hk_phone() or ""
-    phone_form = PhoneForm(instance=profile, initial={'phone': initial_phone})
-    
-    return render(request, 'socialuser/profile_settings.html', {
-        'form': form,
-        'avatar_form': form,  # 別名，模板中更清晰
-        'edit_mode': edit_mode,
-        'email_form': email_form,
-        'username_form': username_form,
-        'phone_form': phone_form,
-    })
 
 
 
@@ -230,17 +195,17 @@ def profile_emailchange(request):
             email = form.cleaned_data['email']
             if User.objects.filter(email=email).exclude(id=request.user.id).exists():
                 messages.error(request, f'{email} is already in use.')
-                return redirect('socialuser:profile-settings')
+                return redirect('socialuser:profile')
             
             form.save()
             send_email_confirmation(request, request.user)
             messages.success(request, 'Email updated successfully. Verification email sent.')
-            return redirect(reverse('socialuser:profile-settings') + '#section-email')
+            return redirect('socialuser:profile')
         
         messages.error(request, 'Please correct the errors below.')
         return render(request, 'socialuser/email_form.html', {'form': form})
     
-    return redirect('socialuser:profile-settings')
+    return redirect('socialuser:profile')
 
 
 
@@ -282,7 +247,7 @@ def profile_emailverify(request):
         if not user.email:
             logger.warning(f"User {user.id} has no email address")
             messages.error(request, "No email address is set for your account")
-            return redirect(reverse('socialuser:profile-settings') + '#section-email')
+            return redirect('socialuser:profile')
         
         # Force create email address record if doesn't exist
         email_address, created = EmailAddress.objects.get_or_create(
@@ -309,12 +274,12 @@ def profile_emailverify(request):
             logger.info(f"Email {user.email} is already verified")
             messages.info(request, "Email is already verified")
             
-        return redirect(reverse('socialuser:profile-settings') + '#section-email')
+        return redirect('socialuser:profile')
     
     except Exception as e:
         logger.error(f"Email verification error: {e}", exc_info=True)
         messages.error(request, f"Email verification failed: {str(e)}")
-        return redirect(reverse('socialuser:profile-settings') + '#section-email')
+        return redirect('socialuser:profile')
 
 
 
@@ -350,12 +315,12 @@ def profile_usernamechange(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Username updated successfully.')
-            return redirect(reverse('socialuser:profile-settings') + '#section-username')
+            return redirect('socialuser:profile')
         else:
             messages.warning(request, 'Username not valid or already in use')
-            return redirect(reverse('socialuser:profile-settings') + '#section-username')
+            return redirect('socialuser:profile')
     
-    return redirect('socialuser:profile-settings')    
+    return redirect('socialuser:profile')    
 
 
 
@@ -395,12 +360,12 @@ def profile_phonechange(request):
             profile.phone = form.cleaned_data['phone']
             profile.save()
             messages.success(request, '電話號碼更新成功')
-            return redirect(reverse('socialuser:profile-settings') + '#section-phone')
+            return redirect('socialuser:profile')
         else:
             messages.warning(request, '無效的電話號碼格式')
-            return redirect(reverse('socialuser:profile-settings') + '#section-phone')
+            return redirect('socialuser:profile')
     
-    return redirect('socialuser:profile-settings')
+    return redirect('socialuser:profile')
 
 
 
@@ -589,7 +554,7 @@ def test_email_view(request):
     except Exception as e:
         messages.error(request, f"Failed to send test email: {str(e)}")
     
-    return redirect('socialuser:profile-settings')
+    return redirect('socialuser:profile')
 
 
 # Login cancel route to localhost

@@ -1,7 +1,7 @@
 # socialuser/urls.py
 from django.urls import path
 from .views import (
-    profile_view, profile_settings_view, profile_edit_view, 
+    profile_view, profile_edit_view, 
     profile_emailchange, profile_usernamechange, profile_phonechange,
     profile_emailverify, profile_delete_view, order_history, 
     reactivate_account, test_email_view, social_login_status, 
@@ -18,7 +18,6 @@ urlpatterns = [
     path('', profile_view, name="profile"),
     path('debug/', social_login_debug, name='social-login-debug'),
     path('onboarding/', profile_edit_view, name="profile-onboarding"),
-    path('settings/', profile_settings_view, name="profile-settings"),
     path('emailchange/', profile_emailchange, name="profile-emailchange"),
     path('usernamechange/', profile_usernamechange, 
          name="profile-usernamechange"),
