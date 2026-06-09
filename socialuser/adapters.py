@@ -22,9 +22,10 @@ class NoNewUsersAccountAdapter(DefaultAccountAdapter):
     def save_user(self, request, user, form, commit=True):
         """
         防止常规表单注册保存用户
+        社交登录（包括 /accounts/3rdparty/signup/）允許保存
         """
-        # 如果是社交登录，允许保存
-        if request.path.startswith('/accounts/social/'):
+        # 如果是社交登录或社交註冊，允许保存
+        if request.path.startswith('/accounts/social/') or request.path.startswith('/accounts/3rdparty/'):
             return super().save_user(request, user, form, commit)
         raise PermissionError("Regular account creation is disabled")
 
