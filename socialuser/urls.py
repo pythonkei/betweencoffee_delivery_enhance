@@ -6,7 +6,7 @@ from .views import (
     profile_emailverify, profile_delete_view, order_history, 
     reactivate_account, test_email_view, social_login_status, 
     social_login_debug, CustomLoginCancelledView,
-    profile_avatar_ajax,
+    profile_avatar_ajax, profile_info_ajax,
 )
 
 # 導入強化會員系統視圖
@@ -34,6 +34,7 @@ urlpatterns = [
     
     # AJAX 端點
     path('avatar-ajax/', profile_avatar_ajax, name='profile-avatar-ajax'),
+    path('info-ajax/', profile_info_ajax, name='profile-info-ajax'),
     
     # 调试路由
     path('social-status/', social_login_status, name='social-status'),
