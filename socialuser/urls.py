@@ -5,7 +5,8 @@ from .views import (
     profile_emailchange, profile_usernamechange, profile_phonechange,
     profile_emailverify, profile_delete_view, order_history, 
     reactivate_account, test_email_view, social_login_status, 
-    social_login_debug, CustomLoginCancelledView
+    social_login_debug, CustomLoginCancelledView,
+    profile_avatar_ajax,
 )
 
 # 導入強化會員系統視圖
@@ -30,6 +31,9 @@ urlpatterns = [
     path('accounts/3rdparty/login/cancelled/', 
          CustomLoginCancelledView.as_view(), 
          name='socialaccount_login_cancelled'),
+    
+    # AJAX 端點
+    path('avatar-ajax/', profile_avatar_ajax, name='profile-avatar-ajax'),
     
     # 调试路由
     path('social-status/', social_login_status, name='social-status'),
