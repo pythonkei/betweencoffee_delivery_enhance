@@ -310,6 +310,57 @@ def get_database_config():
         except Exception as e:
             logger.error(f"Database configuration error: {e}")
             raise ImproperlyConfigured(f"Invalid DATABASE_URL: {e}")
+    elif IS_RENDER:
+        # Render 環境：嘗試從 Render 內部環境變量獲取數據庫信息
+        logger.info("Render environment detected, checking for Render Postgres internal URL")
+        # Render 會自動注入 DATABASE_URL，如果沒有則使用 Render Postgres 內部連接
+        render_db_url = os.environ.get('RENDER_DATABASE_URL') or os.environ.get('POSTGRES_URL')
+        if render_db_url:
+            try:
+                db_config = dj_database_url.parse(render_db_url)
+                db_config.setdefault('CONN_MAX_AGE', 600)
+                db_config.setdefault('ATOMIC_REQUESTS', False)
+                logger.info("Using Render internal database URL")
+                return {'default': db_config}
+            except Exception as e:
+                logger.error(f"Render database URL parse error: {e}")
+        
+        # 最後嘗試：使用 Render Postgres 的內部連接信息
+        pg_host = os.environ.get('PGHOST')
+        pg_port = os.environ.get('PGPORT', '5432')
+        pg_user = os.environ.get('PGUSER')
+        pg_password = os.environ.get('PGPASSWORD')
+        pg_database = os.environ.get('PGDATABASE')
+        
+        if all([pg_host, pg_user, pg_database]):
+            logger.info(f"Using Render Postgres environment variables (PGHOST={pg_host})")
+            return {
+                'default': {
+                    'ENGINE': 'django.db.backends.postgresql',
+                    'NAME': pg_database,
+                    'USER': pg_user,
+                    'PASSWORD': pg_password or '',
+                    'HOST': pg_host,
+                    'PORT': pg_port,
+                    'CONN_MAX_AGE': 600,
+                    'ATOMIC_REQUESTS': False,
+                }
+            }
+        
+        logger.warning("No Render Postgres connection info found. Database will not be available.")
+        # 返回一個無法連接的配置，但至少不會崩潰
+        return {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'unavailable',
+                'USER': 'unavailable',
+                'PASSWORD': 'unavailable',
+                'HOST': 'unavailable',
+                'PORT': '5432',
+                'CONN_MAX_AGE': 0,
+                'ATOMIC_REQUESTS': False,
+            }
+        }
     else:
         # 本地开发环境
         logger.info("Using local PostgreSQL database")
