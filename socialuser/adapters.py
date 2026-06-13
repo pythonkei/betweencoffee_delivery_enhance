@@ -95,8 +95,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             # 确保用户档案已创建
             if not hasattr(user, 'profile'):
                 try:
-                    from .models import UserProfile
-                    UserProfile.objects.create(user=user)
+                    from .models import Profile
+                    Profile.objects.create(user=user)
                     logger.info(f"Created profile for user: {user.username}")
                 except Exception as e:
                     logger.error(f"Error creating profile: {e}")
