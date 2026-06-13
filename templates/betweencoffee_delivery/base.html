@@ -234,6 +234,12 @@
     {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script> {% endcomment %}
     <script src={% static "js/main.js" %}></script>
 
+    <!-- 移除 Facebook OAuth 回調的 #_=_ 片段 -->
+    <script>
+        if (window.location.hash === '#_=_') {
+            history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+    </script>
 {% endblock %}
 <!-- end bloock js -->
 
