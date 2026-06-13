@@ -76,8 +76,11 @@ load_context() {
         echo "📋 上下文摘要:"
         echo "├── 項目規範 (.clinerules)"
         echo "├── 技術架構: Django + PostgreSQL + WebSocket"
-        echo "├── 系統狀態: 穩定，核心功能完整"
-        echo "├── 優先任務: ID重複、WebSocket穩定性、移動端優化"
+        echo "├── 部署平台: Railway → Render（已遷移）"
+        echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
+        echo "├── 系統狀態: 已部署到 Render，核心功能完整"
+        echo "├── 已知問題: 社交登入（Google/Facebook）需要修復"
+        echo "├── 優先任務: ID重複、WebSocket穩定性、社交登入修復"
         echo "└── 大小: ${FILE_SIZE_KB} KB"
         
         return 0

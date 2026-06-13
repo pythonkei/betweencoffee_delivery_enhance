@@ -3,7 +3,7 @@
     "name": "Between Coffee System Memory Bank",
     "version": "1.0.0",
     "created": "2026-04-05",
-    "last_updated": "2026-04-05",
+    "last_updated": "2026-06-12",
     "description": "持久化項目上下文和知識庫，為Cline AI助理提供完整的項目信息"
   },
   
@@ -11,15 +11,16 @@
     "name": "Between Coffee 咖啡店外帶網站與訂單製作管理系統",
     "type": "電子商務系統 + 訂單管理系統",
     "industry": "餐飲業 - 咖啡店外帶服務",
-    "status": "生產環境穩定運行",
+    "status": "已部署到 Render，生產環境運行中",
     "version": "v2.0+",
+    "live_url": "https://betweencoffee-delivery-enhance-v1.onrender.com/",
     "repository": "https://github.com/pythonkei/betweencoffee_delivery_enhance"
   },
   
   "technology_stack": {
     "backend": ["Django 4.x", "Django Channels", "PostgreSQL", "Redis"],
     "frontend": ["HTML5", "CSS3", "JavaScript", "Bootstrap 5", "jQuery"],
-    "deployment": ["Railway", "Docker (可選)"],
+    "deployment": ["Railway → Render（已遷移）"],
     "payments": ["PayPal", "Alipay", "FPS", "現金支付"],
     "authentication": ["django-allauth", "Google OAuth", "Facebook OAuth"]
   },
