@@ -300,8 +300,9 @@ def get_database_config():
             # 简化配置，移除重复参数
             db_config = dj_database_url.parse(database_url)
             
-            # 确保必要的配置
-            db_config.setdefault('CONN_MAX_AGE', 600)
+            # Render 免費 PostgreSQL 有連接數限制，禁用連接持久化避免 connection already closed
+            conn_max_age = 0 if IS_RENDER else 600
+            db_config.setdefault('CONN_MAX_AGE', conn_max_age)
             db_config.setdefault('ATOMIC_REQUESTS', False)  # 改为False避免事务问题
             
             return {
@@ -318,7 +319,8 @@ def get_database_config():
         if render_db_url:
             try:
                 db_config = dj_database_url.parse(render_db_url)
-                db_config.setdefault('CONN_MAX_AGE', 600)
+                # Render 免費 PostgreSQL 禁用連接持久化
+                db_config.setdefault('CONN_MAX_AGE', 0)
                 db_config.setdefault('ATOMIC_REQUESTS', False)
                 logger.info("Using Render internal database URL")
                 return {'default': db_config}
@@ -342,7 +344,7 @@ def get_database_config():
                     'PASSWORD': pg_password or '',
                     'HOST': pg_host,
                     'PORT': pg_port,
-                    'CONN_MAX_AGE': 600,
+                    'CONN_MAX_AGE': 0,  # Render 免費 PostgreSQL 禁用連接持久化
                     'ATOMIC_REQUESTS': False,
                 }
             }
