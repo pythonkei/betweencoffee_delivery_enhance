@@ -2,6 +2,7 @@
 from django.conf import settings
 from eshop.models import CoffeeItem, BeanItem, CartItem
 from decimal import Decimal, InvalidOperation
+from django.db.utils import InterfaceError, OperationalError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -28,15 +29,23 @@ class Cart:
         if not self.user.is_authenticated:
             return
         
-        # 從數據庫加載購物車項目
-        db_items = CartItem.objects.filter(user=self.user)
-        
-        # 如果有數據庫項目，使用數據庫項目
-        if db_items.exists():
-            self._load_from_db()
-        # 如果會話中有購物車但數據庫沒有，保存到數據庫
-        elif self.cart:
-            self._save_to_db()
+        try:
+            # 從數據庫加載購物車項目
+            db_items = CartItem.objects.filter(user=self.user)
+            
+            # 如果有數據庫項目，使用數據庫項目
+            if db_items.exists():
+                self._load_from_db()
+            # 如果會話中有購物車但數據庫沒有，保存到數據庫
+            elif self.cart:
+                self._save_to_db()
+        except (InterfaceError, OperationalError) as e:
+            logger.warning(f"Database connection error in sync_with_database: {e}")
+            # 保持會話中的購物車不變
+            self.cart = self.session.get(settings.CART_SESSION_ID, {})
+        except Exception as e:
+            logger.error(f"Unexpected error in sync_with_database: {e}")
+            self.cart = self.session.get(settings.CART_SESSION_ID, {})
     
     def _load_from_db(self):
         """從數據庫加載購物車"""

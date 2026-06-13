@@ -107,14 +107,15 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             
         return user
 
-    def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
+    def on_authentication_error(self, request, provider, error, exception=None, extra_context=None):
         """
-        处理认证错误
+        处理认证错误（新版 allauth API）
         """
+        provider_id = provider.id if hasattr(provider, 'id') else str(provider)
         logger.error(f"Social authentication error for {provider_id}: {error}")
         if exception:
             logger.error(f"Exception: {exception}")
-        return super().authentication_error(request, provider_id, error, exception, extra_context)
+        return super().on_authentication_error(request, provider, error, exception, extra_context)
 
     def get_app(self, request, provider, client_id=None, **kwargs):
         """

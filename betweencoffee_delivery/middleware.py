@@ -10,7 +10,18 @@ logger = logging.getLogger(__name__)
 class CartMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Initialize cart early in the request cycle
-        request.cart = Cart(request)
+        try:
+            request.cart = Cart(request)
+        except Exception as e:
+            logger.warning(f"Cart initialization failed (non-critical): {e}")
+            # 創建一個空的購物車對象作為後備
+            from cart.cart import Cart as CartClass
+            # 使用最小初始化，避免數據庫查詢
+            request.cart = CartClass.__new__(CartClass)
+            request.cart.request = request
+            request.cart.session = request.session
+            request.cart.user = request.user
+            request.cart.cart = {}
         
     def process_response(self, request, response):
         # Handle cart merging after login

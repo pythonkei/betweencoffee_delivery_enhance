@@ -21,7 +21,7 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 from allauth.socialaccount.views import LoginCancelledView as AllAuthLoginCancelledView
 
 from django.contrib.sites.models import Site
-from allauth.socialaccount.models import SocialApp
+from allauth.socialaccount.models import SocialApp, SocialAccount
 
 
 
