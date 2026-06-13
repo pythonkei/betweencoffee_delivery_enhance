@@ -14,9 +14,13 @@ class Command(BaseCommand):
             
             # 根据环境设置站点域名
             is_railway = os.environ.get('RAILWAY_ENVIRONMENT') is not None
+            is_render = os.environ.get('RENDER') is not None or os.environ.get('IS_RENDER') is not None
             if is_railway:
                 domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
                 name = 'Between Coffee - Railway'
+            elif is_render:
+                domain = os.environ.get('RENDER_EXTERNAL_URL', 'betweencoffee-delivery-enhance-v1.onrender.com')
+                name = 'Between Coffee - Render'
             else:
                 domain = 'localhost:8081'
                 name = 'Between Coffee - Local'
