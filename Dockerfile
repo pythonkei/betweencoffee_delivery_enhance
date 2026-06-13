@@ -30,4 +30,5 @@ EXPOSE 8000
 # 啟動命令
 CMD python manage.py migrate --noinput && \
     python manage.py setup_social_apps && \
+    python manage.py cleanup_duplicate_user && \
     gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --workers=2 --timeout=120
