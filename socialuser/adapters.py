@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib import messages
+from allauth.account.utils import send_email_confirmation
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,18 @@ class NoNewUsersAccountAdapter(DefaultAccountAdapter):
         if request.path.startswith('/accounts/social/') or request.path.startswith('/accounts/3rdparty/'):
             return super().save_user(request, user, form, commit)
         raise PermissionError("Regular account creation is disabled")
+
+    def get_login_redirect_url(self, request):
+        """
+        登入後跳轉邏輯：
+        - 新社交用戶（session 中有 is_new_social_user）→ onboarding 頁面
+        - 一般用戶 → 首頁
+        """
+        # 檢查是否為新社交用戶
+        if request.session.pop('is_new_social_user', False):
+            logger.info(f"Redirecting new social user to onboarding")
+            return reverse('socialuser:profile-onboarding')
+        return super().get_login_redirect_url(request)
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request, sociallogin):
@@ -71,10 +84,20 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def save_user(self, request, sociallogin, form=None):
         """
         自动验证社交提供者的邮箱并确保创建用户档案
+        
+        流程：
+        1. 保存用户
+        2. 確保 Email 記錄（社交提供者已驗證的設為 verified）
+        3. 確保用戶檔案已創建
+        4. 標記 session 為新用戶（用於 onboarding 跳轉）
+        5. 如果社交提供者未提供 email（需手動填寫），發送驗證郵件
         """
         try:
             # 调用父类方法保存用户
             user = super().save_user(request, sociallogin, form)
+            
+            # 判断是否为新用户（剛創建的用戶）
+            is_new_user = user.date_joined == user.last_login
             
             # 确保邮箱地址
             email = user.email
@@ -86,13 +109,17 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             
             # 创建或更新邮箱地址记录
             if email:
-                # 使用 update_or_create 处理可能的重复
+                # 社交提供者已驗證的郵箱，直接設為 verified
                 email_address, created = EmailAddress.objects.update_or_create(
                     user=user,
                     email=email,
                     defaults={'verified': True, 'primary': True}
                 )
                 logger.info(f"Email {'created' if created else 'updated'} for user: {user.username}")
+            else:
+                # 社交提供者未提供 email，用戶需在社交註冊表單手動填寫
+                # 此時 EmailAddress 記錄尚未建立，由 allauth 後續處理
+                logger.info(f"No email from social provider for user: {user.username}")
             
             # 确保用户档案已创建
             if not hasattr(user, 'profile'):
@@ -102,6 +129,24 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     logger.info(f"Created profile for user: {user.username}")
                 except Exception as e:
                     logger.error(f"Error creating profile: {e}")
+            
+            # === 新用戶 onboarding 流程 ===
+            if is_new_user:
+                # 標記 session 為新用戶，登入後跳轉到 onboarding 頁面
+                request.session['is_new_social_user'] = True
+                request.session.modified = True
+                logger.info(f"New social user marked for onboarding: {user.username}")
+                
+                # 如果社交提供者未提供 email，嘗試發送驗證郵件
+                if not email:
+                    try:
+                        # 檢查是否有 EmailAddress 記錄（可能由社交註冊表單建立）
+                        email_addr = EmailAddress.objects.filter(user=user).first()
+                        if email_addr and not email_addr.verified:
+                            email_addr.send_confirmation(request)
+                            logger.info(f"Verification email sent to {email_addr.email}")
+                    except Exception as e:
+                        logger.warning(f"Failed to send verification email: {e}")
                     
         except Exception as e:
             logger.error(f"Error in save_user: {e}")
