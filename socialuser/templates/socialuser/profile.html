@@ -185,6 +185,52 @@
                                 </li>
                             </ul>
                         </div>
+
+                        <!-- ===== 已綁定的社交帳號區塊 ===== -->
+                        <div style="margin-top: 1.5rem;">
+                            <label class="profile-section-label">
+                                <i class="fas fa-link"></i> 已綁定的社交帳號
+                            </label>
+                            <ul class="profile-info-list">
+                                {% with social_accounts=profile.user.socialaccount_set.all %}
+                                    {% if social_accounts %}
+                                        {% for sa in social_accounts %}
+                                        <li class="profile-info-item">
+                                            <span class="profile-info-icon">
+                                                {% if sa.provider == 'google' %}
+                                                <i class="fab fa-google" style="color:#4285F4;"></i>
+                                                {% elif sa.provider == 'facebook' %}
+                                                <i class="fab fa-facebook" style="color:#1877F2;"></i>
+                                                {% else %}
+                                                <i class="fas fa-share-alt"></i>
+                                                {% endif %}
+                                            </span>
+                                            <span class="profile-info-label">
+                                                {% if sa.provider == 'google' %}Google{% elif sa.provider == 'facebook' %}Facebook{% else %}{{ sa.provider }}{% endif %}
+                                            </span>
+                                            <span class="profile-info-value">
+                                                {{ sa.uid|truncatechars:20 }}
+                                            </span>
+                                            <span class="profile-info-action" style="flex:0 0 auto;">
+                                                <form method="POST" action="{% url 'socialuser:social-disconnect' sa.provider %}" style="display:inline;" onsubmit="return confirm('確定要解除綁定 {{ sa.provider|title }} 帳號嗎？');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="profile-verify-btn" style="background:rgba(255,80,80,0.15);color:#ff6b6b;border-color:rgba(255,80,80,0.3);">
+                                                        <i class="fas fa-unlink"></i> 解除綁定
+                                                    </button>
+                                                </form>
+                                            </span>
+                                        </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li class="profile-info-item">
+                                            <span class="profile-info-icon"><i class="fas fa-info-circle"></i></span>
+                                            <span class="profile-info-label">尚未綁定</span>
+                                            <span class="profile-info-value" style="color:rgba(255,255,255,0.4);">尚未綁定任何社交帳號</span>
+                                        </li>
+                                    {% endif %}
+                                {% endwith %}
+                            </ul>
+                        </div>
                         
                         <!-- ===== 底部操作區 ===== -->
                         <div class="profile-actions mt-5">

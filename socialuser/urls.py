@@ -7,6 +7,7 @@ from .views import (
     reactivate_account, test_email_view, social_login_status, 
     social_login_debug, CustomLoginCancelledView,
     profile_avatar_ajax, profile_info_ajax,
+    social_login_error,
 )
 
 # 導入強化會員系統視圖
@@ -34,6 +35,14 @@ urlpatterns = [
     # AJAX 端點
     path('avatar-ajax/', profile_avatar_ajax, name='profile-avatar-ajax'),
     path('info-ajax/', profile_info_ajax, name='profile-info-ajax'),
+    
+    # 社交登入錯誤頁面
+    path('login-error/', social_login_error, name='social-login-error'),
+    
+    # 社交帳號解除綁定
+    path('social-disconnect/<str:provider>/', 
+         views_enhanced.social_disconnect, 
+         name='social-disconnect'),
     
     # 调试路由
     path('social-status/', social_login_status, name='social-status'),

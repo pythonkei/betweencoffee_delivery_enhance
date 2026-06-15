@@ -9,6 +9,9 @@ from django.utils import timezone
 from decimal import Decimal
 import json
 
+from allauth.socialaccount.models import SocialAccount
+from django.urls import reverse
+
 from .models_enhanced import (
     CustomerLoyalty, CustomerCoupon, CustomerActivity
 )
@@ -425,3 +428,47 @@ def _time_ago(dt):
         return f"{minutes}分鐘前"
     else:
         return "剛剛"
+
+
+@login_required
+@require_http_methods(["POST"])
+def social_disconnect(request, provider):
+    """解除綁定社交帳號"""
+    try:
+        # 檢查用戶是否有密碼（如果沒有密碼，不能解除最後一個社交帳號）
+        has_password = request.user.has_usable_password()
+        social_accounts = SocialAccount.objects.filter(user=request.user)
+        
+        # 如果用戶沒有密碼且這是最後一個社交帳號，不允許解除綁定
+        if not has_password and social_accounts.count() <= 1:
+            messages.error(
+                request, 
+                '您沒有設定密碼，無法解除最後一個社交帳號綁定。'
+                '請先設定密碼後再操作。'
+            )
+            return redirect('socialuser:profile')
+        
+        # 查找並刪除指定的社交帳號
+        account = SocialAccount.objects.filter(
+            user=request.user,
+            provider=provider
+        ).first()
+        
+        if not account:
+            messages.error(request, f'找不到已綁定的 {provider} 帳號')
+            return redirect('socialuser:profile')
+        
+        # 記錄提供者名稱用於提示訊息
+        provider_names = {
+            'google': 'Google',
+            'facebook': 'Facebook',
+        }
+        provider_name = provider_names.get(provider, provider)
+        
+        account.delete()
+        messages.success(request, f'已成功解除 {provider_name} 帳號綁定')
+        
+    except Exception as e:
+        messages.error(request, f'解除綁定失敗: {str(e)}')
+    
+    return redirect('socialuser:profile')

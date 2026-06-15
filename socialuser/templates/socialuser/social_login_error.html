@@ -1,0 +1,97 @@
+<!-- socialuser/templates/socialuser/social_login_error.html -->
+<!-- 社交登入錯誤頁面 - 深色主題 -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Header Banner-->
+<section class="subpage-banner-h500 py-lg-4">
+    <div class="svg-bg-container">
+        <div class="noise_animation"><img class="svg-bg-5" src="{% static 'images/owl_title_bg_01_v2.svg' %}"></div>
+    </div>
+    <div class="ftco-subpage-banner" id="">
+        <div class="container">
+            <div class="row justify-content-center mt-5 p-2">
+                <div class="col-lg-12 col-md-12 heading-section text-center">
+                    <span class="subheading">Login<br>Error</span>
+                    <h2 class="mb-3">&#65371;登入失敗&#65373;</h2>
+                    <p style="color:#ccc;">很抱歉，登入過程中發生問題<br />請稍後再試</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Header Banner-->
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-6 mb-5">
+                <div class="card profile-card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        
+                        <!-- 錯誤圖示 -->
+                        <div class="mb-4">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #ff6b6b;"></i>
+                        </div>
+                        
+                        <h4 class="mb-3" style="color: #fff;">
+                            {% if error_info %}
+                                使用 {{ error_info.provider }} 登入失敗
+                            {% else %}
+                                社交登入失敗
+                            {% endif %}
+                        </h4>
+                        
+                        <p class="mb-4" style="color: rgba(255,255,255,0.6);">
+                            {% if error_info and error_info.error %}
+                                {{ error_info.error }}
+                            {% else %}
+                                無法完成社交帳號登入，可能是以下原因：
+                            {% endif %}
+                        </p>
+                        
+                        <!-- 常見原因列表 -->
+                        <div class="text-start mb-4" style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1.5rem;">
+                            <h6 style="color: #c49b63; margin-bottom: 1rem;">
+                                <i class="fas fa-lightbulb"></i> 常見解決方法：
+                            </h6>
+                            <ul style="color: rgba(255,255,255,0.7); padding-left: 1.2rem; line-height: 2;">
+                                <li>請確認您使用的是正確的 Google / Facebook 帳號</li>
+                                <li>請確認您的網絡連接正常</li>
+                                <li>請嘗試使用其他瀏覽器或清除瀏覽器快取</li>
+                                <li>如問題持續，請嘗試使用其他登入方式</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 操作按鈕 -->
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <a href="{% url 'index' %}" class="btn btn-outline-light px-4 py-2">
+                                <i class="fas fa-home"></i> 返回首頁
+                            </a>
+                            <a href="{% url 'account_login' %}" class="btn btn-outline-light px-4 py-2" style="border-color: #c49b63; color: #c49b63;">
+                                <i class="fas fa-sign-in-alt"></i> 重新登入
+                            </a>
+                        </div>
+                        
+                        <!-- 錯誤詳情（僅開發環境顯示） -->
+                        {% if debug and error_info and error_info.detail %}
+                        <div class="mt-4 pt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                            <details style="color: rgba(255,255,255,0.4); font-size: 0.85rem;">
+                                <summary style="cursor: pointer; color: rgba(255,255,255,0.5);">
+                                    <i class="fas fa-bug"></i> 技術詳情（開發者用）
+                                </summary>
+                                <pre style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 4px; white-space: pre-wrap; word-break: break-all;">{{ error_info.detail }}</pre>
+                            </details>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="flexable-vh-20"></div>
+{% endblock %}

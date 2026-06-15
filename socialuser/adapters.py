@@ -3,6 +3,8 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.models import EmailAddress
 from django.urls import reverse
 from django.conf import settings
+from django.shortcuts import redirect
+from django.contrib import messages
 import logging
 
 logger = logging.getLogger(__name__)
@@ -110,12 +112,25 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def on_authentication_error(self, request, provider, error, exception=None, extra_context=None):
         """
         处理认证错误（新版 allauth API）
+        重定向到友好的中文錯誤頁面，而不是顯示 allauth 預設錯誤頁
         """
         provider_id = provider.id if hasattr(provider, 'id') else str(provider)
+        provider_name = {'google': 'Google', 'facebook': 'Facebook'}.get(provider_id, provider_id)
+        
         logger.error(f"Social authentication error for {provider_id}: {error}")
         if exception:
             logger.error(f"Exception: {exception}")
-        return super().on_authentication_error(request, provider, error, exception, extra_context)
+        
+        # 將錯誤信息存入 session，供錯誤頁面顯示
+        request.session['social_login_error'] = {
+            'provider': provider_name,
+            'error': str(error),
+            'detail': str(exception) if exception else '',
+        }
+        request.session.modified = True
+        
+        # 重定向到友好的錯誤頁面
+        return redirect('socialuser:social-login-error')
 
     def get_app(self, request, provider, client_id=None, **kwargs):
         """

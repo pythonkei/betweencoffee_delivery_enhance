@@ -560,3 +560,15 @@ def test_email_view(request):
 # Login cancel route to localhost
 class CustomLoginCancelledView(AllAuthLoginCancelledView):
     template_name = 'socialuser/login_cancelled.html'
+
+
+def social_login_error(request):
+    """顯示社交登入錯誤的友好中文頁面"""
+    error_info = request.session.pop('social_login_error', None)
+    
+    context = {
+        'error_info': error_info,
+        'debug': settings.DEBUG,
+    }
+    
+    return render(request, 'socialuser/social_login_error.html', context)

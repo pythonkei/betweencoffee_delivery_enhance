@@ -552,7 +552,6 @@ def get_social_providers():
             ],
             'AUTH_PARAMS': {
                 'auth_type': 'reauthenticate',
-                'display': 'popup',
             },
             'EXCHANGE_TOKEN': True,
             'VERIFIED_EMAIL': True,
