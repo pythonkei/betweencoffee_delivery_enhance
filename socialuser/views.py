@@ -214,6 +214,7 @@ def profile_emailchange(request):
 @login_required
 def profile_emailverify(request):
     import logging
+    import traceback
     logger = logging.getLogger(__name__)
     
     # AJAX 請求處理
@@ -231,13 +232,31 @@ def profile_emailverify(request):
             )
             
             if not email_address.verified:
-                email_address.send_confirmation(request)
-                return JsonResponse({'success': True, 'message': f'驗證郵件已發送至 {user.email}'})
+                try:
+                    email_address.send_confirmation(request)
+                    logger.info(f"Verification email sent successfully to {user.email}")
+                    return JsonResponse({'success': True, 'message': f'驗證郵件已發送至 {user.email}'})
+                except Exception as send_err:
+                    error_msg = str(send_err)
+                    logger.error(f"Failed to send verification email to {user.email}: {error_msg}", exc_info=True)
+                    
+                    # 提供更友好的錯誤訊息
+                    if 'Connection refused' in error_msg or 'Connection unexpectedly closed' in error_msg:
+                        user_msg = '無法連接到郵件伺服器，請稍後再試'
+                    elif 'Authentication' in error_msg or 'Username and Password' in error_msg:
+                        user_msg = '郵件伺服器認證失敗，請聯繫管理員'
+                    elif 'timed out' in error_msg:
+                        user_msg = '連線郵件伺服器超時，請稍後再試'
+                    else:
+                        user_msg = f'發送驗證郵件失敗: {error_msg[:100]}'
+                    
+                    return JsonResponse({'success': False, 'message': user_msg})
             else:
                 return JsonResponse({'success': True, 'message': '電子郵件已驗證'})
         except Exception as e:
             logger.error(f"Email verification AJAX error: {e}", exc_info=True)
             return JsonResponse({'success': False, 'message': f'發送失敗: {str(e)}'})
+
     
     # 原始 POST 處理（向後兼容）
     try:

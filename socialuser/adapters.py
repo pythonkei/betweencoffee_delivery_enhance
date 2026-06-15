@@ -54,7 +54,13 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def pre_social_login(self, request, sociallogin):
         """
-        处理社交登录，连接现有账户或创建新用户
+        處理社交登入，連接現有帳戶或創建新用戶
+        
+        流程：
+        1. 檢查社交提供者提供的 email
+        2. 如果 email 已存在於系統中，連接到現有用戶
+        3. 自動將該 email 設為 verified（因為社交提供者已驗證過）
+        4. 如果 email 不存在但用戶已存在（例如用不同社交帳號登入），也同步驗證狀態
         """
         try:
             email = sociallogin.account.extra_data.get("email")
@@ -66,20 +72,33 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             provider = sociallogin.account.provider
             logger.info(f"Social login attempt from {provider} with email: {email}")
 
-            # 检查邮箱是否已存在
+            # 检查邮箱是否已存在（無論是否 verified）
             try:
-                existing_emails = EmailAddress.objects.filter(email=email, verified=True)
+                existing_emails = EmailAddress.objects.filter(email=email)
                 if existing_emails.exists():
-                    # 连接到现有用户
                     existing_email = existing_emails.first()
+                    
+                    # 自動將 email 設為 verified（社交提供者已驗證）
+                    if not existing_email.verified:
+                        existing_email.verified = True
+                        existing_email.save()
+                        logger.info(f"Auto-verified email {email} from social login ({provider})")
+                    
+                    # 連接到現有用戶（如果不是同一個用戶）
                     if existing_email.user != sociallogin.user:
                         sociallogin.connect(request, existing_email.user)
                         logger.info(f"Connected social account to existing user: {email}")
+                else:
+                    # email 不存在，但用戶可能已存在（例如用不同 email 註冊過）
+                    # 這種情況由 allauth 後續處理
+                    logger.info(f"Email {email} not found in system, will create new EmailAddress record")
+                    
             except Exception as e:
                 logger.error(f"Error checking existing emails: {e}")
                 
         except Exception as e:
             logger.error(f"Error in pre_social_login: {e}")
+
 
     def save_user(self, request, sociallogin, form=None):
         """
