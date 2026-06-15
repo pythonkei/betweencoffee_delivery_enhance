@@ -208,8 +208,14 @@
                                             <span class="profile-info-label">
                                                 {% if sa.provider == 'google' %}Google{% elif sa.provider == 'facebook' %}Facebook{% else %}{{ sa.provider }}{% endif %}
                                             </span>
-                                            <span class="profile-info-value">
-                                                {{ sa.uid|truncatechars:20 }}
+                                            <span class="profile-info-value" style="color:rgba(255,255,255,0.5); font-size:0.85rem;">
+                                                {% if sa.provider == 'google' %}
+                                                <i class="fas fa-check-circle" style="color:#34A853; font-size:0.75rem;"></i> 已綁定
+                                                {% elif sa.provider == 'facebook' %}
+                                                <i class="fas fa-check-circle" style="color:#34A853; font-size:0.75rem;"></i> 已綁定
+                                                {% else %}
+                                                <i class="fas fa-check-circle" style="color:#34A853; font-size:0.75rem;"></i> 已綁定
+                                                {% endif %}
                                             </span>
                                             <span class="profile-info-action" style="flex:0 0 auto;">
                                                 <form method="POST" action="{% url 'socialuser:social-disconnect' sa.provider %}" style="display:inline;" onsubmit="return confirm('確定要解除綁定 {{ sa.provider|title }} 帳號嗎？');">
