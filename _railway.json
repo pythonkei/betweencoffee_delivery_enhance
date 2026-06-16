@@ -1,5 +1,0 @@
-{
-  "build": {
-    "command": "python manage.py migrate eshop --fake && python manage.py migrate"
-  }
-}
