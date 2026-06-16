@@ -849,7 +849,7 @@ function validateForm() {
     
     console.log('姓名:', name);
     console.log('电话:', phone);
-    console.log('支付方式:', paymentMethod ? payment.method.value : '未选择');
+    console.log('支付方式:', paymentMethod ? paymentMethod.value : '未选择');
     
     if (!name || !name.trim()) {
         alert('请输入姓名');
