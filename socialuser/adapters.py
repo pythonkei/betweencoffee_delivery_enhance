@@ -6,9 +6,11 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib import messages
 from allauth.account.utils import send_email_confirmation
+from allauth.socialaccount.models import SocialToken
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class NoNewUsersAccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
@@ -110,6 +112,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         3. 確保用戶檔案已創建
         4. 標記 session 為新用戶（用於 onboarding 跳轉）
         5. 如果社交提供者未提供 email（需手動填寫），發送驗證郵件
+        6. 刷新 OAuth Token（確保 Token 有效）
         """
         try:
             # 调用父类方法保存用户
@@ -149,6 +152,18 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 except Exception as e:
                     logger.error(f"Error creating profile: {e}")
             
+            # === 刷新 OAuth Token ===
+            try:
+                from .token_refresh import check_and_refresh_token
+                token = SocialToken.objects.filter(account=sociallogin.account).first()
+                if token:
+                    check_and_refresh_token(token)
+                    logger.info(f"Token refresh check completed for {sociallogin.account.provider}")
+                else:
+                    logger.debug(f"No SocialToken found for {sociallogin.account.provider}")
+            except Exception as e:
+                logger.warning(f"Token refresh failed (non-critical): {e}")
+            
             # === 新用戶 onboarding 流程 ===
             if is_new_user:
                 # 標記 session 為新用戶，登入後跳轉到 onboarding 頁面
@@ -172,6 +187,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             raise
             
         return user
+
 
     def on_authentication_error(self, request, provider, error, exception=None, extra_context=None):
         """
