@@ -56,11 +56,8 @@ class SocialuserConfig(AppConfig):
     def connect_signals(self):
         """连接会员系统信号"""
         try:
-            # 导入信号模块
-            from . import signals_enhanced
-            
-            # 连接信号
-            signals_enhanced.connect_signals()
+            # 导入信号模块，Django 的 @receiver decorator 会自动注册信号
+            from . import signals
             logger.info("✅ 会员系统信号已成功连接")
             
         except Exception as e:

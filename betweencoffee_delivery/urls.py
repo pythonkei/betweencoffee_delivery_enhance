@@ -25,10 +25,6 @@ from .views import Index, About, CoffeeMenu, Coffee, BeanMenu, Bean, CoffeeMenuS
 from socialuser.views import profile_view
 from django.http import HttpResponse, JsonResponse
 
-# 導入測試視圖
-from eshop.views_test import test_smart_allocation_view, test_websocket_monitoring_view
-
-
 # 健康检查视图
 def health_check(request):
     return JsonResponse({"status": "healthy", "service": "betweencoffee"})
@@ -41,7 +37,6 @@ urlpatterns = [
     path('', Index.as_view(), name='index'),  # find own app html file
     path('__debug__/', include('debug_toolbar.urls')),
     path('profile/', include('socialuser.urls')),
-    path('profile/', include('socialuser.urls_enhanced')),  # 添加增強會員系統URL
     path('@<username>/', profile_view, name="user_profile"),
 
     path('eshop/', include('eshop.urls', namespace="eshop")),  # Include eshop URLs
@@ -58,12 +53,6 @@ urlpatterns = [
 
     # path('restaurant/', include('restaurant.urls')),  # find restaurant app html file
     path('about/', About.as_view(), name='about'),
-    
-    # 智能分配系統測試頁面
-    path('test_smart_allocation.html', test_smart_allocation_view, name='test_smart_allocation'),
-    
-    # WebSocket監控系統測試頁面
-    path('test_websocket_monitoring.html', test_websocket_monitoring_view, name='test_websocket_monitoring'),
 ]
 
 # static sources: css and image file root
