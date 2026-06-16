@@ -80,6 +80,17 @@ def get_allowed_hosts():
     """安全地配置允许的主机"""
     default_hosts = ['localhost', '127.0.0.1', '0.0.0.0']
     
+    # 開發模式支援 ngrok 隧道
+    ngrok_host = os.environ.get('NGROK_HOST', '')
+    if ngrok_host:
+        # 從 ngrok 域名提取頂級域名模式，例如 7def-119-236-126-88.ngrok-free.app → .ngrok-free.app
+        parts = ngrok_host.split('.')
+        if len(parts) >= 2:
+            wildcard_domain = '.' + '.'.join(parts[-2:])  # .ngrok-free.app
+        else:
+            wildcard_domain = '.' + parts[-1]
+        default_hosts = [ngrok_host, wildcard_domain] + default_hosts
+    
     if IS_RAILWAY:
         railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
         if railway_domain:
@@ -116,7 +127,12 @@ def get_csrf_trusted_origins():
         else:
             return ['https://*.onrender.com']
     else:
-        return ['http://localhost:8081', 'http://127.0.0.1:8081']
+        origins = ['http://localhost:8081', 'http://127.0.0.1:8081']
+        # 開發模式支援 ngrok 隧道
+        ngrok_host = os.environ.get('NGROK_HOST', '')
+        if ngrok_host:
+            origins.append(f'https://{ngrok_host}')
+        return origins
 
 CSRF_TRUSTED_ORIGINS = get_csrf_trusted_origins()
 
@@ -509,7 +525,7 @@ def get_social_providers():
         render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
         base_domain = render_domain
     else:
-        base_domain = 'localhost:8081'
+        base_domain = os.environ.get('NGROK_HOST', 'localhost:8081')
     
     # Google配置
     google_client_id = env('OAUTH_GOOGLE_CLIENT_ID', default='')
@@ -595,9 +611,15 @@ def setup_site_config():
         name = 'Between Coffee - Render'
         protocol = 'https'
     else:
-        domain = 'localhost:8081'
-        name = 'Between Coffee - Local'
-        protocol = 'http'
+        ngrok_host = os.environ.get('NGROK_HOST', '')
+        if ngrok_host:
+            domain = ngrok_host
+            name = 'Between Coffee - Local (ngrok)'
+            protocol = 'https'
+        else:
+            domain = 'localhost:8081'
+            name = 'Between Coffee - Local'
+            protocol = 'http'
     
     return domain, name, protocol
 
@@ -642,7 +664,11 @@ def get_social_callback_urls():
         else:
             base_url = 'https://*.onrender.com'
     else:
-        base_url = 'http://localhost:8081'
+        ngrok_host = os.environ.get('NGROK_HOST', '')
+        if ngrok_host:
+            base_url = f'https://{ngrok_host}'
+        else:
+            base_url = 'http://localhost:8081'
     
     return {
         'google_callback': f'{base_url}/accounts/google/login/callback/',
