@@ -6,7 +6,10 @@
 - **核心業務流程**: 顧客下單 → 支付處理 → 加入製作隊列 → 員工製作 → 訂單就緒 → 顧客取餐
 - **部署平台**: Railway → Render（已遷移）
 - **Live URL**: https://betweencoffee-delivery-enhance-v1.onrender.com/
-- **當前狀態**: 已部署到 Render，核心功能完整，已完成系統架構清理、訂單狀態卡片修復、支付確認頁面優化、訂單確認頁取貨時間 radio 列表改造、社交註冊頁面 redesign、profile 路由重構。部署後發現社交登入（Google/Facebook）需要修復，其他問題仍在測試中。
+- **當前狀態**: 已部署到 Render，核心功能完整。已完成系統架構清理、訂單狀態卡片修復、支付確認頁面優化、訂單確認頁取貨時間 radio 列表改造、社交註冊頁面 redesign、profile 路由重構、Render 部署問題修復（Pillow 版本衝突、Celery 降級、Procfile 簡化）。部署後發現社交登入（Google/Facebook）需要修復，其他問題仍在測試中。
+- **部署方式**: Render（Docker 運行時），使用 Dockerfile 構建，autoDeploy 啟用
+- **Celery 狀態**: Render free plan 無 Redis，Celery 已配置 MockCelery 優雅降級，任務同步執行
+- **WebSocket**: 使用 Django Channels + InMemoryChannelLayer（無 Redis），ASGI 已禁用 AllowedHostsOriginValidator
 
 ## 開發規範
 
@@ -218,7 +221,7 @@
 
 ---
 
-**最後更新**: 2026年6月12日
+**最後更新**: 2026年6月17日
 **適用版本**: Between Coffee 系統 v2.0+
 **維護者**: 項目開發團隊
 

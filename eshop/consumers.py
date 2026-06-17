@@ -55,10 +55,33 @@ class BaseOrderConsumer(AsyncWebsocketConsumer):
                 })
                 logger.debug(f"❤️ 收到 ping，回應 pong: {self.channel_name}")
             
+            # ----- 處理 sync_request（重連同步請求）-----
+            elif msg_type == 'sync_request':
+                await self._handle_sync_request(data)
+            
         except json.JSONDecodeError:
             logger.warning(f"⚠️ 無效的 JSON 格式: {text_data}")
         except Exception as e:
             logger.error(f"❌ 處理接收訊息時發生錯誤: {e}")
+    
+    async def _handle_sync_request(self, data):
+        """
+        處理客戶端重連後的同步請求
+        客戶端在頁面恢復可見或重連成功後發送此請求，
+        服務端回傳當前訂單/隊列的完整狀態
+        """
+        logger.info(f"🔄 收到同步請求: {getattr(self, 'connection_id', 'unknown')}")
+        
+        # 更新心跳時間
+        if hasattr(self, 'connection_id'):
+            websocket_manager.update_heartbeat(self.connection_id)
+        
+        # 子類覆蓋此方法實現具體同步邏輯
+        await self._send_json({
+            'type': 'sync_ack',
+            'timestamp': timezone.now().isoformat(),
+            'message': '同步請求已接收'
+        })
 
 
 class OrderConsumer(BaseOrderConsumer):
@@ -106,7 +129,21 @@ class OrderConsumer(BaseOrderConsumer):
         
         logger.info(f"✅ 訂單 Consumer 連線成功: {self.connection_id}, 用戶: {user_info['username']}")
     
+    async def _handle_sync_request(self, data):
+        """
+        訂單 Consumer 重連同步請求處理
+        客戶端重連後，發送當前訂單的完整狀態
+        """
+        logger.info(f"🔄 訂單 Consumer 同步請求: 訂單 {self.order_id}")
+        await self.send_current_status()
+        await self._send_json({
+            'type': 'sync_complete',
+            'order_id': self.order_id,
+            'timestamp': timezone.now().isoformat()
+        })
+    
     async def disconnect(self, close_code):
+
         """處理 WebSocket 斷線"""
         # 取消心跳任務
         if hasattr(self, 'heartbeat_task'):
