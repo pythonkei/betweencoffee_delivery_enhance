@@ -1,13 +1,22 @@
 # eshop/tasks.py
 # 支付狀態監控
-from celery import shared_task
+import logging
 from django.utils import timezone
 from datetime import timedelta
-import logging
 from .models import OrderModel
 from .order_status_manager import OrderStatusManager
 
 logger = logging.getLogger(__name__)
+
+# 嘗試導入 Celery，如果不可用則使用同步裝飾器
+try:
+    from celery import shared_task
+except ImportError:
+    # Celery 不可用時，提供一個簡單的裝飾器讓任務同步執行
+    def shared_task(*args, **kwargs):
+        def decorator(f):
+            return f
+        return decorator if args and callable(args[0]) else decorator
 
 @shared_task
 def monitor_pending_payments():
