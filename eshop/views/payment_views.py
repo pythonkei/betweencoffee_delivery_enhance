@@ -723,6 +723,16 @@ def check_pending_orders(request):
                     now = unified_time_service.get_hong_kong_time()
                     remaining = order.payment_timeout - now
                     remaining_seconds = max(0, int(remaining.total_seconds()))
+                # 取得訂單商品名稱
+                items_data = order.get_items() if hasattr(order, 'get_items') else []
+                item_count = len(items_data)
+                if item_count == 1:
+                    item_name = items_data[0].get('name', '')
+                elif item_count > 1:
+                    last_name = items_data[-1].get('name', '')
+                    item_name = f"{last_name} 等多件"
+                else:
+                    item_name = ""
                 pending_orders.append({
                     'id': order.id,
                     'total_price': float(order.total_price),
@@ -731,6 +741,8 @@ def check_pending_orders(request):
                     'is_timeout': order.is_payment_timeout(),
                     'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
                     'remaining_seconds': remaining_seconds,
+                    'item_name': item_name,
+                    'item_count': item_count,
                 })
         else:
             # 訪客用戶：從 session 中獲取最近訂單ID
@@ -753,6 +765,16 @@ def check_pending_orders(request):
                             now = unified_time_service.get_hong_kong_time()
                             remaining = order.payment_timeout - now
                             remaining_seconds = max(0, int(remaining.total_seconds()))
+                        # 取得訂單商品名稱
+                        items_data = order.get_items() if hasattr(order, 'get_items') else []
+                        item_count = len(items_data)
+                        if item_count == 1:
+                            item_name = items_data[0].get('name', '')
+                        elif item_count > 1:
+                            last_name = items_data[-1].get('name', '')
+                            item_name = f"{last_name} 等多件"
+                        else:
+                            item_name = ""
                         pending_orders.append({
                             'id': order.id,
                             'total_price': float(order.total_price),
@@ -761,6 +783,8 @@ def check_pending_orders(request):
                             'is_timeout': order.is_payment_timeout(),
                             'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
                             'remaining_seconds': remaining_seconds,
+                            'item_name': item_name,
+                            'item_count': item_count,
                         })
                 except OrderModel.DoesNotExist:
                     continue

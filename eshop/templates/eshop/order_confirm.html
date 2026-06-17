@@ -1175,18 +1175,12 @@ function updateCountdown(orderId, remainingSeconds) {
     function tick() {
         if (seconds <= 0) {
             timerEl.textContent = '已超時';
-            timerEl.style.color = '#dc3545';
             return;
         }
         
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         timerEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
-        
-        // 低於 60 秒時變紅
-        if (seconds <= 60) {
-            timerEl.style.color = '#dc3545';
-        }
         
         seconds--;
         setTimeout(tick, 1000);
@@ -1246,45 +1240,25 @@ function showPendingOrderWarning(orders) {
                         transition: background 0.2s;
                     " onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
                         <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-                            <span style="
-                                width: 8px; height: 8px;
-                                background: #ffc107;
-                                border-radius: 50%;
-                                flex-shrink: 0;
-                                animation: pendingPulse 1.5s ease-in-out infinite;
-                            "></span>
-                            <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem; white-space: nowrap;">
-                                訂單 #${order.id}
+                            <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;" title="${order.item_name || '訂單 #' + order.id}">
+                                ${order.item_name || '訂單 #' + order.id}
                             </span>
                             <span style="color: rgba(255,255,255,0.4); font-size: 0.85rem;">
                                 $${parseFloat(order.total_price).toFixed(2)}
                             </span>
                             <span style="
-                                font-size: 0.75rem;
+                                font-size: 0.85rem;
                                 color: #ffc107;
                                 background: rgba(255,193,7,0.12);
                                 padding: 2px 8px;
                                 border-radius: 10px;
                                 white-space: nowrap;
-                            ">待支付</span>
+                            ">待支付 <span id="countdown-${order.id}" style="font-size: 0.85rem; font-family: 'Courier New', monospace;">--:--</span></span>
                         </div>
                         <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                            <span style="
-                                display: inline-flex; align-items: center; gap: 4px;
-                                background: rgba(255,193,7,0.1); color: #ffc107;
-                                border: 1px solid rgba(255,193,7,0.2);
-                                border-radius: 6px;
-                                padding: 6px 10px;
-                                font-size: 0.8rem;
-                                font-family: 'Courier New', monospace;
-                                white-space: nowrap;
-                            ">
-                                <i class="fas fa-hourglass-half" style="font-size: 0.7rem;"></i>
-                                <span id="countdown-${order.id}">--:--</span>
-                            </span>
                             <a href="/eshop/order/continue-payment/${order.id}/" style="
                                 display: inline-flex; align-items: center; gap: 6px;
-                                background: #c49b63; color: #1a1a2e;
+                                background: #c49b63; color: #ffffff;
                                 border: none; border-radius: 6px;
                                 padding: 6px 14px;
                                 font-size: 0.85rem; font-weight: 600;
@@ -1300,8 +1274,8 @@ function showPendingOrderWarning(orders) {
                                 background: transparent; color: rgba(255,255,255,0.5);
                                 border: 1px solid rgba(255,255,255,0.15);
                                 border-radius: 6px;
-                                padding: 6px 10px;
-                                font-size: 0.8rem;
+                                padding: 6px 14px;
+                                font-size: 0.85rem; font-weight: 600;
                                 cursor: pointer;
                                 transition: all 0.2s;
                                 white-space: nowrap;
@@ -1316,24 +1290,13 @@ function showPendingOrderWarning(orders) {
 
             <!-- 底部操作 -->
             <div style="
-                display: flex; align-items: center; justify-content: space-between;
+                display: flex; align-items: center;
                 margin-top: 14px; padding-top: 12px;
                 border-top: 1px solid rgba(255,255,255,0.06);
             ">
                 <span style="color: rgba(255,255,255,0.35); font-size: 0.8rem;">
-                    <i class="fas fa-info-circle"></i> 完成支付後即可繼續新訂單
+                    <i class="fas fa-info-circle"></i> 5分鐘後自動刪除此訂單
                 </span>
-                <div style="display: flex; gap: 8px;">
-                    <a href="/" style="
-                        color: rgba(255,255,255,0.5); font-size: 0.85rem;
-                        text-decoration: none; padding: 4px 10px;
-                        border: 1px solid rgba(255,255,255,0.15);
-                        border-radius: 6px;
-                        transition: all 0.2s;
-                    " onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'">
-                        返回首頁
-                    </a>
-                </div>
             </div>
         </div>
         <style>

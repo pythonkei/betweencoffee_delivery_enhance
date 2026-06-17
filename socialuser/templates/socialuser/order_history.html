@@ -187,9 +187,29 @@
                                     </span>
                                 {% elif order.payment_status == 'pending' and not order.is_payment_timeout %}
                                     <a href="{% url 'eshop:continue_payment' order.id %}" 
-                                    class="btn btn-primary btn-sm">
-                                        <i class="fas fa-credit-card mr-1"></i>繼續支付
+                                    style="
+                                        display: inline-flex; align-items: center; gap: 6px;
+                                        background: #c49b63; color: #ffffff;
+                                        border: none; border-radius: 6px;
+                                        padding: 6px 14px;
+                                        font-size: 0.85rem; font-weight: 600;
+                                        text-decoration: none; cursor: pointer;
+                                        transition: all 0.2s; white-space: nowrap;
+                                    " onmouseover="this.style.background='#d4ab73'" onmouseout="this.style.background='#c49b63'">
+                                        <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i> 繼續支付
                                     </a>
+                                    <button type="button" 
+                                            onclick="cancelOrderFromHistory({{ order.id }})"
+                                            style="
+                                                display: inline-flex; align-items: center; gap: 4px;
+                                                background: transparent; color: rgba(255,255,255,0.5);
+                                                border: 1px solid rgba(255,255,255,0.15);
+                                                border-radius: 6px; padding: 6px 10px;
+                                                font-size: 0.8rem; cursor: pointer;
+                                                transition: all 0.2s; white-space: nowrap;
+                                            " onmouseover="this.style.borderColor='rgba(220,53,69,0.5)';this.style.color='#dc3545'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='rgba(255,255,255,0.5)'">
+                                        <i class="fas fa-times" style="font-size: 0.7rem;"></i> 取消
+                                    </button>
                                 {% else %}
                                     <span class="text-danger small" style="display: none;">
                                         <i class="fas fa-times-circle mr-1"></i>订单已取消/超时
@@ -697,9 +717,28 @@ class OrderLoader {
         } else if (order.payment_status === 'paid' && order.status === 'preparing') {
             return '<span class="text-warning" style="display: none;"><i class="fas fa-clock mr-1"></i>制作中，请稍候</span>';
         } else if (order.payment_status === 'pending' && !order.is_payment_timeout) {
-            return `<a href="/eshop/continue-payment/${order.id}/" class="btn btn-primary btn-sm">
-                <i class="fas fa-credit-card mr-1"></i>繼續支付
-            </a>`;
+            return `<a href="/eshop/continue-payment/${order.id}/" style="
+                display: inline-flex; align-items: center; gap: 6px;
+                background: #c49b63; color: #ffffff;
+                border: none; border-radius: 6px;
+                padding: 6px 14px;
+                font-size: 0.85rem; font-weight: 600;
+                text-decoration: none; cursor: pointer;
+                transition: all 0.2s; white-space: nowrap;
+            " onmouseover="this.style.background='#d4ab73'" onmouseout="this.style.background='#c49b63'">
+                <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i> 繼續支付
+            </a>
+            <button type="button" 
+                    onclick="cancelOrderFromHistory(${order.id})" style="
+                display: inline-flex; align-items: center; gap: 4px;
+                background: transparent; color: rgba(255,255,255,0.5);
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 6px; padding: 6px 10px;
+                font-size: 0.8rem; cursor: pointer;
+                transition: all 0.2s; white-space: nowrap;
+            " onmouseover="this.style.borderColor='rgba(220,53,69,0.5)';this.style.color='#dc3545'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='rgba(255,255,255,0.5)'">
+                <i class="fas fa-times" style="font-size: 0.7rem;"></i> 取消
+            </button>`;
         } else {
             return '<span class="text-danger small" style="display: none;"><i class="fas fa-times-circle mr-1"></i>订单已取消/超时</span>';
         }
@@ -726,6 +765,32 @@ class OrderLoader {
             this.loadMoreBtn.innerHTML = '<i class="fas fa-arrow-down mr-2"></i>載入更多訂單';
         }
     }
+}
+
+// 取消訂單函數（從訂單歷史頁面調用）
+function cancelOrderFromHistory(orderId) {
+    if (!confirm('確定要取消訂單 #' + orderId + ' 嗎？')) return;
+    
+    fetch('/eshop/api/cancel-order/' + orderId + '/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('訂單已取消');
+            location.reload();
+        } else {
+            alert('取消訂單失敗: ' + (data.error || '未知錯誤'));
+        }
+    })
+    .catch(error => {
+        console.error('取消訂單失敗:', error);
+        alert('取消訂單失敗，請稍後重試');
+    });
 }
 
 // 页面加载后执行
