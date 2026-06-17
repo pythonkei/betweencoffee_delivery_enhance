@@ -1148,11 +1148,51 @@ function checkPendingOrders() {
     .then(data => {
         if (data.has_pending_orders) {
             showPendingOrderWarning(data.orders);
+            // 啟動倒數計時器
+            startCountdownTimers(data.orders);
         }
     })
     .catch(error => {
         console.error('检查未支付订单失败:', error);
     });
+}
+
+// 倒數計時器
+function startCountdownTimers(orders) {
+    orders.forEach(order => {
+        if (order.remaining_seconds > 0) {
+            updateCountdown(order.id, order.remaining_seconds);
+        }
+    });
+}
+
+function updateCountdown(orderId, remainingSeconds) {
+    const timerEl = document.getElementById('countdown-' + orderId);
+    if (!timerEl) return;
+    
+    let seconds = remainingSeconds;
+    
+    function tick() {
+        if (seconds <= 0) {
+            timerEl.textContent = '已超時';
+            timerEl.style.color = '#dc3545';
+            return;
+        }
+        
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        timerEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+        
+        // 低於 60 秒時變紅
+        if (seconds <= 60) {
+            timerEl.style.color = '#dc3545';
+        }
+        
+        seconds--;
+        setTimeout(tick, 1000);
+    }
+    
+    tick();
 }
 
 function showPendingOrderWarning(orders) {
@@ -1229,7 +1269,20 @@ function showPendingOrderWarning(orders) {
                             ">待支付</span>
                         </div>
                         <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                            <a href="/eshop/order/payment-confirmation/?order_id=${order.id}" style="
+                            <span style="
+                                display: inline-flex; align-items: center; gap: 4px;
+                                background: rgba(255,193,7,0.1); color: #ffc107;
+                                border: 1px solid rgba(255,193,7,0.2);
+                                border-radius: 6px;
+                                padding: 6px 10px;
+                                font-size: 0.8rem;
+                                font-family: 'Courier New', monospace;
+                                white-space: nowrap;
+                            ">
+                                <i class="fas fa-hourglass-half" style="font-size: 0.7rem;"></i>
+                                <span id="countdown-${order.id}">--:--</span>
+                            </span>
+                            <a href="/eshop/order/continue-payment/${order.id}/" style="
                                 display: inline-flex; align-items: center; gap: 6px;
                                 background: #c49b63; color: #1a1a2e;
                                 border: none; border-radius: 6px;

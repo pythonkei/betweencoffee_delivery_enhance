@@ -101,10 +101,22 @@ class OrderStatusManager:
             except Exception as ws_error:
                 logger.error(f"发送WebSocket通知失败: {str(ws_error)}")
             
+            # ✅ 新增：添加会员积分（支付成功后自动添加）
+            # add_points_from_order 内部已自动记录 CustomerActivity（points_earned 类型）
+            if order.user:
+                try:
+                    from socialuser.models_enhanced import CustomerLoyalty
+                    loyalty, created = CustomerLoyalty.objects.get_or_create(user=order.user)
+                    points_earned = loyalty.add_points_from_order(order)
+                    logger.info(f"✅ 用户 {order.user.username} 订单 #{order.id} 获得 {points_earned} 积分")
+                except Exception as e:
+                    logger.error(f"添加会员积分失败: {str(e)}")
+            
             logger.info(f"✅ 订单 {order_id} 支付成功处理完成")
             
             # ✅ 修改：返回字典格式，包含成功状态和订单信息
             return {
+
                 'success': True,
                 'order_id': order_id,
                 'order': order,

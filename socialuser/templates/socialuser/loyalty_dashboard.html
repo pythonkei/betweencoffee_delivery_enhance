@@ -261,6 +261,8 @@
                                             <span class="points-badge {% if activity.points_change > 0 %}points-positive{% else %}points-negative{% endif %}">
                                                 {% if activity.points_change > 0 %}+{% endif %}{{ activity.points_change }} 積分
                                             </span>
+                                            {% elif activity.activity_type == 'order_placed' %}
+                                            <span class="points-badge points-neutral">+0 積分</span>
                                             {% else %}
                                             <span class="points-badge points-neutral">-</span>
                                             {% endif %}

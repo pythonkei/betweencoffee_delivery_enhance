@@ -22,6 +22,7 @@ import traceback
 from ..models import OrderModel, CoffeeQueue
 from eshop.order_status_manager import OrderStatusManager
 from eshop.view_utils import OrderErrorHandler  # 統一錯誤處理器
+from eshop.time_calculation import unified_time_service  # 統一時區服務
 
 # ==================== 导入统一的支付工具 ====================
 from ..payment_utils import (
@@ -703,19 +704,33 @@ def check_pending_orders(request):
         
         if request.user.is_authenticated:
             # 已登入用戶：查詢該用戶的未支付訂單
+            # 排除已取消、已逾時、已支付的訂單
             orders = OrderModel.objects.filter(
                 user=request.user,
                 payment_status='pending',
                 status='pending'
+            ).exclude(
+                payment_status__in=['cancelled', 'expired']
             ).order_by('-created_at')[:5]
             
             for order in orders:
+                # 跳過已超時的訂單，不提醒用戶（超時訂單不應再打擾用戶）
+                if order.is_payment_timeout():
+                    continue
+                # 計算剩餘秒數（用於前端倒數計時）
+                remaining_seconds = 0
+                if order.payment_timeout:
+                    now = unified_time_service.get_hong_kong_time()
+                    remaining = order.payment_timeout - now
+                    remaining_seconds = max(0, int(remaining.total_seconds()))
                 pending_orders.append({
                     'id': order.id,
                     'total_price': float(order.total_price),
                     'created_at': order.created_at.isoformat() if order.created_at else None,
                     'payment_method': order.payment_method,
                     'is_timeout': order.is_payment_timeout(),
+                    'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
+                    'remaining_seconds': remaining_seconds,
                 })
         else:
             # 訪客用戶：從 session 中獲取最近訂單ID
@@ -732,12 +747,20 @@ def check_pending_orders(request):
                 try:
                     order = OrderModel.objects.get(id=oid)
                     if order.payment_status == 'pending' and order.status == 'pending':
+                        # 計算剩餘秒數（用於前端倒數計時）
+                        remaining_seconds = 0
+                        if order.payment_timeout:
+                            now = unified_time_service.get_hong_kong_time()
+                            remaining = order.payment_timeout - now
+                            remaining_seconds = max(0, int(remaining.total_seconds()))
                         pending_orders.append({
                             'id': order.id,
                             'total_price': float(order.total_price),
                             'created_at': order.created_at.isoformat() if order.created_at else None,
                             'payment_method': order.payment_method,
                             'is_timeout': order.is_payment_timeout(),
+                            'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
+                            'remaining_seconds': remaining_seconds,
                         })
                 except OrderModel.DoesNotExist:
                     continue
