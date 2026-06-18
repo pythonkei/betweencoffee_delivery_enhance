@@ -13,8 +13,8 @@
  * - 事件系統（供其他管理器訂閱）
  * - 頁面可見性處理（節省資源）
  * 
- * 版本: 2.0.0
- * 最後更新: 2026-06-17
+ * 版本: 2.1.0
+ * 最後更新: 2026-06-18
  */
 
 class WebSocketCore {
@@ -793,19 +793,19 @@ class WebSocketCore {
 if (typeof window !== 'undefined') {
     window.WebSocketCore = WebSocketCore;
 
-    // 延遲初始化（確保 DOM 就緒）
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (!WebSocketCore.getInstance()) {
-                const core = new WebSocketCore({
-                    autoConnect: true,
-                    showIndicator: false // 預設不顯示，由各頁面決定
-                });
-                window.wsCore = core;
-                console.log('🌍 WebSocketCore 已註冊到 window.wsCore');
-            }
-        }, 500);
-    });
+    // 立即初始化（同步腳本加載順序）
+    // 使用 setTimeout(0) 確保在當前執行緒完成後初始化，
+    // 但早於其他依賴 WebSocketCore 的腳本
+    setTimeout(() => {
+        if (!WebSocketCore.getInstance()) {
+            const core = new WebSocketCore({
+                autoConnect: true,
+                showIndicator: false // 預設不顯示，由各頁面決定
+            });
+            window.wsCore = core;
+            console.log('🌍 WebSocketCore 已註冊到 window.wsCore');
+        }
+    }, 0);
 }
 
 console.log('✅ websocket-core.js 加載完成');

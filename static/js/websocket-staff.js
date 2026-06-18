@@ -1,7 +1,7 @@
 /**
- * websocket-staff.js - 員工端隊列 WebSocket 管理器
+ * websocket-staff.js - 員工端隊列 WebSocket 管理器（新架構）
  * 
- * 基於 websocket-core.js 的事件系統，管理員工隊列頁面的即時更新。
+ * 基於 websocket-core.js 的單一核心，管理員工隊列頁面的即時更新。
  * 支援新訂單通知、隊列更新、訂單就緒通知、支付更新等。
  * 
  * 功能：
@@ -13,8 +13,8 @@
  * - 重連後自動同步
  * - 頁面可見性恢復時自動同步
  * 
- * 版本: 2.0.0
- * 最後更新: 2026-06-17
+ * 版本: 2.1.0
+ * 最後更新: 2026-06-18
  */
 
 class StaffWebSocket {
@@ -286,10 +286,30 @@ class StaffWebSocket {
     // ==================== 公共方法 ====================
 
     /**
+     * 獲取 WebSocketCore 實例
+     * @returns {WebSocketCore|null}
+     */
+    getCore() {
+        return this.core;
+    }
+
+    /**
      * 手動請求同步
      */
     requestSync() {
         this._requestSync();
+    }
+
+    /**
+     * 發送訊息（透過核心）
+     * @param {Object} data
+     * @returns {boolean}
+     */
+    send(data) {
+        if (this.core) {
+            return this.core.sendJSON(data);
+        }
+        return false;
     }
 
     /**

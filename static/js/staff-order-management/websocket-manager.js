@@ -1,308 +1,374 @@
 // static/js/staff-order-management/websocket-manager.js
-// ==================== WebSocket連接管理器 - 增強版（智能重連、離線佇列） ====================
+// ==================== WebSocket連接管理器 - 橋接版（基於 WebSocketCore） ====================
+//
+// 此版本已遷移到 WebSocketCore 統一核心，不再自行建立 WebSocket 連接。
+// 所有連接管理、心跳、重連、離線佇列等功能由 WebSocketCore 統一處理。
+// 此管理器專注於員工頁面的業務邏輯：處理隊列更新、訂單通知等。
+//
+// 遷移日期: 2026-06-18
 
 class WebSocketManager {
     constructor() {
-        console.log('🔄 初始化WebSocket管理器（增強版）...');
+        console.log('🔄 初始化WebSocket管理器（橋接版）...');
         
-        // ====== WebSocket連接狀態 ======
+        // ====== 連接狀態（從核心獲取） ======
         this.socket = null;
         this.isConnected = false;
         this.isConnecting = false;
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 10;  // 增加重試次數
-        this.reconnectInterval = 1000;    // 初始1秒
-        this.maxReconnectInterval = 30000; // 最大30秒
+        this.maxReconnectAttempts = 10;
+        this.reconnectInterval = 1000;
+        this.maxReconnectInterval = 30000;
         this.reconnectTimer = null;
         
-        // ====== 心跳機制 ======
-        this.heartbeatInterval = 25000;   // 25秒
+        // ====== 心跳機制（由核心管理） ======
+        this.heartbeatInterval = 25000;
         this.heartbeatTimer = null;
         this.lastPongTime = Date.now();
-        this.pingTimeout = 5000;          // 5秒未收到pong視為超時
+        this.pingTimeout = 5000;
         this.pingTimer = null;
         
-        // ====== 增強功能：離線訊息佇列 ======
-        this.messageQueue = [];           // 離線時暫存的訊息
-        this.maxQueueSize = 100;          // 最大佇列大小
-        this.processingQueue = false;     // 是否正在處理佇列
+        // ====== 離線訊息佇列（由核心管理） ======
+        this.messageQueue = [];
+        this.maxQueueSize = 100;
+        this.processingQueue = false;
         
-        // ====== 增強功能：連線品質監控 ======
+        // ====== 連線品質監控（由核心管理） ======
         this.connectionQuality = {
-            score: 100,                  // 0-100分
-            lastLatency: 0,             // 最後一次延遲（ms）
-            avgLatency: 0,             // 平均延遲
-            latencySamples: [],         // 延遲樣本
-            disconnects: 0,            // 斷線次數
-            reconnectSuccess: 0,       // 重連成功次數
-            reconnectFailed: 0         // 重連失敗次數
+            score: 100,
+            lastLatency: 0,
+            avgLatency: 0,
+            latencySamples: [],
+            disconnects: 0,
+            reconnectSuccess: 0,
+            reconnectFailed: 0
         };
         
-        // ====== 增強功能：訊息監聽器 ======
-        this.messageListeners = new Map(); // type -> [callbacks]
+        // ====== 訊息監聽器 ======
+        this.messageListeners = new Map();
         
         // 連接狀態元素
         this.connectionIndicator = null;
         
+        // 核心實例引用
+        this.core = null;
+        
+        // 取消註冊函數列表
+        this._unsubscribers = [];
+        
         // 初始化
-        this.connect();
-        this.setupHeartbeat();
-        this.setupEventListeners();
-        this.setupVisibilityHandler();
+        this._init();
         
         // 添加防抖屬性
         this.refreshTimeouts = new Map();
         this.lastRefreshTime = 0;
         this.minRefreshInterval = 1000;
         
-        console.log('✅ WebSocket管理器增強版初始化完成');
+        console.log('✅ WebSocket管理器橋接版初始化完成');
     }
     
-    // ==================== 增強功能1：智能重連策略 ====================
-    
     /**
-     * 建立WebSocket連接（增強版）
+     * 初始化：等待 WebSocketCore 就緒
      */
-    connect() {
-        if (this.isConnected || this.isConnecting) {
-            console.log('⚠️ WebSocket正在連接或已連接，跳過');
-            return;
-        }
+    _init() {
+        const core = window.wsCore || WebSocketCore.getInstance();
         
-        this.isConnecting = true;
-        
-        try {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws/queue/`;
+        if (core) {
+            this._bindToCore(core);
+        } else {
+            console.log('⏳ 等待 WebSocketCore 就緒...');
+            const checkInterval = setInterval(() => {
+                const c = window.wsCore || WebSocketCore.getInstance();
+                if (c) {
+                    clearInterval(checkInterval);
+                    this._bindToCore(c);
+                }
+            }, 200);
             
-            console.log(`🔗 嘗試連接到WebSocket (第${this.reconnectAttempts + 1}次):`, wsUrl);
-            
-            this.socket = new WebSocket(wsUrl);
-            
-            this.socket.onopen = (event) => {
-                this.handleOpen(event);
-            };
-            
-            this.socket.onmessage = (event) => {
-                this.handleMessage(event);
-            };
-            
-            this.socket.onclose = (event) => {
-                this.handleClose(event);
-            };
-            
-            this.socket.onerror = (error) => {
-                this.handleError(error);
-            };
-            
-        } catch (error) {
-            console.error('❌ 建立WebSocket連接失敗:', error);
-            this.isConnecting = false;
-            this.attemptReconnect();
+            // 10秒超時
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (!this.core) {
+                    console.error('❌ WebSocketCore 初始化超時');
+                }
+            }, 10000);
         }
     }
     
     /**
-     * 處理連接成功（增強版）
+     * 綁定到 WebSocketCore
      */
-    handleOpen(event) {
-        console.log('✅ WebSocket連接成功');
+    _bindToCore(core) {
+        this.core = core;
         
-        this.isConnected = true;
-        this.isConnecting = false;
-        this.reconnectAttempts = 0;
-        this.lastPongTime = Date.now();
+        // 同步核心狀態
+        this.isConnected = core.state.isConnected;
+        this.isConnecting = core.state.isConnecting;
         
-        // 更新連線品質
-        this.connectionQuality.reconnectSuccess++;
-        this.connectionQuality.disconnects = 0;
-        this.calculateConnectionScore();
+        // 註冊核心事件監聽
+        this._unsubscribers.push(
+            core.on('connected', () => this._handleCoreConnected())
+        );
+        this._unsubscribers.push(
+            core.on('disconnected', (data) => this._handleCoreDisconnected(data))
+        );
+        this._unsubscribers.push(
+            core.on('reconnecting', (data) => this._handleCoreReconnecting(data))
+        );
+        this._unsubscribers.push(
+            core.on('reconnect_failed', () => this._handleCoreReconnectFailed())
+        );
+        this._unsubscribers.push(
+            core.on('message', (data) => this._handleCoreMessage(data))
+        );
+        this._unsubscribers.push(
+            core.on('page_visible', () => this._handleCorePageVisible())
+        );
         
-        // 顯示連接狀態
-        this.showConnectionStatus(true);
+        // 如果核心已連線，更新狀態
+        if (core.state.isConnected) {
+            this._syncConnectionState(true);
+        }
         
-        // 發送連接信息
-        this.sendConnectionInfo();
-        
-        // 處理離線佇列
+        console.log('✅ WebSocketManager 已綁定到 WebSocketCore');
+    }
+    
+    // ==================== 核心事件處理 ====================
+    
+    _handleCoreConnected() {
+        console.log('✅ WebSocketCore 已連線（橋接）');
+        this._syncConnectionState(true);
         this.processMessageQueue();
-        
-        // 觸發連接成功事件
         this.triggerEvent('websocket_connected', {
             timestamp: new Date().toISOString(),
             reconnectCount: this.connectionQuality.reconnectSuccess
         });
-        
-        // 清除重連計時器
-        if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer);
-            this.reconnectTimer = null;
-        }
     }
     
-    /**
-     * 處理連接關閉（增強版）
-     */
-    handleClose(event) {
-        console.log(`❌ WebSocket連接關閉: 代碼=${event.code}, 原因=${event.reason || '未知'}`);
-        
-        this.isConnected = false;
-        this.isConnecting = false;
-        this.socket = null;
-        
-        // 更新連線品質
-        this.connectionQuality.disconnects++;
-        this.calculateConnectionScore();
-        
-        // 顯示連接狀態
-        this.showConnectionStatus(false);
-        
-        // 觸發斷線事件
+    _handleCoreDisconnected(data) {
+        console.log(`❌ WebSocketCore 斷線（橋接）: ${data.reason}`);
+        this._syncConnectionState(false);
         this.triggerEvent('websocket_disconnected', {
-            code: event.code,
-            reason: event.reason,
+            code: data.code,
+            reason: data.reason,
             timestamp: new Date().toISOString()
         });
-        
-        // 非正常關閉（非1000）才重連
-        if (event.code !== 1000) {
-            this.attemptReconnect();
-        }
     }
     
-    /**
-     * 智能重連（指數退避 + 隨機抖動）
-     */
-    attemptReconnect() {
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.error('❌ 達到最大重試次數，停止重連');
-            
-            // 更新連線品質
-            this.connectionQuality.reconnectFailed++;
-            this.calculateConnectionScore();
-            
-            // 觸發重連失敗事件
-            this.triggerEvent('websocket_reconnect_failed', {
-                attempts: this.reconnectAttempts,
-                timestamp: new Date().toISOString()
-            });
-            
-            // 顯示永久斷線狀態
-            this.showPermanentDisconnect();
-            
+    _handleCoreReconnecting(data) {
+        console.log(`🔄 WebSocketCore 重連中（橋接）: ${data.attempt}/${data.maxRetries}`);
+        this.reconnectAttempts = data.attempt;
+        this.isConnecting = true;
+        this.isConnected = false;
+        // WebSocketCore 返回的 delay 已是毫秒單位
+        this.updateReconnectStatus(data.attempt, data.delay);
+    }
+    
+    _handleCoreReconnectFailed() {
+        console.error('❌ WebSocketCore 重連失敗（橋接）');
+        this.connectionQuality.reconnectFailed++;
+        this.calculateConnectionScore();
+        this.showPermanentDisconnect();
+        this.triggerEvent('websocket_reconnect_failed', {
+            attempts: this.reconnectAttempts,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    _handleCoreMessage(data) {
+        // 更新最後活動時間
+        this.lastPongTime = Date.now();
+        
+        // 處理 pong
+        if (data.type === 'pong') {
+            if (data.client_time) {
+                const latency = Date.now() - data.client_time;
+                this.recordLatency(latency);
+            }
             return;
         }
         
-        this.reconnectAttempts++;
+        console.log('📨 收到WebSocket訊息（橋接）:', data.type);
         
-        // 指數退避：2^attempt * 1000ms，最大30秒
-        const baseDelay = Math.min(
-            this.reconnectInterval * Math.pow(1.5, this.reconnectAttempts - 1),
-            this.maxReconnectInterval
-        );
-        
-        // 添加隨機抖動（±20%）
-        const jitter = baseDelay * 0.2 * (Math.random() * 2 - 1);
-        const delay = Math.max(1000, Math.min(baseDelay + jitter, this.maxReconnectInterval));
-        
-        console.log(`🔄 ${Math.round(delay/1000)}秒後嘗試重新連接 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-        
-        // 更新狀態顯示
-        this.updateReconnectStatus(this.reconnectAttempts, delay);
-        
-        this.reconnectTimer = setTimeout(() => {
-            this.connect();
-        }, delay);
-    }
-    
-    // ==================== 增強功能2：心跳與延遲檢測 ====================
-    
-    /**
-     * 設置心跳機制（增強版）
-     */
-    setupHeartbeat() {
-        // 清除現有計時器
-        if (this.heartbeatTimer) {
-            clearInterval(this.heartbeatTimer);
+        // 觸發監聽器
+        if (this.messageListeners.has(data.type)) {
+            this.messageListeners.get(data.type).forEach(callback => {
+                try { callback(data); } catch (error) {
+                    console.error(`❌ 監聽器錯誤 (${data.type}):`, error);
+                }
+            });
         }
         
-        this.heartbeatTimer = setInterval(() => {
-            this.checkHeartbeat();
-        }, this.heartbeatInterval);
-        
-        console.log(`💓 心跳機制已啟動（間隔: ${this.heartbeatInterval/1000}秒）`);
+        // 原有訊息處理
+        this.handleLegacyMessage(data);
+    }
+    
+    _handleCorePageVisible() {
+        console.log('👁️ 頁面恢復可見（橋接）');
+        this.triggerUnifiedDataRefresh();
     }
     
     /**
-     * 檢查心跳狀態
+     * 同步連接狀態
      */
-    checkHeartbeat() {
-        if (!this.isConnected) return;
+    _syncConnectionState(connected) {
+        this.isConnected = connected;
+        this.isConnecting = false;
         
-        const now = Date.now();
-        const timeSinceLastPong = now - this.lastPongTime;
-        
-        // 如果超過ping超時時間未收到pong，視為連線超時
-        if (timeSinceLastPong > this.pingTimeout) {
-            console.warn(`⚠️ 心跳超時 (${timeSinceLastPong}ms)，重新連接...`);
-            
-            // 更新連線品質
-            this.connectionQuality.score -= 20;
-            
-            // 主動重連
-            this.disconnect();
-            this.attemptReconnect();
+        if (connected) {
+            this.reconnectAttempts = 0;
+            this.lastPongTime = Date.now();
+            this.connectionQuality.reconnectSuccess++;
+            this.connectionQuality.disconnects = 0;
+            this.calculateConnectionScore();
         } else {
-            // 正常發送ping
-            this.sendPing();
+            this.connectionQuality.disconnects++;
+            this.calculateConnectionScore();
+        }
+        
+        this.showConnectionStatus(connected);
+    }
+    
+    // ==================== 兼容原有 API ====================
+    
+    /**
+     * 建立連接（兼容舊 API，實際由核心管理）
+     */
+    connect() {
+        console.log('ℹ️ WebSocketManager.connect() - 連接由 WebSocketCore 管理');
+        if (this.core) {
+            this.core.connect();
+        } else {
+            console.warn('⚠️ WebSocketCore 未就緒，無法連接');
         }
     }
     
     /**
-     * 發送ping（帶延遲測量）
+     * 斷開連接（兼容舊 API）
+     */
+    disconnect() {
+        console.log('ℹ️ WebSocketManager.disconnect() - 斷開由 WebSocketCore 管理');
+        if (this.core) {
+            this.core.disconnect();
+        }
+    }
+    
+    /**
+     * 重新連接（兼容舊 API）
+     */
+    reconnect() {
+        console.log('🔄 WebSocketManager.reconnect() - 重連由 WebSocketCore 管理');
+        if (this.core) {
+            this.core.reconnect();
+        }
+    }
+    
+    /**
+     * 發送訊息（兼容舊 API）
+     */
+    sendMessage(message) {
+        if (this.core) {
+            return this.core.send(message);
+        }
+        return false;
+    }
+    
+    /**
+     * 發送測試訊息（兼容舊 API）
+     */
+    sendTestMessage(message) {
+        return this.sendMessage({
+            type: 'test',
+            message: message,
+            timestamp: new Date().toISOString(),
+            client_time: Date.now()
+        });
+    }
+    
+    /**
+     * 發送連接信息（兼容舊 API）
+     */
+    sendConnectionInfo() {
+        if (this.core && this.core.state.isConnected) {
+            this.core.sendJSON({
+                type: 'connect',
+                user_type: 'staff',
+                user_id: this.getUserId(),
+                timestamp: new Date().toISOString()
+            });
+        }
+    }
+    
+    /**
+     * 發送 ping（兼容舊 API）
      */
     sendPing() {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            const pingTime = Date.now();
-            
-            const message = {
-                type: 'ping',
-                client_time: pingTime,
-                timestamp: new Date().toISOString()
-            };
-            
-            this.socket.send(JSON.stringify(message));
-            
-            // 設置ping超時檢測
-            this.pingTimer = setTimeout(() => {
-                const latency = Date.now() - pingTime;
-                console.log(`📊 當前延遲: ${latency}ms`);
-                
-                // 記錄延遲
-                this.recordLatency(latency);
-            }, 100);
+        // 由核心管理，此處不做操作
+    }
+    
+    /**
+     * 發送 pong（兼容舊 API）
+     */
+    sendPong() {
+        // 由核心管理，此處不做操作
+    }
+    
+    // ==================== 原有方法保持不變 ====================
+    
+    /**
+     * 嘗試重連（兼容舊 API，實際由核心管理）
+     */
+    attemptReconnect() {
+        console.log('ℹ️ 重連由 WebSocketCore 管理');
+        if (this.core) {
+            this.core.reconnect();
         }
     }
+    
+    /**
+     * 設置心跳（兼容舊 API，實際由核心管理）
+     */
+    setupHeartbeat() {
+        // 由核心管理
+    }
+    
+    /**
+     * 檢查心跳（兼容舊 API）
+     */
+    checkHeartbeat() {
+        // 由核心管理
+    }
+    
+    /**
+     * 設置頁面可見性處理器（兼容舊 API，實際由核心管理）
+     */
+    setupVisibilityHandler() {
+        // 由核心管理
+    }
+    
+    handlePageHidden() {
+        // 由核心管理
+    }
+    
+    handlePageVisible() {
+        // 由核心管理
+    }
+    
+    // ==================== 保留的業務邏輯 ====================
     
     /**
      * 記錄延遲數據
      */
     recordLatency(latency) {
         this.connectionQuality.lastLatency = latency;
-        
-        // 保存最近10個樣本
         this.connectionQuality.latencySamples.push(latency);
         if (this.connectionQuality.latencySamples.length > 10) {
             this.connectionQuality.latencySamples.shift();
         }
-        
-        // 計算平均延遲
         const sum = this.connectionQuality.latencySamples.reduce((a, b) => a + b, 0);
         this.connectionQuality.avgLatency = Math.round(
             sum / this.connectionQuality.latencySamples.length
         );
-        
-        // 更新連線分數
         this.calculateConnectionScore();
     }
     
@@ -311,54 +377,16 @@ class WebSocketManager {
      */
     calculateConnectionScore() {
         let score = 100;
-        
-        // 延遲扣分
         if (this.connectionQuality.avgLatency > 0) {
-            if (this.connectionQuality.avgLatency > 1000) {
-                score -= 30;
-            } else if (this.connectionQuality.avgLatency > 500) {
-                score -= 15;
-            } else if (this.connectionQuality.avgLatency > 200) {
-                score -= 5;
-            }
+            if (this.connectionQuality.avgLatency > 1000) score -= 30;
+            else if (this.connectionQuality.avgLatency > 500) score -= 15;
+            else if (this.connectionQuality.avgLatency > 200) score -= 5;
         }
-        
-        // 斷線次數扣分
         score -= Math.min(30, this.connectionQuality.disconnects * 10);
-        
-        // 重連失敗扣分
         score -= Math.min(20, this.connectionQuality.reconnectFailed * 5);
-        
-        // 確保分數在0-100之間
         this.connectionQuality.score = Math.max(0, Math.min(100, score));
-        
-        // 更新狀態指示器
         this.updateConnectionQuality();
-        
         return this.connectionQuality.score;
-    }
-    
-    // ==================== 增強功能3：離線訊息佇列 ====================
-    
-    /**
-     * 發送訊息（帶離線佇列）
-     */
-    sendMessage(message) {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            try {
-                const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
-                this.socket.send(messageStr);
-                return true;
-            } catch (error) {
-                console.error('❌ 發送WebSocket訊息失敗:', error);
-                this.queueMessage(message);
-                return false;
-            }
-        } else {
-            console.warn('⚠️ WebSocket未連接，訊息已加入佇列');
-            this.queueMessage(message);
-            return false;
-        }
     }
     
     /**
@@ -366,26 +394,21 @@ class WebSocketManager {
      */
     queueMessage(message) {
         if (this.messageQueue.length >= this.maxQueueSize) {
-            console.warn('⚠️ 訊息佇列已滿，丟棄最舊訊息');
             this.messageQueue.shift();
         }
-        
         this.messageQueue.push({
             message: message,
             timestamp: Date.now(),
             attempts: 0
         });
-        
         console.log(`📦 訊息已加入佇列，當前佇列大小: ${this.messageQueue.length}`);
-        
-        // 觸發佇列更新事件
         this.triggerEvent('websocket_queue_updated', {
             queueSize: this.messageQueue.length
         });
     }
     
     /**
-     * 處理訊息佇列（帶重試限制）
+     * 處理訊息佇列
      */
     async processMessageQueue() {
         if (this.processingQueue || this.messageQueue.length === 0 || !this.isConnected) {
@@ -400,25 +423,20 @@ class WebSocketManager {
         while (this.messageQueue.length > 0) {
             const queuedMessage = this.messageQueue.shift();
             
-            // 檢查訊息是否過期（超過5分鐘）
             if (Date.now() - queuedMessage.timestamp > 300000) {
-                console.warn('⚠️ 訊息已過期，丟棄:', queuedMessage.message);
                 continue;
             }
             
-            // 檢查重試次數
             queuedMessage.attempts++;
             if (queuedMessage.attempts > 3) {
-                console.error('❌ 訊息重試次數過多，丟棄:', queuedMessage.message);
                 continue;
             }
             
             try {
                 const success = this.sendMessage(queuedMessage.message);
-                
                 if (!success) {
                     failedMessages.push(queuedMessage);
-                    await this.delay(100 * queuedMessage.attempts); // 重試延遲
+                    await this.delay(100 * queuedMessage.attempts);
                 }
             } catch (error) {
                 console.error('❌ 處理佇列訊息失敗:', error);
@@ -426,37 +444,25 @@ class WebSocketManager {
             }
         }
         
-        // 將失敗的訊息重新加入佇列
         failedMessages.forEach(msg => this.messageQueue.unshift(msg));
-        
         this.processingQueue = false;
         
         console.log(`✅ 訊息佇列處理完成，剩餘: ${this.messageQueue.length} 條`);
-        
-        // 觸發佇列處理完成事件
         this.triggerEvent('websocket_queue_processed', {
             remaining: this.messageQueue.length
         });
     }
     
-    // ==================== 增強功能4：事件監聽系統 ====================
+    // ==================== 事件監聽系統 ====================
     
-    /**
-     * 註冊訊息監聽器
-     */
     on(messageType, callback) {
         if (!this.messageListeners.has(messageType)) {
             this.messageListeners.set(messageType, []);
         }
-        
         this.messageListeners.get(messageType).push(callback);
-        
-        return () => this.off(messageType, callback); // 返回取消函數
+        return () => this.off(messageType, callback);
     }
     
-    /**
-     * 移除訊息監聽器
-     */
     off(messageType, callback) {
         if (this.messageListeners.has(messageType)) {
             const listeners = this.messageListeners.get(messageType);
@@ -467,9 +473,6 @@ class WebSocketManager {
         }
     }
     
-    /**
-     * 觸發事件
-     */
     triggerEvent(eventName, detail = {}) {
         const event = new CustomEvent(eventName, {
             detail: {
@@ -479,119 +482,92 @@ class WebSocketManager {
             },
             bubbles: true
         });
-        
         document.dispatchEvent(event);
         console.log(`📢 觸發事件: ${eventName}`, detail);
     }
     
-    /**
-     * 處理收到的訊息（增強版）
-     */
+    // ==================== 訊息處理 ====================
+    
     handleWebSocketMessage(event) {
-        try {
-            const data = JSON.parse(event.data);
-            
-            // 更新最後活動時間
-            this.lastPongTime = Date.now();
-            
-            // 處理pong回應
-            if (data.type === 'pong') {
-                if (data.client_time) {
-                    const latency = Date.now() - data.client_time;
-                    this.recordLatency(latency);
-                }
-                return;
-            }
-            
-            console.log('📨 收到WebSocket訊息:', data.type);
-            
-            // 觸發對應類型的監聽器
-            if (this.messageListeners.has(data.type)) {
-                this.messageListeners.get(data.type).forEach(callback => {
-                    try {
-                        callback(data);
-                    } catch (error) {
-                        console.error(`❌ 訊息監聽器執行錯誤 (${data.type}):`, error);
-                    }
-                });
-            }
-            
-            // 原有的訊息處理邏輯
-            this.handleLegacyMessage(data);
-            
-        } catch (error) {
-            console.error('❌ 解析WebSocket訊息失敗:', error, event.data);
+        // 由核心處理
+    }
+    
+    handleLegacyMessage(data) {
+        switch(data.type) {
+            case 'queue_update':
+                this.handleQueueUpdate(data);
+                break;
+            case 'order_update':
+                this.handleOrderUpdate(data);
+                break;
+            case 'new_order':
+                this.handleNewOrder(data);
+                break;
+            case 'order_ready':
+                this.handleOrderReady(data);
+                break;
+            case 'order_collected':
+                this.handleOrderCollected(data);
+                break;
+            case 'payment_update':
+                this.handlePaymentUpdate(data);
+                break;
+            case 'system_message':
+                this.handleSystemMessage(data);
+                break;
+            case 'ping':
+                break;
+            default:
+                this.handleGenericUpdate(data);
         }
     }
     
-    // ==================== 增強功能5：頁面可見性處理 ====================
+    handleQueueUpdate(data) { /* 保持原有邏輯 */ }
+    handleOrderUpdate(data) { /* 保持原有邏輯 */ }
+    handleNewOrder(data) { /* 保持原有邏輯 */ }
+    handleOrderReady(data) { /* 保持原有邏輯 */ }
+    handleOrderCollected(data) { /* 保持原有邏輯 */ }
+    handlePaymentUpdate(data) { /* 保持原有邏輯 */ }
+    handleSystemMessage(data) { /* 保持原有邏輯 */ }
+    handleGenericUpdate(data) { /* 保持原有邏輯 */ }
     
-    /**
-     * 設置頁面可見性處理器
-     */
-    setupVisibilityHandler() {
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // 頁面隱藏時，降低資源消耗
-                this.handlePageHidden();
+    triggerUnifiedDataRefresh() {
+        if (this.refreshTimeout) {
+            clearTimeout(this.refreshTimeout);
+        }
+        
+        this.refreshTimeout = setTimeout(() => {
+            console.log('🔄 觸發統一數據刷新');
+            
+            if (window.unifiedDataManager && typeof window.unifiedDataManager.loadUnifiedData === 'function') {
+                window.unifiedDataManager.loadUnifiedData();
             } else {
-                // 頁面顯示時，恢復連線
-                this.handlePageVisible();
+                document.dispatchEvent(new CustomEvent('refresh_unified_data'));
             }
-        });
+            
+            this.refreshTimeout = null;
+        }, 300);
     }
     
-    /**
-     * 處理頁面隱藏
-     */
-    handlePageHidden() {
-        console.log('👁️ 頁面隱藏，降低WebSocket活動');
-        
-        // 延長心跳間隔
-        if (this.heartbeatTimer) {
-            clearInterval(this.heartbeatTimer);
-            this.heartbeatTimer = setInterval(() => {
-                this.checkHeartbeat();
-            }, 60000); // 60秒
+    getUserId() {
+        const userMeta = document.querySelector('meta[name="user-id"]');
+        if (userMeta) {
+            return userMeta.getAttribute('content');
         }
+        if (window.currentUserId) {
+            return window.currentUserId;
+        }
+        return 'unknown';
     }
     
-    /**
-     * 處理頁面顯示
-     */
-    handlePageVisible() {
-        console.log('👁️ 頁面顯示，恢復WebSocket活動');
-        
-        // 恢復正常心跳
-        if (this.heartbeatTimer) {
-            clearInterval(this.heartbeatTimer);
-        }
-        this.setupHeartbeat();
-        
-        // 檢查連線狀態
-        if (!this.isConnected && !this.isConnecting) {
-            console.log('🔄 頁面恢復可見，重新連接WebSocket');
-            this.attemptReconnect();
-        }
-        
-        // 發送ping檢測連線
-        if (this.isConnected) {
-            this.sendPing();
-        }
-    }
+    // ==================== UI 方法 ====================
     
-    // ==================== UI增強 ====================
-    
-    /**
-     * 顯示連接狀態（增強版）
-     */
     showConnectionStatus(connected) {
         if (!this.connectionIndicator) {
             this.connectionIndicator = this.createConnectionIndicator();
         }
         
         if (connected) {
-            // 根據連線品質顯示不同顏色
             let statusClass = 'connected';
             let statusText = '實時連接';
             
@@ -610,7 +586,6 @@ class WebSocketManager {
                 <span class="badge badge-light ml-1">${this.connectionQuality.avgLatency}ms</span>
             `;
             
-            // 添加懸浮提示
             this.connectionIndicator.title = `WebSocket連接正常
 延遲: ${this.connectionQuality.avgLatency}ms
 品質分數: ${this.connectionQuality.score}分
@@ -629,9 +604,6 @@ class WebSocketManager {
         }
     }
     
-    /**
-     * 顯示永久斷線狀態
-     */
     showPermanentDisconnect() {
         if (!this.connectionIndicator) {
             this.connectionIndicator = this.createConnectionIndicator();
@@ -648,9 +620,6 @@ class WebSocketManager {
         this.connectionIndicator.title = '無法連接到WebSocket伺服器，請檢查網路或手動重試';
     }
     
-    /**
-     * 更新重連狀態
-     */
     updateReconnectStatus(attempt, delay) {
         if (!this.connectionIndicator) return;
         
@@ -662,13 +631,9 @@ class WebSocketManager {
         `;
     }
     
-    /**
-     * 更新連線品質顯示
-     */
     updateConnectionQuality() {
         if (!this.connectionIndicator || !this.isConnected) return;
         
-        // 更新懸浮提示
         this.connectionIndicator.title = `WebSocket連接正常
 延遲: ${this.connectionQuality.avgLatency}ms
 品質分數: ${this.connectionQuality.score}分
@@ -676,9 +641,6 @@ class WebSocketManager {
 訊息佇列: ${this.messageQueue.length}條`;
     }
     
-    /**
-     * 創建連接狀態指示器（增強版）
-     */
     createConnectionIndicator() {
         let indicator = document.getElementById('websocket-connection-indicator');
         
@@ -704,7 +666,6 @@ class WebSocketManager {
                 transition: all 0.3s ease;
             `;
             
-            // 添加點擊事件，顯示詳細資訊
             indicator.addEventListener('click', () => {
                 this.showConnectionDetails();
             });
@@ -715,9 +676,6 @@ class WebSocketManager {
         return indicator;
     }
     
-    /**
-     * 顯示連線詳細資訊
-     */
     showConnectionDetails() {
         const details = `
             WebSocket 連線詳情
@@ -731,106 +689,18 @@ class WebSocketManager {
             斷線次數: ${this.connectionQuality.disconnects}次
             
             訊息佇列: ${this.messageQueue.length}條待發送
-            心跳間隔: ${this.heartbeatInterval/1000}秒
-            
-            WebSocket狀態: ${this.socket ? ['連接中', '已連接', '關閉中', '已關閉'][this.socket.readyState] : '無'}
             
             ⏱️ 最後更新: ${new Date().toLocaleTimeString()}
         `;
         
-        // 使用toast顯示
         this.showNotification(details, 'info', 8000);
     }
     
-    // ==================== 兼容原有API ====================
-    
-    /**
-     * 處理傳統訊息（保持向後兼容）
-     */
-    handleLegacyMessage(data) {
-        // 原有的switch-case邏輯
-        switch(data.type) {
-            case 'queue_update':
-                this.handleQueueUpdate(data);
-                break;
-            case 'order_update':
-                this.handleOrderUpdate(data);
-                break;
-            case 'new_order':
-                this.handleNewOrder(data);
-                break;
-            case 'order_ready':
-                this.handleOrderReady(data);
-                break;
-            case 'order_collected':
-                this.handleOrderCollected(data);
-                break;
-            case 'payment_update':
-                this.handlePaymentUpdate(data);
-                break;
-            case 'system_message':
-                this.handleSystemMessage(data);
-                break;
-            case 'ping':
-                // 已在上層處理
-                break;
-            default:
-                this.handleGenericUpdate(data);
-        }
-    }
-    
-    // ==================== 公用方法 ====================
-    
-    /**
-     * 延遲函數
-     */
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-    /**
-     * 斷開連接
-     */
-    disconnect() {
-        if (this.socket) {
-            console.log('🔌 手動斷開WebSocket連接');
-            this.socket.close(1000, 'manual_disconnect');
-            this.socket = null;
-            this.isConnected = false;
-            this.isConnecting = false;
-        }
-        
-        if (this.heartbeatTimer) {
-            clearInterval(this.heartbeatTimer);
-            this.heartbeatTimer = null;
-        }
-        
-        if (this.pingTimer) {
-            clearTimeout(this.pingTimer);
-            this.pingTimer = null;
-        }
-    }
-    
-    /**
-     * 重新連接
-     */
-    reconnect() {
-        console.log('🔄 手動重新連接WebSocket');
-        this.disconnect();
-        this.reconnectAttempts = 0; // 重置重試次數
-        setTimeout(() => {
-            this.connect();
-        }, 500);
-    }
-    
-    /**
-     * 獲取連線狀態
-     */
     getConnectionStatus() {
         return {
             isConnected: this.isConnected,
             isConnecting: this.isConnecting,
-            readyState: this.socket ? this.socket.readyState : null,
+            readyState: this.core ? (this.core.socket ? this.core.socket.readyState : null) : null,
             reconnectAttempts: this.reconnectAttempts,
             maxReconnectAttempts: this.maxReconnectAttempts,
             connectionQuality: { ...this.connectionQuality },
@@ -839,9 +709,6 @@ class WebSocketManager {
         };
     }
     
-    /**
-     * 清空訊息佇列
-     */
     clearMessageQueue() {
         const queueSize = this.messageQueue.length;
         this.messageQueue = [];
@@ -849,94 +716,6 @@ class WebSocketManager {
         this.showNotification(`📦 已清空 ${queueSize} 條待發送訊息`, 'info');
     }
     
-    /**
-     * 發送測試訊息
-     */
-    sendTestMessage(message) {
-        return this.sendMessage({
-            type: 'test',
-            message: message,
-            timestamp: new Date().toISOString(),
-            client_time: Date.now()
-        });
-    }
-    
-    // 原有的處理方法保持不變...
-    handleQueueUpdate(data) { /* 保持原有邏輯 */ }
-    handleOrderUpdate(data) { /* 保持原有邏輯 */ }
-    handleNewOrder(data) { /* 保持原有邏輯 */ }
-    handleOrderReady(data) { /* 保持原有邏輯 */ }
-    handleOrderCollected(data) { /* 保持原有邏輯 */ }
-    handlePaymentUpdate(data) { /* 保持原有邏輯 */ }
-    handleSystemMessage(data) { /* 保持原有邏輯 */ }
-    handleGenericUpdate(data) { /* 保持原有邏輯 */ }
-    
-    /**
-     * 觸發統一數據刷新（保持原有邏輯）
-     */
-    triggerUnifiedDataRefresh() {
-        if (this.refreshTimeout) {
-            clearTimeout(this.refreshTimeout);
-        }
-        
-        this.refreshTimeout = setTimeout(() => {
-            console.log('🔄 觸發統一數據刷新');
-            
-            if (window.unifiedDataManager && typeof window.unifiedDataManager.loadUnifiedData === 'function') {
-                window.unifiedDataManager.loadUnifiedData();
-            } else {
-                document.dispatchEvent(new CustomEvent('refresh_unified_data'));
-            }
-            
-            this.refreshTimeout = null;
-        }, 300);
-    }
-    
-    /**
-     * 發送pong（保持原有邏輯）
-     */
-    sendPong() {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            const message = {
-                type: 'pong',
-                timestamp: new Date().toISOString()
-            };
-            this.socket.send(JSON.stringify(message));
-        }
-    }
-    
-    /**
-     * 發送連接信息（保持原有邏輯）
-     */
-    sendConnectionInfo() {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            const message = {
-                type: 'connect',
-                user_type: 'staff',
-                user_id: this.getUserId(),
-                timestamp: new Date().toISOString()
-            };
-            this.socket.send(JSON.stringify(message));
-        }
-    }
-    
-    /**
-     * 獲取用戶ID（保持原有邏輯）
-     */
-    getUserId() {
-        const userMeta = document.querySelector('meta[name="user-id"]');
-        if (userMeta) {
-            return userMeta.getAttribute('content');
-        }
-        if (window.currentUserId) {
-            return window.currentUserId;
-        }
-        return 'unknown';
-    }
-    
-    /**
-     * 顯示通知（增強版）
-     */
     showNotification(message, type = 'info', duration = 3000) {
         const notification = document.createElement('div');
         notification.className = `websocket-notification ${type}`;
@@ -992,9 +771,6 @@ class WebSocketManager {
         }, duration);
     }
     
-    /**
-     * 播放聲音（保持原有邏輯）
-     */
     playSound(frequency, volume, duration) {
         try {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1004,86 +780,22 @@ class WebSocketManager {
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
-            oscillator.frequency.value = frequency;
             oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency || 880, audioContext.currentTime);
             
-            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            gainNode.gain.setValueAtTime(volume || 0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + (duration || 0.3));
             
             oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
+            oscillator.stop(audioContext.currentTime + (duration || 0.3));
             
-        } catch (error) {
-            console.log('🔇 聲音播放失敗（可能瀏覽器不支持）:', error);
+            oscillator.onended = () => audioContext.close();
+        } catch (e) {
+            console.debug('🔇 音效播放失敗:', e.message);
         }
     }
     
-    /**
-     * 播放新訂單聲音（保持原有邏輯）
-     */
-    playNewOrderSound() {
-        this.playSound(800, 0.3, 0.5);
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
-    
-    /**
-     * 播放完成聲音（保持原有邏輯）
-     */
-    playCompletionSound() {
-        this.playSound(1200, 0.3, 0.3);
-    }
-    
-    /**
-     * 播放通知聲音（保持原有邏輯）
-     */
-    playNotificationSound() {
-        this.playSound(1000, 0.2, 0.4);
-    }
-    
-    /**
-     * 設置事件監聽器（新增）
-     */
-    setupEventListeners() {
-        // 監聽網路狀態變化
-        window.addEventListener('online', () => {
-            console.log('🌐 網路已恢復');
-            this.showNotification('🌐 網路已恢復，重新連接中...', 'success');
-            this.reconnect();
-        });
-        
-        window.addEventListener('offline', () => {
-            console.log('🌐 網路已中斷');
-            this.showNotification('🌐 網路已中斷，將在恢復後自動重連', 'warning', 5000);
-        });
-        
-        // 監聽頁面卸載
-        window.addEventListener('beforeunload', () => {
-            this.disconnect();
-        });
-    }
-}
-
-// ==================== 全局註冊 ====================
-
-if (typeof window !== 'undefined') {
-    // 延遲初始化，確保DOM就緒
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (!window.webSocketManager) {
-                console.log('🌍 創建WebSocket管理器增強版...');
-                window.webSocketManager = new WebSocketManager();
-                
-                // 方便調試
-                console.log('🌍 WebSocketManager 增強版已註冊到 window 對象');
-                
-                // 添加全局輔助方法
-                window.WebSocketUtils = {
-                    reconnect: () => window.webSocketManager?.reconnect(),
-                    disconnect: () => window.webSocketManager?.disconnect(),
-                    getStatus: () => window.webSocketManager?.getConnectionStatus(),
-                    clearQueue: () => window.webSocketManager?.clearMessageQueue(),
-                    sendTestMessage: (msg) => window.webSocketManager?.sendTestMessage(msg)
-                };
-            }
-        }, 500);
-    });
 }
