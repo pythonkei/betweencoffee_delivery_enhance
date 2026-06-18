@@ -12,28 +12,12 @@ class WebSocketManager {
         console.log('🔄 初始化WebSocket管理器（橋接版）...');
         
         // ====== 連接狀態（從核心獲取） ======
-        this.socket = null;
         this.isConnected = false;
         this.isConnecting = false;
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 10;
-        this.reconnectInterval = 1000;
-        this.maxReconnectInterval = 30000;
-        this.reconnectTimer = null;
         
-        // ====== 心跳機制（由核心管理） ======
-        this.heartbeatInterval = 25000;
-        this.heartbeatTimer = null;
-        this.lastPongTime = Date.now();
-        this.pingTimeout = 5000;
-        this.pingTimer = null;
-        
-        // ====== 離線訊息佇列（由核心管理） ======
-        this.messageQueue = [];
-        this.maxQueueSize = 100;
-        this.processingQueue = false;
-        
-        // ====== 連線品質監控（由核心管理） ======
+        // ====== 連線品質監控（從核心獲取） ======
         this.connectionQuality = {
             score: 100,
             lastLatency: 0,
@@ -43,6 +27,11 @@ class WebSocketManager {
             reconnectSuccess: 0,
             reconnectFailed: 0
         };
+        
+        // ====== 離線訊息佇列（本地備份） ======
+        this.messageQueue = [];
+        this.maxQueueSize = 100;
+        this.processingQueue = false;
         
         // ====== 訊息監聽器 ======
         this.messageListeners = new Map();
@@ -125,10 +114,8 @@ class WebSocketManager {
             core.on('page_visible', () => this._handleCorePageVisible())
         );
         
-        // 如果核心已連線，更新狀態
-        if (core.state.isConnected) {
-            this._syncConnectionState(true);
-        }
+        // 無論核心狀態如何，都顯示連接指示器
+        this._syncConnectionState(core.state.isConnected);
         
         console.log('✅ WebSocketManager 已綁定到 WebSocketCore');
     }
@@ -176,10 +163,7 @@ class WebSocketManager {
     }
     
     _handleCoreMessage(data) {
-        // 更新最後活動時間
-        this.lastPongTime = Date.now();
-        
-        // 處理 pong
+        // 處理 pong（延遲數據從核心獲取）
         if (data.type === 'pong') {
             if (data.client_time) {
                 const latency = Date.now() - data.client_time;
@@ -217,7 +201,6 @@ class WebSocketManager {
         
         if (connected) {
             this.reconnectAttempts = 0;
-            this.lastPongTime = Date.now();
             this.connectionQuality.reconnectSuccess++;
             this.connectionQuality.disconnects = 0;
             this.calculateConnectionScore();
@@ -705,7 +688,9 @@ class WebSocketManager {
             maxReconnectAttempts: this.maxReconnectAttempts,
             connectionQuality: { ...this.connectionQuality },
             messageQueueSize: this.messageQueue.length,
-            lastPongTime: new Date(this.lastPongTime).toLocaleTimeString()
+            lastPongTime: this.core?.heartbeat?.lastPongTime 
+                ? new Date(this.core.heartbeat.lastPongTime).toLocaleTimeString() 
+                : 'N/A'
         };
     }
     
@@ -798,4 +783,9 @@ class WebSocketManager {
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
+}
+
+// 暴露到全局
+if (typeof window !== 'undefined') {
+    window.WebSocketManager = WebSocketManager;
 }

@@ -251,4 +251,4 @@ def websocket_monitor_dashboard(request):
     URL: /eshop/staff/websocket-monitor/
     權限: 僅管理員
     """
-    return render(request, 'admin/websocket_monitor.html')
+    return render(request, 'websocket_monitoring_dashboard.html')
