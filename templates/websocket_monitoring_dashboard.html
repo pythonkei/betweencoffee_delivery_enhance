@@ -96,6 +96,21 @@
     color: var(--ws-text-muted);
     font-size: 0.85rem;
 }
+.ws-detail-label i {
+    width: 1.4rem;
+    text-align: center;
+    margin-right: 0.6rem;
+}
+.ws-alert span i {
+    width: 1.2rem;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+.ws-card h5 i {
+    width: 1.4rem;
+    text-align: center;
+    margin-right: 0.5rem;
+}
 .ws-detail-value {
     color: var(--ws-text);
     font-weight: 500;
@@ -170,18 +185,13 @@
 {% endblock %}
 
 {% block content %}
-<!-- ===== Header Banner（仿 profile 頁面） ===== -->
+<!-- ===== Header Banner（簡潔版） ===== -->
 <section class="subpage-banner-h500 py-lg-4">
-    <div class="svg-bg-container">
-        <div class="noise_animation"><img class="svg-bg-5" src="{% static 'images/owl_title_bg_01_v2.svg' %}"></div>
-    </div>
     <div class="ftco-subpage-banner">
         <div class="container">
             <div class="row justify-content-center mt-5 p-2">
                 <div class="col-lg-12 col-md-12 heading-section text-center">
-                    <span class="subheading">WebSocket<br>Monitor</span>
                     <h2 class="mb-3">&#65371;連線監控&#65373;</h2>
-                    <p style="color:#ccc;">即時 WebSocket 連線狀態與健康度<br />Between Coffee 內部系統</p>
                 </div>
             </div>
         </div>
