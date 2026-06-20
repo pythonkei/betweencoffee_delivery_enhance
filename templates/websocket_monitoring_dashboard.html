@@ -99,7 +99,7 @@
 .ws-detail-label i {
     width: 1.4rem;
     text-align: center;
-    margin-right: 0.6rem;
+    margin-right: 1rem;
 }
 .ws-alert span i {
     width: 1.2rem;
@@ -288,31 +288,31 @@
                     <div class="col-md-6">
                         <div class="ws-card">
                             <h5 style="color:var(--ws-gold);margin-bottom:1rem;">
-                                <i class="fas fa-info-circle me-2"></i>連線詳細資訊
+                                <i class="fas fa-info-circle"></i>連線詳細資訊
                             </h5>
                             <ul class="ws-detail-list">
                                 <li class="ws-detail-item">
-                                    <span class="ws-detail-label"><i class="fas fa-link me-2"></i>連線位址</span>
+                                    <span class="ws-detail-label"><i class="fas fa-link"></i>連線位址</span>
                                     <span class="ws-detail-value" id="wsUrl" style="font-size:0.8rem;word-break:break-all;max-width:60%;text-align:right;">-</span>
                                 </li>
                                 <li class="ws-detail-item">
-                                    <span class="ws-detail-label"><i class="fas fa-clock me-2"></i>連線持續時間</span>
+                                    <span class="ws-detail-label"><i class="fas fa-clock"></i>連線持續時間</span>
                                     <span class="ws-detail-value" id="wsDuration">-</span>
                                 </li>
                                 <li class="ws-detail-item">
-                                    <span class="ws-detail-label"><i class="fas fa-sync me-2"></i>重連次數</span>
+                                    <span class="ws-detail-label"><i class="fas fa-sync"></i>重連次數</span>
                                     <span class="ws-detail-value" id="wsReconnects">-</span>
                                 </li>
                                 <li class="ws-detail-item">
-                                    <span class="ws-detail-label"><i class="fas fa-exclamation-triangle me-2"></i>錯誤次數</span>
+                                    <span class="ws-detail-label"><i class="fas fa-exclamation-triangle"></i>錯誤次數</span>
                                     <span class="ws-detail-value" id="wsErrors">-</span>
                                 </li>
                                 <li class="ws-detail-item">
-                                    <span class="ws-detail-label"><i class="fas fa-database me-2"></i>佇列訊息</span>
+                                    <span class="ws-detail-label"><i class="fas fa-database"></i>佇列訊息</span>
                                     <span class="ws-detail-value" id="wsQueueSize">-</span>
                                 </li>
                                 <li class="ws-detail-item">
-                                    <span class="ws-detail-label"><i class="fas fa-signal me-2"></i>連線品質</span>
+                                    <span class="ws-detail-label"><i class="fas fa-signal"></i>連線品質</span>
                                     <span class="ws-detail-value" id="wsQuality">-</span>
                                 </li>
                             </ul>
@@ -323,7 +323,7 @@
                         <div class="ws-card">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 style="color:var(--ws-gold);margin:0;">
-                                    <i class="fas fa-bell me-2"></i>即時警報
+                                    <i class="fas fa-bell"></i>即時警報
                                 </h5>
                                 <button class="ws-btn" id="btnClearAlerts" style="padding:0.3rem 0.8rem;font-size:0.75rem;">
                                     <i class="fas fa-trash-alt"></i> 清除
@@ -331,7 +331,7 @@
                             </div>
                             <div id="wsAlertsContainer">
                                 <div class="ws-alert info">
-                                    <span><i class="fas fa-info-circle me-2"></i>監控系統已啟動</span>
+                                    <span><i class="fas fa-info-circle"></i>監控系統已啟動</span>
                                     <span class="ws-alert-time">剛剛</span>
                                 </div>
                             </div>
@@ -422,7 +422,7 @@
         const icons = {critical:'fa-exclamation-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle'};
         const div = document.createElement('div');
         div.className = `ws-alert ${level}`;
-        div.innerHTML = `<span><i class="fas ${icons[level]||'fa-info-circle'} me-2"></i>${msg}</span><span class="ws-alert-time">剛剛</span>`;
+        div.innerHTML = `<span><i class="fas ${icons[level]||'fa-info-circle'}"></i>${msg}</span><span class="ws-alert-time">剛剛</span>`;
         alertsContainer.insertBefore(div, alertsContainer.firstChild);
         // 保留最多 20 條
         while (alertsContainer.children.length > 20) {
