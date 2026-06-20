@@ -476,6 +476,11 @@ class QueueConsumer(BaseOrderConsumer):
         """處理 WebSocket 連線"""
         self.room_group_name = 'queue_updates'
         
+        # 🔧 修復：在 accept() 之前先初始化資料庫連線
+        # Render 生產環境中，PostgreSQL 連線在空閒後會被關閉，
+        # 導致後續廣播時出現 "django.db.utils.InterfaceError: connection already closed"
+        await self._ensure_db_connection()
+        
         # 獲取使用者資訊
         user_info = await self._get_user_info()
         self.user_info = user_info
@@ -501,6 +506,18 @@ class QueueConsumer(BaseOrderConsumer):
         self.heartbeat_task = asyncio.create_task(self._heartbeat_checker())
         
         logger.info(f"✅ 隊列 Consumer 連線成功: {self.connection_id}, 用戶: {user_info['username']}")
+    
+    @database_sync_to_async
+    def _ensure_db_connection(self):
+        """
+        初始化資料庫連線，避免 WebSocket 連線後出現 connection already closed
+        
+        在 Render 生產環境中，PostgreSQL 連線在空閒後會被資料庫端關閉。
+        此方法在 accept() 之前強制初始化資料庫連線池，確保後續查詢正常。
+        """
+        from django.db import connection
+        connection.ensure_connection()
+        return True
     
     async def disconnect(self, close_code):
         """處理 WebSocket 斷線"""
