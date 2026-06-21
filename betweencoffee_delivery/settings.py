@@ -138,7 +138,7 @@ CSRF_TRUSTED_ORIGINS = get_csrf_trusted_origins()
 
 
 # 安全配置
-if IS_RAILWAY:
+if IS_RAILWAY or IS_RENDER:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
