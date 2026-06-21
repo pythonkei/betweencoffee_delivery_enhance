@@ -1,1 +1,1 @@
-web: python manage.py collectstatic --noinput && mkdir -p staticfiles/media && cp -r media/* staticfiles/media/ 2>/dev/null || true && gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --workers=2 --timeout=120
+web: python manage.py collectstatic --noinput && mkdir -p staticfiles/media && cp -r media/* staticfiles/media/ 2>/dev/null || true && daphne -b 0.0.0.0 -p $PORT betweencoffee_delivery.asgi:application

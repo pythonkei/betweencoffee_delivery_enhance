@@ -28,7 +28,10 @@ RUN mkdir -p /app/staticfiles/media && \
 EXPOSE 8000
 
 # 啟動命令
+# 🔧 修復：使用 daphne 替代 gunicorn 以支援 WebSocket
+# gunicorn 只能處理 WSGI（HTTP），無法處理 WebSocket 請求
+# daphne 是 Django Channels 的 ASGI 伺服器，支援 HTTP + WebSocket
 CMD python manage.py migrate --noinput && \
     python manage.py setup_social_apps && \
     python manage.py cleanup_duplicate_user && \
-    gunicorn betweencoffee_delivery.wsgi:application --bind 0.0.0.0:$PORT --workers=2 --timeout=120
+    daphne -b 0.0.0.0 -p $PORT betweencoffee_delivery.asgi:application

@@ -13,6 +13,7 @@ certifi==2023.7.22
 cffi==1.15.1
 channels==4.2.2
 channels_redis==4.2.1
+daphne==4.1.2
 chardet==5.2.0
 charset-normalizer==3.2.0
 cryptography==44.0.2
