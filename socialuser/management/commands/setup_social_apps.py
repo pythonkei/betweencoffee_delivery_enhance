@@ -19,7 +19,9 @@ class Command(BaseCommand):
                 domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
                 name = 'Between Coffee - Railway'
             elif is_render:
-                domain = os.environ.get('RENDER_EXTERNAL_URL', 'betweencoffee-delivery-enhance-v1.onrender.com')
+                # 使用 RENDER_EXTERNAL_HOSTNAME（不包含 https:// 前綴）
+                # 不要使用 RENDER_EXTERNAL_URL（包含 https:// 前綴，會導致 Site domain 格式錯誤）
+                domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee-delivery-enhance-v1.onrender.com')
                 name = 'Between Coffee - Render'
             else:
                 domain = 'localhost:8081'
