@@ -40,21 +40,18 @@ logger = logging.getLogger(__name__)
 
 
 
-# Railway 环境检测
-IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') is not None
-
 # Render 环境检测
 IS_RENDER = os.environ.get('IS_RENDER') == 'True' or os.environ.get('RENDER') is not None
 
 # 通用生产环境检测
-IS_PRODUCTION = IS_RAILWAY or IS_RENDER
+IS_PRODUCTION = IS_RENDER
 
 # ==================== 安全配置 ====================
 
 def get_secret_key():
     """安全地获取密钥，在生产环境中必须设置"""
     secret_key = os.environ.get('SECRET_KEY')
-    if not secret_key and IS_RAILWAY:
+    if not secret_key and IS_RENDER:
         raise ImproperlyConfigured(
             "SECRET_KEY must be set in environment variables in production"
         )
@@ -91,14 +88,7 @@ def get_allowed_hosts():
             wildcard_domain = '.' + parts[-1]
         default_hosts = [ngrok_host, wildcard_domain] + default_hosts
     
-    if IS_RAILWAY:
-        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-        if railway_domain:
-            return [railway_domain, '.railway.app'] + default_hosts
-        else:
-            logger.warning("RAILWAY_PUBLIC_DOMAIN not set, using fallback hosts")
-            return ['.railway.app'] + default_hosts
-    elif IS_RENDER:
+    if IS_RENDER:
         render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
         if render_domain:
             return [render_domain, '.onrender.com'] + default_hosts
@@ -114,13 +104,7 @@ ALLOWED_HOSTS = get_allowed_hosts()
 # CSRF 信任源配置
 def get_csrf_trusted_origins():
     """配置CSRF信任源"""
-    if IS_RAILWAY:
-        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-        if railway_domain:
-            return [f'https://{railway_domain}', 'https://*.railway.app']
-        else:
-            return ['https://*.railway.app']
-    elif IS_RENDER:
+    if IS_RENDER:
         render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
         if render_domain:
             return [f'https://{render_domain}', 'https://*.onrender.com']
@@ -138,7 +122,7 @@ CSRF_TRUSTED_ORIGINS = get_csrf_trusted_origins()
 
 
 # 安全配置
-if IS_RAILWAY or IS_RENDER:
+if IS_RENDER:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -255,21 +239,30 @@ WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
 
 
 # Channels 層配置 - 開發環境使用內存層，生產環境使用Redis
-if IS_RAILWAY:
-    # Railway環境使用Redis
-    redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-                "hosts": [redis_url],
-                "socket_timeout": 10,
-                "socket_connect_timeout": 10,
-                "retry_on_timeout": True,
+if IS_RENDER:
+    # Render環境使用Redis（如有配置）
+    redis_url = os.environ.get('REDIS_URL', '')
+    if redis_url:
+        CHANNEL_LAYERS = {
+            'default': {
+                'BACKEND': 'channels_redis.core.RedisChannelLayer',
+                'CONFIG': {
+                    "hosts": [redis_url],
+                    "socket_timeout": 10,
+                    "socket_connect_timeout": 10,
+                    "retry_on_timeout": True,
+                },
             },
-        },
-    }
-    print("使用Redis Channel層進行生產環境")
+        }
+        print("使用Redis Channel層進行生產環境")
+    else:
+        # Render free plan 無 Redis，使用內存層
+        CHANNEL_LAYERS = {
+            "default": {
+                "BACKEND": "channels.layers.InMemoryChannelLayer"
+            }
+        }
+        print("使用內存Channel層（Render 無 Redis）")
 else:
     # 開發環境使用內存層（無需Redis）
     CHANNEL_LAYERS = {
@@ -281,28 +274,6 @@ else:
 
 # ✅ 確認 ASGI 應用設定正確
 ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'
-
-
-# # Channels层配置 - 使用Redis作为后端
-# if IS_RAILWAY:
-#     # Railway环境使用Redis
-#     CHANNEL_LAYERS = {
-#         'default': {
-#             'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#             'CONFIG': {
-#                 "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
-#             },
-#         },
-#     }
-# else:
-#     # 开发环境使用内存层（无需Redis）
-#     CHANNEL_LAYERS = {
-#         "default": {
-#             "BACKEND": "channels.layers.InMemoryChannelLayer"
-#         }
-#     }
-#     print("使用内存Channel层进行开发")
-
 
 
 # ==================== 数据库配置 ====================
@@ -518,10 +489,7 @@ def get_social_providers():
     providers = {}
     
     # 获取基础URL用于回调
-    if IS_RAILWAY:
-        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
-        base_domain = railway_domain
-    elif IS_RENDER:
+    if IS_RENDER:
         render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
         base_domain = render_domain
     else:
@@ -602,11 +570,7 @@ ACCOUNT_ALLOW_SOCIAL_SIGNUP = True
 # 重要：动态站点配置
 def setup_site_config():
     """动态配置站点信息"""
-    if IS_RAILWAY:
-        domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'web-production-6a798.up.railway.app')
-        name = 'Between Coffee - Railway'
-        protocol = 'https'
-    elif IS_RENDER:
+    if IS_RENDER:
         domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
         name = 'Between Coffee - Render'
         protocol = 'https'
@@ -651,13 +615,7 @@ SOCIALACCOUNT_TEMPLATES = {
 # 重要：配置社交登录回调URL
 def get_social_callback_urls():
     """配置社交登录回调URL"""
-    if IS_RAILWAY:
-        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-        if railway_domain:
-            base_url = f'https://{railway_domain}'
-        else:
-            base_url = 'https://*.railway.app'
-    elif IS_RENDER:
+    if IS_RENDER:
         render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
         if render_domain:
             base_url = f'https://{render_domain}'
@@ -853,7 +811,7 @@ def validate_paypal_config():
 def check_environment():
     """检查环境配置"""
     logger.info("=== Environment Check ===")
-    logger.info(f"IS_RAILWAY: {IS_RAILWAY}")
+    logger.info(f"IS_RENDER: {IS_RENDER}")
     logger.info(f"DEBUG: {DEBUG}")
     logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
     logger.info(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
@@ -914,7 +872,7 @@ except Exception as e:
     logger.error(f"启动时配置检查失败: {e}")
 
 # 最终安全检查
-if DEBUG and IS_RAILWAY:
+if DEBUG and IS_RENDER:
     logger.warning("DEBUG mode is enabled in production environment!")
 
 if not SECRET_KEY.startswith('django-insecure-') and DEBUG:
