@@ -1482,14 +1482,16 @@ class CoffeeQueue(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    added_at = models.DateTimeField(auto_now_add=True, verbose_name='加入隊列時間')
     
     class Meta:
-        ordering = ['position']
+        ordering = ['estimated_start_time']
         verbose_name = '咖啡制作队列'
         verbose_name_plural = '咖啡制作队列'
         indexes = [
-            models.Index(fields=['status', 'position']),
+            models.Index(fields=['status', 'estimated_start_time']),
             models.Index(fields=['estimated_completion_time']),
+            models.Index(fields=['added_at']),
         ]
     
     def __str__(self):

@@ -569,9 +569,9 @@ class CoffeeQueueManager:
             return 1
     
     def _get_next_simple_position(self):
-        """獲取下一個簡單順序位置"""
+        """獲取下一個簡單順序位置（基於 added_at）"""
         try:
-            last_item = CoffeeQueue.objects.filter(status='waiting').order_by('-position').first()
+            last_item = CoffeeQueue.objects.filter(status='waiting').order_by('-added_at').first()
             position = last_item.position + 1 if last_item else 1
             
             self.logger.debug(f"簡單順序位置計算: {position}")
@@ -587,11 +587,11 @@ class CoffeeQueueManager:
         
         優先級規則：
         1. 所有快速訂單優先
-        2. 快速訂單內部按創建時間排序
-        3. 普通訂單按創建時間排序
+        2. 快速訂單內部按加入隊列時間排序
+        3. 普通訂單按加入隊列時間排序
         """
         try:
-            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('position')
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('added_at')
             
             if not waiting_queues.exists():
                 self.logger.debug(f"訂單 #{order.id} 優先級位置: 1 (隊列為空)")
@@ -603,7 +603,7 @@ class CoffeeQueueManager:
                     if queue.order.order_type != 'quick':
                         self.logger.debug(f"訂單 #{order.id} 優先級位置: {queue.position} (插入到普通訂單前)")
                         return queue.position
-                    if order.created_at < queue.order.created_at:
+                    if queue.added_at and order.added_at and order.added_at < queue.added_at:
                         self.logger.debug(f"訂單 #{order.id} 優先級位置: {queue.position} (插入到較晚的快速訂單前)")
                         return queue.position
                 
@@ -620,7 +620,7 @@ class CoffeeQueueManager:
                 
                 if last_quick_position == 0:
                     for queue in waiting_queues:
-                        if order.created_at < queue.order.created_at:
+                        if queue.added_at and order.added_at and order.added_at < queue.added_at:
                             self.logger.debug(f"訂單 #{order.id} 優先級位置: {queue.position} (插入到較晚的普通訂單前)")
                             return queue.position
                 
@@ -649,11 +649,11 @@ class CoffeeQueueManager:
                     'order_id': queue.order.id,
                     'order_type': queue.order.order_type,
                     'current_position': queue.position,
-                    'created_at': queue.order.created_at.timestamp(),
+                    'added_at': queue.added_at.timestamp() if queue.added_at else 0,
                 })
             
-            # 排序：快速訂單優先，然後按創建時間
-            queues_info.sort(key=lambda x: (0 if x['order_type'] == 'quick' else 1, x['created_at']))
+            # 排序：快速訂單優先，然後按加入隊列時間
+            queues_info.sort(key=lambda x: (0 if x['order_type'] == 'quick' else 1, x['added_at']))
             
             # 檢查是否需要重新排序
             needs_reorder = any(
@@ -858,7 +858,7 @@ class CoffeeQueueManager:
         """
         try:
             current_time = unified_time_service.get_hong_kong_time()
-            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('position')
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('added_at')
             
             cumulative_time = timedelta(minutes=0)
             waiting_orders_updated = 0
@@ -946,23 +946,13 @@ class CoffeeQueueManager:
             if ready_with_position.exists():
                 issues.append(f"發現 {ready_with_position.count()} 個ready訂單有隊列位置")
             
-            # 檢查waiting訂單連續性
-            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('position')
-            expected_pos = 1
-            for queue in waiting_queues:
-                if queue.position != expected_pos:
-                    issues.append(f"訂單 #{queue.order.id} 位置不連續: {queue.position} (期望: {expected_pos})")
-                expected_pos += 1
-            
-            # 檢查重複位置
-            from django.db.models import Count
-            duplicate_positions = CoffeeQueue.objects.filter(status='waiting') \
-                .values('position') \
-                .annotate(count=Count('position')) \
-                .filter(count__gt=1)
-            
-            for dup in duplicate_positions:
-                issues.append(f"位置 {dup['position']} 有 {dup['count']} 個訂單")
+            # 檢查waiting訂單的 added_at 順序
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('added_at')
+            for i, queue in enumerate(waiting_queues):
+                if i > 0:
+                    prev = waiting_queues[i - 1]
+                    if queue.added_at and prev.added_at and queue.added_at < prev.added_at:
+                        issues.append(f"訂單 #{queue.order.id} added_at 順序異常: {queue.added_at} < {prev.added_at}")
             
             waiting_count = waiting_queues.count()
             preparing_count = CoffeeQueue.objects.filter(status='preparing').count()
@@ -1151,7 +1141,7 @@ class CoffeeQueueManager:
             ready_positions_reset = CoffeeQueue.objects.filter(status='ready', position__gt=0).update(position=0)
             
             # 重新分配waiting訂單位置
-            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('created_at')
+            waiting_queues = CoffeeQueue.objects.filter(status='waiting').order_by('added_at')
             waiting_positions_fixed = 0
             
             for index, queue in enumerate(waiting_queues, start=1):
