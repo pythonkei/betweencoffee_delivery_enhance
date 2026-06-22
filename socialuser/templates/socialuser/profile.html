@@ -74,7 +74,7 @@
                         
                         <!-- ===== 資訊列表（完全仿 order_confirm 列表風格） ===== -->
                         <label class="profile-section-label">
-                            <i class="fas fa-id-card"></i> 基本資訊
+                            基本資訊
                         </label>
                         <ul class="profile-info-list">
                             
@@ -158,7 +158,7 @@
                         <!-- ===== 驗證狀態區塊 ===== -->
                         <div style="margin-top: 1.5rem;">
                             <label class="profile-section-label">
-                                <i class="fas fa-shield-alt"></i> 帳戶安全
+                                帳戶安全
                             </label>
                             <ul class="profile-info-list">
                                 <!-- Email 驗證狀態 -->
@@ -192,9 +192,8 @@
                         </div>
 
                         <!-- ===== 已綁定的社交帳號區塊 ===== -->
-                        <div style="margin-top: 1.5rem;">
                             <label class="profile-section-label">
-                                <i class="fas fa-link"></i> 已綁定的社交帳號
+                                已綁定的社交帳號
                             </label>
                             <ul class="profile-info-list">
                                 {% with social_accounts=profile.user.socialaccount_set.all %}
@@ -203,9 +202,9 @@
                                         <li class="profile-info-item">
                                             <span class="profile-info-icon">
                                                 {% if sa.provider == 'google' %}
-                                                <i class="fab fa-google" style="color:#4285F4;"></i>
+                                                <i class="fab fa-google"></i>
                                                 {% elif sa.provider == 'facebook' %}
-                                                <i class="fab fa-facebook" style="color:#1877F2;"></i>
+                                                <i class="fab fa-facebook"></i>
                                                 {% else %}
                                                 <i class="fas fa-share-alt"></i>
                                                 {% endif %}

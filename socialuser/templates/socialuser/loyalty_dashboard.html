@@ -245,7 +245,7 @@
                                                 <!-- 活動描述內容 -->
                                                 <div class="activity-description-content">
                                                     <div class="activity-description">{{ activity.description }}</div>
-                                                <div class="activity-time">
+                                                <div class="activity-time" style="display:none;">
                                                     記錄時間: {{ activity.created_at|date:"Y-m-d H:i" }}
                                                 </div>
                                                     {% if activity.details %}
