@@ -1,5 +1,6 @@
 // static/js/staff-order-management/unified-data-manager.js
 // ==================== 統一數據管理器 - 核心數據協調中心（增強版） ====================
+// 最後更新: 2026-06-21 - 移除重疊的 WebSocket 監聽，統一使用 DebounceCoordinator
 
 class UnifiedDataManager {
     constructor() {
@@ -31,7 +32,7 @@ class UnifiedDataManager {
     init() {
         console.log('✅ 統一數據管理器初始化完成');
         
-        // 綁定全局事件
+        // 綁定全局事件（精簡版：只保留必要的）
         this.bindGlobalEvents();
         
         // 啟動定期刷新
@@ -363,86 +364,34 @@ class UnifiedDataManager {
         }
     }
     
-    // ==================== 事件處理（優化WebSocket監聽） ====================
+    // ==================== 事件處理（精簡版：移除重疊的WebSocket監聽） ====================
     
     /**
-     * 綁定全局事件（優化：避免重複觸發）
+     * 綁定全局事件（精簡版）
+     * 注意：WebSocket 事件已由 DebounceCoordinator 統一管理
+     * UnifiedDataManager 不再直接監聽 WebSocket 事件
      */
     bindGlobalEvents() {
-        // 手動刷新事件
+        // 手動刷新事件（保留）
         document.addEventListener('refresh_unified_data', (event) => {
             console.log('🔄 收到手動刷新事件', event.detail);
             this.loadUnifiedData(true);
         });
         
-        // ✅ 優化：合併WebSocket事件，避免重複刷新
-        let refreshTimeout = null;
-        const handleWebSocketEvent = (eventName) => {
-            console.log(`🔄 WebSocket事件觸發: ${eventName}`);
-            
-            // 清除之前的定時器
-            if (refreshTimeout) {
-                clearTimeout(refreshTimeout);
-            }
-            
-            // 設置新的定時器（防抖）
-            refreshTimeout = setTimeout(() => {
-                this.loadUnifiedData();
-                refreshTimeout = null;
-            }, 300); // 300ms防抖
-        };
-        
-        // WebSocket核心事件（合併）
-        const coreWsEvents = [
-            'queue_updated',           // 隊列更新
-            'order_status_changed',    // 訂單狀態變化
-            'new_order_created'        // 新訂單
-        ];
-        
-        coreWsEvents.forEach(eventName => {
-            document.addEventListener(eventName, () => handleWebSocketEvent(eventName));
-        });
-        
-        // 標籤頁切換時刷新
-        let tabChangeTimeout = null;
+        // 標籤頁切換時刷新（保留，但由 DebounceCoordinator 統一調度）
         document.addEventListener('tab_changed', (event) => {
             console.log(`🔄 標籤頁切換: ${event.detail.tabId}`);
-            
-            if (tabChangeTimeout) {
-                clearTimeout(tabChangeTimeout);
-            }
-            
-            tabChangeTimeout = setTimeout(() => {
-                this.loadUnifiedData();
-                tabChangeTimeout = null;
-            }, 500);
-        });
-        
-        // 頁面可見性變化
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                console.log('🔄 頁面恢復可見，刷新數據');
-                setTimeout(() => this.loadUnifiedData(), 1000);
+            // 由 DebounceCoordinator 統一調度
+            if (window.debounceCoordinator) {
+                window.debounceCoordinator.scheduleRefresh('tab_change', 'tab_changed', event.detail);
             }
         });
         
-        // 網絡狀態恢復（防抖處理）
-        let networkRecoveryTimeout = null;
-        window.addEventListener('online', () => {
-            console.log('🌐 網絡恢復，準備刷新數據...');
-            
-            // 清除之前的定時器
-            if (networkRecoveryTimeout) {
-                clearTimeout(networkRecoveryTimeout);
-            }
-            
-            // 等待1秒確保網絡穩定，然後刷新數據
-            networkRecoveryTimeout = setTimeout(() => {
-                console.log('🔄 網絡穩定，開始刷新數據');
-                this.loadUnifiedData(true);
-                networkRecoveryTimeout = null;
-            }, 1000);
-        });
+        // 頁面可見性變化（由 DebounceCoordinator 統一處理）
+        // 此處不再直接監聽 visibilitychange
+        
+        // 網絡狀態恢復（由 DebounceCoordinator 統一處理）
+        // 此處不再直接監聽 online 事件
     }
     
     /**
@@ -468,6 +417,7 @@ class UnifiedDataManager {
     
     /**
      * 啟動智能自動刷新（根據系統負載調整，離線時暫停）
+     * 優化：WebSocket 連線時暫停輪詢，斷線時恢復
      */
     startAutoRefresh() {
         let refreshInterval = 10000; // 默認10秒
@@ -491,6 +441,12 @@ class UnifiedDataManager {
             // 檢查網絡狀態
             if (!navigator.onLine) {
                 console.log('🌐 網絡離線，暫停自動刷新');
+                return;
+            }
+            
+            // ✅ 優化：WebSocket 連線時暫停輪詢
+            if (window.webSocketManager && window.webSocketManager.isConnected) {
+                // WebSocket 連線中，跳過輪詢（由 WebSocket 事件觸發刷新）
                 return;
             }
             
@@ -645,6 +601,12 @@ if (typeof window !== 'undefined') {
 /**
  * 全局防抖協調器 - 確保所有組件的刷新邏輯協調一致
  * 防止WebSocket推送和API輪詢同時觸發數據刷新
+ * 
+ * 職責：
+ * 1. 統一接收所有觸發刷新的事件（WebSocket、手動、標籤頁切換等）
+ * 2. 按事件類型應用不同的防抖時間
+ * 3. 按優先級排序處理刷新任務
+ * 4. 調用 UnifiedDataManager.loadUnifiedData() 執行實際刷新
  */
 class DebounceCoordinator {
     constructor() {
@@ -680,6 +642,7 @@ class DebounceCoordinator {
     
     /**
      * 設置事件監聽器
+     * 注意：這是所有刷新事件的唯一入口
      */
     setupEventListeners() {
         // WebSocket核心事件

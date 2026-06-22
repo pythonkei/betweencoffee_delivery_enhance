@@ -534,7 +534,8 @@ class DynamicReadyOrdersRenderer {
                 const button = orderElement.querySelector('.mark-collected-btn');
                 if (button) {
                     button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>處理中';
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1" style="font-size: 1.1rem;"></i>處理中';
+                    button.style.borderRadius = '0.375rem';
                     button.classList.remove('btn-info');
                     button.classList.add('btn-secondary');
                 }

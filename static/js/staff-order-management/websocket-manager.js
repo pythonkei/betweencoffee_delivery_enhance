@@ -6,6 +6,7 @@
 // 此管理器專注於員工頁面的業務邏輯：處理隊列更新、訂單通知等。
 //
 // 遷移日期: 2026-06-18
+// 最後更新: 2026-06-21 - 修復雙重刷新路徑，統一使用 DebounceCoordinator
 
 class WebSocketManager {
     constructor() {
@@ -183,13 +184,16 @@ class WebSocketManager {
             });
         }
         
-        // 原有訊息處理
+        // 原有訊息處理 - 使用 DebounceCoordinator 統一調度刷新
         this.handleLegacyMessage(data);
     }
     
     _handleCorePageVisible() {
         console.log('👁️ 頁面恢復可見（橋接）');
-        this.triggerUnifiedDataRefresh();
+        // 由 DebounceCoordinator 統一處理
+        if (window.debounceCoordinator) {
+            window.debounceCoordinator.scheduleRefresh('manual', 'page_visible', {});
+        }
     }
     
     /**
@@ -469,13 +473,22 @@ class WebSocketManager {
         console.log(`📢 觸發事件: ${eventName}`, detail);
     }
     
-    // ==================== 訊息處理 ====================
+    // ==================== 訊息處理（修復版） ====================
     
     handleWebSocketMessage(event) {
         // 由核心處理
     }
     
+    /**
+     * 處理舊版訊息格式 - 修復版
+     * 所有數據刷新統一交由 DebounceCoordinator 調度
+     */
     handleLegacyMessage(data) {
+        // 使用 DebounceCoordinator 統一調度刷新
+        if (window.debounceCoordinator) {
+            window.debounceCoordinator.scheduleRefresh('websocket', data.type, data);
+        }
+        
         switch(data.type) {
             case 'queue_update':
                 this.handleQueueUpdate(data);
@@ -505,31 +518,107 @@ class WebSocketManager {
         }
     }
     
-    handleQueueUpdate(data) { /* 保持原有邏輯 */ }
-    handleOrderUpdate(data) { /* 保持原有邏輯 */ }
-    handleNewOrder(data) { /* 保持原有邏輯 */ }
-    handleOrderReady(data) { /* 保持原有邏輯 */ }
-    handleOrderCollected(data) { /* 保持原有邏輯 */ }
-    handlePaymentUpdate(data) { /* 保持原有邏輯 */ }
-    handleSystemMessage(data) { /* 保持原有邏輯 */ }
-    handleGenericUpdate(data) { /* 保持原有邏輯 */ }
-    
-    triggerUnifiedDataRefresh() {
-        if (this.refreshTimeout) {
-            clearTimeout(this.refreshTimeout);
+    /**
+     * 處理隊列更新 - 顯示 Toast 通知
+     */
+    handleQueueUpdate(data) {
+        console.log('📊 隊列更新:', data);
+        // 隊列數據已由 UnifiedDataManager 處理，此處只做通知
+        if (data.message) {
+            this.showToast(`📊 ${data.message}`, 'info');
         }
-        
-        this.refreshTimeout = setTimeout(() => {
-            console.log('🔄 觸發統一數據刷新');
-            
-            if (window.unifiedDataManager && typeof window.unifiedDataManager.loadUnifiedData === 'function') {
-                window.unifiedDataManager.loadUnifiedData();
-            } else {
-                document.dispatchEvent(new CustomEvent('refresh_unified_data'));
-            }
-            
-            this.refreshTimeout = null;
-        }, 300);
+    }
+    
+    /**
+     * 處理訂單更新 - 顯示 Toast 通知
+     */
+    handleOrderUpdate(data) {
+        console.log('📝 訂單更新:', data);
+        const orderId = data.order_id || data.id;
+        if (orderId && data.status) {
+            const statusMap = {
+                'waiting': '等待中',
+                'preparing': '製作中',
+                'ready': '已就緒',
+                'completed': '已提取'
+            };
+            const statusText = statusMap[data.status] || data.status;
+            this.showToast(`📝 訂單 #${orderId} 狀態更新: ${statusText}`, 'info');
+        }
+    }
+    
+    /**
+     * 處理新訂單 - 顯示通知並播放音效
+     */
+    handleNewOrder(data) {
+        console.log('🆕 新訂單:', data);
+        const orderId = data.order_id || data.id;
+        if (orderId) {
+            this.showToast(`🆕 新訂單 #${orderId} 已創建`, 'success');
+            this.playSound(660, 0.3, 0.2); // 高音提示
+        }
+    }
+    
+    /**
+     * 處理訂單就緒 - 顯示通知並播放音效
+     */
+    handleOrderReady(data) {
+        console.log('✅ 訂單就緒:', data);
+        const orderId = data.order_id || data.id;
+        if (orderId) {
+            this.showToast(`✅ 訂單 #${orderId} 已就緒，等待取餐`, 'success');
+            this.playSound(880, 0.3, 0.3); // 更高音提示
+        }
+    }
+    
+    /**
+     * 處理訂單已提取 - 顯示通知
+     */
+    handleOrderCollected(data) {
+        console.log('📦 訂單已提取:', data);
+        const orderId = data.order_id || data.id;
+        if (orderId) {
+            this.showToast(`📦 訂單 #${orderId} 已提取`, 'info');
+        }
+    }
+    
+    /**
+     * 處理支付更新 - 顯示通知
+     */
+    handlePaymentUpdate(data) {
+        console.log('💳 支付更新:', data);
+        const orderId = data.order_id || data.id;
+        if (orderId) {
+            const status = data.payment_status || data.status;
+            this.showToast(`💳 訂單 #${orderId} 支付狀態: ${status}`, 'info');
+        }
+    }
+    
+    /**
+     * 處理系統訊息 - 顯示通知
+     */
+    handleSystemMessage(data) {
+        console.log('🔔 系統訊息:', data);
+        const message = data.message || data.text || '系統訊息';
+        const level = data.level || 'info';
+        this.showToast(`🔔 ${message}`, level);
+    }
+    
+    /**
+     * 處理通用更新
+     */
+    handleGenericUpdate(data) {
+        console.log('🔄 通用更新:', data);
+        // 通用更新只觸發數據刷新，不顯示通知
+    }
+    
+    /**
+     * 觸發統一數據刷新 - 已棄用，改用 DebounceCoordinator
+     * @deprecated
+     */
+    triggerUnifiedDataRefresh() {
+        // 已棄用：統一由 DebounceCoordinator 調度
+        console.log('ℹ️ triggerUnifiedDataRefresh 已棄用，由 DebounceCoordinator 管理');
     }
     
     getUserId() {
@@ -754,6 +843,43 @@ class WebSocketManager {
                 setTimeout(() => notification.remove(), 300);
             }
         }, duration);
+    }
+    
+    /**
+     * 顯示 Toast 通知（使用統一的 toast-manager.js）
+     */
+    showToast(message, type = 'info') {
+        // 防止重複顯示相同訊息
+        const now = Date.now();
+        const messageKey = `${message}_${type}`;
+        
+        if (this.recentlyShownToasts && this.recentlyShownToasts.has(messageKey)) {
+            const lastShownTime = this.recentlyShownToasts.get(messageKey);
+            if (now - lastShownTime < 3000) {
+                console.log(`⏭️ 跳過重複訊息: ${message} (${type})`);
+                return;
+            }
+        }
+        
+        if (!this.recentlyShownToasts) {
+            this.recentlyShownToasts = new Map();
+        }
+        this.recentlyShownToasts.set(messageKey, now);
+        setTimeout(() => {
+            if (this.recentlyShownToasts) {
+                this.recentlyShownToasts.delete(messageKey);
+            }
+        }, 3000);
+        
+        // 優先使用統一的 toast-manager.js
+        if (window.toast) {
+            const toastType = type === 'success' ? 'success' : 
+                             type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 'info';
+            window.toast[toastType](message);
+        } else {
+            this.showNotification(message, type, 3000);
+        }
     }
     
     playSound(frequency, volume, duration) {

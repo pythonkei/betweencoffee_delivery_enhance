@@ -1076,10 +1076,7 @@ class QueueManager {
             button.classList.add('btn-secondary');
         }
         
-        // 2. 顯示處理中提示
-        this.showToast(`正在處理訂單 #${orderId}...`, 'info');
-        
-        // 3. 記錄樂觀更新狀態
+        // 2. 記錄樂觀更新狀態
         if (!this.optimisticUpdates) {
             this.optimisticUpdates = new Map();
         }
