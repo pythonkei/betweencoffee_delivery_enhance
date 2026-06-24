@@ -54,12 +54,12 @@
                             <div class="d-flex align-items-center justify-content-between px-3 py-3">
                                 <div class="d-flex align-items-center">
                                     <div>
-                                        <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                        <div style="color: #fff; font-size: 0.95rem; font-weight: 500;" class="pt-3">
                                             <i class="fas fa-hourglass-half" style="color: #c49b63; margin-right: 6px;"></i> 支付剩餘時間: <span id="payment-timeout-countdown" style="color: #c49b63; font-size: 1.2rem; font-weight: 700;">05:00</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center" style="gap: 6px;">
+                                <div class="d-flex align-items-center pt-3" style="gap: 6px;">
                                     <a href="{% url 'eshop:continue_payment' order.id %}" style="
                                         display: inline-flex; align-items: center; gap: 6px;
                                         background: #c49b63; color: #ffffff;
@@ -575,7 +575,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cancelBtn) {
         cancelBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (!confirm('確定要取消此訂單支付嗎？')) return;
             
             const orderId = '{{ order.id }}';
             const csrfToken = '{{ csrf_token }}';
