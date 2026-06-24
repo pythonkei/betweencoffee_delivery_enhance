@@ -660,6 +660,51 @@ def fps_payment(request, order_id):
         messages.error(request, f"FPS支付页面加载失败: {str(e)}")
         return redirect('eshop:order_payment_confirmation', order_id=order_id)
 
+# ==================== FPS 支付確認視圖 ====================
+
+def fps_confirm_payment(request, order_id):
+    """FPS支付確認 - 用戶點擊「我已完成支付」後處理"""
+    try:
+        if request.method != 'POST':
+            return redirect('eshop:fps_payment', order_id=order_id)
+        
+        order = get_object_or_404(OrderModel, id=order_id)
+        
+        # 驗證用戶權限
+        if request.user.is_authenticated and order.user != request.user:
+            messages.error(request, "您無權訪問此訂單")
+            return redirect('index')
+        
+        # 如果已經支付，直接跳轉
+        if order.payment_status == 'paid':
+            clear_user_cart_and_session(request)
+            return redirect_to_confirmation(order.id)
+        
+        logger.info(f"FPS支付確認: 訂單 {order_id}, 用戶聲稱已完成支付")
+        
+        # 使用 OrderStatusManager 處理支付成功
+        result = OrderStatusManager.process_payment_success(order_id, request)
+        
+        if result.get('success'):
+            logger.info(f"✅ FPS支付確認成功: 訂單 {order_id}")
+            clear_user_cart_and_session(request)
+            messages.success(request, "支付確認成功！")
+            return redirect_to_confirmation(order.id)
+        else:
+            error_msg = result.get('message', '訂單處理失敗')
+            logger.error(f"❌ FPS支付確認失敗: {error_msg}")
+            messages.error(request, f"支付確認失敗: {error_msg}")
+            return redirect('eshop:fps_payment', order_id=order_id)
+        
+    except OrderModel.DoesNotExist:
+        messages.error(request, "訂單不存在")
+        return redirect('index')
+    except Exception as e:
+        logger.error(f"FPS支付確認異常: {str(e)}")
+        messages.error(request, f"支付確認異常: {str(e)}")
+        return redirect('eshop:fps_payment', order_id=order_id)
+
+
 # ==================== 现金支付视图 ====================
 
 def cash_payment(request, order_id):

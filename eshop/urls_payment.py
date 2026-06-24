@@ -10,6 +10,7 @@ from .views.payment_views import (
     check_alipay_config,
     paypal_callback,
     fps_payment,
+    fps_confirm_payment,
     cash_payment,
     check_and_update_payment_status,
     check_payment_timeout,
@@ -37,6 +38,7 @@ urlpatterns = [
     
     # FPS和现金支付
     path('fps/<int:order_id>/', fps_payment, name='fps_payment'),
+    path('fps/<int:order_id>/confirm/', fps_confirm_payment, name='fps_confirm_payment'),
     path('cash/<int:order_id>/', cash_payment, name='cash_payment'),
     
     # 支付检查
