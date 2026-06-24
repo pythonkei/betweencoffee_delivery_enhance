@@ -2,6 +2,7 @@
 
 import json
 import logging
+import time
 from datetime import timedelta
 
 from django.views import View
@@ -738,3 +739,51 @@ def health_check(request):
             status_code=503,
             details={'error_type': 'health_check'}
         )
+
+
+# ==================== FPS 動態 QR Code API ====================
+
+@csrf_exempt
+def generate_fps_qr_api(request):
+    """
+    FPS 動態 QR Code 生成 API
+    用於 order_confirm.html 頁面中 FPS 支付選項展開時動態加載 QR Code
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': '僅支持 POST 請求'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        amount = data.get('amount', '0')
+        reference = data.get('reference', f'BC{int(time.time()) % 1000000:06d}')
+        
+        # 創建一個臨時訂單對象來生成 QR Code
+        from eshop.fps_utils import generate_fps_qr_code
+        
+        # 使用一個簡單的對象來模擬訂單
+        class TempOrder:
+            def __init__(self, amount, ref):
+                self.total_price = amount
+                self.id = int(time.time()) % 1000000
+        
+        temp_order = TempOrder(amount, reference)
+        qr_code = generate_fps_qr_code(temp_order)
+        
+        if qr_code:
+            return JsonResponse({
+                'success': True,
+                'qr_code': qr_code,
+                'reference': reference,
+                'amount': amount
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': '無法生成 QR Code'
+            })
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': '無效的 JSON 數據'})
+    except Exception as e:
+        logger.error(f"FPS QR Code 生成失敗: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)})

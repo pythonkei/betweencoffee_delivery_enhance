@@ -625,7 +625,7 @@ def clear_user_cart_and_session(request):
 # ==================== FPS支付视图 ====================
 
 def fps_payment(request, order_id):
-    """FPS支付页面"""
+    """FPS支付页面 - 顯示動態生成的QR Code"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
         
@@ -641,9 +641,14 @@ def fps_payment(request, order_id):
         else:
             fps_reference = f"BC{order.id:06d}"
         
+        # 生成動態QR Code
+        from eshop.fps_utils import generate_fps_qr_code
+        fps_qr_code = generate_fps_qr_code(order)
+        
         context = {
             'order': order,
             'fps_reference': order.fps_reference or fps_reference,
+            'fps_qr_code': fps_qr_code,
             'amount': order.total_price,
             'phone': order.phone or '',
         }

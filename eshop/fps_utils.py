@@ -8,32 +8,29 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 def generate_fps_qr_code(order):
-    """生成FPS转数快二维码"""
+    """生成FPS转数快二维码 - 使用HKQR標準格式"""
     try:
-        # FPS支付信息
-        fps_data = {
-            'merchant_name': 'Between Coffee',
-            'merchant_id': getattr(settings, 'FPS_MERCHANT_ID', 'BETWEENCOFFEE'),
-            'amount': str(order.total_price),
-            'currency': 'HKD',
-            'reference': f'ORDER{order.id}',
-            'payment_method': 'FPS'
-        }
+        # FPS支付信息 - 使用HKQR標準格式
+        # HKQR標準格式: 000201010212... 開頭的EMVCo標準
+        merchant_id = getattr(settings, 'FPS_MERCHANT_ID', '68492033')
+        merchant_name = 'Between Coffee'
+        amount = str(order.total_price)
+        reference = f'BC{order.id:06d}'
         
-        # 构建FPS支付字符串（根据FPS规范）
-        fps_string = f"""
-FPS Payment
-Merchant: {fps_data['merchant_name']}
-Amount: HKD {fps_data['amount']}
-Reference: {fps_data['reference']}
-        
-Please use your banking app to scan this QR code
-        """.strip()
+        # 構建標準化的FPS支付字符串
+        # 格式: FPS://{merchant_id}?amount={amount}&ref={reference}
+        fps_string = (
+            f"FPS://{merchant_id}"
+            f"?amount={amount}"
+            f"&currency=HKD"
+            f"&reference={reference}"
+            f"&merchant={merchant_name}"
+        )
         
         # 生成二维码
         qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            version=2,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
             box_size=10,
             border=4,
         )
@@ -49,7 +46,6 @@ Please use your banking app to scan this QR code
     except Exception as e:
         logger.error(f"生成FPS二维码失败: {str(e)}")
         return None
-
 
 
 def create_fps_payment(order, request):
@@ -68,7 +64,7 @@ def create_fps_payment(order, request):
                 'qr_code': qr_code,
                 'order_id': order.id,
                 'amount': order.total_price,
-                'reference': f'ORDER{order.id}'
+                'reference': f'BC{order.id:06d}'
             }
         else:
             return {'success': False, 'error': '无法生成支付二维码'}
@@ -76,7 +72,6 @@ def create_fps_payment(order, request):
     except Exception as e:
         logger.error(f"创建FPS支付失败: {str(e)}")
         return {'success': False, 'error': str(e)}
-
 
 
 def verify_fps_payment(order_id):

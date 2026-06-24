@@ -322,106 +322,67 @@
                         <!-- ========== end 積分獎勵選擇區塊 ========== -->
 
 
-                        <!-- 付款方式選擇（方案B：簡約列表式） -->
+                        <!-- 付款方式選擇（方案C：無Accordion簡約列表式） -->
                         <div class="col-md-12 px-0 mb-4">
                             <div class="form-group">
                                 <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
                                     <i class="fas fa-credit-card" style="color: #c49b63;"></i> 支付方式
                                 </label>
-                                <div class="payment-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                                <div class="payment-list-simple" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
                                     <!-- 支付宝 -->
-                                    <div class="payment-item" data-payment="alipay">
+                                    <div class="payment-item-simple" data-payment="alipay">
                                         <input type="radio" name="payment_method" id="pay-alipay" value="alipay" checked
                                                style="display: none;">
-                                        <label for="pay-alipay" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
-                                            <div class="d-flex align-items-center">
-                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
-                                                </span>
-                                                <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fab fa-alipay" style="color: #c49b63; margin-right: 6px;"></i> Alipay 支付宝
-                                                    </div>
-                                                </div>
+                                        <label for="pay-alipay" class="payment-label-simple mb-0 d-flex align-items-center px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                            <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                            </span>
+                                            <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                <i class="fab fa-alipay" style="color: #c49b63; margin-right: 6px;"></i> Alipay 支付宝
                                             </div>
-                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
                                         </label>
-                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
-                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0;">使用支付宝扫码支付，快速安全</p>
-                                        </div>
                                     </div>
 
                                     <!-- PayPal -->
-                                    <div class="payment-item" data-payment="paypal">
+                                    <div class="payment-item-simple" data-payment="paypal">
                                         <input type="radio" name="payment_method" id="pay-paypal" value="paypal"
                                                style="display: none;">
-                                        <label for="pay-paypal" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
-                                            <div class="d-flex align-items-center">
-                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
-                                                </span>
-                                                <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fab fa-paypal" style="color: #c49b63; margin-right: 6px;"></i> PayPal 支付
-                                                    </div>
-                                                </div>
+                                        <label for="pay-paypal" class="payment-label-simple mb-0 d-flex align-items-center px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                            <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                            </span>
+                                            <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                <i class="fab fa-paypal" style="color: #c49b63; margin-right: 6px;"></i> PayPal 支付
                                             </div>
-                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
                                         </label>
-                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
-                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0;">使用PayPal账户或信用卡支付</p>
-                                        </div>
                                     </div>
 
                                     <!-- FPS轉數快 -->
-                                    <div class="payment-item" data-payment="fps">
+                                    <div class="payment-item-simple" data-payment="fps">
                                         <input type="radio" name="payment_method" id="pay-fps" value="fps"
                                                style="display: none;">
-                                        <label for="pay-fps" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
-                                            <div class="d-flex align-items-center">
-                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
-                                                </span>
-                                                <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fas fa-mobile-alt" style="color: #c49b63; margin-right: 6px;"></i> FPS 轉數快
-                                                    </div>
-                                                </div>
+                                        <label for="pay-fps" class="payment-label-simple mb-0 d-flex align-items-center px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                            <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                            </span>
+                                            <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                <i class="fas fa-mobile-alt" style="color: #c49b63; margin-right: 6px;"></i> FPS 轉數快
                                             </div>
-                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
                                         </label>
-                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
-                                            <p>使用香港手機銀行App掃碼支付</p>
-                                            <div class="fps-qrcode-container mt-2 mb-2 text-center">
-                                                <img src="{% static 'images/fps_qrcode_v2.png' %}" 
-                                                     alt="FPS 轉數快 QR Code" 
-                                                     class="fps-qrcode-img"
-                                                     style="max-width: 320px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; background-color: rgba(255,255,255,0.9);">
-
-                                            </div>
-                                        </div>
                                     </div>
 
                                     <!-- 现金支付 -->
-                                    <div class="payment-item" data-payment="cash">
+                                    <div class="payment-item-simple" data-payment="cash">
                                         <input type="radio" name="payment_method" id="pay-cash" value="cash"
                                                style="display: none;">
-                                        <label for="pay-cash" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; display: flex !important;">
-                                            <div class="d-flex align-items-center">
-                                                <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
-                                                </span>
-                                                <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fas fa-money-bill-wave" style="color: #c49b63; margin-right: 6px;"></i> 現金支付
-                                                    </div>
-                                                </div>
+                                        <label for="pay-cash" class="payment-label-simple mb-0 d-flex align-items-center px-3 py-3" style="cursor: pointer;">
+                                            <span class="payment-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+                                                <span class="payment-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                            </span>
+                                            <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                <i class="fas fa-money-bill-wave" style="color: #c49b63; margin-right: 6px;"></i> 現金支付
                                             </div>
-                                            <i class="fas fa-chevron-down payment-arrow" style="color: rgba(255,255,255,0.3); transition: transform 0.3s ease;"></i>
                                         </label>
-                                        <div class="payment-details" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 3rem;">
-                                            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 0;">到店取貨時支付現金，如有訂單相關問題，我們會聯絡您</p>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -675,17 +636,15 @@
 
 
 <script>
-// 支付方式交互（方案B：簡約列表式）- 自定義 radio + 展開/收起
+// 支付方式交互（方案C：無Accordion簡約列表式）- 自定義 radio 切換（無箭頭、無展開/收起）
 document.addEventListener('DOMContentLoaded', function() {
-    const paymentItems = document.querySelectorAll('.payment-item');
+    const paymentItems = document.querySelectorAll('.payment-item-simple');
     
     function updatePaymentStyle(item) {
         const radio = item.querySelector('input[type="radio"]');
         const circle = item.querySelector('.payment-radio-circle');
         const dot = item.querySelector('.payment-radio-dot');
-        const label = item.querySelector('.payment-label');
-        const arrow = item.querySelector('.payment-arrow');
-        const details = item.querySelector('.payment-details');
+        const label = item.querySelector('.payment-label-simple');
         
         if (radio.checked) {
             // 選中樣式：金色 radio + 背景高亮
@@ -698,15 +657,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (label) {
                 label.style.background = 'rgba(196,155,99,0.08)';
             }
-            // 展開詳情
-            if (details) {
-                details.style.maxHeight = details.scrollHeight + 50 + 'px';
-                details.style.padding = '0.75rem 3rem';
-            }
-            if (arrow) {
-                arrow.style.transform = 'rotate(180deg)';
-                arrow.style.color = '#c49b63';
-            }
         } else {
             // 未選中樣式
             if (circle) {
@@ -717,15 +667,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (label) {
                 label.style.background = 'transparent';
-            }
-            // 收起詳情
-            if (details) {
-                details.style.maxHeight = '0';
-                details.style.padding = '0 3rem';
-            }
-            if (arrow) {
-                arrow.style.transform = 'rotate(0deg)';
-                arrow.style.color = 'rgba(255,255,255,0.3)';
             }
         }
     }
@@ -740,14 +681,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 點擊 label 時切換
     paymentItems.forEach(item => {
-        const label = item.querySelector('.payment-label');
+        const label = item.querySelector('.payment-label-simple');
         const radio = item.querySelector('input[type="radio"]');
         
         if (label && radio) {
             label.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                // 如果已經選中，不做任何事（保持展開）
+                // 如果已經選中，不做任何事
                 if (radio.checked) return;
                 
                 // 取消所有其他選中
@@ -1322,6 +1263,8 @@ function useExistingOrder(orderId) {
     // 提交表单
     form.submit();
 }
+
+// FPS 動態 QR Code 加載 - 已移除（FPS 僅顯示付款選項）
 
 // 取消未完成訂單（在 order_confirm.html 中直接操作，無需跳轉到 payment-confirmation）
 function cancelPendingOrder(orderId) {

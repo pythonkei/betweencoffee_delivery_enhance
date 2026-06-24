@@ -20,6 +20,7 @@ from .views.api_views import (
     get_quick_order_times,
     update_order_pickup_times_api,
     health_check,
+    generate_fps_qr_api,
 )
 
 # ==================== 導入 WebSocket 監控視圖 ====================
@@ -77,6 +78,8 @@ urlpatterns = [
     # ==================== 取消訂單 API ====================
     path('cancel-order/<int:order_id>/', api_cancel_order, name='api_cancel_order'),
 
+    # ==================== FPS 動態 QR Code API ====================
+    path('fps/generate-qr/', generate_fps_qr_api, name='generate_fps_qr'),
 
     
     # ==================== 🔥 WebSocket 監控 API（管理員專用）====================
