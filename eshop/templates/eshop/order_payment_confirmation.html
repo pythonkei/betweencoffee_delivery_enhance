@@ -47,30 +47,54 @@
                     
                     {% elif payment_info.status == 'pending' %}
                         <h5 class="mb-0">{{ payment_info.message }}</h5>
-                        {% if payment_info.timeout_message %}
-                            <p class="mt-3">{{ payment_info.timeout_message|safe }}</p>
-                        {% endif %}
                         
-                        <!-- 支付超时倒计时 -->
-                        <div class="mt-4 p-3 bg-warning text-dark rounded">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <i class="fas fa-hourglass-half mr-2"></i>
-                                    <strong>支付剩余时间:</strong>
-                                    <span id="payment-timeout-countdown">05:00</span>
+                        <!-- 支付超时倒计时（與 order_confirm.html 未完成訂單區域按鈕設計一致） -->
+                        <div class="mt-5" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; width: 90%; margin-left: auto; margin-right: auto;">
+                            <!-- 倒計時 + 按鈕行 -->
+                            <div class="d-flex align-items-center justify-content-between px-3 py-3">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                            <i class="fas fa-hourglass-half" style="color: #c49b63; margin-right: 6px;"></i> 支付剩餘時間: <span id="payment-timeout-countdown" style="color: #c49b63; font-size: 1.2rem; font-weight: 700;">05:00</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button id="cancel-payment-btn" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-times mr-1"></i>取消支付
-                                </button>
+                                <div class="d-flex align-items-center" style="gap: 6px;">
+                                    <a href="{% url 'eshop:continue_payment' order.id %}" style="
+                                        display: inline-flex; align-items: center; gap: 6px;
+                                        background: #c49b63; color: #ffffff;
+                                        border: none; border-radius: 6px;
+                                        padding: 6px 14px;
+                                        font-size: 0.85rem; font-weight: 600;
+                                        text-decoration: none;
+                                        cursor: pointer;
+                                        transition: all 0.2s;
+                                        white-space: nowrap;
+                                    " onmouseover="this.style.background='#d4ab73'" onmouseout="this.style.background='#c49b63'">
+                                        <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i> 繼續支付
+                                    </a>
+                                    <button id="cancel-payment-btn" style="
+                                        display: inline-flex; align-items: center; gap: 4px;
+                                        background: transparent; color: rgba(255,255,255,0.5);
+                                        border: 1px solid rgba(255,255,255,0.15);
+                                        border-radius: 6px;
+                                        padding: 6px 14px;
+                                        font-size: 0.85rem; font-weight: 600;
+                                        cursor: pointer;
+                                        transition: all 0.2s;
+                                        white-space: nowrap;
+                                    " onmouseover="this.style.borderColor='rgba(220,53,69,0.5)';this.style.color='#dc3545'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='rgba(255,255,255,0.5)'">
+                                        <i class="fas fa-times" style="font-size: 0.7rem;"></i> 取消
+                                    </button>
+                                </div>
                             </div>
-                            <small class="d-block mt-1">请在时间内完成支付，超时订单将自动取消</small>
-                        </div>
-                        
-                        <!-- ====== 繼續支付按鈕 ====== -->
-                        <div class="mt-4">
-                            <a href="{% url 'eshop:continue_payment' order.id %}" class="btn btn-primary mr-2">
-                                <i class="fas fa-credit-card"></i> 繼續支付
-                            </a>
+                            <!-- 客服提示行（居中對齊，無圖標） -->
+                            <div class="px-3 py-3 text-center">
+                                <div style="color: rgba(255,255,255,0.7); font-size: 1.0rem; line-height: 1.6;">
+                                    若長時間未更新，請聯絡客服並提供訂單號碼:<br>
+                                    <span style="color: #c49b63; font-size: 1.0rem; font-weight: 700;">#{{ order.id }}</span>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- ====== 自動輪詢支付狀態（隱藏） ====== -->
@@ -533,11 +557,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (diff <= 0) {
                     countdownEl.textContent = '00:00';
-                    const parentDiv = countdownEl.closest('.bg-warning');
-                    if (parentDiv) {
-                        parentDiv.classList.remove('bg-warning', 'text-dark');
-                        parentDiv.classList.add('bg-danger', 'text-white');
-                    }
                     return;
                 }
                 
