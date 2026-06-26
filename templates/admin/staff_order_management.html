@@ -45,88 +45,78 @@
 
                 <!-- 訂單標籤頁內容 -->
                 <div class="tab-content" id="orderTabsContent">
-                    <!-- 製作隊列標籤頁 -->
+                    <!-- 製作隊列標籤頁 - 分層子標籤頁系統 -->
                     <div class="tab-pane fade show active" id="queue" role="tabpanel" aria-labelledby="queue-tab">
                         <div class="order-section" data-status="queue">
-                            <div id="waiting-queue-content">
-                                <div class="order-list" id="waiting-orders-list">
-                                    <!-- 動態內容將由JavaScript以卡片形式填充 -->
+                            
+                            <!-- 子標籤頁導航 -->
+                            <ul class="nav nav-tabs mb-4" id="queueSubTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="waiting-tab" data-toggle="tab" href="#waiting" role="tab" aria-controls="waiting" aria-selected="true">
+                                        <i class="fas fa-list-ol mr-2"></i>等待中
+                                        <span class="badge badge-warning ml-2" id="waiting-badge">0</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="payment-pending-tab" data-toggle="tab" href="#payment-pending" role="tab" aria-controls="payment-pending" aria-selected="false">
+                                        <i class="fas fa-clock mr-2"></i>待確認付款
+                                        <span class="badge badge-danger ml-2" id="payment-pending-badge">0</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            <!-- 子標籤頁內容 -->
+                            <div class="tab-content" id="queueSubTabsContent">
+                                
+                                <!-- 子標籤頁1：等待中 -->
+                                <div class="tab-pane fade show active" id="waiting" role="tabpanel" aria-labelledby="waiting-tab">
+                                    <div class="sub-order-section" data-sub-status="waiting">
+                                        
+                                        <!-- 訂單內容容器 -->
+                                        <div id="waiting-orders-list">
+                                            <!-- 動態內容將由JavaScript以卡片形式填充 -->
+                                        </div>
+                                        
+                                        <!-- 空狀態 -->
+                                        <div id="waiting-queue-empty" class="text-center py-5" style="display: none;">
+                                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">暫無等待訂單</p>
+                                        </div>
+                                        
+                                    </div>
                                 </div>
+                                
+                                <!-- 子標籤頁2：待確認付款 -->
+                                <div class="tab-pane fade" id="payment-pending" role="tabpanel" aria-labelledby="payment-pending-tab">
+                                    <div class="sub-order-section" data-sub-status="payment-pending">
+                                        
+                                        <!-- 訂單內容容器 -->
+                                        <div id="payment-pending-orders-list">
+                                            <!-- 動態內容將由 PaymentPendingRenderer 填充 -->
+                                        </div>
+                                        
+                                        <!-- 空狀態 -->
+                                        <div id="payment-pending-orders-empty" class="text-center py-5" style="display: none;">
+                                            <div class="mb-4">
+                                                <i class="fas fa-check-circle fa-3x text-success"></i>
+                                            </div>
+                                            <h4>暫無待確認付款的訂單</h4>
+                                            <p class="text-muted">所有 FPS 付款訂單已確認</p>
+                                        </div>
+                                        
+                                        <!-- 刷新按鈕 -->
+                                        <div class="text-center mt-4">
+                                            <button class="btn btn-outline-danger btn-sm" id="refresh-payment-pending-orders-btn">
+                                                <i class="fas fa-sync-alt mr-1"></i> 刷新待確認付款
+                                            </button>
+                                            <small class="text-muted d-block mt-1">最後更新: <span id="payment-pending-orders-last-update">-</span></small>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                
                             </div>
                             
-                            <div id="waiting-queue-empty" class="text-center py-5" style="display: none;">
-                                <i class="fas fa-clock fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">暫無等待訂單</p>
-                            </div>
-
-                            <!-- 不使用 隊列統計卡片 -->
-                            {% comment %} <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <div class="card text-white bg-warning">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <h4 class="card-title" id="waiting-count">0</h4>
-                                                    <p class="card-text">等待中</p>
-                                                </div>
-                                                <div class="align-self-center">
-                                                    <i class="fas fa-clock fa-2x"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card text-white bg-primary">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <h4 class="card-title" id="preparing-count">0</h4>
-                                                    <p class="card-text">製作中</p>
-                                                </div>
-                                                <div class="align-self-center">
-                                                    <i class="fas fa-mug-hot fa-2x"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card text-white bg-success">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <h4 class="card-title" id="ready-count">0</h4>
-                                                    <p class="card-text">已就緒</p>
-                                                </div>
-                                                <div class="align-self-center">
-                                                    <i class="fas fa-check-circle fa-2x"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> {% endcomment %}
-                            
-                            
-                            <!-- 等待隊列 -->
-                                <div hidden class="card-header bg-warning text-white">
-                                    <h5><i class="fas fa-clock"></i> 等待隊列 
-                                        <span class="badge badge-light" id="waiting-queue-count">0</span>
-                                    </h5>
-                                </div>
-                                    <!-- 刪除加載指示器 -->
-                                    <!-- 
-                                    <div id="waiting-queue-loading" style="display: none;">
-                                        <div class="text-center">
-                                            <div class="spinner-border text-warning" role="status">
-                                                <span class="sr-only">加載中...</span>
-                                            </div>
-                                            <p class="mt-2">正在加載等待隊列...</p>
-                                        </div>
-                                    </div>
-                                    -->
-                                    
                         </div>
                     </div>
                     
@@ -336,6 +326,7 @@
 <script src="{% static 'js/staff-order-management/order-manager.js' %}"></script>
 
 <!-- 5. 各标签页渲染器 -->
+<script src="{% static 'js/staff-order-management/payment-pending-renderer.js' %}"></script>
 <script src="{% static 'js/staff-order-management/preparing-orders-renderer-enhanced.js' %}"></script>
 <script src="{% static 'js/staff-order-management/ready-orders-renderer.js' %}"></script>
 <script src="{% static 'js/staff-order-management/completed-orders-renderer.js' %}"></script>

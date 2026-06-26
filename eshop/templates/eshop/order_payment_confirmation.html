@@ -104,6 +104,25 @@
                             </div>
                         </div>
                     
+                    {% elif payment_info.status == 'payment_pending' %}
+                        <h5 class="mb-0">{{ payment_info.message }}</h5>
+                        
+                        <!-- FPS 待確認付款提示（無倒數計時和繼續支付按鈕） -->
+                        <div class="mt-5" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; width: 90%; margin-left: auto; margin-right: auto;">
+                            <div class="px-3 py-4 text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-info-circle" style="color: #c49b63; font-size: 2rem;"></i>
+                                </div>
+                                <div style="color: rgba(255,255,255,0.8); font-size: 1.0rem; line-height: 1.6;">
+                                    您的 FPS 轉帳已提交，店員將在確認收款後更新訂單狀態。
+                                </div>
+                                <div class="mt-3" style="color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.6;">
+                                    若長時間未更新，請聯絡客服並提供訂單號碼:<br>
+                                    <span style="color: #c49b63; font-size: 1.0rem; font-weight: 700;">#{{ order.id }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    
                     {% else %}
                         <!-- 支付狀態未知 -->
                         <h5 class="mb-0">{{ payment_info.message }}</h5>
@@ -541,6 +560,75 @@ if (document.body) {
 <script src="{% static 'js/order_status_cards.js' %}"></script>
 
 <script>
+// ==================== Toast 通知系統 ====================
+function showToast(type, message) {
+    // 嘗試使用全局 toast 方法
+    if (window.toast) {
+        if (type === 'success') window.toast.success(message, '成功');
+        else if (type === 'error') window.toast.error(message, '錯誤');
+        else window.toast.info(message, '提示');
+        return;
+    }
+    
+    // 自定義 Toast 實現
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;';
+        document.body.appendChild(toastContainer);
+    }
+    
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    const title = type === 'success' ? '成功' : type === 'error' ? '錯誤' : '提示';
+    
+    const toastEl = document.createElement('div');
+    toastEl.style.cssText = `
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        min-width: 280px;
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: toastSlideIn 0.3s ease;
+        font-size: 0.95rem;
+    `;
+    toastEl.innerHTML = `
+        <span style="font-size:1.1rem;">${icon}</span>
+        <div>
+            <div style="font-weight:600;font-size:0.85rem;opacity:0.9;">${title}</div>
+            <div>${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            margin-left:auto;background:none;border:none;color:#fff;
+            opacity:0.7;cursor:pointer;font-size:1.2rem;padding:0 4px;
+        ">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toastEl);
+    
+    setTimeout(() => {
+        toastEl.style.transition = 'all 0.3s ease';
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translateX(20px)';
+        setTimeout(() => toastEl.remove(), 300);
+    }, 3500);
+}
+
+// 添加 toast 動畫
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+    @keyframes toastSlideIn {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+`;
+document.head.appendChild(toastStyle);
+
 // 所有JavaScript代碼都在DOMContentLoaded事件中執行，防止錯誤
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -601,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('取消支付失敗:', error);
                 cancelBtn.disabled = false;
                 cancelBtn.innerHTML = '<i class="fas fa-times mr-1"></i>取消支付';
-                alert('取消支付失敗，請稍後重試');
+                showToast('error', '取消支付失敗，請稍後重試');
             });
         });
     }
@@ -612,11 +700,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const pickupCode = pickupCodeElement ? pickupCodeElement.textContent.trim() : "";
         
         if (!pickupCode) {
-            if (window.toast) {
-                window.toast.error('提取碼不存在');
-            } else {
-                alert('提取碼不存在');
-            }
+            showToast('error', '提取碼不存在');
             return;
         }
         
@@ -633,25 +717,13 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const successful = document.execCommand('copy');
             if (successful) {
-                if (window.toast) {
-                    window.toast.success(`提取碼 ${pickupCode} 已複製到剪貼簿`, '複製成功');
-                } else {
-                    alert(`提取碼 ${pickupCode} 已複製到剪貼簿`);
-                }
+                showToast('success', `提取碼 ${pickupCode} 已複製到剪貼簿`);
             } else {
-                if (window.toast) {
-                    window.toast.error('複製失敗，請手動複製', '操作失敗');
-                } else {
-                    alert('複製失敗，請手動複製提取碼: ' + pickupCode);
-                }
+                showToast('error', '複製失敗，請手動複製提取碼: ' + pickupCode);
             }
         } catch (err) {
             console.error('複製失敗:', err);
-            if (window.toast) {
-                window.toast.error('複製失敗，請手動複製', '操作失敗');
-            } else {
-                alert('複製失敗，請手動複製提取碼: ' + pickupCode);
-            }
+            showToast('error', '複製失敗，請手動複製提取碼: ' + pickupCode);
         }
         
         document.body.removeChild(textArea);
@@ -662,21 +734,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const saveBtn = this;
         
         if (typeof html2canvas === 'undefined') {
-            if (window.toast) {
-                window.toast.error('圖片保存功能不可用，請稍後重試', '功能不可用');
-            } else {
-                alert('圖片保存功能暫時不可用');
-            }
+            showToast('error', '圖片保存功能暫時不可用');
             return;
         }
         
         const qrcodeSection = document.getElementById('qrcode-section');
         if (!qrcodeSection) {
-            if (window.toast) {
-                window.toast.error('截圖區域不存在', '操作失敗');
-            } else {
-                alert('找不到保存區域');
-            }
+            showToast('error', '找不到保存區域');
             return;
         }
         
@@ -766,22 +830,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
                 
-                if (window.toast) {
-                    window.toast.success('提取碼圖片已保存', '保存成功');
-                } else {
-                    alert('圖片保存成功');
-                }
+                showToast('success', '提取碼圖片已保存');
             }, 'image/png');
             
         } catch (error) {
             console.error('生成圖片失敗:', error);
             saveBtn.innerHTML = originalText;
             saveBtn.disabled = false;
-            if (window.toast) {
-                window.toast.error('生成圖片失敗，請稍後重試', '保存失敗');
-            } else {
-                alert('生成圖片失敗，請稍後重試');
-            }
+            showToast('error', '生成圖片失敗，請稍後重試');
         }
     });
 });

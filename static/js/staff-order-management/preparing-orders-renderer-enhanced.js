@@ -1206,15 +1206,9 @@ class EnhancedPreparingOrdersRenderer {
 // ==================== 全局註冊 ====================
 
 if (typeof window !== 'undefined') {
-    // 延遲實例化，確保DOM就緒
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (!window.enhancedPreparingRenderer) {
-                console.log('🌍 創建增強版製作中訂單渲染器實例...');
-                window.enhancedPreparingRenderer = new EnhancedPreparingOrdersRenderer();
-                window.EnhancedPreparingOrdersRenderer = EnhancedPreparingOrdersRenderer;
-                console.log('🌍 增強版製作中訂單渲染器已註冊到 window');
-            }
-        }, 500);
-    });
+    // 只註冊類，不自動創建實例（由 main.js 的 initRenderers 負責）
+    // 注意：main.js 使用 DynamicPreparingOrdersRenderer 名稱
+    window.DynamicPreparingOrdersRenderer = EnhancedPreparingOrdersRenderer;
+    window.EnhancedPreparingOrdersRenderer = EnhancedPreparingOrdersRenderer;
+    console.log('🌍 DynamicPreparingOrdersRenderer / EnhancedPreparingOrdersRenderer 類已註冊到 window');
 }

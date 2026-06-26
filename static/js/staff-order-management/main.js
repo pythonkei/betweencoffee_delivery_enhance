@@ -10,32 +10,51 @@ class OrderManagementSystem {
     async init() {
         if (this.initialized) return;
         
+        const initStartTime = Date.now();
         console.log('🔄 === 訂單管理系統初始化開始（統一數據流版） ===');
         
         try {
             // 1. 確保時間工具存在
+            console.log('📋 [步驟 1/6] 確保時間工具...');
             this.ensureTimeUtils();
+            console.log(`✅ [步驟 1/6] 時間工具就緒 (${Date.now() - initStartTime}ms)`);
             
             // 2. 等待統一數據管理器加載（關鍵）
+            console.log('📋 [步驟 2/6] 等待統一數據管理器...');
             await this.waitForUnifiedDataManager();
+            console.log(`✅ [步驟 2/6] 統一數據管理器就緒 (${Date.now() - initStartTime}ms)`);
             
             // 3. 按正確順序初始化核心組件
+            console.log('📋 [步驟 3/6] 初始化核心組件...');
             await this.initCoreComponents();
+            console.log(`✅ [步驟 3/6] 核心組件初始化完成 (${Date.now() - initStartTime}ms)`);
             
             // 4. 初始化渲染器
+            console.log('📋 [步驟 4/6] 初始化渲染器...');
             this.initRenderers();
+            console.log(`✅ [步驟 4/6] 渲染器初始化完成 (${Date.now() - initStartTime}ms)`);
+            
+            // 4a. 渲染器初始化完成後，主動觸發數據檢查
+            console.log('📋 [步驟 4a/6] 觸發渲染器數據檢查...');
+            this.triggerRenderersDataCheck();
+            console.log(`✅ [步驟 4a/6] 渲染器數據檢查已觸發 (${Date.now() - initStartTime}ms)`);
             
             // 5. 綁定全局事件
+            console.log('📋 [步驟 5/6] 綁定全局事件...');
             this.bindGlobalEvents();
+            console.log(`✅ [步驟 5/6] 全局事件綁定完成 (${Date.now() - initStartTime}ms)`);
             
             // 6. 啟動系統
+            console.log('📋 [步驟 6/6] 啟動系統...');
             await this.startSystem();
             
             this.initialized = true;
-            console.log('✅ === 訂單管理系統初始化完成 ===');
+            const totalTime = Date.now() - initStartTime;
+            console.log(`✅ === 訂單管理系統初始化完成 (總耗時: ${totalTime}ms) ===`);
             
         } catch (error) {
-            console.error('❌ 訂單管理系統初始化失敗:', error);
+            const failTime = Date.now() - initStartTime;
+            console.error(`❌ 訂單管理系統初始化失敗 (${failTime}ms):`, error);
             this.showInitializationError(error);
         }
     }
@@ -201,6 +220,7 @@ class OrderManagementSystem {
     // 初始化渲染器（按需延迟加载）
     initRenderers() {
         const rendererConfigs = [
+            { id: 'payment-pending', name: 'paymentPendingRenderer', Class: window.PaymentPendingRenderer },
             { id: 'preparing', name: 'preparingRenderer', Class: window.DynamicPreparingOrdersRenderer },
             { id: 'ready', name: 'readyRenderer', Class: window.DynamicReadyOrdersRenderer },
             { id: 'completed', name: 'completedRenderer', Class: window.DynamicCompletedOrdersRenderer }
@@ -433,6 +453,38 @@ class OrderManagementSystem {
         console.log('✅ 訂單管理系統已清理');
     }
     
+    // ====== 新增：渲染器初始化完成後主動觸發數據檢查 ======
+    triggerRenderersDataCheck() {
+        console.log('🔄 觸發所有渲染器的數據檢查...');
+        
+        // 檢查統一數據管理器是否已有數據
+        if (window.unifiedDataManager && window.unifiedDataManager.currentData) {
+            console.log('✅ 統一數據管理器已有數據，通知所有渲染器');
+            
+            // 主動通知所有渲染器（確保它們都有數據）
+            window.unifiedDataManager.notifyAllListeners();
+        } else {
+            console.log('⏳ 統一數據管理器尚無數據，等待初始加載完成後自動通知');
+            
+            // 監聽數據加載完成事件
+            const onDataLoaded = () => {
+                console.log('✅ 數據加載完成，渲染器將自動更新');
+                document.removeEventListener('unified_data_updated', onDataLoaded);
+            };
+            document.addEventListener('unified_data_updated', onDataLoaded);
+            
+            // 超時保護：5秒後如果還沒有數據，強制觸發一次加載
+            setTimeout(() => {
+                if (!window.unifiedDataManager || !window.unifiedDataManager.currentData) {
+                    console.log('⚠️ 數據加載超時，強制觸發數據加載');
+                    if (window.unifiedDataManager) {
+                        window.unifiedDataManager.loadUnifiedData(true);
+                    }
+                }
+            }, 5000);
+        }
+    }
+    
     // ====== 新增：檢查系統狀態 ======
     checkSystemStatus() {
         const status = {
@@ -445,7 +497,7 @@ class OrderManagementSystem {
             preparingRenderer: !!window.preparingRenderer,
             readyRenderer: !!window.readyRenderer,
             completedRenderer: !!window.completedRenderer,
-            lastUpdateTime: window.unifiedDataManager ? window.unifiedDataManager.getLastUpdateTime() : null
+            lastUpdateTime: window.unifiedDataManager ? window.unifiedDataManager.lastUpdateTime : null
         };
         
         console.log('🔍 系統狀態檢查:', status);

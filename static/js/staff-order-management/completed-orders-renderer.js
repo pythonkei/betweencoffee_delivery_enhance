@@ -301,7 +301,10 @@ class DynamicCompletedOrdersRenderer {
             `;
         }
         
-    // ====== 構建訂單HTML ======
+        // ====== 獲取商品列表（支援多種字段名） ======
+        const orderItems = order.items || order.coffee_items || order.order_items || order.products || [];
+        
+        // ====== 構建訂單HTML ======
     orderDiv.innerHTML = `
         <!-- 訂單類型徽章（左上角） -->
         <div class="order-type-badges-container">
@@ -318,7 +321,7 @@ class DynamicCompletedOrdersRenderer {
 
         <div class="order-items">
             <div>
-                ${this.renderOrderItems(order.items || [])}
+                ${this.renderOrderItems(orderItems)}
             </div>
             <div>
                 <span class="card-text-md">${order.items_display || (order.items_count || 0) + '項商品'}</span>
@@ -595,14 +598,7 @@ class DynamicCompletedOrdersRenderer {
 // ==================== 全局注册 ====================
 
 if (typeof window !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (!window.completedRenderer) {
-                console.log('🌍 创建已提取订单渲染器实例...');
-                window.completedRenderer = new DynamicCompletedOrdersRenderer();
-                window.DynamicCompletedOrdersRenderer = DynamicCompletedOrdersRenderer;
-                console.log('🌍 已提取订单渲染器已注册到 window');
-            }
-        }, 500);
-    });
+    // 只註冊類，不自動創建實例（由 main.js 的 initRenderers 負責）
+    window.DynamicCompletedOrdersRenderer = DynamicCompletedOrdersRenderer;
+    console.log('🌍 DynamicCompletedOrdersRenderer 類已註冊到 window');
 }

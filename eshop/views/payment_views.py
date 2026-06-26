@@ -663,7 +663,14 @@ def fps_payment(request, order_id):
 # ==================== FPS 支付確認視圖 ====================
 
 def fps_confirm_payment(request, order_id):
-    """FPS支付確認 - 用戶點擊「我已完成支付」後處理"""
+    """
+    FPS支付確認 - 用戶點擊「我已完成支付」後處理
+    
+    流程變更（2026-06-25）：
+    1. 顧客按下「我已付款」→ payment_status = 'payment_pending'（等待員工確認）
+    2. 員工在製作隊列頁面確認款項已收到 → payment_status = 'paid'
+    3. 然後根據訂單類型進入對應流程（咖啡→waiting，咖啡豆→ready）
+    """
     try:
         if request.method != 'POST':
             return redirect('eshop:fps_payment', order_id=order_id)
@@ -680,21 +687,40 @@ def fps_confirm_payment(request, order_id):
             clear_user_cart_and_session(request)
             return redirect_to_confirmation(order.id)
         
+        # 如果已經是付款待確認狀態，提示用戶
+        if order.payment_status == 'payment_pending':
+            messages.info(request, "您的付款已提交，請等待員工確認。")
+            return redirect_to_confirmation(order.id)
+        
         logger.info(f"FPS支付確認: 訂單 {order_id}, 用戶聲稱已完成支付")
         
-        # 使用 OrderStatusManager 處理支付成功
-        result = OrderStatusManager.process_payment_success(order_id, request)
+        # ====== 新流程：設為 payment_pending，等待員工確認 ======
+        order.payment_status = 'payment_pending'
+        order.save()
         
-        if result.get('success'):
-            logger.info(f"✅ FPS支付確認成功: 訂單 {order_id}")
-            clear_user_cart_and_session(request)
-            messages.success(request, "支付確認成功！")
-            return redirect_to_confirmation(order.id)
-        else:
-            error_msg = result.get('message', '訂單處理失敗')
-            logger.error(f"❌ FPS支付確認失敗: {error_msg}")
-            messages.error(request, f"支付確認失敗: {error_msg}")
-            return redirect('eshop:fps_payment', order_id=order_id)
+        logger.info(f"✅ FPS訂單 #{order_id} 已設為 payment_pending，等待員工確認")
+        
+        # 發送 WebSocket 通知給員工端
+        try:
+            from eshop.websocket_utils import send_order_update
+            send_order_update(
+                order_id=order_id,
+                update_type='payment_pending',
+                data={
+                    'order_id': order_id,
+                    'payment_method': 'fps',
+                    'payment_status': 'payment_pending',
+                    'message': f'FPS訂單 #{order_id} 等待付款確認'
+                }
+            )
+        except Exception as ws_error:
+            logger.error(f"發送WebSocket通知失敗: {str(ws_error)}")
+        
+        # 清空購物車和 session
+        clear_user_cart_and_session(request)
+        
+        messages.success(request, "付款已提交！請等待員工確認付款後，訂單將自動進入製作流程。")
+        return redirect_to_confirmation(order.id)
         
     except OrderModel.DoesNotExist:
         messages.error(request, "訂單不存在")

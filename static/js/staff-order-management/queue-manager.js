@@ -297,6 +297,7 @@ class QueueManager {
         orderDiv.setAttribute('data-status', 'waiting');
         orderDiv.setAttribute('data-type', order.is_quick_order ? 'quick' : 'normal');
         orderDiv.setAttribute('data-payment', order.payment_method);
+        orderDiv.setAttribute('data-payment-status', order.payment_status || '');
         orderDiv.setAttribute('data-created', order.created_at);
         
         // ====== 關鍵修正：訂單類型判斷 ======
@@ -415,6 +416,17 @@ class QueueManager {
             `;
         }
 
+        // ====== FPS 付款狀態徽章 ======
+        const isFpsPending = order.payment_method === 'fps' && order.payment_status === 'pending';
+        let fpsPaymentBadge = '';
+        if (isFpsPending) {
+            fpsPaymentBadge = `
+                <span class="badge badge-danger ml-1">
+                    <i class="fas fa-exclamation-circle mr-1"></i>FPS 待確認
+                </span>
+            `;
+        }
+
         // 構建訂單HTML（徽章修正版）
         orderDiv.innerHTML = `
             <!-- 訂單類型徽章（左上角） -->
@@ -474,9 +486,18 @@ class QueueManager {
             </div>
 
             <div class="d-flex justify-content-end align-items-center">
+                ${isFpsPending ? `
+                <div class="mr-2">
+                    <span class="badge badge-danger mr-2"><i class="fas fa-exclamation-circle mr-1"></i>FPS 待確認付款</span>
+                </div>
+                <button class="btn btn-success btn-sm confirm-fps-payment-btn" data-order-id="${order.id}">
+                    <i class="fas fa-check-circle mr-1"></i>確認 FPS 付款
+                </button>
+                ` : `
                 <button class="btn btn-primary btn-sm start-preparation-btn" data-order-id="${order.id}">
                     <i class="fas fa-play mr-1"></i>開始製作
                 </button>
+                `}
             </div>
         `;
         
@@ -862,6 +883,92 @@ class QueueManager {
         }
     }
     
+    // ==================== FPS 付款確認方法 ====================
+    
+    /**
+     * 確認 FPS 付款 - 員工確認 FPS 款項已收到
+     * 調用 API 將訂單從 payment_pending 轉為 paid
+     */
+    async confirmFpsPayment(orderId) {
+        try {
+            if (this.isLoading) {
+                console.log('⏳ 已有操作正在進行，跳過重複請求');
+                return;
+            }
+            this.isLoading = true;
+            
+            const csrfToken = this.getCsrfToken();
+            if (!csrfToken) {
+                throw new Error('無法獲取安全令牌，請刷新頁面重試');
+            }
+            
+            console.log(`🚀 確認 FPS 付款: 訂單 #${orderId}`);
+            
+            // 禁用按鈕防止重複點擊
+            const btn = document.querySelector(`.confirm-fps-payment-btn[data-order-id="${orderId}"]`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>確認中...';
+            }
+            
+            const response = await fetch(`/eshop/api/fps/confirm-payment/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({}),
+            });
+            
+            console.log(`📡 FPS 付款確認 API 響應: HTTP ${response.status}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('📊 FPS 付款確認響應:', data);
+                
+                if (data.success) {
+                    this.showToast(`✅ 訂單 #${orderId} FPS 付款已確認`, 'success');
+                    
+                    // 觸發統一數據刷新
+                    if (window.unifiedDataManager) {
+                        setTimeout(() => window.unifiedDataManager.loadUnifiedData(true), 500);
+                    }
+                    
+                    // 觸發付款確認事件
+                    document.dispatchEvent(new CustomEvent('fps_payment_confirmed', {
+                        detail: { 
+                            order_id: orderId,
+                            payment_status: 'paid',
+                            status: data.status || 'waiting'
+                        }
+                    }));
+                    
+                    return { success: true, message: 'FPS 付款已確認', status: data.status || 'waiting' };
+                } else {
+                    throw new Error(data.message || data.error || '確認失敗');
+                }
+            } else if (response.status === 403) {
+                throw new Error('權限不足：請確認您有員工權限');
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error(`❌ FPS 付款確認失敗 (訂單 #${orderId}):`, error);
+            
+            // 恢復按鈕狀態
+            const btn = document.querySelector(`.confirm-fps-payment-btn[data-order-id="${orderId}"]`);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i>確認 FPS 付款';
+            }
+            
+            this.showToast(`❌ FPS 付款確認失敗: ${error.message}`, 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+    
     // ==================== 事件監聽器 ====================
     
     initEventListeners() {
@@ -886,6 +993,13 @@ class QueueManager {
                 e.stopPropagation();
                 const orderId = e.target.closest('[data-order-id]')?.dataset.orderId;
                 if (orderId) this.markAsCollected(orderId);
+            }
+            
+            if (e.target.closest('.confirm-fps-payment-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const orderId = e.target.closest('[data-order-id]')?.dataset.orderId;
+                if (orderId) this.confirmFpsPayment(orderId);
             }
             
             if (e.target.closest('.view-details-btn')) {

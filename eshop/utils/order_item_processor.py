@@ -259,6 +259,7 @@ class OrderItemProcessor:
             'is_mixed_order': item_result['is_mixed_order'],
             'is_beans_only': item_result['is_beans_only'],
             'payment_method': order.payment_method or '',
+            'payment_status': order.payment_status or 'pending',
             'is_quick_order': order.is_quick_order,
             'pickup_time_info': pickup_time_info,
             'pickup_time_display': pickup_time_info['text'] if pickup_time_info else '--',

@@ -15,14 +15,15 @@ class UnifiedDataManager {
         this.maxRetryCount = 3;
         this.retryDelay = 5000; // 5秒
         
-        // 監聽器註冊表（修正：添加 completed_orders）
+        // 監聽器註冊表（修正：添加 payment_pending_orders 和 completed_orders）
         this.listeners = {
-            badge_summary: [],      // 徽章數據監聽器
-            waiting_orders: [],     // 等待隊列監聽器
-            preparing_orders: [],   // 製作中訂單監聽器
-            ready_orders: [],       // 已就緒訂單監聽器
-            completed_orders: [],   // ✅ 已提取訂單監聽器（新增）
-            all_data: []           // 所有數據監聽器
+            badge_summary: [],          // 徽章數據監聽器
+            payment_pending_orders: [], // 待確認付款訂單監聽器（新增）
+            waiting_orders: [],         // 等待隊列監聽器
+            preparing_orders: [],       // 製作中訂單監聽器
+            ready_orders: [],           // 已就緒訂單監聽器
+            completed_orders: [],       // ✅ 已提取訂單監聽器
+            all_data: []               // 所有數據監聽器
         };
         
         // 初始化
@@ -38,8 +39,8 @@ class UnifiedDataManager {
         // 啟動定期刷新
         this.startAutoRefresh();
         
-        // 初始加載數據
-        setTimeout(() => this.loadUnifiedData(), 1000);
+        // 初始加載數據（縮短延遲以減少用戶等待時間）
+        setTimeout(() => this.loadUnifiedData(), 500);
     }
     
     // ==================== 核心方法：加載統一數據（增強版） ====================

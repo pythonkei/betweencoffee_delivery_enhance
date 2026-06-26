@@ -787,3 +787,74 @@ def generate_fps_qr_api(request):
     except Exception as e:
         logger.error(f"FPS QR Code 生成失敗: {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ==================== FPS 付款確認 API（員工端） ====================
+
+@csrf_exempt
+def api_confirm_fps_payment(request, order_id):
+    """
+    員工確認 FPS 付款已收到 API
+    
+    由員工端製作隊列頁面調用，當員工確認 FPS 款項已收到時，
+    將訂單從 payment_pending 狀態轉為 paid，並根據訂單類型
+    進入對應流程（咖啡→waiting，咖啡豆→ready）。
+    
+    POST 參數：
+        staff_name: 員工名稱（可選）
+    
+    Returns:
+        JSON: {success, message, order_id, payment_status, status}
+    """
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': '僅支持 POST 請求'
+        }, status=405)
+    
+    try:
+        # 驗證員工權限（檢查是否為 staff 或 superuser）
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'success': False,
+                'error': '需要登入'
+            }, status=401)
+        
+        if not (request.user.is_staff or request.user.is_superuser):
+            return JsonResponse({
+                'success': False,
+                'error': '需要員工權限'
+            }, status=403)
+        
+        # 獲取員工名稱
+        staff_name = request.POST.get('staff_name', request.user.username)
+        
+        # 使用 OrderStatusManager 確認 FPS 付款
+        from eshop.order_status_manager import OrderStatusManager
+        result = OrderStatusManager.confirm_fps_payment(
+            order_id=order_id,
+            staff_name=staff_name
+        )
+        
+        if result.get('success'):
+            logger.info(f"✅ API: 員工 {staff_name} 確認 FPS 付款，訂單 #{order_id}")
+            return JsonResponse({
+                'success': True,
+                'message': result['message'],
+                'order_id': order_id,
+                'payment_status': 'paid',
+                'status': result.get('status', 'waiting')
+            })
+        else:
+            logger.warning(f"⚠️ API: FPS 付款確認失敗: {result.get('message')}")
+            return JsonResponse({
+                'success': False,
+                'error': result.get('message', '確認失敗')
+            }, status=400)
+        
+    except Exception as e:
+        logger.error(f"❌ API: FPS 付款確認異常: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'FPS 付款確認失敗: {str(e)}'
+        }, status=500)

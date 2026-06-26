@@ -22,7 +22,8 @@ from eshop.views.queue_processors import (
     process_waiting_queues,
     process_preparing_queues,
     process_ready_orders,
-    process_completed_orders
+    process_completed_orders,
+    process_payment_pending_orders,
 )
 
 logger = logging.getLogger(__name__)
@@ -82,6 +83,7 @@ def get_unified_queue_data(request):
         now = timezone.now().astimezone(hk_tz)
         
         # 使用現有的處理函數取得各類訂單數據
+        payment_pending_orders = process_payment_pending_orders(now, hk_tz)
         waiting_orders = process_waiting_queues(now, hk_tz)
         preparing_orders = process_preparing_queues(now, hk_tz)
         ready_orders = process_ready_orders(now, hk_tz)
@@ -89,6 +91,7 @@ def get_unified_queue_data(request):
         
         # 徽章摘要
         badge_summary = {
+            'payment_pending': len(payment_pending_orders),
             'waiting': len(waiting_orders),
             'preparing': len(preparing_orders),
             'ready': len(ready_orders),
@@ -99,6 +102,7 @@ def get_unified_queue_data(request):
         response_data = {
             'success': True,
             'data': {
+                'payment_pending_orders': payment_pending_orders,
                 'waiting_orders': waiting_orders,
                 'preparing_orders': preparing_orders,
                 'ready_orders': ready_orders,

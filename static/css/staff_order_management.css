@@ -30,6 +30,82 @@
     color: white;
 }
 
+/* 待確認付款卡片樣式 */
+.payment-pending-card {
+    border-left: 4px solid #dc3545 !important;
+    transition: all 0.2s ease;
+}
+
+.payment-pending-card:hover {
+    background-color: rgba(0,0,0,0.05);
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.payment-pending-card .badge-pulse {
+    animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* 子標籤頁導航樣式 */
+.nav-tabs .nav-link {
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+}
+
+.nav-tabs .nav-link .badge {
+    font-size: 0.75rem;
+    vertical-align: middle;
+}
+
+/* 子標籤頁內容區域 */
+.sub-order-section {
+    min-height: 200px;
+}
+
+/* 待確認付款按鈕樣式 - 與開始製作按鈕外觀一致 */
+.btn-confirm-fps-payment {
+    background: #c49b63 !important;
+    border: 1px solid #c49b63 !important;
+    color: white !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.btn-confirm-fps-payment:hover,
+.btn-confirm-fps-payment:focus,
+.btn-confirm-fps-payment:active {
+    background: #c49b63 !important;
+    border: 1px solid #c49b63 !important;
+    color: white !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.btn-cancel-order {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.btn-cancel-order:hover,
+.btn-cancel-order:focus,
+.btn-cancel-order:active {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 /* 支付倒计时样式 */
 .payment-countdown {
     background: linear-gradient(135deg, #ffc107, #ff9800);
@@ -177,8 +253,11 @@
 .order-type-badges-container {
     position: absolute;
     top: 0px;
-    left: -10px;
-    z-index: -1;
+    left: 0px;
+    z-index: 1;
+    overflow: hidden;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .order-type-badge {
@@ -189,7 +268,10 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+    border-top-right-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
     /* border: 2px solid white; */
 }
 
@@ -198,7 +280,6 @@
     border-left: 4px solid #007bff !important;
     background: linear-gradient(90deg, rgba(0, 123, 255, 0.05) 0%, transparent 10%) !important;
     position: relative;
-    overflow: hidden;
 }
 
 /* 快速訂單標識 */
@@ -206,7 +287,6 @@
     border-left: 4px solid #28a745 !important;
     background: linear-gradient(90deg, rgba(40, 167, 69, 0.05) 0%, transparent 10%) !important;
     position: relative;
-    overflow: hidden;
 }
 
 /* 混合訂單標識 */
@@ -214,7 +294,6 @@
     border-left: 4px solid #6f42c1 !important;
     background: linear-gradient(90deg, rgba(111, 66, 193, 0.05) 0%, transparent 10%) !important;
     position: relative;
-    overflow: hidden;
 }
 
 
@@ -430,12 +509,7 @@
 }
 
 .tab-pane {
-    animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    /* 移除 fadeIn 動畫，避免大量 DOM 操作時渲染中斷 */
 }
 
 /* 标签页徽章颜色 */
@@ -645,20 +719,26 @@ table td:nth-child(3) {
 }
 
 
-/* 操作按鈕樣式 */
-.start-preparation-btn {
-    background: linear-gradient(110deg, #007bff, #0056b3);
-    border: none;
-    color: white;
-    padding: 0.375rem 0.75rem;
-    border-radius: 4px;
-    transition: all 0.3s ease;
+/* 操作按鈕樣式 - 使用主題金色 #c49b63，高權重選擇器覆蓋 Bootstrap */
+.btn-primary.start-preparation-btn {
+    background: #c49b63 !important;
+    border: 1px solid #c49b63 !important;
+    color: white !important;
+    padding: 0.375rem 0.75rem !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
 }
 
-.start-preparation-btn:hover {
-    background: linear-gradient(110deg, #0056b3, #003d7a);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 91, 187, 0.3);
+.btn-primary.start-preparation-btn:hover,
+.btn-primary.start-preparation-btn:focus,
+.btn-primary.start-preparation-btn:active,
+.btn-primary.start-preparation-btn:disabled {
+    background: #c49b63 !important;
+    border: 1px solid #c49b63 !important;
+    color: white !important;
+    transform: none !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
 

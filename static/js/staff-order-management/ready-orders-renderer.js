@@ -821,13 +821,7 @@ class DynamicReadyOrdersRenderer {
 // ==================== 全局註冊 ====================
 
 if (typeof window !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (!window.readyRenderer) {
-                window.readyRenderer = new DynamicReadyOrdersRenderer();
-                window.DynamicReadyOrdersRenderer = DynamicReadyOrdersRenderer;
-                console.log('🌍 已就緒訂單渲染器（修正閃爍版）已註冊到 window');
-            }
-        }, 500);
-    });
+    // 只註冊類，不自動創建實例（由 main.js 的 initRenderers 負責）
+    window.DynamicReadyOrdersRenderer = DynamicReadyOrdersRenderer;
+    console.log('🌍 DynamicReadyOrdersRenderer 類已註冊到 window');
 }

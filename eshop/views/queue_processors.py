@@ -328,6 +328,56 @@ def get_unified_queue_data() -> Dict[str, Any]:
     return processor.get_unified_queue_data()
 
 
+def process_payment_pending_orders(now, hk_tz) -> List[Dict[str, Any]]:
+    """
+    處理待確認付款訂單（FPS 付款待確認）
+    
+    查詢條件：
+    - payment_status = 'payment_pending'
+    - status = 'pending'（尚未進入製作流程）
+    
+    Args:
+        now: 當前時間
+        hk_tz: 香港時區
+        
+    Returns:
+        待確認付款訂單數據列表
+    """
+    try:
+        orders = OrderModel.objects.filter(
+            payment_status='payment_pending',
+            status='pending',
+        ).order_by('-created_at')[:50]
+        
+        pending_data = []
+        for order in orders:
+            try:
+                order_data = OrderItemProcessor.prepare_order_data(
+                    order=order,
+                    queue_item=None,
+                    now=now,
+                    hk_tz=hk_tz,
+                    include_queue_info=False
+                )
+                if order_data:
+                    # 確保包含支付相關資訊
+                    order_data['payment_status'] = order.payment_status
+                    order_data['payment_method'] = order.payment_method or 'fps'
+                    order_data['total_price'] = str(order.total_price) if order.total_price else '0'
+                    pending_data.append(order_data)
+            except Exception as e:
+                logger.error(f"處理待確認付款訂單 {order.id} 失敗: {str(e)}")
+                continue
+        
+        # 按創建時間排序（最新的在前）
+        pending_data.sort(key=lambda x: x.get('created_at') or '', reverse=True)
+        return pending_data
+        
+    except Exception as e:
+        logger.error(f"獲取待確認付款訂單失敗: {str(e)}", exc_info=True)
+        return []
+
+
 def process_waiting_queues(now, hk_tz) -> List[Dict[str, Any]]:
     """簡化接口：處理等待隊列"""
     processor = WaitingQueueProcessor(now, hk_tz)

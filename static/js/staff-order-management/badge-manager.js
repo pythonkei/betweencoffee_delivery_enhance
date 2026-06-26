@@ -7,7 +7,9 @@ class BadgeManager {
         
         // 徽章ID映射表（根據staff_order_management.html的ID）
         this.badgeIdMap = {
+            'payment_pending': 'payment-pending-badge',
             'waiting': 'queue-badge',
+            'waiting_sub': 'waiting-badge',  // 等待子標籤頁的 badge
             'preparing': 'preparing-orders-badge',
             'ready': 'ready-orders-badge',
             'completed': 'completed-orders-badge'
@@ -15,6 +17,7 @@ class BadgeManager {
         
         // 徽章樣式映射（靜態，不變）
         this.badgeStyleMap = {
+            'payment_pending': 'badge-danger',
             'waiting': 'badge-warning',
             'preparing': 'badge-primary',
             'ready': 'badge-success',
@@ -23,6 +26,7 @@ class BadgeManager {
         
         // 徽章標籤映射
         this.badgeLabelMap = {
+            'payment_pending': '待確認付款',
             'waiting': '等待中',
             'preparing': '製作中',
             'ready': '已就緒',
@@ -76,8 +80,14 @@ class BadgeManager {
         
         console.log('🔄 從統一數據更新徽章（靜態）:', badgeData);
         
+        // 更新待確認付款徽章（始終顯示）
+        this.updateBadgeElement('payment_pending', badgeData.payment_pending);
+        
         // 更新等待徽章（始終顯示）
         this.updateBadgeElement('waiting', badgeData.waiting);
+        
+        // 同步更新等待子標籤頁徽章（waiting-badge）
+        this.updateBadgeElement('waiting_sub', badgeData.waiting);
         
         // 更新製作中徽章（始終顯示）
         this.updateBadgeElement('preparing', badgeData.preparing);

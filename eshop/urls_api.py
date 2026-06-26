@@ -14,6 +14,7 @@ from .views.api_views import (
     get_dashboard_stats,
     api_mark_order_as_ready,
     api_mark_order_as_completed,
+    api_confirm_fps_payment,
     # 兼容性API
     get_recent_orders,
     get_active_orders,
@@ -80,6 +81,9 @@ urlpatterns = [
 
     # ==================== FPS 動態 QR Code API ====================
     path('fps/generate-qr/', generate_fps_qr_api, name='generate_fps_qr'),
+
+    # ==================== FPS 付款確認 API（員工端）====================
+    path('fps/confirm-payment/<int:order_id>/', api_confirm_fps_payment, name='confirm_fps_payment'),
 
     
     # ==================== 🔥 WebSocket 監控 API（管理員專用）====================

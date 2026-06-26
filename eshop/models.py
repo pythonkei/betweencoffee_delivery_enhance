@@ -323,9 +323,10 @@ class OrderModel(models.Model):
     # ====== 支付状态字段 ======
     PAYMENT_STATUS_CHOICES = [
         ('pending', '待支付'),
+        ('payment_pending', '付款待確認'),  # FPS 專用：顧客已提交付款，等待員工確認
         ('paid', '已支付'),
         ('cancelled', '已取消'),
-        ('expired', '已过期'),
+        ('expired', '已過期'),
     ]
     payment_status = models.CharField(
         max_length=20, 
@@ -578,6 +579,15 @@ class OrderModel(models.Model):
                     'icon_size': '3rem',
                     'timeout_message': f'若長時間未更新，請聯絡客服並提供訂單號碼: #{self.id}'
                 },
+                'payment_pending': {
+                    'status': 'payment_pending',
+                    'title': 'FPS 付款已提交',
+                    'message': '您的 FPS 轉帳已提交，請稍候店員確認付款。',
+                    'icon': 'fa-hourglass-half',
+                    'icon_color': 'text-info',
+                    'icon_size': '3rem',
+                    'timeout_message': f'若長時間未更新，請聯絡客服並提供訂單號碼: #{self.id}'
+                },
                 'unknown': {
                     'status': 'unknown',
                     'title': '支付狀態未知',
@@ -593,6 +603,8 @@ class OrderModel(models.Model):
                 payment_key = 'paid'
             elif self.payment_status == 'pending':
                 payment_key = 'pending'
+            elif self.payment_status == 'payment_pending':
+                payment_key = 'payment_pending'
             else:
                 payment_key = 'unknown'
             

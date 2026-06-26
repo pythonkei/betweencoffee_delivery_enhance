@@ -714,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
             if (!selectedPayment) {
                 e.preventDefault();
-                alert('請選擇支付方式');
+                showToast('error', '請選擇支付方式');
                 return false;
             }
         });
@@ -793,24 +793,24 @@ function validateForm() {
     console.log('支付方式:', paymentMethod ? paymentMethod.value : '未选择');
     
     if (!name || !name.trim()) {
-        alert('请输入姓名');
+        showToast('error', '請輸入姓名');
         return false;
     }
     
     if (!phone || !phone.trim()) {
-        alert('请输入电话');
+        showToast('error', '請輸入電話');
         return false;
     }
     
     // 验证电话格式（香港电话8位数字）
     const phoneRegex = /^[0-9]{8}$/;
     if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-        alert('请输入有效的8位香港电话号码');
+        showToast('error', '請輸入有效的8位香港電話號碼');
         return false;
     }
     
     if (!paymentMethod) {
-        alert('请选择支付方式');
+        showToast('error', '請選擇支付方式');
         return false;
     }
     
@@ -843,6 +843,77 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+// ==================== Toast 通知系統 ====================
+function showToast(type, message) {
+    // 嘗試使用全局 toast 方法
+    if (window.showToast) {
+        window.showToast(type, message);
+        return;
+    }
+    
+    // 自定義 Toast 實現
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;';
+        document.body.appendChild(toastContainer);
+    }
+    
+    const bgClass = type === 'success' ? 'bg-success' : 
+                    type === 'error' ? 'bg-danger' : 'bg-info';
+    
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    const title = type === 'success' ? '成功' : type === 'error' ? '錯誤' : '提示';
+    
+    const toastEl = document.createElement('div');
+    toastEl.style.cssText = `
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        min-width: 280px;
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: toastSlideIn 0.3s ease;
+        font-size: 0.95rem;
+    `;
+    toastEl.innerHTML = `
+        <span style="font-size:1.1rem;">${icon}</span>
+        <div>
+            <div style="font-weight:600;font-size:0.85rem;opacity:0.9;">${title}</div>
+            <div>${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            margin-left:auto;background:none;border:none;color:#fff;
+            opacity:0.7;cursor:pointer;font-size:1.2rem;padding:0 4px;
+        ">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toastEl);
+    
+    // 3.5 秒後自動移除
+    setTimeout(() => {
+        toastEl.style.transition = 'all 0.3s ease';
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translateX(20px)';
+        setTimeout(() => toastEl.remove(), 300);
+    }, 3500);
+}
+
+// 添加 toast 動畫
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+    @keyframes toastSlideIn {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+`;
+document.head.appendChild(toastStyle);
+
 // 检测用户从支付宝页面返回的情况
 document.addEventListener('DOMContentLoaded', function() {
     // 检查是否有未支付的订单
@@ -939,7 +1010,7 @@ function showRetryOptions(orderId) {
 
 // 重新支付函数
 function retryPayment(orderId) {
-    if (!confirm('确定要重新尝试支付吗？')) return;
+    showToast('info', '正在重新跳轉到支付頁面...');
     
     // 显示加载状态
     const button = event.target;
@@ -959,14 +1030,14 @@ function retryPayment(orderId) {
         if (data.success) {
             window.location.href = data.redirect_url;
         } else {
-            alert('重新支付失败: ' + data.error);
+            showToast('error', '重新支付失敗: ' + data.error);
             button.disabled = false;
             button.innerHTML = '<i class="fas fa-redo"></i> 重新支付';
         }
     })
     .catch(error => {
         console.error('重新支付请求失败:', error);
-        alert('网络错误，请稍后重试');
+        showToast('error', '網絡錯誤，請稍後重試');
         button.disabled = false;
         button.innerHTML = '<i class="fas fa-redo"></i> 重新支付';
     });
@@ -974,7 +1045,7 @@ function retryPayment(orderId) {
 
 // 取消订单函数
 function cancelPayment(orderId) {
-    if (!confirm('确定要取消这个订单吗？取消后需要重新下单。')) return;
+    showToast('info', '正在取消訂單...');
     
     fetch(`/eshop/api/cancel-order/${orderId}/`, {
         method: 'POST',
@@ -986,15 +1057,17 @@ function cancelPayment(orderId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('订单已取消');
-            window.location.href = "{% url 'cart:cart_detail' %}";
+            showToast('success', '訂單已取消');
+            setTimeout(() => {
+                window.location.href = "{% url 'cart:cart_detail' %}";
+            }, 1000);
         } else {
-            alert('取消订单失败: ' + data.error);
+            showToast('error', '取消訂單失敗: ' + data.error);
         }
     })
     .catch(error => {
         console.error('取消订单请求失败:', error);
-        alert('网络错误，请稍后重试');
+        showToast('error', '網絡錯誤，請稍後重試');
     });
 }
 </script>
@@ -1268,7 +1341,7 @@ function useExistingOrder(orderId) {
 
 // 取消未完成訂單（在 order_confirm.html 中直接操作，無需跳轉到 payment-confirmation）
 function cancelPendingOrder(orderId) {
-    if (!confirm('確定要取消訂單 #' + orderId + ' 嗎？')) return;
+    showToast('info', '正在取消訂單 #' + orderId + '...');
     
     const orderEl = document.getElementById('pending-order-' + orderId);
     const csrfToken = '{{ csrf_token }}';
@@ -1283,6 +1356,7 @@ function cancelPendingOrder(orderId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            showToast('success', '訂單 #' + orderId + ' 已取消');
             // 移除該訂單項目
             if (orderEl) {
                 orderEl.style.transition = 'all 0.3s ease';
@@ -1306,12 +1380,12 @@ function cancelPendingOrder(orderId) {
                 }, 300);
             }
         } else {
-            alert('取消訂單失敗: ' + (data.error || '未知錯誤'));
+            showToast('error', '取消訂單失敗: ' + (data.error || '未知錯誤'));
         }
     })
     .catch(error => {
         console.error('取消訂單失敗:', error);
-        alert('取消訂單失敗，請稍後重試');
+        showToast('error', '取消訂單失敗，請稍後重試');
     });
 }
 
