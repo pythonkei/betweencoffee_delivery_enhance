@@ -212,7 +212,9 @@ class DynamicReadyOrdersRenderer {
         const isBeansOnly = order.is_beans_only || (hasBeans && !hasCoffee);
         
         // 設置訂單類型屬性
-        if (isMixedOrder) {
+        if (order.is_quick_order) {
+            orderDiv.setAttribute('data-order-type', 'quick');
+        } else if (isMixedOrder) {
             orderDiv.setAttribute('data-order-type', 'mixed');
         } else {
             orderDiv.setAttribute('data-order-type', 'single');
@@ -224,7 +226,7 @@ class DynamicReadyOrdersRenderer {
         // 1. 快速訂單徽章（優先級最高）
         if (order.is_quick_order) {
             orderTypeBadges = `
-                <span class="badge badge-quickorder order-type-badge">
+                <span class="badge order-type-badge" data-order-type="quick">
                     <i class="fas fa-bolt mr-1"></i>快速訂單
                 </span>
             `;
@@ -232,7 +234,7 @@ class DynamicReadyOrdersRenderer {
         // 2. 混合訂單徽章（次優先級）
         else if (isMixedOrder) {
             orderTypeBadges = `
-                <span class="badge badge-primary order-type-badge">
+                <span class="badge order-type-badge" data-order-type="mixed">
                     <i class="fas fa-random mr-1"></i>混合訂單
                 </span>
             `;
@@ -240,7 +242,7 @@ class DynamicReadyOrdersRenderer {
         // 3. 普通訂單徽章（默認）
         else {
             orderTypeBadges = `
-                <span class="badge badge-info order-type-badge">
+                <span class="badge order-type-badge" data-order-type="single">
                     <i class="fas fa-shopping-bag mr-1"></i>普通訂單
                 </span>
             `;

@@ -30,15 +30,26 @@
     color: white;
 }
 
+/* 基於訂單類型的左側邊框顏色 */
+.order-item[data-order-type="quick"] {
+    border-left: 4px solid #dc3545 !important;
+}
+
+.order-item[data-order-type="mixed"] {
+    border-left: 4px solid #007bff !important;
+}
+
+.order-item[data-order-type="single"] {
+    border-left: 4px solid #28a745 !important;
+}
+
 /* 待確認付款卡片樣式 */
 .payment-pending-card {
-    border-left: 4px solid #dc3545 !important;
     transition: all 0.2s ease;
 }
 
 .payment-pending-card:hover {
-    background-color: rgba(0,0,0,0.05);
-    border-color: rgba(255,255,255,0.2);
+    background-color: transparent !important;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
@@ -187,7 +198,7 @@
 }
 
 .order-item:hover {
-    background-color: rgba(0,0,0,0.3);
+    background-color: rgba(0,0,0,0.1);
     border-color: rgba(255,255,255,0.2);
 }
 
@@ -196,7 +207,7 @@
 }
 
 .order-item.selectable:hover {
-    /* transform: translateY(-2px); */
+    background-color: rgba(0,0,0,0.1);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
@@ -234,17 +245,6 @@
     object-fit: contain;
 }
 
-/* 快速訂單標識 */
-.order-item[data-type="quick"] {
-    border-left: 4px solid #28a745 !important;
-    background: linear-gradient(90deg, rgba(40, 167, 69, 0.05) 0%, transparent 10%) !important;
-}
-
-/* 普通訂單標識 */
-.order-item[data-type="normal"] {
-    border-left: 4px solid #007bff !important;
-    background: linear-gradient(90deg, rgba(0, 123, 255, 0.05) 0%, transparent 10%) !important;
-}
 
 
 /* static/css/staff-order-management.css - 徽章样式修正 */
@@ -275,26 +275,22 @@
     /* border: 2px solid white; */
 }
 
-/* 普通訂單標識 */
-.order-item[data-order-type="single"] {
-    border-left: 4px solid #007bff !important;
-    background: linear-gradient(90deg, rgba(0, 123, 255, 0.05) 0%, transparent 10%) !important;
-    position: relative;
+/* 訂單類型徽章顏色 - 使用 data-order-type 統一控制，與左側邊框顏色一致 */
+.order-type-badge[data-order-type="quick"] {
+    background-color: #dc3545 !important;
+    color: white !important;
 }
 
-/* 快速訂單標識 */
-.order-item[data-type="quick"] {
-    border-left: 4px solid #28a745 !important;
-    background: linear-gradient(90deg, rgba(40, 167, 69, 0.05) 0%, transparent 10%) !important;
-    position: relative;
+.order-type-badge[data-order-type="mixed"] {
+    background-color: #007bff !important;
+    color: white !important;
 }
 
-/* 混合訂單標識 */
-.order-item[data-order-type="mixed"] {
-    border-left: 4px solid #6f42c1 !important;
-    background: linear-gradient(90deg, rgba(111, 66, 193, 0.05) 0%, transparent 10%) !important;
-    position: relative;
+.order-type-badge[data-order-type="single"] {
+    background-color: #28a745 !important;
+    color: white !important;
 }
+
 
 
 

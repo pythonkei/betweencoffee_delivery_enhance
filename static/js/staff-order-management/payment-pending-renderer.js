@@ -171,19 +171,19 @@ class PaymentPendingRenderer {
         let orderTypeBadges = '';
         if (order.is_quick_order) {
             orderTypeBadges = `
-                <span class="badge badge-quickorder order-type-badge">
+                <span class="badge order-type-badge" data-order-type="quick">
                     <i class="fas fa-bolt mr-1"></i>快速訂單
                 </span>
             `;
         } else if (isMixedOrder) {
             orderTypeBadges = `
-                <span class="badge badge-primary order-type-badge">
+                <span class="badge order-type-badge" data-order-type="mixed">
                     <i class="fas fa-random mr-1"></i>混合訂單
                 </span>
             `;
         } else {
             orderTypeBadges = `
-                <span class="badge badge-info order-type-badge">
+                <span class="badge order-type-badge" data-order-type="single">
                     <i class="fas fa-shopping-bag mr-1"></i>普通訂單
                 </span>
             `;
