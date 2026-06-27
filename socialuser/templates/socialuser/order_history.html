@@ -769,8 +769,6 @@ class OrderLoader {
 
 // 取消訂單函數（從訂單歷史頁面調用）
 function cancelOrderFromHistory(orderId) {
-    if (!confirm('確定要取消訂單 #' + orderId + ' 嗎？')) return;
-    
     fetch('/eshop/api/cancel-order/' + orderId + '/', {
         method: 'POST',
         headers: {
