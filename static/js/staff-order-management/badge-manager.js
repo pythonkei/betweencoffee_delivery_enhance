@@ -83,8 +83,8 @@ class BadgeManager {
         // 更新待確認付款徽章（始終顯示）
         this.updateBadgeElement('payment_pending', badgeData.payment_pending);
         
-        // 更新等待徽章（始終顯示）
-        this.updateBadgeElement('waiting', badgeData.waiting);
+        // 更新等待徽章（始終顯示）- 包含 payment_pending 以正確反映父標籤總數
+        this.updateBadgeElement('waiting', badgeData.waiting + (badgeData.payment_pending || 0));
         
         // 同步更新等待子標籤頁徽章（waiting-badge）
         this.updateBadgeElement('waiting_sub', badgeData.waiting);
