@@ -843,35 +843,31 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-{% if payment_info.status == 'payment_pending' %}
+{% if order.payment_status == 'payment_pending' %}
 <!-- FPS 付款狀態自動輪詢 -->
 <script>
 (function() {
     var orderId = '{{ order.id }}';
+    var pollTimer;
     var pollCount = 0;
-    var maxPolls = 100; // 最多輪詢 100 次 (5 分鐘)
+    var maxPolls = 100;
     
-    function pollPaymentStatus() {
+    function pollStatus() {
         pollCount++;
-        if (pollCount > maxPolls) return; // 超過 5 分鐘停止
+        if (pollCount > maxPolls) { clearInterval(pollTimer); return; }
         
         fetch('/eshop/order/api/order-status/' + orderId + '/')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success && data.payment_status === 'paid') {
+                    clearInterval(pollTimer);
                     location.reload();
-                } else {
-                    setTimeout(pollPaymentStatus, 3000);
                 }
             })
-            .catch(function() {
-                setTimeout(pollPaymentStatus, 5000);
-            });
+            .catch(function() {});
     }
     
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(pollPaymentStatus, 3000);
-    });
+    pollTimer = setInterval(pollStatus, 3000);
 })();
 </script>
 {% endif %}
