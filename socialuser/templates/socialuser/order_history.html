@@ -92,6 +92,10 @@
                                                 <i class="fas fa-hourglass-half mr-1"></i>
                                                 待支付 - 剩餘: <span class="countdown-text">{{ order.payment_timeout|timeuntil }}</span>
                                             </span>
+                                        {% elif order.payment_status == 'payment_pending' %}
+                                            <span class="badge badge-info">
+                                                <i class="fas fa-clock mr-1"></i>付款待確認
+                                            </span>
                                         {% elif order.is_payment_timeout or order.payment_status == 'cancelled' %}
                                             <!-- 恢复显示取消/超时徽章 -->
                                             <span class="badge badge-danger">
@@ -671,6 +675,10 @@ class OrderLoader {
                 return `<span class="badge badge-warning payment-countdown">
                     <i class="fas fa-hourglass-half mr-1"></i>
                     待支付 - 剩余: <span class="countdown-text">15分鐘</span>
+                </span>`;
+            } else if (order.payment_status === 'payment_pending') {
+                return `<span class="badge badge-info">
+                    <i class="fas fa-clock mr-1"></i>付款待確認
                 </span>`;
             } else if (order.is_payment_timeout || order.payment_status === 'cancelled') {
                 return `<span class="badge badge-danger">
