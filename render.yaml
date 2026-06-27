@@ -1,10 +1,15 @@
 # Render 一鍵部署配置（Blueprint）
 # 用於 Between Coffee 咖啡店外帶網站
 #
-# ⚠️ 注意：Render Blueprint 僅支援 web service 類型
-# PostgreSQL 和 Cron Job 需手動建立（請參考部署指南）
-#
 # 詳細部署指南：docs/guides/RENDER_DEPLOY_GUIDE.md
+
+databases:
+  # ==================== PostgreSQL 資料庫 ====================
+  - name: betweencoffee-db
+    plan: free
+    region: singapore
+    postgresMajorVersion: 15
+    ipAllowList: []  # 僅允許 Render 內部網路訪問
 
 services:
   # ==================== Web 服務 ====================
@@ -25,9 +30,11 @@ services:
         value: "False"
       - key: IS_RENDER
         value: "True"
-      # DATABASE_URL 需手動設定（建立 PostgreSQL 後取得 Internal Database URL）
+      # 自動從 PostgreSQL 服務取得 Internal Database URL
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: betweencoffee-db
+          property: connectionString
       - key: RENDER_EXTERNAL_HOSTNAME
         value: betweencoffee-delivery-enhance-v1.onrender.com
       # === 郵件配置（Gmail SMTP，可選）===

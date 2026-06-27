@@ -3,11 +3,13 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 安裝系統依賴
+# cargo（Rust 套件管理器）用於編譯 rpds-py 等需要 Rust 的套件
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libpq-dev \
     gcc \
     python3-dev \
+    cargo \
     && rm -rf /var/lib/apt/lists/*
 
 # 複製專案檔案

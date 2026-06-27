@@ -79,6 +79,7 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
+        echo "├── 最新改動: 訂單類型徽章統一 data-order-type + hover 透明度 0.1"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
         echo "├── 已知問題: 社交登入（Google/Facebook）需要修復"
