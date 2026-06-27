@@ -843,6 +843,22 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+// ==================== CSRF Token 輔助函數 ====================
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // ==================== Toast 通知系統 ====================
 function showToast(type, message) {
     // 嘗試使用全局 toast 方法
@@ -1043,14 +1059,14 @@ function retryPayment(orderId) {
     });
 }
 
-// 取消订单函数
+// 取消订单函数（統一使用此版本）
 function cancelPayment(orderId) {
     showToast('info', '正在取消訂單...');
     
-    fetch(`/eshop/api/cancel-order/${orderId}/`, {
+    fetch('/eshop/api/cancel-order/' + orderId + '/', {
         method: 'POST',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
+            'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         }
     })
@@ -1059,7 +1075,7 @@ function cancelPayment(orderId) {
         if (data.success) {
             showToast('success', '訂單已取消');
             setTimeout(() => {
-                window.location.href = "{% url 'cart:cart_detail' %}";
+                window.location.href = '/cart/';
             }, 1000);
         } else {
             showToast('error', '取消訂單失敗: ' + data.error);
@@ -1144,6 +1160,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+// === 跨 <script> 區塊輔助函數：確保 showToast 在此區塊也可用 ===
+function showToast(type, message) {
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;';
+        document.body.appendChild(toastContainer);
+    }
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    const title = type === 'success' ? '成功' : type === 'error' ? '錯誤' : '提示';
+    const toastEl = document.createElement('div');
+    toastEl.style.cssText = `
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+        color: #fff; padding: 12px 20px; border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3); min-width: 280px; max-width: 400px;
+        display: flex; align-items: center; gap: 10px;
+        animation: toastSlideIn 0.3s ease; font-size: 0.95rem;
+    `;
+    toastEl.innerHTML = `
+        <span style="font-size:1.1rem;">${icon}</span>
+        <div><div style="font-weight:600;font-size:0.85rem;opacity:0.9;">${title}</div><div>${message}</div></div>
+        <button onclick="this.parentElement.remove()" style="
+            margin-left:auto;background:none;border:none;color:#fff;
+            opacity:0.7;cursor:pointer;font-size:1.2rem;padding:0 4px;
+        ">&times;</button>
+    `;
+    toastContainer.appendChild(toastEl);
+    setTimeout(() => {
+        toastEl.style.transition = 'all 0.3s ease';
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translateX(20px)';
+        setTimeout(() => toastEl.remove(), 300);
+    }, 3500);
+}
 
 // 在 order_confirm.html 的 JavaScript 部分添加
 document.addEventListener('DOMContentLoaded', function() {
@@ -1339,18 +1391,33 @@ function useExistingOrder(orderId) {
 
 // FPS 動態 QR Code 加載 - 已移除（FPS 僅顯示付款選項）
 
+// === 跨 <script> 區塊輔助函數：確保 getCookie 在此區塊也可用 ===
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // 取消未完成訂單（在 order_confirm.html 中直接操作，無需跳轉到 payment-confirmation）
 function cancelPendingOrder(orderId) {
     showToast('info', '正在取消訂單 #' + orderId + '...');
     
     const orderEl = document.getElementById('pending-order-' + orderId);
-    const csrfToken = '{{ csrf_token }}';
     
     fetch('/eshop/api/cancel-order/' + orderId + '/', {
         method: 'POST',
         headers: {
-            'X-CSRFToken': csrfToken,
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
         }
     })
     .then(response => response.json())

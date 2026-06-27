@@ -774,6 +774,9 @@ def check_pending_orders(request):
     """
     檢查當前用戶是否有未支付的訂單
     用於 order_confirm.html 頁面加載時檢測
+    
+    修復：查詢 payment_status 為 pending 或 payment_pending 的訂單，
+    確保 FPS 等待確認的訂單也能被顯示和取消。
     """
     try:
         pending_orders = []
@@ -781,12 +784,11 @@ def check_pending_orders(request):
         if request.user.is_authenticated:
             # 已登入用戶：查詢該用戶的未支付訂單
             # 排除已取消、已逾時、已支付的訂單
+            # 修復：同時查詢 pending 和 payment_pending 狀態
             orders = OrderModel.objects.filter(
                 user=request.user,
-                payment_status='pending',
+                payment_status__in=['pending', 'payment_pending'],
                 status='pending'
-            ).exclude(
-                payment_status__in=['cancelled', 'expired']
             ).order_by('-created_at')[:5]
             
             for order in orders:
@@ -984,8 +986,14 @@ def cancel_timeout_payment(request, order_id):
         return redirect('eshop:order_payment_confirmation_with_id', order_id=order_id)
 
 
+@csrf_exempt
 def api_cancel_order(request, order_id):
-    """API: 取消訂單（返回 JSON，供 order_confirm.html 前端調用）"""
+    """
+    API: 取消訂單（返回 JSON，供 order_confirm.html 前端調用）
+    
+    修復：添加 @csrf_exempt 裝飾器，因為前端使用 fetch API 發送 POST 請求，
+    CSRF token 在 JavaScript 中可能無法正確傳遞。
+    """
     try:
         order = OrderModel.objects.get(id=order_id)
         
