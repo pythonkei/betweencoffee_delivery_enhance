@@ -779,15 +779,13 @@ function cancelOrderFromHistory(orderId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('訂單已取消');
             location.reload();
         } else {
-            alert('取消訂單失敗: ' + (data.error || '未知錯誤'));
+            console.error('取消訂單失敗:', data.error || '未知錯誤');
         }
     })
     .catch(error => {
         console.error('取消訂單失敗:', error);
-        alert('取消訂單失敗，請稍後重試');
     });
 }
 
