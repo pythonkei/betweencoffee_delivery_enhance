@@ -166,10 +166,10 @@ test_context() {
         return 1
     fi
     
-    # 測試4: 檢查 .clinerules
-    if [ -f "$PROJECT_DIR/.clinerules" ]; then
-        CLINERULES_SIZE=$(wc -c < "$PROJECT_DIR/.clinerules")
-        success "測試4: .clinerules 存在 (${CLINERULES_SIZE} 字符)"
+    # 測試4: 檢查 .clinerules 目錄
+    if [ -d "$PROJECT_DIR/.clinerules" ] && [ -f "$PROJECT_DIR/.clinerules/.clinerules" ]; then
+        CLINERULES_SIZE=$(wc -c < "$PROJECT_DIR/.clinerules/.clinerules")
+        success "測試4: .clinerules 目錄存在 (${CLINERULES_SIZE} 字符)"
     else
         error "測試4: .clinerules 不存在"
         return 1
