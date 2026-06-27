@@ -843,5 +843,38 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+{% if payment_info.status == 'payment_pending' %}
+<!-- FPS 付款狀態自動輪詢 -->
+<script>
+(function() {
+    var orderId = '{{ order.id }}';
+    var pollCount = 0;
+    var maxPolls = 100; // 最多輪詢 100 次 (5 分鐘)
+    
+    function pollPaymentStatus() {
+        pollCount++;
+        if (pollCount > maxPolls) return; // 超過 5 分鐘停止
+        
+        fetch('/eshop/order/api/order-status/' + orderId + '/')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success && data.payment_status === 'paid') {
+                    location.reload();
+                } else {
+                    setTimeout(pollPaymentStatus, 3000);
+                }
+            })
+            .catch(function() {
+                setTimeout(pollPaymentStatus, 5000);
+            });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(pollPaymentStatus, 3000);
+    });
+})();
+</script>
+{% endif %}
+
 
 {% endblock content %}
