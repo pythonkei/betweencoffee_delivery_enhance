@@ -18,8 +18,11 @@ from pathlib import Path
 
 def load_clinerules():
     """加載 .clinerules 文件內容"""
-    clinerules_path = Path(".clinerules")
-    if clinerules_path.exists():
+    # 支援檔案和目錄兩種結構
+    clinerules_path = Path(".clinerules/.clinerules")
+    if not clinerules_path.exists():
+        clinerules_path = Path(".clinerules")
+    if clinerules_path.exists() and clinerules_path.is_file():
         try:
             with open(clinerules_path, 'r', encoding='utf-8') as f:
                 content = f.read()
