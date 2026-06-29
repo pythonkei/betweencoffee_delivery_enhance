@@ -79,7 +79,7 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: order_history.html UI 調整（徽章字體 0.85rem、折扣文字 0.85rem、訂單時間文字色 rgb(232,232,232)、左右兩側頂部對齊）"
+        echo "├── 最新改動: 修復 Alipay 付款後未獲得獎勵積分（alipay_callback() 添加 CustomerLoyalty.add_points_from_order() 調用，FPS confirm_fps_payment() 同步修復）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
         echo "├── 已知問題: 社交登入（Google/Facebook）需要修復"
