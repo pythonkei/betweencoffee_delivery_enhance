@@ -376,6 +376,16 @@ def alipay_callback(request):
                 logger.info(f"   是否包含咖啡: {has_coffee}")
                 logger.info(f"   是否純咖啡豆: {has_beans}")
                 
+                # ✅ 新增：添加會員積分（Alipay 支付成功後自動添加）
+                if order.user:
+                    try:
+                        from socialuser.models_enhanced import CustomerLoyalty
+                        loyalty, created = CustomerLoyalty.objects.get_or_create(user=order.user)
+                        points_earned = loyalty.add_points_from_order(order)
+                        logger.info(f"✅ 用戶 {order.user.username} Alipay 訂單 #{order.id} 獲得 {points_earned} 積分")
+                    except Exception as e:
+                        logger.error(f"添加會員積分失敗: {str(e)}")
+                
                 # 清理session
                 clear_payment_session(request, out_trade_no)
                 
