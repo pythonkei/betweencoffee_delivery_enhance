@@ -79,7 +79,8 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: 忠誠度計劃獎勵系統增強（$8 現金券、積分兌換 UI 修復、order_confirm.html 折扣顯示修復）"
+        echo "├── 最新改動: order_payment_confirmation.html payment_pending 區塊修正（移除重複文字、放大客服提示字體）"
+
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
         echo "├── 已知問題: 社交登入（Google/Facebook）需要修復"
