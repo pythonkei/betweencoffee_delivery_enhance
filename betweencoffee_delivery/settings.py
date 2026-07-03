@@ -484,69 +484,115 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # ==================== 社交登录配置 ====================
 
-def get_social_providers():
-    """安全地配置社交登录提供商"""
-    providers = {}
-    
-    # 获取基础URL用于回调
-    if IS_RENDER:
-        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
-        base_domain = render_domain
-    else:
-        base_domain = os.environ.get('NGROK_HOST', 'localhost:8081')
-    
-    # Google配置
-    google_client_id = env('OAUTH_GOOGLE_CLIENT_ID', default='')
-    google_secret = env('OAUTH_GOOGLE_SECRET', default='')
-    
-    if google_client_id and google_secret:
-        providers['google'] = {
-            'APP': {
-                'client_id': google_client_id,
-                'secret': google_secret,
-            },
-            'SCOPE': ['profile', 'email'],
-            'AUTH_PARAMS': {
-                'access_type': 'online',
-                'prompt': 'select_account',
-            },
-        }
-        logger.info(f"Google OAuth configured for domain: {base_domain}")
-    else:
-        logger.warning("Google OAuth credentials not set")
+# ==================== 惰性社交登录配置 ====================
+# 注意：SOCIALACCOUNT_PROVIDERS 使用惰性加載（Lazy Load），
+# 確保在 Render 運行時（而非 Docker build 階段）才讀取環境變數。
+# 這樣 local 開發和 Render 生產環境都能正確獲取 OAuth 憑證和域名。
 
-    # Facebook配置
-    facebook_client_id = env('OAUTH_FACEBOOK_CLIENT_ID', default='')
-    facebook_secret = env('OAUTH_FACEBOOK_SECRET', default='')
+class LazySocialAccountProviders:
+    """惰性加載 SOCIALACCOUNT_PROVIDERS
     
-    if facebook_client_id and facebook_secret:
-        providers['facebook'] = {
-            'APP': {
-                'client_id': facebook_client_id,
-                'secret': facebook_secret,
-            },
-            'METHOD': 'oauth2',
-            'SCOPE': ['email', 'public_profile'],
-            'FIELDS': [
-                'id',
-                'email', 
-                'name',
-                'first_name',
-                'last_name',
-            ],
-            'AUTH_PARAMS': {
-                'auth_type': 'reauthenticate',
-            },
-            'EXCHANGE_TOKEN': True,
-            'VERIFIED_EMAIL': True,
-        }
-        logger.info(f"Facebook OAuth configured for domain: {base_domain}")
-    else:
-        logger.warning("Facebook OAuth credentials not set")
+    在運行時才讀取環境變數和 Render 域名，解決：
+    1. Docker build 階段 IS_RENDER=False 導致使用 localhost 的問題
+    2. Render 環境變數在 build 階段不可用的問題
+    """
     
-    return providers
+    def _load_providers(self):
+        """運行時加載社交登錄提供商配置"""
+        providers = {}
+        
+        # 獲取基礎 URL 用於回調（運行時判斷）
+        if IS_RENDER:
+            render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
+            base_domain = render_domain
+        else:
+            base_domain = os.environ.get('NGROK_HOST', 'localhost:8081')
+        
+        # Google 配置
+        google_client_id = env('OAUTH_GOOGLE_CLIENT_ID', default='')
+        google_secret = env('OAUTH_GOOGLE_SECRET', default='')
+        
+        if google_client_id and google_secret:
+            providers['google'] = {
+                'APP': {
+                    'client_id': google_client_id,
+                    'secret': google_secret,
+                },
+                'SCOPE': ['profile', 'email'],
+                'AUTH_PARAMS': {
+                    'access_type': 'online',
+                    'prompt': 'select_account',
+                },
+            }
+            logger.info(f"Google OAuth configured for domain: {base_domain}")
+        else:
+            logger.warning("Google OAuth credentials not set")
 
-SOCIALACCOUNT_PROVIDERS = get_social_providers()
+        # Facebook 配置
+        facebook_client_id = env('OAUTH_FACEBOOK_CLIENT_ID', default='')
+        facebook_secret = env('OAUTH_FACEBOOK_SECRET', default='')
+        
+        if facebook_client_id and facebook_secret:
+            providers['facebook'] = {
+                'APP': {
+                    'client_id': facebook_client_id,
+                    'secret': facebook_secret,
+                },
+                'METHOD': 'oauth2',
+                'SCOPE': ['email', 'public_profile'],
+                'FIELDS': [
+                    'id',
+                    'email', 
+                    'name',
+                    'first_name',
+                    'last_name',
+                ],
+                'AUTH_PARAMS': {
+                    'auth_type': 'reauthenticate',
+                },
+                'EXCHANGE_TOKEN': True,
+                'VERIFIED_EMAIL': True,
+            }
+            logger.info(f"Facebook OAuth configured for domain: {base_domain}")
+        else:
+            logger.warning("Facebook OAuth credentials not set")
+        
+        return providers
+    
+    def __getitem__(self, key):
+        """支援字典式訪問（django-allauth 需要）"""
+        return self._load_providers().__getitem__(key)
+    
+    def __contains__(self, key):
+        """支援 'in' 運算符"""
+        return key in self._load_providers()
+    
+    def __iter__(self):
+        """支援迭代"""
+        return iter(self._load_providers())
+    
+    def __len__(self):
+        """支援 len()"""
+        return len(self._load_providers())
+    
+    def get(self, key, default=None):
+        """支援 .get() 方法"""
+        return self._load_providers().get(key, default)
+    
+    def keys(self):
+        """支援 .keys() 方法"""
+        return self._load_providers().keys()
+    
+    def values(self):
+        """支援 .values() 方法"""
+        return self._load_providers().values()
+    
+    def items(self):
+        """支援 .items() 方法"""
+        return self._load_providers().items()
+
+SOCIALACCOUNT_PROVIDERS = LazySocialAccountProviders()
+
 
 # allauth 关键配置
 ACCOUNT_EMAIL_VERIFICATION = 'optional'

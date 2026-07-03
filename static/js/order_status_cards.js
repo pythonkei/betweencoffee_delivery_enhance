@@ -689,9 +689,15 @@ class OrderStatusCardsManager {
         }
     }
     
-    // 顯示Toast提示
+    // 顯示Toast提示（使用全局 Toast 管理器）
     showToast(message) {
-        // 創建Toast元素
+        // 優先使用全局 toast-manager.js 提供的 API
+        if (window.toast) {
+            window.toast.info(message, '訂單狀態更新');
+            return;
+        }
+        
+        // 回退方案：創建Toast元素
         const toast = document.createElement('div');
         toast.className = 'status-toast';
         toast.innerHTML = `
