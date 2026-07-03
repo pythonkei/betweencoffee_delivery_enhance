@@ -208,22 +208,6 @@ class CoffeeQueueManager:
                 model='CoffeeQueue'
             )
     
-    def add_order_to_queue_compatible(self, order, use_priority=True):
-        """
-        兼容性包裝器 - 返回原始格式的隊列項
-        
-        為了保持向後兼容性，這個方法返回原始的隊列項格式
-        而不是錯誤處理框架的響應格式
-        """
-        result = self.add_order_to_queue(order, use_priority)
-        
-        if result.get('success'):
-            return result['data']['queue_item']
-        else:
-            # 如果失敗，返回None
-            self.logger.error(f"添加訂單到隊列失敗，返回None: {result.get('error_id', 'N/A')}")
-            return None
-    
     def start_preparation(self, queue_item, barista_name=None):
         """
         開始製作 - 使用錯誤處理框架
@@ -322,19 +306,6 @@ class CoffeeQueueManager:
                 query=f"開始製作隊列項: #{queue_item.id if queue_item else 'None'}",
                 model='CoffeeQueue'
             )
-    
-    def start_preparation_compatible(self, queue_item, barista_name=None):
-        """
-        兼容性包裝器 - 返回原始格式的布爾值
-        """
-        result = self.start_preparation(queue_item, barista_name)
-        
-        if result.get('success'):
-            return True
-        else:
-            # 如果失敗，返回False
-            self.logger.error(f"開始製作失敗，返回False: {result.get('error_id', 'N/A')}")
-            return False
     
     def mark_as_ready(self, queue_item, staff_name=None):
         """
@@ -493,19 +464,6 @@ class CoffeeQueueManager:
                 query=f"標記隊列項為就緒: #{queue_item.id if queue_item else 'None'}",
                 model='CoffeeQueue'
             )
-    
-    def mark_as_ready_compatible(self, queue_item, staff_name=None):
-        """
-        兼容性包裝器 - 返回原始格式的布爾值
-        """
-        result = self.mark_as_ready(queue_item, staff_name)
-        
-        if result.get('success'):
-            return True
-        else:
-            # 如果失敗，返回False
-            self.logger.error(f"標記為就緒失敗，返回False: {result.get('error_id', 'N/A')}")
-            return False
     
     # ==================== 私有輔助方法 ====================
     
@@ -820,23 +778,6 @@ class CoffeeQueueManager:
                 model='OrderModel'
             )
     
-    def recalculate_all_order_times_compatible(self):
-        """
-        兼容性包裝器 - 返回原始格式的字典
-        """
-        result = self.recalculate_all_order_times()
-        
-        if result.get('success'):
-            return result['data']
-        else:
-            # 如果失敗，返回錯誤字典
-            self.logger.error(f"重新計算時間失敗: {result.get('error_id', 'N/A')}")
-            return {
-                'success': False,
-                'error': result.get('message', '未知錯誤'),
-                'message': '時間重新計算失敗'
-            }
-    
     def update_estimated_times(self):
         """
         更新隊列預計時間 - 使用錯誤處理框架
@@ -902,19 +843,6 @@ class CoffeeQueueManager:
                 query='更新隊列預計時間',
                 model='CoffeeQueue'
             )
-    
-    def update_estimated_times_compatible(self):
-        """
-        兼容性包裝器 - 返回原始格式的布爾值
-        """
-        result = self.update_estimated_times()
-        
-        if result.get('success'):
-            return True
-        else:
-            # 如果失敗，返回False
-            self.logger.error(f"更新預計時間失敗: {result.get('error_id', 'N/A')}")
-            return False
     
     def verify_queue_integrity(self):
         """
@@ -999,22 +927,6 @@ class CoffeeQueueManager:
                 query='驗證隊列完整性',
                 model='CoffeeQueue'
             )
-    
-    def verify_queue_integrity_compatible(self):
-        """
-        兼容性包裝器 - 返回原始格式的字典
-        """
-        result = self.verify_queue_integrity()
-        
-        if result.get('success'):
-            return result['data']
-        else:
-            # 如果失敗，返回錯誤字典
-            self.logger.error(f"驗證隊列完整性失敗: {result.get('error_id', 'N/A')}")
-            return {
-                'has_issues': True,
-                'issues': [f"驗證失敗: {result.get('message', '未知錯誤')}"]
-            }
     
     def sync_order_queue_status(self):
         """
@@ -1104,19 +1016,6 @@ class CoffeeQueueManager:
                 model='OrderModel'
             )
     
-    def sync_order_queue_status_compatible(self):
-        """
-        兼容性包裝器 - 返回原始格式的布爾值
-        """
-        result = self.sync_order_queue_status()
-        
-        if result.get('success'):
-            return True
-        else:
-            # 如果失敗，返回False
-            self.logger.error(f"同步狀態失敗: {result.get('error_id', 'N/A')}")
-            return False
-    
     def fix_queue_positions(self):
         """
         修復隊列位置 - 使用錯誤處理框架
@@ -1181,19 +1080,6 @@ class CoffeeQueueManager:
                 query='修復隊列位置',
                 model='CoffeeQueue'
             )
-    
-    def fix_queue_positions_compatible(self):
-        """
-        兼容性包裝器 - 返回原始格式的布爾值
-        """
-        result = self.fix_queue_positions()
-        
-        if result.get('success'):
-            return True
-        else:
-            # 如果失敗，返回False
-            self.logger.error(f"修復隊列位置失敗: {result.get('error_id', 'N/A')}")
-            return False
     
     # ==================== 智能分配方法 ====================
     

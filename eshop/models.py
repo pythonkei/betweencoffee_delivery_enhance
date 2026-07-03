@@ -980,7 +980,7 @@ class OrderModel(models.Model):
         
         # 使用統一的製作時間計算（與queue_manager一致）
         from .queue_manager_refactored import CoffeeQueueManager
-        return CoffeeQueueManager.get_preparation_time_compatible(coffee_count)
+        return CoffeeQueueManager.get_preparation_time(coffee_count)
     
     def should_be_in_queue_by_now(self):
         """檢查是否應該已經在隊列中（基於最晚開始時間）"""

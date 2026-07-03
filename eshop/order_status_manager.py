@@ -84,12 +84,13 @@ class OrderStatusManager:
                 # 将订单加入队列
                 from .queue_manager_refactored import CoffeeQueueManager
                 queue_manager = CoffeeQueueManager()
-                queue_item = queue_manager.add_order_to_queue_compatible(order)
+                queue_result = queue_manager.add_order_to_queue(order)
                 
-                if queue_item:
+                if queue_result.get('success'):
+                    queue_item = queue_result['data']['queue_item']
                     logger.info(f"订单 {order.id} 已加入制作队列，位置: {queue_item.position}")
                 else:
-                    logger.error(f"订单 {order.id} 加入队列失败")
+                    logger.error(f"订单 {order.id} 加入队列失败: {queue_result.get('message')}")
             else:
                 logger.info(f"ℹ️ 订单 #{order_id} 不需要加入队列")
             
@@ -97,7 +98,7 @@ class OrderStatusManager:
             logger.info(f"🔄 订单 #{order_id} 支付成功，开始统一时间计算...")
             from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
-            time_result = queue_manager.recalculate_all_order_times_compatible()
+            time_result = queue_manager.recalculate_all_order_times()
             
             # ✅ 修改：如果有request，清空购物车
             if request:
@@ -223,12 +224,12 @@ class OrderStatusManager:
             queue_manager = CoffeeQueueManager()
             
             logger.info(f"🔄 訂單狀態變化，開始統一時間計算...")
-            time_result = queue_manager.recalculate_all_order_times_compatible()
+            time_result = queue_manager.recalculate_all_order_times()
             
             if time_result.get('success'):
                 logger.info(f"✅ 訂單狀態變化後時間計算完成")
             else:
-                logger.warning(f"⚠️ 訂單狀態變化後時間計算有問題: {time_result.get('error')}")
+                logger.warning(f"⚠️ 訂單狀態變化後時間計算有問題: {time_result.get('message')}")
             
             # ============================================================
             # 🔧 修復：發送WebSocket通知（統一使用 'status' 類型）
@@ -284,7 +285,7 @@ class OrderStatusManager:
             from .queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
             
-            time_result = queue_manager.recalculate_all_order_times_compatible()
+            time_result = queue_manager.recalculate_all_order_times()
             
             logger.info(f"✅ 批量處理完成，統一時間計算結果: {time_result.get('success')}")
             
@@ -298,157 +299,15 @@ class OrderStatusManager:
             logger.error(f"❌ 批量處理訂單狀態變化失敗: {str(e)}")
             return {'success': False, 'error': str(e)}
 
-    # ==================== FPS 付款確認方法 ====================
+    # ==================== 線下付款確認方法（統一） ====================
 
     @classmethod
-    def confirm_fps_payment(cls, order_id, staff_name='staff'):
+    def confirm_offline_payment(cls, order_id, payment_method, staff_name='staff'):
         """
-        員工確認 FPS 付款已收到
+        統一處理線下付款確認（FPS / 現金）
         
         流程：
         1. 檢查訂單是否為 payment_pending 狀態
-        2. 將 payment_status 從 payment_pending 改為 paid
-        3. 根據訂單類型設置 status：
-           - 含咖啡：status = 'waiting'（等待加入製作隊列）
-           - 純咖啡豆：status = 'ready'（可直接提取）
-        4. 將訂單加入製作隊列（如適用）
-        5. 發送 WebSocket 通知
-        
-        Args:
-            order_id: 訂單 ID
-            staff_name: 確認付款的員工名稱
-            
-        Returns:
-            dict: {'success': True/False, 'message': '...', 'order_id': ...}
-        """
-        try:
-            logger.info(f"🔄 員工 {staff_name} 開始確認 FPS 付款，訂單 #{order_id}")
-            
-            order = OrderModel.objects.get(id=order_id)
-            
-            # 檢查訂單狀態
-            if order.payment_status != 'payment_pending':
-                return {
-                    'success': False,
-                    'message': f'訂單 #{order_id} 當前支付狀態為 {order.payment_status}，無法確認 FPS 付款',
-                    'order_id': order_id
-                }
-            
-            # 1. 更新支付狀態為 paid
-            order.payment_status = 'paid'
-            order.paid_at = timezone.now()
-            order.payment_method = 'fps'
-            
-            # 2. 根據訂單類型設置狀態
-            items = order.get_items()
-            has_coffee = any(item.get('type') == 'coffee' for item in items)
-            has_beans = any(item.get('type') == 'bean' for item in items)
-            
-            if has_coffee:
-                order.status = 'waiting'
-                logger.info(f"✅ FPS 訂單 #{order_id} 含咖啡，狀態設為 waiting")
-            elif has_beans:
-                order.status = 'ready'
-                logger.info(f"✅ FPS 訂單 #{order_id} 純咖啡豆，狀態設為 ready")
-            else:
-                order.status = 'waiting'
-                logger.warning(f"⚠️ FPS 訂單 #{order_id} 無商品類型，設為 waiting")
-            
-            # 3. 保存訂單
-            order.save()
-            logger.info(f"✅ FPS 訂單 #{order_id} 付款確認成功")
-            
-            # 4. 將訂單加入製作隊列（如適用）
-            queue_result = None
-            if has_coffee:
-                try:
-                    from .queue_manager_refactored import CoffeeQueueManager
-                    queue_manager = CoffeeQueueManager()
-                    queue_item = queue_manager.add_order_to_queue_compatible(order)
-                    
-                    if queue_item:
-                        if isinstance(queue_item, dict):
-                            position = queue_item.get('position', 0)
-                        else:
-                            position = queue_item.position
-                        logger.info(f"✅ FPS 訂單 #{order_id} 已加入製作隊列，位置: {position}")
-                        queue_result = {'added': True, 'position': position}
-                    else:
-                        logger.warning(f"⚠️ FPS 訂單 #{order_id} 加入隊列失敗")
-                        queue_result = {'added': False}
-                except Exception as queue_error:
-                    logger.error(f"❌ FPS 訂單 #{order_id} 加入隊列異常: {queue_error}")
-                    queue_result = {'added': False, 'error': str(queue_error)}
-            
-            # 5. 發送 WebSocket 通知
-            try:
-                from .websocket_utils import send_order_update, send_queue_update
-                
-                send_order_update(
-                    order_id=order_id,
-                    update_type='payment_confirmed',
-                    data={
-                        'order_id': order_id,
-                        'payment_method': 'fps',
-                        'payment_status': 'paid',
-                        'status': order.status,
-                        'message': f'FPS 付款已確認，訂單 #{order_id} 已進入製作流程'
-                    }
-                )
-                
-                if queue_result and queue_result.get('added'):
-                    send_queue_update(
-                        update_type='add',
-                        data={
-                            'order_id': order_id,
-                            'position': queue_result.get('position', 0),
-                            'queue_type': 'waiting'
-                        }
-                    )
-            except Exception as ws_error:
-                logger.error(f"發送 WebSocket 通知失敗: {ws_error}")
-            
-            # ✅ 新增：添加會員積分（FPS 付款確認後自動添加）
-            if order.user:
-                try:
-                    from socialuser.models_enhanced import CustomerLoyalty
-                    loyalty, created = CustomerLoyalty.objects.get_or_create(user=order.user)
-                    points_earned = loyalty.add_points_from_order(order)
-                    logger.info(f"✅ 用戶 {order.user.username} FPS 訂單 #{order.id} 獲得 {points_earned} 積分")
-                except Exception as e:
-                    logger.error(f"添加會員積分失敗: {str(e)}")
-            
-            return {
-                'success': True,
-                'message': f'FPS 訂單 #{order_id} 付款確認成功',
-                'order_id': order_id,
-                'payment_status': 'paid',
-                'status': order.status,
-                'queue_result': queue_result
-            }
-            
-        except OrderModel.DoesNotExist:
-            logger.error(f"❌ FPS 訂單 #{order_id} 不存在")
-            return {
-                'success': False,
-                'message': f'訂單 #{order_id} 不存在',
-                'order_id': order_id
-            }
-        except Exception as e:
-            logger.error(f"❌ FPS 付款確認異常: {str(e)}")
-            return {
-                'success': False,
-                'message': f'FPS 付款確認失敗: {str(e)}',
-                'order_id': order_id
-            }
-
-    @classmethod
-    def confirm_cash_payment(cls, order_id, staff_name='staff'):
-        """
-        員工確認現金付款已收到
-        
-        流程：
-        1. 檢查訂單是否為 payment_pending 狀態（現金付款待確認）
         2. 將 payment_status 從 payment_pending 改為 paid
         3. 根據訂單類型設置 status：
            - 含咖啡：status = 'waiting'（等待加入製作隊列）
@@ -459,13 +318,15 @@ class OrderStatusManager:
         
         Args:
             order_id: 訂單 ID
+            payment_method: 支付方式 ('fps' 或 'cash')
             staff_name: 確認付款的員工名稱
             
         Returns:
             dict: {'success': True/False, 'message': '...', 'order_id': ...}
         """
+        method_label = 'FPS' if payment_method == 'fps' else '現金'
         try:
-            logger.info(f"🔄 員工 {staff_name} 開始確認現金付款，訂單 #{order_id}")
+            logger.info(f"🔄 員工 {staff_name} 開始確認 {method_label} 付款，訂單 #{order_id}")
             
             order = OrderModel.objects.get(id=order_id)
             
@@ -473,14 +334,14 @@ class OrderStatusManager:
             if order.payment_status != 'payment_pending':
                 return {
                     'success': False,
-                    'message': f'訂單 #{order_id} 當前支付狀態為 {order.payment_status}，無法確認現金付款',
+                    'message': f'訂單 #{order_id} 當前支付狀態為 {order.payment_status}，無法確認 {method_label} 付款',
                     'order_id': order_id
                 }
             
             # 1. 更新支付狀態為 paid
             order.payment_status = 'paid'
             order.paid_at = timezone.now()
-            order.payment_method = 'cash'
+            order.payment_method = payment_method
             
             # 2. 根據訂單類型設置狀態
             items = order.get_items()
@@ -489,17 +350,17 @@ class OrderStatusManager:
             
             if has_coffee:
                 order.status = 'waiting'
-                logger.info(f"✅ 現金訂單 #{order_id} 含咖啡，狀態設為 waiting")
+                logger.info(f"✅ {method_label} 訂單 #{order_id} 含咖啡，狀態設為 waiting")
             elif has_beans:
                 order.status = 'ready'
-                logger.info(f"✅ 現金訂單 #{order_id} 純咖啡豆，狀態設為 ready")
+                logger.info(f"✅ {method_label} 訂單 #{order_id} 純咖啡豆，狀態設為 ready")
             else:
                 order.status = 'waiting'
-                logger.warning(f"⚠️ 現金訂單 #{order_id} 無商品類型，設為 waiting")
+                logger.warning(f"⚠️ {method_label} 訂單 #{order_id} 無商品類型，設為 waiting")
             
             # 3. 保存訂單
             order.save()
-            logger.info(f"✅ 現金訂單 #{order_id} 付款確認成功")
+            logger.info(f"✅ {method_label} 訂單 #{order_id} 付款確認成功")
             
             # 4. 將訂單加入製作隊列（如適用）
             queue_result = None
@@ -507,20 +368,18 @@ class OrderStatusManager:
                 try:
                     from .queue_manager_refactored import CoffeeQueueManager
                     queue_manager = CoffeeQueueManager()
-                    queue_item = queue_manager.add_order_to_queue_compatible(order)
+                    queue_result_data = queue_manager.add_order_to_queue(order)
                     
-                    if queue_item:
-                        if isinstance(queue_item, dict):
-                            position = queue_item.get('position', 0)
-                        else:
-                            position = queue_item.position
-                        logger.info(f"✅ 現金訂單 #{order_id} 已加入製作隊列，位置: {position}")
+                    if queue_result_data.get('success'):
+                        queue_item = queue_result_data['data']['queue_item']
+                        position = queue_item.position
+                        logger.info(f"✅ {method_label} 訂單 #{order_id} 已加入製作隊列，位置: {position}")
                         queue_result = {'added': True, 'position': position}
                     else:
-                        logger.warning(f"⚠️ 現金訂單 #{order_id} 加入隊列失敗")
+                        logger.warning(f"⚠️ {method_label} 訂單 #{order_id} 加入隊列失敗: {queue_result_data.get('message')}")
                         queue_result = {'added': False}
                 except Exception as queue_error:
-                    logger.error(f"❌ 現金訂單 #{order_id} 加入隊列異常: {queue_error}")
+                    logger.error(f"❌ {method_label} 訂單 #{order_id} 加入隊列異常: {queue_error}")
                     queue_result = {'added': False, 'error': str(queue_error)}
             
             # 5. 發送 WebSocket 通知
@@ -532,10 +391,10 @@ class OrderStatusManager:
                     update_type='payment_confirmed',
                     data={
                         'order_id': order_id,
-                        'payment_method': 'cash',
+                        'payment_method': payment_method,
                         'payment_status': 'paid',
                         'status': order.status,
-                        'message': f'現金付款已確認，訂單 #{order_id} 已進入製作流程'
+                        'message': f'{method_label} 付款已確認，訂單 #{order_id} 已進入製作流程'
                     }
                 )
                 
@@ -551,19 +410,19 @@ class OrderStatusManager:
             except Exception as ws_error:
                 logger.error(f"發送 WebSocket 通知失敗: {ws_error}")
             
-            # 6. 添加會員積分（現金付款確認後自動添加）
+            # 6. 添加會員積分
             if order.user:
                 try:
                     from socialuser.models_enhanced import CustomerLoyalty
                     loyalty, created = CustomerLoyalty.objects.get_or_create(user=order.user)
                     points_earned = loyalty.add_points_from_order(order)
-                    logger.info(f"✅ 用戶 {order.user.username} 現金訂單 #{order.id} 獲得 {points_earned} 積分")
+                    logger.info(f"✅ 用戶 {order.user.username} {method_label} 訂單 #{order.id} 獲得 {points_earned} 積分")
                 except Exception as e:
                     logger.error(f"添加會員積分失敗: {str(e)}")
             
             return {
                 'success': True,
-                'message': f'現金訂單 #{order_id} 付款確認成功',
+                'message': f'{method_label} 訂單 #{order_id} 付款確認成功',
                 'order_id': order_id,
                 'payment_status': 'paid',
                 'status': order.status,
@@ -571,19 +430,29 @@ class OrderStatusManager:
             }
             
         except OrderModel.DoesNotExist:
-            logger.error(f"❌ 現金訂單 #{order_id} 不存在")
+            logger.error(f"❌ {method_label} 訂單 #{order_id} 不存在")
             return {
                 'success': False,
                 'message': f'訂單 #{order_id} 不存在',
                 'order_id': order_id
             }
         except Exception as e:
-            logger.error(f"❌ 現金付款確認異常: {str(e)}")
+            logger.error(f"❌ {method_label} 付款確認異常: {str(e)}")
             return {
                 'success': False,
-                'message': f'現金付款確認失敗: {str(e)}',
+                'message': f'{method_label} 付款確認失敗: {str(e)}',
                 'order_id': order_id
             }
+
+    @classmethod
+    def confirm_fps_payment(cls, order_id, staff_name='staff'):
+        """保留向後兼容 - 調用統一的 confirm_offline_payment"""
+        return cls.confirm_offline_payment(order_id, 'fps', staff_name)
+
+    @classmethod
+    def confirm_cash_payment(cls, order_id, staff_name='staff'):
+        """保留向後兼容 - 調用統一的 confirm_offline_payment"""
+        return cls.confirm_offline_payment(order_id, 'cash', staff_name)
 
     def get_display_status(self):
         """获取订单显示状态"""
@@ -849,7 +718,8 @@ class OrderStatusManager:
             # 創建或更新隊列項
             from eshop.queue_manager_refactored import CoffeeQueueManager
             queue_manager = CoffeeQueueManager()
-            queue_item = queue_manager.add_order_to_queue_compatible(order)
+            queue_result = queue_manager.add_order_to_queue(order)
+            queue_item = queue_result['data']['queue_item'] if queue_result.get('success') else None
             
             # 觸發相關事件
             cls._trigger_payment_success_events(order, payment_method)
@@ -1016,7 +886,7 @@ class OrderStatusManager:
                 
                 def async_update_queue_times():
                     try:
-                        queue_manager.update_estimated_times_compatible()
+                        queue_manager.update_estimated_times()
                         logger.info(
                             f"✅ 訂單 #{order_id} 隊列時間已異步更新"
                         )
