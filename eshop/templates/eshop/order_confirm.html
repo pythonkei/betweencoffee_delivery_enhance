@@ -274,10 +274,6 @@
                             <div class="form-group">
                                 <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
                                     <i class="fas fa-gift" style="color: #c49b63;"></i> 積分兌換
-                                    <span class="badge badge-theme ml-2" style="font-size: 0.75rem; vertical-align: middle;">
-                                        {{ user.loyalty.points|default:"0" }} 積分
-
-                                    </span>
                                 </label>
                                 <div class="reward-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
                                     {% for reward in available_rewards %}
@@ -310,9 +306,6 @@
                                 <div class="d-flex justify-content-between align-items-center mt-2 px-1">
                                     <small style="color: rgba(255,255,255,0.4); font-size: 0.75rem;">
                                         <i class="fas fa-info-circle"></i> 勾選後提交訂單即自動兌換
-                                    </small>
-                                    <small style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">
-                                        積分折扣: -$<span id="reward-discount-amount" style="color: #28a745; font-weight: 600;">0.00</span>
                                     </small>
                                 </div>
                             </div>
@@ -507,10 +500,17 @@
                     <!-- 支付信息-->
                     <div class="sidebar-box">
                         <div class="dividerline mb-4"></div>
-                        <div class="total-price mb-5 text-right">
+                        <div class="total-price mb-2 text-right">
                             <span class="h4">總計: </span>
                             <span class="h4">${{ total_price|floatformat:"-2" }}</span>
                         </div>
+                        {% if user.is_authenticated and available_rewards %}
+                        <div id="reward-discount-container" class="text-right mb-4 px-1" style="visibility: hidden; min-height: 1.5rem;">
+                            <small style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">
+                                積分折扣: -$<span id="reward-discount-amount" style="color: #28a745; font-weight: 600;">0.00</span>
+                            </small>
+                        </div>
+                        {% endif %}
                         <div class="block-21 justify-content-end">
                             <div class="form-group pb-5">
                             <!-- 支付按钮 -->
@@ -1143,10 +1143,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 const discount = this.checked ? parseFloat(this.dataset.discount) : 0;
                 rewardDiscountSpan.textContent = discount.toFixed(2);
                 
-                // 更新總價
+                // 更新總價（保持與初始格式一致，避免多出 .00）
                 const newTotal = Math.max(0, originalTotalPrice - discount);
                 if (totalPriceElement) {
-                    totalPriceElement.textContent = '$' + newTotal.toFixed(2);
+                    const formattedTotal = newTotal % 1 === 0 ? newTotal.toFixed(0) : newTotal.toFixed(2);
+                    totalPriceElement.textContent = '$' + formattedTotal;
+                }
+                
+                // 控制折扣容器的顯示/隱藏（使用 visibility 避免佈局抖動）
+                const discountContainer = document.getElementById('reward-discount-container');
+                if (discountContainer) {
+                    if (this.checked && discount > 0) {
+                        discountContainer.style.visibility = 'visible';
+                    } else {
+                        discountContainer.style.visibility = 'hidden';
+                    }
                 }
                 
                 console.log('獎勵選擇:', this.checked ? this.dataset.rewardName : '無', 
