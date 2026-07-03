@@ -3,7 +3,7 @@
     "name": "Between Coffee System Memory Bank",
     "version": "1.0.0",
     "created": "2026-04-05",
-    "last_updated": "2026-07-02",
+    "last_updated": "2026-07-03",
     "description": "持久化項目上下文和知識庫，為Cline AI助理提供完整的項目信息"
   },
   

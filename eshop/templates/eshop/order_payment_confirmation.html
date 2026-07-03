@@ -561,9 +561,6 @@ if (document.body) {
 <!-- 引入訂單支付確認功能（簡化版，不包含狀態更新） -->
 <script src="{% static 'js/order_payment_confirmation.js' %}"></script>
 
-<!-- 引入訂單狀態卡片功能 -->
-<script src="{% static 'js/order_status_cards.js' %}"></script>
-
 <script>
 // ==================== Toast 通知系統（使用全局 Toast 管理器） ====================
 function showToast(type, message) {
@@ -879,3 +876,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 {% endblock content %}
+
+{% block extra_scripts %}
+<!-- 訂單狀態卡片管理器（依賴 WebSocketCore） -->
+<script src="{% static 'js/order_status_cards.js' %}"></script>
+{% endblock %}

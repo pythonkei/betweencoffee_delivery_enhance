@@ -31,6 +31,7 @@ from .views.websocket_views import (
     websocket_connections_api,  # WebSocket 連線列表
     websocket_broadcast_test,   # 系統廣播測試
     websocket_reset_stats,      # 🔥 新增：重置統計數據（管理員用）
+    ws_fallback_api,            # 🔥 新增：HTTP Fallback API（前端輪詢用）
 )
 
 # ==================== 導入智能分配 API 視圖 ====================
@@ -90,6 +91,9 @@ urlpatterns = [
     path('cash/confirm-payment/<int:order_id>/', api_confirm_cash_payment, name='confirm_cash_payment'),
 
     
+    # ==================== 🔥 HTTP Fallback API（公開，供前端輪詢）====================
+    path('ws-fallback/', ws_fallback_api, name='ws_fallback'),
+
     # ==================== 🔥 WebSocket 監控 API（管理員專用）====================
 
     # 這些端點需要 staff_member_required 權限，已在視圖中處理

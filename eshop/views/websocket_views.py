@@ -208,6 +208,91 @@ def websocket_disconnect_user(request):
         }, status=500)
 
 
+# ==================== HTTP Fallback API（公開，供前端輪詢）====================
+
+@require_GET
+def ws_fallback_api(request):
+    """
+    HTTP Fallback API - 當 WebSocket 不可用時，前端透過此 API 輪詢獲取最新狀態
+    
+    URL: /eshop/api/ws-fallback/
+    權限: 公開（僅返回訂單基本狀態，無敏感資訊）
+    
+    查詢參數:
+        order_ids: 逗號分隔的訂單 ID 列表（可選）
+        queue: 是否返回隊列狀態（1 或 0）
+        since: ISO 格式時間戳，只返回此時間後的更新
+    
+    返回:
+        {
+            'orders': { order_id: { status, payment_status, ... } },
+            'queue': { waiting_count, preparing_count, ... },
+            'updates': [ { type, ... }, ... ],
+            'timestamp': '...'
+        }
+    """
+    try:
+        from django.utils import timezone
+        from eshop.models import OrderModel, CoffeeQueue
+        
+        response_data = {
+            'orders': {},
+            'queue': None,
+            'updates': [],
+            'timestamp': timezone.now().isoformat()
+        }
+        
+        # 1. 查詢訂單狀態
+        order_ids_str = request.GET.get('order_ids', '')
+        if order_ids_str:
+            order_ids = [int(x.strip()) for x in order_ids_str.split(',') if x.strip().isdigit()]
+            if order_ids:
+                orders = OrderModel.objects.filter(id__in=order_ids).select_related()
+                for order in orders:
+                    queue_info = None
+                    try:
+                        queue = CoffeeQueue.objects.get(order=order)
+                        queue_info = {
+                            'position': queue.position,
+                            'estimated_completion_time': queue.estimated_completion_time.isoformat() if queue.estimated_completion_time else None,
+                        }
+                    except CoffeeQueue.DoesNotExist:
+                        pass
+                    
+                    response_data['orders'][str(order.id)] = {
+                        'order_id': order.id,
+                        'status': order.status,
+                        'status_display': order.get_status_display(),
+                        'payment_status': order.payment_status,
+                        'payment_method': order.payment_method,
+                        'pickup_code': order.pickup_code,
+                        'queue_position': queue_info['position'] if queue_info else None,
+                        'estimated_completion_time': queue_info['estimated_completion_time'] if queue_info else None,
+                    }
+        
+        # 2. 查詢隊列狀態
+        if request.GET.get('queue') == '1':
+            waiting_count = CoffeeQueue.objects.filter(status='waiting').count()
+            preparing_count = CoffeeQueue.objects.filter(status='preparing').count()
+            ready_count = CoffeeQueue.objects.filter(status='ready').count()
+            
+            response_data['queue'] = {
+                'waiting_count': waiting_count,
+                'preparing_count': preparing_count,
+                'ready_count': ready_count,
+                'total_active': waiting_count + preparing_count,
+            }
+        
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        logger.error(f"❌ Fallback API 錯誤: {e}")
+        return JsonResponse({
+            'error': str(e),
+            'timestamp': timezone.now().isoformat()
+        }, status=500)
+
+
 # ==================== 健康檢查端點（公開）====================
 
 @require_GET

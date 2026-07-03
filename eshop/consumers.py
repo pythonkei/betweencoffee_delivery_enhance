@@ -49,8 +49,11 @@ class BaseOrderConsumer(AsyncWebsocketConsumer):
                 if hasattr(self, 'connection_id'):
                     websocket_manager.update_heartbeat(self.connection_id)
                 
+                # 回應 pong，包含服務端時間戳和延遲資訊
                 await self._send_json({
                     'type': 'pong',
+                    'client_time': data.get('client_time'),
+                    'server_time': timezone.now().timestamp(),
                     'timestamp': timezone.now().isoformat()
                 })
                 logger.debug(f"❤️ 收到 ping，回應 pong: {self.channel_name}")
@@ -58,6 +61,33 @@ class BaseOrderConsumer(AsyncWebsocketConsumer):
             # ----- 處理 sync_request（重連同步請求）-----
             elif msg_type == 'sync_request':
                 await self._handle_sync_request(data)
+            
+            # ----- 處理 subscribe_order（訂閱訂單）-----
+            elif msg_type == 'subscribe_order':
+                order_id = data.get('order_id')
+                if order_id:
+                    room_group = f'order_{order_id}'
+                    await self.channel_layer.group_add(room_group, self.channel_name)
+                    logger.info(f"📋 客戶端訂閱訂單: {order_id}")
+                    await self._send_json({
+                        'type': 'subscribed',
+                        'order_id': order_id,
+                        'timestamp': timezone.now().isoformat()
+                    })
+            
+            # ----- 處理 subscribe_queue（訂閱隊列）-----
+            elif msg_type == 'subscribe_queue':
+                if hasattr(self, 'room_group_name') and self.room_group_name == 'queue_updates':
+                    # 已在隊列群組中
+                    pass
+                else:
+                    await self.channel_layer.group_add('queue_updates', self.channel_name)
+                    logger.info(f"📋 客戶端訂閱隊列")
+                    await self._send_json({
+                        'type': 'subscribed',
+                        'queue': True,
+                        'timestamp': timezone.now().isoformat()
+                    })
             
         except json.JSONDecodeError:
             logger.warning(f"⚠️ 無效的 JSON 格式: {text_data}")

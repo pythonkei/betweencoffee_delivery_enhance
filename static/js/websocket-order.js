@@ -1,7 +1,7 @@
 /**
- * websocket-order.js - 顧客端訂單 WebSocket 管理器
+ * websocket-order.js - 顧客端訂單 WebSocket 管理器（v3.0.0）
  * 
- * 基於 websocket-core.js 的事件系統，管理訂單頁面的即時更新。
+ * 基於 websocket-core.js v3.0.0 的事件系統，管理訂單頁面的即時更新。
  * 支援訂單狀態、隊列位置、預計時間、支付狀態等更新。
  * 
  * 功能：
@@ -12,9 +12,11 @@
  * - 訂單就緒通知
  * - 重連後自動同步
  * - 頁面可見性恢復時自動同步
+ * - 支援 HTTP fallback 模式（WebSocket 不可用時自動切換）
+ * - 支援 localStorage 持久化訂閱
  * 
- * 版本: 2.0.0
- * 最後更新: 2026-06-17
+ * 版本: 3.0.0
+ * 最後更新: 2026-07-03
  */
 
 class OrderWebSocket {

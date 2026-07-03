@@ -321,7 +321,7 @@ class OrderStatusCardsManager {
         console.log(`記錄狀態 ${status} 的時間: ${timeString}`);
     }
     
-    // 初始化WebSocket連接（使用增強連接器）
+    // 初始化WebSocket連接（使用 WebSocketCore v3.0.0）
     initWebSocket() {
         try {
             // 檢查WebSocket支持
@@ -331,102 +331,84 @@ class OrderStatusCardsManager {
                 return;
             }
             
-            // 檢查增強連接器是否可用
-            if (!window.EnhancedWebSocketConnector) {
-                console.warn("增強WebSocket連接器未加載，使用標準WebSocket");
-                this.initStandardWebSocket();
+            // 檢查 WebSocketCore 是否可用
+            const core = WebSocketCore.getInstance();
+            if (!core) {
+                console.warn("WebSocketCore 未初始化，等待...");
+                setTimeout(() => this.initWebSocket(), 500);
                 return;
             }
             
-            // 構建WebSocket URL
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = window.location.host;
-            const wsUrl = `${protocol}//${host}/ws/order/${this.orderId}/`;
+            console.log("使用 WebSocketCore v3.0.0 訂閱訂單:", this.orderId);
             
-            console.log("使用增強WebSocket連接器:", wsUrl);
+            // 訂閱訂單
+            core.subscribeOrder(this.orderId);
             
-            // 創建增強連接器
-            this.websocketConnector = new EnhancedWebSocketConnector(wsUrl, {
-                reconnectOptions: {
-                    baseDelay: 1000,      // 1秒基礎延遲
-                    maxDelay: 30000,      // 30秒最大延遲
-                    maxRetries: 10,       // 最大重試10次
-                    jitterFactor: 0.2,    // ±20%抖動
-                    enableJitter: true
-                },
-                heartbeatEnabled: true,
-                heartbeatInterval: 30000,  // 30秒心跳間隔
-                heartbeatTimeout: 10000    // 10秒心跳超時
-            });
+            // 註冊事件監聽
+            this._wsUnsubscribers = [];
             
-            // 設置事件監聽器
-            this.websocketConnector.addEventListener('open', (event) => {
-                console.log("✅ WebSocket連接成功（增強版）");
+            this._wsUnsubscribers.push(
+                core.on('connected', () => {
+                    console.log("✅ WebSocketCore 已連線");
+                    this.isConnected = true;
+                    this.setWebSocketStatus(true, "實時更新已連接");
+                })
+            );
+            
+            this._wsUnsubscribers.push(
+                core.on('disconnected', () => {
+                    console.log("🔌 WebSocketCore 斷線");
+                    this.isConnected = false;
+                    this.setWebSocketStatus(false, "連接已斷開");
+                })
+            );
+            
+            this._wsUnsubscribers.push(
+                core.on('reconnecting', (data) => {
+                    console.log(`🔄 正在重新連接（第 ${data.attempt} 次）`);
+                    this.setWebSocketStatus(false, `正在重新連接... (${data.attempt}次)`);
+                })
+            );
+            
+            // 監聽訂單狀態更新
+            this._wsUnsubscribers.push(
+                core.on('message:order_status', (data) => {
+                    console.log("收到訂單狀態更新:", data);
+                    this.handleOrderStatusData(data);
+                })
+            );
+            
+            this._wsUnsubscribers.push(
+                core.on('message:order_status_update', (data) => {
+                    console.log("收到訂單狀態更新（舊格式）:", data);
+                    this.handleOrderStatusUpdate(data);
+                })
+            );
+            
+            // 監聽品質變化
+            this._wsUnsubscribers.push(
+                core.on('quality_change', (data) => {
+                    if (data.score < 60) {
+                        this.setWebSocketStatus(false, "連接質量差");
+                    } else if (data.score < 80) {
+                        this.setWebSocketStatus(true, "連接正常（質量中等）");
+                    } else {
+                        this.setWebSocketStatus(true, "連接良好");
+                    }
+                })
+            );
+            
+            // 如果核心已連線，立即更新狀態
+            if (core.state.isConnected) {
                 this.isConnected = true;
                 this.setWebSocketStatus(true, "實時更新已連接");
-                
-                // 顯示連接健康度
-                const status = this.websocketConnector.getConnectionStatus();
-                console.log("連接健康度:", status.reconnectStatus.healthScore, "分");
-            });
+            }
             
-            this.websocketConnector.addEventListener('message', (event) => {
-                try {
-                    const data = event.data;
-                    console.log("收到WebSocket消息（增強版）:", data);
-                    
-                    // 處理不同格式的WebSocket消息
-                    if (data.type === 'order_status_update') {
-                        // 格式1: {type: 'order_status_update', order_id: 123, status: 'preparing', ...}
-                        this.handleOrderStatusUpdate(data);
-                    } else if (data.type === 'order_status') {
-                        // 格式2: {type: 'order_status', data: {status: 'preparing', ...}, ...}
-                        this.handleOrderStatusData(data);
-                    } else if (data.type === 'ping') {
-                        // 回應ping消息（增強連接器會自動處理）
-                        console.debug("收到ping消息，增強連接器會自動回應");
-                    } else {
-                        console.log("收到其他類型的WebSocket消息:", data.type);
-                    }
-                } catch (error) {
-                    console.error("解析WebSocket消息失敗:", error);
-                }
-            });
-            
-            this.websocketConnector.addEventListener('error', (event) => {
-                console.error("❌ WebSocket錯誤（增強版）:", event);
-                this.setWebSocketStatus(false, "連接錯誤");
-            });
-            
-            this.websocketConnector.addEventListener('close', (event) => {
-                console.log("🔌 WebSocket連接關閉（增強版）:", event.code, event.reason);
-                this.isConnected = false;
-                this.setWebSocketStatus(false, "連接已斷開");
-            });
-            
-            this.websocketConnector.addEventListener('reconnect', (event) => {
-                console.log(`🔄 正在嘗試重新連接（第 ${event.attempt}/${event.maxRetries} 次）`);
-                this.setWebSocketStatus(false, `正在重新連接... (${event.attempt}/${event.maxRetries})`);
-            });
-            
-            this.websocketConnector.addEventListener('healthChange', (event) => {
-                console.log("📊 連接健康度變化:", event.healthScore, "分");
-                
-                // 根據健康度更新狀態指示器
-                if (event.healthScore < 60) {
-                    this.setWebSocketStatus(false, "連接質量差，正在優化...");
-                } else if (event.healthScore < 80) {
-                    this.setWebSocketStatus(true, "連接正常（質量中等）");
-                } else {
-                    this.setWebSocketStatus(true, "連接良好");
-                }
-            });
-            
-            // 開始連接
-            this.websocketConnector.connect();
+            // 保存核心引用
+            this._wsCore = core;
             
         } catch (error) {
-            console.error("初始化增強WebSocket失敗:", error);
+            console.error("初始化 WebSocketCore 失敗:", error);
             this.setWebSocketStatus(false, "連接失敗");
             
             // 回退到標準WebSocket

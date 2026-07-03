@@ -79,12 +79,12 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: order_payment_confirmation.html payment_pending 區塊修正（移除重複文字、放大客服提示字體）"
+        echo "├── 最新改動: 社交登入（Google/Facebook）修復 + ID重複修復（2026-07-03）"
 
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
-        echo "├── 已知問題: 社交登入（Google/Facebook）需要修復"
-        echo "├── 優先任務: ID重複、WebSocket穩定性、社交登入修復"
+        echo "├── 已知問題: WebSocket 穩定性、移動端優化"
+        echo "├── 優先任務: WebSocket穩定性、移動端優化、錯誤處理完善"
         echo "└── 大小: ${FILE_SIZE_KB} KB"
         
         return 0
