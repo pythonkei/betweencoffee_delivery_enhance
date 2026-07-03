@@ -777,6 +777,63 @@ def cash_payment(request, order_id):
         return redirect('eshop:order_payment_confirmation', order_id=order_id)
 
 
+def cash_confirm_payment(request, order_id):
+    """
+    現金支付確認 - 用戶點擊「確認訂單」後處理
+    
+    現金到店付款流程（方案 B：員工確認）：
+    1. 顧客選擇現金支付 → 看到現金支付頁面
+    2. 顧客點擊「確認訂單」→ 此視圖處理
+    3. 訂單設為 payment_pending（等待員工確認收到現金）
+    4. 跳轉到支付確認頁面（顯示二維碼和提取碼）
+    5. 員工在員工端「待確認付款」分頁看到訂單
+    6. 員工收到現金後點擊「確認現金付款」
+    7. 訂單正式加入 CoffeeQueue 製作隊列
+    """
+    try:
+        if request.method != 'POST':
+            return redirect('eshop:cash_payment', order_id=order_id)
+        
+        order = get_object_or_404(OrderModel, id=order_id)
+        
+        # 驗證用戶權限
+        if request.user.is_authenticated and order.user != request.user:
+            messages.error(request, "您無權訪問此訂單")
+            return redirect('index')
+        
+        # 如果已經支付，直接跳轉
+        if order.payment_status == 'paid':
+            clear_user_cart_and_session(request)
+            return redirect_to_confirmation(order.id)
+        
+        logger.info(f"現金支付確認: 訂單 {order_id}, 用戶確認到店付款（等待員工確認）")
+        
+        # ====== 方案 B：設為 payment_pending，等待員工確認 ======
+        # 不直接設為 paid，而是讓員工在收到現金後確認
+        order.payment_status = 'payment_pending'
+        order.payment_method = 'cash'
+        order.save(update_fields=['payment_status', 'payment_method'])
+        
+        # 清空購物車和 session
+        clear_user_cart_and_session(request)
+        
+        logger.info(f"✅ 現金訂單 #{order_id} 已設為 payment_pending，等待員工確認")
+        messages.success(
+            request, 
+            "訂單已提交！請到店後向店員出示二維碼並支付現金，店員確認後將開始製作。"
+        )
+        return redirect_to_confirmation(order.id)
+
+        
+    except OrderModel.DoesNotExist:
+        messages.error(request, "訂單不存在")
+        return redirect('index')
+    except Exception as e:
+        logger.error(f"現金支付確認異常: {str(e)}")
+        messages.error(request, f"支付確認異常: {str(e)}")
+        return redirect('eshop:cash_payment', order_id=order_id)
+
+
 
 # ==================== 支付状态检查视图 ====================
 

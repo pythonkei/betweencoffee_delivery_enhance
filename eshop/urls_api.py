@@ -15,6 +15,7 @@ from .views.api_views import (
     api_mark_order_as_ready,
     api_mark_order_as_completed,
     api_confirm_fps_payment,
+    api_confirm_cash_payment,
     # 兼容性API
     get_recent_orders,
     get_active_orders,
@@ -85,8 +86,12 @@ urlpatterns = [
     # ==================== FPS 付款確認 API（員工端）====================
     path('fps/confirm-payment/<int:order_id>/', api_confirm_fps_payment, name='confirm_fps_payment'),
 
+    # ==================== 現金付款確認 API（員工端）====================
+    path('cash/confirm-payment/<int:order_id>/', api_confirm_cash_payment, name='confirm_cash_payment'),
+
     
     # ==================== 🔥 WebSocket 監控 API（管理員專用）====================
+
     # 這些端點需要 staff_member_required 權限，已在視圖中處理
     path('websocket/stats/', websocket_stats_api, name='websocket_stats'),
     path('websocket/connections/', websocket_connections_api, name='websocket_connections'),

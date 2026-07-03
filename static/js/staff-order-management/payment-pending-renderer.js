@@ -311,17 +311,26 @@ class PaymentPendingRenderer {
                 </div>
 
                 <div class="d-flex justify-content-end align-items-center">
-                    <button class="btn btn-success btn-sm mr-2 btn-confirm-fps-payment" 
-                            data-order-id="${orderId}"
-                            title="確認 FPS 付款已收到">
-                        <i class="fas fa-check-circle mr-1"></i>確認 FPS 付款
-                    </button>
+                    ${order.payment_method === 'cash' ? `
+                        <button class="btn btn-success btn-sm mr-2 btn-confirm-cash-payment" 
+                                data-order-id="${orderId}"
+                                title="確認現金付款已收到">
+                            <i class="fas fa-money-bill-wave mr-1"></i>確認現金付款
+                        </button>
+                    ` : `
+                        <button class="btn btn-success btn-sm mr-2 btn-confirm-fps-payment" 
+                                data-order-id="${orderId}"
+                                title="確認 FPS 付款已收到">
+                            <i class="fas fa-check-circle mr-1"></i>確認 FPS 付款
+                        </button>
+                    `}
                     <button class="btn btn-outline-danger btn-sm btn-cancel-order" 
                             data-order-id="${orderId}"
                             title="取消此訂單">
                         <i class="fas fa-times mr-1"></i>取消訂單
                     </button>
                 </div>
+
             </div>
         `;
     }
@@ -354,6 +363,14 @@ class PaymentPendingRenderer {
             });
         });
         
+        // 確認現金付款按鈕
+        document.querySelectorAll('.btn-confirm-cash-payment').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const orderId = btn.dataset.orderId;
+                this.confirmCashPayment(orderId);
+            });
+        });
+        
         // 取消訂單按鈕
         document.querySelectorAll('.btn-cancel-order').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -362,6 +379,7 @@ class PaymentPendingRenderer {
             });
         });
     }
+
     
     /**
      * 確認 FPS 付款
@@ -432,11 +450,76 @@ class PaymentPendingRenderer {
     }
     
     /**
+     * 確認現金付款
+     * 
+     * @param {number} orderId - 訂單 ID
+     */
+    async confirmCashPayment(orderId) {
+        // 禁用按鈕防止重複點擊
+        const buttons = document.querySelectorAll(`.btn-confirm-cash-payment[data-order-id="${orderId}"]`);
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>處理中...';
+        });
+        
+        try {
+            // 使用 queueManager 的 confirmCashPayment 方法
+            if (window.queueManager && typeof window.queueManager.confirmCashPayment === 'function') {
+                const result = await window.queueManager.confirmCashPayment(orderId);
+                
+                if (result && result.success) {
+                    setTimeout(() => {
+                        this.refresh();
+                    }, 1000);
+                } else {
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-money-bill-wave mr-1"></i>確認現金付款';
+                    });
+                }
+            } else {
+                // 直接調用 API（備用方案）
+                const response = await fetch(`/eshop/api/cash/confirm-payment/${orderId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCsrfToken(),
+                    },
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    this.showToast('success', `訂單 #${orderId} 現金付款已確認成功`);
+                    setTimeout(() => {
+                        this.refresh();
+                    }, 1000);
+                } else {
+                    this.showToast('error', `訂單 #${orderId} 確認失敗: ${result.message || '未知錯誤'}`);
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-money-bill-wave mr-1"></i>確認現金付款';
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('❌ 確認現金付款失敗:', error);
+            this.showToast('error', `系統錯誤: ${error.message}`);
+            
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-money-bill-wave mr-1"></i>確認現金付款';
+            });
+        }
+    }
+    
+    /**
      * 取消訂單
      * 
      * @param {number} orderId - 訂單 ID
      */
     async cancelOrder(orderId) {
+
         const buttons = document.querySelectorAll(`.btn-cancel-order[data-order-id="${orderId}"]`);
         buttons.forEach(btn => {
             btn.disabled = true;

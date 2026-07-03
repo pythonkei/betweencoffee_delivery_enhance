@@ -428,7 +428,7 @@ class OrderStatusManager:
             }
             
         except OrderModel.DoesNotExist:
-            logger.error(f"❌ FPS 確認失敗：訂單 #{order_id} 不存在")
+            logger.error(f"❌ FPS 訂單 #{order_id} 不存在")
             return {
                 'success': False,
                 'message': f'訂單 #{order_id} 不存在',
@@ -439,6 +439,149 @@ class OrderStatusManager:
             return {
                 'success': False,
                 'message': f'FPS 付款確認失敗: {str(e)}',
+                'order_id': order_id
+            }
+
+    @classmethod
+    def confirm_cash_payment(cls, order_id, staff_name='staff'):
+        """
+        員工確認現金付款已收到
+        
+        流程：
+        1. 檢查訂單是否為 payment_pending 狀態（現金付款待確認）
+        2. 將 payment_status 從 payment_pending 改為 paid
+        3. 根據訂單類型設置 status：
+           - 含咖啡：status = 'waiting'（等待加入製作隊列）
+           - 純咖啡豆：status = 'ready'（可直接提取）
+        4. 將訂單加入製作隊列（如適用）
+        5. 發送 WebSocket 通知
+        6. 添加會員積分
+        
+        Args:
+            order_id: 訂單 ID
+            staff_name: 確認付款的員工名稱
+            
+        Returns:
+            dict: {'success': True/False, 'message': '...', 'order_id': ...}
+        """
+        try:
+            logger.info(f"🔄 員工 {staff_name} 開始確認現金付款，訂單 #{order_id}")
+            
+            order = OrderModel.objects.get(id=order_id)
+            
+            # 檢查訂單狀態
+            if order.payment_status != 'payment_pending':
+                return {
+                    'success': False,
+                    'message': f'訂單 #{order_id} 當前支付狀態為 {order.payment_status}，無法確認現金付款',
+                    'order_id': order_id
+                }
+            
+            # 1. 更新支付狀態為 paid
+            order.payment_status = 'paid'
+            order.paid_at = timezone.now()
+            order.payment_method = 'cash'
+            
+            # 2. 根據訂單類型設置狀態
+            items = order.get_items()
+            has_coffee = any(item.get('type') == 'coffee' for item in items)
+            has_beans = any(item.get('type') == 'bean' for item in items)
+            
+            if has_coffee:
+                order.status = 'waiting'
+                logger.info(f"✅ 現金訂單 #{order_id} 含咖啡，狀態設為 waiting")
+            elif has_beans:
+                order.status = 'ready'
+                logger.info(f"✅ 現金訂單 #{order_id} 純咖啡豆，狀態設為 ready")
+            else:
+                order.status = 'waiting'
+                logger.warning(f"⚠️ 現金訂單 #{order_id} 無商品類型，設為 waiting")
+            
+            # 3. 保存訂單
+            order.save()
+            logger.info(f"✅ 現金訂單 #{order_id} 付款確認成功")
+            
+            # 4. 將訂單加入製作隊列（如適用）
+            queue_result = None
+            if has_coffee:
+                try:
+                    from .queue_manager_refactored import CoffeeQueueManager
+                    queue_manager = CoffeeQueueManager()
+                    queue_item = queue_manager.add_order_to_queue_compatible(order)
+                    
+                    if queue_item:
+                        if isinstance(queue_item, dict):
+                            position = queue_item.get('position', 0)
+                        else:
+                            position = queue_item.position
+                        logger.info(f"✅ 現金訂單 #{order_id} 已加入製作隊列，位置: {position}")
+                        queue_result = {'added': True, 'position': position}
+                    else:
+                        logger.warning(f"⚠️ 現金訂單 #{order_id} 加入隊列失敗")
+                        queue_result = {'added': False}
+                except Exception as queue_error:
+                    logger.error(f"❌ 現金訂單 #{order_id} 加入隊列異常: {queue_error}")
+                    queue_result = {'added': False, 'error': str(queue_error)}
+            
+            # 5. 發送 WebSocket 通知
+            try:
+                from .websocket_utils import send_order_update, send_queue_update
+                
+                send_order_update(
+                    order_id=order_id,
+                    update_type='payment_confirmed',
+                    data={
+                        'order_id': order_id,
+                        'payment_method': 'cash',
+                        'payment_status': 'paid',
+                        'status': order.status,
+                        'message': f'現金付款已確認，訂單 #{order_id} 已進入製作流程'
+                    }
+                )
+                
+                if queue_result and queue_result.get('added'):
+                    send_queue_update(
+                        update_type='add',
+                        data={
+                            'order_id': order_id,
+                            'position': queue_result.get('position', 0),
+                            'queue_type': 'waiting'
+                        }
+                    )
+            except Exception as ws_error:
+                logger.error(f"發送 WebSocket 通知失敗: {ws_error}")
+            
+            # 6. 添加會員積分（現金付款確認後自動添加）
+            if order.user:
+                try:
+                    from socialuser.models_enhanced import CustomerLoyalty
+                    loyalty, created = CustomerLoyalty.objects.get_or_create(user=order.user)
+                    points_earned = loyalty.add_points_from_order(order)
+                    logger.info(f"✅ 用戶 {order.user.username} 現金訂單 #{order.id} 獲得 {points_earned} 積分")
+                except Exception as e:
+                    logger.error(f"添加會員積分失敗: {str(e)}")
+            
+            return {
+                'success': True,
+                'message': f'現金訂單 #{order_id} 付款確認成功',
+                'order_id': order_id,
+                'payment_status': 'paid',
+                'status': order.status,
+                'queue_result': queue_result
+            }
+            
+        except OrderModel.DoesNotExist:
+            logger.error(f"❌ 現金訂單 #{order_id} 不存在")
+            return {
+                'success': False,
+                'message': f'訂單 #{order_id} 不存在',
+                'order_id': order_id
+            }
+        except Exception as e:
+            logger.error(f"❌ 現金付款確認異常: {str(e)}")
+            return {
+                'success': False,
+                'message': f'現金付款確認失敗: {str(e)}',
                 'order_id': order_id
             }
 

@@ -12,6 +12,7 @@ from .views.payment_views import (
     fps_payment,
     fps_confirm_payment,
     cash_payment,
+    cash_confirm_payment,
     check_and_update_payment_status,
     check_payment_timeout,
     cancel_timeout_payment,
@@ -40,6 +41,7 @@ urlpatterns = [
     path('fps/<int:order_id>/', fps_payment, name='fps_payment'),
     path('fps/<int:order_id>/confirm/', fps_confirm_payment, name='fps_confirm_payment'),
     path('cash/<int:order_id>/', cash_payment, name='cash_payment'),
+    path('cash/<int:order_id>/confirm/', cash_confirm_payment, name='cash_confirm_payment'),
     
     # 支付检查
     path('check-status/<int:order_id>/', check_and_update_payment_status, name='check_payment_status'),

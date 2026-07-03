@@ -581,13 +581,14 @@ class OrderModel(models.Model):
                 },
                 'payment_pending': {
                     'status': 'payment_pending',
-                    'title': 'FPS 付款已提交',
-                    'message': '您的 FPS 轉帳已提交，請稍候店員確認付款。',
+                    'title': '付款已提交',
+                    'message': '您的付款已提交，請稍候店員確認。',
                     'icon': 'fa-hourglass-half',
                     'icon_color': 'text-info',
                     'icon_size': '3rem',
                     'timeout_message': f'若長時間未更新，請聯絡客服並提供訂單號碼: #{self.id}'
                 },
+
                 'unknown': {
                     'status': 'unknown',
                     'title': '支付狀態未知',

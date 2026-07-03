@@ -105,25 +105,30 @@
                         </div>
                     
                     {% elif payment_info.status == 'payment_pending' %}
-                        <h5 class="mb-0">{{ payment_info.message }}</h5>
-                        
-                        <!-- FPS 待確認付款提示（無倒數計時和繼續支付按鈕） -->
+                        {% if order.payment_method == 'cash' %}
+                        <h5 class="mb-0">您的訂單已確認，請到店付款，收款後將開始製作。</h5>
+                        {% else %}
+                        <h5 class="mb-0">您的 FPS 轉帳已確認，店員將在確認收款後更新訂單狀態。</h5>
+                        {% endif %}
+
+                        <!-- 待確認付款提示 -->
                         <div class="mt-5" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; width: 90%; margin-left: auto; margin-right: auto;">
                             <div class="px-3 py-4 text-center">
                                 <div class="mb-3">
                                     <i class="fas fa-info-circle" style="color: #c49b63; font-size: 2rem;"></i>
                                 </div>
-                                <div style="color: rgba(255,255,255,0.8); font-size: 1.0rem; line-height: 1.6;">
-                                    您的 FPS 轉帳已提交，店員將在確認收款後更新訂單狀態。
-                                </div>
-                                <div class="mt-3" style="color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.6;">
+                                <div class="mt-3" style="color: rgba(255,255,255,0.8); font-size: 1.1rem; line-height: 1.6;">
                                     若長時間未更新，請聯絡客服並提供訂單號碼:<br>
-                                    <span style="color: #c49b63; font-size: 1.0rem; font-weight: 700;">#{{ order.id }}</span>
+                                    <span style="color: #c49b63; font-size: 1.3rem; font-weight: 700;">#{{ order.id }}</span>
                                 </div>
+
                             </div>
                         </div>
-                    
+
+
+
                     {% else %}
+
                         <!-- 支付狀態未知 -->
                         <h5 class="mb-0">{{ payment_info.message }}</h5>
                     {% endif %}

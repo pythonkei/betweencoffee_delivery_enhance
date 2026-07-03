@@ -971,7 +971,77 @@ class QueueManager {
         }
     }
     
+    /**
+     * 確認現金付款 - 員工確認現金款項已收到
+     * 調用 API 將訂單從 payment_pending 轉為 paid
+     */
+    async confirmCashPayment(orderId) {
+        try {
+            if (this.isLoading) {
+                console.log('⏳ 已有操作正在進行，跳過重複請求');
+                return;
+            }
+            this.isLoading = true;
+            
+            const csrfToken = this.getCsrfToken();
+            if (!csrfToken) {
+                throw new Error('無法獲取安全令牌，請刷新頁面重試');
+            }
+            
+            console.log(`🚀 確認現金付款: 訂單 #${orderId}`);
+            
+            const response = await fetch(`/eshop/api/cash/confirm-payment/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({}),
+            });
+            
+            console.log(`📡 現金付款確認 API 響應: HTTP ${response.status}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('📊 現金付款確認響應:', data);
+                
+                if (data.success) {
+                    this.showToast(`✅ 訂單 #${orderId} 現金付款已確認`, 'success');
+                    
+                    // 觸發統一數據刷新
+                    if (window.unifiedDataManager) {
+                        setTimeout(() => window.unifiedDataManager.loadUnifiedData(true), 500);
+                    }
+                    
+                    // 觸發付款確認事件
+                    document.dispatchEvent(new CustomEvent('cash_payment_confirmed', {
+                        detail: { 
+                            order_id: orderId,
+                            payment_status: 'paid',
+                            status: data.status || 'waiting'
+                        }
+                    }));
+                    
+                    return { success: true, message: '現金付款已確認', status: data.status || 'waiting' };
+                } else {
+                    throw new Error(data.message || data.error || '確認失敗');
+                }
+            } else if (response.status === 403) {
+                throw new Error('權限不足：請確認您有員工權限');
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error(`❌ 現金付款確認失敗 (訂單 #${orderId}):`, error);
+            this.showToast(`❌ 現金付款確認失敗: ${error.message}`, 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+    
     // ==================== 事件監聽器 ====================
+
     
     initEventListeners() {
         // 使用事件委託處理操作按鈕

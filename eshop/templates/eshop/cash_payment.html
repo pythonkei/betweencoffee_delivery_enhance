@@ -161,9 +161,12 @@
 
                         <!-- 操作按钮 -->
                         <div class="text-center">
-                            <a href="{% url 'eshop:order_payment_confirmation' %}?order_id={{ order.id }}" class="btn btn-warning btn-lg">
-                                <i class="fas fa-check mr-2"></i>確認訂單
-                            </a>
+                            <form method="POST" action="{% url 'eshop:cash_confirm_payment' order.id %}" style="display: inline-block;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-lg">
+                                    <i class="fas fa-check mr-2"></i>確認訂單
+                                </button>
+                            </form>
                             <a href="{% url 'eshop:order_confirm' %}" class="btn btn-outline-secondary ml-2">
                                 <i class="fas fa-arrow-left mr-2"></i>返回修改
                             </a>
