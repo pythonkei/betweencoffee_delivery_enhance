@@ -19,6 +19,7 @@ from eshop.models import OrderModel
 from allauth.account.models import EmailAddress
 from django.core.mail import send_mail, EmailMultiAlternatives
 from allauth.socialaccount.views import LoginCancelledView as AllAuthLoginCancelledView
+from .models_enhanced import CustomerActivity
 
 from django.contrib.sites.models import Site
 from allauth.socialaccount.models import SocialApp, SocialAccount
@@ -468,6 +469,24 @@ def order_history(request):
     # 檢查是否還有更多訂單
     has_more = (offset + limit) < total_orders
     
+    # 查詢每個訂單的積分變化
+    order_points = {}
+    for order in orders:
+        try:
+            activity = CustomerActivity.objects.filter(
+                user=request.user,
+                activity_type='points_earned',
+                metadata__order_id=order.id
+            ).first()
+            if activity:
+                order_points[order.id] = activity.points_change
+                # 直接在 order 對象上動態添加屬性，方便模板使用
+                order.points_earned = activity.points_change
+            else:
+                order.points_earned = 0
+        except Exception:
+            order.points_earned = 0
+    
     # 如果是AJAX請求，返回JSON
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         from django.core import serializers
@@ -491,6 +510,7 @@ def order_history(request):
                 'payment_status_display': str(order.get_payment_status_display()),  # 轉換為字符串
                 'is_payment_timeout': bool(order.is_payment_timeout),
                 'is_quick_order': bool(order.is_quick_order),
+                'points_earned': order_points.get(order.id, 0),
                 'items': []
             }
             
@@ -522,7 +542,8 @@ def order_history(request):
     return render(request, 'socialuser/order_history.html', {
         'orders': orders,
         'has_more': has_more,
-        'total_orders': total_orders
+        'total_orders': total_orders,
+        'order_points': order_points,
     })
 
 

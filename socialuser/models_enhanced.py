@@ -111,32 +111,44 @@ class CustomerLoyalty(models.Model):
             return 0
     
     def get_available_rewards(self):
-        """獲取可兌換獎勵"""
+        """獲取可兌換獎勵（全部顯示，標註是否可兌換）"""
         rewards = []
         
-        # $30 現金券 (300積分)
-        if self.points >= 300:
-            rewards.append({
-                'id': 'voucher_30',
-                'name': '$30 現金券',
-                'points_required': 300,
-                'description': '兌換 $30 現金券折扣',
-                'icon': 'fa-ticket-alt',
-                'color': 'success'
-            })
-        
         # $5 現金券 (30積分)
-        if self.points >= 30:
-            rewards.append({
-                'id': 'voucher_5',
-                'name': '$5 現金券',
-                'points_required': 30,
-                'description': '兌換 $5 現金券折扣',
-                'icon': 'fa-ticket-alt',
-                'color': 'success'
-            })
-
-
+        rewards.append({
+            'id': 'voucher_5',
+            'name': '$5 現金券',
+            'points_required': 30,
+            'description': '兌換 $5 現金券折扣',
+            'icon': 'fa-ticket-alt',
+            'color': 'success',
+            'can_redeem': self.points >= 30,
+            'points_needed': max(0, 30 - self.points),
+        })
+        
+        # $8 現金券 (50積分)
+        rewards.append({
+            'id': 'voucher_8',
+            'name': '$8 現金券',
+            'points_required': 50,
+            'description': '兌換 $8 現金券折扣',
+            'icon': 'fa-ticket-alt',
+            'color': 'success',
+            'can_redeem': self.points >= 50,
+            'points_needed': max(0, 50 - self.points),
+        })
+        
+        # $30 現金券 (300積分)
+        rewards.append({
+            'id': 'voucher_30',
+            'name': '$30 現金券',
+            'points_required': 300,
+            'description': '兌換 $30 現金券折扣',
+            'icon': 'fa-ticket-alt',
+            'color': 'success',
+            'can_redeem': self.points >= 300,
+            'points_needed': max(0, 300 - self.points),
+        })
         
         return rewards
     
@@ -530,6 +542,9 @@ class RedeemedReward(models.Model):
         # $30 現金券：減去 $30
         if reward_id == 'voucher_30':
             return Decimal('30.00')
+        # $8 現金券：減去 $8
+        elif reward_id == 'voucher_8':
+            return Decimal('8.00')
         # $5 現金券：減去 $5
         elif reward_id == 'voucher_5':
             return Decimal('5.00')
@@ -546,16 +561,6 @@ class RedeemedReward(models.Model):
         available = []
         try:
             loyalty = CustomerLoyalty.objects.get(user=user)
-            # $30 現金券：積分 >= 300 即可使用
-            if loyalty.points >= 300:
-                available.append({
-                    'id': 'voucher_30',
-                    'reward_id': 'voucher_30',
-                    'reward_name': '$30 現金券',
-                    'discount': float(cls.get_reward_discount_amount('voucher_30')),
-                    'points_required': 300,
-                    'description': '兌換 $30 現金券折扣',
-                })
             # $5 現金券：積分 >= 30 即可使用
             if loyalty.points >= 30:
                 available.append({
@@ -565,6 +570,26 @@ class RedeemedReward(models.Model):
                     'discount': float(cls.get_reward_discount_amount('voucher_5')),
                     'points_required': 30,
                     'description': '兌換 $5 現金券折扣',
+                })
+            # $8 現金券：積分 >= 50 即可使用
+            if loyalty.points >= 50:
+                available.append({
+                    'id': 'voucher_8',
+                    'reward_id': 'voucher_8',
+                    'reward_name': '$8 現金券',
+                    'discount': float(cls.get_reward_discount_amount('voucher_8')),
+                    'points_required': 50,
+                    'description': '兌換 $8 現金券折扣',
+                })
+            # $30 現金券：積分 >= 300 即可使用
+            if loyalty.points >= 300:
+                available.append({
+                    'id': 'voucher_30',
+                    'reward_id': 'voucher_30',
+                    'reward_name': '$30 現金券',
+                    'discount': float(cls.get_reward_discount_amount('voucher_30')),
+                    'points_required': 300,
+                    'description': '兌換 $30 現金券折扣',
                 })
 
 
@@ -588,14 +613,15 @@ class RedeemedReward(models.Model):
             reward_info = cls.get_reward_discount_amount(reward_id)
             
             # 檢查獎勵是否存在
-            if reward_id == 'voucher_30':
-                points_needed = 300
-                reward_name = '$30 現金券'
-            elif reward_id == 'voucher_5':
+            if reward_id == 'voucher_5':
                 points_needed = 30
                 reward_name = '$5 現金券'
-
-
+            elif reward_id == 'voucher_8':
+                points_needed = 50
+                reward_name = '$8 現金券'
+            elif reward_id == 'voucher_30':
+                points_needed = 300
+                reward_name = '$30 現金券'
             else:
                 return False, Decimal('0.00'), ''
             

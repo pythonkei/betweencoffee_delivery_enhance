@@ -170,6 +170,9 @@
    - mcp-server-filesystem: 文件系統訪問
    - mcp-server-github: GitHub 操作
    - mcp-server-fetch: 網絡資源獲取
+   - redis-mcp: Redis 鍵值操作
+   - mcp-server-monitor: 系統監控（CPU、內存、磁盤、網絡、Docker）
+   - render-mcp: Render 部署管理（服務、Postgres、Key-Value、日誌、指標）
 
 2. **使用規範**:
    - 合理使用 MCP 工具提高效率
@@ -220,7 +223,7 @@
 
 ---
 
-**最後更新**: 2026年6月29日
+**最後更新**: 2026年7月2日
 **適用版本**: Between Coffee 系統 v2.0+
 **維護者**: 項目開發團隊
 

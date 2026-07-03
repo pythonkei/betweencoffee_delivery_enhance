@@ -40,12 +40,12 @@
                 <!-- table content -->
                 <div class="Rtable-cell sidebar-box ftco-animate mt-6 hiddenSmall">
                     {% for item in items %}
-                        <div class="block-21 mb-5 d-flex">
-                            <div class="blog-img mr-4">
+                        <div class="block-21 mb-5 d-flex" style="align-items: flex-start;">
+                            <div class="blog-img mr-4" style="flex-shrink: 0;">
                                 <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
                                 <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
                             </div>
-                            <div class="text">
+                            <div class="text" style="flex: 1; min-width: 0;">
                                 <h3 class="heading">{{ item.name }}</h3>
                                 <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
 
@@ -279,11 +279,11 @@
 
                                     </span>
                                 </label>
-                                <div class="reward-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                                <div class="reward-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
                                     {% for reward in available_rewards %}
-                                    <div class="reward-item d-flex align-items-center justify-content-between px-3 py-3 {% if not forloop.last %}" style="border-bottom: 1px solid rgba(255,255,255,0.06);{% else %}"{% endif %}>
-                                        <div class="d-flex align-items-center">
-                                            <div class="reward-checkbox-wrapper mr-3">
+                                    <div class="reward-item d-flex align-items-center justify-content-between px-3 py-3" style="{% if not forloop.last %}border-bottom: 1px solid rgba(255,255,255,0.06);{% endif %}">
+                                        <div class="d-flex align-items-center" style="min-width: 0; flex: 1;">
+                                            <div class="reward-checkbox-wrapper mr-3" style="flex-shrink: 0;">
                                                 <input type="checkbox" name="use_reward" value="{{ reward.reward_id }}"
                                                        id="reward-{{ reward.reward_id }}"
                                                        data-discount="{{ reward.discount }}"
@@ -294,15 +294,14 @@
                                                     <i class="fas fa-check" style="color: #fff; font-size: 12px; opacity: 0; transition: opacity 0.2s ease;"></i>
                                                 </label>
                                             </div>
-                                            <div>
+                                            <div style="min-width: 0;">
                                                 <div class="reward-name" style="color: #fff; font-size: 0.95rem; font-weight: 500;">{{ reward.reward_name }}</div>
                                                 <div class="reward-points" style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">
                                                     <i class="fas fa-star" style="color: #c49b63; font-size: 0.7rem;"></i> 消耗 {{ reward.points_required }} 積分
-
                                                 </div>
                                             </div>
                                         </div>
-                                        <span class="reward-discount font-weight-bold" style="color: #28a745; font-size: 1.05rem;">
+                                        <span class="reward-discount font-weight-bold" style="color: #28a745; font-size: 1.05rem; flex-shrink: 0; margin-left: 12px;">
                                             -${{ reward.discount|floatformat:"2" }}
                                         </span>
                                     </div>
@@ -440,12 +439,12 @@
                 <div class="col-xl-5 sidebar">
                     <div class="sidebar-box mt-6 hiddenSmall">
                         {% for item in items %}
-                            <div class="block-21 mb-5 d-flex">
-                                <div class="blog-img mr-4">
+                            <div class="block-21 mb-5 d-flex" style="align-items: flex-start;">
+                                <div class="blog-img mr-4" style="flex-shrink: 0;">
                                     <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
                                     <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
                                 </div>
-                                <div class="text">
+                                <div class="text" style="flex: 1; min-width: 0;">
                                     <h3 class="heading">{{ item.name }}</h3>
                                     <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
 
