@@ -393,6 +393,22 @@ class OrderStatusCardsManager {
                 })
             );
             
+            // 🔥 修復：監聽 order_update 類型（後端 send_order_update 發送的實際類型）
+            // 後端 websocket_utils.py 中 send_order_update 發送 type: 'order_update'
+            // WebSocketCore 會將其分發為 message:order_update 事件
+            this._wsUnsubscribers.push(
+                core.on('message:order_update', (data) => {
+                    console.log("收到訂單更新（order_update）:", data);
+                    // data.update_type 可能是 'status'、'payment_status'、'staff_action' 等
+                    if (data.update_type === 'status') {
+                        // 格式: {type: 'order_update', update_type: 'status', order_id: 123, data: {status: 'preparing', ...}}
+                        this.handleOrderStatusUpdate(data);
+                    } else if (data.update_type === 'payment_status') {
+                        console.log("收到支付狀態更新:", data);
+                    }
+                })
+            );
+            
             // 監聽品質變化
             this._wsUnsubscribers.push(
                 core.on('quality_change', (data) => {
@@ -496,14 +512,32 @@ class OrderStatusCardsManager {
     
     // 處理訂單狀態更新（格式1）
     handleOrderStatusUpdate(data) {
-        const { order_id, status, timestamp } = data;
+        // 支援多種格式：
+        // 格式A（輪詢API）: {order_id, status, ...}
+        // 格式B（WebSocket order_update）: {type: 'order_update', update_type: 'status', order_id: 123, data: {status: 'preparing', ...}}
+        // 格式C（WebSocket order_status_update）: {type: 'order_status_update', order_id: 123, status: 'preparing', ...}
         
-        if (order_id.toString() === this.orderId) {
-            console.log("訂單狀態更新（格式1）:", status);
-            
-            // 根據狀態更新卡片
-            this.updateStatusFromServer(status);
+        // 從 data 中提取 order_id
+        const orderId = data.order_id || data.orderId;
+        if (!orderId || orderId.toString() !== this.orderId) {
+            return;
         }
+        
+        // 從 data 中提取 status - 可能在 data.data 中（WebSocket order_update 格式）
+        let status = data.status;
+        if (!status && data.data && data.data.status) {
+            status = data.data.status;
+        }
+        
+        if (!status) {
+            console.warn("handleOrderStatusUpdate: 無法提取狀態, data=", data);
+            return;
+        }
+        
+        console.log("訂單狀態更新（格式1）:", status, "原始數據:", data);
+        
+        // 根據狀態更新卡片
+        this.updateStatusFromServer(status);
     }
     
     // 處理訂單狀態數據（格式2）
