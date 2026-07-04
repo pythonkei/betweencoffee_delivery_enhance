@@ -14,6 +14,18 @@ class OrderStatusCardsManager {
         this.websocketConnector = null;
         this.isConnected = false;
         
+        // 標準 WebSocket 回退的重連計數器
+        this.reconnectAttempts = 0;
+        
+        // 定期輪詢定時器
+        this._periodicCheckTimer = null;
+        
+        // WebSocketCore 事件取消訂閱函數陣列
+        this._wsUnsubscribers = [];
+        
+        // WebSocketCore 實例引用
+        this._wsCore = null;
+        
         // 記錄最後一次從服務器收到的狀態（用於去重，防止輪詢重複彈 Toast）
         this.lastServerStatus = null;
 
@@ -28,6 +40,7 @@ class OrderStatusCardsManager {
         
         this.init();
     }
+
     
     // 初始化狀態卡片
     init() {
@@ -64,12 +77,12 @@ class OrderStatusCardsManager {
             const cardId = card.id;
             
             // 根據ID前綴判斷訂單類型並存儲卡片
-            // 支持兩種ID命名模式：
-            // 1. 新命名：status-card-{orderType}-{status} (如：status-card-beans-ordered)
-            // 2. 舊命名兼容：status-card-{status} (如：status-card-ordered)
+            // 支援的ID命名模式：status-card-{orderType}-{status}
+            //   - orderType: beans（純咖啡豆）或 coffee（咖啡訂單）
+            //   - status: ordered, preparing, ready, completed
+            // 例如：status-card-beans-ordered, status-card-coffee-preparing
             
             if (cardId) {
-                // 新命名模式檢測
                 if (cardId.startsWith('status-card-beans-') || cardId.startsWith('status-card-coffee-')) {
                     // 提取狀態名稱（移除前綴）
                     const statusFromId = cardId.replace(/^status-card-(beans|coffee)-/, '');
@@ -82,30 +95,24 @@ class OrderStatusCardsManager {
                         const timeId = cardId.replace('status-card-', 'status-time-');
                         this.statusTimes[status] = document.getElementById(timeId);
                         
-                        console.log(`收集到狀態卡片 (新命名): ${cardId}, 狀態: ${status}`);
+                        console.log(`收集到狀態卡片: ${cardId}, 狀態: ${status}`);
                     }
-                } else if (cardId.startsWith('status-card-')) {
-                    // 舊命名模式（兼容性）
-                    this.statusCards[status] = card;
-                    this.statusTimes[status] = card.querySelector('.status-time');
-                    console.log(`收集到狀態卡片 (舊命名): ${cardId}, 狀態: ${status}`);
+                } else {
+                    console.warn(`狀態卡片ID格式不符合規範: ${cardId}，跳過`);
                 }
             } else {
-                // 如果沒有ID，使用舊的查詢方式
-                this.statusCards[status] = card;
-                this.statusTimes[status] = card.querySelector('.status-time');
-                console.log(`收集到狀態卡片 (無ID): 狀態: ${status}`);
+                console.warn(`狀態卡片缺少ID屬性 (data-status=${status})，跳過`);
             }
         });
         
         console.log("收集到狀態卡片總數:", Object.keys(this.statusCards).length, "詳細:", this.statusCards);
         
-        // 兼容性檢查：確保所有必要的狀態都有對應的卡片
-        this.ensureStatusCardsCompatibility();
+        // 確保所有必要的狀態都有對應的卡片
+        this.ensureRequiredStatusCards();
     }
     
-    // 確保狀態卡片兼容性
-    ensureStatusCardsCompatibility() {
+    // 確保必要的狀態卡片都存在
+    ensureRequiredStatusCards() {
         const requiredStatuses = this.isBeansOnly ? ['ordered', 'ready', 'completed'] : ['ordered', 'preparing', 'ready', 'completed'];
         
         requiredStatuses.forEach(status => {
@@ -122,6 +129,7 @@ class OrderStatusCardsManager {
             }
         });
     }
+
     
     // 收集連接點
     collectConnectorDots() {
