@@ -1,231 +1,197 @@
 # Between Coffee 系統 .clinerules
 
+> 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
+> **最後更新**: 2026年7月4日
+
+## 開發者背景與方法論
+
+### 開發者角色
+- **新手開發者** — 使用 **Vibe Coding** 方法（跟著感覺走、邊做邊學）
+- **多視角分析** — 從四個不同角色視角分析系統，產出平衡解決方案：
+  1. 🛠️ **系統工程師** — 技術架構、程式碼品質、效能
+  2. 🎨 **前端工程師** — 使用者體驗、互動流程、響應式設計
+  3. 🖌️ **UX/UI 設計師** — 品牌調性、視覺一致性、易用性
+  4. 👤 **用戶** — 實際使用情境、痛點、需求
+- **目標** — 透過多視角碰撞，找到最適合小咖啡店的平衡方案
+
+### Vibe Coding 原則
+- 先讓功能跑起來，再回頭優化
+- 小步迭代，每次改進一個小功能
+- 遇到問題先搜尋、再問、最後才自己寫
+- 保持程式碼簡單可讀，不過度工程化
+- 享受開發過程，保持學習心態
+
 ## 項目概述
 - **項目名稱**: Between Coffee 咖啡店外帶網站與訂單製作管理系統
 - **技術棧**: Django + PostgreSQL + WebSocket + Bootstrap 5
 - **核心業務流程**: 顧客下單 → 支付處理 → 加入製作隊列 → 員工製作 → 訂單就緒 → 顧客取餐
-- **部署平台**: Railway → Render（已遷移）
 - **Live URL**: https://betweencoffee-delivery-enhance-v1.onrender.com/
+- **GitHub**: https://github.com/pythonkei/betweencoffee_delivery_enhance
 - **部署方式**: Render（Docker 運行時），使用 Dockerfile 構建，autoDeploy 啟用
 - **Celery 狀態**: Render free plan 無 Redis，Celery 已配置 MockCelery 優雅降級，任務同步執行
 - **WebSocket**: 使用 Django Channels + InMemoryChannelLayer（無 Redis），ASGI 已禁用 AllowedHostsOriginValidator
 
+## 系統核心價值
+
+```
+輕量、高效、個性化咖啡店 — 從小店視角出發為最終目標
+```
+
+### 系統主張
+- 專注單一地區咖啡店外帶場景，不追求大而全
+- 小店的人情味、地域親近感是核心競爭力
+- 簡單直覺的下單流程、即時狀態更新
+- 只賣咖啡和咖啡豆，非連鎖式店鋪產品
+- 不模仿連鎖品牌的複雜系統，保持輕量靈活
+- 以單一店鋪需求為基礎，可快速調整
+
+### 店内營運參數
+- 咖啡機數量: 2 台
+- 製作員工: 2 名
+- 每名員工同時製作: 2 杯
+- 最大同時製作量: 4 杯
+- 商品類型: 咖啡、咖啡豆
+
+## 技術架構
+
+### 整體架構
+```
+前端層: HTML5 + CSS3 + Bootstrap 5 + JavaScript (ES6+)
+  └── WebSocket 三層架構: WebSocketCore → 橋接層 → 業務邏輯層
+後端層: Django 4.x + Django Channels + DRF
+  ├── eshop/ (核心業務: 商品、訂單、支付、隊列)
+  ├── cart/ (購物車管理)
+  ├── socialuser/ (用戶認證、會員、忠誠度)
+  ├── restaurant/ (餐廳/員工管理)
+  └── core/ (共用工具函數)
+數據層: PostgreSQL + InMemoryChannelLayer + MockCelery
+```
+
+### 技術棧
+| 層級 | 技術 | 用途 |
+|------|------|------|
+| 後端框架 | Django 4.x | Web 框架 |
+| 即時通訊 | Django Channels 4.x | WebSocket |
+| API | Django REST Framework 3.x | REST API |
+| 認證 | django-allauth | 社交登入 |
+| 數據庫 | PostgreSQL 13+ | 主要存儲 |
+| 緩存/通道 | InMemoryChannelLayer | WebSocket（無 Redis） |
+| 異步任務 | MockCelery | 同步降級（無 Redis） |
+| 前端框架 | Bootstrap 5.x | 響應式 UI |
+| 前端 JS | Vanilla JS ES6+ | 客戶端邏輯 |
+| 部署 | Render Docker | 生產環境 |
+
+## 核心業務流程
+
+### 訂單狀態機
+```
+pending → payment_pending (FPS/現金) → paid → waiting → preparing → ready → completed
+```
+
+### 支付流程對照
+| 支付方式 | 自動化程度 | 積分獎勵位置 |
+|---------|:----------:|:----------:|
+| PayPal | ✅ 全自動 | `process_payment_success()` |
+| Alipay | ✅ 全自動 | `alipay_callback()` 手動調用 |
+| FPS | ⚠️ 半自動 | `confirm_fps_payment()` |
+| 現金 | ⚠️ 半自動 | `confirm_cash_payment()` |
+
+### 數據模型核心關係
+```
+OrderModel → CoffeeItem (M2M), BeanItem (M2M), CoffeeQueue (1:1)
+CoffeeQueue → Barista (M2O)
+CustomerLoyalty → user (1:1), CustomerCoupon (FK)
+Barista → name, is_available, current_workload
+```
+
 ## 開發規範
 
-### 代碼質量要求
-1. **文檔標準**: 所有新函數必須附帶詳細文檔
-   - Python: 使用 docstring 格式（Google 風格）
-   - JavaScript: 使用 JSDoc 風格註釋
-   - 文檔必須包含參數說明、返回值說明和示例
+### 程式碼風格
+- Python: flake8, black, isort (配置在 pyproject.toml)
+- JavaScript: ES6+ class 語法
+- 提交規範: feat/fix/docs/style/refactor/test/chore
 
-2. **函數設計**: 
-   - 函數必須有明確的回傳值
-   - 避免出現沒有傳回的函數
-   - 單一職責原則：每個函數只做一件事
+### 分支策略
+```
+main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | bugfix/* → 問題修復
+```
 
-3. **測試要求**:
-   - 所有新增功能必須覆蓋至少 80% 的單元測試
-   - 關鍵業務邏輯必須有集成測試
-   - 測試用例必須包含邊界情況和錯誤處理
+### 關鍵文件索引
 
-### 安全要求
-1. **身份驗證與授權**:
-   - WebSocket 連接必須經過正確的身份驗證和授權
-   - 使用 django-allauth 處理社交登入（Google、Facebook）
-   - 敏感操作必須有權限檢查
+#### 後端核心
+| 文件 | 行數 | 重要性 |
+|------|:----:|:------:|
+| `betweencoffee_delivery/settings.py` | 979 | ⭐⭐⭐⭐⭐ |
+| `eshop/models.py` | 1636 | ⭐⭐⭐⭐⭐ |
+| `eshop/order_status_manager.py` | 1259 | ⭐⭐⭐⭐⭐ |
+| `eshop/queue_manager_refactored.py` | 1637 | ⭐⭐⭐⭐⭐ |
+| `eshop/consumers.py` | ~300 | ⭐⭐⭐⭐ |
+| `eshop/views/payment_views.py` | ~500 | ⭐⭐⭐⭐ |
+| `eshop/views/api_views.py` | ~400 | ⭐⭐⭐⭐ |
 
-2. **數據安全**:
-   - 敏感數據（支付信息、用戶資料）必須加密存儲
-   - 所有用戶輸入必須進行驗證和清理
-   - 防止 SQL 注入、XSS、CSRF 攻擊
+#### 前端核心
+| 文件 | 行數 | 重要性 |
+|------|:----:|:------:|
+| `static/js/websocket-core.js` | ~200 | ⭐⭐⭐⭐⭐ |
+| `static/js/websocket-order.js` | ~150 | ⭐⭐⭐⭐ |
+| `static/js/websocket-staff.js` | ~150 | ⭐⭐⭐⭐ |
+| `static/js/order_status_cards.js` | ~300 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/main.js` | ~100 | ⭐⭐⭐⭐ |
 
-3. **支付安全**:
-   - 支付處理必須使用安全的支付網關（PayPal、Alipay、FPS）
-   - 支付交易必須有完整的日誌記錄
-   - 支付狀態必須實時同步
+#### 模板文件
+| 文件 | 重要性 |
+|------|:------:|
+| `templates/betweencoffee_delivery/base.html` | ⭐⭐⭐⭐⭐ |
+| `eshop/templates/eshop/order_payment_confirmation.html` | ⭐⭐⭐⭐⭐ |
+| `templates/admin/staff_order_management.html` | ⭐⭐⭐⭐⭐ |
+| `templates/layouts/nav.html` | ⭐⭐⭐⭐ |
 
-### 性能優化要求
-1. **數據庫優化**:
-   - 所有查詢必須使用適當的索引
-   - 避免 N+1 查詢問題
-   - 使用查詢緩存和結果緩存
+## 常見開發任務速查
 
-2. **WebSocket 優化**:
-   - 實現指數退避重連策略
-   - 連接狀態必須有監控和告警
-   - 消息傳輸必須高效且可靠
+### 新增 API 端點
+```python
+# 1. 在 eshop/views/api_views.py 新增視圖
+# 2. 在 eshop/urls_api.py 註冊路由
+# 3. 在前端 JS 中調用
+```
 
-3. **前端優化**:
-   - 資源必須進行懶加載和壓縮
-   - 確保移動端響應式設計
-   - 減少不必要的 DOM 操作
+### 新增 WebSocket 事件
+```python
+# 後端: 在 eshop/consumers.py 新增事件處理
+async def handle_new_event(self, event):
+    await self.send_json({'type': 'new_event', 'data': event['data']})
 
-## 項目特定規則
+# 前端: 在 websocket-core.js 監聽事件
+WebSocketCore.getInstance().on('message:new_event', (data) => { ... });
+```
 
-### Django 開發規範
-1. **架構遵循**:
-   - 使用 Django Channels 處理 WebSocket 連接
-   - 遵循 Django REST Framework 最佳實踐
-   - 使用 Django 的內置安全功能
+### 新增數據庫遷移
+```bash
+python manage.py makemigrations && python manage.py migrate
+```
 
-2. **模型設計**:
-   - 使用 Django 的 ORM 進行數據庫操作
-   - 模型必須有適當的索引和約束
-   - 使用 Django 的遷移系統管理數據庫變更
+## 除錯指南
 
-3. **視圖設計**:
-   - 視圖必須遵循 DRY 原則
-   - 業務邏輯應該放在服務層或工具函數中
-   - 錯誤處理必須統一且友好
+### WebSocket 連接問題
+1. 檢查 `betweencoffee_delivery/asgi.py` ASGI 配置
+2. 檢查 `settings.py` → CHANNEL_LAYERS
+3. 檢查 `eshop/consumers.py` 消費者
+4. 檢查 `static/js/websocket-core.js` 前端連接
+5. 檢查 `eshop/routing.py` WebSocket 路由
 
-### 前端開發規範
-1. **UI/UX 標準**:
-   - 使用 Bootstrap 5 進行響應式設計
-   - 確保移動端體驗優先
-   - 保持一致的設計語言和用戶體驗
+### 支付問題
+1. 檢查環境變量 (PAYPAL_CLIENT_ID, ALIPAY_APP_ID 等)
+2. 檢查 `eshop/views/payment_views.py`
+3. 檢查 `eshop/paypal_utils.py`, `eshop/alipay_utils.py`
+4. 檢查 `eshop/order_status_manager.py`
 
-2. **JavaScript 開發**:
-   - 使用模塊化的 JavaScript 代碼
-   - 避免全局變量污染
-   - 使用現代 JavaScript 特性（ES6+）
+## 技術債務（已知）
+- `models.py` (1636行) - 需拆分
+- `queue_manager_refactored.py` (1637行) - 需拆分
+- `order_status_manager.py` (1259行) - 需拆分
+- 支付確認邏輯重複 (confirm_fps_payment / confirm_cash_payment)
+- 測試覆蓋率低
+- 前端 JS 部分重複邏輯
 
-3. **實時功能**:
-   - 使用 WebSocket 實現實時狀態更新
-   - 狀態管理必須一致且可靠
-   - 用戶界面必須反映最新的系統狀態
-
-### 部署與維護
-1. **部署流程**:
-   - 使用 Railway 進行自動化部署
-   - 部署前必須通過所有測試
-   - 必須有回滾計劃
-
-2. **監控與日誌**:
-   - 系統必須有完整的監控和日誌記錄
-   - 錯誤必須有適當的告警機制
-   - 性能指標必須定期檢查
-
-3. **文檔維護**:
-   - 所有變更必須更新相關文檔
-   - 文檔必須保持最新且準確
-   - 必須有系統架構文檔和 API 文檔
-
-## 工作流程指導
-
-### Plan Mode 行為規範
-1. **任務開始前**:
-   - 先分析現有系統狀態
-   - 參考「綜合工作總結與遷移報告.md」
-   - 檢查相關的技術文檔和報告
-
-2. **計劃制定**:
-   - 制定詳細的實施計劃
-   - 識別潛在的風險和挑戰
-   - 確定測試策略和驗證方法
-
-3. **溝通與確認**:
-   - 與用戶確認計劃的可行性
-   - 討論可能的替代方案
-   - 確定優先級和時間安排
-
-### Act Mode 行為規範
-1. **實施策略**:
-   - 使用增量修改策略
-   - 每次修改盡量小，便於測試和回滾
-   - 遵循「測試驅動開發」原則
-
-2. **代碼修改**:
-   - 修改前後都進行充分測試
-   - 確保代碼風格一致
-   - 更新相關的文檔和註釋
-
-3. **驗證與測試**:
-   - 修改後立即進行功能測試
-   - 運行相關的單元測試和集成測試
-   - 驗證系統的整體穩定性
-
-## 優先級指導
-
-### 高優先級任務（立即處理）
-1. **ID 重複問題**: 訂單支付確認頁面的狀態卡片 ID 重複
-2. **WebSocket 穩定性**: 增強連接重連機制
-3. **移動端優化**: 進一步優化響應式設計
-
-### 中優先級任務（1-2週內處理）
-1. **代碼重複問題**: 整合重複的 JavaScript 功能
-2. **錯誤處理完善**: 增強邊界情況的錯誤處理
-3. **性能監控缺失**: 添加系統性能監控機制
-
-### 低優先級任務（1個月內處理）
-1. **代碼文檔化**: 添加複雜邏輯的文檔說明
-2. **測試覆蓋率**: 提高關鍵功能的測試覆蓋率
-3. **代碼風格統一**: 實施統一的代碼風格規範
-
-## 工具與集成
-
-### MCP 伺服器配置
-1. **可用工具**:
-   - simple-tavily-search: 網絡搜索功能
-   - simple-postgres: PostgreSQL 數據庫操作
-   - mcp-server-filesystem: 文件系統訪問
-   - mcp-server-github: GitHub 操作
-   - mcp-server-fetch: 網絡資源獲取
-   - redis-mcp: Redis 鍵值操作
-   - mcp-server-monitor: 系統監控（CPU、內存、磁盤、網絡、Docker）
-   - render-mcp: Render 部署管理（服務、Postgres、Key-Value、日誌、指標）
-
-2. **使用規範**:
-   - 合理使用 MCP 工具提高效率
-   - 確保工具配置正確且安全
-   - 工具使用必須符合項目需求
-
-### 測試工具
-1. **測試框架**:
-   - 使用 Django 的測試框架進行後端測試
-   - 使用 Jest 或類似工具進行前端測試
-   - 使用 Selenium 或類似工具進行端到端測試
-
-2. **測試策略**:
-   - 單元測試覆蓋核心業務邏輯
-   - 集成測試驗證組件協作
-   - 性能測試確保系統響應時間
-
-## 溝通與協作
-
-### 進度報告
-1. **定期更新**: 定期報告工作進展
-2. **問題反饋**: 及時反饋遇到的問題
-3. **決策記錄**: 記錄重要的技術決策
-
-### 知識管理
-1. **文檔維護**: 保持文檔的時效性和準確性
-2. **知識共享**: 確保知識在團隊中共享
-3. **經驗總結**: 總結工作經驗和最佳實踐
-
-## 版本控制
-
-### Git 工作流
-1. **分支策略**:
-   - main: 生產環境代碼
-   - develop: 開發環境代碼
-   - feature/*: 功能開發分支
-   - bugfix/*: 問題修復分支
-
-2. **提交規範**:
-   - 提交信息必須清晰且有意義
-   - 遵循約定式提交規範
-   - 相關的修改必須在一個提交中
-
-3. **代碼審查**:
-   - 所有代碼必須經過審查
-   - 審查重點：代碼質量、安全性、性能
-   - 審查意見必須及時處理
-
----
-
-**最後更新**: 2026年7月3日
-
-**適用版本**: Between Coffee 系統 v2.0+
-**維護者**: 項目開發團隊
-
-*此文件會自動影響 Cline 的行為，確保它遵循 Between Coffee 項目的特定要求。如有變更，請及時更新此文件。*
+## 完整參考
+詳細系統分析請參閱根目錄 `BETWEEN_COFFEE_SYSTEM_REPORT.md`（1185行）

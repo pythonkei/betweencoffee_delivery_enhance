@@ -74,17 +74,17 @@ load_context() {
         # 顯示摘要
         echo ""
         echo "📋 上下文摘要:"
+        echo "├── 系統報告: BETWEEN_COFFEE_SYSTEM_REPORT.md (1185行)"
         echo "├── 項目規範 (.clinerules)"
         echo "├── 技術架構: Django + PostgreSQL + WebSocket"
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: order_status_cards.js WebSocket 即時更新修復（2026-07-04）"
-
+        echo "├── 最新改動: 系統全面分析報告 v1.0（2026-07-04）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
-        echo "├── 已知問題: WebSocket 穩定性、移動端優化"
-        echo "├── 優先任務: WebSocket穩定性、移動端優化、錯誤處理完善"
+        echo "├── 已知問題: 文件過大、支付確認邏輯重複、測試覆蓋率低"
+        echo "├── 優先任務: 購物車圖標、商品分類、一頁式結帳、WebSocket 優化"
         echo "└── 大小: ${FILE_SIZE_KB} KB"
         
         return 0
