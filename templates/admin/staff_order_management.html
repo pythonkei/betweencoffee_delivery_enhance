@@ -330,16 +330,19 @@
 <!-- 5. 订单管理器 -->
 <script src="{% static 'js/staff-order-management/order-manager.js' %}"></script>
 
-<!-- 6. 各标签页渲染器 -->
+<!-- 6. 基礎渲染器（所有渲染器的共用基礎類） -->
+<script src="{% static 'js/staff-order-management/renderers/base-renderer.js' %}"></script>
+
+<!-- 7. 各标签页渲染器 -->
 <script src="{% static 'js/staff-order-management/payment-pending-renderer.js' %}"></script>
 <script src="{% static 'js/staff-order-management/preparing-orders-renderer-enhanced.js' %}"></script>
 <script src="{% static 'js/staff-order-management/ready-orders-renderer.js' %}"></script>
 <script src="{% static 'js/staff-order-management/completed-orders-renderer.js' %}"></script>
 
-<!-- 7. WebSocket管理器 -->
+<!-- 8. WebSocket管理器 -->
 <script src="{% static 'js/staff-order-management/websocket-manager.js' %}"></script>
 
-<!-- 8. 主初始化 -->
+<!-- 9. 主初始化 -->
 <script src="{% static 'js/staff-order-management/main.js' %}"></script>
 
 <script>
