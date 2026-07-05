@@ -39,7 +39,7 @@
                                 {% if account.get_avatar_url %}
                                     <img src="{{ account.get_avatar_url }}" alt="{{ account.get_provider.name }}" />
                                 {% else %}
-                                    <i class="fas fa-user-circle" style="font-size:3rem;color:#c49b63;"></i>
+                                    <i class="fas fa-user-circle" style="font-size:3rem;color:var(--brand-primary);"></i>
                                 {% endif %}
                             </div>
                             <div class="social-account-details">
@@ -139,7 +139,7 @@
     height: 56px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid #c49b63;
+    border: 2px solid var(--brand-primary);
 }
 
 .social-account-avatar img {
@@ -157,7 +157,7 @@
 .social-account-provider {
     font-size: 1rem;
     font-weight: 600;
-    color: #c49b63;
+    color: var(--brand-primary);
 }
 
 .social-account-provider i {
@@ -192,7 +192,7 @@
 }
 
 .social-signup-description strong {
-    color: #c49b63;
+    color: var(--brand-primary);
 }
 
 /* ===== 表單欄位 ===== */
@@ -228,7 +228,7 @@
 
 .social-signup-field input:focus {
     outline: none;
-    border-color: #c49b63;
+    border-color: var(--brand-primary);
     box-shadow: 0 0 0 3px rgba(196, 155, 99, 0.2);
     background: rgba(255, 255, 255, 0.08);
 }
@@ -264,7 +264,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.85rem 2.5rem;
-    background: #c49b63;
+    background: var(--brand-primary);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -303,7 +303,7 @@
 }
 
 .social-signup-footer a {
-    color: #c49b63;
+    color: var(--brand-primary);
     text-decoration: none;
     transition: color 0.3s ease;
 }

@@ -73,19 +73,19 @@
                             <div class="roastrange">
                                 {% with level=bean.roast_level|default:'medium' %}
                                 <div class="roastrange-item{% if level == 'light' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'light' %} style="color:#c49b63;"{% endif %}>浅</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'light' %} style="color:var(--brand-primary);"{% endif %}>浅</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'medium_light' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'medium_light' %} style="color:#c49b63;"{% endif %}>中浅</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'medium_light' %} style="color:var(--brand-primary);"{% endif %}>中浅</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'medium' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'medium' %} style="color:#c49b63;"{% endif %}>中</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'medium' %} style="color:var(--brand-primary);"{% endif %}>中</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'medium_dark' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'medium_dark' %} style="color:#c49b63;"{% endif %}>中深</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'medium_dark' %} style="color:var(--brand-primary);"{% endif %}>中深</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'dark' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'dark' %} style="color:#c49b63;"{% endif %}>深</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'dark' %} style="color:var(--brand-primary);"{% endif %}>深</span></div>
                                 </div>
                                 {% endwith %}
                             </div>

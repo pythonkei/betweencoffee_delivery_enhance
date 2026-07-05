@@ -1220,7 +1220,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw; */
   font-family: "Mogra", cursive;
   font-size: 58px;
   letter-spacing: -4px;
-  color: #c49b63;
+  color: var(--brand-primary);
   line-height: 0.8;
   /* margin-bottom: -21px; */
   z-index: 1; }
@@ -1585,7 +1585,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw; */
     font-family: "Mogra", cursive;
     font-size: 58px;
     letter-spacing: -4px;
-    color: #c49b63;
+    color: var(--brand-primary);
     line-height: 0.8;
     /* margin-bottom: -21px; */
     z-index: 1;
@@ -1612,7 +1612,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw; */
 }
 
 .morphing {
-  font-family: 'Roboto Slab', serif;
+  font-family: 'Noto Serif TC', serif;
   position: relative;
   font-size: 1.1em;
   color: #fff;

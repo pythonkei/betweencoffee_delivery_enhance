@@ -4,7 +4,7 @@
  * 用於 profile.html, order_history.html, loyalty_dashboard.html
  * 
  * 使用 a.member-nav-item 提高 specificity，
- * 確保不受 style.css 的 a { color: #c49b63; } 影響
+ * 確保不受 style.css 的 a { color: var(--brand-primary); } 影響
  */
 
 .member-nav-wrapper {
@@ -15,7 +15,7 @@
 
 .member-nav-container {
     display: inline-flex;
-    background-color: #c49b63;
+    background-color: var(--brand-primary);
     border-radius: 50px;
     padding: 4px;
     gap: 4px;
@@ -44,12 +44,12 @@ a.member-nav-item:hover {
 
 a.member-nav-item.active {
     background-color: #ffffff;
-    color: #c49b63 !important;
+    color: var(--brand-primary) !important;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 a.member-nav-item.active i {
-    color: #c49b63 !important;
+    color: var(--brand-primary) !important;
 }
 
 a.member-nav-item i {
@@ -84,7 +84,7 @@ a.member-nav-item i {
 }
 
 .profile-detail-item i {
-    color: #c49b63;
+    color: var(--brand-primary);
     width: 1.2rem;
     text-align: center;
 }
@@ -99,7 +99,7 @@ a.member-nav-item i {
 .profile-section-title {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #c49b63;
+    color: var(--brand-primary);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 0.75rem;
@@ -127,16 +127,16 @@ a.member-nav-item i {
     padding: 0.5rem 1.25rem;
     font-size: 0.85rem;
     font-weight: 500;
-    color: #c49b63;
+    color: var(--brand-primary);
     background: transparent;
-    border: 1px solid #c49b63;
+    border: 1px solid var(--brand-primary);
     border-radius: 4px;
     text-decoration: none;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .profile-btn:hover {
-    background: #c49b63;
+    background: var(--brand-primary);
     color: #1a1a1a;
     text-decoration: none;
 }

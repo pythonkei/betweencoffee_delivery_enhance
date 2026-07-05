@@ -111,7 +111,7 @@
 
 /* 活動類型顏色 */
 .activity-icon.points-earned {
-    color: #c49b63; /* 綠色 - 獲得積分 */
+    color: var(--brand-primary); /* 綠色 - 獲得積分 */
 }
 
 .activity-icon.reward-redeemed {
@@ -123,7 +123,7 @@
 }
 
 .activity-icon.order-placed {
-    color: #c49b63; /* 品牌藍色 - 下單 */
+    color: var(--brand-primary); /* 品牌藍色 - 下單 */
 }
 
 .activity-icon.other {
@@ -179,7 +179,7 @@
 }
 
 .points-positive {
-    background-color: #c49b63; /* 實色綠色 */
+    background-color: var(--brand-primary); /* 實色綠色 */
     color: #ffffff; /* 白色文字 */
     border: none; /* 取消邊框 */
 }
@@ -357,7 +357,7 @@
 
 .reward-coupon-icon {
     font-size: 2.4rem;
-    color: #c49b63;
+    color: var(--brand-primary);
     line-height: 1;
 }
 
@@ -371,7 +371,7 @@
 .reward-points-number {
     font-size: 2rem;
     font-weight: 700;
-    color: #c49b63;
+    color: var(--brand-primary);
 }
 
 .reward-points-label {
@@ -421,16 +421,16 @@
     padding: 0.4rem 1rem;
     font-size: 0.8rem;
     font-weight: 500;
-    color: #c49b63;
+    color: var(--brand-primary);
     background: transparent;
-    border: 1px solid #c49b63;
+    border: 1px solid var(--brand-primary);
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .reward-coupon-btn:hover {
-    background: #c49b63;
+    background: var(--brand-primary);
     color: #1a1a1a;
 }
 
@@ -480,7 +480,7 @@
 
 .stats-card-icon {
     font-size: 2rem;
-    color: #c49b63;
+    color: var(--brand-primary);
     line-height: 1;
     margin-bottom: 0.25rem;
 }
@@ -488,7 +488,7 @@
 .stats-card-number {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #c49b63;
+    color: var(--brand-primary);
     margin: 0;
     line-height: 1.1;
 }
