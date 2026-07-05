@@ -32,7 +32,23 @@
   --breakpoint-lg: 992px;
   --breakpoint-xl: 1200px;
   --font-family-sans-serif: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* ===== Between Coffee 品牌視覺變數 ===== */
+  --brand-primary: #c49b63;
+  --brand-primary-dark: #a67c3e;
+  --brand-primary-light: #d4b07a;
+  --brand-bg: #1a1a2e;
+  --brand-bg-light: #2a2a3e;
+  --brand-bg-card: rgba(255, 255, 255, 0.05);
+  --brand-text: #ffffff;
+  --brand-text-muted: rgba(255, 255, 255, 0.5);
+  --brand-border: rgba(255, 255, 255, 0.1);
+  --brand-border-light: rgba(255, 255, 255, 0.06);
+  --font-heading: 'Noto Serif TC', 'Work Sans', serif;
+  --font-body: 'Noto Sans TC', 'Work Sans', sans-serif;
+  --card-radius: 12px;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
 
 
 *,
@@ -8686,4 +8702,100 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
         height: 20px;
         margin-right: 8px;
     }
+}
+
+/* ===== Between Coffee 品牌統一實用類別 ===== */
+
+/* 品牌主色文字 */
+.text-brand { color: var(--brand-primary) !important; }
+.text-brand-dark { color: var(--brand-primary-dark) !important; }
+.text-brand-light { color: var(--brand-primary-light) !important; }
+
+/* 品牌主色背景 */
+.bg-brand { background-color: var(--brand-primary) !important; }
+.bg-brand-dark { background-color: var(--brand-primary-dark) !important; }
+.bg-brand-light { background-color: var(--brand-primary-light) !important; }
+
+/* 品牌邊框 */
+.border-brand { border-color: var(--brand-primary) !important; }
+.border-brand-light { border-color: var(--brand-border) !important; }
+
+/* 品牌按鈕 */
+.btn-brand {
+    background-color: var(--brand-primary);
+    border: 1px solid var(--brand-primary);
+    color: #fff;
+    transition: all 0.3s ease;
+}
+.btn-brand:hover {
+    background-color: var(--brand-primary-dark);
+    border-color: var(--brand-primary-dark);
+    color: #fff;
+}
+.btn-brand-outline {
+    background-color: transparent;
+    border: 1px solid var(--brand-primary);
+    color: var(--brand-primary);
+    transition: all 0.3s ease;
+}
+.btn-brand-outline:hover {
+    background-color: var(--brand-primary);
+    color: #fff;
+}
+
+/* 品牌卡片 */
+.card-brand {
+    background-color: var(--brand-bg-card);
+    border: 1px solid var(--brand-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+}
+
+/* 品牌標題字體 */
+.font-heading { font-family: var(--font-heading) !important; }
+.font-body { font-family: var(--font-body) !important; }
+
+/* 品牌分隔線 */
+.divider-brand {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--brand-primary), transparent);
+    border: none;
+    margin: 1.5rem 0;
+}
+
+/* 品牌徽章 */
+.badge-brand {
+    background-color: var(--brand-primary);
+    color: #fff;
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+}
+
+/* 品牌連結 */
+.link-brand {
+    color: var(--brand-primary);
+    transition: color 0.3s ease;
+}
+.link-brand:hover {
+    color: var(--brand-primary-light);
+    text-decoration: underline;
+}
+
+/* 品牌輸入框 */
+.form-control-brand {
+    background-color: var(--brand-bg-card);
+    border: 1px solid var(--brand-border);
+    color: var(--brand-text);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease;
+}
+.form-control-brand:focus {
+    border-color: var(--brand-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(196, 155, 99, 0.2);
+}
+.form-control-brand::placeholder {
+    color: var(--brand-text-muted);
 }

@@ -310,31 +310,36 @@
 <!-- 时间工具 -->
 <script src="{% static 'js/staff-order-management/time-utils.js' %}"></script>
 
-<!-- 0. 共用工具模块（基础工具） -->
+<!-- 0. 基础服务层（独立运行，无依赖） -->
+<script src="{% static 'js/staff-order-management/services/toast-service.js' %}"></script>
+<script src="{% static 'js/staff-order-management/services/event-bus.js' %}"></script>
+<script src="{% static 'js/staff-order-management/services/api-service.js' %}"></script>
+
+<!-- 1. 共用工具模块（基础工具） -->
 <script src="{% static 'js/staff-order-management/common-utils.js' %}"></script>
 
-<!-- 1. 统一数据管理器（核心） -->
+<!-- 2. 统一数据管理器（核心） -->
 <script src="{% static 'js/staff-order-management/unified-data-manager.js' %}"></script>
 
-<!-- 2. 徽章管理器（依赖统一数据） -->
+<!-- 3. 徽章管理器（依赖统一数据） -->
 <script src="{% static 'js/staff-order-management/badge-manager.js' %}"></script>
 
-<!-- 3. 队列管理器（依赖统一数据） -->
+<!-- 4. 队列管理器（依赖统一数据） -->
 <script src="{% static 'js/staff-order-management/queue-manager.js' %}"></script>
 
-<!-- 4. 订单管理器 -->
+<!-- 5. 订单管理器 -->
 <script src="{% static 'js/staff-order-management/order-manager.js' %}"></script>
 
-<!-- 5. 各标签页渲染器 -->
+<!-- 6. 各标签页渲染器 -->
 <script src="{% static 'js/staff-order-management/payment-pending-renderer.js' %}"></script>
 <script src="{% static 'js/staff-order-management/preparing-orders-renderer-enhanced.js' %}"></script>
 <script src="{% static 'js/staff-order-management/ready-orders-renderer.js' %}"></script>
 <script src="{% static 'js/staff-order-management/completed-orders-renderer.js' %}"></script>
 
-<!-- 6. WebSocket管理器 -->
+<!-- 7. WebSocket管理器 -->
 <script src="{% static 'js/staff-order-management/websocket-manager.js' %}"></script>
 
-<!-- 7. 主初始化 -->
+<!-- 8. 主初始化 -->
 <script src="{% static 'js/staff-order-management/main.js' %}"></script>
 
 <script>

@@ -907,7 +907,7 @@ class QueueManager {
             console.log(`🚀 確認 FPS 付款: 訂單 #${orderId}`);
             
             // 禁用按鈕防止重複點擊
-            const btn = document.querySelector(`.confirm-fps-payment-btn[data-order-id="${orderId}"]`);
+            const btn = document.querySelector(`.btn-confirm-fps-payment[data-order-id="${orderId}"]`);
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>確認中...';
@@ -959,7 +959,7 @@ class QueueManager {
             console.error(`❌ FPS 付款確認失敗 (訂單 #${orderId}):`, error);
             
             // 恢復按鈕狀態
-            const btn = document.querySelector(`.confirm-fps-payment-btn[data-order-id="${orderId}"]`);
+            const btn = document.querySelector(`.btn-confirm-fps-payment[data-order-id="${orderId}"]`);
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i>確認 FPS 付款';
@@ -1040,6 +1040,73 @@ class QueueManager {
         }
     }
     
+    // ==================== 取消訂單方法 ====================
+    
+    /**
+     * 取消訂單 - 員工取消待確認付款的訂單
+     * 調用 API 取消訂單
+     */
+    async cancelOrder(orderId) {
+        try {
+            if (this.isLoading) {
+                console.log('⏳ 已有操作正在進行，跳過重複請求');
+                return;
+            }
+            this.isLoading = true;
+            
+            const csrfToken = this.getCsrfToken();
+            if (!csrfToken) {
+                throw new Error('無法獲取安全令牌，請刷新頁面重試');
+            }
+            
+            console.log(`🚀 取消訂單: #${orderId}`);
+            
+            const response = await fetch(`/eshop/api/cancel-order/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({}),
+            });
+            
+            console.log(`📡 取消訂單 API 響應: HTTP ${response.status}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('📊 取消訂單響應:', data);
+                
+                if (data.success) {
+                    this.showToast(`✅ 訂單 #${orderId} 已取消`, 'success');
+                    
+                    // 觸發統一數據刷新
+                    if (window.unifiedDataManager) {
+                        setTimeout(() => window.unifiedDataManager.loadUnifiedData(true), 500);
+                    }
+                    
+                    // 觸發取消事件
+                    document.dispatchEvent(new CustomEvent('order_cancelled', {
+                        detail: { order_id: orderId }
+                    }));
+                    
+                    return { success: true, message: '訂單已取消' };
+                } else {
+                    throw new Error(data.message || data.error || '取消失敗');
+                }
+            } else if (response.status === 403) {
+                throw new Error('權限不足：請確認您有員工權限');
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error(`❌ 取消訂單失敗 (訂單 #${orderId}):`, error);
+            this.showToast(`❌ 取消訂單失敗: ${error.message}`, 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+    
     // ==================== 事件監聽器 ====================
 
     
@@ -1067,11 +1134,25 @@ class QueueManager {
                 if (orderId) this.markAsCollected(orderId);
             }
             
-            if (e.target.closest('.confirm-fps-payment-btn')) {
+            if (e.target.closest('.btn-confirm-fps-payment')) {
                 e.preventDefault();
                 e.stopPropagation();
                 const orderId = e.target.closest('[data-order-id]')?.dataset.orderId;
                 if (orderId) this.confirmFpsPayment(orderId);
+            }
+            
+            if (e.target.closest('.btn-confirm-cash-payment')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const orderId = e.target.closest('[data-order-id]')?.dataset.orderId;
+                if (orderId) this.confirmCashPayment(orderId);
+            }
+            
+            if (e.target.closest('.btn-cancel-order')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const orderId = e.target.closest('[data-order-id]')?.dataset.orderId;
+                if (orderId) this.cancelOrder(orderId);
             }
             
             if (e.target.closest('.view-details-btn')) {
