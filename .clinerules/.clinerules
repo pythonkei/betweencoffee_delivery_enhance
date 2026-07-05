@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月4日
+> **最後更新**: 2026年7月5日
 
 ## 開發者背景與方法論
 
@@ -137,6 +137,11 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 | `static/js/websocket-staff.js` | ~150 | ⭐⭐⭐⭐ |
 | `static/js/order_status_cards.js` | ~300 | ⭐⭐⭐⭐ |
 | `static/js/staff-order-management/main.js` | ~100 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/services/toast-service.js` | ~80 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/services/event-bus.js` | ~100 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/services/api-service.js` | ~120 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/renderers/base-renderer.js` | ~100 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/websocket-manager.js` | ~150 | ⭐⭐⭐⭐ |
 
 #### 模板文件
 | 文件 | 重要性 |
