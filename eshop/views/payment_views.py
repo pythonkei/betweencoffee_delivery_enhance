@@ -665,20 +665,28 @@ def fps_payment(request, order_id):
         messages.error(request, f"FPS支付页面加载失败: {str(e)}")
         return redirect('eshop:order_payment_confirmation', order_id=order_id)
 
-# ==================== FPS 支付確認視圖 ====================
+# ==================== 線下支付確認（統一） ====================
 
-def fps_confirm_payment(request, order_id):
+def _confirm_offline_payment(request, order_id, payment_method):
     """
-    FPS支付確認 - 用戶點擊「我已完成支付」後處理
+    統一處理線下支付確認（FPS / 現金）
     
-    流程變更（2026-06-25）：
-    1. 顧客按下「我已付款」→ payment_status = 'payment_pending'（等待員工確認）
+    流程：
+    1. 顧客按下確認 → payment_status = 'payment_pending'（等待員工確認）
     2. 員工在製作隊列頁面確認款項已收到 → payment_status = 'paid'
     3. 然後根據訂單類型進入對應流程（咖啡→waiting，咖啡豆→ready）
+    
+    Args:
+        request: HTTP request
+        order_id: 訂單 ID
+        payment_method: 'fps' 或 'cash'
     """
+    method_label = 'FPS' if payment_method == 'fps' else '現金'
+    payment_url_name = f'eshop:{payment_method}_payment'
+    
     try:
         if request.method != 'POST':
-            return redirect('eshop:fps_payment', order_id=order_id)
+            return redirect(payment_url_name, order_id=order_id)
         
         order = get_object_or_404(OrderModel, id=order_id)
         
@@ -697,13 +705,14 @@ def fps_confirm_payment(request, order_id):
             messages.info(request, "您的付款已提交，請等待員工確認。")
             return redirect_to_confirmation(order.id)
         
-        logger.info(f"FPS支付確認: 訂單 {order_id}, 用戶聲稱已完成支付")
+        logger.info(f"{method_label}支付確認: 訂單 {order_id}, 用戶確認{method_label}付款")
         
-        # ====== 新流程：設為 payment_pending，等待員工確認 ======
+        # 設為 payment_pending，等待員工確認
         order.payment_status = 'payment_pending'
-        order.save()
+        order.payment_method = payment_method
+        order.save(update_fields=['payment_status', 'payment_method'])
         
-        logger.info(f"✅ FPS訂單 #{order_id} 已設為 payment_pending，等待員工確認")
+        logger.info(f"✅ {method_label}訂單 #{order_id} 已設為 payment_pending，等待員工確認")
         
         # 發送 WebSocket 通知給員工端
         try:
@@ -713,9 +722,9 @@ def fps_confirm_payment(request, order_id):
                 update_type='payment_pending',
                 data={
                     'order_id': order_id,
-                    'payment_method': 'fps',
+                    'payment_method': payment_method,
                     'payment_status': 'payment_pending',
-                    'message': f'FPS訂單 #{order_id} 等待付款確認'
+                    'message': f'{method_label}訂單 #{order_id} 等待付款確認'
                 }
             )
         except Exception as ws_error:
@@ -724,16 +733,25 @@ def fps_confirm_payment(request, order_id):
         # 清空購物車和 session
         clear_user_cart_and_session(request)
         
-        messages.success(request, "付款已提交！請等待員工確認付款後，訂單將自動進入製作流程。")
+        success_messages = {
+            'fps': "付款已提交！請等待員工確認付款後，訂單將自動進入製作流程。",
+            'cash': "訂單已提交！請到店後向店員出示二維碼並支付現金，店員確認後將開始製作。"
+        }
+        messages.success(request, success_messages.get(payment_method, f"{method_label}付款已提交"))
         return redirect_to_confirmation(order.id)
         
     except OrderModel.DoesNotExist:
         messages.error(request, "訂單不存在")
         return redirect('index')
     except Exception as e:
-        logger.error(f"FPS支付確認異常: {str(e)}")
+        logger.error(f"{method_label}支付確認異常: {str(e)}")
         messages.error(request, f"支付確認異常: {str(e)}")
-        return redirect('eshop:fps_payment', order_id=order_id)
+        return redirect(payment_url_name, order_id=order_id)
+
+
+def fps_confirm_payment(request, order_id):
+    """FPS支付確認 - 委託給統一處理函數"""
+    return _confirm_offline_payment(request, order_id, 'fps')
 
 
 # ==================== 现金支付视图 ====================
@@ -774,7 +792,7 @@ def cash_payment(request, order_id):
 
 def cash_confirm_payment(request, order_id):
     """
-    現金支付確認 - 用戶點擊「確認訂單」後處理
+    現金支付確認 - 委託給統一處理函數
     
     現金到店付款流程（方案 B：員工確認）：
     1. 顧客選擇現金支付 → 看到現金支付頁面
@@ -785,48 +803,7 @@ def cash_confirm_payment(request, order_id):
     6. 員工收到現金後點擊「確認現金付款」
     7. 訂單正式加入 CoffeeQueue 製作隊列
     """
-    try:
-        if request.method != 'POST':
-            return redirect('eshop:cash_payment', order_id=order_id)
-        
-        order = get_object_or_404(OrderModel, id=order_id)
-        
-        # 驗證用戶權限
-        if request.user.is_authenticated and order.user != request.user:
-            messages.error(request, "您無權訪問此訂單")
-            return redirect('index')
-        
-        # 如果已經支付，直接跳轉
-        if order.payment_status == 'paid':
-            clear_user_cart_and_session(request)
-            return redirect_to_confirmation(order.id)
-        
-        logger.info(f"現金支付確認: 訂單 {order_id}, 用戶確認到店付款（等待員工確認）")
-        
-        # ====== 方案 B：設為 payment_pending，等待員工確認 ======
-        # 不直接設為 paid，而是讓員工在收到現金後確認
-        order.payment_status = 'payment_pending'
-        order.payment_method = 'cash'
-        order.save(update_fields=['payment_status', 'payment_method'])
-        
-        # 清空購物車和 session
-        clear_user_cart_and_session(request)
-        
-        logger.info(f"✅ 現金訂單 #{order_id} 已設為 payment_pending，等待員工確認")
-        messages.success(
-            request, 
-            "訂單已提交！請到店後向店員出示二維碼並支付現金，店員確認後將開始製作。"
-        )
-        return redirect_to_confirmation(order.id)
-
-        
-    except OrderModel.DoesNotExist:
-        messages.error(request, "訂單不存在")
-        return redirect('index')
-    except Exception as e:
-        logger.error(f"現金支付確認異常: {str(e)}")
-        messages.error(request, f"支付確認異常: {str(e)}")
-        return redirect('eshop:cash_payment', order_id=order_id)
+    return _confirm_offline_payment(request, order_id, 'cash')
 
 
 

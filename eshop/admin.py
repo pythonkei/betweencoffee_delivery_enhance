@@ -1,4 +1,5 @@
 # eshop/admin.py - 修正版
+import logging
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import path
@@ -7,6 +8,9 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import CoffeeItem, BeanItem, OrderModel, CoffeeQueue, Barista, CoffeePreparationTime
 from eshop.order_status_manager import OrderStatusManager
+
+logger = logging.getLogger(__name__)
+
 
 
 # 員工訂單管理視圖
@@ -308,23 +312,20 @@ class OrderModelAdmin(admin.ModelAdmin):
 
 # CoffeeItem Admin
 class CoffeeItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'is_published', 'is_shop_hot_item', 'image_preview', 'index_image_preview')
-    list_filter = ('is_published', 'is_shop_hot_item', 'list_date')
-    search_fields = ('name', 'introduction', 'description')
-    list_editable = ('is_published', 'is_shop_hot_item')  # 允许直接编辑排序字段
+    list_display = ('name', 'price', 'is_available', 'hot_item', 'image_preview', 'index_image_preview')
+    list_filter = ('is_available', 'hot_item')
+    search_fields = ('name', 'description')
+    list_editable = ('is_available', 'hot_item')
     fieldsets = (
         ('基本信息', {
-            'fields': ('name', 'introduction', 'description', 'price', 'origin', 'flavor')
+            'fields': ('name', 'description', 'price')
         }),
         ('图片管理', {
-            'fields': ('image', 'image_index'),
-            'description': '详情页图片用于咖啡菜单和详情页，首页图片专门用于首页展示'
-        }),
-        ('选项设置', {
-            'fields': ('cup_level', 'milk_level')
+            'fields': ('image',),
+            'description': '商品图片'
         }),
         ('状态管理', {
-            'fields': ('is_published', 'is_shop_hot_item', 'list_date')
+            'fields': ('is_available', 'hot_item', 'hot_item_order')
         }),
     )
 
@@ -332,12 +333,10 @@ class CoffeeItemAdmin(admin.ModelAdmin):
         if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover;" />', obj.image.url)
         return "-"
-    image_preview.short_description = '详情页图片'
+    image_preview.short_description = '图片'
 
     def index_image_preview(self, obj):
-        if obj.image_index:
-            return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover;" />', obj.image_index.url)
-        elif obj.image:
+        if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; opacity: 0.5;" title="使用详情页图片" />', obj.image.url)
         return "-"
     index_image_preview.short_description = '首页图片'
@@ -345,23 +344,20 @@ class CoffeeItemAdmin(admin.ModelAdmin):
 
 # BeanItem Admin
 class BeanItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price_200g', 'price_500g', 'roast_level', 'is_published', 'is_shop_hot_item', 'image_preview', 'index_image_preview')
-    list_filter = ('is_published', 'is_shop_hot_item', 'roast_level', 'list_date')
-    search_fields = ('name', 'introduction', 'description')
-    list_editable = ('is_published', 'is_shop_hot_item')  # 允许直接编辑排序字段
+    list_display = ('name', 'price_500g', 'is_available', 'hot_item', 'image_preview', 'index_image_preview')
+    list_filter = ('is_available', 'hot_item')
+    search_fields = ('name', 'description')
+    list_editable = ('is_available', 'hot_item')
     fieldsets = (
         ('基本信息', {
-            'fields': ('name', 'introduction', 'description', 'price_200g', 'price_500g', 'origin', 'roast_level', 'flavor')
+            'fields': ('name', 'description', 'price_500g')
         }),
         ('图片管理', {
-            'fields': ('image', 'image_index'),
-            'description': '详情页图片用于咖啡豆菜单和详情页，首页图片专门用于首页展示'
-        }),
-        ('研磨选项', {
-            'fields': ('grinding_level',)
+            'fields': ('image',),
+            'description': '商品图片'
         }),
         ('状态管理', {
-            'fields': ('is_published', 'is_shop_hot_item', 'list_date')
+            'fields': ('is_available', 'hot_item', 'hot_item_order')
         }),
     )
 
@@ -369,12 +365,10 @@ class BeanItemAdmin(admin.ModelAdmin):
         if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover;" />', obj.image.url)
         return "-"
-    image_preview.short_description = '详情页图片'
+    image_preview.short_description = '图片'
 
     def index_image_preview(self, obj):
-        if obj.image_index:
-            return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover;" />', obj.image_index.url)
-        elif obj.image:
+        if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; opacity: 0.5;" title="使用详情页图片" />', obj.image.url)
         return "-"
     index_image_preview.short_description = '首页图片'
