@@ -34,15 +34,17 @@ logger = logging.getLogger(__name__)
 @login_required
 @staff_member_required
 def queue_management(request):
-    """队列管理主页面"""
-    return render(request, 'eshop/queue_dashboard.html')
+    """队列管理主页面（重定向到员工订单管理页面）"""
+    from django.shortcuts import redirect
+    return redirect('eshop:staff_order_management')
 
 
 @login_required
 @staff_member_required
 def queue_dashboard(request):
-    """队列仪表板"""
-    return render(request, 'eshop/queue_dashboard.html')
+    """队列仪表板（重定向到员工订单管理页面）"""
+    from django.shortcuts import redirect
+    return redirect('eshop:staff_order_management')
 
 
 @login_required

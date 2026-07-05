@@ -42,7 +42,8 @@ urlpatterns = [
     # ==================== 页面路由 ====================
     path('dashboard/', queue_dashboard, name='queue_dashboard'),
     path('management/', queue_management, name='queue_management'),
-    path('staff-management/', staff_order_management, name='staff_order_management'),
+    # ⚠️ staff_order_management 已移至 eshop/urls_staff.py（路徑: /eshop/staff/order-management/）
+    # 此處不再重複註冊，避免路由重複
     
     # ==================== 统一数据API路由（新增） ====================
     # 注意：这是核心API，所有前端组件都将使用这个单一端点
