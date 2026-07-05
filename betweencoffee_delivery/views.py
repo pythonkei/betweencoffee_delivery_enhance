@@ -96,7 +96,7 @@ class Bean(View):
 # Keeping NOT use
 class CoffeeMenuSearch(View):
     def get(self, request, *args, **kwargs):
-        query = self.request.GET.get('q')
+        query = request.GET.get('q')
         # # 提供Search 搜尋特定的項目, 使用below過濾任何部分匹配結果
         search_items = CoffeeItem.objects.filter(
             Q(name__icontains = query) |
@@ -112,7 +112,7 @@ class CoffeeMenuSearch(View):
 
 class BeanMenuSearch(View):
     def get(self, request, *args, **kwargs):
-        query = self.request.GET.get('q')
+        query = request.GET.get('q')
         # 使用below過濾任何部分匹配結果
         search_items = CoffeeItem.objects.filter(
             Q(name__icontains = query) |
@@ -136,11 +136,4 @@ class About(View):
         return render (request, 'betweencoffee_delivery/about.html', context)
     
 
-class ItemInCart(View):
-    def get(self, request, *args, **kwargs):
-        cart = Cart(request)  # Initialize the cart
-        
-        context = {
-            'cart': cart,  # keep cart count into page
-        }
-        return render (request, '/socialuser/login.html', context)
+# ItemInCart 已移除（未使用，無路由引用）

@@ -64,10 +64,7 @@ urlpatterns = [
     
 
     
-    # ==================== 需要扩展的API路由（已提取订单） ====================
-    # 注意：第一步的get_unified_queue_data没有包含completed_orders，需要扩展
-    # 暂时保持原路由，后续扩展统一API
-    path('completed-orders/json/', get_unified_queue_data, name='completed_orders_json_api'),  # 暂时重定向
+    # ✅ get_unified_queue_data 已包含 completed_orders，無需獨立路由
 ]
 
 
