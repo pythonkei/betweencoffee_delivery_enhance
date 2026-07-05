@@ -420,7 +420,7 @@
     padding: 0.6em 1em 0.6em 1em;
     font-size: 1.05em;
     font-weight: 600;
-    background-color: #cb8409;
+    background-color: var(--brand-primary);
     color: white;
 
     border-radius: 8px;
@@ -715,7 +715,7 @@ table td:nth-child(3) {
 }
 
 
-/* 操作按鈕樣式 - 使用主題金色 #c49b63，高權重選擇器覆蓋 Bootstrap */
+/* 操作按鈕樣式 - 使用主題金色，高權重選擇器覆蓋 Bootstrap */
 .btn-primary.start-preparation-btn {
     background: var(--brand-primary) !important;
     border: 1px solid var(--brand-primary) !important;
