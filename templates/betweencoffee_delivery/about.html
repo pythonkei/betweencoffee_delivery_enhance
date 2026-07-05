@@ -1,3 +1,6 @@
+{# 注意：直接繼承 base.html 而非 layouts/blank.html #}
+{# 因為 about 頁面有自己的 ftco-section-blank 處理間距 #}
+{# 若繼承 blank.html 會多一層 blank-container 的 24vh padding-top #}
 {% extends 'betweencoffee_delivery/base.html' %}
 {% load static %}
 {% block title %}Between Coffee - About{% endblock %}

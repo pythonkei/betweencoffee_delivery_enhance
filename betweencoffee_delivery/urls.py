@@ -51,7 +51,7 @@ urlpatterns = [
     path('coffee_menu/search/', CoffeeMenuSearch.as_view(), name='coffee_menu_search'),
     path('bean_menu/search/', BeanMenuSearch.as_view(), name='bean_menu_search'),
 
-    # path('restaurant/', include('restaurant.urls')),  # find restaurant app html file
+    # restaurant app 已移除（功能已被 staff_order_management 取代）
     path('about/', About.as_view(), name='about'),
 ]
 
