@@ -48,29 +48,9 @@ def queue_dashboard(request):
 @login_required
 @staff_member_required
 def staff_order_management(request):
-    """员工订单管理页面"""
-    try:
-        now = timezone.now()
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        
-        total_orders_today = OrderModel.objects.filter(
-            created_at__gte=today_start
-        ).count()
-        
-        context = {
-            'total_orders_today': total_orders_today,
-            'current_time': now,
-        }
-        
-        return render(request, 'admin/staff_order_management.html', context)
-        
-    except Exception as e:
-        logger.error(f"员工订单管理页面加载失败: {str(e)}")
-        return render(request, 'admin/staff_order_management.html', {
-            'error': '加载订单管理页面失败',
-            'total_orders_today': 0,
-            'current_time': timezone.now(),
-        })
+    """员工订单管理页面 - 委託給 staff_views.py 的完整版本"""
+    from eshop.views.staff_views import staff_order_management as full_view
+    return full_view(request)
 
 
 # ==================== 统一队列数据API（核心功能） ====================

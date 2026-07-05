@@ -310,37 +310,42 @@ class ApiService {
     
     /**
      * 開始製作
+     * 實際路由: /eshop/queue/start/<order_id>/
      */
     startPreparation(orderId) {
-        return this.post(`/eshop/api/start-preparation/${orderId}/`, {});
+        return this.post(`/eshop/queue/start/${orderId}/`, {});
     }
     
     /**
      * 標記為就緒
+     * 實際路由: /eshop/queue/ready/<order_id>/
      */
     markAsReady(orderId) {
-        return this.post(`/eshop/api/mark-ready/${orderId}/`, {});
+        return this.post(`/eshop/queue/ready/${orderId}/`, {});
     }
     
     /**
      * 標記為已取餐
+     * 實際路由: /eshop/queue/collected/<order_id>/
      */
     markAsCollected(orderId) {
-        return this.post(`/eshop/api/mark-collected/${orderId}/`, {});
+        return this.post(`/eshop/queue/collected/${orderId}/`, {});
     }
     
     /**
      * 獲取訂單詳情
+     * 實際路由: /eshop/queue/order-details/<order_id>/
      */
     getOrderDetails(orderId) {
-        return this.get(`/eshop/api/order-details/${orderId}/`);
+        return this.get(`/eshop/queue/order-details/${orderId}/`);
     }
     
     /**
      * 獲取統一數據
+     * 實際路由: /eshop/queue/unified-data/
      */
     getUnifiedData() {
-        return this.get('/eshop/api/staff/unified-data/');
+        return this.get('/eshop/queue/unified-data/');
     }
     
     // ==================== 清理方法 ====================

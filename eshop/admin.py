@@ -1,4 +1,5 @@
 # eshop/admin.py - 修正版
+import logging
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import path
@@ -8,99 +9,35 @@ from django.utils import timezone
 from .models import CoffeeItem, BeanItem, OrderModel, CoffeeQueue, Barista, CoffeePreparationTime
 from eshop.order_status_manager import OrderStatusManager
 
+logger = logging.getLogger(__name__)
 
-# 員工訂單管理視圖
+
+# 員工訂單管理視圖 - 委託給 staff_views.py 的完整版本
 def staff_order_management(request):
-    """員工訂單管理界面"""
+    """員工訂單管理界面 - 委託給 staff_views.py"""
     if not request.user.is_staff:
         messages.error(request, "無權訪問此頁面")
         return redirect('admin:index')
-    
-    # 獲取需要處理的訂單 - 員工管理頁面保持快速訂單優先排序
-    preparing_orders = OrderModel.objects.filter(
-        payment_status='paid', 
-        status='preparing'
-    ).order_by('-is_quick_order', 'created_at')  # 快速訂單優先
-    
-    ready_orders = OrderModel.objects.filter(
-        payment_status='paid', 
-        status='ready'
-    ).order_by('-is_quick_order', 'created_at')  # 快速訂單優先
-    
-    recent_completed_orders = OrderModel.objects.filter(
-        payment_status='paid',
-        status='completed',
-        picked_up_at__gte=timezone.now() - timezone.timedelta(hours=4)
-    ).order_by('-picked_up_at')
-    
-    # 今日訂單統計
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    total_orders_today = OrderModel.objects.filter(
-        created_at__gte=today_start,
-        payment_status='paid'
-    ).count()
-    
-    context = {
-        'preparing_orders': preparing_orders,
-        'ready_orders': ready_orders,
-        'recent_completed_orders': recent_completed_orders,
-        'total_orders_today': total_orders_today,
-        'title': '訂單管理',
-        'site_header': 'Between Coffee - 員工管理',
-        'staff_user': request.user
-    }
-    
-    return render(request, 'admin/staff_order_management.html', context)
+    from eshop.views.staff_views import staff_order_management as full_view
+    return full_view(request)
 
 
 def mark_order_ready(request, order_id):
-    """標記訂單為已就緒 - 使用 OrderStatusManager"""
+    """標記訂單為已就緒 - 委託給 staff_views.py"""
     if not request.user.is_staff:
         messages.error(request, "無權執行此操作")
         return redirect('admin:index')
-    
-    try:
-        staff_name = request.user.get_full_name() or request.user.username
-        result = OrderStatusManager.mark_as_ready_manually(
-            order_id=order_id,
-            staff_name=staff_name
-        )
-        
-        if result['success']:
-            messages.success(request, f'訂單 #{order_id} 已標記為已就緒')
-        else:
-            messages.error(request, f'操作失敗: {result["message"]}')
-            
-    except Exception as e:
-        messages.error(request, f'系統錯誤: {str(e)}')
-    
-    # 使用正確的URL名稱
-    return redirect('admin:staff_order_management')
+    from eshop.views.staff_views import mark_order_ready as full_view
+    return full_view(request, order_id)
 
 
 def mark_order_completed(request, order_id):
-    """標記訂單為已提取 - 使用 OrderStatusManager"""
+    """標記訂單為已提取 - 委託給 staff_views.py"""
     if not request.user.is_staff:
         messages.error(request, "無權執行此操作")
         return redirect('admin:index')
-    
-    try:
-        staff_name = request.user.get_full_name() or request.user.username
-        result = OrderStatusManager.mark_as_completed_manually(
-            order_id=order_id,
-            staff_name=staff_name
-        )
-        
-        if result['success']:
-            messages.success(request, f'訂單 #{order_id} 已標記為已提取')
-        else:
-            messages.error(request, f'操作失敗: {result["message"]}')
-            
-    except Exception as e:
-        messages.error(request, f'系統錯誤: {str(e)}')
-    
-    # 使用正確的URL名稱
-    return redirect('admin:staff_order_management')
+    from eshop.views.staff_views import mark_order_collected as full_view
+    return full_view(request, order_id)
 
 
 # 管理動作 - 使用 OrderStatusManager
