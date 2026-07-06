@@ -33,10 +33,90 @@
 - **插畫風格**: 每個包裝均帶有不同的插畫，畫風傳達「輕鬆感、自由感、放空感」
 - **口味配色**: 每種咖啡及咖啡豆口味都以不同的顏色設計，便於識別
 
-### 2.4 設計語言
+### 2.4 動畫視覺元素
+
+#### 2.4.1 SVG 背景插畫 + noise_animation
+頁面背景使用透明度低的 SVG 插畫元素，搭配 CSS `noise_animation` 動畫，豐富視覺層次。
+
+**技術實現**:
+- CSS class: `.noise_animation` — 使用 `desktop_noise_animation` 關鍵幀動畫，1 秒循環，`will-change: filter`
+- CSS class: `.noise-filiter` — 隱藏的 SVG filter 容器（`display: none; width: 0; height: 0`）
+- CSS class: `.smart_noise_animation` — 行動裝置優化版本
+- 關鍵幀 `@keyframes desktop_noise_animation` — 透過 SVG noise filter（`#noise-0` ~ `#noise-4`）產生噪點抖動效果
+- 關鍵幀 `@keyframes smart_noise_animation` — 行動版（`#noise-5` ~ `#noise-9`）
+
+**使用範例**:
+```html
+<!-- 頁面 banner 背景 SVG 插畫 + noise_animation -->
+<div class="ftco-subpage-banner" id="section-counter">
+    <div class="svg-bg ftco-counter noise_animation" 
+         style="background-image: url({% static 'images/title_bg_img_01.svg' %});"></div>
+    <div class="container">
+        ...
+    </div>
+</div>
+
+<!-- 商品卡片 hover 效果 -->
+<span id="svg_over_on">
+    <img src="{% static 'images/product_hover.svg' %}" class="noise_animation">
+</span>
+
+<!-- 首頁裝飾元素 -->
+<div class="noise-img">
+    <img src="{% static 'images/owl_title_bg_01.svg' %}" class="noise_animation">
+</div>
+<div class="svg-box">
+    <img src="{% static 'images/owl_title_bg_02.svg' %}" class="noise_animation">
+</div>
+```
+
+**應用頁面**:
+| 頁面 | SVG 插畫 | 用途 |
+|------|----------|------|
+| 首頁 (`index.html`) | `owl_title_bg_01.svg`, `owl_title_bg_02.svg`, `product_hover.svg` | 背景裝飾、商品 hover |
+| 咖啡菜單 (`coffee_menu.html`) | `title_bg_img_01.svg`, `product_hover.svg` | Banner 背景、商品 hover |
+| 咖啡豆菜單 (`bean_menu.html`) | `title_bg_img_02.svg`, `product_hover.svg` | Banner 背景、商品 hover |
+| 全域 (`base.html`) | — | noise-filiter SVG filter 容器 |
+
+#### 2.4.2 背景訊息字體元素（title-bg-head）
+頁面背景使用透明度極低的品牌字體元素，與頁面內容相關，豐富視覺層次。
+
+**技術實現**:
+- CSS class: `.title-bg-head`
+  - `font-family: 'Mogra'` — 使用品牌 Logo 字型
+  - `font-size: 20vw` — 超大尺寸
+  - `opacity: .05` — 極低透明度
+  - `position: absolute; z-index: -2` — 置於背景層
+  - `letter-spacing: -10px` — 緊湊字距
+  - `color: #fff` — 白色文字
+
+**使用範例**:
+```html
+<!-- 咖啡商品詳情頁 -->
+<span class="title-bg-head">｛BREWED<br>&nbsp;&nbsp;&nbsp;FAST｝</span>
+
+<!-- 咖啡豆商品詳情頁 -->
+<span class="title-bg-head">｛SERVED<br>&nbsp;&nbsp;&nbsp;FRESH｝</span>
+
+<!-- 關於我們頁面 -->
+<span class="title-bg-head">｛US｝</span>
+```
+
+**應用頁面**:
+| 頁面 | 背景文字 | 語意 |
+|------|----------|------|
+| 咖啡詳情 (`coffee.html`) | `｛BREWED FAST｝` | 快速沖泡 |
+| 咖啡豆詳情 (`bean.html`) | `｛SERVED FRESH｝` | 新鮮供應 |
+| 關於我們 (`about.html`) | `｛US｝` | 品牌故事 |
+
+### 2.5 設計語言
 - 清晰且含空間感
 - 簡潔留白但不失設計感
 - 字體清晰可讀
+- 背景層次豐富：SVG 插畫 + noise_animation 動畫 + 背景訊息字體
+- 所有動畫僅限品牌已有的 `noise_animation`，不引入其他 CSS/JS 動畫
+- 不使用漸變色（`linear-gradient`、`radial-gradient` 等）
+- 功能優先，裝飾其次，不花巧
 
 ---
 

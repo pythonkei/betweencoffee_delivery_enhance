@@ -1,6 +1,6 @@
 # 專案概述
 
-> **最後更新**: 2026年7月5日
+> **最後更新**: 2026年7月6日
 
 ## 開發者背景與方法論
 
@@ -39,14 +39,41 @@
 ```
 
 ### 品牌視覺元素
-- **SVG 插圖**: 全域使用手繪趣味性風格 SVG 插圖
-- **黑色主題背景**: 全域黑色 theme 背景，加強產品視覺對比
-- **背景裝飾**: 多數頁面有透明度低的 SVG 插畫 + `noise_animation` 動畫
-- **產品照片**: 無顏色背景的 PNG 去背圖，僅呈現產品物件
-- **包裝設計**: 統一風格，每種口味不同配色，插畫傳達品牌訊息
+- **SVG 插圖**: 全域使用手繪趣味性風格 SVG 插圖，帶出品牌訊息
+- **黑色主題背景**: 全域黑色 theme 背景，加強所有咖啡產品的視覺對比
+- **背景裝飾**: 多數頁面有透明度低的 SVG 插畫元素，附有 CSS 動畫 `noise_animation`，豐富視覺層次
+- **產品照片**: 無顏色背景的 PNG 去背圖，僅呈現產品物件本身，加強視覺焦點
+- **包裝設計**: 統一風格，每種口味不同配色，插畫傳達「輕鬆感、自由感、放空感」
+
+### 動畫視覺元素
+
+#### SVG 背景插畫 + noise_animation
+頁面背景使用透明度低的 SVG 插畫元素，搭配 CSS `noise_animation` 動畫（1 秒循環，`will-change: filter`），透過 SVG noise filter 產生噪點抖動效果。
+
+**應用頁面**:
+| 頁面 | SVG 插畫 | 用途 |
+|------|----------|------|
+| 首頁 (`index.html`) | `owl_title_bg_01.svg`, `owl_title_bg_02.svg`, `product_hover.svg` | 背景裝飾、商品 hover |
+| 咖啡菜單 (`coffee_menu.html`) | `title_bg_img_01.svg`, `product_hover.svg` | Banner 背景、商品 hover |
+| 咖啡豆菜單 (`bean_menu.html`) | `title_bg_img_02.svg`, `product_hover.svg` | Banner 背景、商品 hover |
+| 全域 (`base.html`) | — | noise-filiter SVG filter 容器 |
+
+#### 背景訊息字體元素（title-bg-head）
+頁面背景使用透明度極低的品牌字體元素（`font-family: 'Mogra'`, `font-size: 20vw`, `opacity: .05`），與頁面內容相關。
+
+**應用頁面**:
+| 頁面 | 背景文字 | 語意 |
+|------|----------|------|
+| 咖啡詳情 (`coffee.html`) | `｛BREWED FAST｝` | 快速沖泡 |
+| 咖啡豆詳情 (`bean.html`) | `｛SERVED FRESH｝` | 新鮮供應 |
+| 關於我們 (`about.html`) | `｛US｝` | 品牌故事 |
 
 ### 設計語言
 - 清晰含空間感、簡潔留白、字體清晰
+- 背景層次豐富：SVG 插畫 + noise_animation 動畫 + 背景訊息字體
+- 所有動畫僅限品牌已有的 `noise_animation`，不引入其他 CSS/JS 動畫
+- 不使用漸變色（`linear-gradient`、`radial-gradient` 等）
+- 功能優先，裝飾其次，不花巧
 
 ## 完整報告
 
@@ -56,4 +83,4 @@
 
 涵蓋 8 大章節：系統核心價值、系統工程師視角、前端工程師視角、UX/UI 設計師視角、用戶視角、開發原則與藍圖、開發環境規則、附錄。
 
-📄 **`.clinerules/ui-principles.md`** — UI 設計原則（品牌色、字型、間距、元件規範）
+📄 **`.clinerules/ui-principles.md`** — UI 設計原則（品牌色、字型、間距、元件規範、動畫視覺元素）

@@ -142,6 +142,10 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 | `static/js/staff-order-management/services/api-service.js` | ~120 | ⭐⭐⭐⭐ |
 | `static/js/staff-order-management/renderers/base-renderer.js` | ~100 | ⭐⭐⭐⭐ |
 | `static/js/staff-order-management/websocket-manager.js` | ~150 | ⭐⭐⭐⭐ |
+| `static/js/bc-slideout-cart.js` | ~200 | ⭐⭐⭐⭐⭐ |
+| `static/js/bc-checkout.js` | ~200 | ⭐⭐⭐⭐⭐ |
+| `static/js/bc-toast.js` | ~100 | ⭐⭐⭐⭐ |
+| `static/js/main.js` | ~200 | ⭐⭐⭐⭐ |
 
 #### CSS 樣式文件
 | 文件 | 行數 | 重要性 |
@@ -149,6 +153,8 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 | `static/css/style-bootstrap.css` | 4410 | ⭐⭐⭐ |
 | `static/css/style-custom.css` | 1850 | ⭐⭐⭐⭐ |
 | `static/css/style-utilities.css` | 2541 | ⭐⭐⭐ |
+| `static/css/animate.css` | 3591 | ⭐⭐⭐⭐ |
+| `static/css/bc-components.css` | ~500 | ⭐⭐⭐⭐⭐ |
 
 #### 模板文件
 | 文件 | 重要性 |
@@ -157,6 +163,8 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 | `eshop/templates/eshop/order_payment_confirmation.html` | ⭐⭐⭐⭐⭐ |
 | `templates/admin/staff_order_management.html` | ⭐⭐⭐⭐⭐ |
 | `templates/layouts/nav.html` | ⭐⭐⭐⭐ |
+| `templates/cart/checkout.html` | ⭐⭐⭐⭐ |
+| `templates/cart/slideout_cart.html` | ⭐⭐⭐⭐ |
 
 ## 常見開發任務速查
 
@@ -228,6 +236,8 @@ python manage.py makemigrations && python manage.py migrate
 - **產品照片**: 使用無顏色背景的 PNG 去背圖
 - **包裝設計**: 統一風格，每種口味不同配色
 - **設計語言**: 清晰含空間感、簡潔留白、字體清晰
+- **背景裝飾**: 大多數頁面背景有透明度低的 SVG 插畫元素，附有 CSS 動畫 `noise_animation`，豐富視覺層次
+- **背景訊息字體**: 頁面背景有透明度低的品牌字體元素（`.title-bg-head`），與頁面內容相關
 
 ## 完整參考
 詳細系統分析請參閱根目錄 `BETWEEN_COFFEE_SYSTEM_REPORT.md`（1185行）

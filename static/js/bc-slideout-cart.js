@@ -125,13 +125,13 @@ class SlideoutCart {
           <img src="${item.image || '/static/images/placeholder.png'}" alt="${item.name}" class="bc-cart-item-image">
           <div class="bc-cart-item-info">
             <p class="bc-cart-item-name">${this._escapeHtml(item.name)}</p>
-            ${optionsText ? `<p class="bc-cart-item-options">${this._escapeHtml(optionsText)}</p>` : ''}
+            ${optionsText ? `<p class="bc-cart-item-options">${optionsText}</p>` : ''}
             <p class="bc-cart-item-price">$${item.total_price}</p>
             <div class="bc-cart-item-qty">
               <button class="bc-cart-item-qty-btn" data-action="decrease" data-key="${item.item_id}">−</button>
               <span class="bc-cart-item-qty-value">${item.quantity}</span>
               <button class="bc-cart-item-qty-btn" data-action="increase" data-key="${item.item_id}">+</button>
-              <button class="bc-cart-item-remove" data-action="remove" data-key="${item.item_id}">✕</button>
+              <button class="bc-cart-item-remove" data-action="remove" data-key="${item.item_id}"><i class="icon-close"></i></button>
             </div>
           </div>
         </div>
@@ -218,22 +218,25 @@ class SlideoutCart {
 
   _formatOptions(item) {
     const parts = [];
-    if (item.cup_level) {
-      const map = { Small: '細', Medium: '中', Large: '大' };
-      parts.push(`杯量:${map[item.cup_level] || item.cup_level}`);
+    if (item.type === 'coffee') {
+      if (item.cup_level) {
+        const map = { Small: '細', Medium: '中', Large: '大' };
+        parts.push(`<i class="icon material-symbols-outlined">water_full</i> 杯量:${map[item.cup_level] || item.cup_level}`);
+      }
+      if (item.milk_level) {
+        const map = { Light: '少', Medium: '正常', Extra: '追加' };
+        parts.push(`<i class="icon material-symbols-outlined">humidity_mid</i> 奶量:${map[item.milk_level] || item.milk_level}`);
+      }
+    } else if (item.type === 'bean') {
+      if (item.grinding_level) {
+        const map = { Non: '免研磨', Light: '細', Medium: '中', Deep: '粗' };
+        parts.push(`<i class="icon material-symbols-outlined">roller_shades</i> 研磨:${map[item.grinding_level] || item.grinding_level}`);
+      }
+      if (item.weight) {
+        parts.push(`<i class="icon material-symbols-outlined">scale</i> 重量:${item.weight}`);
+      }
     }
-    if (item.milk_level) {
-      const map = { Light: '少', Medium: '正常', Extra: '追加' };
-      parts.push(`奶量:${map[item.milk_level] || item.milk_level}`);
-    }
-    if (item.weight) {
-      parts.push(`重量:${item.weight}`);
-    }
-    if (item.grinding_level) {
-      const map = { Non: '免研磨', Light: '細', Medium: '中', Deep: '粗' };
-      parts.push(`研磨:${map[item.grinding_level] || item.grinding_level}`);
-    }
-    return parts.join(' | ');
+    return parts.join('<br>');
   }
 
   _escapeHtml(text) {
