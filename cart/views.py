@@ -182,6 +182,27 @@ def clear_cart(request):
         return redirect('cart:cart_detail')
 
 
+@require_GET
+def checkout_page(request):
+    """一頁式結帳頁面"""
+    try:
+        cart = Cart(request)
+        
+        if len(cart) == 0:
+            messages.warning(request, "購物車是空的，請先選購商品")
+            return redirect('coffee_menu')
+        
+        context = {
+            'cart': cart,
+        }
+        return render(request, 'cart/checkout.html', context)
+    
+    except Exception as e:
+        logger.error(f"結帳頁面錯誤: {str(e)}")
+        messages.error(request, "載入結帳頁面時發生錯誤")
+        return redirect('cart:cart_detail')
+
+
 @require_POST
 def create_order(request):
     """從購物車創建訂單"""
@@ -213,15 +234,115 @@ def create_order(request):
         return handle_order_error(request, e, 'cart:cart_detail', 'cart')
 
 
-@require_GET
-def cart_count(request):
-    """獲取購物車商品數量（API）"""
+@require_POST
+def create_order_ajax(request):
+    """一頁式結帳 AJAX 提交 - 創建訂單"""
     try:
         cart = Cart(request)
-        return JsonResponse({'count': len(cart)})
+        
+        if len(cart) == 0:
+            return JsonResponse({
+                'success': False,
+                'message': '購物車為空'
+            })
+        
+        # 從 POST 數據獲取聯絡資訊
+        customer_name = request.POST.get('customer_name', '').strip()
+        customer_phone = request.POST.get('customer_phone', '').strip()
+        customer_email = request.POST.get('customer_email', '').strip()
+        payment_method = request.POST.get('payment_method', '')
+        pickup_time = request.POST.get('pickup_time', '10')
+        coupon_code = request.POST.get('coupon_code', '').strip()
+        
+        # 驗證必填欄位
+        if not customer_name:
+            return JsonResponse({
+                'success': False,
+                'message': '請填寫姓名'
+            })
+        if not customer_phone:
+            return JsonResponse({
+                'success': False,
+                'message': '請填寫電話號碼'
+            })
+        if not payment_method:
+            return JsonResponse({
+                'success': False,
+                'message': '請選擇支付方式'
+            })
+        
+        # 保存到會話供後續使用
+        request.session['pending_order'] = {
+            'items': cart.cart,
+            'total_price': str(cart.get_total_price()),
+            'cart_item_count': len(cart),
+            'customer_name': customer_name,
+            'customer_phone': customer_phone,
+            'customer_email': customer_email,
+            'payment_method': payment_method,
+            'pickup_time': pickup_time,
+            'coupon_code': coupon_code,
+        }
+        
+        if 'quick_order_data' in request.session:
+            del request.session['quick_order_data']
+        
+        request.session.modified = True
+        
+        # 根據支付方式決定跳轉
+        if payment_method in ('paypal', 'alipay'):
+            # 需要支付跳轉
+            return JsonResponse({
+                'success': True,
+                'redirect_url': f'/order/create/?payment={payment_method}',
+                'order_id': None,
+            })
+        else:
+            # FPS / 現金 - 直接創建訂單
+            return JsonResponse({
+                'success': True,
+                'redirect_url': f'/order/create/?payment={payment_method}',
+                'order_id': None,
+            })
+    
+    except Exception as e:
+        logger.error(f"AJAX 創建訂單錯誤: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': '系統錯誤，請稍後再試'
+        })
+
+
+@require_GET
+def cart_count(request):
+    """獲取購物車商品數量及詳情（API）- 供滑出購物車使用"""
+    try:
+        cart = Cart(request)
+        items = []
+        for item in cart:
+            items.append({
+                'item_id': item['item_id'],
+                'name': item['name'],
+                'type': item['type'],
+                'quantity': item['quantity'],
+                'price': item['price'],
+                'total_price': item['total_price'],
+                'image': item['image'],
+                'cup_level': item.get('cup_level'),
+                'milk_level': item.get('milk_level'),
+                'grinding_level': item.get('grinding_level'),
+                'weight': item.get('weight'),
+            })
+        return JsonResponse({
+            'success': True,
+            'count': len(cart),
+            'cart_total_items': len(cart),
+            'cart_total_price': format_price(cart.get_total_price()),
+            'items': items,
+        })
     except Exception as e:
         logger.error(f"獲取購物車數量錯誤: {str(e)}")
-        return JsonResponse({'count': 0})
+        return JsonResponse({'success': False, 'count': 0, 'items': []})
 
 
 def format_price(value):

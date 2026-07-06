@@ -34,6 +34,21 @@ def load_clinerules():
         print("⚠️  .clinerules 文件不存在")
     return None
 
+def load_ui_principles():
+    """加載 UI 設計原則文件內容"""
+    ui_principles_path = Path(".clinerules/ui-principles.md")
+    if ui_principles_path.exists():
+        try:
+            with open(ui_principles_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            print(f"✅ 已加載 UI 設計原則 ({len(content)} 字符)")
+            return content
+        except Exception as e:
+            print(f"❌ 加載 UI 設計原則失敗: {e}")
+    else:
+        print("⚠️  UI 設計原則文件不存在 (.clinerules/ui-principles.md)")
+    return None
+
 def load_memory_bank_summary():
     """加載 Memory Bank 摘要內容"""
     memory_bank_path = Path("betweencoffee_memory_bank")
@@ -157,6 +172,9 @@ def generate_context():
     # 加載 .clinerules
     clinerules_content = load_clinerules()
     
+    # 加載 UI 設計原則
+    ui_principles_content = load_ui_principles()
+    
     # 加載 Memory Bank 摘要
     memory_bank_summary = load_memory_bank_summary()
     
@@ -166,6 +184,11 @@ def generate_context():
     if clinerules_content:
         context_parts.append("# 📋 項目規範 (.clinerules)")
         context_parts.append(clinerules_content[:2000] + "..." if len(clinerules_content) > 2000 else clinerules_content)
+        context_parts.append("")
+    
+    if ui_principles_content:
+        context_parts.append("# 🎨 UI 設計原則 (.clinerules/ui-principles.md)")
+        context_parts.append(ui_principles_content[:3000] + "..." if len(ui_principles_content) > 3000 else ui_principles_content)
         context_parts.append("")
     
     if memory_bank_summary:
@@ -186,21 +209,24 @@ def generate_context():
 ### 包含內容
 1. **系統報告** (BETWEEN_COFFEE_SYSTEM_REPORT.md): 1185行完整系統分析
 2. **項目規範** (.clinerules): 開發標準、安全要求、性能優化
-3. **項目總覽**: 業務背景、技術棧、核心模塊
-4. **系統狀態**: 當前狀態、已知問題、性能指標
-5. **優先任務**: 高優先級待處理問題
+3. **UI 設計原則** (.clinerules/ui-principles.md): 品牌色、字型、間距、元件規範
+4. **項目總覽**: 業務背景、技術棧、核心模塊
+5. **系統狀態**: 當前狀態、已知問題、性能指標
+6. **優先任務**: 高優先級待處理問題
 
 ### 使用建議
 - 在開始任何任務前，先查看相關規範
 - 參考系統狀態了解當前限制
 - 優先處理高優先級任務
 - 遵循項目開發標準
+- 開發 UI 時參考設計原則
 
 ### 完整信息
 如需完整信息，請查看：
 - `BETWEEN_COFFEE_SYSTEM_REPORT.md` - 完整系統分析報告（1185行）
 - `betweencoffee_memory_bank/` 目錄下的詳細文件
 - `docs/` 目錄下的技術文檔和報告
+- `.clinerules/ui-principles.md` - UI 設計原則
 """
     
     full_context += usage_note

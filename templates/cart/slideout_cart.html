@@ -1,0 +1,41 @@
+<!-- cart/templates/cart/slideout_cart.html -->
+<!-- Between Coffee 滑出購物車面板 -->
+
+<!-- 遮罩層 -->
+<div id="bc-cart-overlay" class="bc-cart-overlay"></div>
+
+<!-- 滑出抽屜 -->
+<div id="bc-cart-drawer" class="bc-cart-drawer">
+  <!-- 頂部標題欄 -->
+  <div class="bc-cart-header">
+    <span class="bc-cart-title">
+      <i class="icon-shopping-cart"></i> 購物車
+      <span class="bc-badge bc-cart-count">0</span>
+    </span>
+    <button class="bc-cart-close" aria-label="關閉購物車">
+      <i class="icon-close"></i>
+    </button>
+  </div>
+
+  <!-- 商品列表 -->
+  <div id="bc-cart-items" class="bc-cart-items">
+    <div class="bc-cart-empty">
+      <div class="bc-cart-empty-icon"><i class="icon-shopping-cart" style="font-size:3rem;"></i></div>
+      <p class="bc-cart-empty-sub">來一杯咖啡吧</p>
+    </div>
+  </div>
+
+  <!-- 底部結帳欄 -->
+  <div class="bc-cart-footer">
+    <div class="bc-cart-total-row">
+      <span class="bc-cart-total-label">小計</span>
+      <span id="bc-cart-total" class="bc-cart-total-amount">$0</span>
+    </div>
+    <a href="{% url 'cart:checkout_page' %}" class="bc-btn bc-btn-primary bc-btn-block bc-btn-lg">
+      前往結帳 <i class="icon-arrow-right"></i>
+    </a>
+    <button class="bc-btn bc-btn-secondary bc-btn-block bc-cart-close" style="cursor:pointer;">
+      繼續購物
+    </button>
+  </div>
+</div>

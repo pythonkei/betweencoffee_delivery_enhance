@@ -31,6 +31,8 @@
     <link rel="stylesheet" href={% static "css/flaticon.css" %} />
     <link rel="stylesheet" href={% static "css/icomoon.css" %} />
     <link rel="stylesheet" href={% static "css/toast.css" %} />
+    <!-- Between Coffee 品牌元件庫 -->
+    <link rel="stylesheet" href={% static "css/bc-components.css" %} />
 
     <link rel='stylesheet' href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
@@ -88,6 +90,8 @@
 
 <!-- end Main content extend block -->
 
+<!-- 滑出購物車 -->
+{% include 'cart/slideout_cart.html' %}
 
 <!-- footer -->
 <footer class="ftco-footer ftco-section img" style="background-image: url('{% static 'images/footer_bg_v5.jpg' %}'); background-position: bottom right; background-size:contain; background-color: #0e0e0e;">
@@ -229,10 +233,14 @@
     <script src={% static "js/select2.min.js" %}></script>
     <!-- 全局 Toast 管理器 -->
     <script src={% static "js/toast-manager.js" %}></script>
+    <!-- Between Coffee Toast 系統 -->
+    <script src={% static "js/bc-toast.js" %}></script>
     <!-- WebSocket 統一核心管理器 -->
     <script src={% static "js/websocket-core.js" %}></script>
     <!-- 移動端優化增強腳本 -->
     <script src={% static "js/mobile-optimization-enhanced.js" %}></script>
+    <!-- 滑出購物車 -->
+    <script src={% static "js/bc-slideout-cart.js" %}></script>
 
     <!-- delivery tut -->
 

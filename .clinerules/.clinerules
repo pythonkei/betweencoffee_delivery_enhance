@@ -205,5 +205,30 @@ python manage.py makemigrations && python manage.py migrate
 - 測試覆蓋率低
 - 前端 JS 部分重複邏輯
 
+## UI 開發設計注意事項
+
+進行所有 UI 開發設計和修改時，請遵循以下原則（詳見 `.clinerules/ui-principles.md`）：
+
+### 核心原則
+- **不花巧** — 功能優先，裝飾其次
+- **無需動畫** — 避免不必要的 CSS/JS 動畫（品牌已有的 noise_animation 除外）
+- **無需漸變色** — 使用純色，不使用 `linear-gradient`、`radial-gradient` 等
+
+### 風格統一性
+所有 UI 元素必須保持以下五個面向的統一：
+1. **元素元件** — 卡片、按鈕、輸入框、列表等元件風格一致
+2. **字體** — 嚴格遵循字型系統規範（Noto Serif TC / Noto Sans TC / Mogra）
+3. **按鈕** — 統一使用 `.bc-btn` 系列樣式，不自行定義新按鈕風格
+4. **色彩** — 嚴格使用品牌色系統中的顏色值，不引入新色
+5. **圖標** — 優先使用 icomoon 字型圖標，不引入新圖標集
+
+### 品牌視覺設計風格
+- **SVG 插圖**: 全域使用手繪趣味性風格 SVG 插圖
+- **黑色主題背景**: 全域黑色 theme 背景
+- **產品照片**: 使用無顏色背景的 PNG 去背圖
+- **包裝設計**: 統一風格，每種口味不同配色
+- **設計語言**: 清晰含空間感、簡潔留白、字體清晰
+
 ## 完整參考
 詳細系統分析請參閱根目錄 `BETWEEN_COFFEE_SYSTEM_REPORT.md`（1185行）
+UI 設計原則請參閱 `.clinerules/ui-principles.md`

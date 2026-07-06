@@ -1,0 +1,184 @@
+<!-- cart/templates/cart/checkout.html -->
+<!-- Between Coffee 一頁式結帳 -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+
+{% block title %}Between Coffee - 結帳{% endblock %}
+
+{% block content %}
+<section class="ftco-section-blank-small"></section>
+
+<!-- 頁面標題 -->
+<section class="ftco-subpage-section">
+  <div class="container">
+    <div class="row justify-content-center align-items-center">
+      <span class="title-bg-head">&#65371;Checkout&#65373;</span>
+      <div class="col-lg-12 col-md-12 col-sm-12">
+        <p class="d-flex mb-3" style="justify-content:space-between; align-items:center;">
+          <span class="h4" style="color:var(--bc-text);">一頁式結帳</span>
+          <a href="{% url 'coffee_menu' %}" style="font-size:1em; color:var(--bc-text-muted);">
+            <i class="icon material-symbols-outlined">undo</i> 繼續購物
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 一頁式結帳內容 -->
+<section class="ftco-subpage-section">
+  <div class="bc-checkout">
+    <form id="bc-checkout-form" method="POST" action="{% url 'cart:create_order' %}">
+      {% csrf_token %}
+
+      <!-- 1. 商品列表 -->
+      <div class="bc-checkout-section">
+        <h3 class="bc-checkout-section-title"><i class="icon-cart-plus"></i> 訂單商品</h3>
+        <div class="bc-checkout-items">
+          {% for item in cart %}
+          <div class="bc-checkout-item">
+            <img src="{{ item.image }}" alt="{{ item.name }}" class="bc-checkout-item-image">
+            <div class="bc-checkout-item-info">
+              <div class="bc-checkout-item-name">{{ item.name }}</div>
+              <div class="bc-checkout-item-detail">
+                {% if item.type == 'coffee' %}
+                  杯量: {% if item.cup_level == 'Small' %}細{% elif item.cup_level == 'Medium' %}中{% else %}大{% endif %}
+                  | 奶量: {% if item.milk_level == 'Light' %}少{% elif item.milk_level == 'Medium' %}正常{% else %}追加{% endif %}
+                {% elif item.type == 'bean' %}
+                  重量: {{ item.weight|default:"200g" }}
+                  | 研磨: {% if item.grinding_level == 'Non' %}免研磨{% elif item.grinding_level == 'Light' %}細{% elif item.grinding_level == 'Medium' %}中{% else %}粗{% endif %}
+                {% endif %}
+              </div>
+            </div>
+            <span class="bc-checkout-item-qty">x{{ item.quantity }}</span>
+            <span class="bc-checkout-item-total">${{ item.total_price|floatformat:"-2" }}</span>
+          </div>
+          {% empty %}
+          <p style="color:var(--bc-text-muted); text-align:center; padding:20px 0;">
+            購物車沒有物品
+          </p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 2. 聯絡資訊 -->
+      <div class="bc-checkout-section">
+        <h3 class="bc-checkout-section-title"><i class="icon-user"></i> 聯絡資訊</h3>
+        <div class="bc-field-row">
+          <div class="bc-field">
+            <label class="bc-field-label">姓名 *</label>
+            <input type="text" name="customer_name" class="bc-input" 
+                   value="{{ request.user.get_full_name|default:'' }}" 
+                   placeholder="您的姓名" required>
+          </div>
+          <div class="bc-field">
+            <label class="bc-field-label">電話 *</label>
+            <input type="tel" name="customer_phone" class="bc-input" 
+                   value="{{ request.user.phone|default:'' }}" 
+                   placeholder="91234567" required>
+          </div>
+        </div>
+        <div class="bc-field">
+          <label class="bc-field-label">Email（選填，用於接收取餐通知）</label>
+          <input type="email" name="customer_email" class="bc-input" 
+                 value="{{ request.user.email|default:'' }}" 
+                 placeholder="your@email.com">
+        </div>
+      </div>
+
+      <!-- 3. 取貨時間 -->
+      <div class="bc-checkout-section">
+        <h3 class="bc-checkout-section-title"><i class="icon-clock-o"></i> 預計取貨時間</h3>
+        <div class="bc-time-options">
+          <button type="button" class="bc-time-chip" data-minutes="5">
+            <span class="time-label">5 分鐘</span>
+            <span class="time-sub">最快</span>
+          </button>
+          <button type="button" class="bc-time-chip active" data-minutes="10">
+            <span class="time-label">10 分鐘</span>
+            <span class="time-sub">推薦</span>
+          </button>
+          <button type="button" class="bc-time-chip" data-minutes="15">
+            <span class="time-label">15 分鐘</span>
+            <span class="time-sub">從容</span>
+          </button>
+          <button type="button" class="bc-time-chip" data-minutes="20">
+            <span class="time-label">20 分鐘</span>
+            <span class="time-sub">悠閒</span>
+          </button>
+          <button type="button" class="bc-time-chip" data-minutes="30">
+            <span class="time-label">30 分鐘</span>
+            <span class="time-sub">慢慢來</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. 支付方式 -->
+      <div class="bc-checkout-section">
+        <h3 class="bc-checkout-section-title"><i class="icon-credit-card"></i> 支付方式</h3>
+        <div class="bc-payment-options">
+          <button type="button" class="bc-payment-option" data-method="paypal">
+            <span class="payment-icon"><i class="icon-paypal"></i></span>
+            <span class="payment-name">PayPal</span>
+          </button>
+          <button type="button" class="bc-payment-option" data-method="alipay">
+            <span class="payment-icon"><i class="icon-mobile"></i></span>
+            <span class="payment-name">Alipay</span>
+          </button>
+          <button type="button" class="bc-payment-option" data-method="fps">
+            <span class="payment-icon"><i class="icon-camera"></i></span>
+            <span class="payment-name">FPS 轉數快</span>
+          </button>
+          <button type="button" class="bc-payment-option" data-method="cash">
+            <span class="payment-icon"><i class="icon-money"></i></span>
+            <span class="payment-name">現金</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 5. 訂單摘要 -->
+      <div class="bc-checkout-section">
+        <h3 class="bc-checkout-section-title"><i class="icon-list-alt"></i> 訂單摘要</h3>
+        
+        <!-- 優惠碼 -->
+        <div class="bc-coupon-row" style="margin-bottom:16px;">
+          <input type="text" id="bc-coupon-input" class="bc-input" 
+                 placeholder="輸入優惠碼" name="coupon_code">
+          <button type="button" id="bc-apply-coupon" class="bc-btn bc-btn-secondary" style="white-space:nowrap;">
+            應用
+          </button>
+        </div>
+        <div id="bc-coupon-msg" class="bc-coupon-msg"></div>
+
+        <hr class="bc-divider">
+
+        <div class="bc-summary-row">
+          <span class="label">商品總計</span>
+          <span class="value">${{ cart.get_total_price|floatformat:"-2" }}</span>
+        </div>
+        <div class="bc-summary-row">
+          <span class="label">優惠折扣</span>
+          <span class="value" id="bc-discount-amount">-$0</span>
+        </div>
+        <div class="bc-summary-total">
+          <span class="label">應付總額</span>
+          <span id="bc-final-total" class="value">${{ cart.get_total_price|floatformat:"-2" }}</span>
+        </div>
+
+        <hr class="bc-divider">
+
+        <button type="submit" class="bc-btn bc-btn-primary bc-btn-block bc-btn-lg" 
+                style="margin-top:8px; font-size:1.05rem;">
+          確認訂單並支付
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<div class="flexable-vh-20"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/bc-checkout.js' %}"></script>
+{% endblock %}
