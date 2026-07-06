@@ -114,7 +114,7 @@ class BeanMenuSearch(View):
     def get(self, request, *args, **kwargs):
         query = request.GET.get('q')
         # 使用below過濾任何部分匹配結果
-        search_items = CoffeeItem.objects.filter(
+        search_items = BeanItem.objects.filter(
             Q(name__icontains = query) |
             Q(price__icontains = query) |
             Q(description__icontains = query)

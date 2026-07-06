@@ -9,7 +9,7 @@ from .views.queue_views import (
     # 页面视图
     queue_dashboard,
     queue_management,
-    staff_order_management,
+    # staff_order_management 已移至 eshop/urls_staff.py（路徑: /eshop/staff/order-management/）
     
     # ==================== 统一数据API（新增） ====================
     get_unified_queue_data,  # 核心：统一的队列数据API
@@ -67,20 +67,22 @@ urlpatterns = [
     # ✅ get_unified_queue_data 已包含 completed_orders，無需獨立路由
 ]
 
-
-# 示例：重定向旧API到新API（可选）
-from django.views.generic import RedirectView
-
-# 如果希望旧API自动重定向到新API，可以取消注释以下代码：
-"""
-urlpatterns += [
-    # 重定向旧API到统一API
-    path('updates/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_queue_updates'),
-    path('badge-summary/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_badge_summary'),
-    path('preparing-count/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_preparing_count'),
-    path('ready-count/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_ready_count'),
-]
-"""
+# ==================== 命名風格說明 ====================
+# 本文件使用 snake_case 命名風格（如 start_preparation_api）
+# eshop/urls_staff.py 使用 kebab-case 命名風格（如 mark-order-ready）
+# eshop/urls_api.py 使用 kebab-case 命名風格（如 mark-ready）
+# 
+# 前端 JS 調用 API 路由（/eshop/api/mark-ready/），不直接調用 queue 路由
+# 因此命名風格不一致不影響功能，但新路由建議統一使用 kebab-case
+#
+# 舊 API 重定向（已註釋，需要時取消註釋）：
+# from django.views.generic import RedirectView
+# urlpatterns += [
+#     path('updates/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_queue_updates'),
+#     path('badge-summary/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_badge_summary'),
+#     path('preparing-count/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_preparing_count'),
+#     path('ready-count/', RedirectView.as_view(pattern_name='unified_queue_data', permanent=False), name='old_ready_count'),
+# ]
 
 # ==================== API文档说明 ====================
 """

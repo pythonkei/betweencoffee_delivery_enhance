@@ -58,8 +58,8 @@ from .queue_views import (
     force_sync_api,
     order_details_for_waiting_api,
     cleanup_queue_data,
-    recalculate_all_times_api,
-    repair_queue_data,  # ✅ 補上缺少的導入
+    recalculate_all_times_api,  # ✅ 補上：__all__ 中有但導入缺失
+    repair_queue_data,
 )
 
 # 從 api_views 导入

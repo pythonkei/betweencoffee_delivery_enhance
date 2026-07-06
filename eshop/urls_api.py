@@ -21,8 +21,8 @@ from .views.api_views import (
     get_active_orders,
     get_quick_order_times,
     update_order_pickup_times_api,
-    health_check,
     generate_fps_qr_api,
+    health_check,
 )
 
 # ==================== 導入 WebSocket 監控視圖 ====================
