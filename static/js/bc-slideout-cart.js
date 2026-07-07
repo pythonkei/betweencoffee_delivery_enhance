@@ -405,11 +405,11 @@ class SlideoutCart {
     if (item.type === 'coffee') {
       if (item.cup_level) {
         const map = { Small: '細', Medium: '中', Large: '大' };
-        parts.push(`<i class="icon material-symbols-outlined">water_full</i> 杯量:${map[item.cup_level] || item.cup_level}`);
+        parts.push(`<i class="icon material-symbols-outlined">water_full</i> 杯量: ${map[item.cup_level] || item.cup_level}`);
       }
       if (item.milk_level) {
         const map = { Light: '少', Medium: '正常', Extra: '追加' };
-        parts.push(`<i class="icon material-symbols-outlined">humidity_mid</i> 奶量:${map[item.milk_level] || item.milk_level}`);
+        parts.push(`<i class="icon material-symbols-outlined">humidity_mid</i> 奶量: ${map[item.milk_level] || item.milk_level}`);
       }
     } else if (item.type === 'bean') {
       if (item.grinding_level) {
