@@ -309,9 +309,11 @@
                         cart_count: data.cart_count,
                         cart_total: data.cart_total_price
                     });
-                    document.querySelectorAll('.cart-count').forEach(element => {
+                    document.querySelectorAll('.bc-cart-count').forEach(element => {
                         element.textContent = data.cart_count;
                     });
+                    // 觸發購物車更新事件，讓 SlideoutCart 同步狀態
+                    document.dispatchEvent(new CustomEvent('cart:updated'));
                 } else {
                     alert('加入購物車失敗: ' + data.message);
                 }

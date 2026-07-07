@@ -1234,7 +1234,7 @@
             if (!WebSocketCore.getInstance()) {
                 const core = new WebSocketCore({
                     autoConnect: true,
-                    showIndicator: true,
+                    showIndicator: false,
                     enableFallback: true,
                     enablePersistence: true
                 });

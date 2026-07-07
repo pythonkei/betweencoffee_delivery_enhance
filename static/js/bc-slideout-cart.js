@@ -42,6 +42,10 @@ class SlideoutCart {
     this.drawer.classList.add('open');
     this._lockScroll();
     this._loadItems();
+    // 打開購物車時隱藏浮動按鈕，避免覆蓋在面板上
+    // 設定標記防止 _updateFloatingCartVisibility 重新顯示
+    this._cartOpenHiddenFloating = true;
+    this._hideFloatingCart();
   }
 
   close() {
@@ -50,6 +54,10 @@ class SlideoutCart {
     this.overlay?.classList.remove('open');
     this.drawer.classList.remove('open');
     this._unlockScroll();
+    // 清除標記，允許 _updateFloatingCartVisibility 再次處理浮動按鈕
+    this._cartOpenHiddenFloating = false;
+    // 關閉購物車後，根據導覽列購物車可見性決定是否顯示浮動按鈕
+    this._restoreFloatingCartAfterClose();
   }
 
   toggle() {
@@ -74,8 +82,16 @@ class SlideoutCart {
       this.toggle();
     });
 
-    // 關閉按鈕
-    this.drawer.querySelector('.bc-cart-close')?.addEventListener('click', () => this.close());
+    // 浮動購物車按鈕切換
+    document.querySelector('#bc-floating-cart-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.toggle();
+    });
+
+    // 關閉按鈕（所有 .bc-cart-close 元素）
+    this.drawer.querySelectorAll('.bc-cart-close').forEach(btn => {
+      btn.addEventListener('click', () => this.close());
+    });
 
     // 點擊遮罩關閉
     this.overlay?.addEventListener('click', () => this.close());
@@ -87,6 +103,9 @@ class SlideoutCart {
 
     // 監聽自定義事件：加入購物車後刷新
     document.addEventListener('cart:updated', () => this.refreshAndOpen());
+
+    // 滾動監聽：導覽列購物車不可見時顯示浮動按鈕
+    this._initFloatingCartScrollListener();
   }
 
   async _loadItems() {
@@ -124,9 +143,11 @@ class SlideoutCart {
         <div class="bc-cart-item" data-key="${item.item_id}">
           <img src="${item.image || '/static/images/placeholder.png'}" alt="${item.name}" class="bc-cart-item-image">
           <div class="bc-cart-item-info">
-            <p class="bc-cart-item-name">${this._escapeHtml(item.name)}</p>
+            <div class="bc-cart-item-name-row">
+              <p class="bc-cart-item-name">${this._escapeHtml(item.name)}</p>
+              <p class="bc-cart-item-price">$${item.total_price}</p>
+            </div>
             ${optionsText ? `<p class="bc-cart-item-options">${optionsText}</p>` : ''}
-            <p class="bc-cart-item-price">$${item.total_price}</p>
             <div class="bc-cart-item-qty">
               <button class="bc-cart-item-qty-btn" data-action="decrease" data-key="${item.item_id}">−</button>
               <span class="bc-cart-item-qty-value">${item.quantity}</span>
@@ -204,6 +225,10 @@ class SlideoutCart {
       if (response.ok) {
         this._loadItems();
         this._updateBadge();
+        // 如果在結帳頁（order/confirm），重新載入頁面以更新右側商品列表
+        if (window.location.pathname.includes('/eshop/order/confirm/')) {
+          window.location.reload();
+        }
       }
     } catch (err) {
       console.error('移除商品失敗:', err);
@@ -213,6 +238,165 @@ class SlideoutCart {
   _updateBadge(count) {
     document.querySelectorAll(this.options.badgeSelector).forEach(el => {
       el.textContent = count || '0';
+    });
+    // 同步浮動購物車按鈕顯示狀態
+    this._updateFloatingCartVisibility(count);
+  }
+
+  /**
+   * 初始化滾動監聽：導覽列購物車不可見時顯示浮動按鈕
+   */
+  _initFloatingCartScrollListener() {
+    this.floatingCart = document.getElementById('bc-floating-cart');
+    this.navCartToggle = document.getElementById('bc-cart-toggle');
+    if (!this.floatingCart || !this.navCartToggle) return;
+
+    // 員工訂單管理頁面不需要顯示浮動購物車按鈕
+    if (window.location.pathname.includes('/admin/eshop/ordermodel/staff-management/')) {
+      this.floatingCart.style.display = 'none';
+      return;
+    }
+
+    // 使用 IntersectionObserver 監測導覽列購物車是否在可視範圍
+    this._navObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        // 導覽列購物車不可見時顯示浮動按鈕
+        if (!entry.isIntersecting) {
+          this._showFloatingCart();
+        } else {
+          this._hideFloatingCart();
+        }
+      });
+    }, { threshold: 0 });
+
+    this._navObserver.observe(this.navCartToggle);
+
+    // 初始檢查：載入購物車數量並檢查導覽列購物車是否在可視範圍
+    // 使用 requestAnimationFrame 確保 DOM 已渲染完成
+    requestAnimationFrame(() => {
+      // 先載入購物車數量，確保 badge 正確
+      this._syncBadgeFromServer().then(() => {
+        const rect = this.navCartToggle.getBoundingClientRect();
+        const isVisible = (
+          rect.top >= 0 &&
+          rect.left >= 0 &&
+          rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+          rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+        if (!isVisible) {
+          this._showFloatingCart();
+        } else {
+          this._hideFloatingCart();
+        }
+      });
+    });
+  }
+
+  /**
+   * 從伺服器同步購物車數量到 badge
+   */
+  async _syncBadgeFromServer() {
+    try {
+      const response = await fetch('/cart/count/');
+      const data = await response.json();
+      if (data.success) {
+        this._updateBadge(data.cart_total_items);
+      }
+    } catch (err) {
+      // 靜默失敗，使用 HTML 初始值
+    }
+  }
+
+  /**
+   * 更新浮動購物車顯示狀態（根據購物車數量）
+   */
+  _updateFloatingCartVisibility(count) {
+    if (!this.floatingCart) return;
+    // 購物車打開時不處理浮動按鈕顯示
+    if (this._cartOpenHiddenFloating) return;
+    const itemCount = count !== undefined ? parseInt(count) : null;
+    if (itemCount !== null) {
+      if (itemCount <= 0) {
+        // 購物車為空時隱藏浮動按鈕
+        this.floatingCart.style.display = 'none';
+        this.floatingCart.classList.remove('show', 'hide');
+        return;
+      } else {
+        // 購物車有商品時，確保浮動按鈕可見
+        this.floatingCart.style.display = '';
+        // 檢查導覽列購物車是否在可視範圍內
+        if (this.navCartToggle) {
+          const rect = this.navCartToggle.getBoundingClientRect();
+          const isVisible = (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+          );
+          if (!isVisible) {
+            this._showFloatingCart();
+          } else {
+            this._hideFloatingCart();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 顯示浮動購物車（從底部滑入）
+   */
+  _showFloatingCart() {
+    if (!this.floatingCart) return;
+    // 如果購物車為空，不顯示
+    const badge = this.floatingCart.querySelector('.bc-floating-cart-badge');
+    if (badge && parseInt(badge.textContent) <= 0) return;
+
+    if (this.floatingCart.classList.contains('show')) return;
+
+    // 確保元素可見（移除可能殘留的 display:none inline style）
+    this.floatingCart.style.display = '';
+
+    this.floatingCart.classList.remove('hide');
+    // 強制 reflow 確保動畫重新觸發
+    void this.floatingCart.offsetWidth;
+    this.floatingCart.classList.add('show');
+  }
+
+  /**
+   * 隱藏浮動購物車（向下滑出）
+   */
+  _hideFloatingCart() {
+    if (!this.floatingCart) return;
+    if (!this.floatingCart.classList.contains('show')) {
+      // 如果沒有 show class，直接隱藏（確保 display:none）
+      this.floatingCart.style.display = 'none';
+      return;
+    }
+
+    this.floatingCart.classList.remove('show');
+    this.floatingCart.classList.add('hide');
+  }
+
+  /**
+   * 關閉購物車後，根據導覽列購物車可見性決定是否顯示浮動按鈕
+   */
+  _restoreFloatingCartAfterClose() {
+    if (!this.floatingCart || !this.navCartToggle) return;
+    // 使用 requestAnimationFrame 確保 _unlockScroll 已完成
+    requestAnimationFrame(() => {
+      const rect = this.navCartToggle.getBoundingClientRect();
+      const isVisible = (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      );
+      if (!isVisible) {
+        this._showFloatingCart();
+      } else {
+        this._hideFloatingCart();
+      }
     });
   }
 
@@ -267,6 +451,10 @@ class SlideoutCart {
         el.style.right = scrollbarWidth + 'px';
       }
     });
+    // 補償浮動購物車按鈕的 right 值，防止 body padding-right 導致位移
+    if (this.floatingCart) {
+      this.floatingCart.style.right = (40 + scrollbarWidth) + 'px';
+    }
   }
 
   /**
@@ -279,6 +467,10 @@ class SlideoutCart {
     document.querySelectorAll('.ftco-navbar-light, .ftco_navbar').forEach(el => {
       el.style.right = '';
     });
+    // 移除浮動購物車按鈕的 right 補償
+    if (this.floatingCart) {
+      this.floatingCart.style.right = '';
+    }
   }
 
   _getCSRF() {

@@ -143,6 +143,31 @@ class OrderConfirm(View):
     
     def get(self, request, *args, **kwargs):
         try:
+            # ✅ 修正：從購物車 session 同步 pending_order
+            # 確保無論從哪個入口進入（滑出購物車直接連結、cart_detail 等），
+            # pending_order 都與當前購物車內容一致
+            from django.conf import settings
+            cart_session = request.session.get(settings.CART_SESSION_ID, {})
+            pending_order = request.session.get('pending_order')
+            
+            # 如果購物車有商品，但 pending_order 不存在或內容不一致，自動重建
+            if cart_session:
+                pending_items = pending_order.get('items', {}) if pending_order else {}
+                # 比較購物車 session 與 pending_order 的 items 是否一致
+                cart_keys = set(cart_session.keys())
+                pending_keys = set(pending_items.keys())
+                if cart_keys != pending_keys:
+                    logger.info(f"購物車內容已變更，自動同步 pending_order（購物車:{len(cart_session)}項, pending:{len(pending_items)}項）")
+                    request.session['pending_order'] = {
+                        'items': cart_session,
+                        'total_price': str(sum(
+                            float(d.get('price', 0)) * int(d.get('quantity', 1))
+                            for d in cart_session.values()
+                        )),
+                        'cart_item_count': len(cart_session)
+                    }
+                    request.session.modified = True
+            
             # 优先检查购物车数据
             cart_data = request.session.get('pending_order')
             quick_order_data = request.session.get('quick_order_data')
@@ -218,8 +243,27 @@ class OrderConfirm(View):
                         })
                         continue
 
+                # 從購物車 session 讀取聯絡資訊（如果有的話）
+                customer_name = cart_data.get('customer_name', '')
+                customer_phone = cart_data.get('customer_phone', '')
+                customer_email = cart_data.get('customer_email', '')
+                
+                # 如果 session 中沒有，嘗試從用戶資料獲取
+                if not customer_name and request.user.is_authenticated:
+                    customer_name = request.user.get_full_name() or request.user.username or ''
+                if not customer_phone and request.user.is_authenticated:
+                    try:
+                        customer_phone = getattr(request.user, 'phone', '')
+                    except:
+                        pass
+                if not customer_email and request.user.is_authenticated:
+                    customer_email = request.user.email or ''
+                
                 # ✅ 修正：普通訂單 - 固定為5分鐘，不顯示選擇（隱藏）
                 initial_data = {
+                    'name': customer_name,
+                    'phone': customer_phone,
+                    'email': customer_email,
                     'pickup_time': '5'  # 固定值，隱藏不顯示
                 }
                 is_quick_order = False

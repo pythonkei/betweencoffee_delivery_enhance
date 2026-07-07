@@ -16,25 +16,28 @@ logger = logging.getLogger(__name__)
 
 @require_GET
 def cart_detail(request):
-    """購物車詳情頁面"""
+    """購物車詳情頁面 - 直接重定向到訂單確認頁面"""
     try:
         cart = Cart(request)
         
-        # 設置會話中的 pending_order（如果需要）
-        if len(cart) > 0:
-            request.session['pending_order'] = {
-                'items': cart.cart,
-                'total_price': str(cart.get_total_price())
-            }
-            request.session.modified = True
+        if len(cart) == 0:
+            messages.warning(request, "購物車是空的，請先選購商品")
+            return redirect('coffee_menu')
         
-        context = {
-            'cart': cart,
-            'total_items': len(cart),
-            'total_price': cart.get_total_price(),
+        # 保存購物車數據到 session
+        request.session['pending_order'] = {
+            'items': cart.cart,
+            'total_price': str(cart.get_total_price()),
+            'cart_item_count': len(cart)
         }
         
-        return render(request, 'cart/cart_detail.html', context)
+        # 清除快速訂單數據
+        if 'quick_order_data' in request.session:
+            del request.session['quick_order_data']
+        
+        request.session.modified = True
+        
+        return redirect('eshop:order_confirm')
     
     except Exception as e:
         logger.error(f"購物車詳情錯誤: {str(e)}")

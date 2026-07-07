@@ -383,35 +383,37 @@
 
 
 
-                        <!-- ========== 聯絡方式（置於最底部，隱藏） ========== -->
-                        <div class="col-md-12 px-0 mb-3" style="display: none;">
-                            <h3 class="mb-4 billing-heading">聯絡方式</h3>
-                        </div>
-                        <div class="col-md-8 px-0 mb-3" style="display: none;">
+                        <!-- ========== 聯絡資訊（使用 bc-components 風格，從 checkout.html 搬過來） ========== -->
+                        <div class="col-md-12 px-0 mb-4">
                             <div class="form-group">
-                                <label for="name">名稱</label>
-                                <input required class="form-control" type="text" name="name" placeholder="Ricky" autocomplete="off" value="{% if initial_data.name %}{{ initial_data.name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"/>
-                            </div>
-                        </div>
-
-                        <div class="w-100"></div>
-
-                        <div class="col-md-6 px-0 mb-3" style="display: none;">
-                            <div class="form-group">
-                                <label for="phone">電話 / Whatsapp</label>
-                                <input required class="form-control mb-2" type="text" name="phone" 
-                                    placeholder="98092384" autocomplete="off"
-                                    pattern="[0-9]{8}" 
-                                    title="請輸入8位數字香港電話號碼"
-                                    value="{% if initial_data.phone %}{{ initial_data.phone }}{% elif user.is_authenticated and user.profile.phone %}{{ user.profile.hk_phone }}{% endif %}"/>
-                                <caption class="">默認以 WhatsApp 通知</caption>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6" style="display: none;">
-                            <div class="form-group">
-                                <label for="email">電郵</label>
-                                <input class="form-control" type="email" name="email" placeholder="mark_yeung@gmail.com" autocomplete="off" value="{% if initial_data.email %}{{ initial_data.email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}"/>
+                                <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
+                                    <i class="icon-user" style="color: #c49b63;"></i> 聯絡資訊
+                                </label>
+                                <div class="bc-field-row" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <div class="bc-field" style="flex: 1; min-width: 200px;">
+                                        <label class="bc-field-label">姓名 *</label>
+                                        <input type="text" name="name" class="bc-input" required
+                                               value="{% if initial_data.name %}{{ initial_data.name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
+                                               placeholder="您的姓名">
+                                    </div>
+                                    <div class="bc-field" style="flex: 1; min-width: 200px;">
+                                        <label class="bc-field-label">電話 *</label>
+                                        <input type="tel" name="phone" class="bc-input" required
+                                               value="{% if initial_data.phone %}{{ initial_data.phone }}{% elif user.is_authenticated and user.profile.phone %}{{ user.profile.hk_phone }}{% endif %}"
+                                               placeholder="91234567"
+                                               pattern="[0-9]{8}"
+                                               title="請輸入8位數字香港電話號碼">
+                                    </div>
+                                </div>
+                                <div class="bc-field" style="margin-top: 12px;">
+                                    <label class="bc-field-label">Email（選填，用於接收取餐通知）</label>
+                                    <input type="email" name="email" class="bc-input"
+                                           value="{% if initial_data.email %}{{ initial_data.email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}"
+                                           placeholder="your@email.com">
+                                </div>
+                                <small class="form-text text-muted mt-2" style="color: rgba(255,255,255,0.4) !important;">
+                                    <i class="icon-whatsapp mr-1"></i>默認以 WhatsApp 通知
+                                </small>
                             </div>
                         </div>
 

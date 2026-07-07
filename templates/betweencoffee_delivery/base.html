@@ -93,6 +93,14 @@
 <!-- 滑出購物車 -->
 {% include 'cart/slideout_cart.html' %}
 
+<!-- 浮動購物車按鈕（導覽列購物車不可見時顯示） -->
+<div id="bc-floating-cart" class="bc-floating-cart" style="display:none;">
+  <button id="bc-floating-cart-btn" class="bc-floating-cart-btn" aria-label="購物車">
+    <i class="icon-shopping-cart"></i>
+    <span class="bc-floating-cart-badge bc-cart-count">0</span>
+  </button>
+</div>
+
 <!-- footer -->
 <footer class="ftco-footer ftco-section img" style="background-image: url('{% static 'images/footer_bg_v5.jpg' %}'); background-position: bottom right; background-size:contain; background-color: #0e0e0e;">
     <div hidden class="gifbox">

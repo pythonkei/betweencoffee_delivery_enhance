@@ -253,10 +253,12 @@
                         cart_total: data.cart_total_price
                     });
                     
-                    // 更新购物车数量
-                    document.querySelectorAll('.cart-count').forEach(element => {
+                    // 更新购物车数量（同時更新導航列和浮動購物車的 badge）
+                    document.querySelectorAll('.bc-cart-count').forEach(element => {
                         element.textContent = data.cart_count;
                     });
+                    // 觸發購物車更新事件，讓 SlideoutCart 同步狀態
+                    document.dispatchEvent(new CustomEvent('cart:updated'));
                 } else {
                     alert('加入購物車失敗: ' + (data.message || '未知错误'));
                 }

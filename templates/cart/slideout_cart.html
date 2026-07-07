@@ -1,11 +1,11 @@
-<!-- cart/templates/cart/slideout_cart.html -->
-<!-- Between Coffee 滑出購物車面板 -->
 
 <!-- 遮罩層 -->
 <div id="bc-cart-overlay" class="bc-cart-overlay"></div>
 
 <!-- 滑出抽屜 -->
 <div id="bc-cart-drawer" class="bc-cart-drawer">
+  <!-- 背景訊息文字 -->
+  <span class="title-bg-head" style="top: 2vw; left: -10%; opacity: 0.03; font-size: clamp(94px, 12.3vw, 160px); letter-spacing: -5px;">&#65371;Enjoy&#65373;</span>
   <!-- 頂部標題欄 -->
   <div class="bc-cart-header">
     <span class="bc-cart-title">
@@ -31,7 +31,7 @@
       <span class="bc-cart-total-label">小計</span>
       <span id="bc-cart-total" class="bc-cart-total-amount">$0</span>
     </div>
-    <a href="{% url 'cart:checkout_page' %}" class="bc-btn bc-btn-primary bc-btn-block bc-btn-lg">
+    <a href="{% url 'eshop:order_confirm' %}" class="bc-btn bc-btn-primary bc-btn-block bc-btn-lg">
       前往結帳 <i class="icon-arrow-right"></i>
     </a>
     <button class="bc-btn bc-btn-secondary bc-btn-block bc-cart-close" style="cursor:pointer;">
