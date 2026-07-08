@@ -1459,7 +1459,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-radius: 0;
+  border-radius: 2px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -2199,7 +2199,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
     padding: 2rem 4rem;
     /* background-color: rgba(0, 0, 0, 0.8); */
     /* border: 1px solid rgba(255, 255, 255, 0.1); */
-    border-radius: 0;
+    border-radius: 6px;
 }
 
 .social-login-title {
@@ -2336,7 +2336,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid rgba(196, 155, 99, 0.3);
-    border-radius: 0;
+    border-radius: 6px;
     /* background-color: rgba(0, 0, 0, 0.8); */
     /* color: #fff; */
     font-size: 1rem;
@@ -2386,7 +2386,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
     width: 100%;
     padding: 1rem;
     border: none;
-    border-radius: 0;
+    border-radius: 6px;
     background-color: var(--brand-primary);
     color: #000;
     font-size: 1rem;

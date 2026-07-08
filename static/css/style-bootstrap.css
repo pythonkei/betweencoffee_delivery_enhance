@@ -196,7 +196,7 @@ label  {
 
 
 button  { 
-  border-radius: 0; }
+  border-radius: 6px; }
 
 
 button:focus  { 
@@ -3667,10 +3667,10 @@ h1, h2, h3, h4, h5,
 
 .btn  { 
   cursor: pointer;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  -ms-border-radius: 0;
-  border-radius: 0;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  border-radius: 6px;
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
   font-size: 15px; }
@@ -4173,7 +4173,7 @@ h1, h2, h3, h4, h5,
   background: transparent !important;
   /* color: rgba(255, 255, 255, 0.9) !important; */
   font-size: 14px;
-  border-radius: 0px;
+  border-radius: 6px;
   -webkit-box-shadow: none !important;
   box-shadow: none !important; }
 
@@ -4314,7 +4314,7 @@ h1, h2, h3, h4, h5,
   background: transparent; /* clear background */
   /* background-color: rgba(255, 255, 255, 0.9); */
   font-size: 14px;
-  border-radius: 0px;
+  border-radius: 6px;
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
   border: transparent !important;

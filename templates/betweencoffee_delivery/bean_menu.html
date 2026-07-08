@@ -50,7 +50,6 @@
                   <a href="{% url 'bean' bean.id %}" id="svg_over">
                     <span id="svg_over_on"><img src= {% static 'images/product_hover.svg' %} class="noise_animation"></span>
                     <canvas id="mouse_hit"></canvas>
-                    <!-- 使用详情页图片 -->
                     <img src="{{ bean.get_detail_image }}" alt="{{ bean.name }}" class="img">
                   </a>
                 </div>
@@ -61,7 +60,7 @@
                   <p style="m-4">{{ bean.description }}</p>
                   <form action="{% url 'bean' bean.id %}" method="post" class="pt-2">
                       {% csrf_token %}
-                      <a href="{% url 'bean' bean.id %}" class="btn btn-primary btn-outline-primary">詳細</a>
+                      <a href="{% url 'bean' bean.id %}" class="btn btn-primary btn-outline-primary">落單</a>
                   </form> 
                 </div>
               </div>

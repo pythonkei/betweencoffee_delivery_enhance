@@ -734,7 +734,7 @@ width: 25%;
   background: transparent;
   color: rgba(255, 255, 255, 1);
   font-size: 15px;
-  border-radius: 0px;
+  border-radius: 2px;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
@@ -743,7 +743,7 @@ width: 25%;
   height: 58px;
   background: transparent; /* clear background */
   font-size: 15px;
-  border-radius: 0px;
+  border-radius: 2px;
   -webkit-box-shadow: none;
   box-shadow: none;
   border: transparent;
