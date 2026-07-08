@@ -102,32 +102,28 @@
                     {% csrf_token %}
                     <div class="row mt-4">
                         <!-- Weight Level -->
-                        <div class="col-md-8">
+                        <div class="col-md-12">
                             <div class="form-group d-flex">
                                 <p>淨量 :</p>
-                                <div class="select-wrap">
-                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                                    <select name="weight" id="weight" class="form-control pr-5">
-                                        <option value="200g" data-price="{{ bean.price_200g|floatformat:'0' }}">200g - ${{ bean.price_200g|floatformat:"0" }}</option>
-                                        <option value="500g" data-price="{{ bean.price_500g|floatformat:'0' }}">500g - ${{ bean.price_500g|floatformat:"0" }}</option>
-                                    </select>
+                                <div class="bc-option-group" id="weight-group">
+                                    <button type="button" class="bc-option-btn active" data-value="200g" data-price="{{ bean.price_200g|floatformat:'0' }}">200g - ${{ bean.price_200g|floatformat:"0" }}</button>
+                                    <button type="button" class="bc-option-btn" data-value="500g" data-price="{{ bean.price_500g|floatformat:'0' }}">500g - ${{ bean.price_500g|floatformat:"0" }}</button>
                                 </div>
+                                <input type="hidden" name="weight" id="weight" value="200g">
                             </div>
                         </div>
 
                         <!-- Grinding Level -->
-                        <div class="col-md-8">
+                        <div class="col-md-12">
                             <div class="form-group d-flex">
                                 <p>研磨 :</p>
-                                <div class="select-wrap">
-                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                                    <select name="grinding_level" id="grinding_level" class="form-control pr-5">
-                                        <option value="Non" selected>免研磨</option>
-                                        <option value="Light">細</option>
-                                        <option value="Medium">中</option>
-                                        <option value="Deep">粗</option>
-                                    </select>
+                                <div class="bc-option-group" id="grinding-group">
+                                    <button type="button" class="bc-option-btn active" data-value="Non">免研磨</button>
+                                    <button type="button" class="bc-option-btn" data-value="Light">細</button>
+                                    <button type="button" class="bc-option-btn" data-value="Medium">中</button>
+                                    <button type="button" class="bc-option-btn" data-value="Deep">粗</button>
                                 </div>
+                                <input type="hidden" name="grinding_level" id="grinding_level" value="Non">
                             </div>
                         </div>
 
@@ -135,17 +131,17 @@
                         <div class="w-100 form-group">
 							<div class="input-group col col-md-8 d-flex mb-3">
                                 <p>數量 :</p>
-                                    <span class="input-group-btn mr-2">
-                                        <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
-                                            <i class="icon-minus"></i>
-                                        </button>
-                                    </span>
-                                    <input type="text" id="quantity" name="quantity" class="form-control input-number text-center" value="1" min="1" max="100">
-                                    <span class="input-group-btn ml-2">
-                                        <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
-                                            <i class="icon-plus"></i>
-                                        </button>
-                                    </span>
+                                <span class="input-group-btn mr-2">
+                                    <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
+                                        <i class="icon-minus"></i>
+                                    </button>
+                                </span>
+                                <input type="text" id="quantity" name="quantity" class="form-control input-number text-center" value="1" min="1" max="100" autocomplete="off">
+                                <span class="input-group-btn ml-2">
+                                    <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
+                                        <i class="icon-plus"></i>
+                                    </button>
+                                </span>
                             </div>
                         </div>
 
@@ -214,10 +210,10 @@
     document.addEventListener('DOMContentLoaded', function () {
         // 更新价格显示的函数 - 只显示单价
         function updatePriceDisplay() {
-            const weightSelect = document.getElementById('weight');
+            const weightInput = document.getElementById('weight');
             const priceElement = document.querySelector('.price');
             
-            const selectedWeight = weightSelect.value;
+            const selectedWeight = weightInput.value;
             
             // 根据重量获取价格
             let unitPrice;
@@ -231,16 +227,25 @@
             priceElement.textContent = '$' + unitPrice.toFixed(0);
         }
 
-        // 移除数量变化监听，因为价格不再随数量变化
-        document.getElementById('weight').addEventListener('change', updatePriceDisplay);
-        // 初始更新
-        updatePriceDisplay();
-        
-        // 监听重量和数量变化
-        document.getElementById('weight').addEventListener('change', updatePriceDisplay);
-        document.getElementById('quantity').addEventListener('change', updatePriceDisplay);
-        document.getElementById('quantity').addEventListener('input', updatePriceDisplay);
-        
+        // Option Button Toggle - 淨量
+        document.querySelectorAll('#weight-group .bc-option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('#weight-group .bc-option-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('weight').value = this.dataset.value;
+                updatePriceDisplay();
+            });
+        });
+
+        // Option Button Toggle - 研磨
+        document.querySelectorAll('#grinding-group .bc-option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('#grinding-group .bc-option-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('grinding_level').value = this.dataset.value;
+            });
+        });
+
         // 初始更新
         updatePriceDisplay();
 
@@ -252,7 +257,6 @@
                 let value = parseInt(input.value);
                 if (value > 1) {
                     input.value = value - 1;
-                    updatePriceDisplay(); // 更新价格显示
                 }
             });
         });
@@ -263,7 +267,6 @@
                 const input = document.getElementById('quantity');
                 let value = parseInt(input.value);
                 input.value = value + 1;
-                updatePriceDisplay(); // 更新价格显示
             });
         });
     
@@ -273,9 +276,9 @@
             const formData = new FormData(this);
             
             // 获取当前重量和数量
-            const weightSelect = document.getElementById('weight');
+            const weightInput = document.getElementById('weight');
             const quantityInput = document.getElementById('quantity');
-            const selectedWeight = weightSelect.value;
+            const selectedWeight = weightInput.value;
             const quantity = parseInt(quantityInput.value);
             
             // 根据重量计算单价

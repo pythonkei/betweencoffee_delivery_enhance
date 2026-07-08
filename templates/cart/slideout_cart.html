@@ -9,12 +9,17 @@
   <!-- 頂部標題欄 -->
   <div class="bc-cart-header">
     <span class="bc-cart-title">
-      <i class="icon-shopping-cart"></i> 購物車
+      購物車
       <span class="bc-badge bc-cart-count">0</span>
     </span>
-    <button class="bc-cart-close" aria-label="關閉購物車">
-      <span class="material-symbols-outlined" style="font-size:1.4rem;">close</span>
-    </button>
+    <div class="bc-cart-header-actions">
+      <button class="bc-cart-clear-btn" id="bc-cart-clear-btn" aria-label="清空購物車">
+        <i class="icon material-symbols-outlined">delete_sweep</i> 清空購物車
+      </button>
+      <button class="bc-cart-close" aria-label="關閉購物車">
+        <span class="material-symbols-outlined" style="font-size:1.4rem;">close</span>
+      </button>
+    </div>
   </div>
 
   <!-- 商品列表 -->

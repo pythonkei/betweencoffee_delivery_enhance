@@ -79,14 +79,12 @@
                         <div class="col-md-12">
                             <div class="form-group d-flex">
                                 <p>杯量 :</p>
-                                <div class="select-wrap">
-                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                                    <select name="cup_level" id="cup_level" class="form-control pr-5">
-                                        <option value="Small">細</option>
-                                        <option value="Medium" selected>中</option>
-                                        <option value="Large">大</option>
-                                    </select>
+                                <div class="bc-option-group" id="cup-level-group">
+                                    <button type="button" class="bc-option-btn" data-value="Small">少</button>
+                                    <button type="button" class="bc-option-btn active" data-value="Medium">正常</button>
+                                    <button type="button" class="bc-option-btn" data-value="Large">追加</button>
                                 </div>
+                                <input type="hidden" name="cup_level" id="cup_level" value="Medium">
                             </div>
                         </div>
 
@@ -94,14 +92,12 @@
                         <div class="col-md-12">
                             <div class="form-group d-flex">
                                 <p>奶量 :</p>
-                                <div class="select-wrap">
-                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                                    <select name="milk_level" id="milk_level" class="form-control pr-5">
-                                        <option value="Light">少</option>
-                                        <option value="Medium" selected>正常</option>
-                                        <option value="Extra">追加</option>
-                                    </select>
+                                <div class="bc-option-group" id="milk-level-group">
+                                    <button type="button" class="bc-option-btn" data-value="Light">少</button>
+                                    <button type="button" class="bc-option-btn active" data-value="Medium">正常</button>
+                                    <button type="button" class="bc-option-btn" data-value="Extra">追加</button>
                                 </div>
+                                <input type="hidden" name="milk_level" id="milk_level" value="Medium">
                             </div>
                         </div>
 
@@ -187,6 +183,24 @@
 <!-- Handle option -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Option Button Toggle - 杯量
+        document.querySelectorAll('#cup-level-group .bc-option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('#cup-level-group .bc-option-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('cup_level').value = this.dataset.value;
+            });
+        });
+
+        // Option Button Toggle - 奶量
+        document.querySelectorAll('#milk-level-group .bc-option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('#milk-level-group .bc-option-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('milk_level').value = this.dataset.value;
+            });
+        });
+
         // Quantity Controls
         document.querySelectorAll('.quantity-left-minus').forEach(button => {
             button.addEventListener('click', function (e) {

@@ -93,6 +93,12 @@ class SlideoutCart {
       btn.addEventListener('click', () => this.close());
     });
 
+    // 清空購物車按鈕
+    this.drawer.querySelector('#bc-cart-clear-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this._clearCart();
+    });
+
     // 點擊遮罩關閉
     this.overlay?.addEventListener('click', () => this.close());
 
@@ -101,8 +107,8 @@ class SlideoutCart {
       if (e.key === 'Escape' && this.isOpen) this.close();
     });
 
-    // 監聽自定義事件：加入購物車後刷新
-    document.addEventListener('cart:updated', () => this.refreshAndOpen());
+    // 監聽自定義事件：加入購物車後刷新（不自動打開面板）
+    document.addEventListener('cart:updated', () => this._loadItems());
 
     // 滾動監聽：導覽列購物車不可見時顯示浮動按鈕
     this._initFloatingCartScrollListener();
@@ -232,6 +238,31 @@ class SlideoutCart {
       }
     } catch (err) {
       console.error('移除商品失敗:', err);
+    }
+  }
+
+  /**
+   * 清空購物車
+   */
+  async _clearCart() {
+    try {
+      const response = await fetch('/cart/clear/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': this.csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      if (response.ok || response.redirected) {
+        this._loadItems();
+        this._updateBadge(0);
+        // 如果在結帳頁（order/confirm），重新載入頁面以更新右側商品列表
+        if (window.location.pathname.includes('/eshop/order/confirm/')) {
+          window.location.reload();
+        }
+      }
+    } catch (err) {
+      console.error('清空購物車失敗:', err);
     }
   }
 

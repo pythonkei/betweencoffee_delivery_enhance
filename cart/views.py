@@ -177,10 +177,14 @@ def clear_cart(request):
     try:
         cart = Cart(request)
         cart.clear()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': '購物車已清空'})
         messages.success(request, "購物車已清空")
         return redirect('cart:cart_detail')
     except Exception as e:
         logger.error(f"清空購物車錯誤: {str(e)}")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': '清空購物車時發生錯誤'}, status=500)
         messages.error(request, "清空購物車時發生錯誤")
         return redirect('cart:cart_detail')
 
