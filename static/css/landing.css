@@ -110,6 +110,7 @@
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
+  background-color: rgba(18,18,18,1);
 }
 
 
@@ -117,9 +118,8 @@
 .feed::before, .feed::after {
   display: block;
   width: 100%;
-  /*background-color: ##121213; */
+  background-color: rgba(18,18,18,1);
   background-image: url(../images/bg_4.jpg);
-  /* background-color:transparent; */
   content: "";
 }
 
@@ -137,20 +137,38 @@
 
 .feed__layer-parts {
   top: 0;
-  width: 2428px;
-  height: 568px;
+  width: 2430px;
+  height: 570px;
   flex-shrink: 0;
-  background-color: rgba(18,18,18,1);
-  /* background:transparent; */
-  content: ""
+  background: rgba(18,18,18,1) none !important;
+  content: "";
   -webkit-clip-path: url(#mask);
           clip-path: url(#mask);
   animation: feedScroll 60s infinite linear 0.5s both;
+  /* 防止 clip-path 邊緣漏光 */
+  position: relative;
+  z-index: 2;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
+
+
+
+
+
+
+
 .feed__mask {
-  height: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
+
+
 
 .feed__mask_middle {
   height: 0;
@@ -229,7 +247,7 @@
     height: 140px;
   }
   .feed__layer-parts {
-    width: 1702px;
+    width: 1704px;
     height: 400px;
   }
   .feed__triangle {
@@ -242,8 +260,8 @@
     height: 160px;
   }
   .feed__layer-parts {
-    width: 1020.6px;
-    height: 239.4px;
+    width: 1022px;
+    height: 240px;
   }
   .feed__triangle {
     width: 340px;

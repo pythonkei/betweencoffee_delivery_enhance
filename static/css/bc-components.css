@@ -1335,3 +1335,181 @@
   font-size: 1rem;
 }
 
+
+/* ============================================================
+   order_payment_confirmation.html 專用樣式
+   ============================================================ */
+
+/* ---- 半透明卡片容器 ---- */
+.payment-confirm-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ---- 倒計時文字 ---- */
+.payment-countdown-text {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.payment-countdown-icon {
+  color: #c49b63;
+  margin-right: 6px;
+}
+.payment-countdown-time {
+  color: #c49b63;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* ---- 按鈕行間距 ---- */
+.payment-btn-group {
+  gap: 6px;
+}
+
+/* ---- 繼續支付按鈕 ---- */
+.bc-btn-continue-payment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #c49b63;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.bc-btn-continue-payment:hover {
+  background: #d4ab73;
+  color: #ffffff;
+}
+.bc-btn-continue-payment i {
+  font-size: 0.75rem;
+}
+
+/* ---- 取消支付按鈕 ---- */
+.bc-btn-cancel-payment {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.bc-btn-cancel-payment:hover {
+  border-color: rgba(220,53,69,0.5);
+  color: #dc3545;
+}
+.bc-btn-cancel-payment i {
+  font-size: 0.7rem;
+}
+
+/* ---- 客服提示文字 ---- */
+.payment-support-text {
+  color: rgba(255,255,255,0.7);
+  font-size: 1.0rem;
+  line-height: 1.6;
+}
+.payment-support-order-id {
+  color: #c49b63;
+  font-size: 1.0rem;
+  font-weight: 700;
+}
+
+/* ---- 待確認付款提示 ---- */
+.payment-pending-icon {
+  color: #c49b63;
+  font-size: 2rem;
+}
+.payment-pending-message {
+  color: rgba(255,255,255,0.8);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+.payment-pending-order-id {
+  color: #c49b63;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* ---- 積分獎勵條 ---- */
+.bc-points-bar {
+  background-color: #c49b63;
+  width: 100%;
+  border-radius: 50px;
+  height: 50px;
+}
+.bc-points-star {
+  font-size: 1.5rem;
+}
+.bc-points-label {
+  font-size: 1.1rem;
+}
+.bc-points-number {
+  font-size: 1.3rem;
+}
+
+/* ---- 商品圖片容器 ---- */
+.bc-product-img-box {
+  width: 98px;
+  height: 98px;
+}
+.bc-product-img {
+  max-height: 110px;
+}
+
+/* ---- 折扣小計文字 ---- */
+.bc-summary-label {
+  color: rgba(255,255,255,0.7);
+  font-size: 1.05rem;
+}
+.bc-summary-value {
+  color: rgba(255,255,255,0.9);
+  font-size: 1.05rem;
+}
+.bc-summary-icon-gold {
+  color: #c49b63;
+}
+.bc-summary-discount {
+  color: #28a745;
+  font-size: 1.05rem;
+}
+
+/* ---- 合計行 ---- */
+.bc-summary-total {
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+.bc-summary-total-label {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+.bc-summary-total-value {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+/* ---- 二維碼圖片 ---- */
+.bc-qr-img {
+  max-width: 250px;
+  height: auto;
+}
+
