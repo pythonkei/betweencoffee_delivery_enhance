@@ -80,12 +80,14 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: Sprint 1-4 URL/視圖審查 P1修復（2026-07-06）"
+        echo "├── 最新改動: 咖啡及咖啡豆詳情頁 UI 優化（2026-07-09）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
         echo "├── 已知問題: 文件過大、支付確認邏輯重複、測試覆蓋率低"
-        echo "├── 優先任務: 購物車圖標、商品分類、一頁式結帳、WebSocket 優化"
+        echo "├── 優先任務: 購物車圖標、商品分類、一頁式結帳、Supabase 遷移"
+        echo "├── 資料庫建議: 遷移至 Supabase PostgreSQL（提升獨立性與管理便利性）"
         echo "└── 大小: ${FILE_SIZE_KB} KB"
+
         
         return 0
     else
