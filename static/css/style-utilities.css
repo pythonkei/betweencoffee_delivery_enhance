@@ -906,7 +906,29 @@ button.alert:hover {
   z-index: -2;
   max-width: 100%;
   justify-content: flex-start;
-  opacity: .05;
+  opacity: .045;
+  font-family: 'Mogra';
+  letter-spacing: -10px;
+}
+
+.title-bg-head-v2 {
+  bottom: auto;
+  color: #fff;
+  font-size: 20vw;
+  font-weight: 700;
+  height: auto;
+  left: -8vw;
+  line-height: 1.2;
+  margin: 0 0 0 0;
+  position: absolute;
+  right: auto;
+  text-align: left;
+  top: -30px;
+  width: auto;
+  z-index: -2;
+  max-width: 100%;
+  justify-content: flex-start;
+  opacity: .03;
   font-family: 'Mogra';
   letter-spacing: -10px;
 }

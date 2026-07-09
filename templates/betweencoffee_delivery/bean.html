@@ -145,10 +145,15 @@
                             </div>
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="col-md-12 mt-4 d-flex button-d-flex">
-                            <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3">加入購物車</button>
-                            <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></p></span>
+                        <!-- Submit Buttons -->
+                        <div class="col-md-12 mt-4">
+                            <div class="d-flex button-d-flex justify-content-between px-2" style="width: 100%; align-items: stretch !important;">
+                                <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3" >立即購買</button>
+                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3" style="width: calc(50% - 16px) !important;white-space: nowrap;">加入購物車</button>
+                            </div>
+                            <div class="text-center mt-3">
+                                <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></span>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -323,6 +328,41 @@
             })
             .catch(error => {
                 console.error('Error:', error);
+            });
+        });
+
+        // Handle Buy Now Button - 立即購買
+        document.getElementById('buy-now-btn').addEventListener('click', function (e) {
+            e.preventDefault();
+            const form = document.getElementById('add-to-cart-form');
+            const formData = new FormData(form);
+            const addToCartUrl = "{% url 'cart:add_to_cart' bean.id 'bean' %}";
+
+            fetch(addToCartUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应不正常: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // 加入購物車成功後直接跳轉到結帳頁
+                    window.location.href = "{% url 'eshop:order_confirm' %}";
+                } else {
+                    alert('加入購物車失敗: ' + (data.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('请求错误:', error);
+                alert('网络错误: ' + error.message);
             });
         });
     });
