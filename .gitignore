@@ -100,6 +100,11 @@ logs/
 .ruff_cache/
 __pycache__/
 
+# Django development server cache
+localhost:8081/
+betweencoffee_delivery/localhost:8081/
+staticfiles/
+
 # Node.js
 node_modules/
 npm-debug.log*
