@@ -1054,7 +1054,7 @@
 
 .bc-option-btn {
   flex: 1;
-  padding: 7px 5px;
+  padding: 6px 2px;
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 500;
@@ -1069,6 +1069,12 @@
   outline: none;
   box-shadow: none;
 }
+
+
+
+
+
+
 
 .bc-option-btn:focus,
 .bc-option-btn:focus-visible {
@@ -1111,10 +1117,11 @@
   color: #fff;
 }
 
-.input-number {
-  height: 34px;
-  width: 7px;
-  padding: 0;
+.product-details .input-number {
+  width: 80px !important;
+
+  flex: none !important;
+  padding: 0 !important;
   font-size: 0.85rem;
   text-align: center;
   background: transparent;
@@ -1123,3 +1130,208 @@
   color: var(--bc-text);
   outline: none;
 }
+
+/* ===== 商品詳情頁文字顏色 #adadad ===== */
+.product-details .block-23 p.pb-2 {
+  color: #adadad;
+  font-size: 1.1rem;
+}
+
+
+.product-details .block-23 ul li span.text {
+  color: #adadad;
+  font-size: 1rem;
+}
+
+
+
+.product-details .block-23 ul li .icon {
+  font-size: 24px;
+  width: 32px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== 積分兌換區域 ===== */
+.bc-section-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+.bc-section-icon {
+  color: var(--bc-gold);
+}
+
+.reward-item-left {
+  min-width: 0;
+  flex: 1;
+}
+
+.reward-name-wrap {
+  min-width: 0;
+}
+
+.reward-list {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.reward-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.reward-item:last-child {
+  border-bottom: none;
+}
+
+.reward-checkbox-wrapper {
+  flex-shrink: 0;
+}
+
+.reward-checkbox-input {
+  display: none;
+}
+
+.reward-checkbox-label {
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+.reward-checkbox-label .fa-check {
+  color: #fff;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.reward-checkbox-input:checked + .reward-checkbox-label {
+  border-color: var(--bc-gold);
+  background-color: var(--bc-gold);
+}
+.reward-checkbox-input:checked + .reward-checkbox-label .fa-check {
+  opacity: 1;
+}
+
+.reward-name {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.reward-points {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+.reward-points .fa-star {
+  color: var(--bc-gold);
+  font-size: 0.7rem;
+}
+
+.reward-info-text {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+/* ===== 支付方式區域 ===== */
+.payment-section-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+.payment-section-icon {
+  color: var(--bc-gold);
+}
+
+.payment-list-simple {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.payment-item-simple input[type="radio"] {
+  display: none;
+}
+
+.payment-label-simple {
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.2s ease;
+}
+.payment-item-simple:last-child .payment-label-simple {
+  border-bottom: none;
+}
+
+.payment-radio-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.payment-radio-circle.active {
+  border-color: #c49b63;
+}
+.payment-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+.payment-radio-dot.active {
+  background: #c49b63;
+}
+
+.payment-label-simple.active {
+  background: rgba(196, 155, 99, 0.08);
+}
+
+.payment-label-text {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.payment-label-icon {
+  color: var(--bc-gold);
+  margin-right: 6px;
+}
+
+
+/* ===== 積分折扣顯示 ===== */
+.reward-discount-container {
+  visibility: hidden;
+  min-height: 1.5rem;
+}
+.reward-discount-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+}
+.reward-discount-amount {
+  color: #28a745;
+  font-weight: 700;
+  font-size: 1rem;
+}
+

@@ -296,20 +296,22 @@
 
 .block-21 .blog-img  { 
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   object-fit: cover;
-  flex: 0 0 100px;
+  flex: 0 0 90px;
    }
+
 
 .block-21 .meta strong  { 
   color: #eee;
   font-weight: 500; }
 
 .block-21 .text  { 
-  width: calc(100% - 100px);
+  width: calc(100% - 90px);
   padding-left: 18px;
 }
+
 
   .block-21 .text .heading  { 
     font-size: 16px;
@@ -324,7 +326,6 @@
         color: var(--brand-primary); }
 
   .block-21 .text .meta > div  { 
-    display: inline-block;
     font-size: 15px;
     margin-right: 16px; }
 
@@ -1846,5 +1847,27 @@ ul.entry-btns li a .entry-btn .arrow img  {
   left: auto;
   margin: 0 0 0 0;
   padding: 0px;
+}
+
+/* ===== 訂單確認頁面 ===== */
+/* 商品選項不換行，避免「免研磨」等較長文字折行 */
+.meta.pb-2.d-flex {
+  gap: 8px !important;
+}
+.meta.pb-2.d-flex > div {
+  white-space: nowrap;
+}
+
+/* 訂單確認頁面商品圖片 */
+.bc-order-img {
+  width: 72px;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+@media (max-width: 768px) {
+  .bc-order-img {
+    width: 54px;
+  }
 }
 

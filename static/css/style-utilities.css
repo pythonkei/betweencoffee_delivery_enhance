@@ -1455,7 +1455,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   border: 2px solid var(--brand-primary);
   color: white;
   padding: 0.8rem 2.5rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 1px;
