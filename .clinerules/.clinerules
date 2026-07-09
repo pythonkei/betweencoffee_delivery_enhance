@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月9日（更新：Supabase 資料庫遷移建議）
+> **最後更新**: 2026年7月10日（更新：order_payment_confirmation.html inline styles 遷移至 CSS classes）
 
 
 ## 開發者背景與方法論
