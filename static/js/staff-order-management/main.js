@@ -151,7 +151,18 @@ class OrderManagementSystem {
     async initCoreComponents() {
         // ====== 按正確順序初始化組件 ======
         const initOrder = [
-            // 第一步：徽章管理器（依賴統一數據管理器）
+            // 第一步：子標籤頁管理器（無依賴，優先初始化）
+            { 
+                name: 'subtabManager', 
+                Class: window.SubtabManager, 
+                required: true,
+                onInit: (instance) => {
+                    instance.init();
+                    console.log('✅ SubtabManager 已初始化，自定義子 tab 切換已啟用');
+                }
+            },
+            
+            // 第二步：徽章管理器（依賴統一數據管理器）
             { 
                 name: 'badgeManager', 
                 Class: window.BadgeManager, 
@@ -161,7 +172,7 @@ class OrderManagementSystem {
                 }
             },
             
-            // 第二步：隊列管理器（依賴統一數據管理器）
+            // 第三步：隊列管理器（依賴統一數據管理器）
             { 
                 name: 'queueManager', 
                 Class: window.QueueManager, 
@@ -171,7 +182,7 @@ class OrderManagementSystem {
                 }
             },
             
-            // 第三步：OrderManager（全局管理器）
+            // 第四步：OrderManager（全局管理器）
             { 
                 name: 'orderManager', 
                 Class: window.OrderManager, 
@@ -181,7 +192,7 @@ class OrderManagementSystem {
                 }
             },
             
-            // 第四步：WebSocket管理器
+            // 第五步：WebSocket管理器
             { 
                 name: 'webSocketManager', 
                 Class: window.WebSocketManager, 

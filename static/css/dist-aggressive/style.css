@@ -3059,10 +3059,10 @@ h1, h2, h3, h4, h5,
   z-index: 3;
   border-bottom: 1px solid rgba(255, 255, 255, 0.0); }
 
-  /* orginal ver @media (max-width: 991.98px) */
+  /* Mobile: dark background to match dark theme */
   @media (max-width: 991.98px)  { 
     .ftco-navbar-light  { 
-      background-color: rgba(255, 255, 255, 0.9) !important;
+      background-color: #0e0e0e !important;
       /* position: relative; */ /* narbar fix */
       top: 0; }
 }

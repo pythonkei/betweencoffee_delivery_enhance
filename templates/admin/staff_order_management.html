@@ -10,35 +10,32 @@
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col col-lg-12 mb-5">
-                <h1 class="mb-5">📋 店鋪訂單製作</h1>
+                <h1 class="mb-5">店鋪訂單製作</h1>
 
-                <!-- 渲染器標籤頁導覽 -->
-                <ul class="nav nav-tabs mb-4 pt-4" id="orderTabs" role="tablist">
+                <!-- 渲染器標籤頁導覽（不使用 Bootstrap data-toggle，改用自定義 JS 切換） -->
+                <ul class="staff-nav-tabs mb-4 pt-4" id="orderTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="queue-tab" data-toggle="tab" href="#queue" role="tab" aria-controls="queue" aria-selected="true">
+                        <a class="nav-link active" id="queue-tab" href="#queue" role="tab" aria-controls="queue" aria-selected="true">
                             <i class="fas fa-list-ol mr-2"></i>製作隊列
-                            <span class="badge ml-2" id="queue-badge">0</span>
+                            <span class="staff-badge has-items ml-2" id="queue-badge">0</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="preparing-tab" data-toggle="tab" href="#preparing" role="tab" aria-controls="preparing" aria-selected="false">
+                        <a class="nav-link" id="preparing-tab" href="#preparing" role="tab" aria-controls="preparing" aria-selected="false">
                             <i class="fas fa-clock mr-2"></i>製作中
-                            <!-- 修改ID -->
-                            <span class="badge ml-2" id="preparing-orders-badge">0</span>
+                            <span class="staff-badge has-items ml-2" id="preparing-orders-badge">0</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="ready-tab" data-toggle="tab" href="#ready" role="tab" aria-controls="ready" aria-selected="false">
+                        <a class="nav-link" id="ready-tab" href="#ready" role="tab" aria-controls="ready" aria-selected="false">
                             <i class="fas fa-mug-hot mr-2"></i>已就緒
-                            <!-- 修改ID -->
-                            <span class="badge badge-success ml-2" id="ready-orders-badge">0</span>
+                            <span class="staff-badge has-items ml-2" id="ready-orders-badge">0</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab" aria-controls="completed" aria-selected="false">
+                        <a class="nav-link" id="completed-tab" href="#completed" role="tab" aria-controls="completed" aria-selected="false">
                             <i class="fas fa-check-double mr-2"></i>已提取
-                            <!-- 修改ID -->
-                            <span class="badge badge-info ml-2" id="completed-orders-badge">0</span>
+                            <span class="staff-badge has-items ml-2" id="completed-orders-badge">0</span>
                         </a>
                     </li>
                 </ul>
@@ -49,18 +46,18 @@
                     <div class="tab-pane fade show active" id="queue" role="tabpanel" aria-labelledby="queue-tab">
                         <div class="order-section" data-status="queue">
                             
-                            <!-- 子標籤頁導航 -->
-                            <ul class="nav nav-tabs mb-4" id="queueSubTabs" role="tablist">
+                            <!-- 子標籤頁導航（不使用 Bootstrap data-toggle，改用自定義 JS 切換） -->
+                            <ul class="staff-subnav-tabs mb-4" id="queueSubTabs" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <a class="nav-link active" id="waiting-tab" data-toggle="tab" href="#waiting" role="tab" aria-controls="waiting" aria-selected="true">
-                                        <i class="fas fa-list-ol mr-2"></i>等待中
-                                        <span class="badge badge-warning ml-2" id="waiting-badge">0</span>
+                                    <a class="nav-link active" id="waiting-tab" href="#waiting" role="tab" aria-controls="waiting" aria-selected="true">
+                                        等待中
+                                        <span class="staff-badge has-items ml-2" id="waiting-badge">0</span>
                                     </a>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <a class="nav-link" id="payment-pending-tab" data-toggle="tab" href="#payment-pending" role="tab" aria-controls="payment-pending" aria-selected="false">
-                                        <i class="fas fa-clock mr-2"></i>待確認付款
-                                        <span class="badge badge-danger ml-2" id="payment-pending-badge">0</span>
+                                    <a class="nav-link" id="payment-pending-tab" href="#payment-pending" role="tab" aria-controls="payment-pending" aria-selected="false">
+                                        待確認付款
+                                        <span class="staff-badge has-items ml-2" id="payment-pending-badge">0</span>
                                     </a>
                                 </li>
                             </ul>
@@ -124,18 +121,18 @@
                     <div class="tab-pane fade" id="preparing" role="tabpanel" aria-labelledby="preparing-tab">
                         <div class="order-section" data-status="preparing">
                             
-                            <!-- 子標籤頁導航 -->
-                            <ul class="nav nav-tabs mb-4" id="preparingSubTabs" role="tablist">
+                            <!-- 子標籤頁導航（不使用 Bootstrap data-toggle，改用自定義 JS 切換） -->
+                            <ul class="staff-subnav-tabs mb-4" id="preparingSubTabs" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <a class="nav-link active" id="countdown-active-tab" data-toggle="tab" href="#countdown-active" role="tab" aria-controls="countdown-active" aria-selected="true">
-                                        <i class="fas fa-hourglass-half mr-2"></i>進行中
-                                        <span class="badge badge-red-active ml-2" id="countdown-active-badge">0</span>
+                                    <a class="nav-link active" id="countdown-active-tab" href="#countdown-active" role="tab" aria-controls="countdown-active" aria-selected="true">
+                                        進行中
+                                        <span class="staff-badge has-items ml-2" id="countdown-active-badge">0</span>
                                     </a>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <a class="nav-link" id="countdown-completed-tab" data-toggle="tab" href="#countdown-completed" role="tab" aria-controls="countdown-completed" aria-selected="false">
-                                        <i class="fas fa-hourglass-end mr-2"></i>已完成
-                                        <span class="badge badge-red-completed ml-2" id="countdown-completed-badge">0</span>
+                                    <a class="nav-link" id="countdown-completed-tab" href="#countdown-completed" role="tab" aria-controls="countdown-completed" aria-selected="false">
+                                        已完成
+                                        <span class="staff-badge has-items ml-2" id="countdown-completed-badge">0</span>
                                     </a>
                                 </li>
                             </ul>
@@ -318,7 +315,10 @@
 <!-- 1. 共用工具模块（基础工具） -->
 <script src="{% static 'js/staff-order-management/common-utils.js' %}"></script>
 
-<!-- 2. 统一数据管理器（核心） -->
+<!-- 2. 子標籤頁管理器（自定義 tab 切換，解決 Bootstrap 嵌套 tab 問題） -->
+<script src="{% static 'js/staff-order-management/subtab-manager.js' %}"></script>
+
+<!-- 3. 统一数据管理器（核心） -->
 <script src="{% static 'js/staff-order-management/unified-data-manager.js' %}"></script>
 
 <!-- 3. 徽章管理器（依赖统一数据） -->

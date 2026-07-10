@@ -15,13 +15,13 @@ class BadgeManager {
             'completed': 'completed-orders-badge'
         };
         
-        // 徽章樣式映射（靜態，不變）
+        // 徽章樣式映射（靜態，不變）- 使用 staff-badge 統一風格
         this.badgeStyleMap = {
-            'payment_pending': 'badge-danger',
-            'waiting': 'badge-warning',
-            'preparing': 'badge-primary',
-            'ready': 'badge-success',
-            'completed': 'badge-info'
+            'payment_pending': 'staff-badge',
+            'waiting': 'staff-badge',
+            'preparing': 'staff-badge',
+            'ready': 'staff-badge',
+            'completed': 'staff-badge'
         };
         
         // 徽章標籤映射
@@ -133,34 +133,22 @@ class BadgeManager {
         // 移除所有動畫類
         element.classList.remove('badge-updated', 'badge-pulse', 'badge-blink');
         
-        // 添加或更新靜態樣式類
-        const styleClass = this.badgeStyleMap[badgeType];
-        if (styleClass) {
-            // 移除所有樣式類
-            ['badge-warning', 'badge-primary', 'badge-success', 'badge-info', 
-             'badge-secondary', 'badge-light', 'badge-dark'].forEach(cls => {
-                element.classList.remove(cls);
-            });
-            
-            // 根據數量決定最終樣式
-            if (formattedCount > 0) {
-                // 有訂單：使用原始樣式
-                element.classList.add(styleClass);
-                element.classList.add('has-items');
-                element.style.backgroundColor = ''; // 重置內聯樣式
-                element.style.color = ''; // 重置內聯樣式
-            } else {
-                // 無訂單：使用淡色樣式，但仍然可見
-                const lightStyleClass = this.getLightStyleClass(badgeType);
-                element.classList.add(lightStyleClass);
-                element.classList.remove('has-items');
-                element.classList.add('no-items');
-                
-                // 添加淡色內聯樣式（無邊框，保持與有訂單狀態一致）
-                element.style.backgroundColor = this.getLightBackground(badgeType);
-                element.style.color = this.getLightTextColor(badgeType);
-                element.style.border = 'none';
-            }
+        // 使用 staff-badge 統一風格
+        element.classList.add('staff-badge');
+        
+        // 根據數量決定 has-items / no-items
+        if (formattedCount > 0) {
+            element.classList.add('has-items');
+            element.classList.remove('no-items');
+            element.style.backgroundColor = ''; // 重置內聯樣式
+            element.style.color = ''; // 重置內聯樣式
+            element.style.border = ''; // 重置內聯樣式
+        } else {
+            element.classList.remove('has-items');
+            element.classList.add('no-items');
+            element.style.backgroundColor = ''; // 重置內聯樣式
+            element.style.color = ''; // 重置內聯樣式
+            element.style.border = ''; // 重置內聯樣式
         }
         
         // 添加懸浮提示（始終顯示）
@@ -311,26 +299,112 @@ class BadgeManager {
     }
     
     /**
-     * 處理徽章點擊事件
+     * 處理徽章點擊事件（修正：使用 SubtabManager 切換所有 tab，解決 Bootstrap 嵌套 tab 問題）
      */
     handleBadgeClick(badgeId) {
         console.log(`🔄 徽章點擊: ${badgeId}`);
         
-        // 徽章到標籤頁的映射
+        // 徽章到標籤頁的映射（包含子標籤頁）
         const tabMap = {
+            'payment-pending-badge': 'payment-pending-tab',
             'queue-badge': 'queue-tab',
+            'waiting-badge': 'waiting-tab',
             'preparing-orders-badge': 'preparing-tab',
             'ready-orders-badge': 'ready-tab',
             'completed-orders-badge': 'completed-tab'
         };
         
         const tabId = tabMap[badgeId];
-        if (tabId) {
-            const tabElement = document.getElementById(tabId);
-            if (tabElement) {
-                console.log(`🔄 切換到標籤頁: ${tabId}`);
-                // 使用Bootstrap方法切換
-                $(tabElement).tab('show');
+        if (!tabId) {
+            console.warn(`⚠️ 未找到徽章 ${badgeId} 對應的標籤頁`);
+            return;
+        }
+        
+        const tabElement = document.getElementById(tabId);
+        if (!tabElement) {
+            console.warn(`⚠️ 標籤頁元素 #${tabId} 未找到`);
+            return;
+        }
+        
+        console.log(`🔄 切換到標籤頁: ${tabId}`);
+        
+        // 獲取 SubtabManager 實例
+        const subtabManager = this._getSubtabManager();
+        
+        // 判斷是否為子標籤頁（需要先切換父標籤頁）
+        const parentTabMap = {
+            'payment-pending-tab': 'queue-tab',
+            'waiting-tab': 'queue-tab',
+            'countdown-active-tab': 'preparing-tab',
+            'countdown-completed-tab': 'preparing-tab'
+        };
+        
+        const parentTabId = parentTabMap[tabId];
+        
+        // 如果是子標籤頁，先確保父標籤頁已激活
+        if (parentTabId) {
+            const parentTabElement = document.getElementById(parentTabId);
+            if (parentTabElement) {
+                const parentLi = parentTabElement.closest('.nav-item');
+                if (parentLi && !parentLi.classList.contains('active')) {
+                    console.log(`🔄 先切換到父標籤頁: ${parentTabId}`);
+                    
+                    // 使用 SubtabManager 切換主 tab
+                    if (subtabManager && typeof subtabManager.switchToMainTabById === 'function') {
+                        subtabManager.switchToMainTabById(parentTabId);
+                        // 切換主 tab 後，再切換子 tab
+                        setTimeout(() => {
+                            this._switchSubtab(tabId, subtabManager);
+                        }, 50);
+                    } else {
+                        // 降級：直接點擊
+                        parentTabElement.click();
+                        setTimeout(() => {
+                            this._switchSubtab(tabId, subtabManager);
+                        }, 50);
+                    }
+                    return;
+                }
+            }
+        }
+        
+        // 如果是子標籤頁且父標籤頁已激活，使用 SubtabManager 切換
+        if (parentTabId) {
+            this._switchSubtab(tabId, subtabManager);
+        } else {
+            // 主標籤頁，使用 SubtabManager 切換
+            if (subtabManager && typeof subtabManager.switchToMainTabById === 'function') {
+                console.log(`🔄 使用 SubtabManager 切換主 tab: ${tabId}`);
+                subtabManager.switchToMainTabById(tabId);
+            } else {
+                // 降級方案：直接點擊
+                console.log(`🔄 使用降級方案切換主 tab: ${tabId}`);
+                tabElement.click();
+            }
+        }
+    }
+    
+    /**
+     * 獲取 SubtabManager 實例
+     */
+    _getSubtabManager() {
+        return (window.orderManagementSystem && window.orderManagementSystem.components && window.orderManagementSystem.components.subtabManager)
+            || window.subtabManagerInstance;
+    }
+    
+    /**
+     * 使用 SubtabManager 切換子標籤頁
+     */
+    _switchSubtab(tabId, subtabManager) {
+        if (subtabManager && typeof subtabManager.switchToTabById === 'function') {
+            console.log(`🔄 使用 SubtabManager 切換子標籤頁: ${tabId}`);
+            subtabManager.switchToTabById(tabId);
+        } else {
+            // 降級方案：直接操作 DOM
+            console.log(`🔄 使用降級方案切換子標籤頁: ${tabId}`);
+            const tab = document.getElementById(tabId);
+            if (tab) {
+                tab.click();
             }
         }
     }

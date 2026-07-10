@@ -13,21 +13,21 @@
 
 /* 合并的已支付和制作中样式 */
 .badge-warning {
-    background-color: transparent;
-    color: #d0a00f;
-    border: 1px solid #d0a00f;
+    background-color: transparent !important;
+    color: #d0a00f !important;
+    border: 1px solid #d0a00f !important;
 }
 
 /* 已就绪样式 */
 .badge-success {
-    background-color: #28a745;
-    color: white;
+    background-color: #28a745 !important;
+    color: white !important;
 }
 
 /* 取消/超时样式 */
 .badge-danger {
-    background-color: #dc3545;
-    color: white;
+    background-color: #dc3545 !important;
+    color: white !important;
 }
 
 /* 基於訂單類型的左側邊框顏色 */
@@ -425,7 +425,7 @@
 
     border-radius: 8px;
     letter-spacing: 0.5px;
-    box-shadow: 0 2px 4px rgba(0, 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -456,75 +456,151 @@
 }
 
 
-/* 标签页样式 - 修復 */
-.nav-tabs {
-    border-bottom: 2px solid #454545;
+/* ==================== 主標籤頁樣式（員工專用） ==================== */
+/* 使用 staff-nav-tabs 避免與 Bootstrap 預設 nav-tabs 衝突 */
+.staff-nav-tabs {
+    display: flex;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.08);
     margin-bottom: 1.5rem;
+    gap: 0;
+    list-style: none;
+    padding: 0;
 }
 
-.nav-tabs .nav-link {
+.staff-nav-tabs .nav-link {
     border: none;
-    border-bottom: 3px solid transparent;
-    color: #777;
+    border-bottom: 2px solid transparent;
+    color: rgba(255, 255, 255, 0.45);
     font-weight: 600;
-    padding: 1.2rem 1.8rem;
-    position: relative;
-    transition: all 0.3s ease;
-    margin-bottom: -2px;
-    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+    background: transparent;
+    white-space: nowrap;
+    margin-bottom: 0;
+    transform: translateY(2px);
 }
 
-.nav-tabs .nav-link:hover {
-    border-bottom: 3px solid rgba(255, 255, 255, 0.4);
-    color: #aaa;
-    background-color: rgba(0, 0, 0, 0.03);
+.staff-nav-tabs .nav-link:hover {
+    border-bottom-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
 }
 
-.nav-tabs .nav-link.active {
-    background-color: transparent;
+.staff-nav-tabs .nav-link.active {
+    background: transparent;
     border: none;
-    border-bottom: 3px solid #fff;
-    color: #fff;
+    border-bottom: 2px solid var(--brand-primary, #c49b63);
+    color: #ffffff;
     font-weight: 700;
-    font-size: 1.1rem;
 }
 
-.nav-tabs .nav-link .badge {
-    font-size: 0.85em;
-    padding: 0.4em 0.7em;
+.staff-nav-tabs .nav-link i {
+    font-size: 1.1em;
+    margin-right: 0.4rem;
 }
 
-/* 加大图标 */
-.nav-tabs .nav-link i {
-    font-size: 1.2em;
-    margin-right: 0.5rem;
+/* 主標籤頁徽章 - 統一使用 staff-badge */
+.staff-nav-tabs .nav-link .staff-badge {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.8em;
+    font-weight: 600;
+    border-radius: 4px;
+    min-width: 1.6em;
+    text-align: center;
+    line-height: 1.4;
+    margin-left: 0.4rem;
+    vertical-align: middle;
 }
 
+.staff-nav-tabs .nav-link .staff-badge.has-items {
+    background-color: var(--brand-primary, #c49b63);
+    color: #ffffff;
+}
+
+.staff-nav-tabs .nav-link .staff-badge.no-items {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== 子標籤頁樣式（員工專用） ==================== */
+.staff-subnav-tabs {
+    display: inline-flex;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    padding: 0.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    list-style: none;
+}
+
+.staff-subnav-tabs .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+}
+
+.staff-subnav-tabs .nav-link::before {
+    content: '○';
+    font-size: 0.55rem;
+    color: rgba(255, 255, 255, 0.25);
+    line-height: 1;
+}
+
+.staff-subnav-tabs .nav-link:hover {
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.staff-subnav-tabs .nav-link.active {
+    color: #ffffff;
+    background: rgba(196, 155, 99, 0.12);
+}
+
+.staff-subnav-tabs .nav-link.active::before {
+    content: '●';
+    color: var(--brand-primary, #c49b63);
+}
+
+/* 子標籤頁徽章 */
+.staff-subnav-tabs .nav-link .staff-badge {
+    display: inline-block;
+    padding: 0.2em 0.5em;
+    font-size: 0.75em;
+    font-weight: 600;
+    border-radius: 4px;
+    min-width: 1.4em;
+    text-align: center;
+    line-height: 1.3;
+    margin-left: 0.2rem;
+    vertical-align: middle;
+}
+
+.staff-subnav-tabs .nav-link .staff-badge.has-items {
+    background-color: var(--brand-primary, #c49b63);
+    color: #ffffff;
+}
+
+.staff-subnav-tabs .nav-link .staff-badge.no-items {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== 通用 tab-content ==================== */
 .tab-content {
     min-height: 400px;
 }
 
 .tab-pane {
     /* 移除 fadeIn 動畫，避免大量 DOM 操作時渲染中斷 */
-}
-
-/* 标签页徽章颜色 */
-#queue-tab .badge {
-    background-color: #ffc107 !important;
-    color: #212529;
-}
-
-#preparing-tab .badge {
-    background-color: #cb400e !important;
-    color: #fff;
-}
-
-#ready-tab .badge {
-    background-color: #28a745 !important;
-}
-
-#completed-tab .badge {
-    background-color: #17a2b8 !important;
 }
 
 /* 修复Bootstrap 4的间距类 */

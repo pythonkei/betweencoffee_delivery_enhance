@@ -1647,7 +1647,7 @@ input[type="button"].btn-block  {
   -webkit-box-direction: normal;
   -ms-flex-direction: column;
   flex-direction: column;
-  padding-left: 0;
+  /* padding-left: 0; */
   margin-bottom: 0;
   list-style: none; }
 
@@ -3164,8 +3164,7 @@ h1, h2, h3, h4, h5,
   /* orginal ver @media (max-width: 991.98px) */
   @media (max-width: 991.98px)  { 
     .ftco-navbar-light  { 
-      /* background-color: rgba(255, 255, 255, 0.9) !important; */
-      /* position: relative; */ /* narbar fix */
+      background: #0e0e0e !important;
       top: 0; }
 }
 

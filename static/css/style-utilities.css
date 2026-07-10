@@ -1481,7 +1481,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-radius: 2px;
+  border-radius: 4px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
