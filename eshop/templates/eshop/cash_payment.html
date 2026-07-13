@@ -18,7 +18,7 @@
                         <!-- 訂單資訊 -->
                         <div class="text-center mb-4">
                             <div class="mb-3">
-                                <i class="fas fa-money-bill-wave fa-3x text-warning"></i>
+                                <i class="fas fa-money-bill-wave fa-3x" style="color: #c49b63;"></i>
                             </div>
                             <h5>到店支付現金</h5>
                             <p hidden class="text-muted">訂單編號: #{{ order.id }}</p>
@@ -98,7 +98,7 @@
                                 
                                 <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                                     <h5 class="mb-0">總計:</h5>
-                                    <h5 class="mb-0 text-warning">HK$ {{ order.total_price|floatformat:2 }}</h5>
+                                    <h5 class="mb-0" style="color: #c49b63;">HK$ {{ order.total_price|floatformat:2 }}</h5>
                                 </div>
                             </div>
                         </div>
@@ -138,32 +138,45 @@
                                     <p class="mb-3">
                                         <strong>支付状态:</strong> <span class="badge badge-warning">待支付</span>
                                     </p>
-                                    <p class="h5 mb-0 text-warning">HK$ {{ order.total_price|floatformat:2 }}</p>
+                                    <p class="h5 mb-0" style="color: #c49b63;">HK$ {{ order.total_price|floatformat:2 }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 取餐信息 -->
-                        <div class="border rounded p-3 mb-4">
-                            <p><i class="fas fa-exclamation-circle mr-2"></i>重要提示：</p>
-                            <ul class="mb-0 pl-3">
-                                <li>到店時請向店員出示訂單信息</li>
-                                <li>我們只接受港幣現金支付或八達通</li>
-                                
-                                <!-- 根据订单类型显示不同的提示 -->
-                                {% if has_beans and not has_coffee %}
-                                    <li class="">您的咖啡豆已準備就緒，無需等待即可提取</li>
-                                {% elif has_coffee %}
-                                    <li class="">請留意預計制作時間，我們會盡快為您準備</li>
-                                {% endif %}
-                            </ul>
+                        <!-- 付款說明（Accordion 樣式，與 FPS 付款頁面設計一致） -->
+                        <div class="payment-item-cash" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; width: 70%; margin-left: auto; margin-right: auto;">
+                            <div class="payment-item" data-payment="cash-instructions">
+                                <input type="radio" name="cash_instructions" id="cash-instructions-toggle" value="open" checked
+                                       style="display: none;">
+                                <label for="cash-instructions-toggle" class="payment-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; display: flex !important;">
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
+                                                <i class="fas fa-info-circle" style="color: #c49b63; margin-right: 6px;"></i> 付款說明
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down payment-arrow" style="color: #c49b63; transition: transform 0.3s ease; transform: rotate(180deg);"></i>
+                                </label>
+                                <div class="payment-details" style="max-height: 300px; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0.75rem 3rem;">
+                                    <ul class="mb-0 pl-3" style="color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.8;">
+                                        <li>到店時請向店員出示訂單信息</li>
+                                        <li>我們只接受港幣現金支付或八達通</li>
+                                        {% if has_beans and not has_coffee %}
+                                            <li>您的咖啡豆已準備就緒，無需等待即可提取</li>
+                                        {% elif has_coffee %}
+                                            <li>請留意預計制作時間，我們會盡快為您準備</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 操作按钮 -->
                         <div class="text-center">
                             <form method="POST" action="{% url 'eshop:cash_confirm_payment' order.id %}" style="display: inline-block;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-warning btn-lg">
+                                <button type="submit" class="btn bc-btn btn-lg">
                                     <i class="fas fa-check mr-2"></i>確認訂單
                                 </button>
                             </form>
@@ -180,5 +193,57 @@
 
 <section class="ftco-section-blank-small"></section>
 
+<script>
+// 付款說明 Accordion 交互（與 FPS 付款頁面設計一致）
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentItem = document.querySelector('.payment-item-cash .payment-item');
+    if (!paymentItem) return;
+    
+    const label = paymentItem.querySelector('.payment-label');
+    const radio = paymentItem.querySelector('input[type="radio"]');
+    const arrow = paymentItem.querySelector('.payment-arrow');
+    const details = paymentItem.querySelector('.payment-details');
+    function toggleInstructions(expand) {
+        if (expand) {
+            // 展開
+            if (details) {
+                details.style.maxHeight = details.scrollHeight + 50 + 'px';
+                details.style.padding = '0.75rem 3rem';
+            }
+            if (arrow) {
+                arrow.style.transform = 'rotate(180deg)';
+                arrow.style.color = '#c49b63';
+            }
+            if (label) label.style.background = 'rgba(196,155,99,0.08)';
+        } else {
+            // 收起
+            if (details) {
+                details.style.maxHeight = '0';
+                details.style.padding = '0 3rem';
+            }
+            if (arrow) {
+                arrow.style.transform = 'rotate(0deg)';
+                arrow.style.color = 'rgba(255,255,255,0.3)';
+            }
+            if (label) label.style.background = 'transparent';
+        }
+    }
+    
+    if (label && radio) {
+        label.addEventListener('click', function(e) {
+            e.preventDefault();
+            // 切換展開/收起
+            const isExpanded = radio.checked;
+            radio.checked = !isExpanded;
+            toggleInstructions(!isExpanded);
+        });
+    }
+    
+    // 預設展開
+    if (radio && radio.checked) {
+        toggleInstructions(true);
+    }
+});
+</script>
 
 {% endblock %}

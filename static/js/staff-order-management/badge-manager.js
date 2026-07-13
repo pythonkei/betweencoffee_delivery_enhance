@@ -133,6 +133,10 @@ class BadgeManager {
         // 移除所有動畫類
         element.classList.remove('badge-updated', 'badge-pulse', 'badge-blink');
         
+        // 移除可能被 Bootstrap 動態添加的類別（防止 CSS 優先級衝突）
+        element.classList.remove('badge', 'badge-primary', 'badge-secondary', 'badge-success', 
+            'badge-danger', 'badge-warning', 'badge-info', 'badge-light', 'badge-dark');
+        
         // 使用 staff-badge 統一風格
         element.classList.add('staff-badge');
         

@@ -233,7 +233,7 @@ class SlideoutCart {
         this._updateBadge();
         // 如果在結帳頁（order/confirm），重新載入頁面以更新右側商品列表
         if (window.location.pathname.includes('/eshop/order/confirm/')) {
-          window.location.reload();
+          window.location.href = '/coffee_menu/';
         }
       }
     } catch (err) {
@@ -256,9 +256,9 @@ class SlideoutCart {
       if (response.ok || response.redirected) {
         this._loadItems();
         this._updateBadge(0);
-        // 如果在結帳頁（order/confirm），重新載入頁面以更新右側商品列表
+        // 如果在結帳頁（order/confirm），清空後重新導向到菜單頁面
         if (window.location.pathname.includes('/eshop/order/confirm/')) {
-          window.location.reload();
+          window.location.href = '/coffee_menu/';
         }
       }
     } catch (err) {

@@ -273,10 +273,7 @@ class BaseRenderer {
                             數量: ${item.quantity || 1} 
                         </p>
                         <div class="card-text-md">
-                            ${item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : ''}
-                            ${item.milk_level_cn ? ` | 牛奶: ${item.milk_level_cn}` : ''}
-                            ${item.grinding_level_cn ? ` 研磨: ${item.grinding_level_cn}` : ''}
-                            ${item.weight ? ` | 重量: ${item.weight}` : ''}
+                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}${(item.cup_level_cn || item.milk_level_cn) && (item.grinding_level_cn || item.weight) ? '&nbsp;&nbsp;&nbsp;' : ''}${[item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}
                         </div>
                     </div>
                     <div class="text-right">

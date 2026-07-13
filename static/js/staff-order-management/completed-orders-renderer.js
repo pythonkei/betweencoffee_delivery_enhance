@@ -260,24 +260,17 @@ class DynamicCompletedOrdersRenderer {
             `;
         }
         
-        // ====== 咖啡杯數徽章 ======
-        let coffeeCountBadge = '';
+        // ====== 商品數量文字 + 產品類型徽章（order-product-badge 樣式） ======
+        let itemsDisplayHTML = (order.items_count || 0) + '項商品';
         if (coffeeCount > 0) {
-            coffeeCountBadge = `
-                <span hidden class="badge badge-dark ml-1">
-                    <i class="fas fa-mug-hot mr-1"></i>${coffeeCount}杯
-                </span>
-            `;
+            itemsDisplayHTML += ` - <span class="order-product-badge">${coffeeCount}杯咖啡</span>`;
         }
-        
-        // ====== 咖啡豆數量徽章 ======
-        let beanCountBadge = '';
         if (beanCount > 0) {
-            beanCountBadge = `
-                <span class="badge badge-warning ml-1">
-                    <i class="fas fa-seedling mr-1"></i>${beanCount}包咖啡豆
-                </span>
-            `;
+            if (coffeeCount > 0) {
+                itemsDisplayHTML += ` <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            } else {
+                itemsDisplayHTML += ` - <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            }
         }
         
         // ====== 合併徽章顯示 ======
@@ -315,8 +308,6 @@ class DynamicCompletedOrdersRenderer {
         
         <div class="d-flex justify-content-between mb-3 mt-3">
             <div class="mt-2">
-                ${coffeeCountBadge}
-                ${beanCountBadge}
                 ${combinedBadge}
             </div>
         </div>
@@ -326,7 +317,7 @@ class DynamicCompletedOrdersRenderer {
                 ${this.renderOrderItems(orderItems)}
             </div>
             <div>
-                <span class="card-text-md">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                <span class="card-text-md">${itemsDisplayHTML}</span>
             </div>
         </div>
 
@@ -338,8 +329,6 @@ class DynamicCompletedOrdersRenderer {
                     訂單時間: ${createdTime}
                 </p>
                 <div hidden class="mt-2">
-                    ${coffeeCountBadge}
-                    ${beanCountBadge}
                     ${isBeansOnly ? `
                     <div class="mt-2">
                         <span class="badge badge-warning">
@@ -402,7 +391,7 @@ class DynamicCompletedOrdersRenderer {
                             數量: ${item.quantity || 1} 
                         </p>
                         <div class="card-text-md">
-                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : '', item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join(' | ')}
+                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}${(item.cup_level_cn || item.milk_level_cn) && (item.grinding_level_cn || item.weight) ? '&nbsp;&nbsp;&nbsp;' : ''}${[item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}
                         </div>
                     </div>
                     <div class="text-right">

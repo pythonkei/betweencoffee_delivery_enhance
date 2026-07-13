@@ -357,30 +357,23 @@ class QueueManager {
             `;
         }
         
-        // ====== 咖啡杯數徽章 ======
-        let coffeeCountBadge = '';
+        // ====== 商品數量文字 + 產品類型徽章（order-product-badge 樣式） ======
+        let itemsDisplayHTML = (order.items_count || 0) + '項商品';
         if (coffeeCount > 0) {
-            coffeeCountBadge = `
-                <span hidden class="badge badge-dark ml-1">
-                    <i class="fas fa-mug-hot mr-1"></i>${coffeeCount}杯
-                </span>
-            `;
+            itemsDisplayHTML += ` - <span class="order-product-badge">${coffeeCount}杯咖啡</span>`;
+        }
+        if (beanCount > 0) {
+            if (coffeeCount > 0) {
+                itemsDisplayHTML += ` <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            } else {
+                itemsDisplayHTML += ` - <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            }
         }
         
         // ====== 關鍵修復：使用統一的 window.TimeUtils.formatOrderTime 格式化香港時間 ======
         const orderTime = window.TimeUtils ? 
             window.TimeUtils.formatOrderTime(order.created_at, false) : // 只顯示時間
             (order.created_at_display || '--:--');
-        
-        // ====== 咖啡豆數量徽章 ======
-        let beanCountBadge = '';
-        if (beanCount > 0) {
-            beanCountBadge = `
-                <span class="badge badge-warning ml-1">
-                    <i class="fas fa-seedling mr-1"></i>${beanCount}包咖啡豆
-                </span>
-            `;
-        }
         
         // ====== 支付方式徽章 ======
         let paymentMethodBadge = '';
@@ -442,8 +435,6 @@ class QueueManager {
                         <i class="fas fa-clock mr-1"></i>等待中
                     </span>
                     ${queuePositionBadge}
-                    ${coffeeCountBadge}
-                    ${beanCountBadge}
                     <!-- ${paymentMethodBadge} -->
                 </div>
             </div>
@@ -451,7 +442,7 @@ class QueueManager {
             <div class="order-items">
                 ${this.renderWaitingOrderItems(order)}
                 <div>
-                    <span class="card-text-md">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                    <span class="card-text-md">${itemsDisplayHTML}</span>
                 </div>
             </div>
             
@@ -541,10 +532,7 @@ class QueueManager {
                                 數量: ${item.quantity || 1} 
                             </p>
                             <div class="card-text-md">
-                                ${item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : ''}
-                                ${item.milk_level_cn ? ` | 牛奶: ${item.milk_level_cn}` : ''}
-                                ${item.grinding_level_cn ? ` 研磨: ${item.grinding_level_cn}` : ''}
-                                ${item.weight ? ` | 重量: ${item.weight}` : ''}
+                                ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}${(item.cup_level_cn || item.milk_level_cn) && (item.grinding_level_cn || item.weight) ? '&nbsp;&nbsp;&nbsp;' : ''}${[item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}
                             </div>
                         </div>
                         <div class="text-right">
@@ -906,11 +894,10 @@ class QueueManager {
             
             console.log(`🚀 確認 FPS 付款: 訂單 #${orderId}`);
             
-            // 禁用按鈕防止重複點擊
+            // 禁用按鈕防止重複點擊（不改變按鈕文字）
             const btn = document.querySelector(`.btn-confirm-fps-payment[data-order-id="${orderId}"]`);
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>確認中...';
             }
             
             const response = await fetch(`/eshop/api/fps/confirm-payment/${orderId}/`, {
@@ -1330,17 +1317,15 @@ class QueueManager {
     
     /**
      * 顯示立即反饋（樂觀更新）
+     * 注意：只禁用按鈕防止重複點擊，不改變按鈕文字
      */
     showImmediateFeedback(orderId, action) {
         console.log(`⚡ 樂觀更新: 訂單 #${orderId} ${action}`);
         
-        // 1. 禁用按鈕，防止重複點擊
+        // 1. 禁用按鈕，防止重複點擊（不改變按鈕文字）
         const button = document.querySelector(`.start-preparation-btn[data-order-id="${orderId}"]`);
         if (button) {
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>處理中...';
-            button.classList.remove('btn-primary');
-            button.classList.add('btn-secondary');
         }
         
         // 2. 記錄樂觀更新狀態

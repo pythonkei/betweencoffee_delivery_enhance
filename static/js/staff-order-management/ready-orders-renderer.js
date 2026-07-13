@@ -279,12 +279,8 @@ class DynamicReadyOrdersRenderer {
                 </span>
             `;
         } else if (isBeansOnly) {
-            // 純咖啡豆訂單：顯示現貨可取
-            readyTimeBadgeHTML = `
-                <span class="badge badge-warning ml-1">
-                    <i class="fas fa-box mr-1"></i>現貨可取
-                </span>
-            `;
+            // 純咖啡豆訂單：無需顯示現貨可取徽章
+            readyTimeBadgeHTML = '';
         } else {
             // 其他情況：只顯示已就緒狀態
             readyTimeBadgeHTML = `
@@ -311,24 +307,17 @@ class DynamicReadyOrdersRenderer {
             `;
         }
         
-        // ====== 咖啡杯數徽章 ======
-        let coffeeCountBadge = '';
+        // ====== 商品數量文字 + 產品類型徽章（order-product-badge 樣式） ======
+        let itemsDisplayHTML = (order.items_count || 0) + '項商品';
         if (coffeeCount > 0) {
-            coffeeCountBadge = `
-                <span hidden class="badge badge-dark ml-1">
-                    <i class="fas fa-mug-hot mr-1"></i>${coffeeCount}杯
-                </span>
-            `;
+            itemsDisplayHTML += ` - <span class="order-product-badge">${coffeeCount}杯咖啡</span>`;
         }
-        
-        // ====== 咖啡豆數量徽章 ======
-        let beanCountBadge = '';
         if (beanCount > 0) {
-            beanCountBadge = `
-                <span hidden class="badge badge-warning ml-1">
-                    <i class="fas fa-seedling mr-1"></i>${beanCount}包咖啡豆
-                </span>
-            `;
+            if (coffeeCount > 0) {
+                itemsDisplayHTML += ` <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            } else {
+                itemsDisplayHTML += ` - <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            }
         }
         
         // ====== 合併徽章顯示 ======
@@ -357,8 +346,6 @@ class DynamicReadyOrdersRenderer {
             
             <div class="d-flex justify-content-between mb-3 mt-3">
                 <div class="mt-2">
-                    ${coffeeCountBadge}
-                    ${beanCountBadge}
                     ${combinedBadge}
                 </div>
             </div>
@@ -368,7 +355,7 @@ class DynamicReadyOrdersRenderer {
                     ${this.renderOrderItems(order.items || [])}
                 </div>
                 <div>
-                    <span class="card-text-md">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                    <span class="card-text-md">${itemsDisplayHTML}</span>
                 </div>
             </div>
 
@@ -380,8 +367,6 @@ class DynamicReadyOrdersRenderer {
                         訂單時間: ${createdTime}
                     </p>
                     <div hidden class="mt-2">
-                        ${coffeeCountBadge}
-                        ${beanCountBadge}
                         ${isBeansOnly ? `
                         <div class="mt-2">
                             <span class="badge badge-warning">
@@ -447,7 +432,7 @@ class DynamicReadyOrdersRenderer {
                             數量: ${item.quantity || 1} 
                         </p>
                         <div class="card-text-md">
-                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : '', item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join(' | ')}
+                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}${(item.cup_level_cn || item.milk_level_cn) && (item.grinding_level_cn || item.weight) ? '&nbsp;&nbsp;&nbsp;' : ''}${[item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}
                         </div>
                     </div>
                     <div class="text-right">
@@ -523,20 +508,16 @@ class DynamicReadyOrdersRenderer {
             console.log(`📢 收到訂單已提取事件: #${orderId}`);
             
             // ✅ 修正：不像製作中訂單那樣立即移除，等待統一數據更新
-            // 只是簡單地標記訂單為處理中，避免閃爍
+            // 只禁用按鈕防止重複點擊，不改變按鈕文字
             const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
             if (orderElement) {
                 orderElement.style.opacity = '0.6';
                 orderElement.style.transition = 'opacity 0.3s';
                 
-                // 禁用按鈕防止重複點擊
+                // 禁用按鈕防止重複點擊（不改變按鈕文字）
                 const button = orderElement.querySelector('.mark-collected-btn');
                 if (button) {
                     button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1" style="font-size: 1.1rem;"></i>處理中';
-                    button.style.borderRadius = '0.375rem';
-                    button.classList.remove('btn-info');
-                    button.classList.add('btn-secondary');
                 }
             }
         });

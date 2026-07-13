@@ -162,10 +162,7 @@ class CommonUtils {
                         <h6 class="mb-0">${item.name || '商品'}</h6>
                         <p class="mb-1 text-muted">數量: ${item.quantity || 1}</p>
                         <div class="text-muted">
-                            ${item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : ''}
-                            ${item.milk_level_cn ? ` | 牛奶: ${item.milk_level_cn}` : ''}
-                            ${item.grinding_level_cn ? ` | 研磨: ${item.grinding_level_cn}` : ''}
-                            ${item.weight ? ` | 重量: ${item.weight}` : ''}
+                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}${(item.cup_level_cn || item.milk_level_cn) && (item.grinding_level_cn || item.weight) ? '&nbsp;&nbsp;&nbsp;' : ''}${[item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}
                         </div>
                     </div>
                     <div class="text-right">

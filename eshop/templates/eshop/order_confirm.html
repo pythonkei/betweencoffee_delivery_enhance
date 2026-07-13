@@ -514,7 +514,7 @@
                         <div class="block-21 justify-content-end">
                             <div class="form-group pb-5">
                             <!-- 支付按钮 -->
-                            <button type="submit" class="btn btn-primary btn-primary-outline pr-8 pl-8 py-3" id="payment-button">確認並支付</button>
+                            <button type="submit" class="btn btn-primary btn-primary-outline pr-8 pl-8 py-3" id="payment-button" style="min-width: 200px; text-align: center; white-space: nowrap;">確認並支付</button>
                                 <div class="text-center mt-3">
                                     <span class=""><a href="{% url 'cart:cart_detail' %}" class="btn">返回購物車</a></span>
                                 </div>
@@ -617,6 +617,11 @@
                 // 显示加载状态
                 const submitButton = document.getElementById('payment-button');
                 if (submitButton) {
+                    // 記錄原始寬度並保持固定，避免文字長度變化影響外觀
+                    if (!submitButton.dataset.originalWidth) {
+                        submitButton.dataset.originalWidth = submitButton.offsetWidth;
+                    }
+                    submitButton.style.width = submitButton.dataset.originalWidth + 'px';
                     submitButton.disabled = true;
                     submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
                 }
@@ -805,6 +810,11 @@ function validateForm() {
     // 显示加载状态
     const submitButton = document.getElementById('payment-button');
     if (submitButton) {
+        // 記錄原始寬度並保持固定，避免文字長度變化影響外觀
+        if (!submitButton.dataset.originalWidth) {
+            submitButton.dataset.originalWidth = submitButton.offsetWidth;
+        }
+        submitButton.style.width = submitButton.dataset.originalWidth + 'px';
         submitButton.disabled = true;
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
     }
@@ -1380,8 +1390,6 @@ function getCookie(name) {
 
 // 取消未完成訂單（在 order_confirm.html 中直接操作，無需跳轉到 payment-confirmation）
 function cancelPendingOrder(orderId) {
-    showToast('info', '正在取消訂單 #' + orderId + '...');
-    
     const orderEl = document.getElementById('pending-order-' + orderId);
     
     fetch('/eshop/api/cancel-order/' + orderId + '/', {

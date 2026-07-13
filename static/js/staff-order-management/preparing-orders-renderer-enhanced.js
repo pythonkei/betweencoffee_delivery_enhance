@@ -391,6 +391,19 @@ class EnhancedPreparingOrdersRenderer {
             `;
         }
         
+        // ====== 商品數量文字 + 產品類型徽章（order-product-badge 樣式） ======
+        let itemsDisplayHTML = (order.items_count || 0) + '項商品';
+        if (coffeeCount > 0) {
+            itemsDisplayHTML += ` - <span class="order-product-badge">${coffeeCount}杯咖啡</span>`;
+        }
+        if (beanCount > 0) {
+            if (coffeeCount > 0) {
+                itemsDisplayHTML += ` <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            } else {
+                itemsDisplayHTML += ` - <span class="order-product-badge">${beanCount}包咖啡豆</span>`;
+            }
+        }
+        
         // ====== 咖啡師信息 ======
         // 純咖啡豆訂單不顯示咖啡師
         let baristaName = '';
@@ -503,7 +516,7 @@ class EnhancedPreparingOrdersRenderer {
                     ${this.renderOrderItems(order)}
                 </div>
                 <div>
-                    <span class="card-text-md">${order.items_display || (order.items_count || 0) + '項商品'}</span>
+                    <span class="card-text-md">${itemsDisplayHTML}</span>
                 </div>
             </div>
 
@@ -578,7 +591,7 @@ class EnhancedPreparingOrdersRenderer {
                             數量: ${item.quantity || 1} 
                         </p>
                         <div class="card-text-md">
-                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : '', item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join(' | ')}
+                            ${[item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '', item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}${(item.cup_level_cn || item.milk_level_cn) && (item.grinding_level_cn || item.weight) ? '&nbsp;&nbsp;&nbsp;' : ''}${[item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '', item.weight ? `重量: ${item.weight}` : ''].filter(Boolean).join('&nbsp;&nbsp;')}
                         </div>
                     </div>
                     <div class="text-right">
@@ -1049,27 +1062,39 @@ class EnhancedPreparingOrdersRenderer {
      * 更新徽章
      */
     updateBadges() {
-        // 更新主徽章
+        // 更新主徽章 - 使用 staff-badge 類別以保持品牌樣式一致
         const preparingBadge = document.getElementById('preparing-orders-badge');
         if (preparingBadge) {
             preparingBadge.textContent = this.allPreparingOrders.size;
-            preparingBadge.className = 'badge ml-2';
+            preparingBadge.className = 'staff-badge ml-2';
             if (this.allPreparingOrders.size > 0) {
-                preparingBadge.classList.add('badge-warning');
+                preparingBadge.classList.add('has-items');
+            } else {
+                preparingBadge.classList.add('no-items');
             }
         }
         
-        // 更新子標籤頁徽章
+        // 更新子標籤頁徽章（使用 staff-badge 統一品牌金色樣式）
         const activeBadge = document.getElementById('countdown-active-badge');
         if (activeBadge) {
             activeBadge.textContent = this.countdownActiveOrders.size;
-            activeBadge.className = 'badge badge-red-active ml-2';
+            activeBadge.className = 'staff-badge ml-2';
+            if (this.countdownActiveOrders.size > 0) {
+                activeBadge.classList.add('has-items');
+            } else {
+                activeBadge.classList.add('no-items');
+            }
         }
 
         const completedBadge = document.getElementById('countdown-completed-badge');
         if (completedBadge) {
             completedBadge.textContent = this.countdownCompletedOrders.size;
-            completedBadge.className = 'badge badge-red-completed ml-2';
+            completedBadge.className = 'staff-badge ml-2';
+            if (this.countdownCompletedOrders.size > 0) {
+                completedBadge.classList.add('has-items');
+            } else {
+                completedBadge.classList.add('no-items');
+            }
         }
     }
     
