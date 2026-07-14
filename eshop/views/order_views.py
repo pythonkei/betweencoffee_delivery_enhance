@@ -531,6 +531,15 @@ class OrderConfirm(View):
             request.session['last_order_id'] = order.id
             request.session.modified = True
 
+            # ✅ 方案D：訂單創建成功後立即清空購物車
+            # 確保從支付平台返回 order_confirm 時不會看到舊商品列表
+            try:
+                cart = Cart(request)
+                cart.clear()
+                logger.info(f"訂單 #{order.id} 創建成功，購物車已清空")
+            except Exception as e:
+                logger.warning(f"清空購物車時出錯（不影響訂單）: {e}")
+
             payment_method = request.POST.get('payment_method', 'alipay')
             return self.handle_payment(request, order, payment_method)
 

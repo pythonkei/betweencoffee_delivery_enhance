@@ -31,6 +31,10 @@ class SlideoutCart {
     this.isOpen = false;
     this.csrfToken = this._getCSRF();
     this._bindEvents();
+
+    // ✅ 修復：初始化時立即從伺服器同步購物車 badge 數量
+    // 確保從支付平台返回時，badge 能正確反映清空後的購物車狀態
+    this._syncBadgeFromServer();
   }
 
   // ===== 公開方法 =====
@@ -112,6 +116,13 @@ class SlideoutCart {
 
     // 滾動監聽：導覽列購物車不可見時顯示浮動按鈕
     this._initFloatingCartScrollListener();
+
+    // 處理 bfcache（後退快取）恢復：從瀏覽器返回按鈕回到頁面時重新同步購物車數量
+    // 即使 event.persisted 為 false（跨域 bfcache 恢復），也執行同步以確保 badge 正確
+    // 使用 forceRefresh=true 避免瀏覽器快取 /cart/count/ 的舊響應
+    window.addEventListener('pageshow', (event) => {
+      this._syncBadgeFromServer(true);
+    });
   }
 
   async _loadItems() {
@@ -325,10 +336,12 @@ class SlideoutCart {
 
   /**
    * 從伺服器同步購物車數量到 badge
+   * @param {boolean} forceRefresh - 是否強制刷新（添加時間戳避免快取）
    */
-  async _syncBadgeFromServer() {
+  async _syncBadgeFromServer(forceRefresh = false) {
     try {
-      const response = await fetch('/cart/count/');
+      const url = forceRefresh ? `/cart/count/?_=${Date.now()}` : '/cart/count/';
+      const response = await fetch(url);
       const data = await response.json();
       if (data.success) {
         this._updateBadge(data.cart_total_items);

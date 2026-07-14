@@ -24,6 +24,7 @@
   "dependencies": {
     "@gongrzhe/server-redis-mcp": "^1.0.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "@supabase/mcp-server-supabase": "^0.8.2",
     "axios": "^1.14.0",
     "pg": "^8.20.0",
     "shadcn-mcp": "^1.0.0"

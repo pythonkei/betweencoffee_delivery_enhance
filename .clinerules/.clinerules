@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月11日（更新：staff_order_management 頁面 Bootstrap tab 自定義切換改造 + nav-link active 偏移修復）
+> **最後更新**: 2026年7月14日（更新：修復從支付平台返回 order_confirm 時仍顯示舊商品列表 + 購物車未清空問題）
 
 
 ## 開發者背景與方法論

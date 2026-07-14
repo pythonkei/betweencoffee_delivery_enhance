@@ -977,3 +977,7 @@ pythonkei
 pythonkei@gmail.com
 '''
 
+'''
+supabase database pw:
+hFEUGy1tIX15ALrz
+'''
