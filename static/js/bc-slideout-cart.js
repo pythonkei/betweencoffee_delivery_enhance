@@ -286,7 +286,7 @@ class SlideoutCart {
   }
 
   /**
-   * 初始化滾動監聽：導覽列購物車不可見時顯示浮動按鈕
+   * 初始化滾動監聽：浮動購物車常駐顯示（有商品時始終顯示）
    */
   _initFloatingCartScrollListener() {
     this.floatingCart = document.getElementById('bc-floating-cart');
@@ -299,38 +299,9 @@ class SlideoutCart {
       return;
     }
 
-    // 使用 IntersectionObserver 監測導覽列購物車是否在可視範圍
-    this._navObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        // 導覽列購物車不可見時顯示浮動按鈕
-        if (!entry.isIntersecting) {
-          this._showFloatingCart();
-        } else {
-          this._hideFloatingCart();
-        }
-      });
-    }, { threshold: 0 });
-
-    this._navObserver.observe(this.navCartToggle);
-
-    // 初始檢查：載入購物車數量並檢查導覽列購物車是否在可視範圍
-    // 使用 requestAnimationFrame 確保 DOM 已渲染完成
+    // 初始載入購物車數量，有商品時常駐顯示
     requestAnimationFrame(() => {
-      // 先載入購物車數量，確保 badge 正確
-      this._syncBadgeFromServer().then(() => {
-        const rect = this.navCartToggle.getBoundingClientRect();
-        const isVisible = (
-          rect.top >= 0 &&
-          rect.left >= 0 &&
-          rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-          rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
-        if (!isVisible) {
-          this._showFloatingCart();
-        } else {
-          this._hideFloatingCart();
-        }
-      });
+      this._syncBadgeFromServer();
     });
   }
 
@@ -352,7 +323,7 @@ class SlideoutCart {
   }
 
   /**
-   * 更新浮動購物車顯示狀態（根據購物車數量）
+   * 更新浮動購物車顯示狀態（根據購物車數量，有商品時常駐顯示）
    */
   _updateFloatingCartVisibility(count) {
     if (!this.floatingCart) return;
@@ -366,23 +337,8 @@ class SlideoutCart {
         this.floatingCart.classList.remove('show', 'hide');
         return;
       } else {
-        // 購物車有商品時，確保浮動按鈕可見
-        this.floatingCart.style.display = '';
-        // 檢查導覽列購物車是否在可視範圍內
-        if (this.navCartToggle) {
-          const rect = this.navCartToggle.getBoundingClientRect();
-          const isVisible = (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-          );
-          if (!isVisible) {
-            this._showFloatingCart();
-          } else {
-            this._hideFloatingCart();
-          }
-        }
+        // 購物車有商品時，常駐顯示浮動按鈕
+        this._showFloatingCart();
       }
     }
   }
@@ -423,23 +379,15 @@ class SlideoutCart {
   }
 
   /**
-   * 關閉購物車後，根據導覽列購物車可見性決定是否顯示浮動按鈕
+   * 關閉購物車後，有商品時常駐顯示浮動按鈕
    */
   _restoreFloatingCartAfterClose() {
-    if (!this.floatingCart || !this.navCartToggle) return;
+    if (!this.floatingCart) return;
     // 使用 requestAnimationFrame 確保 _unlockScroll 已完成
     requestAnimationFrame(() => {
-      const rect = this.navCartToggle.getBoundingClientRect();
-      const isVisible = (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-      );
-      if (!isVisible) {
+      const badge = this.floatingCart.querySelector('.bc-floating-cart-badge');
+      if (badge && parseInt(badge.textContent) > 0) {
         this._showFloatingCart();
-      } else {
-        this._hideFloatingCart();
       }
     });
   }

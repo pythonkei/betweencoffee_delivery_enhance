@@ -997,9 +997,13 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   position: relative;
   color: #fff;
-  font-size: 1.55rem;
+  font-size: 1.78rem;
   padding: 0;
   line-height: 1;
+}
+
+.bc-floating-cart-btn .material-icons {
+  font-size: 1.6rem !important;
 }
 
 .bc-floating-cart-btn:hover {
@@ -1017,17 +1021,17 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
   background: #e74c3c;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  padding: 0 6px;
   line-height: 1;
 }
 

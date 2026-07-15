@@ -80,12 +80,16 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: 修復結帳頁面清空購物車後右側產品列表未即時更新（2026-07-13）"
+        echo "├── 最新改動: 修復從外部支付平台返回時購物車 badge 未更新問題（2026-07-15）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
         echo "├── 已知問題: 文件過大、支付確認邏輯重複、測試覆蓋率低"
         echo "├── 優先任務: 購物車圖標、商品分類、一頁式結帳、Supabase 遷移"
         echo "├── 資料庫建議: 遷移至 Supabase PostgreSQL（提升獨立性與管理便利性）"
+        echo "├── 競品分析: betweencoffee_memory_bank/07_COMPETITIVE_ANALYSIS.md"
+        echo "│   ├── 瑞幸咖啡: 首頁即點單、底部常駐購物車、AI Lucky 智能體"
+        echo "│   ├── Manner Coffee: 分類標籤清晰、自帶杯減 $5"
+        echo "│   └── 喜茶: 極致個性化自定義、5000 萬會員體系"
         echo "└── 大小: ${FILE_SIZE_KB} KB"
 
         
