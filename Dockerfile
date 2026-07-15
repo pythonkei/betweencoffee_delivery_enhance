@@ -12,6 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cargo \
     && rm -rf /var/lib/apt/lists/*
 
+# 🔧 強制清除 Docker layer cache：每次部署都重新複製專案檔案
+# 使用 build arg 確保 COPY 步驟不被 cache
+ARG CACHEBUST=1
+
 # 複製專案檔案
 COPY . /app/
 
