@@ -1107,7 +1107,7 @@ optgroup  {
   display: block; /* makes it have a width */
   content: ""; /* clears default height */
   color: var(--brand-primary);
-  font-family: 'Microsoft JhengHei';
+  font-family: "Noto Sans TC", Arial, sans-serif;
   font-size: 25px;
   font-weight: 700;
   line-height: 32px;
@@ -1314,7 +1314,7 @@ optgroup  {
 
 @media (min-width: 1024px)  { 
   #navi  { 
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: "Noto Sans TC", Arial, sans-serif;
     padding: 20px 25px 20px 30px; 
   }
 }

@@ -987,23 +987,25 @@
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: var(--bc-gold);
-  border: none;
+  background: rgba(196, 155, 99, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(196, 155, 99, 0.3);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
   position: relative;
   color: #fff;
-  font-size: 1.78rem;
+  font-size: 1.96rem;
   padding: 0;
   line-height: 1;
 }
 
 .bc-floating-cart-btn .material-icons {
-  font-size: 1.6rem !important;
+  font-size: 1.76rem !important;
 }
 
 .bc-floating-cart-btn:hover {
@@ -1021,17 +1023,17 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  min-width: 22px;
-  height: 22px;
-  border-radius: 11px;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 12px;
   background: #e74c3c;
   color: #fff;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 6px;
+  padding: 0 7px;
   line-height: 1;
 }
 

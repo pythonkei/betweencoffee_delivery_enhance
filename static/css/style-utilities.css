@@ -1587,7 +1587,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   width: auto;
   max-width: 92vw;
   min-width: 600px;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.55);
   border-radius: 14px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.4);
   z-index: 9999;
@@ -1601,6 +1601,8 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   text-decoration: none;
   color: inherit;
   overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .cart-popup.show {
@@ -1616,27 +1618,31 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   transition: all 0.3s ease;
 }
 
-/* 左側區塊：主題色背景 */
+/* 左側區塊：半透明金色背景 + 模糊 */
 .cart-popup .popup-left {
   display: flex;
   align-items: center;
   gap: 24px;
   padding: 16px 32px;
-  background: var(--brand-primary);
+  background: rgba(196, 155, 99, 0.8);
   border-radius: 14px 0 0 14px;
   flex: 1;
   min-width: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-/* 右側區塊：白色背景 */
+/* 右側區塊：半透明白色背景 + 模糊 */
 .cart-popup .popup-right {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px 32px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 0 14px 14px 0;
   flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* 中：最近加入的商品資訊 */

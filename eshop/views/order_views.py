@@ -706,6 +706,17 @@ def quick_order(request):
     pickup_time_display = f"{minutes_to_add}分鐘後"
     # ---------------------------------------------------------
     
+    # ✅ 修復：清除購物車 session，避免 OrderConfirm.get() 誤用購物車資料覆蓋快速訂單
+    # 當用戶購物車中已有商品時，OrderConfirm.get() 第154-169行會自動重建 pending_order，
+    # 然後第179-183行會因為 cart_data 和 quick_order_data 同時存在而優先使用購物車資料。
+    # 因此必須在設定快速訂單資料前清除購物車 session。
+    from django.conf import settings
+    CART_SESSION_ID = settings.CART_SESSION_ID
+    if CART_SESSION_ID in request.session:
+        del request.session[CART_SESSION_ID]
+    if 'pending_order' in request.session:
+        del request.session['pending_order']
+    
     try:
         # 尝试获取WakeMeup咖啡
         wake_meup_coffee = CoffeeItem.objects.get(id=1)

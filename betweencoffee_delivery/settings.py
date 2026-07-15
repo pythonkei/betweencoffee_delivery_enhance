@@ -497,8 +497,14 @@ class LazySocialAccountProviders:
     2. Render 環境變數在 build 階段不可用的問題
     """
     
+    _cached_providers = None
+    _logged = False
+    
     def _load_providers(self):
-        """運行時加載社交登錄提供商配置"""
+        """運行時加載社交登錄提供商配置（僅首次執行 logger）"""
+        if self._cached_providers is not None:
+            return self._cached_providers
+            
         providers = {}
         
         # 獲取基礎 URL 用於回調（運行時判斷）
@@ -524,10 +530,9 @@ class LazySocialAccountProviders:
                     'prompt': 'select_account',
                 },
             }
-            logger.info(f"Google OAuth configured for domain: {base_domain}")
         else:
-            logger.warning("Google OAuth credentials not set")
-
+            providers['google'] = {}
+        
         # Facebook 配置
         facebook_client_id = env('OAUTH_FACEBOOK_CLIENT_ID', default='')
         facebook_secret = env('OAUTH_FACEBOOK_SECRET', default='')
@@ -553,10 +558,17 @@ class LazySocialAccountProviders:
                 'EXCHANGE_TOKEN': True,
                 'VERIFIED_EMAIL': True,
             }
-            logger.info(f"Facebook OAuth configured for domain: {base_domain}")
         else:
-            logger.warning("Facebook OAuth credentials not set")
+            providers['facebook'] = {}
         
+        # 僅首次載入時記錄一次
+        if not self._logged:
+            google_ok = bool(google_client_id and google_secret)
+            facebook_ok = bool(facebook_client_id and facebook_secret)
+            logger.info(f"OAuth | Google: {'✅ configured' if google_ok else '❌ not set'} | Facebook: {'✅ configured' if facebook_ok else '❌ not set'} | domain: {base_domain}")
+            self._logged = True
+        
+        self._cached_providers = providers
         return providers
     
     def __getitem__(self, key):
