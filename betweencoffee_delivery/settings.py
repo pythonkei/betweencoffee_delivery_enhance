@@ -283,9 +283,12 @@ ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'
 def parse_database_url(url):
     """手動解析 DATABASE_URL，支援 Supabase 等複雜格式
     
-    dj_database_url.parse() 在某些版本對含有多段子域名的 host 解析有問題，
-    因此改用手動 urlparse 方式解析。
+    使用正則表達式直接從 URL 中提取各組件，避免 urlparse 在 Python 3.11+
+    中可能出現的 hostname 驗證問題（如 ValueError: 'hostname' does not 
+    appear to be an IPv4 or IPv6 address）。
     """
+    import re
+    
     # 清理 pgbouncer 等 psycopg2 不支援的連線選項
     if '?' in url:
         base_url, query_string = url.split('?', 1)
@@ -293,18 +296,26 @@ def parse_database_url(url):
         valid_params = [p for p in params if not p.startswith('pgbouncer')]
         url = base_url + ('?' + '&'.join(valid_params) if valid_params else '')
     
-    parsed = urlparse(url)
+    # 使用正則表達式解析 PostgreSQL URL
+    # 格式: postgresql://user:password@host:port/database?options
+    pattern = r'^postgres(?:ql)?://(?:([^:@]+)(?::([^@]*))?@)?([^:/?#]+)(?::(\d+))?(?:/([^?#]*))?(?:\?([^#]*))?'
+    match = re.match(pattern, url)
     
-    # 解析使用者名稱和密碼
-    username = unquote(parsed.username) if parsed.username else ''
-    password = unquote(parsed.password) if parsed.password else ''
-    
-    # 解析主機和端口
-    host = parsed.hostname or ''
-    port = parsed.port or 5432
-    
-    # 解析資料庫名稱（移除路徑前的 /）
-    db_name = parsed.path.lstrip('/') if parsed.path else 'postgres'
+    if match:
+        username = unquote(match.group(1)) if match.group(1) else ''
+        password = unquote(match.group(2)) if match.group(2) else ''
+        host = match.group(3) or ''
+        port = int(match.group(4)) if match.group(4) else 5432
+        db_name = match.group(5) if match.group(5) else 'postgres'
+    else:
+        # 正則表達式匹配失敗，回退到 urlparse
+        logger.warning(f"Regex parse failed for DATABASE_URL, falling back to urlparse")
+        parsed = urlparse(url)
+        username = unquote(parsed.username) if parsed.username else ''
+        password = unquote(parsed.password) if parsed.password else ''
+        host = parsed.hostname or ''
+        port = parsed.port or 5432
+        db_name = parsed.path.lstrip('/') if parsed.path else 'postgres'
     
     return {
         'ENGINE': 'django.db.backends.postgresql',
