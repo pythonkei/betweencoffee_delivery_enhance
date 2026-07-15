@@ -441,7 +441,7 @@ class QueueManager {
 
             <div class="order-items">
                 ${this.renderWaitingOrderItems(order)}
-                <div>
+                <div class="mt-4">
                     <span class="card-text-md">${itemsDisplayHTML}</span>
                 </div>
             </div>

@@ -316,7 +316,7 @@ class DynamicCompletedOrdersRenderer {
             <div>
                 ${this.renderOrderItems(orderItems)}
             </div>
-            <div>
+            <div class="mt-4">
                 <span class="card-text-md">${itemsDisplayHTML}</span>
             </div>
         </div>

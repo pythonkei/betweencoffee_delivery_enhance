@@ -268,7 +268,7 @@ class PaymentPendingRenderer {
 
                 <div class="order-items">
                     ${itemsHTML}
-                    <div>
+                    <div class="mt-4">
                         <span class="card-text-md">${itemsDisplayHTML}</span>
                     </div>
                 </div>
