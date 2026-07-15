@@ -4,7 +4,9 @@ Django settings for betweencoffee_delivery project.
 
 import os
 import sys
+import re
 import logging
+from urllib.parse import urlparse, unquote
 import dj_database_url
 from environ import Env
 from django.core.exceptions import ImproperlyConfigured
@@ -278,32 +280,53 @@ ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'
 
 # ==================== 数据库配置 ====================
 
+def parse_database_url(url):
+    """手動解析 DATABASE_URL，支援 Supabase 等複雜格式
+    
+    dj_database_url.parse() 在某些版本對含有多段子域名的 host 解析有問題，
+    因此改用手動 urlparse 方式解析。
+    """
+    # 清理 pgbouncer 等 psycopg2 不支援的連線選項
+    if '?' in url:
+        base_url, query_string = url.split('?', 1)
+        params = query_string.split('&')
+        valid_params = [p for p in params if not p.startswith('pgbouncer')]
+        url = base_url + ('?' + '&'.join(valid_params) if valid_params else '')
+    
+    parsed = urlparse(url)
+    
+    # 解析使用者名稱和密碼
+    username = unquote(parsed.username) if parsed.username else ''
+    password = unquote(parsed.password) if parsed.password else ''
+    
+    # 解析主機和端口
+    host = parsed.hostname or ''
+    port = parsed.port or 5432
+    
+    # 解析資料庫名稱（移除路徑前的 /）
+    db_name = parsed.path.lstrip('/') if parsed.path else 'postgres'
+    
+    return {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': db_name,
+        'USER': username,
+        'PASSWORD': password,
+        'HOST': host,
+        'PORT': port,
+        'CONN_MAX_AGE': 0 if IS_RENDER else 600,
+        'ATOMIC_REQUESTS': False,
+    }
+
+
 def get_database_config():
     """安全地配置数据库"""
     database_url = os.environ.get('DATABASE_URL')
     
     if database_url:
         try:
-            # 清理 DATABASE_URL：移除 pgbouncer 等 psycopg2 不支援的連線選項
-            # Render 提供的 DATABASE_URL 可能包含 pgbouncer 參數
-            cleaned_url = database_url
-            if '?' in cleaned_url:
-                base_url, query_string = cleaned_url.split('?', 1)
-                params = query_string.split('&')
-                valid_params = [p for p in params if not p.startswith('pgbouncer')]
-                cleaned_url = base_url + ('?' + '&'.join(valid_params) if valid_params else '')
-            
-            # 简化配置，移除重复参数
-            db_config = dj_database_url.parse(cleaned_url)
-            
-            # Render 免費 PostgreSQL 有連接數限制，禁用連接持久化避免 connection already closed
-            conn_max_age = 0 if IS_RENDER else 600
-            db_config.setdefault('CONN_MAX_AGE', conn_max_age)
-            db_config.setdefault('ATOMIC_REQUESTS', False)  # 改为False避免事务问题
-            
-            return {
-                'default': db_config
-            }
+            db_config = parse_database_url(database_url)
+            logger.info(f"Using DATABASE_URL (host={db_config['HOST']}, db={db_config['NAME']}, user={db_config['USER']})")
+            return {'default': db_config}
         except Exception as e:
             logger.error(f"Database configuration error: {e}")
             raise ImproperlyConfigured(f"Invalid DATABASE_URL: {e}")
