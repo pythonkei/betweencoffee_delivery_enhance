@@ -284,8 +284,17 @@ def get_database_config():
     
     if database_url:
         try:
+            # 清理 DATABASE_URL：移除 pgbouncer 等 psycopg2 不支援的連線選項
+            # Render 提供的 DATABASE_URL 可能包含 pgbouncer 參數
+            cleaned_url = database_url
+            if '?' in cleaned_url:
+                base_url, query_string = cleaned_url.split('?', 1)
+                params = query_string.split('&')
+                valid_params = [p for p in params if not p.startswith('pgbouncer')]
+                cleaned_url = base_url + ('?' + '&'.join(valid_params) if valid_params else '')
+            
             # 简化配置，移除重复参数
-            db_config = dj_database_url.parse(database_url)
+            db_config = dj_database_url.parse(cleaned_url)
             
             # Render 免費 PostgreSQL 有連接數限制，禁用連接持久化避免 connection already closed
             conn_max_age = 0 if IS_RENDER else 600
