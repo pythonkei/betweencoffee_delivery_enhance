@@ -13,7 +13,7 @@ from allauth.socialaccount.models import SocialAccount
 from django.urls import reverse
 
 from .models_enhanced import (
-    CustomerLoyalty, CustomerCoupon, CustomerActivity
+    CustomerLoyalty, CustomerActivity
 )
 
 
@@ -40,13 +40,6 @@ def loyalty_dashboard(request):
         # 獲取會員基本信息
         membership_info = loyalty.get_membership_info()
         
-        # 獲取可用優惠券
-        active_coupons = CustomerCoupon.objects.filter(
-            user=request.user,
-            is_used=False,
-            valid_to__gte=timezone.now()
-        ).order_by('-created_at')[:10]
-        
         # 獲取近期活動
         recent_activities = CustomerActivity.objects.filter(
             user=request.user
@@ -59,7 +52,6 @@ def loyalty_dashboard(request):
             'loyalty': loyalty,
             'points_summary': points_summary,
             'membership_info': membership_info,
-            'active_coupons': active_coupons,
             'recent_activities': recent_activities,
             'available_rewards': available_rewards,
             'profile': getattr(request.user, 'profile', None),
@@ -118,105 +110,6 @@ def redeem_reward(request):
         return JsonResponse({
             'success': False,
             'message': f'兌換失敗: {str(e)}'
-        })
-
-
-@login_required
-def coupons_list(request):
-    """優惠券列表"""
-    try:
-        # 獲取所有優惠券（包括已使用和過期的）
-        all_coupons = CustomerCoupon.objects.filter(
-            user=request.user
-        ).order_by('-created_at')
-        
-        # 分離有效和無效的優惠券
-        active_coupons = []
-        expired_coupons = []
-        used_coupons = []
-        
-        now = timezone.now()
-        for coupon in all_coupons:
-            if coupon.is_used:
-                used_coupons.append(coupon)
-            elif coupon.valid_to < now:
-                expired_coupons.append(coupon)
-            else:
-                active_coupons.append(coupon)
-        
-        context = {
-            'active_coupons': active_coupons,
-            'expired_coupons': expired_coupons[:10],  # 只顯示最近10個過期的
-            'used_coupons': used_coupons[:10],  # 只顯示最近10個已使用的
-        }
-        
-        return render(request, 'socialuser/coupons_list.html', context)
-        
-    except Exception as e:
-        # 記錄錯誤但不顯示消息，避免消息中間件問題
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"加載優惠券列表失敗: {str(e)}")
-        return redirect('socialuser:loyalty_dashboard')
-
-
-@login_required
-@require_http_methods(["POST"])
-def apply_coupon(request):
-    """應用優惠券（在購物車或結賬時）"""
-    try:
-        data = json.loads(request.body)
-        coupon_code = data.get('coupon_code')
-        order_amount = Decimal(data.get('order_amount', 0))
-        
-        if not coupon_code:
-            return JsonResponse({
-                'success': False,
-                'message': '請輸入優惠碼'
-            })
-        
-        # 查找優惠券
-        try:
-            coupon = CustomerCoupon.objects.get(
-                code=coupon_code,
-                user=request.user
-            )
-        except CustomerCoupon.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': '優惠碼不存在'
-            })
-        
-        # 應用折扣
-        discount, message = coupon.apply_discount(order_amount)
-        
-        if discount > 0:
-            # 標記為已使用
-            coupon.mark_as_used()
-            
-            # 記錄活動
-            CustomerActivity.record_coupon_used(
-                request.user,
-                coupon_code,
-                discount
-            )
-            
-            return JsonResponse({
-                'success': True,
-                'message': message,
-                'discount': float(discount),
-                'final_amount': float(order_amount - discount)
-            })
-        else:
-            return JsonResponse({
-                'success': False,
-                'message': message
-            })
-            
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': f'應用優惠券失敗: {str(e)}'
         })
 
 
@@ -362,42 +255,6 @@ def api_recent_activities(request):
             'success': True,
             'activities': activities_data,
             'count': len(activities_data),
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })
-
-
-@login_required
-def api_active_coupons(request):
-    """API: 獲取有效優惠券"""
-    try:
-        coupons = CustomerCoupon.objects.filter(
-            user=request.user,
-            is_used=False,
-            valid_to__gte=timezone.now()
-        ).order_by('-created_at')
-        
-        coupons_data = []
-        for coupon in coupons:
-            coupons_data.append({
-                'code': coupon.code,
-                'type': coupon.coupon_type,
-                'type_display': coupon.get_coupon_type_display(),
-                'value': float(coupon.value),
-                'min_order_amount': float(coupon.min_order_amount),
-                'valid_to': coupon.valid_to.isoformat(),
-                'description': coupon.description,
-                'days_remaining': (coupon.valid_to - timezone.now()).days,
-            })
-        
-        return JsonResponse({
-            'success': True,
-            'coupons': coupons_data,
-            'count': len(coupons_data),
         })
         
     except Exception as e:

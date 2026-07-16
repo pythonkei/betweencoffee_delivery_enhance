@@ -44,92 +44,54 @@ logger = logging.getLogger(__name__)
 
 # ==================== 優惠券和折扣處理函數 ====================
 
-def apply_coupon_discounts(request, original_total_price, items):
+def apply_coupon_discounts(request, original_total_price, items, selected_reward_id=None):
     """
-    應用優惠券和折扣到訂單
+    應用折扣到訂單（積分獎勵由用戶選擇）
     返回處理後的訂單數據
+    
+    參數:
+        selected_reward_id: 用戶選擇的獎勵ID（如 'voucher_5', 'voucher_8', 'voucher_30'）
+                           如果為 None，則不套用任何積分獎勵
     """
-    coupon_code = request.POST.get('coupon_code', '').strip()
-    applied_coupon_code = None
-    coupon_discount = Decimal('0.00')
     final_total_price = original_total_price
     
-    # 1. 處理優惠券
-    if coupon_code:
-        # 這裡可以實現優惠券驗證邏輯
-        # 暫時使用簡單的測試優惠券
-        if coupon_code == 'TEST10':
-            coupon_discount = Decimal('10.00')
-            applied_coupon_code = coupon_code
-            final_total_price = max(Decimal('0.00'), original_total_price - coupon_discount)
-            logger.info(f"優惠券 {coupon_code} 應用成功，折扣: {coupon_discount}")
-        else:
-            logger.warning(f"無效的優惠券代碼: {coupon_code}")
-    
-    # 2. 會員折扣已移除，所有用戶看到相同價格
+    # 會員折扣已移除，所有用戶看到相同價格
     loyalty_discount_rate = Decimal('1.00')  # 無折扣
     loyalty_discount_amount = Decimal('0.00')
     
-    # 3. 處理積分獎勵（如果用戶已登入）- 用戶手動選擇是否使用
-    #    支援兩種模式：
-    #    a) 直接從積分兌換（reward_id 格式如 'voucher_30'）
-
-    #    b) 使用已兌換的 RedeemedReward（reward_id 為數字 ID）
+    # 處理積分獎勵（如果用戶已登入且選擇了獎勵）
     applied_reward_id = None
     applied_reward_name = None
     reward_discount_amount = Decimal('0.00')
     
-    if request.user.is_authenticated:
-        use_reward_id = request.POST.get('use_reward', '').strip()
-        if use_reward_id:
-            try:
-                from socialuser.models_enhanced import RedeemedReward
-                
-                # 先嘗試當作直接兌換（reward_id 是字串如 'voucher_30'）
-
-                if use_reward_id in ('voucher_30', 'voucher_5'):
-
-                    success, discount, reward_name = RedeemedReward.apply_reward_at_checkout(
-                        request.user, use_reward_id
-                    )
-                    if success and discount > 0:
-                        reward_discount_amount = discount
-                        applied_reward_id = use_reward_id
-                        applied_reward_name = reward_name
-                        final_total_price = max(Decimal('0.00'), final_total_price - discount)
-                        logger.info(f"用戶直接兌換並使用獎勵 {reward_name}，折扣: ${discount}")
-                    else:
-                        logger.warning(f"直接兌換獎勵失敗: {use_reward_id}")
-                else:
-                    # 傳統模式：使用已兌換的 RedeemedReward 記錄
-                    reward = RedeemedReward.objects.get(
-                        id=use_reward_id,
-                        user=request.user,
-                        is_used=False
-                    )
-                    discount = RedeemedReward.get_reward_discount_amount(reward.reward_id)
-                    if discount > 0:
-                        reward_discount_amount = discount
-                        applied_reward_id = reward.reward_id
-                        applied_reward_name = reward.reward_name
-                        final_total_price = max(Decimal('0.00'), final_total_price - discount)
-                        logger.info(f"用戶選擇使用已兌換獎勵 {reward.reward_name}，折扣: ${discount}")
-            except RedeemedReward.DoesNotExist:
-                logger.warning(f"無效的獎勵ID: {use_reward_id}")
-            except Exception as e:
-                logger.error(f"處理積分獎勵失敗: {str(e)}")
+    if request.user.is_authenticated and selected_reward_id:
+        try:
+            from socialuser.models_enhanced import RedeemedReward
+            
+            # 套用用戶選擇的獎勵
+            success, discount, reward_name = RedeemedReward.apply_reward_at_checkout(
+                request.user, selected_reward_id
+            )
+            if success and discount > 0:
+                reward_discount_amount = discount
+                applied_reward_id = selected_reward_id
+                applied_reward_name = reward_name
+                final_total_price = max(Decimal('0.00'), final_total_price - discount)
+                logger.info(f"用戶選擇套用獎勵 {reward_name}，折扣: ${discount}")
+        except Exception as e:
+            logger.error(f"套用積分獎勵失敗: {str(e)}")
     
     return {
         'original_total_price': original_total_price,
         'final_total_price': final_total_price,
-        'applied_coupon_code': applied_coupon_code,
-        'coupon_discount': coupon_discount,
+        'applied_coupon_code': None,
+        'coupon_discount': Decimal('0.00'),
         'loyalty_discount_rate': loyalty_discount_rate,
         'loyalty_discount_amount': loyalty_discount_amount,
         'applied_reward_id': applied_reward_id,
         'applied_reward_name': applied_reward_name,
         'reward_discount_amount': reward_discount_amount,
-        'total_discount': coupon_discount + loyalty_discount_amount + reward_discount_amount
+        'total_discount': loyalty_discount_amount + reward_discount_amount
     }
 
 
@@ -296,20 +258,37 @@ class OrderConfirm(View):
 
             # 查詢用戶在結帳時可直接使用的獎勵（基於積分，無需預先兌換）
             available_rewards = []
+            best_reward = None
             if request.user.is_authenticated:
                 try:
                     from socialuser.models_enhanced import RedeemedReward
                     available_rewards = RedeemedReward.get_available_rewards_for_checkout(request.user)
+                    # 自動選出最佳優惠（折扣最大的）
+                    if available_rewards:
+                        best_reward = max(available_rewards, key=lambda r: r['discount'])
+                        # 將最佳優惠置頂
+                        available_rewards = sorted(
+                            available_rewards,
+                            key=lambda r: r['reward_id'] == best_reward['reward_id'],
+                            reverse=True
+                        )
                 except Exception as e:
                     logger.error(f"查詢可用獎勵失敗: {str(e)}")
+
+            # 計算折扣後總價
+            discounted_total = total_price
+            if best_reward:
+                discounted_total = total_price - best_reward['discount']
 
             context = {
                 'items': items,
                 'total_price': total_price,
+                'discounted_total': discounted_total,
                 'user': request.user,
                 'initial_data': initial_data,
                 'is_quick_order': is_quick_order,
                 'available_rewards': available_rewards,
+                'best_reward': best_reward,
             }
             return render(request, self.template_name, context)
         
@@ -432,8 +411,19 @@ class OrderConfirm(View):
                 field_errors = {'phone': '電話號碼格式不正確'}
                 return handle_validation_error(request, field_errors)
 
-            # 應用優惠券和折扣
-            discount_data = apply_coupon_discounts(request, Decimal(str(total_price)), items)
+            # 讀取用戶選擇的積分獎勵（checkbox：有勾選才有值，取消勾選則不發送）
+            selected_reward = request.POST.get('selected_reward', '')
+            # 如果 selected_reward 為空字串，視為未選擇任何獎勵
+            if selected_reward == '':
+                selected_reward = None
+
+            # 應用優惠券和折扣（傳遞用戶選擇的獎勵ID）
+            discount_data = apply_coupon_discounts(
+                request, 
+                Decimal(str(total_price)), 
+                items,
+                selected_reward_id=selected_reward if selected_reward else None
+            )
             
             # 更新總價為折扣後的價格
             final_total_price = float(discount_data['final_total_price'])

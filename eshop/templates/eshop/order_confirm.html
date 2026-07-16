@@ -40,17 +40,17 @@
                 <!-- table content -->
                 <div class="Rtable-cell sidebar-box ftco-animate mt-6 hiddenSmall">
                     {% for item in items %}
-                        <div class="block-21 mb-5 d-flex" style="align-items: flex-start;">
-                            <div class="blog-img mr-4" style="flex-shrink: 0; width: 80%;">
+                        <div class="block-21 mb-5 d-flex bc-order-item">
+                            <div class="blog-img mr-4 bc-order-item-img">
                                 <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
                                 <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
                             </div>
-                            <div class="text" style="flex: 1; min-width: 0;">
+                            <div class="text bc-order-item-text">
                                 <h3 class="heading">{{ item.name }}</h3>
                                 <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
 
                                 {% if item.type == 'coffee' %}
-                                <div class="meta pb-2 d-flex" style="display: flex !important; gap: 8px;">
+                                <div class="meta pb-2 d-flex bc-order-item-meta">
                                     <div>
                                         <span class="icon material-symbols-outlined">water_full</span>
                                         杯量 :
@@ -75,7 +75,7 @@
                                     </div>
                                 </div>
                                 {% elif item.type == 'bean' %}
-                                <div class="meta pb-2 d-flex" style="display: flex !important; gap: 8px;">
+                                <div class="meta pb-2 d-flex bc-order-item-meta">
 
                                     <div>
                                         <span class="icon material-symbols-outlined">roller_shades</span>
@@ -94,6 +94,7 @@
                                         重量 :
                                         <strong>
                                         {% if item.weight == '200g' %}200g
+                                        {% elif item.weight == '500g' %}500g
                                         {% elif item.weight == '1kg' %}1kg
                                         {% endif %}
                                         </strong>
@@ -114,7 +115,7 @@
 
 <section class="ftco-section-billing">
     <div class="container">
-        <span class="title-bg-head-v2" style="font-size: 16vw;">｛Hug<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Caffeine!｝</span>
+        <span class="title-bg-head-v2 bc-title-bg-order">｛Hug<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Caffeine!｝</span>
         <div class="row">
             <!-- info from -->
             <div class="col-xl-7">
@@ -137,92 +138,92 @@
                         <div class="col-md-12 px-0 mb-4">
                             {% if is_quick_order %}
                             <div class="form-group">
-                                <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
-                                    <i class="fas fa-clock" style="color: #c49b63;"></i> 取貨時間
+                                <label class="mb-3 bc-section-title">
+                                    <i class="fas fa-clock bc-section-icon-gold"></i> 取貨時間
                                 </label>
-                                <div class="pickup-time-list" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                                <div class="pickup-time-list bc-pickup-list">
                                     <div class="pickup-time-item" data-time="5">
-                                        <input type="radio" name="pickup_time" id="pickup-5" value="5" {% if initial_data.pickup_time == "5" %}checked{% endif %} style="display: none;">
-                                        <label for="pickup-5" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                        <input type="radio" name="pickup_time" id="pickup-5" value="5" {% if initial_data.pickup_time == "5" %}checked{% endif %} class="bc-radio-hidden">
+                                        <label for="pickup-5" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3 bc-pickup-label">
                                             <div class="d-flex align-items-center">
-                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                <span class="pickup-radio-circle mr-3 bc-pickup-radio-circle">
+                                                    <span class="pickup-radio-dot bc-pickup-radio-dot"></span>
                                                 </span>
                                                 <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fas fa-bolt" style="color: #c49b63; margin-right: 6px;"></i> 5 分鐘後
+                                                    <div class="bc-pickup-title">
+                                                        <i class="fas fa-bolt bc-section-icon-gold"></i> 5 分鐘後
                                                     </div>
-                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">快速取貨</div>
+                                                    <div class="bc-pickup-subtitle">快速取貨</div>
                                                 </div>
                                             </div>
                                         </label>
                                     </div>
                                     <div class="pickup-time-item" data-time="10">
-                                        <input type="radio" name="pickup_time" id="pickup-10" value="10" {% if initial_data.pickup_time == "10" %}checked{% endif %} style="display: none;">
-                                        <label for="pickup-10" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                        <input type="radio" name="pickup_time" id="pickup-10" value="10" {% if initial_data.pickup_time == "10" %}checked{% endif %} class="bc-radio-hidden">
+                                        <label for="pickup-10" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3 bc-pickup-label">
                                             <div class="d-flex align-items-center">
-                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                <span class="pickup-radio-circle mr-3 bc-pickup-radio-circle">
+                                                    <span class="pickup-radio-dot bc-pickup-radio-dot"></span>
                                                 </span>
                                                 <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fas fa-mug-hot" style="color: #c49b63; margin-right: 6px;"></i> 10 分鐘後
+                                                    <div class="bc-pickup-title">
+                                                        <i class="fas fa-mug-hot bc-section-icon-gold"></i> 10 分鐘後
                                                     </div>
-                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">標準</div>
+                                                    <div class="bc-pickup-subtitle">標準</div>
                                                 </div>
                                             </div>
                                         </label>
                                     </div>
                                     <div class="pickup-time-item" data-time="15">
-                                        <input type="radio" name="pickup_time" id="pickup-15" value="15" {% if initial_data.pickup_time == "15" %}checked{% endif %} style="display: none;">
-                                        <label for="pickup-15" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                        <input type="radio" name="pickup_time" id="pickup-15" value="15" {% if initial_data.pickup_time == "15" %}checked{% endif %} class="bc-radio-hidden">
+                                        <label for="pickup-15" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3 bc-pickup-label">
                                             <div class="d-flex align-items-center">
-                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                <span class="pickup-radio-circle mr-3 bc-pickup-radio-circle">
+                                                    <span class="pickup-radio-dot bc-pickup-radio-dot"></span>
                                                 </span>
                                                 <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fas fa-coffee" style="color: #c49b63; margin-right: 6px;"></i> 15 分鐘後
+                                                    <div class="bc-pickup-title">
+                                                        <i class="fas fa-coffee bc-section-icon-gold"></i> 15 分鐘後
                                                     </div>
-                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">從容</div>
+                                                    <div class="bc-pickup-subtitle">從容</div>
                                                 </div>
                                             </div>
                                         </label>
                                     </div>
                                     <div class="pickup-time-item" data-time="20">
-                                        <input type="radio" name="pickup_time" id="pickup-20" value="20" {% if initial_data.pickup_time == "20" %}checked{% endif %} style="display: none;">
-                                        <label for="pickup-20" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex !important;">
+                                        <input type="radio" name="pickup_time" id="pickup-20" value="20" {% if initial_data.pickup_time == "20" %}checked{% endif %} class="bc-radio-hidden">
+                                        <label for="pickup-20" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3 bc-pickup-label">
                                             <div class="d-flex align-items-center">
-                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                <span class="pickup-radio-circle mr-3 bc-pickup-radio-circle">
+                                                    <span class="pickup-radio-dot bc-pickup-radio-dot"></span>
                                                 </span>
                                                 <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fas fa-hourglass-half" style="color: #c49b63; margin-right: 6px;"></i> 20 分鐘後
+                                                    <div class="bc-pickup-title">
+                                                        <i class="fas fa-hourglass-half bc-section-icon-gold"></i> 20 分鐘後
                                                     </div>
-                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">悠閒</div>
+                                                    <div class="bc-pickup-subtitle">悠閒</div>
                                                 </div>
                                             </div>
                                         </label>
                                     </div>
                                     <div class="pickup-time-item" data-time="30">
-                                        <input type="radio" name="pickup_time" id="pickup-30" value="30" {% if initial_data.pickup_time == "30" %}checked{% endif %} style="display: none;">
-                                        <label for="pickup-30" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3" style="cursor: pointer; display: flex !important;">
+                                        <input type="radio" name="pickup_time" id="pickup-30" value="30" {% if initial_data.pickup_time == "30" %}checked{% endif %} class="bc-radio-hidden">
+                                        <label for="pickup-30" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3 bc-pickup-label-last">
                                             <div class="d-flex align-items-center">
-                                                <span class="pickup-radio-circle mr-3" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
-                                                    <span class="pickup-radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: all 0.2s ease;"></span>
+                                                <span class="pickup-radio-circle mr-3 bc-pickup-radio-circle">
+                                                    <span class="pickup-radio-dot bc-pickup-radio-dot"></span>
                                                 </span>
                                                 <div>
-                                                    <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                        <i class="fas fa-star" style="color: #c49b63; margin-right: 6px;"></i> 30 分鐘後
+                                                    <div class="bc-pickup-title">
+                                                        <i class="fas fa-star bc-section-icon-gold"></i> 30 分鐘後
                                                     </div>
-                                                    <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">最舒適</div>
+                                                    <div class="bc-pickup-subtitle">最舒適</div>
                                                 </div>
                                             </div>
                                         </label>
                                     </div>
                                 </div>
-                                <small class="form-text text-muted mt-2" style="color: rgba(255,255,255,0.4) !important;">
+                                <small class="form-text text-muted mt-2 bc-pickup-hint">
                                     <i class="fas fa-info-circle mr-1"></i>您可以修改取貨時間
                                 </small>
                             </div>
@@ -268,49 +269,6 @@
                         </div>
 
                         <div class="w-100"></div>
-
-                        <!-- ========== 積分獎勵選擇區塊（方案B：簡約列表式） ========== -->
-                        {% if user.is_authenticated and available_rewards %}
-                        <div class="col-md-12 px-0 mb-4">
-                            <div class="form-group">
-                                <label class="mb-3 bc-section-label">
-                                    <i class="fas fa-gift bc-section-icon"></i> 積分兌換
-                                </label>
-                                <div class="reward-list">
-                                    {% for reward in available_rewards %}
-                                    <div class="reward-item d-flex align-items-center justify-content-between px-3 py-3">
-                                        <div class="d-flex align-items-center reward-item-left">
-                                            <div class="reward-checkbox-wrapper mr-3">
-                                                <input type="checkbox" name="use_reward" value="{{ reward.reward_id }}"
-                                                       id="reward-{{ reward.reward_id }}"
-                                                       data-discount="{{ reward.discount }}"
-                                                       data-reward-name="{{ reward.reward_name }}"
-                                                       class="reward-checkbox-input">
-                                                <label for="reward-{{ reward.reward_id }}" class="reward-checkbox-label mb-0">
-                                                    <i class="fas fa-check"></i>
-                                                </label>
-                                            </div>
-                                            <div class="reward-name-wrap">
-                                                <div class="reward-name">{{ reward.reward_name }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="reward-points">
-                                            <i class="fas fa-star"></i> 消耗 {{ reward.points_required }} 積分
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
-                                    <small class="reward-info-text">
-                                        <i class="fas fa-info-circle"></i> 勾選後提交訂單即自動兌換
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- ========== end 積分獎勵選擇區塊 ========== -->
-
 
                         <!-- 付款方式選擇（方案C：無Accordion簡約列表式） -->
                         <div class="col-md-12 px-0 mb-4">
@@ -374,6 +332,54 @@
                             </div>
                         </div>
 
+                        <!-- ========== 積分兌換區塊（用戶自行選擇） ========== -->
+                        {% if user.is_authenticated and available_rewards %}
+                        <div class="col-md-12 px-0 mb-4">
+                            <div class="form-group">
+                                <label class="mb-3 bc-section-label">
+                                    <i class="fas fa-gift bc-section-icon"></i> 積分兌換
+                                </label>
+                                <div class="reward-select-list">
+                                    {% for reward in available_rewards %}
+                                    <div class="reward-select-item">
+                                        <input type="checkbox" name="selected_reward" 
+                                               id="reward-{{ reward.reward_id }}" 
+                                               value="{{ reward.reward_id }}"
+                                               data-discount="{{ reward.discount }}"
+                                               data-name="{{ reward.reward_name }}"
+                                               data-points="{{ reward.points_required }}"
+                                               {% if reward.reward_id == best_reward.reward_id %}checked{% endif %}>
+                                        <label for="reward-{{ reward.reward_id }}" class="reward-select-label">
+                                            <span class="reward-checkbox-box">
+                                                <i class="fas fa-check reward-checkbox-check"></i>
+                                            </span>
+                                            <div class="reward-select-info">
+                                                <div class="reward-select-name">{{ reward.reward_name }}</div>
+                                                <div class="reward-select-points">
+                                                    <i class="fas fa-star bc-reward-star"></i> 消耗 {{ reward.points_required }} 積分
+                                                </div>
+                                            </div>
+                                            <div class="reward-select-discount">
+                                                {% if reward.reward_id == best_reward.reward_id %}
+                                                <span class="reward-best-text">已兌換最佳優惠</span>
+                                                {% endif %}
+                                                -${{ reward.discount|floatformat:"-2" }}
+                                            </div>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                                    <small class="reward-info-text bc-reward-info">
+                                        <i class="fas fa-info-circle"></i> 勾選積分優惠以套用折扣，取消勾選則不使用
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- ========== end 積分兌換區塊 ========== -->
+
 
 
 
@@ -381,17 +387,17 @@
                         <!-- ========== 聯絡資訊（使用 bc-components 風格，從 checkout.html 搬過來） ========== -->
                         <div class="col-md-12 px-0 mb-4">
                             <div class="form-group">
-                                <label class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #fff;">
-                                    <i class="icon-user" style="color: #c49b63;"></i> 聯絡資訊
+                                <label class="mb-3 bc-section-title">
+                                    <i class="icon-user bc-section-icon-gold"></i> 聯絡資訊
                                 </label>
-                                <div class="bc-field-row" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                    <div class="bc-field" style="flex: 1; min-width: 200px;">
+                                <div class="bc-field-row-custom">
+                                    <div class="bc-field bc-field-custom">
                                         <label class="bc-field-label">姓名 *</label>
                                         <input type="text" name="name" class="bc-input" required
                                                value="{% if initial_data.name %}{{ initial_data.name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
                                                placeholder="您的姓名">
                                     </div>
-                                    <div class="bc-field" style="flex: 1; min-width: 200px;">
+                                    <div class="bc-field bc-field-custom">
                                         <label class="bc-field-label">電話 *</label>
                                         <input type="tel" name="phone" class="bc-input" required
                                                value="{% if initial_data.phone %}{{ initial_data.phone }}{% elif user.is_authenticated and user.profile.phone %}{{ user.profile.hk_phone }}{% endif %}"
@@ -400,13 +406,13 @@
                                                title="請輸入8位數字香港電話號碼">
                                     </div>
                                 </div>
-                                <div class="bc-field" style="margin-top: 12px;">
+                                <div class="bc-field bc-field-mt">
                                     <label class="bc-field-label">Email（選填，用於接收取餐通知）</label>
                                     <input type="email" name="email" class="bc-input"
                                            value="{% if initial_data.email %}{{ initial_data.email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}"
                                            placeholder="your@email.com">
                                 </div>
-                                <small class="form-text text-muted mt-2" style="color: rgba(255,255,255,0.4) !important;">
+                                <small class="form-text text-muted mt-2 bc-contact-hint">
                                     <i class="icon-whatsapp mr-1"></i>默認以 WhatsApp 通知
                                 </small>
                             </div>
@@ -429,17 +435,17 @@
                 <div class="col-xl-5 sidebar">
                     <div class="sidebar-box mt-6 hiddenSmall">
                         {% for item in items %}
-                            <div class="block-21 mb-5 d-flex" style="align-items: flex-start;">
-                                <div class="blog-img mr-4" style="flex-shrink: 0; width: 80%;">
+                            <div class="block-21 mb-5 d-flex bc-order-item">
+                                <div class="blog-img mr-4 bc-order-item-img">
                                     <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
                                     <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
                                 </div>
-                                <div class="text" style="flex: 1; min-width: 0;">
+                                <div class="text bc-order-item-text">
                                     <h3 class="heading">{{ item.name }}</h3>
                                     <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
 
                                     {% if item.type == 'coffee' %}
-                                    <div class="meta pb-2 d-flex" style="display: flex !important; gap: 4px;">
+                                    <div class="meta pb-2 d-flex bc-order-item-meta-sm">
                                         <div>
                                             <span class="icon material-symbols-outlined">water_full</span>
                                             杯量 :
@@ -464,7 +470,7 @@
                                         </div>
                                     </div>
                                     {% elif item.type == 'bean' %}
-                                    <div class="meta pb-2 d-flex" style="display: flex !important; gap: 4px;">
+                                    <div class="meta pb-2 d-flex bc-order-item-meta-sm">
 
                                         <div>
                                             <span class="icon material-symbols-outlined">roller_shades</span>
@@ -483,6 +489,7 @@
                                             重量 :
                                             <strong>
                                             {% if item.weight == '200g' %}200g
+                                            {% elif item.weight == '500g' %}500g
                                             {% elif item.weight == '1kg' %}1kg
                                             {% endif %}
                                             </strong>
@@ -499,22 +506,31 @@
                     <!-- 支付信息-->
                     <div class="sidebar-box">
                         <div class="dividerline mb-4"></div>
-                        <div class="total-price mb-2 text-right">
-                            <span class="h4">總計: </span>
-                            <span class="h4">${{ total_price|floatformat:"-2" }}</span>
+                        <div class="total-price d-flex justify-content-between">
+                            <span class="h5">小計: </span>
+                            <span class="h5" id="bc-subtotal-amount">${{ total_price|floatformat:"-2" }}</span>
                         </div>
-                        {% if user.is_authenticated and available_rewards %}
-                        <div id="reward-discount-container" class="text-right mb-4 px-1 reward-discount-container">
-                            <span class="reward-discount-text">
-                                積分折扣: -$<span id="reward-discount-amount" class="reward-discount-amount">0.00</span>
+                        <div class="text-right px-1" id="bc-discount-row" style="{% if not user.is_authenticated or not best_reward %}display:none;{% endif %}">
+                            <span class="bc-total-discount" id="bc-discount-text">
+                                {% if user.is_authenticated and best_reward %}
+                                積分折扣: -${{ best_reward.discount|floatformat:"-2" }}
+                                {% endif %}
                             </span>
                         </div>
-
-                        {% endif %}
+                        <div class="total-price mb-2 mt-4 d-flex justify-content-between">
+                            <span class="h5 bc-total-gold">總計: </span>
+                            <span class="h5 bc-total-gold" id="bc-total-amount">
+                                {% if user.is_authenticated and best_reward %}
+                                ${{ discounted_total|floatformat:"-2" }}
+                                {% else %}
+                                ${{ total_price|floatformat:"-2" }}
+                                {% endif %}
+                            </span>
+                        </div>
                         <div class="block-21 justify-content-end">
                             <div class="form-group pb-5">
                             <!-- 支付按钮 -->
-                            <button type="submit" class="btn btn-primary btn-primary-outline pr-8 pl-8 py-3" id="payment-button" style="min-width: 200px; text-align: center; white-space: nowrap;">確認並支付</button>
+                            <button type="submit" class="btn btn-primary btn-primary-outline pr-8 pl-8 py-3 mt-4 bc-payment-btn" id="payment-button">確認並支付</button>
                                 <div class="text-center mt-3">
                                     <span class=""><a href="{% url 'cart:cart_detail' %}" class="btn">返回購物車</a></span>
                                 </div>
@@ -640,6 +656,63 @@
 
 
 <script>
+// ==================== 積分兌換即時更新價格（checkbox 版本） ====================
+document.addEventListener('DOMContentLoaded', function() {
+    const rewardCheckboxes = document.querySelectorAll('input[name="selected_reward"]');
+    const discountRow = document.getElementById('bc-discount-row');
+    const discountText = document.getElementById('bc-discount-text');
+    const totalAmount = document.getElementById('bc-total-amount');
+    const subtotalAmount = document.getElementById('bc-subtotal-amount');
+    
+    // 獲取原始總價
+    let originalTotal = 0;
+    if (subtotalAmount) {
+        originalTotal = parseFloat(subtotalAmount.textContent.replace('$', '')) || 0;
+    }
+    
+    function updatePriceDisplay() {
+        // 找到所有勾選的 checkbox
+        const checkedBoxes = document.querySelectorAll('input[name="selected_reward"]:checked');
+        
+        if (checkedBoxes.length === 0) {
+            // 沒有勾選任何獎勵，顯示原價
+            if (discountRow) discountRow.style.display = 'none';
+            if (totalAmount) totalAmount.textContent = '$' + originalTotal.toFixed(2);
+            return;
+        }
+        
+        // 取第一個勾選的獎勵（只能選一個）
+        const selected = checkedBoxes[0];
+        const discount = parseFloat(selected.dataset.discount) || 0;
+        const discountedTotal = Math.max(0, originalTotal - discount);
+        
+        // 更新折扣行
+        if (discountRow) discountRow.style.display = 'block';
+        if (discountText) discountText.textContent = '積分折扣: -$' + discount.toFixed(2);
+        
+        // 更新總計
+        if (totalAmount) totalAmount.textContent = '$' + discountedTotal.toFixed(2);
+    }
+    
+    // 初始化：根據預設勾選的獎勵更新價格
+    updatePriceDisplay();
+    
+    // 監聽變更：當勾選一個 checkbox 時，取消其他勾選（只能選一個）
+    rewardCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            if (this.checked) {
+                // 取消其他 checkbox 的勾選（只能選一個）
+                rewardCheckboxes.forEach(other => {
+                    if (other !== this) {
+                        other.checked = false;
+                    }
+                });
+            }
+            updatePriceDisplay();
+        });
+    });
+});
+
 // 支付方式交互（方案C：無Accordion簡約列表式）- 自定義 radio 切換（無箭頭、無展開/收起）
 document.addEventListener('DOMContentLoaded', function() {
     const paymentItems = document.querySelectorAll('.payment-item-simple');
@@ -1085,99 +1158,6 @@ function cancelPayment(orderId) {
 </script>
 
 <script>
-// 積分獎勵選擇（方案B：簡約列表式）- 自定義 checkbox 交互 + 即時更新總價
-document.addEventListener('DOMContentLoaded', function() {
-    const rewardCheckboxes = document.querySelectorAll('.reward-checkbox-input');
-    const rewardDiscountSpan = document.getElementById('reward-discount-amount');
-    const totalPriceElement = document.querySelector('.total-price .h4:last-child');
-    const originalTotalPrice = {{ total_price }};
-    
-    if (rewardCheckboxes.length > 0) {
-        rewardCheckboxes.forEach(cb => {
-            // 點擊 label 時切換 checkbox（CSS 已處理 :checked 樣式）
-            const label = cb.nextElementSibling;
-            if (label) {
-                label.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    cb.checked = !cb.checked;
-                    cb.dispatchEvent(new Event('change'));
-                });
-            }
-            
-            cb.addEventListener('change', function() {
-                // 限制只能選一個獎勵
-                rewardCheckboxes.forEach(other => {
-                    if (other !== this) {
-                        other.checked = false;
-                    }
-                });
-                
-                // 計算折扣
-                const discount = this.checked ? parseFloat(this.dataset.discount) : 0;
-                rewardDiscountSpan.textContent = discount.toFixed(2);
-                
-                // 更新總價（保持與初始格式一致，避免多出 .00）
-                const newTotal = Math.max(0, originalTotalPrice - discount);
-                if (totalPriceElement) {
-                    const formattedTotal = newTotal % 1 === 0 ? newTotal.toFixed(0) : newTotal.toFixed(2);
-                    totalPriceElement.textContent = '$' + formattedTotal;
-                }
-                
-                // 控制折扣容器的顯示/隱藏（使用 visibility 避免佈局抖動）
-                const discountContainer = document.getElementById('reward-discount-container');
-                if (discountContainer) {
-                    if (this.checked && discount > 0) {
-                        discountContainer.style.visibility = 'visible';
-                    } else {
-                        discountContainer.style.visibility = 'hidden';
-                    }
-                }
-                
-                console.log('獎勵選擇:', this.checked ? this.dataset.rewardName : '無', 
-                            '折扣:', discount, '新總價:', newTotal);
-            });
-            
-        });
-    }
-});
-
-
-// === 跨 <script> 區塊輔助函數：確保 showToast 在此區塊也可用 ===
-function showToast(type, message) {
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        toastContainer.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;';
-        document.body.appendChild(toastContainer);
-    }
-    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-    const title = type === 'success' ? '成功' : type === 'error' ? '錯誤' : '提示';
-    const toastEl = document.createElement('div');
-    toastEl.style.cssText = `
-        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
-        color: #fff; padding: 12px 20px; border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3); min-width: 280px; max-width: 400px;
-        display: flex; align-items: center; gap: 10px;
-        animation: toastSlideIn 0.3s ease; font-size: 0.95rem;
-    `;
-    toastEl.innerHTML = `
-        <span style="font-size:1.1rem;">${icon}</span>
-        <div><div style="font-weight:600;font-size:0.85rem;opacity:0.9;">${title}</div><div>${message}</div></div>
-        <button onclick="this.parentElement.remove()" style="
-            margin-left:auto;background:none;border:none;color:#fff;
-            opacity:0.7;cursor:pointer;font-size:1.2rem;padding:0 4px;
-        ">&times;</button>
-    `;
-    toastContainer.appendChild(toastEl);
-    setTimeout(() => {
-        toastEl.style.transition = 'all 0.3s ease';
-        toastEl.style.opacity = '0';
-        toastEl.style.transform = 'translateX(20px)';
-        setTimeout(() => toastEl.remove(), 300);
-    }, 3500);
-}
-
 // 在 order_confirm.html 的 JavaScript 部分添加
 document.addEventListener('DOMContentLoaded', function() {
     // 检查是否有未支付的订单
@@ -1438,5 +1418,3 @@ function cancelPendingOrder(orderId) {
 </script>
 
 {% endblock content %}
-
-

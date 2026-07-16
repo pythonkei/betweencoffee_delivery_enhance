@@ -198,52 +198,6 @@
                     </div>
                 </div>
                 
-                <!-- 我的優惠券 -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0">
-                            <i class="fas fa-ticket-alt mr-1"></i>
-                            我的優惠券
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        {% if active_coupons %}
-                        <div class="reward-coupon-list">
-                            {% for coupon in active_coupons %}
-                            <div class="reward-coupon-item">
-                                <div class="reward-coupon-left">
-                                    <div class="reward-coupon-icon">
-                                        <i class="fas fa-tag"></i>
-                                    </div>
-                                </div>
-                                <div class="reward-coupon-divider"></div>
-                                <div class="reward-coupon-right">
-                                    <h5 class="reward-coupon-name">{{ coupon.description }}</h5>
-                                    <p class="reward-coupon-desc">
-                                        優惠碼: <strong>{{ coupon.code }}</strong>
-                                        {% if coupon.coupon_type == 'percentage' %}
-                                        （{{ coupon.value }}% 折扣）
-                                        {% elif coupon.coupon_type == 'fixed' %}
-                                        （減 ${{ coupon.value }}）
-                                        {% endif %}
-                                    </p>
-                                    <p class="reward-coupon-desc text-muted small">
-                                        有效期至: {{ coupon.valid_to|date:"Y-m-d" }}
-                                    </p>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">暫無優惠券</h5>
-                            <p class="text-muted">兌換獎勵後，優惠券會顯示在這裡</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                
                 <!-- 近期活動記錄 - 表格組件（已隱藏，積分變化已顯示在訂單歷史頁面） -->
                 <div class="card shadow-sm" style="display: none;">
                     <div class="card-header">

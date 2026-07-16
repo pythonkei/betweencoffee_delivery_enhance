@@ -27,9 +27,6 @@ class OnePageCheckout {
       el.addEventListener('click', () => this._selectTime(el.dataset.minutes));
     });
 
-    // 優惠碼應用
-    document.getElementById('bc-apply-coupon')?.addEventListener('click', () => this._applyCoupon());
-
     // 表單提交
     this.form.addEventListener('submit', (e) => this._handleSubmit(e));
   }
@@ -46,42 +43,6 @@ class OnePageCheckout {
     document.querySelectorAll('.bc-time-chip').forEach(el => {
       el.classList.toggle('active', el.dataset.minutes === minutes);
     });
-  }
-
-  async _applyCoupon() {
-    const input = document.getElementById('bc-coupon-input');
-    const msgEl = document.getElementById('bc-coupon-msg');
-    const code = input?.value.trim();
-    if (!code) return;
-
-    try {
-      const response = await fetch('/socialuser/apply_coupon/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': this.csrfToken
-        },
-        body: JSON.stringify({ coupon_code: code })
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        msgEl.textContent = data.message;
-        msgEl.className = 'bc-coupon-msg success';
-        // 更新總價
-        const totalEl = document.getElementById('bc-final-total');
-        if (totalEl && data.final_amount) {
-          totalEl.textContent = `$${parseFloat(data.final_amount).toFixed(0)}`;
-        }
-        input.disabled = true;
-        document.getElementById('bc-apply-coupon').disabled = true;
-      } else {
-        msgEl.textContent = data.message;
-        msgEl.className = 'bc-coupon-msg error';
-      }
-    } catch (err) {
-      console.error('優惠碼失敗:', err);
-    }
   }
 
   async _handleSubmit(e) {

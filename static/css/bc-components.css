@@ -1528,3 +1528,288 @@
 .bc-rounded-full { border-radius: 50%; }
 .bc-rounded-pill { border-radius: 50px; }
 
+/* ============================================================
+   order_confirm.html 專用樣式
+   ============================================================ */
+
+/* ---- 商品列表 ---- */
+.bc-order-item {
+  align-items: flex-start;
+}
+.bc-order-item-img {
+  flex-shrink: 0;
+  width: 80%;
+}
+.bc-order-item-text {
+  flex: 1;
+  min-width: 0;
+}
+.bc-order-item-meta {
+  display: flex !important;
+  gap: 8px;
+}
+.bc-order-item-meta-sm {
+  display: flex !important;
+  gap: 4px;
+}
+
+/* ---- 區塊標題 ---- */
+.bc-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+.bc-section-icon-gold {
+  color: #c49b63;
+}
+
+/* ---- 取貨時間列表 ---- */
+.bc-pickup-list {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bc-pickup-label {
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex !important;
+}
+.bc-pickup-label-last {
+  cursor: pointer;
+  display: flex !important;
+}
+.bc-pickup-radio-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.bc-pickup-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+.bc-pickup-title {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.bc-pickup-subtitle {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.8rem;
+}
+.bc-pickup-hint {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* ---- 積分獎勵 ---- */
+.bc-reward-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+.bc-reward-icon-check {
+  color: #28a745;
+  font-size: 1.3rem;
+}
+.bc-reward-name {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.bc-reward-detail {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+.bc-reward-star {
+  color: #c49b63;
+}
+.bc-reward-discount {
+  color: #28a745;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.bc-reward-info {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* ---- 聯絡資訊 ---- */
+.bc-field-row-custom {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.bc-field-custom {
+  flex: 1;
+  min-width: 200px;
+}
+.bc-field-mt {
+  margin-top: 12px;
+}
+.bc-contact-hint {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* ---- 總計區塊 ---- */
+.bc-total-discount {
+  color: #28a745;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+.bc-total-gold {
+  color: #c49b63;
+}
+.bc-payment-btn {
+  min-width: 200px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ---- 背景訊息字體 ---- */
+.bc-title-bg-order {
+  font-size: 16vw;
+}
+
+/* ---- 隱藏 radio input ---- */
+.bc-radio-hidden {
+  display: none;
+}
+
+/* ===== 積分兌換 radio 選擇列表 ===== */
+.reward-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reward-select-item {
+  position: relative;
+}
+
+.reward-select-item input[type="checkbox"] {
+  display: none;
+}
+
+.reward-select-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bc-bg-card);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius-sm);
+  cursor: pointer;
+  transition: all var(--bc-transition);
+  margin-bottom: 0;
+}
+
+.reward-select-label:hover {
+  background: var(--bc-bg-card-hover);
+  border-color: var(--bc-gold-light);
+}
+
+.reward-select-item input[type="checkbox"]:checked + .reward-select-label {
+  background: rgba(196, 155, 99, 0.08);
+  border-color: rgba(196, 155, 99, 0.35);
+}
+
+.reward-checkbox-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--bc-transition);
+  background: transparent;
+}
+
+.reward-select-item input[type="checkbox"]:checked + .reward-select-label .reward-checkbox-box {
+  border-color: var(--bc-gold);
+  background: var(--bc-gold);
+}
+
+.reward-checkbox-check {
+  color: #0e0e0e;
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity var(--bc-transition);
+}
+
+.reward-select-item input[type="checkbox"]:checked + .reward-select-label .reward-checkbox-check {
+  opacity: 1;
+}
+
+.reward-select-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.reward-select-name {
+  color: var(--bc-text);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.reward-select-points {
+  color: var(--bc-text-muted);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.reward-select-discount {
+  color: var(--bc-gold);
+  font-size: 1.05rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reward-best-text {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #fff !important;
+  white-space: nowrap;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* 積分兌換區塊標題（與中間的 .bc-section-label/.bc-section-icon 定義重複，此處保留以覆蓋舊值） */
+/* 注意：中間已有 .bc-section-label 定義（color: #fff; font-size: 1.1rem; font-weight: 600;）*/
+/* 此處覆蓋為更適合積分兌換區塊的樣式 */
+.bc-section-label {
+  color: var(--bc-text);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.bc-section-icon {
+  color: var(--bc-gold);
+  margin-right: 6px;
+}
+
+.bc-reward-star {
+  color: #ffc107;
+  font-size: 0.75rem;
+  margin-right: 2px;
+}
+
+.bc-reward-info {
+  color: var(--bc-text-muted) !important;
+  font-size: 0.8rem;
+}
+
