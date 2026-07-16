@@ -32,11 +32,9 @@
 <!-- End Header Banner-->
 
 
-<!-- Render Coffee by for loop coffee_id -->
-<section class="ftco-subpage-section ftco-section-single-product">
+<section class="ftco-subpage-section ftco-section-single-product bc-section-with-bg-text" data-bg-text="&#65371;BREWED&#xa;&nbsp;&nbsp;&nbsp;&nbsp;FAST&#65373;">
     <div class="container">
         <div class="row justify-content-center mt-5">
-            <span class="title-bg-head">&#65371;BREWED<br>&nbsp;&nbsp;&nbsp;FAST&#65373;</span>
             <!-- coffee.html - 保持不变，使用详情页图片 -->
             <div class="col-lg-6 mb-5">
                 <div class="img-box">
@@ -80,9 +78,21 @@
                             <div class="form-group d-flex">
                                 <p>杯量 :</p>
                                 <div class="bc-option-group" id="cup-level-group">
-                                    <button type="button" class="bc-option-btn" data-value="Small">少</button>
-                                    <button type="button" class="bc-option-btn active" data-value="Medium">正常</button>
-                                    <button type="button" class="bc-option-btn" data-value="Large">追加</button>
+                                    <button type="button" class="bc-option-btn" data-value="Small" data-oz="12oz">
+                                        <span class="bc-option-oz">12oz</span>
+                                        <i class="bc-option-icon icon-coffee"></i>
+                                        <span class="bc-option-label-text">少</span>
+                                    </button>
+                                    <button type="button" class="bc-option-btn active" data-value="Medium" data-oz="16oz">
+                                        <span class="bc-option-oz">16oz</span>
+                                        <i class="bc-option-icon icon-coffee"></i>
+                                        <span class="bc-option-label-text">正常</span>
+                                    </button>
+                                    <button type="button" class="bc-option-btn" data-value="Large" data-oz="20oz">
+                                        <span class="bc-option-oz">20oz</span>
+                                        <i class="bc-option-icon icon-coffee"></i>
+                                        <span class="bc-option-label-text">追加</span>
+                                    </button>
                                 </div>
                                 <input type="hidden" name="cup_level" id="cup_level" value="Medium">
                             </div>

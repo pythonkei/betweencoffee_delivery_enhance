@@ -901,14 +901,35 @@ button.alert:hover {
   position: absolute;
   right: auto;
   text-align: left;
-  top: -30px;
+  top: 0;
   width: auto;
   z-index: -2;
   max-width: 100%;
-  justify-content: flex-start;
   opacity: .045;
   font-family: 'Mogra';
   letter-spacing: -10px;
+}
+
+/* 使用 ::before 偽元素實現背景文字，避免 overflow: hidden 裁切問題 */
+.bc-section-with-bg-text {
+  position: relative;
+}
+
+.bc-section-with-bg-text::before {
+  content: attr(data-bg-text);
+  position: absolute;
+  top: 0;
+  left: -12vw;
+  font-family: 'Mogra';
+  font-size: 20vw;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fff;
+  opacity: .045;
+  letter-spacing: -10px;
+  z-index: 0;
+  pointer-events: none;
+  white-space: pre-wrap;
 }
 
 .title-bg-head-v2 {
@@ -928,6 +949,28 @@ button.alert:hover {
   z-index: -2;
   max-width: 100%;
   justify-content: flex-start;
+  opacity: .03;
+  font-family: 'Mogra';
+  letter-spacing: -10px;
+}
+
+
+.title-bg-head-v3 {
+  bottom: auto;
+  color: #fff;
+  font-size: 20vw;
+  font-weight: 700;
+  height: auto;
+  left: -8vw;
+  line-height: 1.2;
+  margin: 0 0 0 0;
+  position: absolute;
+  right: auto;
+  text-align: left;
+  top: 0px;
+  width: auto;
+  z-index: -2;
+  max-width: 100%;
   opacity: .03;
   font-family: 'Mogra';
   letter-spacing: -10px;

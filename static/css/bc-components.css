@@ -1060,7 +1060,7 @@
 
 .bc-option-btn {
   flex: 1;
-  padding: 6px 2px;
+  padding: 8px 10px;
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 500;
@@ -1074,13 +1074,13 @@
   line-height: 1.3;
   outline: none;
   box-shadow: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
 }
-
-
-
-
-
-
 
 .bc-option-btn:focus,
 .bc-option-btn:focus-visible {
@@ -1093,9 +1093,58 @@
   color: #fff;
 }
 
+.bc-option-btn:hover .bc-option-icon,
+.bc-option-btn:hover .bc-option-label-text {
+  color: #fff;
+}
+
+.bc-option-btn:hover .bc-option-oz {
+  color: var(--bc-gold);
+  background: #fff;
+}
+
 .bc-option-btn.active {
   background: var(--bc-gold);
   color: #fff;
+}
+
+.bc-option-btn.active .bc-option-icon,
+.bc-option-btn.active .bc-option-label-text {
+  color: #fff;
+}
+
+.bc-option-btn.active .bc-option-oz {
+  color: var(--bc-gold);
+  background: #fff;
+}
+
+/* 杯量按鈕 - 右上角 oz 標籤 */
+.bc-option-oz {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 0.6rem;
+  color: #fff;
+  line-height: 1;
+  transition: all var(--bc-transition);
+  background: var(--bc-gold);
+  padding: 2px 5px;
+  margin: 3px;
+  border-radius: 0 3px 0 4px;
+  letter-spacing: 0.5px;
+}
+
+/* 杯量按鈕 - 圖標 (icomoon) */
+.bc-option-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* 杯量按鈕 - 標籤文字 */
+.bc-option-label-text {
+  font-size: 0.8rem;
+  line-height: 1;
 }
 
 /* ===== 商品詳情頁數量按鈕（與選項按鈕同高） ===== */
