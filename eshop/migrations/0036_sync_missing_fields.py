@@ -1,5 +1,6 @@
 # Generated manually to sync model fields with database
 # Adds missing columns that were defined in models.py but not created in the database
+# 注意：這些欄位在資料庫中已經存在，所以使用 SeparateDatabaseAndState 只更新 Django state
 
 from django.db import migrations, models
 
@@ -11,42 +12,24 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # 1. Add updated_at to CartItem (defined in model but missing in DB)
-        migrations.AddField(
-            model_name='cartitem',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, null=True),
+        # 1. Add updated_at to CartItem (already exists in DB, update state only)
+        # 2. Add position to CoffeeQueue (already exists in DB, update state only)
+        # 3. Rename contact_phone to phone in OrderModel (already done in DB, update state only)
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddField(
+                    model_name='cartitem',
+                    name='updated_at',
+                    field=models.DateTimeField(auto_now=True, null=True),
+                ),
+                migrations.AddField(
+                    model_name='coffeequeue',
+                    name='position',
+                    field=models.PositiveIntegerField(default=0, verbose_name='位置'),
+                ),
+            ],
+            database_operations=[],
         ),
-        # 2. Add position to CoffeeQueue (defined in model but missing in DB)
-        migrations.AddField(
-            model_name='coffeequeue',
-            name='position',
-            field=models.PositiveIntegerField(default=0, verbose_name='位置'),
-        ),
-        # 3. Rename contact_phone to phone in OrderModel to match model definition
-        # 注意：如果 contact_phone 欄位不存在（例如已經被重新命名過），則跳過此操作
-        migrations.RunSQL(
-            sql="""
-                DO $$
-                BEGIN
-                    IF EXISTS (
-                        SELECT 1 FROM information_schema.columns
-                        WHERE table_name='eshop_ordermodel' AND column_name='contact_phone'
-                    ) THEN
-                        ALTER TABLE eshop_ordermodel RENAME COLUMN contact_phone TO phone;
-                    END IF;
-                END $$;
-            """,
-            reverse_sql="""
-                DO $$
-                BEGIN
-                    IF EXISTS (
-                        SELECT 1 FROM information_schema.columns
-                        WHERE table_name='eshop_ordermodel' AND column_name='phone'
-                    ) THEN
-                        ALTER TABLE eshop_ordermodel RENAME COLUMN phone TO contact_phone;
-                    END IF;
-                END $$;
-            """,
-        ),
+        # 注意：contact_phone → phone 的重新命名已在資料庫中完成
+        # 此處不再需要 RunSQL，因為 Django state 中的欄位名稱已經是 phone
     ]
