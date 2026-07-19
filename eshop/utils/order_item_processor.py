@@ -243,7 +243,7 @@ class OrderItemProcessor:
             'id': order.id,
             'order_id': order.id,
             'pickup_code': order.pickup_code or '',
-            'name': order.name or '顾客',
+            'name': order.contact_name or '顾客',
             'phone': order.phone or '',
             'total_price': total_price,
             'items': item_result['all_items'],

@@ -387,7 +387,7 @@ def order_details_for_waiting_api(request, order_id):
             'id': order.id,
             'pickup_code': order.pickup_code,
             'total_price': str(order.total_price),
-            'name': order.name,
+            'name': order.contact_name,
             'phone': order.phone,
             'is_quick_order': order.is_quick_order,
             'payment_method': order.payment_method,

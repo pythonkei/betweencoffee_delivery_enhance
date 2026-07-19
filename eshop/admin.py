@@ -220,13 +220,13 @@ class OrderModelAdmin(admin.ModelAdmin):
     payment_status_with_badge.admin_order_field = 'payment_status'
     
     list_display = (
-        'id', 'user', 'name', 'phone', 'payment_method', 
+        'id', 'user', 'contact_name', 'phone', 'payment_method', 
         'payment_status_with_badge', 'status_with_badge', 'created_at', 
         'total_price', 'colored_quick_order', 'picked_up_at'
     )
     
     list_filter = ('payment_method', 'is_quick_order', 'payment_status', 'status')
-    search_fields = ('name', 'phone', 'email', 'user__username', 'pickup_code')
+    search_fields = ('contact_name', 'phone', 'email', 'user__username', 'pickup_code')
     
     readonly_fields = ('created_at', 'display_items', 'picked_up_at', 'picked_up_by')
     # 在ModelAdmin中也保持一致，不优先排序快速订单
@@ -281,7 +281,7 @@ class OrderModelAdmin(admin.ModelAdmin):
     fieldsets = (
         ('訂單信息', {
             'fields': (
-                ('name', 'phone'), 'email', 'user', 
+                ('contact_name', 'phone'), 'email', 'user', 
                 'is_quick_order', 'total_price', 'payment_method',
                 'payment_status', 'status', 'pickup_code'
             ),

@@ -54,7 +54,7 @@ def prepare_order_confirm_context(request, order=None, items=None, total_price=N
             'total_price': order.total_price,
             'user': request.user,
             'initial_data': {
-                'name': order.name,
+                'name': order.contact_name,
                 'phone': order.phone,
                 'email': order.email,
                 'pickup_time': order.pickup_time,

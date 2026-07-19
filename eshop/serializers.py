@@ -52,7 +52,7 @@ class OrderDataSerializer:
                 'is_paid': order.payment_status == 'paid',
                 'is_quick_order': order.is_quick_order,
                 'pickup_code': order.pickup_code,
-                'name': order.name or '顧客',
+                'name': order.contact_name or '顧客',
                 'phone': order.phone or '',
                 'total_price': str(order.total_price),
                 'created_at': order.created_at.isoformat(),

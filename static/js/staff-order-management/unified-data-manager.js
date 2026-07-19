@@ -47,9 +47,14 @@ class UnifiedDataManager {
     
     async loadUnifiedData(force = false, retryCount = 0) {
         // 防止重複加載
-        if (this.isLoading && !force) {
-            console.log('⚠️ 數據正在加載中，跳過重複請求');
-            return false;
+        if (this.isLoading) {
+            if (!force) {
+                console.log('⚠️ 數據正在加載中，跳過重複請求');
+                return false;
+            }
+            // force=true 時，強制中斷當前加載並重新開始
+            console.log('🔄 強制刷新：中斷當前加載並重新請求');
+            this.isLoading = false;
         }
         
         this.isLoading = true;
@@ -95,6 +100,7 @@ class UnifiedDataManager {
             
             const loadTime = Date.now() - startTime;
             console.log(`✅ 統一數據加載成功 (${loadTime}ms)，數據結構:`, {
+                payment_pending: result.data.payment_pending_orders?.length || 0, // ✅ 新增
                 waiting: result.data.waiting_orders?.length || 0,
                 preparing: result.data.preparing_orders?.length || 0,
                 ready: result.data.ready_orders?.length || 0,
@@ -191,6 +197,7 @@ class UnifiedDataManager {
         // 檢查必要的數據字段
         const requiredFields = [
             'badge_summary',
+            'payment_pending_orders', // ✅ 新增：待確認付款訂單
             'waiting_orders',
             'preparing_orders', 
             'ready_orders',
@@ -209,7 +216,7 @@ class UnifiedDataManager {
         // 驗證徽章數據結構
         const badgeData = result.data.badge_summary;
         if (badgeData) {
-            const requiredBadgeFields = ['waiting', 'preparing', 'ready', 'completed'];
+            const requiredBadgeFields = ['payment_pending', 'waiting', 'preparing', 'ready', 'completed'];
             for (const field of requiredBadgeFields) {
                 if (typeof badgeData[field] !== 'number') {
                     console.warn(`⚠️ 徽章數據驗證：${field} 不是數字`);
@@ -309,11 +316,12 @@ class UnifiedDataManager {
         
         // 通知順序：徽章優先，然後其他數據
         const notifyOrder = [
-            'badge_summary',    // 徽章數據（最先更新）
-            'waiting_orders',   // 等待隊列
-            'preparing_orders', // 製作中訂單
-            'ready_orders',     // 已就緒訂單
-            'completed_orders'  // ✅ 已提取訂單（新增）
+            'badge_summary',            // 徽章數據（最先更新）
+            'payment_pending_orders',   // 待確認付款訂單（新增）
+            'waiting_orders',           // 等待隊列
+            'preparing_orders',         // 製作中訂單
+            'ready_orders',             // 已就緒訂單
+            'completed_orders'          // ✅ 已提取訂單
         ];
         
         notifyOrder.forEach(dataType => {
@@ -784,8 +792,8 @@ class DebounceCoordinator {
             // 根據任務類型執行不同的刷新邏輯
             switch(task.sourceType) {
                 case 'websocket':
-                    // WebSocket事件：立即刷新
-                    await window.unifiedDataManager.loadUnifiedData();
+                    // WebSocket事件：強制刷新（確保不會被 isLoading 鎖擋住）
+                    await window.unifiedDataManager.loadUnifiedData(true);
                     break;
                     
                 case 'manual':

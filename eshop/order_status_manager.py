@@ -104,15 +104,25 @@ class OrderStatusManager:
             if request:
                 cls.clear_user_cart_and_session(request)
             
-            # ✅ 修改：发送WebSocket通知
+            # ✅ 修改：发送WebSocket通知（同時通知訂單群組和隊列群組）
             try:
-                from .websocket_utils import send_payment_update
+                from .websocket_utils import send_payment_update, send_queue_update
+                # 1. 發送到特定訂單群組（顧客端）
                 send_payment_update(
                     order_id=order_id,
                     payment_status='paid',
                     data={
                         'payment_method': order.payment_method,
                         'message': '支付成功，订单已加入队列'
+                    }
+                )
+                # 2. 發送到隊列群組（員工端），觸發員工頁面刷新
+                send_queue_update(
+                    update_type='payment_confirmed',
+                    data={
+                        'order_id': order_id,
+                        'payment_method': order.payment_method,
+                        'message': f'訂單 #{order_id} 支付確認，已加入隊列'
                     }
                 )
             except Exception as ws_error:
@@ -207,17 +217,28 @@ class OrderStatusManager:
             order.save()
             logger.info(f"✅ 訂單 #{order_id} 狀態已更新: {old_status} → {new_status}")
             
-            # ✅ 重要：清理隊列位置（當訂單狀態變為 ready 或 completed 時）
-            if new_status in ['ready', 'completed']:
-                queue_item = CoffeeQueue.objects.filter(order=order).first()
-                if queue_item and queue_item.position > 0:
-                    old_position = queue_item.position
-                    queue_item.position = 0
-                    queue_item.save()
-                    logger.info(
-                        f"✅ 訂單 #{order_id} 隊列位置已清理: "
-                        f"位置 {old_position} → 0 (狀態: {new_status})"
-                    )
+            # ✅ 重要：同步更新 CoffeeQueue.status（確保與 OrderModel.status 一致）
+            queue_item = CoffeeQueue.objects.filter(order=order).first()
+            if queue_item:
+                old_queue_status = queue_item.status
+                queue_item.status = new_status
+                
+                # 根據狀態設置時間戳
+                if new_status == 'preparing':
+                    queue_item.actual_start_time = now
+                elif new_status == 'ready':
+                    queue_item.actual_completion_time = now
+                    queue_item.position = 0  # 清理隊列位置
+                elif new_status == 'completed':
+                    queue_item.position = 0  # 清理隊列位置
+                
+                queue_item.save()
+                logger.info(
+                    f"✅ 訂單 #{order_id} CoffeeQueue 狀態已同步: "
+                    f"{old_queue_status} → {new_status}"
+                )
+            else:
+                logger.warning(f"⚠️ 訂單 #{order_id} 無對應 CoffeeQueue 記錄")
             
             # ✅ 重要：觸發統一時間計算
             from .queue_manager_refactored import CoffeeQueueManager
@@ -313,8 +334,9 @@ class OrderStatusManager:
            - 含咖啡：status = 'waiting'（等待加入製作隊列）
            - 純咖啡豆：status = 'ready'（可直接提取）
         4. 將訂單加入製作隊列（如適用）
-        5. 發送 WebSocket 通知
-        6. 添加會員積分
+        5. 重新計算所有訂單時間（確保新加入的訂單影響其他訂單的預計時間）
+        6. 發送 WebSocket 通知
+        7. 添加會員積分
         
         Args:
             order_id: 訂單 ID
@@ -382,7 +404,20 @@ class OrderStatusManager:
                     logger.error(f"❌ {method_label} 訂單 #{order_id} 加入隊列異常: {queue_error}")
                     queue_result = {'added': False, 'error': str(queue_error)}
             
-            # 5. 發送 WebSocket 通知
+            # 5. 重新計算所有訂單時間（確保新加入的訂單影響其他訂單的預計時間）
+            if queue_result and queue_result.get('added'):
+                try:
+                    from .queue_manager_refactored import CoffeeQueueManager
+                    qm = CoffeeQueueManager()
+                    time_result = qm.recalculate_all_order_times()
+                    if time_result.get('success'):
+                        logger.info(f"✅ {method_label} 訂單 #{order_id} 已重新計算所有訂單時間")
+                    else:
+                        logger.warning(f"⚠️ {method_label} 訂單 #{order_id} 重新計算時間失敗: {time_result.get('message')}")
+                except Exception as time_error:
+                    logger.error(f"❌ {method_label} 訂單 #{order_id} 重新計算時間異常: {time_error}")
+            
+            # 6. 發送 WebSocket 通知
             try:
                 from .websocket_utils import send_order_update, send_queue_update
                 
@@ -398,19 +433,28 @@ class OrderStatusManager:
                     }
                 )
                 
+                # ✅ 修復：總是發送 send_queue_update，即使加入隊列失敗也通知員工端刷新數據
+                queue_update_data = {
+                    'order_id': order_id,
+                    'payment_method': payment_method,
+                    'queue_type': 'waiting'
+                }
                 if queue_result and queue_result.get('added'):
-                    send_queue_update(
-                        update_type='add',
-                        data={
-                            'order_id': order_id,
-                            'position': queue_result.get('position', 0),
-                            'queue_type': 'waiting'
-                        }
-                    )
+                    queue_update_data['position'] = queue_result.get('position', 0)
+                    queue_update_data['update_type'] = 'add'
+                else:
+                    queue_update_data['update_type'] = 'payment_confirmed'
+                    queue_update_data['queue_added'] = False
+                    queue_update_data['message'] = f'訂單 #{order_id} 付款已確認，但加入隊列失敗，請手動處理'
+                
+                send_queue_update(
+                    update_type=queue_update_data['update_type'],
+                    data=queue_update_data
+                )
             except Exception as ws_error:
                 logger.error(f"發送 WebSocket 通知失敗: {ws_error}")
             
-            # 6. 添加會員積分
+            # 7. 添加會員積分
             if order.user:
                 try:
                     from socialuser.models_enhanced import CustomerLoyalty

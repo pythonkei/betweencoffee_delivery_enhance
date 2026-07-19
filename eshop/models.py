@@ -316,7 +316,7 @@ class OrderModel(models.Model):
     # ====== 基础字段 ======
     # created_on 字段已移除，使用 created_at 替代
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
-    name = models.CharField(max_length=50, blank=True)
+    contact_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='聯絡人名稱')
     email = models.EmailField(max_length=80, blank=True, null=True, default='')
     phone = models.CharField(max_length=12, blank=True, null=True)
     
@@ -394,6 +394,7 @@ class OrderModel(models.Model):
     # pickup_time 字段已移除，可通过 estimated_ready_time 计算
     # cup_size 字段已移除，未使用
     
+    order_number = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name='訂單編號')
     pickup_code = models.CharField(max_length=4, unique=True, blank=True)
     qr_code = models.TextField(blank=True, null=True)
     estimated_ready_time = models.DateTimeField(blank=True, null=True)
@@ -445,6 +446,7 @@ class OrderModel(models.Model):
     applied_coupon_code = models.CharField(max_length=50, blank=True, null=True, verbose_name='應用優惠碼')
     coupon_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='優惠券折扣金額')
     original_total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='原始總價')
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='折扣金額')
     
     # ====== 會員折扣相關字段（已棄用，所有用戶看到相同價格） ======
     loyalty_discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=1.00, verbose_name='會員折扣率')
@@ -454,6 +456,16 @@ class OrderModel(models.Model):
     applied_reward_id = models.CharField(max_length=50, blank=True, null=True, verbose_name='應用獎勵ID')
     applied_reward_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='應用獎勵名稱')
     reward_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='獎勵折扣金額')
+    
+    # ====== 資料庫殘留欄位（僅供 Django state 同步，不影響業務邏輯） ======
+    extra_info = models.TextField(blank=True, null=True, verbose_name='額外資訊')
+    completed_at = models.DateTimeField(blank=True, null=True, verbose_name='完成時間')
+    coupon_code = models.CharField(max_length=50, blank=True, null=True, verbose_name='優惠碼（舊版）')
+    note = models.TextField(blank=True, null=True, verbose_name='備註')
+    payment_id = models.CharField(max_length=255, blank=True, null=True, verbose_name='支付ID')
+    pickup_time = models.DateTimeField(blank=True, null=True, verbose_name='取貨時間（舊版）')
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='小計（舊版）')
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='總計（舊版）')
     
     class Meta:
         indexes = [
@@ -755,30 +767,79 @@ class OrderModel(models.Model):
         return True
     
     # ====== 订单商品处理方法 ======
-    def get_items(self):
-        """解析 JSON 字符串，并返回包含数值项的列表"""
+    def get_items(self, with_chinese_options=False):
+        """解析 JSON 字符串，并返回包含数值项的列表（使用批量查询优化 + 实例缓存）
+        
+        使用 _cached_items 避免同一个实例重复解析 items_json，
+        因为同一个 OrderModel 实例可能在一次请求中被多次调用 get_items()。
+        
+        参数:
+            with_chinese_options: 如果为 True，同时添加中文选项字段（cup_level_cn, milk_level_cn 等），
+                                  避免后续再调用 get_items_with_chinese_options() 重复遍历。
+        """
+        # 使用实例缓存，避免重复解析
+        if hasattr(self, '_cached_items'):
+            items = self._cached_items
+            # 如果缓存已有但需要中文选项，直接添加
+            if with_chinese_options:
+                self._add_chinese_options(items)
+            return items
+        
         from .models import CoffeeItem, BeanItem
         
         if isinstance(self.items, str):
             items = json.loads(self.items)
         else:
             items = self.items
-            
+        
+        # 预先收集需要查询数据库的商品ID，按类型分组
+        coffee_ids = set()
+        bean_ids = set()
+        needs_price = False
+        needs_image = False
+        
+        for item in items:
+            if 'price' not in item:
+                needs_price = True
+                if item.get('type') == 'coffee':
+                    coffee_ids.add(item['id'])
+                elif item.get('type') == 'bean':
+                    bean_ids.add(item['id'])
+            if 'image' not in item:
+                needs_image = True
+                if item.get('type') == 'coffee':
+                    coffee_ids.add(item['id'])
+                elif item.get('type') == 'bean':
+                    bean_ids.add(item['id'])
+        
+        # 批量查询数据库（仅当需要时）
+        coffee_map = {}
+        bean_map = {}
+        
+        if coffee_ids and (needs_price or needs_image):
+            coffee_qs = CoffeeItem.objects.filter(id__in=coffee_ids)
+            coffee_map = {c.id: c for c in coffee_qs}
+        
+        if bean_ids and (needs_price or needs_image):
+            bean_qs = BeanItem.objects.filter(id__in=bean_ids)
+            bean_map = {b.id: b for b in bean_qs}
+        
+        # 处理每个商品项
         for item in items:
             try:
+                item_type = item.get('type', 'unknown')
+                item_id = item.get('id')
+                
                 # 确保 price 键存在
                 if 'price' not in item:
-                    try:
-                        if item['type'] == 'coffee':
-                            product = CoffeeItem.objects.get(id=item['id'])
-                            item['price'] = float(product.price)
-                        elif item['type'] == 'bean':
-                            product = BeanItem.objects.get(id=item['id'])
-                            weight = item.get('weight', '200g')
-                            item['price'] = float(product.get_price(weight))
-                        else:
-                            item['price'] = 0.0
-                    except (CoffeeItem.DoesNotExist, BeanItem.DoesNotExist, KeyError):
+                    if item_type == 'coffee' and item_id in coffee_map:
+                        product = coffee_map[item_id]
+                        item['price'] = float(product.price)
+                    elif item_type == 'bean' and item_id in bean_map:
+                        product = bean_map[item_id]
+                        weight = item.get('weight', '200g')
+                        item['price'] = float(product.get_price(weight))
+                    else:
                         item['price'] = 0.0
                 else:
                     item['price'] = float(item['price'])
@@ -795,23 +856,19 @@ class OrderModel(models.Model):
                 
                 # Ensure image URL exists
                 if 'image' not in item:
-                    try:
-                        if item['type'] == 'coffee':
-                            product = CoffeeItem.objects.get(id=item['id'])
-                            if product.image and hasattr(product.image, 'name') and product.image.name:
-                                item['image'] = get_image_url(product.image, '/static/images/default-coffee.png')
-                            else:
-                                item['image'] = '/static/images/default-coffee.png'
-                        elif item['type'] == 'bean':
-                            product = BeanItem.objects.get(id=item['id'])
-                            if product.image and hasattr(product.image, 'name') and product.image.name:
-                                item['image'] = get_image_url(product.image, '/static/images/default-bean.png')
-                            else:
-                                item['image'] = '/static/images/default-bean.png'
+                    if item_type == 'coffee' and item_id in coffee_map:
+                        product = coffee_map[item_id]
+                        if product.image and hasattr(product.image, 'name') and product.image.name:
+                            item['image'] = get_image_url(product.image, '/static/images/default-coffee.png')
                         else:
-                            product = None
-                            item['image'] = '/static/images/default-product.png'
-                    except:
+                            item['image'] = '/static/images/default-coffee.png'
+                    elif item_type == 'bean' and item_id in bean_map:
+                        product = bean_map[item_id]
+                        if product.image and hasattr(product.image, 'name') and product.image.name:
+                            item['image'] = get_image_url(product.image, '/static/images/default-bean.png')
+                        else:
+                            item['image'] = '/static/images/default-bean.png'
+                    else:
                         item['image'] = '/static/images/default-product.png'
             except (TypeError, ValueError, KeyError) as e:
                 item['price'] = 0.0
@@ -819,12 +876,17 @@ class OrderModel(models.Model):
                 item['image'] = '/static/images/default-product.png'
                 if 'quantity' not in item:
                     item['quantity'] = 1
+        
+        # 如果需要中文选项，在同一个遍历中添加
+        if with_chinese_options:
+            self._add_chinese_options(items)
+        
+        # 缓存结果到实例，避免同一实例重复解析
+        self._cached_items = items
         return items
     
-    def get_items_with_chinese_options(self):
-        """返回带有中文选项的商品列表"""
-        items = self.get_items()
-        
+    def _add_chinese_options(self, items):
+        """为商品列表添加中文选项字段（内部方法，由 get_items 调用）"""
         for item in items:
             # 确保图片路径正确
             item['image'] = get_product_image_url(item)
@@ -840,9 +902,7 @@ class OrderModel(models.Model):
                     item['milk_level_cn'] = self.translate_option('milk_level', item['milk_level'])
                 # 咖啡商品不应该有重量选项，确保不显示
                 if 'weight' in item:
-                    # 记录调试信息但不显示重量选项
                     logger.debug(f"咖啡商品 {item.get('name', '未知')} 包含重量选项: {item['weight']}")
-                    # 移除重量选项，避免前端显示
                     item.pop('weight', None)
                     
             elif item_type == 'bean':
@@ -850,7 +910,6 @@ class OrderModel(models.Model):
                 if 'grinding_level' in item:
                     item['grinding_level_cn'] = self.translate_option('grinding_level', item['grinding_level'])
                 if 'weight' in item:
-                    # 将重量转换为中文显示
                     item['weight_cn'] = self.translate_weight(item['weight'])
             else:
                 # 其他类型商品：处理所有可能的选项
@@ -860,8 +919,14 @@ class OrderModel(models.Model):
                     item['milk_level_cn'] = self.translate_option('milk_level', item['milk_level'])
                 if 'grinding_level' in item:
                     item['grinding_level_cn'] = self.translate_option('grinding_level', item['grinding_level'])
+    
+    def get_items_with_chinese_options(self):
+        """返回带有中文选项的商品列表
         
-        return items
+        现在委托给 get_items(with_chinese_options=True) 以利用缓存，
+        避免重复遍历。
+        """
+        return self.get_items(with_chinese_options=True)
     
     @staticmethod
     def translate_option(option_type, value):
@@ -1256,6 +1321,11 @@ class OrderModel(models.Model):
         try:
             logger.info(f"=== 开始保存订单 {self.id or '新订单'} ===")
             
+            # 生成订单编号（新订单）
+            if not self.order_number:
+                self.order_number = self.generate_order_number()
+                logger.info(f"生成订单编号: {self.order_number}")
+            
             # 修复：确保在保存前就有 pickup_code
             if not self.pickup_code or self.pickup_code == '':
                 logger.info("为新订单生成取餐码")
@@ -1307,17 +1377,17 @@ class OrderModel(models.Model):
                         # 检查是否已经在队列中
                         existing_queue_item = CoffeeQueue.objects.filter(order=self).first()
                         if existing_queue_item:
-                            logger.info(f"订单 {self.id} 已在队列中，位置: {existing_queue_item.position}")
+                            logger.info(f"订单 {self.id} 已在队列中，位置: {existing_queue_item.queue_position}")
                         else:
                             # 将订单加入队列
                             queue_item = queue_manager.add_order_to_queue(self)
                             if queue_item:
                                 # 修复：queue_item可能是字典或对象，需要检查类型
                                 if isinstance(queue_item, dict):
-                                    position = queue_item.get('position', 0)
+                                    position = queue_item.get('queue_position', 0)
                                     logger.info(f"订单 {self.id} 已加入制作队列，位置: {position}")
                                 else:
-                                    logger.info(f"订单 {self.id} 已加入制作队列，位置: {queue_item.position}")
+                                    logger.info(f"订单 {self.id} 已加入制作队列，位置: {queue_item.queue_position}")
                             else:
                                 logger.error(f"订单 {self.id} 加入队列失败")
                     except Exception as e:
@@ -1337,6 +1407,27 @@ class OrderModel(models.Model):
                 super().save(*args, **kwargs)
             else:
                 raise e
+    
+    def generate_order_number(self):
+        """生成唯一的订单编号 - 格式: BC-YYYYMMDD-XXXX"""
+        today = timezone.now().strftime('%Y%m%d')
+        prefix = f"BC-{today}-"
+        
+        # 查找今天已生成的最大序号
+        last_order = OrderModel.objects.filter(
+            order_number__startswith=prefix
+        ).order_by('-order_number').first()
+        
+        if last_order and last_order.order_number:
+            try:
+                last_seq = int(last_order.order_number.split('-')[-1])
+                new_seq = last_seq + 1
+            except (ValueError, IndexError):
+                new_seq = 1
+        else:
+            new_seq = 1
+        
+        return f"{prefix}{new_seq:04d}"
     
     def generate_unique_pickup_code(self):
         """生成唯一的取餐码 - 4位数字版本"""
@@ -1480,7 +1571,8 @@ class CoffeeQueue(models.Model):
     '''
     
     order = models.OneToOneField(OrderModel, on_delete=models.CASCADE, related_name='queue_item')
-    position = models.PositiveIntegerField(default=0, verbose_name='队列位置')
+    queue_position = models.PositiveIntegerField(default=0, verbose_name='队列位置')
+    position = models.PositiveIntegerField(default=0, verbose_name='位置')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')
     estimated_start_time = models.DateTimeField(null=True, blank=True, verbose_name='预计开始时间')
     estimated_completion_time = models.DateTimeField(null=True, blank=True, verbose_name='预计完成时间')
@@ -1492,6 +1584,9 @@ class CoffeeQueue(models.Model):
     # 制作时间估算字段
     coffee_count = models.PositiveIntegerField(default=0, verbose_name='咖啡杯数')
     preparation_time_minutes = models.PositiveIntegerField(default=0, verbose_name='预计制作时间(分钟)')
+    
+    # 是否為加速訂單（用於優先隊列）
+    is_expedited = models.BooleanField(default=False, verbose_name='是否加速')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1577,7 +1672,7 @@ class CoffeePreparationTime(models.Model):
         # 创建队列项
         queue_item = CoffeeQueue.objects.create(
             order=self,
-            position=position,
+            queue_position=position,
             coffee_count=coffee_count,
             preparation_time_minutes=preparation_time,
             status='waiting'
@@ -1592,7 +1687,7 @@ class CoffeePreparationTime(models.Model):
     def get_queue_position(self):
         """获取订单在队列中的位置"""
         if hasattr(self, 'queue_item'):
-            return self.queue_item.position
+            return self.queue_item.queue_position
         return None
     
     def get_queue_wait_time(self):

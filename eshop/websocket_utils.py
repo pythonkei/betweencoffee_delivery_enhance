@@ -204,7 +204,7 @@ def send_queue_update(update_type: str, data: Dict[str, Any] = None) -> int:
         'data': data or {},
         'timestamp': None
     }
-    result = broadcast_to_group('queue', message)
+    result = broadcast_to_group('queue_updates', message)
     return result.get('success', 0)
 
 
@@ -266,7 +266,7 @@ def send_system_message(message: str, message_type: str = 'info') -> int:
         'timestamp': None
     }
     total_success = 0
-    result = broadcast_to_group('queue', system_message)
+    result = broadcast_to_group('queue_updates', system_message)
     total_success += result.get('success', 0)
     result = broadcast_to_group('admin_monitoring', system_message)
     total_success += result.get('success', 0)

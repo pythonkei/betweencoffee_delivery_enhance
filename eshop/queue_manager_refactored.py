@@ -149,7 +149,8 @@ class CoffeeQueueManager:
                 position=position,
                 coffee_count=coffee_count,
                 preparation_time_minutes=preparation_time,
-                status='waiting'
+                status='waiting',
+                is_expedited=False
             )
             
             self.logger.info(

@@ -317,48 +317,46 @@ def alipay_callback(request):
                     except Exception as queue_error:
                         logger.error(f"加入隊列失敗: {queue_error}")
                 
-                # 6. 發送WebSocket通知（暫時註釋掉，以避免事件循環錯誤）
-                # try:
-                #     if WEBSOCKET_ENABLED:
-                #         send_payment_update(
-                #             order_id=order.id,
-                #             payment_status='paid',
-                #             data={
-                #                 'payment_method': 'alipay',
-                #                 'message': '支付宝支付成功'
-                #             }
-                #         )
-                #
-                #         send_order_update(
-                #             order_id=order.id,
-                #             update_type='status_change',
-                #             data={
-                #                 'status': order.status,
-                #                 'message': '支付成功，訂單已確認'
-                #             }
-                #         )
-                #         
-                #         # 如果有隊列項，發送隊列更新
-                #         try:
-                #             queue_item = CoffeeQueue.objects.get(order=order)
-                #             send_queue_update(
-                #                 update_type='add',
-                #                 data={
-                #                     'order_id': order.id,
-                #                     'position': queue_item.position,
-                #                     'queue_type': 'waiting',
-                #                     'estimated_start': queue_item.estimated_start_time.isoformat() if queue_item.estimated_start_time else None,
-                #                     'estimated_complete': queue_item.estimated_completion_time.isoformat() if queue_item.estimated_completion_time else None,
-                #                     'coffee_count': queue_item.coffee_count,
-                #                     'preparation_time': queue_item.preparation_time_minutes
-                #                 }
-                #             )
-                #         except CoffeeQueue.DoesNotExist:
-                #             logger.info(f"訂單 {order.id} 沒有隊列項，可能不包含咖啡")
-                # except Exception as ws_error:
-                #     logger.error(f"發送WebSocket通知失敗: {ws_error}")
-                #     
-                # # WebSocket 發送暫時禁用，以確保支付流程穩定
+                # 6. 發送WebSocket通知（恢復：通知員工端刷新）
+                try:
+                    if WEBSOCKET_ENABLED:
+                        send_payment_update(
+                            order_id=order.id,
+                            payment_status='paid',
+                            data={
+                                'payment_method': 'alipay',
+                                'message': '支付宝支付成功'
+                            }
+                        )
+
+                        send_order_update(
+                            order_id=order.id,
+                            update_type='status_change',
+                            data={
+                                'status': order.status,
+                                'message': '支付成功，訂單已確認'
+                            }
+                        )
+                        
+                        # 如果有隊列項，發送隊列更新
+                        try:
+                            queue_item = CoffeeQueue.objects.get(order=order)
+                            send_queue_update(
+                                update_type='add',
+                                data={
+                                    'order_id': order.id,
+                                    'position': queue_item.position,
+                                    'queue_type': 'waiting',
+                                    'estimated_start': queue_item.estimated_start_time.isoformat() if queue_item.estimated_start_time else None,
+                                    'estimated_complete': queue_item.estimated_completion_time.isoformat() if queue_item.estimated_completion_time else None,
+                                    'coffee_count': queue_item.coffee_count,
+                                    'preparation_time': queue_item.preparation_time_minutes
+                                }
+                            )
+                        except CoffeeQueue.DoesNotExist:
+                            logger.info(f"訂單 {order.id} 沒有隊列項，可能不包含咖啡")
+                except Exception as ws_error:
+                    logger.error(f"發送WebSocket通知失敗: {ws_error}")
                 
                 logger.info(f"✅ 支付寶回調處理成功，訂單: {out_trade_no}")
             
@@ -519,28 +517,28 @@ def paypal_callback(request):
             # 清空購物車
             clear_user_cart_and_session(request)
             
-            # 發送通知（暫時註釋掉，以避免事件循環錯誤）
-            # try:
-            #     if WEBSOCKET_ENABLED:
-            #         send_payment_update(
-            #             order_id=order.id,
-            #             payment_status='paid',
-            #             data={
-            #                 'payment_method': 'paypal',
-            #                 'message': 'PayPal支付成功'
-            #             }
-            #         )
-            #
-            #         send_order_update(
-            #             order_id=order.id,
-            #             update_type='status_change',
-            #             data={
-            #                 'status': order.status,
-            #                 'message': '支付成功，訂單已確認'
-            #             }
-            #         )
-            # except Exception as ws_error:
-            #     logger.error(f"發送WebSocket通知失敗: {ws_error}")
+            # 發送通知（恢復：通知員工端刷新）
+            try:
+                if WEBSOCKET_ENABLED:
+                    send_payment_update(
+                        order_id=order.id,
+                        payment_status='paid',
+                        data={
+                            'payment_method': 'paypal',
+                            'message': 'PayPal支付成功'
+                        }
+                    )
+
+                    send_order_update(
+                        order_id=order.id,
+                        update_type='status_change',
+                        data={
+                            'status': order.status,
+                            'message': '支付成功，訂單已確認'
+                        }
+                    )
+            except Exception as ws_error:
+                logger.error(f"發送WebSocket通知失敗: {ws_error}")
             
             # 清理session
             clear_payment_session(request, order_id)
@@ -1209,7 +1207,20 @@ def redirect_to_confirmation(order_id):
 
 
 def handle_payment_by_order_id(request, order_id):
-    """根据订单ID处理支付"""
+    """
+    根据订单ID处理支付（支付回調/返回時調用）
+    
+    修復（2026-07-18）：
+    原本直接設 payment_status='paid' 後調用 mark_as_waiting_manually，
+    但 mark_as_waiting_manually 只更新狀態，不會：
+    - 調用 should_add_to_queue() 判斷是否需要加入隊列
+    - 調用 CoffeeQueueManager.add_order_to_queue() 加入製作隊列
+    - 調用 recalculate_all_order_times() 重新計算時間
+    - 發送 WebSocket 通知
+    - 添加會員積分
+    
+    修復後：統一使用 OrderStatusManager.process_payment_success() 處理所有邏輯
+    """
     try:
         if not order_id:
             from django.urls import reverse
@@ -1220,17 +1231,18 @@ def handle_payment_by_order_id(request, order_id):
         if order.payment_status == "paid":
             return redirect_to_confirmation(order_id)
         else:
-            # 即使回调有问题，也标记为已支付（因为手机端显示已扣款）
-            order.payment_status = 'paid'
-            # ✅ 已修復：使用 OrderStatusManager
+            # ✅ 修復：統一使用 OrderStatusManager.process_payment_success()
+            # 它會處理：更新支付狀態 → 分析訂單類型 → 加入隊列 → 計算時間 → 發送WS → 添加積分
             from eshop.order_status_manager import OrderStatusManager
-            result = OrderStatusManager.mark_as_waiting_manually(
-                order_id=order.id,
-                staff_name=request.user.username if hasattr(request, 'user') else 'system'
-            )
+            result = OrderStatusManager.process_payment_success(order_id, request)
+            
             if not result.get('success'):
-                logger.error(f"標記訂單 {order.id} 為 waiting 失敗: {result.get('message')}")
-            order.save()
+                error_msg = result.get('message', '處理支付成功失敗')
+                logger.error(f"❌ handle_payment_by_order_id: 處理訂單 {order_id} 支付成功失敗: {error_msg}")
+                # 降級處理：至少更新支付狀態
+                order.payment_status = 'paid'
+                order.save(update_fields=['payment_status'])
+            
             clear_payment_session(request, order_id)
             return redirect_to_confirmation(order_id)
             
@@ -1238,6 +1250,7 @@ def handle_payment_by_order_id(request, order_id):
         logger.error(f"订单不存在: {order_id}")
         # 訂單不存在，重定向到首頁
         return redirect('index')
+
 
 # ==================== 支付宝配置检查 ====================
 

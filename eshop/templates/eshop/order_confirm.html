@@ -5,7 +5,45 @@
 
 {% block content %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Django messages 顯示區塊 - 使用 BcToast 或自定義 showToast -->
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            if (typeof BcToast !== 'undefined' && BcToast.show) {
+                BcToast.show('錯誤', '{{ message|escapejs }}', 'error');
+            } else {
+                showToast('error', '{{ message|escapejs }}');
+            }
+        {% elif message.tags == 'success' %}
+            if (typeof BcToast !== 'undefined' && BcToast.show) {
+                BcToast.show('成功', '{{ message|escapejs }}', 'info');
+            } else {
+                showToast('success', '{{ message|escapejs }}');
+            }
+        {% elif message.tags == 'warning' %}
+            if (typeof BcToast !== 'undefined' && BcToast.show) {
+                BcToast.show('提示', '{{ message|escapejs }}', 'info');
+            } else {
+                showToast('info', '{{ message|escapejs }}');
+            }
+        {% else %}
+            if (typeof BcToast !== 'undefined' && BcToast.show) {
+                BcToast.show('提示', '{{ message|escapejs }}', 'info');
+            } else {
+                showToast('info', '{{ message|escapejs }}');
+            }
+        {% endif %}
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+
 <!-- Shop info -->
+
 <section>
     <div class="cm-fixedbtn u-section" id="js-fixedbtn">
     </div>
@@ -274,7 +312,7 @@
                         <div class="col-md-12 px-0 mb-4">
                             <div class="form-group">
                                 <label class="mb-3 payment-section-label">
-                                    <i class="fas fa-credit-card payment-section-icon"></i> 支付方式
+                                    <i class="fas fa-credit-card payment-section-icon mr-2"></i> 支付方式
                                 </label>
                                 <div class="payment-list-simple">
                                     <!-- 支付宝 -->
@@ -388,13 +426,13 @@
                         <div class="col-md-12 px-0 mb-4">
                             <div class="form-group">
                                 <label class="mb-3 bc-section-title">
-                                    <i class="icon-user bc-section-icon-gold"></i> 聯絡資訊
+                                    <i class="icon-user bc-section-icon-gold mr-2"></i> 聯絡資訊
                                 </label>
                                 <div class="bc-field-row-custom">
                                     <div class="bc-field bc-field-custom">
                                         <label class="bc-field-label">姓名 *</label>
                                         <input type="text" name="name" class="bc-input" required
-                                               value="{% if initial_data.name %}{{ initial_data.name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
+                                               value="{% if initial_data.contact_name %}{{ initial_data.contact_name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
                                                placeholder="您的姓名">
                                     </div>
                                     <div class="bc-field bc-field-custom">
@@ -929,14 +967,16 @@ function getCookie(name) {
 }
 
 // ==================== Toast 通知系統 ====================
+// 使用 BcToast 優先，若不可用則使用自定義實現
 function showToast(type, message) {
-    // 嘗試使用全局 toast 方法
-    if (window.showToast) {
-        window.showToast(type, message);
+    // 優先使用 BcToast 系統
+    if (typeof BcToast !== 'undefined' && BcToast.show) {
+        const title = type === 'error' ? '錯誤' : type === 'success' ? '成功' : '提示';
+        BcToast.show(title, message, type);
         return;
     }
     
-    // 自定義 Toast 實現
+    // 自定義 Toast 實現（fallback）
     let toastContainer = document.getElementById('toast-container');
     if (!toastContainer) {
         toastContainer = document.createElement('div');

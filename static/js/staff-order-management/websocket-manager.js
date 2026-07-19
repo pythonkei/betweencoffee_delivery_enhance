@@ -477,11 +477,18 @@ class WebSocketManager {
     
     /**
      * 處理隊列更新
+     * 🔧 修復：收到 queue_update 後觸發 UnifiedDataManager 重新加載數據
      */
     handleQueueUpdate(data) {
         console.log('📊 隊列更新:', data);
         if (data.message && window.toast) {
             window.toast.info(`📊 ${data.message}`);
+        }
+        
+        // 🔧 修復：觸發統一數據管理器重新加載，確保員工端即時顯示新訂單
+        if (window.unifiedDataManager) {
+            console.log('🔄 隊列更新，觸發統一數據重新加載');
+            window.unifiedDataManager.loadUnifiedData(true);
         }
     }
     

@@ -223,7 +223,7 @@ class OrderConfirm(View):
                 
                 # ✅ 修正：普通訂單 - 固定為5分鐘，不顯示選擇（隱藏）
                 initial_data = {
-                    'name': customer_name,
+                    'contact_name': customer_name,
                     'phone': customer_phone,
                     'email': customer_email,
                     'pickup_time': '5'  # 固定值，隱藏不顯示
@@ -246,7 +246,7 @@ class OrderConfirm(View):
                         pickup_time_from_session = match.group(1)
                 
                 initial_data = {
-                    'name': quick_order_data.get('name', ''),
+                    'contact_name': quick_order_data.get('name', ''),
                     'phone': quick_order_data.get('phone', ''),
                     'email': quick_order_data.get('email', ''),
                     'pickup_time': pickup_time_from_session,  # ✅ 使用轉換後的取貨時間
@@ -438,7 +438,7 @@ class OrderConfirm(View):
             
             if existing_order:
                 logger.info(f"找到可重用的未支付订单: {existing_order.id}")
-                existing_order.name = request.POST.get('name', '')
+                existing_order.contact_name = request.POST.get('name', '')
                 existing_order.email = request.POST.get('email', '')
                 existing_order.phone = formatted_phone
                 existing_order.pickup_time_choice = pickup_time_choice
@@ -460,7 +460,7 @@ class OrderConfirm(View):
                         user=request.user if request.user.is_authenticated else None,
                         total_price=final_total_price,  # 使用折扣後的價格
                         original_total_price=original_total_price,  # 保存原始總價
-                        name=request.POST.get('name', ''),
+                        contact_name=request.POST.get('name', ''),
                         email=request.POST.get('email', ''),
                         phone=formatted_phone,
                         items=items,
@@ -497,11 +497,12 @@ class OrderConfirm(View):
                         except Exception as e:
                             logger.error(f"標記獎勵為已使用失敗: {str(e)}")
                     
-                    # 計算取貨時間相關的時間
-                    order.calculate_times_based_on_pickup_choice()
-                    order.set_payment_timeout(minutes=5)
-                    order.save()
+                    # 先從資料庫重新讀取，確保所有欄位（特別是 items）已正確保存
                     order.refresh_from_db()
+                    # 計算取貨時間相關的時間（修改 estimated_ready_time, latest_start_time）
+                    order.calculate_times_based_on_pickup_choice()
+                    # set_payment_timeout() 內部已呼叫 save()，會一併保存上述修改
+                    order.set_payment_timeout(minutes=5)
                     
                 except Exception as e:
                     logger.error(f"订单创建失败: {str(e)}")
