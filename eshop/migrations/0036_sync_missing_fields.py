@@ -24,9 +24,29 @@ class Migration(migrations.Migration):
             field=models.PositiveIntegerField(default=0, verbose_name='位置'),
         ),
         # 3. Rename contact_phone to phone in OrderModel to match model definition
-        # Use RunSQL only - no state_operations since model already has 'phone' not 'contact_phone'
+        # 注意：如果 contact_phone 欄位不存在（例如已經被重新命名過），則跳過此操作
         migrations.RunSQL(
-            sql="ALTER TABLE eshop_ordermodel RENAME COLUMN contact_phone TO phone;",
-            reverse_sql="ALTER TABLE eshop_ordermodel RENAME COLUMN phone TO contact_phone;",
+            sql="""
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name='eshop_ordermodel' AND column_name='contact_phone'
+                    ) THEN
+                        ALTER TABLE eshop_ordermodel RENAME COLUMN contact_phone TO phone;
+                    END IF;
+                END $$;
+            """,
+            reverse_sql="""
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name='eshop_ordermodel' AND column_name='phone'
+                    ) THEN
+                        ALTER TABLE eshop_ordermodel RENAME COLUMN phone TO contact_phone;
+                    END IF;
+                END $$;
+            """,
         ),
     ]
