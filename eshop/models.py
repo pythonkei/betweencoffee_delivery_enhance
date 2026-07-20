@@ -1347,6 +1347,30 @@ class OrderModel(models.Model):
                 self.estimated_ready_time = self.calculate_estimated_ready_time()
                 logger.info(f"预计就绪时间: {self.estimated_ready_time}")
             
+            # 计算咖啡杯数和制作时间
+            if self.items:
+                try:
+                    items_data = self.get_items()
+                    coffee_count = sum(
+                        item.get('quantity', 1) for item in items_data 
+                        if item.get('type') == 'coffee'
+                    )
+                    self.coffee_count = coffee_count
+                    
+                    # 计算预计制作时间
+                    if coffee_count > 0:
+                        from .time_calculation.unified_time_service import UnifiedTimeService
+                        time_service = UnifiedTimeService()
+                        self.preparation_time_minutes = time_service.calculate_preparation_time(coffee_count)
+                    else:
+                        self.preparation_time_minutes = 0
+                except Exception as e:
+                    logger.warning(f"计算咖啡杯数失败: {e}")
+                    if not self.coffee_count:
+                        self.coffee_count = 0
+                    if not self.preparation_time_minutes:
+                        self.preparation_time_minutes = 0
+            
             # 生成二维码数据
             if not self.qr_code and self.pickup_code:
                 logger.info("生成二维码数据")
