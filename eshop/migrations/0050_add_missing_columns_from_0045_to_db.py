@@ -19,6 +19,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('eshop', '0047_fix_barista_table_schema'),
         ('eshop', '0049_add_discount_column_to_db'),
     ]
 
