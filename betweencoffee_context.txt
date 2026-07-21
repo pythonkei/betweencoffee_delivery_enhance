@@ -1,135 +1,203 @@
 # 📋 項目規範 (.clinerules)
 # Between Coffee 系統 .clinerules
 
+> 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
+> **最後更新**: 2026年7月22日（更新：Phase 2 員工端渲染器 v2 重構完成 + 審核發現 2 個 URL bug + Phase 3 規劃）
+
+
+## 開發者背景與方法論
+
+### 開發者角色
+- **新手開發者** — 使用 **Vibe Coding** 方法（跟著感覺走、邊做邊學）
+- **多視角分析** — 從四個不同角色視角分析系統，產出平衡解決方案：
+  1. 🛠️ **系統工程師** — 技術架構、程式碼品質、效能
+  2. 🎨 **前端工程師** — 使用者體驗、互動流程、響應式設計
+  3. 🖌️ **UX/UI 設計師** — 品牌調性、視覺一致性、易用性
+  4. 👤 **用戶** — 實際使用情境、痛點、需求
+- **目標** — 透過多視角碰撞，找到最適合小咖啡店的平衡方案
+
+### Vibe Coding 原則
+- 先讓功能跑起來，再回頭優化
+- 小步迭代，每次改進一個小功能
+- 遇到問題先搜尋、再問、最後才自己寫
+- 保持程式碼簡單可讀，不過度工程化
+- 享受開發過程，保持學習心態
+
+## 修復與驗證原則
+
+### 端到端全面修復思維
+不只是修復或處理單一問題，要像真人審查者一樣思考端到端的全面修復：
+
+1. **先模擬完整流程** — 深入分析整個流程，在腦中模擬流程運行一次。例如修復下單問題時，要追蹤：前端下單 → 後端邏輯處理 → 隊列 → 後端邏輯處理 → 前端顯示，確保整條鏈路邏輯正確。
+
+2. **檢查類似問題** — 修復一個問題後，檢查系統中是否有其他類似模式或位置出現相同問題，一併全面修復。
+
+3. **多次失敗嘗試不同解法** — 如果修復了多次仍然沒有成功，嘗試不同的解決方案，並向用戶說明其他可行方案。
+
+4. **新手友善** — 用戶是新手開發者，可以舉例說明、產生流程圖等輔助理解。
+
+### 驗證後端改動
+不要只憑「編輯成功」就回報 bug 改動已經完成。要像真人審查者一樣驗證：
+
+1. **啟動開發伺服器**，模擬修復後的運行。
+2. **檢查後端邏輯**：不能有新增的錯誤或警告。
+3. **創建腳本直接執行和驗證**，確保邏輯正確。
+
+### 驗證前端改動
+不要只憑「編輯成功」就回報 UI 改動已經完成。要像真人審查者一樣驗證：
+
+1. **啟動開發伺服器**，在瀏覽器中打開被修改的頁面。
+2. **直接操作這個改動**。如果是新的控制元件（按鈕、輸入框、切換開關）：
+   點擊它、確認狀態有按預期改變。
+3. **檢查瀏覽器主控台**：不能有新增的錯誤或警告。
+4. **使用 Chrome Devtools**，跑一次效能追蹤，並檢查核心網頁指標（Core Web Vitals）。
+
+如果任何一步失敗，先修好問題，再從第 1 步重跑一次，不要交出只驗證一半的工作。
+
+### GitHub 推送規則
+- **不要自動 push 到 GitHub** — 每個任務完成後，不要自行 push 到 GitHub，直到我通知你。
+
 ## 項目概述
 - **項目名稱**: Between Coffee 咖啡店外帶網站與訂單製作管理系統
 - **技術棧**: Django + PostgreSQL + WebSocket + Bootstrap 5
 - **核心業務流程**: 顧客下單 → 支付處理 → 加入製作隊列 → 員工製作 → 訂單就緒 → 顧客取餐
-- **部署平台**: Render（Docker 運行時），autoDeploy 啟用
 - **Live URL**: https://betweencoffee-delivery-enhance-v1.onrender.com/
 - **GitHub**: https://github.com/pythonkei/betweencoffee_delivery_enhance
-- **當前狀態**: 系統穩定，核心功能完整。已完成 Render 部署 migration 修復（0037-0051）、Barista 模型重構、QueueConsumer order_update 修復、CoffeeQueue 新增 coffee_count/preparation_time_minutes 欄位、端到端流程修復驗證
+- **部署方式**: Render（Docker 運行時），使用 Dockerfile 構建，autoDeploy 啟用
+- **Celery 狀態**: Render free plan 無 Redis，Celery 已配置 MockCelery 優雅降級，任務同步執行
+- **WebSocket**: 使用 Django Channels + InMemoryChannelLayer（無 Redis），ASGI 已禁用 AllowedHostsOriginValidator
 
-## 開發規範
+## 系統核心價值
 
-### 代碼質量要求
-1. **文檔標準**: 所有新函數必須附帶詳細文檔
-   - Python: 使用 docstring 格式（Google 風格）
-   - JavaScript: 使用 JSDoc 風格註釋
-   - 文檔必須包含參數說明、返回值說明和示例
+```
+輕量、高效、個性化咖啡店 — 從小店視角出發為最終目標
+```
 
-2. **函數設計**: 
-   - 函數必須有明確的回傳值
-   - 避免出現沒有傳回的函數
-   - 單一職責原則：每個函數只做一件事
+### 系統主張
+- 專注單一地區咖啡店外帶場景，不追求大而全
+- 小店的人情味、地域親近感是核心...
 
-3. **測試要求**:
-   - 所有新增功能必須覆蓋至少 80% 的單元測試
-   - 關鍵業務邏輯必須有集成測試
-   - 測試用例必須包含邊界情況和錯誤處理
+# 🎨 UI 設計原則 (.clinerules/ui-principles.md)
+# Between Coffee UI 設計原則
 
-### 安全要求
-1. **身份驗證與授權**:
-   - WebSocket 連接必須經過正確的身份驗證和授權
-   - 使用 django-allauth 處理社交登入（Google、Facebook）
-   - 敏感操作必須有權限檢查
+> 最後更新: 2026年7月6日
+> 來源: 全面分析網站現有模板與 CSS 使用情況 + 品牌視覺設計風格定義
 
-2. **數據安全**:
-   - 敏感數據（支付信息、用戶資料）必須加密存儲
-   - 所有用戶輸入必須進行驗證和清理
-   - 防止 SQL 注入、XSS、CSRF 攻擊
+---
 
-3. **支付安全**:
-   - 支付處理必須使用安全的支付網關（PayPal、Alipay、FPS）
-   - 支付交易必須有完整的日誌記錄
-   - 支付狀態必須實時同步
+## 一、品牌核心訊息
 
-### 性能優化要求
-1. **數據庫優化**:
-   - 所有查詢必須使用適當的索引
-   - 避免 N+1 查詢問題
-   - 使用查詢緩存和結果緩存
+```
+輕鬆感 · 自由感 · 放空感
+```
 
-2. **WebSocket 優化**:
-   - 實現指數退避重連策略
-   - 連接狀態必須有監控和告警
-   - 消息傳輸必須高效且可靠
+- 所有 UI 設計圍繞這三個關鍵詞展開
+- 不花巧、無需動畫、無需漸變色
+- 風格統一性：元素元件、字體、按鈕、色彩、圖標保持一致
 
-3. **前端優化**:
-   - 資源必須進行懶加載和壓縮
-   - 確保移動端響應式設計
-   - 減少不必要的 DOM 操作
+---
 
-## 項目特定規則
+## 二、品牌視覺設計風格
 
-### Django 開發規範
-1. **架構遵循**:
-   - 使用 Django Channels 處理 WebSocket 連接
-   - 遵循 Django REST Framework 最佳實踐
-   - 使用 Django 的內置安全功能
+### 2.1 品牌視覺元素
+- **SVG 插圖**: 全域網站使用具設計感的 SVG 插圖，畫風為手繪趣味性風格，帶出品牌訊息
+- **黑色主題背景**: 全域為黑色 theme 背景，加強所有咖啡產品的視覺對比
+- **背景裝飾**: 大多數頁面背景有透明度低的 SVG 插畫元素，附有 CSS 動畫 `noise_animation`，豐富視覺層次
 
-2. **模型設計**:
-   - 使用 Django 的 ORM 進行數據庫操作
-   - 模型必須有適當的索引和約束
-   - 使用 Django 的遷移系統管理數據庫變更
+### 2.2 產品照片
+- 所有咖啡和咖啡豆使用**無顏色背景的 PNG 去背圖**，僅呈現產品物件本身
+- 去背圖加強產品視覺焦點，讓顧客專注於產品本身
 
-3. **視圖設計**:
-   - 視圖必須遵循 DRY 原則
-   - 業務邏輯應該放在服務層或工具函數中
-   - 錯誤處理必須統一且友好
+### 2.3 咖啡杯及咖啡豆包裝設計
+- **設計統一性**: 所有包裝設計保持一致風格，營造獨有品牌感
+- **插畫風格**: 每個包裝均帶有不同的插畫，畫風傳達「輕鬆感、自由感、放空感」
+- **口味配色**: 每種咖啡及咖啡豆口味都以不同的顏色設計，便於識別
 
-### 前端開發規範
-1. **UI/UX 標準**:
-   - 使用 Bootstrap 5 進行響應式設計
-   - 確保移動端體驗優先
-   - 保持一致的設計語言和用戶體驗
+### 2.4 動畫視覺元素
 
-2. **JavaScript 開發**:
-   - 使用模塊化的 JavaScript 代碼
-   - 避免全局變量污染
-   - 使用現代 JavaScript 特性（ES6+）
+#### 2.4.1 SVG 背景插畫 + noise_animation
+頁面背景使用透明度低的 SVG 插畫元素，搭配 CSS `noise_animation` 動畫，豐富視覺層次。
 
-3. **實時功能**:
-   - 使用 WebSocket 實現實時狀態更新
-   - 狀態管理必須一致且可靠
-   - 用戶界面必須反映最新的系統狀態
+**技術實現**:
+- CSS class: `.noise_animation` — 使用 `desktop_noise_animation` 關鍵幀動畫，1 秒循環，`will-change: filter`
+- CSS class: `.noise-filiter` — 隱藏的 SVG filter 容器（`display: none; width: 0; height: 0`）
+- CSS class: `.smart_noise_animation` — 行動裝置優化版本
+- 關鍵幀 `@keyframes desktop_noise_animation` — 透過 SVG noise filter（`#noise-0` ~ `#noise-4`）產生噪點抖動效果
+- 關鍵幀 `@keyframes smart_noise_animation` — 行動版（`#noise-5` ~ `#noise-9`）
 
-### 部署與維護
-1. **部署流程**:
-   - 使用 Railway 進行自動化部署
-   - 部署前必須通過所有測試
-   - 必須有回滾計劃
+**使用範例**:
+```html
+<!-- 頁面 banner 背景 SVG 插畫 + noise_animation -->
+<div class="ftco-subpage-banner" id="section-counter">
+    <div class="svg-bg ftco-counter noise_animation" 
+         style="background-image: url({% static 'images/title_bg_img_01.svg' %});"></div>
+    <div class="container">
+        ...
+    </div>
+</div>
 
-2. **監控與日誌**:
-   - 系統必須有完整的監控和日誌記錄
-   - 錯誤必須有適當的告警機制
-   - 性能指標必須定期檢查
+<!-- 商品卡片 hover 效果 -->
+<span id="svg_over_on">
+    <img src="{% static 'images/product_hover.svg' %}" class="noise_animation">
+</span>
 
-3. **文檔維護**:
-   - 所有變更必須更新相關文檔
-   - 文檔必須保持最新且準確
-   - 必須有系統架構文檔和 API 文檔
+<!-- 首頁裝飾元素 -->
+<div class="noise-img">
+    <img src="{% static 'images/owl_title_bg_01.svg' %}" class="noise_animation">
+</div>
+<div class="svg-box">
+    <img src="{% static 'images/owl_title_bg_02.svg' %}" class="noise_animation">
+</div>
+```
 
-## 工作流程指導
+**應用頁面**:
+| 頁面 | SVG 插畫 | 用途 |
+|------|----------|------|
+| 首頁 (`index.html`) | `owl_title_bg_01.svg`, `owl_title_bg_02.svg`, `product_hover.svg` | 背景裝飾、商品 hover |
+| 咖啡菜單 (`coffee_menu.html`) | `title_bg_img_01.svg`, `product_hover.svg` | Banner 背景、商品 hover |
+| 咖啡豆菜單 (`bean_menu.html`) | `title_bg_img_02.svg`, `product_hover.svg` | Banner 背景、商品 hover |
+| 全域 (`base.html`) | — | noise-filiter SVG filter 容器 |
 
-### Plan Mode 行為規範
-1. **任務開始前**:
-   - 先分析現有系統狀態
-   - 參考「綜合工作總結與遷移報告.md」
-   - 檢查相關的技術文檔和報告
+#### 2.4.2 背景訊息字體元素（title-bg-head）
+頁面背景使用透明度極低的品牌字體元素，與頁面內容相關，豐富視覺層次。
 
-2. **計劃制定**:
-   - 制定詳細...
+**技術實現**:
+- CSS class: `.title-bg-head`
+  - `font-family: 'Mogra'` — 使用品牌 Logo 字型
+  - `font-size: 20vw` — 超大尺寸
+  - `opacity: .05` — 極低透明度
+  - `position: absolute; z-index: -2` — 置於背景層
+  - `letter-spacing: -10px` — 緊湊字距
+  - `color: #fff` — 白色文字
+
+**使用範例**:
+```html
+<!-- 咖啡商品詳情頁 -->
+<span class="title-bg-head">｛BREWED<br>&nbsp;&nbsp;&nbsp;FAST｝</span>
+
+<!-- 咖啡豆商品詳情頁 -->
+<span class="title-bg-head">｛SERVED<br>&nbsp;&nbsp;&nbsp;FRESH｝</span>
+
+<!-- 關於我們頁面 -->
+<span class="title-bg-head">｛US｝</span>
+```
+
+**應用頁面**:
+| 頁面 | 背景文字 | 語意 |
+|------|----------|------|
+| 咖啡詳情 (`coffee.html`) | `｛BREWED FAST｝` | 快速沖泡 |
+| 咖啡豆詳情 (`bean.html`) | `｛SERVED FRESH｝` | 新鮮供應 |
+| 關於我們 (`about.htm...
 
 # Between Coffee 系統 - 上下文摘要
 **項目**: Between Coffee 咖啡店外帶網站與訂單製作管理系統
-**狀態**: 生產環境穩定運行
+**狀態**: 已部署到 Render，生產環境運行中
 **版本**: v2.0+
 
 ## 技術棧
 - **backend**: Django 4.x, Django Channels, PostgreSQL, Redis
 - **frontend**: HTML5, CSS3, JavaScript, Bootstrap 5, jQuery
-- **deployment**: Railway, Docker (可選)
+- **deployment**: Railway → Render（已遷移）
 - **payments**: PayPal, Alipay, FPS, 現金支付
 - **authentication**: django-allauth, Google OAuth, Facebook OAuth
 
@@ -141,150 +209,47 @@
 - **core**: 核心工具和錯誤處理
 
 ## 系統狀態摘要
-## 📊 當前系統狀態概覽
+## 系統狀態摘要
 
-### 系統健康狀態
-- **整體狀態**: ✅ 穩定運行
-- **核心功能**: ✅ 完整可用
-- **性能表現**: ✅ 良好
-- **安全狀態**: ✅ 安全
+| 維度 | 狀態 | 備註 |
+|------|:----:|------|
+| 核心功能 | ✅ 完整 | 下單→支付→製作→取餐 |
+| WebSocket | ✅ 穩定 | 三層架構，InMemoryChannelLayer |
+| 支付 | ✅ 4種 | PayPal/Alipay/FPS/現金 |
+| 社交登入 | ✅ 已修復 | Google/Facebook |
+| 忠誠度 | ✅ 基礎 | 積分+優惠券 |
+| 員工管理 | ✅ 完整 | 隊列+付款確認 |
+| 前端架構 | ✅ Sprint 1-2 完成 + CSS 拆分 | 基礎服務層 + 核心重構 + style.css 拆分為三檔案 |
+| 員工端 JS 架構 | ✅ SubtabManager 改造完成 | Bootstrap tab 組件自定義切換，支援主 tab + 子 tab |
+| **員工端渲染器 v2** | ✅ **Phase 2 完成** | **BaseOrderRendererV2 (1123行) + 4 個 v2 渲染器 + 降級方案** |
+| 測試 | ⚠️ 不足 | 覆蓋率低 |
+| 監控 | ⚠️ 基礎 | 無告警系統 |
+| 文檔 | ⚠️ 待完善 | 此報告為起點 |
 
-### 版本信息
-- **當前版本**: v2.0+
-- **最後更新**: 2026年3月29日
-- **部署環境**: Railway (生產環境)
-- **數據庫**: PostgreSQL (Railway)
+## 關鍵 API 端點
 
-## 🎯 核心功能狀態
+| 端點 | 方法 | 用途 |
+|------|:----:|------|
+| `/api/orders/` | GET | 獲取訂單列表 |
+| `/api/orders/<id>/` | GET/POST | 訂單詳情/更新 |
+| `/api/queue/` | GET | 獲取隊列狀態 |
+| `/api/fps/confirm-payment/<id>/` | POST | 確認 FPS 付款 |
+| `/api/cash/confirm-payment/<id>/` | POST | 確認現金付款 |
+| `/api/mark-ready/` | POST | 標記訂單就緒 |
+| `/api/mark-completed/` | POST | 標記訂單完成 |
+| `/api/ws-stats/` | GET | WebSocket 統計 |
+| `/api/ws-connections/` | GET | WebSocket 連接列表 |
+| `/api/ws-fallback/` | GET | HTTP Fallback API |
 
-### 顧客端功能 (100% 完整)
+## WebSocket 事件類型
 
-#### 1. 商品瀏覽與下單 ✅
-- 咖啡/咖啡豆選擇
-- 自定義選項（杯型、牛奶量、研磨程度）
-- 購物車管理
-- 取餐時間選擇
-
-#### 2. 支付系統 ✅
-- PayPal 支付 (Sandbox/Production)
-- Alipay 支付
-- FPS 快速支付
-- 現金支付選項
-- 支付狀態實時更新
-
-#### 3. 訂單追蹤 ✅
-- 實時狀態更新 (WebSocket)
-- 4階段狀態卡片：已下單 → 製作中 → 待取餐 → 已完成
-- 二維碼提取系統
-- 提取碼驗證
-
-#### 4. 用戶管理 ✅
-- 社交登入 (Google, Facebook)
-- 用戶資料管理
-- 訂單歷史查看
-- 會員功能 (基礎)
-
-### 員工端功能 (95% 完整)
-
-#### 1. 訂單隊列管理 ✅
-- 實時訂單隊列顯示
-- 訂單狀態更新界面
-- 智能訂單分配
-- 咖啡師工作負載顯示
-
-#### 2. 製作流程管理 ✅
-- 訂單準備狀態管理
-- 製作時間追蹤
-- 就緒訂單標記
-- 完成訂單處理
-
-#### 3. 工作負載可視化 ✅
-- 咖啡師可用狀態
-- 當前工作負載顯示
-- 智能分配算法
-- 效率統計
-
-#### 4. 狀態手動更新 ✅
-- 等待 → 製作中
-- 製作中 → 已就緒
-- 已就緒 → 已完成
-- 狀態變更時間記錄
-
-### 管理端功能 (90% 完整)
-
-#### 1. 商品管理 ✅
-- 咖啡商品管理
-- 咖啡豆商品管理
-- 價格調整
-- 庫存管理 (基礎)
-
-#### 2. 訂單統計 ✅
-- 銷售報表
-- 時間段分析
-- 熱門商品統計
-- 收入統計
-
-#### 3. 用戶管理 ✅
-- 用戶賬戶管理
-- 權限控制
-- 員工賬戶管理
-- 角色分配
-
-## 🔧 技術狀態評估
-
-### 後端技術狀態 (90% 穩定)
-
-#### Django 應用
-- **運行狀態**: ✅ 穩定
-- **性能表現**: ✅ 良好
-- **錯誤率**: ⚠️ 低 (需持續監控)
-- **日誌系統**: ✅ 完整
-
-#### WebSocket 連接
-- **連接穩定性**: ✅ 穩定
-- **重連機制**: ✅ 已實現
-- **消息傳輸**: ✅ 可靠
-- **性能監控**: ⚠️ 需要增強
-
-#### 數據庫性能
-- **查詢性能**: ✅ 良好
-- **索引優化**: ✅ 已完成
-- **連接池**: ✅ 配置正常
-- **備份策略**: ✅ 已建立
-
-### 前端技術狀態 (85% 穩定)
-
-#### 頁面加載性能
-- **首屏加載**: ✅ 良好
-- **資源優化**: ✅ 已壓縮
-- **緩存策略**: ✅ 已配置
-- **移動端兼容**: ⚠️ 需要進一步優化
-
-#### JavaScript 功能
-- **錯誤處理**: ✅ 完整
-- **狀態管理**: ✅ 一致
-- **實時更新**: ✅ 穩定
-- **用戶體驗**: ✅ 良好
-
-#### 響應式設計
-- **桌面端**: ✅ 優秀
-- **平板端**: ✅ 良好
-- **移動端**: ⚠️ 需要優化
-- **瀏覽器兼容**: ✅ 良好
-
-### 部署和運維狀態 (88% 穩定)
-
-#### Railway 部署
-- **部署流程**: ✅ 自動化
-- **環境配置**: ✅ 完整
-- **監控面板**: ✅ 可用
-- **日誌收集**: ✅ 完整
-
-#### 系統監控
-- **性能監控**: ⚠️ 基礎監控
-- **錯誤追蹤**: ✅ 已實現
-- **告警系統**: ⚠️ 需要增強
-- **健康檢查**: ✅ 已配置
+| 事件類型 | 方向 | 用途 |
+|----------|:----:|------|
+| `order_status_update` | 後端→前端 | 訂單狀態更新 |
+| `queue_status_update` | 後端→前端 | 隊列狀態更新 |
+| `barista_status_update` | 後端→前端 | 咖啡師狀態更新 |
+| `system_notification` | 後端→前端 | 系統通知 |
+| `order_update` | 後端→前端 | 訂單數據更新 |
 
 
 ## 📖 使用說明
@@ -292,18 +257,23 @@
 此上下文提供了 Between Coffee 系統的關鍵信息：
 
 ### 包含內容
-1. **項目規範** (.clinerules): 開發標準、安全要求、性能優化
-2. **項目總覽**: 業務背景、技術棧、核心模塊
-3. **系統狀態**: 當前狀態、已知問題、性能指標
-4. **優先任務**: 高優先級待處理問題
+1. **系統報告** (BETWEEN_COFFEE_SYSTEM_REPORT.md): 1185行完整系統分析
+2. **項目規範** (.clinerules): 開發標準、安全要求、性能優化
+3. **UI 設計原則** (.clinerules/ui-principles.md): 品牌色、字型、間距、元件規範
+4. **項目總覽**: 業務背景、技術棧、核心模塊
+5. **系統狀態**: 當前狀態、已知問題、性能指標
+6. **優先任務**: 高優先級待處理問題
 
 ### 使用建議
 - 在開始任何任務前，先查看相關規範
 - 參考系統狀態了解當前限制
 - 優先處理高優先級任務
 - 遵循項目開發標準
+- 開發 UI 時參考設計原則
 
 ### 完整信息
 如需完整信息，請查看：
+- `BETWEEN_COFFEE_SYSTEM_REPORT.md` - 完整系統分析報告（1185行）
 - `betweencoffee_memory_bank/` 目錄下的詳細文件
 - `docs/` 目錄下的技術文檔和報告
+- `.clinerules/ui-principles.md` - UI 設計原則

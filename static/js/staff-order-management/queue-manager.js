@@ -478,19 +478,23 @@ class QueueManager {
                 </div>
             </div>
 
-            <div class="d-flex justify-content-end align-items-center">
-                ${isFpsPending ? `
-                <div class="mr-2">
-                    <span class="badge badge-danger mr-2"><i class="fas fa-exclamation-circle mr-1"></i>FPS 待確認付款</span>
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <div>
+                    <span class="text-warning"><i class="fas fa-clock mr-1"></i>等待中</span>
+                    <span class="ml-2 text-muted small">${orderTime}</span>
+                    ${order.position ? `<span class="ml-2 badge badge-info">隊列位置: ${order.position}</span>` : ''}
                 </div>
-                <button class="btn btn-success btn-sm confirm-fps-payment-btn" data-order-id="${order.id}">
-                    <i class="fas fa-check-circle mr-1"></i>確認 FPS 付款
-                </button>
-                ` : `
-                <button class="btn btn-primary btn-sm start-preparation-btn" data-order-id="${order.id}">
-                    <i class="fas fa-play mr-1"></i>開始製作
-                </button>
-                `}
+                <div class="d-flex align-items-center">
+                    ${isFpsPending ? `
+                    <button class="btn btn-success btn-sm confirm-fps-payment-btn" data-order-id="${order.id}">
+                        <i class="fas fa-check-circle mr-1"></i>確認 FPS 付款
+                    </button>
+                    ` : `
+                    <button class="btn btn-primary btn-sm start-preparation-btn" data-order-id="${order.id}">
+                        <i class="fas fa-play mr-1"></i>開始製作
+                    </button>
+                    `}
+                </div>
             </div>
         `;
         

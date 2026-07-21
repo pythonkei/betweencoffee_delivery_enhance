@@ -39,8 +39,8 @@ class UnifiedDataManager {
         // 啟動定期刷新
         this.startAutoRefresh();
         
-        // 初始加載數據（縮短延遲以減少用戶等待時間）
-        setTimeout(() => this.loadUnifiedData(), 500);
+        // 初始加載數據（立即加載，減少用戶等待時間）
+        setTimeout(() => this.loadUnifiedData(), 50);
     }
     
     // ==================== 核心方法：加載統一數據（增強版） ====================

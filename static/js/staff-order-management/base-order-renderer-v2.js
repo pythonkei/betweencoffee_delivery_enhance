@@ -52,6 +52,7 @@ class BaseOrderRendererV2 {
         this.countdownTimers = new Map();     // orderId -> timerId
         this.eventListeners = new Map();      // key -> { target, event, handler }
         this.hasInitialData = false;
+        this.hasRenderedOnce = false;  // 追蹤是否已渲染過一次（初始加載用）
         this.isReady = false;
         this.cachedOrders = null;
         this.isProcessingAction = false;
@@ -90,18 +91,17 @@ class BaseOrderRendererV2 {
 
         const dataKey = this.options.dataKey;
 
-        // 監聽特定訂單類型數據
-        this._addManagedListener(window.unifiedDataManager, 'registerListener', null, (listener) => {
-            // 使用 registerListener 的返回值來註冊
-        });
-
         // 直接使用 unifiedDataManager 的 registerListener
+
         window.unifiedDataManager.registerListener(dataKey, (orders) => {
             console.log(`📥 ${this.orderType} 訂單數據接收:`, orders?.length || 0, '個');
             this.hasInitialData = true;
 
-            if (this.isActiveTab()) {
+            // 初始加載時（hasInitialData 剛被設為 true），無論 tab 是否激活都直接渲染
+            // 後續更新則按 tab 激活狀態決定
+            if (this.isActiveTab() || !this.hasRenderedOnce) {
                 this.renderOrders(orders);
+                this.hasRenderedOnce = true;
             } else {
                 this.cacheOrders(orders);
             }
@@ -112,8 +112,10 @@ class BaseOrderRendererV2 {
             const orders = allData[dataKey];
             if (orders) {
                 this.hasInitialData = true;
-                if (this.isActiveTab()) {
+                // 初始加載時（hasRenderedOnce 為 false），無論 tab 是否激活都直接渲染
+                if (this.isActiveTab() || !this.hasRenderedOnce) {
                     this.renderOrders(orders);
+                    this.hasRenderedOnce = true;
                 } else {
                     this.cacheOrders(orders);
                 }
@@ -315,8 +317,8 @@ class BaseOrderRendererV2 {
      * 渲染訂單項目列表
      * @param {Array} items - 訂單項目數組
      * @param {Object} [options] - 配置選項
-     * @param {number} [options.imageWidth=80] - 圖片容器寬度
-     * @param {number} [options.imageHeight=80] - 圖片容器高度
+     * @param {number} [options.imageWidth=105] - 圖片容器寬度
+     * @param {number} [options.imageHeight=110] - 圖片容器高度
      * @returns {string} HTML 字符串
      */
     renderOrderItems(items, options = {}) {
@@ -324,8 +326,9 @@ class BaseOrderRendererV2 {
             return '<p class="text-muted text-center py-3">暫無商品詳細信息</p>';
         }
 
-        const imgWidth = options.imageWidth || 80;
-        const imgHeight = options.imageHeight || 80;
+        const imgWidth = options.imageWidth || 105;
+        const imgHeight = options.imageHeight || 110;
+
 
         let itemsHTML = '';
 
@@ -656,7 +659,6 @@ class BaseOrderRendererV2 {
         const div = document.createElement('div');
         div.className = 'order-item mb-5 p-5 rounded selectable';
         div.setAttribute('data-order-id', order.id);
-        div.setAttribute('data-order-type', this.orderType);
         return div;
     }
 

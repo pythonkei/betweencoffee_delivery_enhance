@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月21日（更新：重構 confirm_offline_payment 消除支付確認重複邏輯 + 端到端測試驗證通過）
+> **最後更新**: 2026年7月22日（更新：Phase 2 員工端渲染器 v2 重構完成 + 審核發現 2 個 URL bug + Phase 3 規劃）
 
 
 ## 開發者背景與方法論
@@ -177,6 +177,11 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 | `static/js/staff-order-management/services/api-service.js` | ~120 | ⭐⭐⭐⭐ |
 | `static/js/staff-order-management/renderers/base-renderer.js` | ~100 | ⭐⭐⭐⭐ |
 | `static/js/staff-order-management/websocket-manager.js` | ~150 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/base-order-renderer-v2.js` | 1123 | ⭐⭐⭐⭐⭐ |
+| `static/js/staff-order-management/renderers-v2/payment-pending-renderer-v2.js` | ~400 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/renderers-v2/preparing-orders-renderer-v2.js` | ~500 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/renderers-v2/ready-orders-renderer-v2.js` | ~500 | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/renderers-v2/completed-orders-renderer-v2.js` | 334 | ⭐⭐⭐⭐ |
 | `static/js/bc-slideout-cart.js` | ~200 | ⭐⭐⭐⭐⭐ |
 | `static/js/bc-checkout.js` | ~200 | ⭐⭐⭐⭐⭐ |
 | `static/js/bc-toast.js` | ~100 | ⭐⭐⭐⭐ |

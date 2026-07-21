@@ -228,31 +228,56 @@ class OrderManagementSystem {
         }
     }
     
-    // 初始化渲染器（按需延迟加载）
+    // 初始化渲染器（按需延迟加载）- 使用 v2 重構版本
     initRenderers() {
         const rendererConfigs = [
-            { id: 'payment-pending', name: 'paymentPendingRenderer', Class: window.PaymentPendingRenderer },
-            { id: 'preparing', name: 'preparingRenderer', Class: window.DynamicPreparingOrdersRenderer },
-            { id: 'ready', name: 'readyRenderer', Class: window.DynamicReadyOrdersRenderer },
-            { id: 'completed', name: 'completedRenderer', Class: window.DynamicCompletedOrdersRenderer }
+            { id: 'payment-pending', name: 'paymentPendingRenderer', Class: window.PaymentPendingRendererV2 },
+            { id: 'preparing', name: 'preparingRenderer', Class: window.PreparingOrdersRendererV2 },
+            { id: 'ready', name: 'readyRenderer', Class: window.ReadyOrdersRendererV2 },
+            { id: 'completed', name: 'completedRenderer', Class: window.CompletedOrdersRendererV2 }
         ];
         
         rendererConfigs.forEach(config => {
             const tab = document.getElementById(config.id);
             if (tab) {
                 try {
-                    console.log(`🔄 正在初始化 ${config.name}...`);
+                    console.log(`🔄 正在初始化 ${config.name} (v2)...`);
                     
                     const instance = new config.Class();
                     this.components[config.name] = instance;
                     window[config.name] = instance;
                     
-                    console.log(`✅ ${config.name} 初始化成功`);
+                    console.log(`✅ ${config.name} (v2) 初始化成功`);
                 } catch (error) {
-                    console.error(`❌ 初始化 ${config.name} 失败:`, error);
+                    console.error(`❌ 初始化 ${config.name} (v2) 失败:`, error);
+                    
+                    // 降級：嘗試使用舊版渲染器
+                    console.log(`⚠️ 嘗試降級使用舊版 ${config.name}...`);
+                    try {
+                        const fallbackClass = this._getFallbackRenderer(config.name);
+                        if (fallbackClass) {
+                            const fallbackInstance = new fallbackClass();
+                            this.components[config.name] = fallbackInstance;
+                            window[config.name] = fallbackInstance;
+                            console.log(`✅ ${config.name} (降級) 初始化成功`);
+                        }
+                    } catch (fallbackError) {
+                        console.error(`❌ ${config.name} 降級也失敗:`, fallbackError);
+                    }
                 }
             }
         });
+    }
+    
+    // 降級方案：獲取舊版渲染器類
+    _getFallbackRenderer(name) {
+        const fallbackMap = {
+            'paymentPendingRenderer': window.PaymentPendingRenderer,
+            'preparingRenderer': window.DynamicPreparingOrdersRenderer,
+            'readyRenderer': window.DynamicReadyOrdersRenderer,
+            'completedRenderer': window.DynamicCompletedOrdersRenderer
+        };
+        return fallbackMap[name] || null;
     }
     
     // ====== 修正：綁定全局事件 ======
@@ -314,8 +339,8 @@ class OrderManagementSystem {
         console.log('🔄 正在啟動訂單管理系統（統一數據流版）...');
         
         try {
-            // 1. 等待組件初始化完成
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // 1. 等待組件初始化完成（縮短等待時間）
+            await new Promise(resolve => setTimeout(resolve, 100));
             
             // 2. 加載初始數據
             if (window.unifiedDataManager) {

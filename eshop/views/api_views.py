@@ -392,7 +392,26 @@ def api_mark_order_as_ready(request, order_id):
 
         if result.get('success'):
             logger.info(f"✅ API: 訂單 #{order_id} 已標記為就緒")
-            return JsonResponse(result)
+            
+            # 修復：移除無法序列化的對象，只返回可序列化的數據
+            serializable_result = {
+                'success': True,
+                'order_id': order_id,
+                'message': f'訂單 #{order_id} 已標記為就緒',
+                'staff_name': staff_name,
+                'timestamp': timezone.now().isoformat()
+            }
+            
+            # 如果有隊列項信息，添加可序列化的部分
+            if 'queue_item' in result and result['queue_item']:
+                queue_item = result['queue_item']
+                serializable_result['queue_item'] = {
+                    'id': queue_item.id,
+                    'status': queue_item.status,
+                    'actual_completion_time': queue_item.actual_completion_time.isoformat() if queue_item.actual_completion_time else None
+                }
+            
+            return JsonResponse(serializable_result)
         else:
             logger.error(
                 f"❌ API: 標記訂單 #{order_id} 為就緒失敗: {result.get('error')}")
