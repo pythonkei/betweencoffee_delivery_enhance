@@ -789,140 +789,94 @@ def generate_fps_qr_api(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
-# ==================== FPS 付款確認 API（員工端） ====================
+# ==================== 線下付款確認 API（統一，員工端） ====================
 
 @csrf_exempt
+@require_POST
+def api_confirm_offline_payment(request, order_id, payment_method):
+    """
+    統一處理員工確認線下付款（FPS / 現金）API
+     
+    由員工端製作隊列頁面調用，當員工確認款項已收到時，
+    將訂單從 payment_pending 狀態轉為 paid，並根據訂單類型
+    進入對應流程（咖啡→waiting，咖啡豆→ready）。
+     
+    POST 參數：
+        staff_name: 員工名稱（可選）
+     
+    Args:
+        order_id: 訂單 ID
+        payment_method: 支付方式 ('fps' 或 'cash')
+     
+    Returns:
+        JSON: {success, message, order_id, payment_status, status}
+    """
+    method_label = 'FPS' if payment_method == 'fps' else '現金'
+    try:
+        # 驗證員工權限（檢查是否為 staff 或 superuser）
+        if not request.user.is_authenticated:
+            return api_error(
+                message='需要登入',
+                status_code=401,
+                details={'order_id': order_id}
+            )
+         
+        if not (request.user.is_staff or request.user.is_superuser):
+            return api_error(
+                message='需要員工權限',
+                status_code=403,
+                details={'order_id': order_id}
+            )
+         
+        # 獲取員工名稱
+        staff_name = request.POST.get('staff_name', request.user.username)
+         
+        # 使用 OrderStatusManager 確認付款
+        from eshop.order_status_manager import OrderStatusManager
+        result = OrderStatusManager.confirm_offline_payment(
+            order_id=order_id,
+            payment_method=payment_method,
+            staff_name=staff_name
+        )
+         
+        if result.get('success'):
+            logger.info(f"✅ API: 員工 {staff_name} 確認 {method_label} 付款，訂單 #{order_id}")
+            return api_success(
+                data={
+                    'order_id': order_id,
+                    'payment_status': 'paid',
+                    'status': result.get('status', 'waiting'),
+                },
+                message=result['message']
+            )
+        else:
+            logger.warning(f"⚠️ API: {method_label} 付款確認失敗: {result.get('message')}")
+            return api_error(
+                message=result.get('message', '確認失敗'),
+                status_code=400,
+                details={'order_id': order_id}
+            )
+         
+    except Exception as e:
+        logger.error(f"❌ API: {method_label} 付款確認異常: {str(e)}")
+        return api_error(
+            message=f'{method_label} 付款確認失敗: {str(e)}',
+            status_code=500,
+            details={'order_id': order_id, 'error_type': 'confirm_offline_payment'}
+        )
+
+
+# ==================== 保留向後兼容的包裝函數 ====================
+
+@csrf_exempt
+@require_POST
 def api_confirm_fps_payment(request, order_id):
-    """
-    員工確認 FPS 付款已收到 API
-    
-    由員工端製作隊列頁面調用，當員工確認 FPS 款項已收到時，
-    將訂單從 payment_pending 狀態轉為 paid，並根據訂單類型
-    進入對應流程（咖啡→waiting，咖啡豆→ready）。
-    
-    POST 參數：
-        staff_name: 員工名稱（可選）
-    
-    Returns:
-        JSON: {success, message, order_id, payment_status, status}
-    """
-    if request.method != 'POST':
-        return JsonResponse({
-            'success': False,
-            'error': '僅支持 POST 請求'
-        }, status=405)
-    
-    try:
-        # 驗證員工權限（檢查是否為 staff 或 superuser）
-        if not request.user.is_authenticated:
-            return JsonResponse({
-                'success': False,
-                'error': '需要登入'
-            }, status=401)
-        
-        if not (request.user.is_staff or request.user.is_superuser):
-            return JsonResponse({
-                'success': False,
-                'error': '需要員工權限'
-            }, status=403)
-        
-        # 獲取員工名稱
-        staff_name = request.POST.get('staff_name', request.user.username)
-        
-        # 使用 OrderStatusManager 確認 FPS 付款
-        from eshop.order_status_manager import OrderStatusManager
-        result = OrderStatusManager.confirm_fps_payment(
-            order_id=order_id,
-            staff_name=staff_name
-        )
-        
-        if result.get('success'):
-            logger.info(f"✅ API: 員工 {staff_name} 確認 FPS 付款，訂單 #{order_id}")
-            return JsonResponse({
-                'success': True,
-                'message': result['message'],
-                'order_id': order_id,
-                'payment_status': 'paid',
-                'status': result.get('status', 'waiting')
-            })
-        else:
-            logger.warning(f"⚠️ API: FPS 付款確認失敗: {result.get('message')}")
-            return JsonResponse({
-                'success': False,
-                'error': result.get('message', '確認失敗')
-            }, status=400)
-        
-    except Exception as e:
-        logger.error(f"❌ API: FPS 付款確認異常: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': f'FPS 付款確認失敗: {str(e)}'
-        }, status=500)
+    """保留向後兼容 - 調用統一的 api_confirm_offline_payment"""
+    return api_confirm_offline_payment(request, order_id, 'fps')
 
 
+@csrf_exempt
+@require_POST
 def api_confirm_cash_payment(request, order_id):
-    """
-    員工確認現金付款已收到 API
-    
-    由員工端製作隊列頁面調用，當員工確認收到現金款項時，
-    將訂單從 payment_pending 狀態轉為 paid，並根據訂單類型
-    進入對應流程（咖啡→waiting，咖啡豆→ready）。
-    
-    POST 參數：
-        staff_name: 員工名稱（可選）
-    
-    Returns:
-        JSON: {success, message, order_id, payment_status, status}
-    """
-    if request.method != 'POST':
-        return JsonResponse({
-            'success': False,
-            'error': '僅支持 POST 請求'
-        }, status=405)
-    
-    try:
-        # 驗證員工權限（檢查是否為 staff 或 superuser）
-        if not request.user.is_authenticated:
-            return JsonResponse({
-                'success': False,
-                'error': '需要登入'
-            }, status=401)
-        
-        if not (request.user.is_staff or request.user.is_superuser):
-            return JsonResponse({
-                'success': False,
-                'error': '需要員工權限'
-            }, status=403)
-        
-        # 獲取員工名稱
-        staff_name = request.POST.get('staff_name', request.user.username)
-        
-        # 使用 OrderStatusManager 確認現金付款
-        from eshop.order_status_manager import OrderStatusManager
-        result = OrderStatusManager.confirm_cash_payment(
-            order_id=order_id,
-            staff_name=staff_name
-        )
-        
-        if result.get('success'):
-            logger.info(f"✅ API: 員工 {staff_name} 確認現金付款，訂單 #{order_id}")
-            return JsonResponse({
-                'success': True,
-                'message': result['message'],
-                'order_id': order_id,
-                'payment_status': 'paid',
-                'status': result.get('status', 'waiting')
-            })
-        else:
-            logger.warning(f"⚠️ API: 現金付款確認失敗: {result.get('message')}")
-            return JsonResponse({
-                'success': False,
-                'error': result.get('message', '確認失敗')
-            }, status=400)
-        
-    except Exception as e:
-        logger.error(f"❌ API: 現金付款確認異常: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': f'現金付款確認失敗: {str(e)}'
-        }, status=500)
+    """保留向後兼容 - 調用統一的 api_confirm_offline_payment"""
+    return api_confirm_offline_payment(request, order_id, 'cash')

@@ -632,6 +632,23 @@ class QueueConsumer(BaseOrderConsumer):
             'timestamp': timezone.now().isoformat()
         })
     
+    async def order_update(self, event):
+        """
+        訂單更新轉發（來自 send_order_update 發送到 order_{order_id} 群組）
+        
+        當 QueueConsumer 的客戶端通過 subscribe_order 訂閱了特定訂單時，
+        會收到 order_update 訊息。此方法將其轉發為 queue_update 格式，
+        確保前端能正確處理。
+        """
+        await self._send_json({
+            'type': 'queue_update',
+            'action': 'order_update',
+            'order_id': event.get('order_id'),
+            'update_type': event.get('update_type', 'status'),
+            'data': event.get('data', {}),
+            'timestamp': timezone.now().isoformat()
+        })
+    
     async def system_message(self, event):
         """系統訊息廣播"""
         await self._send_json({

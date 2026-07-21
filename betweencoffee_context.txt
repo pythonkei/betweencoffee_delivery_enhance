@@ -5,8 +5,10 @@
 - **項目名稱**: Between Coffee 咖啡店外帶網站與訂單製作管理系統
 - **技術棧**: Django + PostgreSQL + WebSocket + Bootstrap 5
 - **核心業務流程**: 顧客下單 → 支付處理 → 加入製作隊列 → 員工製作 → 訂單就緒 → 顧客取餐
-- **部署平台**: Railway
-- **當前狀態**: 系統穩定，核心功能完整，已完成系統架構清理、訂單狀態卡片修復和支付確認頁面優化
+- **部署平台**: Render（Docker 運行時），autoDeploy 啟用
+- **Live URL**: https://betweencoffee-delivery-enhance-v1.onrender.com/
+- **GitHub**: https://github.com/pythonkei/betweencoffee_delivery_enhance
+- **當前狀態**: 系統穩定，核心功能完整。已完成 Render 部署 migration 修復（0037-0051）、Barista 模型重構、QueueConsumer order_update 修復、CoffeeQueue 新增 coffee_count/preparation_time_minutes 欄位、端到端流程修復驗證
 
 ## 開發規範
 
