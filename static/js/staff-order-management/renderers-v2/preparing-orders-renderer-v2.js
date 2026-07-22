@@ -102,7 +102,7 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         activeOrders.forEach(order => {
             const orderElement = this.createOrderElement(order);
             activeFragment.appendChild(orderElement);
-            this.currentOrders.set(order.id, {
+            this.currentOrders.set(this._getOrderId(order), {
                 element: orderElement,
                 data: order,
                 updated: new Date().getTime()
@@ -113,7 +113,7 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         completedOrders.forEach(order => {
             const orderElement = this.createOrderElement(order);
             completedFragment.appendChild(orderElement);
-            this.currentOrders.set(order.id, {
+            this.currentOrders.set(this._getOrderId(order), {
                 element: orderElement,
                 data: order,
                 updated: new Date().getTime()
@@ -590,11 +590,12 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         this.isProcessingAction = true;
 
         try {
-            const url = `/eshop/api/orders/${order.id}/mark-ready/`;
-            const result = await this._apiPost(url, { order_id: order.id });
+            const orderId = this._getOrderId(order);
+            const url = `/eshop/api/orders/${orderId}/mark-ready/`;
+            const result = await this._apiPost(url, { order_id: orderId });
 
             if (result && result.success) {
-                this.showToast(`✅ 訂單 #${order.order_number || order.id} 已標記為就緒`, 'success');
+                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已標記為就緒`, 'success');
                 this.forceRefresh();
             } else {
                 this.showToast(`❌ 標記就緒失敗: ${result?.error || '未知錯誤'}`, 'error');
@@ -612,11 +613,12 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         this.isProcessingAction = true;
 
         try {
-            const url = `/eshop/api/orders/${order.id}/expedite/`;
-            const result = await this._apiPost(url, { order_id: order.id });
+            const orderId = this._getOrderId(order);
+            const url = `/eshop/api/orders/${orderId}/expedite/`;
+            const result = await this._apiPost(url, { order_id: orderId });
 
             if (result && result.success) {
-                this.showToast(`✅ 訂單 #${order.order_number || order.id} 已加速`, 'success');
+                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已加速`, 'success');
                 this.forceRefresh();
             } else {
                 this.showToast(`❌ 加速失敗: ${result?.error || '未知錯誤'}`, 'error');

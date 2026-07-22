@@ -62,6 +62,27 @@ class BaseOrderRendererV2 {
         setTimeout(() => this.initialize(), 100);
     }
 
+    // ==================== 訂單 ID 標準化方法 ====================
+
+    /**
+     * 獲取訂單 ID（標準化 order.id / order.order_id）
+     * 統一處理後端可能回傳不同欄位名稱的情況
+     * @param {Object} order - 訂單數據物件
+     * @returns {number|string} 訂單 ID
+     */
+    _getOrderId(order) {
+        return order.id || order.order_id;
+    }
+
+    /**
+     * 獲取訂單編號（優先使用 order_number，其次為 id）
+     * @param {Object} order - 訂單數據物件
+     * @returns {number|string} 訂單編號
+     */
+    _getOrderNumber(order) {
+        return order.order_number || order.id || order.order_id;
+    }
+
     // ==================== 初始化 ====================
 
     initialize() {
@@ -231,7 +252,7 @@ class BaseOrderRendererV2 {
             fragment.appendChild(orderElement);
 
             // 更新當前訂單映射
-            this.currentOrders.set(order.id, {
+            this.currentOrders.set(this._getOrderId(order), {
                 element: orderElement,
                 data: order,
                 updated: new Date().getTime()
@@ -613,7 +634,7 @@ class BaseOrderRendererV2 {
      * @returns {string} HTML
      */
     renderOrderNumber(order) {
-        const orderNumber = order.order_number || order.id || '';
+        const orderNumber = this._getOrderNumber(order);
         return `
             <span class="order-number">
                 <i class="fas fa-hashtag mr-1"></i>訂單編號: #${orderNumber}
@@ -658,7 +679,7 @@ class BaseOrderRendererV2 {
     createOrderCardDiv(order) {
         const div = document.createElement('div');
         div.className = 'order-item mb-5 p-5 rounded selectable';
-        div.setAttribute('data-order-id', order.id);
+        div.setAttribute('data-order-id', this._getOrderId(order));
         return div;
     }
 

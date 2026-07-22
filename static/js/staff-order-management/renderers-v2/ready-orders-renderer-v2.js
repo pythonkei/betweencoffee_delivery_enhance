@@ -323,11 +323,12 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
         this.isProcessingAction = true;
 
         try {
-            const url = `/eshop/api/orders/${order.id}/mark-completed/`;
-            const result = await this._apiPost(url, { order_id: order.id });
+            const orderId = this._getOrderId(order);
+            const url = `/eshop/api/orders/${orderId}/mark-completed/`;
+            const result = await this._apiPost(url, { order_id: orderId });
 
             if (result && result.success) {
-                this.showToast(`✅ 訂單 #${order.order_number || order.id} 已標記為已提取`, 'success');
+                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已標記為已提取`, 'success');
                 this.forceRefresh();
             } else {
                 this.showToast(`❌ 標記提取失敗: ${result?.error || '未知錯誤'}`, 'error');

@@ -321,7 +321,7 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
             }
 
             if (result && result.success) {
-                this.showToast(`✅ 訂單 #${order.order_number || order.id} 付款已確認`, 'success');
+                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 付款已確認`, 'success');
                 this.forceRefresh();
             } else {
                 this.showToast(`❌ 確認付款失敗: ${result?.error || '未知錯誤'}`, 'error');
@@ -335,30 +335,33 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
     }
 
     async _confirmFPSPayment(order) {
-        const url = `/eshop/api/fps/confirm-payment/${order.id}/`;
-        return await this._apiPost(url, { order_id: order.id });
+        const orderId = this._getOrderId(order);
+        const url = `/eshop/api/fps/confirm-payment/${orderId}/`;
+        return await this._apiPost(url, { order_id: orderId });
     }
 
     async _confirmCashPayment(order) {
-        const url = `/eshop/api/cash/confirm-payment/${order.id}/`;
-        return await this._apiPost(url, { order_id: order.id });
+        const orderId = this._getOrderId(order);
+        const url = `/eshop/api/cash/confirm-payment/${orderId}/`;
+        return await this._apiPost(url, { order_id: orderId });
     }
 
     async _handleCancelOrder(order) {
         if (this.isProcessingAction) return;
 
-        if (!confirm(`確定要取消訂單 #${order.order_number || order.id} 嗎？`)) {
+        if (!confirm(`確定要取消訂單 #${this._getOrderNumber(order)} 嗎？`)) {
             return;
         }
 
         this.isProcessingAction = true;
 
         try {
-            const url = `/eshop/api/orders/${order.id}/cancel/`;
-            const result = await this._apiPost(url, { order_id: order.id });
+            const orderId = this._getOrderId(order);
+            const url = `/eshop/api/orders/${orderId}/cancel/`;
+            const result = await this._apiPost(url, { order_id: orderId });
 
             if (result && result.success) {
-                this.showToast(`✅ 訂單 #${order.order_number || order.id} 已取消`, 'success');
+                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已取消`, 'success');
                 this.forceRefresh();
             } else {
                 this.showToast(`❌ 取消訂單失敗: ${result?.error || '未知錯誤'}`, 'error');

@@ -273,7 +273,7 @@ class OrderManagementSystem {
     _getFallbackRenderer(name) {
         const fallbackMap = {
             'paymentPendingRenderer': window.PaymentPendingRenderer,
-            'preparingRenderer': window.DynamicPreparingOrdersRenderer,
+            'preparingRenderer': window.EnhancedPreparingOrdersRenderer,
             'readyRenderer': window.DynamicReadyOrdersRenderer,
             'completedRenderer': window.DynamicCompletedOrdersRenderer
         };
@@ -472,21 +472,30 @@ class OrderManagementSystem {
     cleanup() {
         console.log('🔄 正在清理訂單管理系統...');
         
-        // 清理所有組件
-        Object.values(this.components).forEach(component => {
-            if (component && typeof component.cleanup === 'function') {
-                try {
-                    component.cleanup();
-                } catch (error) {
-                    console.error('清理組件失敗:', error);
-                }
+        try {
+            // 安全清理所有組件（防止 this.components 為 null/undefined）
+            if (this.components) {
+                Object.values(this.components).forEach(component => {
+                    if (component && typeof component.cleanup === 'function') {
+                        try {
+                            component.cleanup();
+                        } catch (error) {
+                            console.error('清理組件失敗:', error);
+                        }
+                    }
+                });
             }
-        });
-        
-        this.initialized = false;
-        this.components = {};
-        
-        console.log('✅ 訂單管理系統已清理');
+            
+            this.initialized = false;
+            this.components = {};
+            
+            console.log('✅ 訂單管理系統已清理');
+        } catch (error) {
+            console.error('❌ 清理訂單管理系統時發生錯誤:', error);
+            // 即使出錯也重置狀態
+            this.initialized = false;
+            this.components = {};
+        }
     }
     
     // ====== 新增：渲染器初始化完成後主動觸發數據檢查 ======
