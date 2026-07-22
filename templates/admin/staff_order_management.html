@@ -352,6 +352,9 @@
 <!-- 9. 主初始化 -->
 <script src="{% static 'js/staff-order-management/main.js' %}"></script>
 
+<!-- 10. 效能基準測試（Phase 3A，僅開發環境使用） -->
+<script src="{% static 'js/staff-order-management/benchmark-renderer.js' %}"></script>
+
 <script>
 document.getElementById('debug-badges').addEventListener('click', function() {
     if (window.badgeManager) {

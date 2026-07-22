@@ -2,7 +2,6 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月22日（更新：Phase 2 員工端渲染器 v2 重構完成 + 審核發現 2 個 URL bug + Phase 3 規劃）
 
 
 ## 開發者背景與方法論

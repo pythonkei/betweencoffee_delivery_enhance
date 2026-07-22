@@ -341,42 +341,8 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
         }
     }
 
-    // ==================== API 請求 ====================
-
-    async _apiPost(url, data) {
-        if (this.apiService && typeof this.apiService.post === 'function') {
-            return await this.apiService.post(url, data);
-        }
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': this._getCSRFToken()
-                },
-                body: JSON.stringify(data)
-            });
-            return await response.json();
-        } catch (error) {
-            console.error('❌ API 請求失敗:', error);
-            throw error;
-        }
-    }
-
-    _getCSRFToken() {
-        const name = 'csrftoken';
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                return decodeURIComponent(cookie.substring(name.length + 1));
-            }
-        }
-        return '';
-    }
-
     // ==================== 排序覆蓋 ====================
+
 
     sortOrders(orders) {
         return [...orders].sort((a, b) => {

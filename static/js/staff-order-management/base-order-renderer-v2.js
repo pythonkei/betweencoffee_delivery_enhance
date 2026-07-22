@@ -49,7 +49,6 @@ class BaseOrderRendererV2 {
 
         // 狀態
         this.currentOrders = new Map();      // orderId -> { element, data, updated }
-        this.countdownTimers = new Map();     // orderId -> timerId
         this.eventListeners = new Map();      // key -> { target, event, handler }
         this.hasInitialData = false;
         this.hasRenderedOnce = false;  // 追蹤是否已渲染過一次（初始加載用）
@@ -810,46 +809,103 @@ class BaseOrderRendererV2 {
         });
     }
 
-    startCountdown(badge, orderId, estimatedTime) {
-        const countdownText = badge.querySelector('.countdown-text');
+    // ==================== 全域倒數計時（優化版） ====================
+    // 使用單一全域 setInterval 取代每個訂單獨立的 setInterval
+    // 避免大量 timer 同時運作造成的效能問題
 
-        // 清理現有的定時器
-        const existingTimer = this.countdownTimers.get(orderId);
-        if (existingTimer) {
-            clearInterval(existingTimer);
-        }
+    /**
+     * 啟動全域倒數計時循環
+     * 所有渲染器共享一個 timer，透過 DOM 查詢更新所有活躍的倒數計時
+     */
+    static startGlobalCountdown() {
+        if (BaseOrderRendererV2._globalTimerRunning) return;
+        BaseOrderRendererV2._globalTimerRunning = true;
 
-        const updateCountdown = () => {
+        BaseOrderRendererV2._globalTimer = setInterval(() => {
+            // 查詢所有活躍的倒數計時 badge
+            const activeBadges = document.querySelectorAll('.countdown-badge.active');
             const now = new Date();
-            const diffMs = estimatedTime - now;
 
-            if (diffMs <= 0) {
-                this.markCountdownCompleted(badge, estimatedTime.toISOString());
+            activeBadges.forEach(badge => {
+                const estimatedTimeStr = badge.dataset.estimatedTime;
+                const countdownText = badge.querySelector('.countdown-text');
+                if (!estimatedTimeStr || !countdownText) return;
 
-                const timer = this.countdownTimers.get(orderId);
-                if (timer) {
-                    clearInterval(timer);
-                    this.countdownTimers.delete(orderId);
+                const estimatedTime = new Date(estimatedTimeStr);
+                const diffMs = estimatedTime - now;
+
+                if (diffMs <= 0) {
+                    // 倒數完成，標記為已完成
+                    countdownText.textContent = '已完成';
+                    badge.classList.remove('active', 'badge-secondary');
+                    badge.classList.add('badge-success');
+
+                    const icon = badge.querySelector('i');
+                    if (icon) {
+                        icon.className = 'fas fa-check mr-1';
+                    }
+                    return;
                 }
-                return;
-            }
 
-            const diffMins = Math.floor(diffMs / (1000 * 60));
-            const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+                const diffMins = Math.floor(diffMs / (1000 * 60));
+                const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
 
-            if (diffMins > 0) {
-                countdownText.textContent = `預計完成: ${diffMins}分${diffSecs.toString().padStart(2, '0')}秒`;
-            } else {
-                countdownText.textContent = `預計完成: ${diffSecs}秒`;
-            }
-        };
+                if (diffMins > 0) {
+                    countdownText.textContent = `預計完成: ${diffMins}分${diffSecs.toString().padStart(2, '0')}秒`;
+                } else {
+                    countdownText.textContent = `預計完成: ${diffSecs}秒`;
+                }
+            });
+        }, 1000);
+
+        console.log('🌍 全域倒數計時已啟動（單一 setInterval）');
+    }
+
+    /**
+     * 停止全域倒數計時循環
+     */
+    static stopGlobalCountdown() {
+        if (BaseOrderRendererV2._globalTimer) {
+            clearInterval(BaseOrderRendererV2._globalTimer);
+            BaseOrderRendererV2._globalTimer = null;
+            BaseOrderRendererV2._globalTimerRunning = false;
+            console.log('🌍 全域倒數計時已停止');
+        }
+    }
+
+    /**
+     * 啟動單個訂單的倒數計時
+     * 不再建立獨立的 setInterval，而是將 badge 標記為 active
+     * 由全域 timer 統一更新
+     */
+    startCountdown(badge, orderId, estimatedTime) {
+        // 確保全域 timer 已啟動
+        BaseOrderRendererV2.startGlobalCountdown();
+
+        // 在 badge 上儲存預計完成時間
+        badge.dataset.estimatedTime = estimatedTime.toISOString();
+        badge.classList.add('active');
 
         // 立即更新一次
-        updateCountdown();
+        const countdownText = badge.querySelector('.countdown-text');
+        if (!countdownText) return;
 
-        // 每秒更新一次
-        const timer = setInterval(updateCountdown, 1000);
-        this.countdownTimers.set(orderId, timer);
+        const now = new Date();
+        const diffMs = estimatedTime - now;
+
+        if (diffMs <= 0) {
+            this.markCountdownCompleted(badge, estimatedTime.toISOString());
+            return;
+        }
+
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+        if (diffMins > 0) {
+            countdownText.textContent = `預計完成: ${diffMins}分${diffSecs.toString().padStart(2, '0')}秒`;
+        } else {
+            countdownText.textContent = `預計完成: ${diffSecs}秒`;
+        }
     }
 
     markCountdownCompleted(badge, estimatedTimeStr) {
@@ -873,7 +929,7 @@ class BaseOrderRendererV2 {
         }
 
         countdownText.textContent = completedTimeDisplay;
-        badge.classList.remove('badge-secondary');
+        badge.classList.remove('active', 'badge-secondary');
         badge.classList.add('badge-success');
 
         const icon = badge.querySelector('i');
@@ -883,8 +939,12 @@ class BaseOrderRendererV2 {
     }
 
     cleanupTimers() {
-        this.countdownTimers.forEach(timer => clearInterval(timer));
-        this.countdownTimers.clear();
+        // 全域 timer 由靜態方法管理，不在實例層級清理
+        // 但檢查是否還有其他渲染器在使用，如果沒有則停止全域 timer
+        const rendererCount = document.querySelectorAll('[data-renderer-instance]').length;
+        if (rendererCount <= 1) {
+            BaseOrderRendererV2.stopGlobalCountdown();
+        }
     }
 
     // ==================== 自動刷新 ====================
@@ -1076,6 +1136,52 @@ class BaseOrderRendererV2 {
         console.log(`📦 緩存 ${this.orderType} 訂單數據: ${orders?.length || 0} 個`);
     }
 
+    // ==================== API 請求（共享方法） ====================
+
+    /**
+     * 發送 POST 請求到 API
+     * 優先使用 apiService，如果不可用則使用 fetch
+     * @param {string} url - API URL
+     * @param {Object} data - 請求數據
+     * @returns {Promise<Object>} 響應數據
+     */
+    async _apiPost(url, data) {
+        if (this.apiService && typeof this.apiService.post === 'function') {
+            return await this.apiService.post(url, data);
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this._getCSRFToken()
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('❌ API 請求失敗:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 獲取 CSRF Token
+     * @returns {string} CSRF Token
+     */
+    _getCSRFToken() {
+        const name = 'csrftoken';
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                return decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        }
+        return '';
+    }
+
     // ==================== 事件監聽器管理 ====================
 
     /**
@@ -1106,6 +1212,7 @@ class BaseOrderRendererV2 {
     }
 
     // ==================== 清理方法 ====================
+
 
     /**
      * 清理資源（切換頁面或銷毀時調用）

@@ -245,13 +245,54 @@ python manage.py makemigrations && python manage.py migrate
 3. 檢查 `eshop/paypal_utils.py`, `eshop/alipay_utils.py`
 4. 檢查 `eshop/order_status_manager.py`
 
+## Phase 3 規劃
+
+```
+Phase 3A：Phase 2 收尾（優先級：最高）— ✅ 已完成
+├── [x] 修復 URL bug（payment-pending-renderer-v2.js）
+├── [x] 加上 @staff_api_required 裝飾器
+├── [x] cleanup 加 try-catch 保護
+├── [x] 執行降級方案測試
+├── [x] 執行端到端手動驗證
+├── [x] 子標籤頁徽章端到端驗證
+└── [x] verify_phase2.py 12/12 測試全部通過
+
+Phase 3B：代碼清理（優先級：高）
+├── [ ] 評估舊版渲染器是否可移除
+├── [ ] 統一 order.id / order.order_id 使用
+└── [ ] 添加 JSDoc 註釋
+
+Phase 3C：效能優化（優先級：中）
+├── [ ] 分析渲染器效能瓶頸
+├── [ ] 優化 DOM 操作（DocumentFragment 批量插入）
+├── [ ] 優化倒數計時（requestAnimationFrame vs setInterval）
+└── [ ] 減少不必要的重新渲染
+
+Phase 3D：新功能（優先級：低）
+├── [ ] 訂單搜尋/過濾功能
+├── [ ] 批量操作（批量確認支付）
+├── [ ] 訂單匯出功能
+└── [ ] 操作日誌/審計追蹤
+
+Phase 3E：技術債務（優先級：P1）
+├── [ ] 拆分 models.py（1636行）
+├── [ ] 拆分 queue_manager_refactored.py（1637行）
+├── [ ] 拆分 order_status_manager.py（1259行）
+├── [ ] 增加單元測試覆蓋率
+├── [ ] 系統性能監控儀表板
+└── [ ] 代碼風格統一（flake8/black/isort）
+
+Phase 3F：基礎設施（優先級：P1）
+├── [ ] 資料庫遷移至 Supabase（Render PostgreSQL → Supabase）
+└── [ ] 更新 Django settings 與環境變量
+```
+
 ## 技術債務（已知）
 - `models.py` (1636行) - 需拆分
 - `queue_manager_refactored.py` (1637行) - 需拆分
 - `order_status_manager.py` (1259行) - 需拆分
 - ~~支付確認邏輯重複 (confirm_fps_payment / confirm_cash_payment)~~ ✅ 已於 2026-07-21 重構完成
 - 測試覆蓋率低
-- 前端 JS 部分重複邏輯
 
 ## UI 開發設計注意事項
 
