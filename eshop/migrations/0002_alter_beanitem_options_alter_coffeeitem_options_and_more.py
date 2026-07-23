@@ -6,28 +6,28 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0001_initial'),
+        ("eshop", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='beanitem',
-            options={'ordering': ['-list_date'], 'verbose_name_plural': 'Bean'},
+            name="beanitem",
+            options={"ordering": ["-list_date"], "verbose_name_plural": "Bean"},
         ),
         migrations.AlterModelOptions(
-            name='coffeeitem',
-            options={'ordering': ['-list_date'], 'verbose_name_plural': 'Coffee'},
+            name="coffeeitem",
+            options={"ordering": ["-list_date"], "verbose_name_plural": "Coffee"},
         ),
         migrations.RemoveField(
-            model_name='beanitem',
-            name='hot_item_order',
+            model_name="beanitem",
+            name="hot_item_order",
         ),
         migrations.RemoveField(
-            model_name='beanitem',
-            name='image_index',
+            model_name="beanitem",
+            name="image_index",
         ),
         migrations.RemoveField(
-            model_name='coffeeitem',
-            name='hot_item_order',
+            model_name="coffeeitem",
+            name="hot_item_order",
         ),
     ]

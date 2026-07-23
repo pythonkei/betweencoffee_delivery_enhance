@@ -1,36 +1,39 @@
 # socialuser/forms.py
-from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.models import User
+from django.forms import ModelForm
+
 from .models import Profile
 
 
 class ProfileForm(ModelForm):
     class Meta:
         model = Profile
-        fields = ['image', 'displayname', 'info']  # Removed phone from fields
+        fields = ["image", "displayname", "info"]  # Removed phone from fields
         widgets = {
-            'image': forms.FileInput(),
-            'displayname': forms.TextInput(attrs={'placeholder': 'Add display name'}),
-            'info': forms.Textarea(attrs={'rows':3, 'placeholder': 'Add information'})
+            "image": forms.FileInput(),
+            "displayname": forms.TextInput(attrs={"placeholder": "Add display name"}),
+            "info": forms.Textarea(attrs={"rows": 3, "placeholder": "Add information"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['phone'] = forms.CharField(
+        self.fields["phone"] = forms.CharField(
             required=True,
-            widget=forms.TextInput(attrs={
-                'placeholder': '91234567',
-                'pattern': '[0-9]{8}',
-                'title': '請輸入8位數字電話號碼'
-            }),
-            initial=self.instance.hk_phone() if self.instance.phone else ""
+            widget=forms.TextInput(
+                attrs={
+                    "placeholder": "91234567",
+                    "pattern": "[0-9]{8}",
+                    "title": "請輸入8位數字電話號碼",
+                }
+            ),
+            initial=self.instance.hk_phone() if self.instance.phone else "",
         )
 
     def clean_phone(self):
-        phone = self.data.get('phone', '')
+        phone = self.data.get("phone", "")
         if phone:
-            if not phone.startswith('+852'):
+            if not phone.startswith("+852"):
                 phone = f"+852{phone}"
             if len(phone) != 12 or not phone[1:].isdigit():
                 raise forms.ValidationError("請輸入有效的8位數字香港電話號碼")
@@ -41,20 +44,22 @@ class ProfileForm(ModelForm):
 class PhoneForm(ModelForm):
     class Meta:
         model = Profile
-        fields = ['phone']
+        fields = ["phone"]
         widgets = {
-            'phone': forms.TextInput(attrs={
-                'placeholder': '91234567',
-                'pattern': '[0-9]{8}',
-                'title': '請輸入8位數字電話號碼'
-            })
+            "phone": forms.TextInput(
+                attrs={
+                    "placeholder": "91234567",
+                    "pattern": "[0-9]{8}",
+                    "title": "請輸入8位數字電話號碼",
+                }
+            )
         }
 
     def clean_phone(self):
-        phone = str(self.cleaned_data.get('phone'))  # Convert to string first
+        phone = str(self.cleaned_data.get("phone"))  # Convert to string first
         if phone:
             # Remove any existing country code
-            if phone.startswith('+852'):
+            if phone.startswith("+852"):
                 phone = phone[4:]
             # Ensure it's 8 digits
             if len(phone) != 8 or not phone.isdigit():
@@ -66,20 +71,21 @@ class PhoneForm(ModelForm):
 class AvatarForm(ModelForm):
     class Meta:
         model = Profile
-        fields = ['image']
+        fields = ["image"]
         widgets = {
-            'image': forms.FileInput(),
+            "image": forms.FileInput(),
         }
 
 
 class EmailForm(ModelForm):
     email = forms.EmailField(required=True)
+
     class Meta:
         model = User
-        fields = ['email']
+        fields = ["email"]
 
 
 class UsernameForm(ModelForm):
     class Meta:
         model = User
-        fields = ['username']
+        fields = ["username"]

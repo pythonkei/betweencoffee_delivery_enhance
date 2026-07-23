@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0016_add_pickup_time_fields'),
+        ("eshop", "0016_add_pickup_time_fields"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='ordermodel',
-            name='pickup_time_choice',
+            model_name="ordermodel",
+            name="pickup_time_choice",
         ),
         migrations.RemoveField(
-            model_name='ordermodel',
-            name='pickup_time_custom',
+            model_name="ordermodel",
+            name="pickup_time_custom",
         ),
     ]

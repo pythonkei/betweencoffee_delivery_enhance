@@ -1,72 +1,80 @@
 # socialuser/urls.py
 from django.urls import path
-from .views import (
-    profile_view, profile_edit_view, 
-    profile_emailchange, profile_usernamechange, profile_phonechange,
-    profile_emailverify, profile_delete_view, order_history, 
-    reactivate_account, test_email_view, social_login_status, 
-    social_login_debug, CustomLoginCancelledView,
-    profile_avatar_ajax, profile_info_ajax,
-    social_login_error,
-)
 
 # 導入強化會員系統視圖
 from . import views_enhanced
+from .views import (
+    CustomLoginCancelledView,
+    order_history,
+    profile_avatar_ajax,
+    profile_delete_view,
+    profile_edit_view,
+    profile_emailchange,
+    profile_emailverify,
+    profile_info_ajax,
+    profile_phonechange,
+    profile_usernamechange,
+    profile_view,
+    reactivate_account,
+    social_login_debug,
+    social_login_error,
+    social_login_status,
+    test_email_view,
+)
 
-app_name = 'socialuser'
+app_name = "socialuser"
 
 urlpatterns = [
-    path('', profile_view, name="profile"),
-    path('debug/', social_login_debug, name='social-login-debug'),
-    path('onboarding/', profile_edit_view, name="profile-onboarding"),
-    path('emailchange/', profile_emailchange, name="profile-emailchange"),
-    path('usernamechange/', profile_usernamechange, 
-         name="profile-usernamechange"),
-    path('phonechange/', profile_phonechange, name="profile-phonechange"),
-    path('emailverify/', profile_emailverify, name="profile-emailverify"),
-    path('delete/', profile_delete_view, name="profile-delete"),
-    path('orders/', order_history, name="profile-orders"),
-    path('test-email/', test_email_view, name='test-email'),
-    path('reactivate/', reactivate_account, name='reactivate-account'),
-    path('accounts/3rdparty/login/cancelled/', 
-         CustomLoginCancelledView.as_view(), 
-         name='socialaccount_login_cancelled'),
-    
+    path("", profile_view, name="profile"),
+    path("debug/", social_login_debug, name="social-login-debug"),
+    path("onboarding/", profile_edit_view, name="profile-onboarding"),
+    path("emailchange/", profile_emailchange, name="profile-emailchange"),
+    path("usernamechange/", profile_usernamechange, name="profile-usernamechange"),
+    path("phonechange/", profile_phonechange, name="profile-phonechange"),
+    path("emailverify/", profile_emailverify, name="profile-emailverify"),
+    path("delete/", profile_delete_view, name="profile-delete"),
+    path("orders/", order_history, name="profile-orders"),
+    path("test-email/", test_email_view, name="test-email"),
+    path("reactivate/", reactivate_account, name="reactivate-account"),
+    path(
+        "accounts/3rdparty/login/cancelled/",
+        CustomLoginCancelledView.as_view(),
+        name="socialaccount_login_cancelled",
+    ),
     # AJAX 端點
-    path('avatar-ajax/', profile_avatar_ajax, name='profile-avatar-ajax'),
-    path('info-ajax/', profile_info_ajax, name='profile-info-ajax'),
-    
+    path("avatar-ajax/", profile_avatar_ajax, name="profile-avatar-ajax"),
+    path("info-ajax/", profile_info_ajax, name="profile-info-ajax"),
     # 社交登入錯誤頁面
-    path('login-error/', social_login_error, name='social-login-error'),
-    
+    path("login-error/", social_login_error, name="social-login-error"),
     # 社交帳號解除綁定
-    path('social-disconnect/<str:provider>/', 
-         views_enhanced.social_disconnect, 
-         name='social-disconnect'),
-    
+    path(
+        "social-disconnect/<str:provider>/",
+        views_enhanced.social_disconnect,
+        name="social-disconnect",
+    ),
     # 调试路由
-    path('social-status/', social_login_status, name='social-status'),
-    path('social-debug/', social_login_debug, name='social-debug'),
-    
+    path("social-status/", social_login_status, name="social-status"),
+    path("social-debug/", social_login_debug, name="social-debug"),
     # 會員忠誠度系統（新增）
-    path('loyalty/dashboard/', 
-         views_enhanced.loyalty_dashboard, 
-         name='loyalty_dashboard'),
-    path('loyalty/redeem/', 
-         views_enhanced.redeem_reward, 
-         name='redeem_reward'),
-    path('loyalty/activities/', 
-         views_enhanced.activity_history, 
-         name='activity_history'),
-    path('loyalty/points-summary/', 
-         views_enhanced.points_summary, 
-         name='points_summary'),
-    
+    path(
+        "loyalty/dashboard/", views_enhanced.loyalty_dashboard, name="loyalty_dashboard"
+    ),
+    path("loyalty/redeem/", views_enhanced.redeem_reward, name="redeem_reward"),
+    path(
+        "loyalty/activities/", views_enhanced.activity_history, name="activity_history"
+    ),
+    path(
+        "loyalty/points-summary/", views_enhanced.points_summary, name="points_summary"
+    ),
     # API端點
-    path('api/loyalty-status/', 
-         views_enhanced.api_loyalty_status, 
-         name='api_loyalty_status'),
-    path('api/recent-activities/', 
-         views_enhanced.api_recent_activities, 
-         name='api_recent_activities'),
+    path(
+        "api/loyalty-status/",
+        views_enhanced.api_loyalty_status,
+        name="api_loyalty_status",
+    ),
+    path(
+        "api/recent-activities/",
+        views_enhanced.api_recent_activities,
+        name="api_recent_activities",
+    ),
 ]

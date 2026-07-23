@@ -15,13 +15,13 @@ eshop.models - 模型重新導出模組
 import warnings
 
 from .models.base import get_image_url, get_product_image_url
-from .models.shop_items import CoffeeItem, BeanItem
 from .models.cart_item import CartItem
 from .models.order import OrderModel
-from .models.queue_models import CoffeeQueue, Barista, CoffeePreparationTime
+from .models.queue_models import Barista, CoffeePreparationTime, CoffeeQueue
+from .models.shop_items import BeanItem, CoffeeItem
 
 warnings.warn(
     "直接從 eshop.models 導入已棄用，請從 eshop.models 套件導入。",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )

@@ -10,8 +10,10 @@
 """
 
 import logging
+
 from django.core.management.base import BaseCommand
 from django.db import connection
+
 from eshop.models import OrderModel
 
 logger = logging.getLogger(__name__)
@@ -92,8 +94,11 @@ class Command(BaseCommand):
         self.stdout.write("\n=== 檢查 3: 代碼引用 ===")
         try:
             # 運行 cleanup_payment_references 來檢查
-            from eshop.management.commands.cleanup_payment_references import PaymentReferenceCleaner
             from pathlib import Path
+
+            from eshop.management.commands.cleanup_payment_references import (
+                PaymentReferenceCleaner,
+            )
             
             project_root = Path.cwd()
             cleaner = PaymentReferenceCleaner(project_root)

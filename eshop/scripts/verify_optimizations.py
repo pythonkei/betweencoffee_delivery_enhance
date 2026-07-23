@@ -2,8 +2,9 @@
 
 import os
 import sys
-import django
 from datetime import datetime
+
+import django
 
 # 獲取項目根目錄的正確路徑
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,9 +15,12 @@ sys.path.insert(0, project_root)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'betweencoffee_delivery.settings')
 django.setup()
 
-from django.db import connection
-from eshop.models import OrderModel, CoffeeQueue
 import time
+
+from django.db import connection
+
+from eshop.models import CoffeeQueue, OrderModel
+
 
 def verify_optimizations():
     """驗證優化效果"""

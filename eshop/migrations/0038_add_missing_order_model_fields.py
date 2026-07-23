@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0037_add_missing_fields_pickup_time_and_queue_status'),
+        ("eshop", "0037_add_missing_fields_pickup_time_and_queue_status"),
     ]
 
     operations = [
@@ -16,113 +16,156 @@ class Migration(migrations.Migration):
             state_operations=[
                 # 1. latest_start_time
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='latest_start_time',
-                    field=models.DateTimeField(blank=True, null=True, verbose_name='最晚開始時間'),
+                    model_name="ordermodel",
+                    name="latest_start_time",
+                    field=models.DateTimeField(
+                        blank=True, null=True, verbose_name="最晚開始時間"
+                    ),
                 ),
                 # 2. is_delivery
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='is_delivery',
+                    model_name="ordermodel",
+                    name="is_delivery",
                     field=models.BooleanField(default=False),
                 ),
                 # 3. items (JSONField)
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='items',
+                    model_name="ordermodel",
+                    name="items",
                     field=models.JSONField(default=list),
                     preserve_default=False,
                 ),
                 # 4. total_price
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='total_price',
-                    field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
+                    model_name="ordermodel",
+                    name="total_price",
+                    field=models.DecimalField(
+                        decimal_places=2, default=0.0, max_digits=10
+                    ),
                     preserve_default=False,
                 ),
                 # 5. order_type
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='order_type',
-                    field=models.CharField(choices=[('normal', '普通訂單'), ('quick', '快速訂單')], default='normal', max_length=10),
+                    model_name="ordermodel",
+                    name="order_type",
+                    field=models.CharField(
+                        choices=[("normal", "普通訂單"), ("quick", "快速訂單")],
+                        default="normal",
+                        max_length=10,
+                    ),
                 ),
                 # 6. qr_code
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='qr_code',
+                    model_name="ordermodel",
+                    name="qr_code",
                     field=models.TextField(blank=True, null=True),
                 ),
                 # 7. estimated_ready_time
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='estimated_ready_time',
+                    model_name="ordermodel",
+                    name="estimated_ready_time",
                     field=models.DateTimeField(blank=True, null=True),
                 ),
                 # 8. payment_timeout
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='payment_timeout',
-                    field=models.DateTimeField(blank=True, null=True, verbose_name='支付超时时间'),
+                    model_name="ordermodel",
+                    name="payment_timeout",
+                    field=models.DateTimeField(
+                        blank=True, null=True, verbose_name="支付超时时间"
+                    ),
                 ),
                 # 9. fps_reference
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='fps_reference',
-                    field=models.CharField(blank=True, max_length=50, null=True, verbose_name='FPS参考编号'),
+                    model_name="ordermodel",
+                    name="fps_reference",
+                    field=models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="FPS参考编号"
+                    ),
                 ),
                 # 10. fps_qr_code
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='fps_qr_code',
-                    field=models.TextField(blank=True, null=True, verbose_name='FPS二维码'),
+                    model_name="ordermodel",
+                    name="fps_qr_code",
+                    field=models.TextField(
+                        blank=True, null=True, verbose_name="FPS二维码"
+                    ),
                 ),
                 # 11. notification_sent
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='notification_sent',
+                    model_name="ordermodel",
+                    name="notification_sent",
                     field=models.BooleanField(default=False),
                 ),
                 # 12. applied_coupon_code
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='applied_coupon_code',
-                    field=models.CharField(blank=True, max_length=50, null=True, verbose_name='應用優惠碼'),
+                    model_name="ordermodel",
+                    name="applied_coupon_code",
+                    field=models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="應用優惠碼"
+                    ),
                 ),
                 # 13. original_total_price
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='original_total_price',
-                    field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, verbose_name='原始總價'),
+                    model_name="ordermodel",
+                    name="original_total_price",
+                    field=models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        max_digits=10,
+                        verbose_name="原始總價",
+                    ),
                 ),
                 # 14. loyalty_discount_rate
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='loyalty_discount_rate',
-                    field=models.DecimalField(decimal_places=2, default=1.0, max_digits=5, verbose_name='會員折扣率'),
+                    model_name="ordermodel",
+                    name="loyalty_discount_rate",
+                    field=models.DecimalField(
+                        decimal_places=2,
+                        default=1.0,
+                        max_digits=5,
+                        verbose_name="會員折扣率",
+                    ),
                 ),
                 # 15. loyalty_discount_amount
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='loyalty_discount_amount',
-                    field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, verbose_name='會員折扣金額'),
+                    model_name="ordermodel",
+                    name="loyalty_discount_amount",
+                    field=models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        max_digits=10,
+                        verbose_name="會員折扣金額",
+                    ),
                 ),
                 # 16. applied_reward_id
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='applied_reward_id',
-                    field=models.CharField(blank=True, max_length=50, null=True, verbose_name='應用獎勵ID'),
+                    model_name="ordermodel",
+                    name="applied_reward_id",
+                    field=models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="應用獎勵ID"
+                    ),
                 ),
                 # 17. applied_reward_name
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='applied_reward_name',
-                    field=models.CharField(blank=True, max_length=100, null=True, verbose_name='應用獎勵名稱'),
+                    model_name="ordermodel",
+                    name="applied_reward_name",
+                    field=models.CharField(
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="應用獎勵名稱",
+                    ),
                 ),
                 # 18. reward_discount_amount
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='reward_discount_amount',
-                    field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, verbose_name='獎勵折扣金額'),
+                    model_name="ordermodel",
+                    name="reward_discount_amount",
+                    field=models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        max_digits=10,
+                        verbose_name="獎勵折扣金額",
+                    ),
                 ),
             ],
             database_operations=[],

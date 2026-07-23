@@ -6,16 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0010_ordermodel_updated_at'),
+        ("eshop", "0010_ordermodel_updated_at"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='ordermodel',
-            index=models.Index(fields=['updated_at'], name='eshop_order_updated_78cf76_idx'),
+            model_name="ordermodel",
+            index=models.Index(
+                fields=["updated_at"], name="eshop_order_updated_78cf76_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='ordermodel',
-            index=models.Index(fields=['status', 'updated_at'], name='eshop_order_status_760184_idx'),
+            model_name="ordermodel",
+            index=models.Index(
+                fields=["status", "updated_at"], name="eshop_order_status_760184_idx"
+            ),
         ),
     ]

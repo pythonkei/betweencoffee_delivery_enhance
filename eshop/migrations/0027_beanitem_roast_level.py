@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0026_add_coupon_discount_fields'),
+        ("eshop", "0026_add_coupon_discount_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='beanitem',
-            name='roast_level',
-            field=models.CharField(choices=[('light', '浅'), ('medium_light', '中浅'), ('medium', '中'), ('medium_dark', '中深'), ('dark', '深')], default='medium', max_length=20),
+            model_name="beanitem",
+            name="roast_level",
+            field=models.CharField(
+                choices=[
+                    ("light", "浅"),
+                    ("medium_light", "中浅"),
+                    ("medium", "中"),
+                    ("medium_dark", "中深"),
+                    ("dark", "深"),
+                ],
+                default="medium",
+                max_length=20,
+            ),
         ),
     ]

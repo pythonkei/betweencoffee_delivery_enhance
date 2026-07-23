@@ -1,11 +1,13 @@
 """
 OrderModel 模型测试
 """
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from eshop.models import OrderModel
 import json
 import warnings
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+
+from eshop.models import OrderModel
 
 User = get_user_model()
 

@@ -2,8 +2,9 @@
 
 import os
 import sys
-import django
 from datetime import datetime, timedelta
+
+import django
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, '../..'))
@@ -12,15 +13,17 @@ sys.path.insert(0, project_root)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'betweencoffee_delivery.settings')
 django.setup()
 
-from eshop.models import OrderModel, CoffeeQueue
+import pytz
+
+from eshop.models import CoffeeQueue, OrderModel
 from eshop.time_utils import format_pickup_time_for_order
 from eshop.views.queue_views import (
-    process_waiting_queues,
+    process_completed_orders,
     process_preparing_queues,
     process_ready_orders,
-    process_completed_orders
+    process_waiting_queues,
 )
-import pytz
+
 
 def final_verification_test():
     """最終驗證測試 - 確保所有功能正常工作"""

@@ -5,25 +5,25 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('socialuser', '0005_remove_tier_not_null'),
+        ("socialuser", "0005_remove_tier_not_null"),
     ]
 
     operations = [
         # 移除舊的會員等級相關字段
         migrations.RemoveField(
-            model_name='customerloyalty',
-            name='discount_rate',
+            model_name="customerloyalty",
+            name="discount_rate",
         ),
         migrations.RemoveField(
-            model_name='customerloyalty',
-            name='free_upgrade',
+            model_name="customerloyalty",
+            name="free_upgrade",
         ),
         migrations.RemoveField(
-            model_name='customerloyalty',
-            name='priority_service',
+            model_name="customerloyalty",
+            name="priority_service",
         ),
         migrations.RemoveField(
-            model_name='customerloyalty',
-            name='tier',
+            model_name="customerloyalty",
+            name="tier",
         ),
     ]

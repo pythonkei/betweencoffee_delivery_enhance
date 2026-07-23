@@ -9,7 +9,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0052_remove_ordermodel_pickup_time_and_more'),
+        ("eshop", "0052_remove_ordermodel_pickup_time_and_more"),
     ]
 
     operations = [

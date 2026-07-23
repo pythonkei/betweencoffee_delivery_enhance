@@ -1,10 +1,12 @@
 """
 队列系统测试
 """
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from eshop.models import OrderModel, CoffeeQueue
 import json
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+
+from eshop.models import CoffeeQueue, OrderModel
 
 User = get_user_model()
 
@@ -72,7 +74,7 @@ class QueueTestCase(TestCase):
     def test_queue_eligibility(self):
         """测试队列资格"""
         from eshop.order_status_manager import OrderStatusManager
-        
+
         # 咖啡订单应该可以加入队列
         coffee_manager = OrderStatusManager(self.coffee_order)
         self.assertTrue(coffee_manager.should_add_to_queue())

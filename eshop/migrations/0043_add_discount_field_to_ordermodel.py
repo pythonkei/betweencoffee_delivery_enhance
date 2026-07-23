@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0042_alter_coffeequeue_actual_completion_time_and_more'),
+        ("eshop", "0042_alter_coffeequeue_actual_completion_time_and_more"),
     ]
 
     operations = [
@@ -18,9 +18,14 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='discount',
-                    field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, verbose_name='折扣金額'),
+                    model_name="ordermodel",
+                    name="discount",
+                    field=models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        max_digits=10,
+                        verbose_name="折扣金額",
+                    ),
                 ),
             ],
             database_operations=[],

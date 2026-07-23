@@ -9,16 +9,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0039_add_missing_coffeequeue_fields_and_fix_cartitem'),
+        ("eshop", "0039_add_missing_coffeequeue_fields_and_fix_cartitem"),
     ]
 
     operations = [
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AddField(
-                    model_name='coffeequeue',
-                    name='barista',
-                    field=models.CharField(blank=True, max_length=100, null=True, verbose_name='咖啡師'),
+                    model_name="coffeequeue",
+                    name="barista",
+                    field=models.CharField(
+                        blank=True, max_length=100, null=True, verbose_name="咖啡師"
+                    ),
                 ),
             ],
             database_operations=[],

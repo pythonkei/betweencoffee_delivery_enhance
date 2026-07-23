@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0013_fix_pickup_code'),
+        ("eshop", "0013_fix_pickup_code"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ordermodel',
-            name='preparation_started_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='開始製作時間'),
+            model_name="ordermodel",
+            name="preparation_started_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="開始製作時間"
+            ),
         ),
         migrations.AddField(
-            model_name='ordermodel',
-            name='ready_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='完成製作時間'),
+            model_name="ordermodel",
+            name="ready_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="完成製作時間"
+            ),
         ),
     ]

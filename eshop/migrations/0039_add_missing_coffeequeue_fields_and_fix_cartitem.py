@@ -3,13 +3,13 @@
 # 注意：CoffeeQueue 欄位在資料庫中已經存在，使用 SeparateDatabaseAndState 只更新 Django state
 # CartItem.updated_at 的 AlterField 保留（修改 NOT NULL 約束）
 
-from django.db import migrations, models
 import django.utils.timezone
+from django.db import migrations, models
 
 
 def set_cartitem_updated_at_default(apps, schema_editor):
     """將 eshop_cartitem 中 NULL 的 updated_at 設為 created_at 的值"""
-    CartItem = apps.get_model('eshop', 'CartItem')
+    CartItem = apps.get_model("eshop", "CartItem")
     db_alias = schema_editor.connection.alias
     CartItem.objects.using(db_alias).filter(updated_at__isnull=True).update(
         updated_at=django.utils.timezone.now()
@@ -19,7 +19,7 @@ def set_cartitem_updated_at_default(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0038_add_missing_order_model_fields'),
+        ("eshop", "0038_add_missing_order_model_fields"),
     ]
 
     operations = [
@@ -28,33 +28,43 @@ class Migration(migrations.Migration):
             state_operations=[
                 # 1. estimated_completion_time
                 migrations.AddField(
-                    model_name='coffeequeue',
-                    name='estimated_completion_time',
-                    field=models.DateTimeField(blank=True, null=True, verbose_name='預計完成時間'),
+                    model_name="coffeequeue",
+                    name="estimated_completion_time",
+                    field=models.DateTimeField(
+                        blank=True, null=True, verbose_name="預計完成時間"
+                    ),
                 ),
                 # 2. actual_completion_time
                 migrations.AddField(
-                    model_name='coffeequeue',
-                    name='actual_completion_time',
-                    field=models.DateTimeField(blank=True, null=True, verbose_name='實際完成時間'),
+                    model_name="coffeequeue",
+                    name="actual_completion_time",
+                    field=models.DateTimeField(
+                        blank=True, null=True, verbose_name="實際完成時間"
+                    ),
                 ),
                 # 3. coffee_count
                 migrations.AddField(
-                    model_name='coffeequeue',
-                    name='coffee_count',
-                    field=models.PositiveIntegerField(default=1, verbose_name='咖啡杯數'),
+                    model_name="coffeequeue",
+                    name="coffee_count",
+                    field=models.PositiveIntegerField(
+                        default=1, verbose_name="咖啡杯數"
+                    ),
                 ),
                 # 4. preparation_time_minutes
                 migrations.AddField(
-                    model_name='coffeequeue',
-                    name='preparation_time_minutes',
-                    field=models.PositiveIntegerField(default=5, verbose_name='製作時間(分鐘)'),
+                    model_name="coffeequeue",
+                    name="preparation_time_minutes",
+                    field=models.PositiveIntegerField(
+                        default=5, verbose_name="製作時間(分鐘)"
+                    ),
                 ),
                 # 5. added_at
                 migrations.AddField(
-                    model_name='coffeequeue',
-                    name='added_at',
-                    field=models.DateTimeField(auto_now_add=True, null=True, verbose_name='加入時間'),
+                    model_name="coffeequeue",
+                    name="added_at",
+                    field=models.DateTimeField(
+                        auto_now_add=True, null=True, verbose_name="加入時間"
+                    ),
                 ),
             ],
             database_operations=[],
@@ -67,8 +77,8 @@ class Migration(migrations.Migration):
         ),
         # 再改為 non-nullable
         migrations.AlterField(
-            model_name='cartitem',
-            name='updated_at',
+            model_name="cartitem",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
     ]

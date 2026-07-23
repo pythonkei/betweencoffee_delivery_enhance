@@ -6,53 +6,69 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0014_ordermodel_preparation_started_at_and_more'),
+        ("eshop", "0014_ordermodel_preparation_started_at_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='ordermodel',
-            options={'verbose_name': '订单', 'verbose_name_plural': '订单'},
+            name="ordermodel",
+            options={"verbose_name": "订单", "verbose_name_plural": "订单"},
         ),
         migrations.RemoveField(
-            model_name='ordermodel',
-            name='created_on',
+            model_name="ordermodel",
+            name="created_on",
         ),
         migrations.RemoveField(
-            model_name='ordermodel',
-            name='cup_size',
+            model_name="ordermodel",
+            name="cup_size",
         ),
         migrations.RemoveField(
-            model_name='ordermodel',
-            name='is_paid',
+            model_name="ordermodel",
+            name="is_paid",
         ),
         migrations.RemoveField(
-            model_name='ordermodel',
-            name='pickup_time',
+            model_name="ordermodel",
+            name="pickup_time",
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='picked_up_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='提取时间'),
+            model_name="ordermodel",
+            name="picked_up_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="提取时间"),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='picked_up_by',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='提取人员'),
+            model_name="ordermodel",
+            name="picked_up_by",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="提取人员"
+            ),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='preparation_started_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='开始制作时间'),
+            model_name="ordermodel",
+            name="preparation_started_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="开始制作时间"
+            ),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='ready_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='完成制作时间'),
+            model_name="ordermodel",
+            name="ready_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="完成制作时间"
+            ),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='status',
-            field=models.CharField(choices=[('pending', '待處理'), ('waiting', '等待制作'), ('preparing', '制作中'), ('ready', '已就緒'), ('completed', '已提取')], default='pending', max_length=20),
+            model_name="ordermodel",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "待處理"),
+                    ("waiting", "等待制作"),
+                    ("preparing", "制作中"),
+                    ("ready", "已就緒"),
+                    ("completed", "已提取"),
+                ],
+                default="pending",
+                max_length=20,
+            ),
         ),
     ]

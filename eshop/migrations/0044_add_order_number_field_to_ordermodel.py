@@ -6,23 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0043_add_discount_field_to_ordermodel'),
+        ("eshop", "0043_add_discount_field_to_ordermodel"),
     ]
 
     operations = [
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AddField(
-                    model_name='ordermodel',
-                    name='order_number',
-                    field=models.CharField(blank=True, max_length=20, null=True, unique=True, verbose_name='訂單編號'),
+                    model_name="ordermodel",
+                    name="order_number",
+                    field=models.CharField(
+                        blank=True,
+                        max_length=20,
+                        null=True,
+                        unique=True,
+                        verbose_name="訂單編號",
+                    ),
                 ),
             ],
             # ⚠️ 注意：此處假設資料庫中已有 order_number 欄位（手動添加），
             # 但實際上 Supabase PostgreSQL 中並沒有該欄位！
             # 這導致 OrderModel.save() 查詢 order_number 時報錯：
             #   column eshop_ordermodel.order_number does not exist
-            # 
+            #
             # 修復方式：新增 migration 0048 在資料庫中實際添加該欄位。
             # 詳見 eshop/migrations/0048_add_order_number_column_to_db.py
             database_operations=[],

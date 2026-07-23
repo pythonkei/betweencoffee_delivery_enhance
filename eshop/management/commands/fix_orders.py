@@ -1,7 +1,10 @@
 # eshop/management/commands/fix_orders_comprehensive.py
-from django.core.management.base import BaseCommand
-from eshop.models import OrderModel, CoffeeItem, BeanItem
 import json
+
+from django.core.management.base import BaseCommand
+
+from eshop.models import BeanItem, CoffeeItem, OrderModel
+
 
 class Command(BaseCommand):
     help = '全面修复订单数据，包括格式问题和缺失字段'

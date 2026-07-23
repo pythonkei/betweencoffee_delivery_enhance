@@ -1,8 +1,8 @@
 """
 基础功能测试
 """
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 
 User = get_user_model()
 
@@ -17,7 +17,7 @@ class BasicTestCase(TestCase):
     def test_models_import(self):
         """测试模型导入"""
         try:
-            from eshop.models import OrderModel, CoffeeItem, BeanItem
+            from eshop.models import BeanItem, CoffeeItem, OrderModel
             self.assertIsNotNone(OrderModel)
             self.assertIsNotNone(CoffeeItem)
             self.assertIsNotNone(BeanItem)

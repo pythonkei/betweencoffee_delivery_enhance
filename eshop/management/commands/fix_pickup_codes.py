@@ -1,8 +1,10 @@
-from django.core.management.base import BaseCommand
-from eshop.models import OrderModel
 import random
 import string
+
+from django.core.management.base import BaseCommand
 from django.db import transaction
+
+from eshop.models import OrderModel
 
 
 class Command(BaseCommand):

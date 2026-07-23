@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0040_fix_coffeequeue_barista_field'),
+        ("eshop", "0040_fix_coffeequeue_barista_field"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coffeequeue',
-            name='added_at',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='加入隊列時間'),
+            model_name="coffeequeue",
+            name="added_at",
+            field=models.DateTimeField(auto_now_add=True, verbose_name="加入隊列時間"),
         ),
     ]

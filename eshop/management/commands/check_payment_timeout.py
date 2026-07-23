@@ -1,10 +1,12 @@
 # eshop/management/commands/check_payment_timeout.py
+import logging
+
+from django.conf import settings
+from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+
 from eshop.models import OrderModel
-from django.core.mail import send_mail
-from django.conf import settings
-import logging
 
 logger = logging.getLogger(__name__)
 

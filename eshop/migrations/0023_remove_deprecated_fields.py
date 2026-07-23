@@ -6,8 +6,9 @@
 - 更新索引和约束
 """
 
-from django.db import migrations
 import warnings
+
+from django.db import migrations
 
 
 def remove_deprecated_fields(apps, schema_editor):
@@ -34,21 +35,20 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ('eshop', '0022_change_pickup_code_to_4_digits'),
+        ("eshop", "0022_change_pickup_code_to_4_digits"),
     ]
 
     operations = [
         migrations.RunPython(
-            remove_deprecated_fields,
-            reverse_code=migrations.RunPython.noop
+            remove_deprecated_fields, reverse_code=migrations.RunPython.noop
         ),
         # 移除旧的索引（如果之前迁移未完成）
         migrations.AlterIndexTogether(
-            name='coffeequeue',
+            name="coffeequeue",
             index_together=set(),
         ),
         migrations.AlterIndexTogether(
-            name='ordermodel',
+            name="ordermodel",
             index_together=set(),
         ),
     ]

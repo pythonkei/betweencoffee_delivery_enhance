@@ -14,10 +14,10 @@
 import logging
 
 from .order_status import (
-    PaymentHandler,
-    StatusDisplay,
     OrderTypeAnalyzer,
+    PaymentHandler,
     StatusChanger,
+    StatusDisplay,
 )
 
 logger = logging.getLogger(__name__)
@@ -82,24 +82,28 @@ class OrderStatusManager:
         return PaymentHandler.clear_user_cart_and_session(request)
 
     @classmethod
-    def confirm_offline_payment(cls, order_id, payment_method, staff_name='staff'):
+    def confirm_offline_payment(cls, order_id, payment_method, staff_name="staff"):
         """線下付款確認 - 委託給 PaymentHandler"""
-        return PaymentHandler.confirm_offline_payment(order_id, payment_method, staff_name)
+        return PaymentHandler.confirm_offline_payment(
+            order_id, payment_method, staff_name
+        )
 
     @classmethod
-    def confirm_fps_payment(cls, order_id, staff_name='staff'):
+    def confirm_fps_payment(cls, order_id, staff_name="staff"):
         """FPS 付款確認 - 委託給 PaymentHandler"""
         return PaymentHandler.confirm_fps_payment(order_id, staff_name)
 
     @classmethod
-    def confirm_cash_payment(cls, order_id, staff_name='staff'):
+    def confirm_cash_payment(cls, order_id, staff_name="staff"):
         """現金付款確認 - 委託給 PaymentHandler"""
         return PaymentHandler.confirm_cash_payment(order_id, staff_name)
 
     @classmethod
     def process_payment_and_update_status(cls, order_id, payment_method="unknown"):
         """處理支付並更新狀態 - 委託給 PaymentHandler"""
-        return PaymentHandler.process_payment_and_update_status(order_id, payment_method)
+        return PaymentHandler.process_payment_and_update_status(
+            order_id, payment_method
+        )
 
     def should_add_to_queue(self):
         """判斷訂單是否應該加入隊列 - 委託給 PaymentHandler"""
@@ -118,7 +122,9 @@ class OrderStatusManager:
     @classmethod
     def process_order_status_change(cls, order_id, new_status, staff_name=None):
         """處理訂單狀態變化 - 委託給 StatusChanger"""
-        return StatusChanger.process_order_status_change(order_id, new_status, staff_name)
+        return StatusChanger.process_order_status_change(
+            order_id, new_status, staff_name
+        )
 
     @classmethod
     def process_batch_status_changes(cls, order_status_list):
@@ -136,9 +142,13 @@ class OrderStatusManager:
         return StatusChanger.mark_as_cancelled_manually(order_id, staff_name, reason)
 
     @classmethod
-    def mark_as_preparing_manually(cls, order_id, barista_name=None, preparation_minutes=None):
+    def mark_as_preparing_manually(
+        cls, order_id, barista_name=None, preparation_minutes=None
+    ):
         """標記為製作中 - 委託給 StatusChanger"""
-        return StatusChanger.mark_as_preparing_manually(order_id, barista_name, preparation_minutes)
+        return StatusChanger.mark_as_preparing_manually(
+            order_id, barista_name, preparation_minutes
+        )
 
     @classmethod
     def mark_as_ready_manually(cls, order_id, staff_name=None):

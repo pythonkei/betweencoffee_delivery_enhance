@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0030_coffeeitem_strength_level_and_more'),
+        ("eshop", "0030_coffeeitem_strength_level_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cartitem',
-            name='strength_level',
+            model_name="cartitem",
+            name="strength_level",
             field=models.CharField(blank=True, max_length=10, null=True),
         ),
     ]

@@ -6,33 +6,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0041_fix_coffeequeue_added_at_not_null'),
+        ("eshop", "0041_fix_coffeequeue_added_at_not_null"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coffeequeue',
-            name='actual_completion_time',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='实际完成时间'),
+            model_name="coffeequeue",
+            name="actual_completion_time",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="实际完成时间"
+            ),
         ),
         migrations.AlterField(
-            model_name='coffeequeue',
-            name='coffee_count',
-            field=models.PositiveIntegerField(default=0, verbose_name='咖啡杯数'),
+            model_name="coffeequeue",
+            name="coffee_count",
+            field=models.PositiveIntegerField(default=0, verbose_name="咖啡杯数"),
         ),
         migrations.AlterField(
-            model_name='coffeequeue',
-            name='estimated_completion_time',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='预计完成时间'),
+            model_name="coffeequeue",
+            name="estimated_completion_time",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="预计完成时间"
+            ),
         ),
         migrations.AlterField(
-            model_name='coffeequeue',
-            name='preparation_time_minutes',
-            field=models.PositiveIntegerField(default=0, verbose_name='预计制作时间(分钟)'),
+            model_name="coffeequeue",
+            name="preparation_time_minutes",
+            field=models.PositiveIntegerField(
+                default=0, verbose_name="预计制作时间(分钟)"
+            ),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='total_price',
+            model_name="ordermodel",
+            name="total_price",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
     ]

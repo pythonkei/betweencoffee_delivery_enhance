@@ -2,15 +2,16 @@
 """
 測試 OrderStatusManager 是否完整覆蓋所有狀態修改
 """
+import ast
+import logging
 import os
 import re
-import ast
-from django.test import TestCase
-from django.core.management import call_command
-from io import StringIO
 from datetime import timedelta
+from io import StringIO
 from unittest import skip
-import logging
+
+from django.core.management import call_command
+from django.test import TestCase
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class OrderStatusManagerCoverageTest(TestCase):
     def setUp(self):
         """在每个测试前设置测试数据"""
         from django.contrib.auth.models import User
-        
+
         # 创建测试用户
         self.user = User.objects.create_user(
             username='testuser',
@@ -144,7 +145,7 @@ class OrderStatusManagerCoverageTest(TestCase):
         """測試集成場景"""
         from eshop.models import OrderModel
         from eshop.order_status_manager import OrderStatusManager
-        
+
         # 使用最简单的方式创建订单（只包含必填字段）
         order = OrderModel.objects.create(
             user=self.user,

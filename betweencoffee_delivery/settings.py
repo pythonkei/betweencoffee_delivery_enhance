@@ -2,14 +2,15 @@
 Django settings for betweencoffee_delivery project.
 """
 
-import os
-import sys
-import re
 import logging
-from urllib.parse import urlparse, unquote
+import os
+import re
+import sys
+from urllib.parse import unquote, urlparse
+
 import dj_database_url
-from environ import Env
 from django.core.exceptions import ImproperlyConfigured
+from environ import Env
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,19 +21,23 @@ env = Env()
 # 尝试读取环境文件，但忽略错误
 try:
     # 明确指定.env文件路径
-    env_file_path = os.path.join(BASE_DIR, '.env')
+    env_file_path = os.path.join(BASE_DIR, ".env")
     print(f"Looking for .env file at: {env_file_path}")
-    
+
     if os.path.exists(env_file_path):
         env.read_env(env_file_path)
         print("Successfully loaded .env file")
-        
+
         # 调试：检查关键环境变量
-        print(f"DEBUG - Google Client ID: {os.environ.get('OAUTH_GOOGLE_CLIENT_ID', 'Not set')}")
-        print(f"DEBUG - Facebook Client ID: {os.environ.get('OAUTH_FACEBOOK_CLIENT_ID', 'Not set')}")
+        print(
+            f"DEBUG - Google Client ID: {os.environ.get('OAUTH_GOOGLE_CLIENT_ID', 'Not set')}"
+        )
+        print(
+            f"DEBUG - Facebook Client ID: {os.environ.get('OAUTH_FACEBOOK_CLIENT_ID', 'Not set')}"
+        )
     else:
         print(f".env file not found at {env_file_path}")
-        
+
 except Exception as e:
     print(f"Warning: Could not read .env file: {e}")
 
@@ -41,18 +46,20 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-
 # Render 环境检测
-IS_RENDER = os.environ.get('IS_RENDER') == 'True' or os.environ.get('RENDER') is not None
+IS_RENDER = (
+    os.environ.get("IS_RENDER") == "True" or os.environ.get("RENDER") is not None
+)
 
 # 通用生产环境检测
 IS_PRODUCTION = IS_RENDER
 
 # ==================== 安全配置 ====================
 
+
 def get_secret_key():
     """安全地获取密钥，在生产环境中必须设置"""
-    secret_key = os.environ.get('SECRET_KEY')
+    secret_key = os.environ.get("SECRET_KEY")
     if not secret_key and IS_RENDER:
         raise ImproperlyConfigured(
             "SECRET_KEY must be set in environment variables in production"
@@ -62,8 +69,9 @@ def get_secret_key():
             "Using default SECRET_KEY for development. "
             "Set SECRET_KEY environment variable for production."
         )
-        return 'django-insecure-development-key-change-in-production'
+        return "django-insecure-development-key-change-in-production"
     return secret_key
+
 
 SECRET_KEY = get_secret_key()
 
@@ -71,34 +79,35 @@ SECRET_KEY = get_secret_key()
 if IS_PRODUCTION:
     DEBUG = False
 else:
-    DEBUG = env.bool('DEBUG', default=True)
+    DEBUG = env.bool("DEBUG", default=True)
 
 
 # ALLOWED_HOSTS 配置
 def get_allowed_hosts():
     """安全地配置允许的主机"""
-    default_hosts = ['localhost', '127.0.0.1', '0.0.0.0']
-    
+    default_hosts = ["localhost", "127.0.0.1", "0.0.0.0"]
+
     # 開發模式支援 ngrok 隧道
-    ngrok_host = os.environ.get('NGROK_HOST', '')
+    ngrok_host = os.environ.get("NGROK_HOST", "")
     if ngrok_host:
         # 從 ngrok 域名提取頂級域名模式，例如 7def-119-236-126-88.ngrok-free.app → .ngrok-free.app
-        parts = ngrok_host.split('.')
+        parts = ngrok_host.split(".")
         if len(parts) >= 2:
-            wildcard_domain = '.' + '.'.join(parts[-2:])  # .ngrok-free.app
+            wildcard_domain = "." + ".".join(parts[-2:])  # .ngrok-free.app
         else:
-            wildcard_domain = '.' + parts[-1]
+            wildcard_domain = "." + parts[-1]
         default_hosts = [ngrok_host, wildcard_domain] + default_hosts
-    
+
     if IS_RENDER:
-        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+        render_domain = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
         if render_domain:
-            return [render_domain, '.onrender.com'] + default_hosts
+            return [render_domain, ".onrender.com"] + default_hosts
         else:
             logger.warning("RENDER_EXTERNAL_HOSTNAME not set, using fallback hosts")
-            return ['.onrender.com'] + default_hosts
+            return [".onrender.com"] + default_hosts
     else:
         return default_hosts
+
 
 ALLOWED_HOSTS = get_allowed_hosts()
 
@@ -107,18 +116,19 @@ ALLOWED_HOSTS = get_allowed_hosts()
 def get_csrf_trusted_origins():
     """配置CSRF信任源"""
     if IS_RENDER:
-        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+        render_domain = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
         if render_domain:
-            return [f'https://{render_domain}', 'https://*.onrender.com']
+            return [f"https://{render_domain}", "https://*.onrender.com"]
         else:
-            return ['https://*.onrender.com']
+            return ["https://*.onrender.com"]
     else:
-        origins = ['http://localhost:8081', 'http://127.0.0.1:8081']
+        origins = ["http://localhost:8081", "http://127.0.0.1:8081"]
         # 開發模式支援 ngrok 隧道
-        ngrok_host = os.environ.get('NGROK_HOST', '')
+        ngrok_host = os.environ.get("NGROK_HOST", "")
         if ngrok_host:
-            origins.append(f'https://{ngrok_host}')
+            origins.append(f"https://{ngrok_host}")
         return origins
+
 
 CSRF_TRUSTED_ORIGINS = get_csrf_trusted_origins()
 
@@ -128,22 +138,22 @@ if IS_RENDER:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
+    X_FRAME_OPTIONS = "DENY"
 
 
 # 临时调试中间件
 class DebugMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-    
+
     def __call__(self, request):
-        if request.path == '/eshop/order_confirm/' and request.method == 'POST':
+        if request.path == "/eshop/order_confirm/" and request.method == "POST":
             print("=== 中间件检测到订单确认POST请求 ===")
             print(f"请求体: {request.POST}")
-        
+
         response = self.get_response(request)
         return response
 
@@ -151,6 +161,7 @@ class DebugMiddleware:
 # 检查daphne是否已安装（Render等无ASGI环境不需要）
 try:
     import daphne
+
     DAPHNE_INSTALLED = True
 except ImportError:
     DAPHNE_INSTALLED = False
@@ -159,96 +170,93 @@ except ImportError:
 # ==================== 应用定义 ====================
 
 INSTALLED_APPS = [
-    'channels',
-    'eshop',
-    'cart',
-    'socialuser',
-    'crispy_forms',
-    'phonenumber_field',
+    "channels",
+    "eshop",
+    "cart",
+    "socialuser",
+    "crispy_forms",
+    "phonenumber_field",
     "django_rename_app",
     # 'debug_toolbar',
-
     # allauth 社交登录
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.facebook',
-
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
     # Django 核心应用
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'django_htmx',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "django_htmx",
 ]
 
 # daphne 必须放在 channels 前面，但只在已安装时添加
 if DAPHNE_INSTALLED:
-    INSTALLED_APPS.insert(0, 'daphne')
+    INSTALLED_APPS.insert(0, "daphne")
 
 SITE_ID = 1
 
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'betweencoffee_delivery.middleware.CartMiddleware',
-    'betweencoffee_delivery.middleware.DebugMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
-    'django_htmx.middleware.HtmxMiddleware',
-    'betweencoffee_delivery.middleware.AdminSessionMiddleware',
-    'eshop.view_utils.ErrorLoggingMiddleware',
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "betweencoffee_delivery.middleware.CartMiddleware",
+    "betweencoffee_delivery.middleware.DebugMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
+    "betweencoffee_delivery.middleware.AdminSessionMiddleware",
+    "eshop.view_utils.ErrorLoggingMiddleware",
 ]
 
 INTERNAL_IPS = [
-    '127.0.0.1',
+    "127.0.0.1",
 ]
 
-ROOT_URLCONF = 'betweencoffee_delivery.urls'
+ROOT_URLCONF = "betweencoffee_delivery.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'cart.context_processors.cart_count',
-                'eshop.view_utils.error_context_processor',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "cart.context_processors.cart_count",
+                "eshop.view_utils.error_context_processor",
             ],
-            'string_if_invalid': '',
+            "string_if_invalid": "",
         },
     },
 ]
 
-WSGI_APPLICATION = 'betweencoffee_delivery.wsgi.application'
-
+WSGI_APPLICATION = "betweencoffee_delivery.wsgi.application"
 
 
 # Channels 層配置 - 開發環境使用內存層，生產環境使用Redis
 if IS_RENDER:
     # Render環境使用Redis（如有配置）
-    redis_url = os.environ.get('REDIS_URL', '')
+    redis_url = os.environ.get("REDIS_URL", "")
     if redis_url:
         CHANNEL_LAYERS = {
-            'default': {
-                'BACKEND': 'channels_redis.core.RedisChannelLayer',
-                'CONFIG': {
+            "default": {
+                "BACKEND": "channels_redis.core.RedisChannelLayer",
+                "CONFIG": {
                     "hosts": [redis_url],
                     "socket_timeout": 10,
                     "socket_connect_timeout": 10,
@@ -260,155 +268,118 @@ if IS_RENDER:
     else:
         # Render free plan 無 Redis，使用內存層
         CHANNEL_LAYERS = {
-            "default": {
-                "BACKEND": "channels.layers.InMemoryChannelLayer"
-            }
+            "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
         }
         print("使用內存Channel層（Render 無 Redis）")
 else:
     # 開發環境使用內存層（無需Redis）
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        }
-    }
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
     print("使用內存Channel層進行開發")
 
 # ✅ 確認 ASGI 應用設定正確
-ASGI_APPLICATION = 'betweencoffee_delivery.asgi.application'
+ASGI_APPLICATION = "betweencoffee_delivery.asgi.application"
 
 
 # ==================== 数据库配置 ====================
 
+
 def parse_database_url(url):
     """手動解析 DATABASE_URL，支援 Supabase 等複雜格式
-    
+
     使用正則表達式直接從 URL 中提取各組件，避免 urlparse 在 Python 3.11+
-    中可能出現的 hostname 驗證問題（如 ValueError: 'hostname' does not 
+    中可能出現的 hostname 驗證問題（如 ValueError: 'hostname' does not
     appear to be an IPv4 or IPv6 address）。
     """
     import re
-    
+
     # 清理 pgbouncer 等 psycopg2 不支援的連線選項
-    if '?' in url:
-        base_url, query_string = url.split('?', 1)
-        params = query_string.split('&')
-        valid_params = [p for p in params if not p.startswith('pgbouncer')]
-        url = base_url + ('?' + '&'.join(valid_params) if valid_params else '')
-    
+    if "?" in url:
+        base_url, query_string = url.split("?", 1)
+        params = query_string.split("&")
+        valid_params = [p for p in params if not p.startswith("pgbouncer")]
+        url = base_url + ("?" + "&".join(valid_params) if valid_params else "")
+
     # 使用正則表達式解析 PostgreSQL URL
     # 格式: postgresql://user:password@host:port/database?options
-    pattern = r'^postgres(?:ql)?://(?:([^:@]+)(?::([^@]*))?@)?([^:/?#]+)(?::(\d+))?(?:/([^?#]*))?(?:\?([^#]*))?'
+    pattern = r"^postgres(?:ql)?://(?:([^:@]+)(?::([^@]*))?@)?([^:/?#]+)(?::(\d+))?(?:/([^?#]*))?(?:\?([^#]*))?"
     match = re.match(pattern, url)
-    
+
     if match:
-        username = unquote(match.group(1)) if match.group(1) else ''
-        password = unquote(match.group(2)) if match.group(2) else ''
-        host = match.group(3) or ''
+        username = unquote(match.group(1)) if match.group(1) else ""
+        password = unquote(match.group(2)) if match.group(2) else ""
+        host = match.group(3) or ""
         port = int(match.group(4)) if match.group(4) else 5432
-        db_name = match.group(5) if match.group(5) else 'postgres'
+        db_name = match.group(5) if match.group(5) else "postgres"
     else:
         # 正則表達式匹配失敗，回退到 urlparse
         logger.warning(f"Regex parse failed for DATABASE_URL, falling back to urlparse")
         parsed = urlparse(url)
-        username = unquote(parsed.username) if parsed.username else ''
-        password = unquote(parsed.password) if parsed.password else ''
-        host = parsed.hostname or ''
+        username = unquote(parsed.username) if parsed.username else ""
+        password = unquote(parsed.password) if parsed.password else ""
+        host = parsed.hostname or ""
         port = parsed.port or 5432
-        db_name = parsed.path.lstrip('/') if parsed.path else 'postgres'
-    
+        db_name = parsed.path.lstrip("/") if parsed.path else "postgres"
+
     return {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': db_name,
-        'USER': username,
-        'PASSWORD': password,
-        'HOST': host,
-        'PORT': port,
-        'CONN_MAX_AGE': 0 if IS_RENDER else 600,
-        'ATOMIC_REQUESTS': False,
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": db_name,
+        "USER": username,
+        "PASSWORD": password,
+        "HOST": host,
+        "PORT": port,
+        "CONN_MAX_AGE": 0 if IS_RENDER else 600,
+        "ATOMIC_REQUESTS": False,
     }
 
 
 def get_database_config():
     """安全地配置数据库"""
-    database_url = os.environ.get('DATABASE_URL')
-    
+    database_url = os.environ.get("DATABASE_URL")
+
     if database_url:
         try:
             db_config = parse_database_url(database_url)
-            logger.info(f"Using DATABASE_URL (host={db_config['HOST']}, db={db_config['NAME']}, user={db_config['USER']})")
-            return {'default': db_config}
+            logger.info(
+                f"Using DATABASE_URL (host={db_config['HOST']}, db={db_config['NAME']}, user={db_config['USER']})"
+            )
+            return {"default": db_config}
         except Exception as e:
             logger.error(f"Database configuration error: {e}")
             raise ImproperlyConfigured(f"Invalid DATABASE_URL: {e}")
     elif IS_RENDER:
-        # Render 環境：嘗試從 Render 內部環境變量獲取數據庫信息
-        logger.info("Render environment detected, checking for Render Postgres internal URL")
-        # Render 會自動注入 DATABASE_URL，如果沒有則使用 Render Postgres 內部連接
-        render_db_url = os.environ.get('RENDER_DATABASE_URL') or os.environ.get('POSTGRES_URL')
-        if render_db_url:
-            try:
-                db_config = dj_database_url.parse(render_db_url)
-                # Render 免費 PostgreSQL 禁用連接持久化
-                db_config.setdefault('CONN_MAX_AGE', 0)
-                db_config.setdefault('ATOMIC_REQUESTS', False)
-                logger.info("Using Render internal database URL")
-                return {'default': db_config}
-            except Exception as e:
-                logger.error(f"Render database URL parse error: {e}")
-        
-        # 最後嘗試：使用 Render Postgres 的內部連接信息
-        pg_host = os.environ.get('PGHOST')
-        pg_port = os.environ.get('PGPORT', '5432')
-        pg_user = os.environ.get('PGUSER')
-        pg_password = os.environ.get('PGPASSWORD')
-        pg_database = os.environ.get('PGDATABASE')
-        
-        if all([pg_host, pg_user, pg_database]):
-            logger.info(f"Using Render Postgres environment variables (PGHOST={pg_host})")
-            return {
-                'default': {
-                    'ENGINE': 'django.db.backends.postgresql',
-                    'NAME': pg_database,
-                    'USER': pg_user,
-                    'PASSWORD': pg_password or '',
-                    'HOST': pg_host,
-                    'PORT': pg_port,
-                    'CONN_MAX_AGE': 0,  # Render 免費 PostgreSQL 禁用連接持久化
-                    'ATOMIC_REQUESTS': False,
-                }
-            }
-        
-        logger.warning("No Render Postgres connection info found. Database will not be available.")
+        # Render 環境：資料庫已遷移至 Supabase，透過 DATABASE_URL 環境變數連接
+        logger.warning(
+            "Render environment detected but no DATABASE_URL set. Database will not be available."
+        )
         # 返回一個無法連接的配置，但至少不會崩潰
         return {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'unavailable',
-                'USER': 'unavailable',
-                'PASSWORD': 'unavailable',
-                'HOST': 'unavailable',
-                'PORT': '5432',
-                'CONN_MAX_AGE': 0,
-                'ATOMIC_REQUESTS': False,
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": "unavailable",
+                "USER": "unavailable",
+                "PASSWORD": "unavailable",
+                "HOST": "unavailable",
+                "PORT": "5432",
+                "CONN_MAX_AGE": 0,
+                "ATOMIC_REQUESTS": False,
             }
         }
     else:
         # 本地开发环境
         logger.info("Using local PostgreSQL database")
         return {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': env('DB_NAME', default='betweencoffee_delivery_db'),
-                'USER': env('DB_USER', default='postgres'),
-                'PASSWORD': env('DB_PASSWORD', default='111111'),
-                'HOST': env('DB_HOST', default='localhost'),
-                'PORT': env('DB_PORT', default='5432'),
-                'CONN_MAX_AGE': 600,
-                'ATOMIC_REQUESTS': False,
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": env("DB_NAME", default="betweencoffee_delivery_db"),
+                "USER": env("DB_USER", default="postgres"),
+                "PASSWORD": env("DB_PASSWORD", default="111111"),
+                "HOST": env("DB_HOST", default="localhost"),
+                "PORT": env("DB_PORT", default="5432"),
+                "CONN_MAX_AGE": 600,
+                "ATOMIC_REQUESTS": False,
             }
         }
-    
+
 
 DATABASES = get_database_config()
 
@@ -453,56 +424,54 @@ DATABASES = get_database_config()
 # sudo -u postgres psql -d betweencoffee_delivery_test -c "SELECT COUNT(*) FROM eshop_coffeeitem;"
 
 
-
-
 # Session设置
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 明确指定会话后端
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # 明确指定会话后端
 SESSION_COOKIE_AGE = 1209600  # 2周，以秒为单位
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # 认证设置
-LOGIN_URL = '/accounts/login/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = "/"
 
 
 # 密码验证
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 6,
-        }
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 6,
+        },
     },
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 # ==================== 国际化配置 ====================
 
-LANGUAGE_CODE = 'zh-hant'
-TIME_ZONE = 'Asia/Hong_Kong'
+LANGUAGE_CODE = "zh-hant"
+TIME_ZONE = "Asia/Hong_Kong"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
 # ==================== 静态文件配置 ====================
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 # WhiteNoise 配置
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_ALLOW_ALL_ORIGINS = True
@@ -513,16 +482,16 @@ WHITENOISE_ALLOW_ALL_ORIGINS = True
 # - 生產環境（DEBUG=False）：/static/media/ → Whitenoise 從 staticfiles/media/ 提供服務
 # 這樣 image.url 在所有環境中都返回正確的路徑，無需額外的 get_media_url() 轉換。
 if IS_PRODUCTION:
-    MEDIA_URL = '/static/media/'
+    MEDIA_URL = "/static/media/"
 else:
-    MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # 购物车会话
-CART_SESSION_ID = 'cart'
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CART_SESSION_ID = "cart"
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 
 # ==================== 社交登录配置 ====================
@@ -532,130 +501,136 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 # 確保在 Render 運行時（而非 Docker build 階段）才讀取環境變數。
 # 這樣 local 開發和 Render 生產環境都能正確獲取 OAuth 憑證和域名。
 
+
 class LazySocialAccountProviders:
     """惰性加載 SOCIALACCOUNT_PROVIDERS
-    
+
     在運行時才讀取環境變數和 Render 域名，解決：
     1. Docker build 階段 IS_RENDER=False 導致使用 localhost 的問題
     2. Render 環境變數在 build 階段不可用的問題
     """
-    
+
     _cached_providers = None
     _logged = False
-    
+
     def _load_providers(self):
         """運行時加載社交登錄提供商配置（僅首次執行 logger）"""
         if self._cached_providers is not None:
             return self._cached_providers
-            
+
         providers = {}
-        
+
         # 獲取基礎 URL 用於回調（運行時判斷）
         if IS_RENDER:
-            render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
+            render_domain = os.environ.get(
+                "RENDER_EXTERNAL_HOSTNAME", "betweencoffee.onrender.com"
+            )
             base_domain = render_domain
         else:
-            base_domain = os.environ.get('NGROK_HOST', 'localhost:8081')
-        
+            base_domain = os.environ.get("NGROK_HOST", "localhost:8081")
+
         # Google 配置
-        google_client_id = env('OAUTH_GOOGLE_CLIENT_ID', default='')
-        google_secret = env('OAUTH_GOOGLE_SECRET', default='')
-        
+        google_client_id = env("OAUTH_GOOGLE_CLIENT_ID", default="")
+        google_secret = env("OAUTH_GOOGLE_SECRET", default="")
+
         if google_client_id and google_secret:
-            providers['google'] = {
-                'APP': {
-                    'client_id': google_client_id,
-                    'secret': google_secret,
+            providers["google"] = {
+                "APP": {
+                    "client_id": google_client_id,
+                    "secret": google_secret,
                 },
-                'SCOPE': ['profile', 'email'],
-                'AUTH_PARAMS': {
-                    'access_type': 'online',
-                    'prompt': 'select_account',
+                "SCOPE": ["profile", "email"],
+                "AUTH_PARAMS": {
+                    "access_type": "online",
+                    "prompt": "select_account",
                 },
             }
         else:
-            providers['google'] = {}
-        
+            providers["google"] = {}
+
         # Facebook 配置
-        facebook_client_id = env('OAUTH_FACEBOOK_CLIENT_ID', default='')
-        facebook_secret = env('OAUTH_FACEBOOK_SECRET', default='')
-        
+        facebook_client_id = env("OAUTH_FACEBOOK_CLIENT_ID", default="")
+        facebook_secret = env("OAUTH_FACEBOOK_SECRET", default="")
+
         if facebook_client_id and facebook_secret:
-            providers['facebook'] = {
-                'APP': {
-                    'client_id': facebook_client_id,
-                    'secret': facebook_secret,
+            providers["facebook"] = {
+                "APP": {
+                    "client_id": facebook_client_id,
+                    "secret": facebook_secret,
                 },
-                'METHOD': 'oauth2',
-                'SCOPE': ['email', 'public_profile'],
-                'FIELDS': [
-                    'id',
-                    'email', 
-                    'name',
-                    'first_name',
-                    'last_name',
+                "METHOD": "oauth2",
+                "SCOPE": ["email", "public_profile"],
+                "FIELDS": [
+                    "id",
+                    "email",
+                    "name",
+                    "first_name",
+                    "last_name",
                 ],
-                'AUTH_PARAMS': {
-                    'auth_type': 'reauthenticate',
+                "AUTH_PARAMS": {
+                    "auth_type": "reauthenticate",
                 },
-                'EXCHANGE_TOKEN': True,
-                'VERIFIED_EMAIL': True,
+                "EXCHANGE_TOKEN": True,
+                "VERIFIED_EMAIL": True,
             }
         else:
-            providers['facebook'] = {}
-        
+            providers["facebook"] = {}
+
         # 僅首次載入時記錄一次
         if not self._logged:
             google_ok = bool(google_client_id and google_secret)
             facebook_ok = bool(facebook_client_id and facebook_secret)
-            logger.info(f"OAuth | Google: {'✅ configured' if google_ok else '❌ not set'} | Facebook: {'✅ configured' if facebook_ok else '❌ not set'} | domain: {base_domain}")
+            logger.info(
+                f"OAuth | Google: {'✅ configured' if google_ok else '❌ not set'} | Facebook: {'✅ configured' if facebook_ok else '❌ not set'} | domain: {base_domain}"
+            )
             self._logged = True
-        
+
         self._cached_providers = providers
         return providers
-    
+
     def __getitem__(self, key):
         """支援字典式訪問（django-allauth 需要）"""
         return self._load_providers().__getitem__(key)
-    
+
     def __contains__(self, key):
         """支援 'in' 運算符"""
         return key in self._load_providers()
-    
+
     def __iter__(self):
         """支援迭代"""
         return iter(self._load_providers())
-    
+
     def __len__(self):
         """支援 len()"""
         return len(self._load_providers())
-    
+
     def get(self, key, default=None):
         """支援 .get() 方法"""
         return self._load_providers().get(key, default)
-    
+
     def keys(self):
         """支援 .keys() 方法"""
         return self._load_providers().keys()
-    
+
     def values(self):
         """支援 .values() 方法"""
         return self._load_providers().values()
-    
+
     def items(self):
         """支援 .items() 方法"""
         return self._load_providers().items()
+
 
 SOCIALACCOUNT_PROVIDERS = LazySocialAccountProviders()
 
 
 # allauth 关键配置
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_ADAPTER = 'socialuser.adapters.NoNewUsersAccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'socialuser.adapters.SocialAccountAdapter'
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_ADAPTER = "socialuser.adapters.NoNewUsersAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "socialuser.adapters.SocialAccountAdapter"
 
 # 社交账户配置
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_STORE_TOKENS = True
@@ -668,31 +643,36 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 # 允许社交账户注册
 ACCOUNT_ALLOW_SOCIAL_SIGNUP = True
 
+
 # 重要：动态站点配置
 def setup_site_config():
     """动态配置站点信息"""
     if IS_RENDER:
-        domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'betweencoffee.onrender.com')
-        name = 'Between Coffee - Render'
-        protocol = 'https'
+        domain = os.environ.get(
+            "RENDER_EXTERNAL_HOSTNAME", "betweencoffee.onrender.com"
+        )
+        name = "Between Coffee - Render"
+        protocol = "https"
     else:
-        ngrok_host = os.environ.get('NGROK_HOST', '')
+        ngrok_host = os.environ.get("NGROK_HOST", "")
         if ngrok_host:
             domain = ngrok_host
-            name = 'Between Coffee - Local (ngrok)'
-            protocol = 'https'
+            name = "Between Coffee - Local (ngrok)"
+            protocol = "https"
         else:
-            domain = 'localhost:8081'
-            name = 'Between Coffee - Local'
-            protocol = 'http'
-    
+            domain = "localhost:8081"
+            name = "Between Coffee - Local"
+            protocol = "http"
+
     return domain, name, protocol
+
 
 SITE_DOMAIN, SITE_NAME, PROTOCOL = setup_site_config()
 
 # 更新站点信息
 try:
     from django.contrib.sites.models import Site
+
     site = Site.objects.get(id=SITE_ID)
     if site.domain != SITE_DOMAIN or site.name != SITE_NAME:
         site.domain = SITE_DOMAIN
@@ -702,37 +682,37 @@ try:
 except Exception as e:
     logger.warning(f"Could not update site: {e}")
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/profile/settings/'
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/accounts/login/'
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/profile/settings/"
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/accounts/login/"
 
 SOCIALACCOUNT_TEMPLATES = {
-    'login_cancelled': 'socialuser/login_cancelled.html',
+    "login_cancelled": "socialuser/login_cancelled.html",
 }
-
 
 
 # 重要：配置社交登录回调URL
 def get_social_callback_urls():
     """配置社交登录回调URL"""
     if IS_RENDER:
-        render_domain = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+        render_domain = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
         if render_domain:
-            base_url = f'https://{render_domain}'
+            base_url = f"https://{render_domain}"
         else:
-            base_url = 'https://*.onrender.com'
+            base_url = "https://*.onrender.com"
     else:
-        ngrok_host = os.environ.get('NGROK_HOST', '')
+        ngrok_host = os.environ.get("NGROK_HOST", "")
         if ngrok_host:
-            base_url = f'https://{ngrok_host}'
+            base_url = f"https://{ngrok_host}"
         else:
-            base_url = 'http://localhost:8081'
-    
+            base_url = "http://localhost:8081"
+
     return {
-        'google_callback': f'{base_url}/accounts/google/login/callback/',
-        'facebook_callback': f'{base_url}/accounts/facebook/login/callback/',
+        "google_callback": f"{base_url}/accounts/google/login/callback/",
+        "facebook_callback": f"{base_url}/accounts/facebook/login/callback/",
     }
+
 
 SOCIAL_CALLBACK_URLS = get_social_callback_urls()
 
@@ -743,62 +723,64 @@ PHONENUMBER_DB_FORMAT = "NATIONAL"
 # ==================== 邮箱配置 ====================
 
 # Gmail SMTP 郵件配置
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Between Coffee <pythonkei@gmail.com>')
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", "Between Coffee <pythonkei@gmail.com>"
+)
 
 # ==================== 日志配置 ====================
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django_errors.log'),
-            'formatter': 'verbose'
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
+    "handlers": {
+        "console": {
+            "level": "DEBUG" if DEBUG else "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
-        'django.request': {
-            'handlers': ['file', 'console'],
-            'level': 'ERROR',
-            'propagate': False,
+        "file": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "django_errors.log"),
+            "formatter": "verbose",
         },
-        'allauth': {
-            'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': False,
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
         },
-        'betweencoffee_delivery': {
-            'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': False,
+        "django.request": {
+            "handlers": ["file", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "allauth": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
+        },
+        "betweencoffee_delivery": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
         },
     },
 }
@@ -806,77 +788,82 @@ LOGGING = {
 # ==================== payment配置 ====================
 
 
-ALIPAY_APP_ID = env('ALIPAY_APP_ID', default='9021000151625966')
+ALIPAY_APP_ID = env("ALIPAY_APP_ID", default="9021000151625966")
+
 
 # 从文件读取密钥
 def read_key_file(filename):
     """从文件读取密钥"""
-    key_path = os.path.join(BASE_DIR, 'keys', filename)
+    key_path = os.path.join(BASE_DIR, "keys", filename)
     try:
-        with open(key_path, 'r') as f:
+        with open(key_path, "r") as f:
             return f.read().strip()
     except FileNotFoundError:
         logger.warning(f"密钥文件未找到: {key_path}")
-        return ''
+        return ""
 
-ALIPAY_APP_PRIVATE_KEY = read_key_file('alipay_private_key.pem')
-ALIPAY_PUBLIC_KEY = read_key_file('alipay_public_key.pem')
+
+ALIPAY_APP_PRIVATE_KEY = read_key_file("alipay_private_key.pem")
+ALIPAY_PUBLIC_KEY = read_key_file("alipay_public_key.pem")
 
 # 如果文件读取失败，回退到环境变量
 if not ALIPAY_APP_PRIVATE_KEY:
-    ALIPAY_APP_PRIVATE_KEY = env('ALIPAY_APP_PRIVATE_KEY', default='')
+    ALIPAY_APP_PRIVATE_KEY = env("ALIPAY_APP_PRIVATE_KEY", default="")
 if not ALIPAY_PUBLIC_KEY:
-    ALIPAY_PUBLIC_KEY = env('ALIPAY_PUBLIC_KEY', default='')
+    ALIPAY_PUBLIC_KEY = env("ALIPAY_PUBLIC_KEY", default="")
 
 ALIPAY_DEBUG = True
-ALIPAY_SIGN_TYPE = 'RSA2'
-ALIPAY_CHARSET = 'utf-8'
-ALIPAY_RETURN_URL = env('ALIPAY_RETURN_URL', default='http://localhost:8081/eshop/payment/alipay/callback/' )
-ALIPAY_NOTIFY_URL = env('ALIPAY_NOTIFY_URL', default='http://localhost:8081/eshop/payment/alipay/notify/')
+ALIPAY_SIGN_TYPE = "RSA2"
+ALIPAY_CHARSET = "utf-8"
+ALIPAY_RETURN_URL = env(
+    "ALIPAY_RETURN_URL", default="http://localhost:8081/eshop/payment/alipay/callback/"
+)
+ALIPAY_NOTIFY_URL = env(
+    "ALIPAY_NOTIFY_URL", default="http://localhost:8081/eshop/payment/alipay/notify/"
+)
 
 # PayPal配置
-PAYPAL_CLIENT_ID = env('PAYPAL_CLIENT_ID', default='')
-PAYPAL_CLIENT_SECRET = env('PAYPAL_CLIENT_SECRET', default='')
-PAYPAL_ENVIRONMENT = env('PAYPAL_ENVIRONMENT', default='sandbox')  # 添加这行
+PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID", default="")
+PAYPAL_CLIENT_SECRET = env("PAYPAL_CLIENT_SECRET", default="")
+PAYPAL_ENVIRONMENT = env("PAYPAL_ENVIRONMENT", default="sandbox")  # 添加这行
 
 # 如果环境变量为空，使用硬编码值作为后备（仅用于开发）
 if not PAYPAL_CLIENT_ID:
-    PAYPAL_CLIENT_ID = 'AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-'
+    PAYPAL_CLIENT_ID = "AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-"
     logger.warning("使用后备PayPal Client ID")
 
 if not PAYPAL_CLIENT_SECRET:
-    PAYPAL_CLIENT_SECRET = 'EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS'
+    PAYPAL_CLIENT_SECRET = "EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS"
     logger.warning("使用后备PayPal Client Secret")
 
 print(f"DEBUG - 最终PayPal配置: {PAYPAL_CLIENT_ID[:20]}...")
 
 # FPS配置
-FPS_MERCHANT_ID = env('FPS_MERCHANT_ID', default='BETWEENCOFFEE')
-FPS_BANK_ACCOUNT = env('FPS_BANK_ACCOUNT', default='')
-FPS_PHONE_NUMBER = env('FPS_PHONE_NUMBER', default='+85212345678')
+FPS_MERCHANT_ID = env("FPS_MERCHANT_ID", default="BETWEENCOFFEE")
+FPS_BANK_ACCOUNT = env("FPS_BANK_ACCOUNT", default="")
+FPS_PHONE_NUMBER = env("FPS_PHONE_NUMBER", default="+85212345678")
 
 # Twilio配置
-TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
-TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
-TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
-
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
+TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER", default="")
 
 
 # ==================== 异常处理 ====================
+
 
 def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
     """处理未捕获的异常"""
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
-    
+
     logger.critical(
-        "Unhandled exception",
-        exc_info=(exc_type, exc_value, exc_traceback)
+        "Unhandled exception", exc_info=(exc_type, exc_value, exc_traceback)
     )
 
-sys.excepthook = handle_unhandled_exception
 
+sys.excepthook = handle_unhandled_exception
 
 
 # ==================== 环境检查 ====================
@@ -885,22 +872,22 @@ sys.excepthook = handle_unhandled_exception
 def validate_paypal_config():
     """验证PayPal配置"""
     issues = []
-    
+
     if not PAYPAL_CLIENT_ID:
         issues.append("PAYPAL_CLIENT_ID 未设置")
     elif len(PAYPAL_CLIENT_ID) < 10:
         issues.append("PAYPAL_CLIENT_ID 长度异常")
-    
+
     if not PAYPAL_CLIENT_SECRET:
         issues.append("PAYPAL_CLIENT_SECRET 未设置")
     elif len(PAYPAL_CLIENT_SECRET) < 10:
         issues.append("PAYPAL_CLIENT_SECRET 长度异常")
-    
+
     if not PAYPAL_ENVIRONMENT:
         issues.append("PAYPAL_ENVIRONMENT 未设置")
-    elif PAYPAL_ENVIRONMENT not in ['sandbox', 'live']:
+    elif PAYPAL_ENVIRONMENT not in ["sandbox", "live"]:
         issues.append("PAYPAL_ENVIRONMENT 必须是 'sandbox' 或 'live'")
-    
+
     if issues:
         logger.warning(f"PayPal配置问题: {', '.join(issues)}")
         return False
@@ -916,37 +903,53 @@ def check_environment():
     logger.info(f"DEBUG: {DEBUG}")
     logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
     logger.info(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
-    
+
     # 检查社交登录配置
-    google_configured = bool(env('OAUTH_GOOGLE_CLIENT_ID', default=''))
-    facebook_configured = bool(env('OAUTH_FACEBOOK_CLIENT_ID', default=''))
-    
+    google_configured = bool(env("OAUTH_GOOGLE_CLIENT_ID", default=""))
+    facebook_configured = bool(env("OAUTH_FACEBOOK_CLIENT_ID", default=""))
+
     # 修复：更宽松的支付配置检查
-    alipay_configured = bool(ALIPAY_APP_ID and ALIPAY_APP_PRIVATE_KEY and ALIPAY_PUBLIC_KEY)
+    alipay_configured = bool(
+        ALIPAY_APP_ID and ALIPAY_APP_PRIVATE_KEY and ALIPAY_PUBLIC_KEY
+    )
     paypal_configured = bool(PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET)
-    
+
     logger.info(f"Google OAuth configured: {google_configured}")
     logger.info(f"Facebook OAuth configured: {facebook_configured}")
     logger.info(f"Alipay configured: {alipay_configured}")
     logger.info(f"PayPal configured: {paypal_configured}")
     logger.info(f"SOCIAL_CALLBACK_URLS: {SOCIAL_CALLBACK_URLS}")
-    
+
     # 详细支付配置信息
     logger.info(f"Alipay App ID: {ALIPAY_APP_ID}")
-    logger.info(f"Alipay Private Key length: {len(ALIPAY_APP_PRIVATE_KEY) if ALIPAY_APP_PRIVATE_KEY else 0}")
-    logger.info(f"Alipay Public Key length: {len(ALIPAY_PUBLIC_KEY) if ALIPAY_PUBLIC_KEY else 0}")
-    
+    logger.info(
+        f"Alipay Private Key length: {len(ALIPAY_APP_PRIVATE_KEY) if ALIPAY_APP_PRIVATE_KEY else 0}"
+    )
+    logger.info(
+        f"Alipay Public Key length: {len(ALIPAY_PUBLIC_KEY) if ALIPAY_PUBLIC_KEY else 0}"
+    )
+
     # 修复：更详细的PayPal配置日志
-    logger.info(f"PayPal Client ID: {'*' * 8}{PAYPAL_CLIENT_ID[-8:]}" if PAYPAL_CLIENT_ID else "PayPal Client ID: Not set")
-    logger.info(f"PayPal Client Secret: {'*' * 8}{PAYPAL_CLIENT_SECRET[-8:]}" if PAYPAL_CLIENT_SECRET else "PayPal Client Secret: Not set")
+    logger.info(
+        f"PayPal Client ID: {'*' * 8}{PAYPAL_CLIENT_ID[-8:]}"
+        if PAYPAL_CLIENT_ID
+        else "PayPal Client ID: Not set"
+    )
+    logger.info(
+        f"PayPal Client Secret: {'*' * 8}{PAYPAL_CLIENT_SECRET[-8:]}"
+        if PAYPAL_CLIENT_SECRET
+        else "PayPal Client Secret: Not set"
+    )
     logger.info(f"PayPal Environment: {PAYPAL_ENVIRONMENT}")
-    
+
     # 修复：添加环境变量直接检查
-    paypal_client_id_env = os.environ.get('PAYPAL_CLIENT_ID')
-    paypal_secret_env = os.environ.get('PAYPAL_CLIENT_SECRET')
+    paypal_client_id_env = os.environ.get("PAYPAL_CLIENT_ID")
+    paypal_secret_env = os.environ.get("PAYPAL_CLIENT_SECRET")
     logger.info(f"ENV PayPal Client ID: {'Set' if paypal_client_id_env else 'Not set'}")
-    logger.info(f"ENV PayPal Client Secret: {'Set' if paypal_secret_env else 'Not set'}")
-    
+    logger.info(
+        f"ENV PayPal Client Secret: {'Set' if paypal_secret_env else 'Not set'}"
+    )
+
     logger.info("=== Environment Check Complete ===")
 
     # 验证PayPal配置
@@ -954,10 +957,10 @@ def check_environment():
     logger.info(f"PayPal配置验证: {'通过' if paypal_valid else '失败'}")
 
 
-
 # 加载本地设置（如果存在）
 try:
     from .local_settings import *
+
     logger.info("Local settings loaded successfully")
 except ImportError:
     logger.info("No local settings found, using default configuration")
@@ -976,13 +979,11 @@ except Exception as e:
 if DEBUG and IS_RENDER:
     logger.warning("DEBUG mode is enabled in production environment!")
 
-if not SECRET_KEY.startswith('django-insecure-') and DEBUG:
+if not SECRET_KEY.startswith("django-insecure-") and DEBUG:
     logger.info("Production SECRET_KEY is being used")
 
 
-
-
-'''
+"""
 For myself reference
 
 virtualenvwrapper path:
@@ -1024,15 +1025,15 @@ https://www.youtube.com/watch?v=dASjmItZcWE
 #PassPassPassFB999
 #meta for developers ac and my app info:
 #app name: kei_production
-'''
+"""
 
-'''
+"""
 ollama ac:
 pythonkei
 pythonkei@gmail.com
-'''
+"""
 
-'''
+"""
 supabase database pw:
 hFEUGy1tIX15ALrz
-'''
+"""

@@ -1,8 +1,10 @@
 # eshop/management/commands/check_queue_priority.py
-from django.core.management.base import BaseCommand
-from eshop.models import OrderModel, CoffeeQueue
-from eshop.queue_manager_refactored import CoffeeQueueManager
 import logging
+
+from django.core.management.base import BaseCommand
+
+from eshop.models import CoffeeQueue, OrderModel
+from eshop.queue_manager_refactored import CoffeeQueueManager
 
 logger = logging.getLogger(__name__)
 

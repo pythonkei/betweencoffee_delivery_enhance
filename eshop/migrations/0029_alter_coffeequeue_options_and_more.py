@@ -6,22 +6,26 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0028_add_added_at_to_coffeequeue'),
+        ("eshop", "0028_add_added_at_to_coffeequeue"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='coffeequeue',
-            options={'ordering': ['estimated_start_time'], 'verbose_name': '咖啡制作队列', 'verbose_name_plural': '咖啡制作队列'},
+            name="coffeequeue",
+            options={
+                "ordering": ["estimated_start_time"],
+                "verbose_name": "咖啡制作队列",
+                "verbose_name_plural": "咖啡制作队列",
+            },
         ),
         migrations.RenameIndex(
-            model_name='coffeequeue',
-            new_name='eshop_coffe_status_dd452b_idx',
-            old_name='eshop_coffe_status_est_start_idx',
+            model_name="coffeequeue",
+            new_name="eshop_coffe_status_dd452b_idx",
+            old_name="eshop_coffe_status_est_start_idx",
         ),
         migrations.RenameIndex(
-            model_name='coffeequeue',
-            new_name='eshop_coffe_added_a_7e98dd_idx',
-            old_name='eshop_coffe_added_at_idx',
+            model_name="coffeequeue",
+            new_name="eshop_coffe_added_a_7e98dd_idx",
+            old_name="eshop_coffe_added_at_idx",
         ),
     ]

@@ -9,7 +9,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0031_add_cartitem_strength_level'),
+        ("eshop", "0031_add_cartitem_strength_level"),
     ]
 
     operations = [

@@ -5,75 +5,85 @@
 使用统一的支付工具和错误处理
 """
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
-from django.conf import settings
-from django.urls import reverse
-from urllib.parse import unquote
-import logging
 import json
+import logging
 import time
 import traceback
+from urllib.parse import unquote
+
+from django.conf import settings
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+
+from eshop.order_status_manager import OrderStatusManager
+from eshop.time_calculation import unified_time_service  # 統一時區服務
+from eshop.view_utils import OrderErrorHandler  # 統一錯誤處理器
 
 # 导入项目模型
-from ..models import OrderModel, CoffeeQueue
-from eshop.order_status_manager import OrderStatusManager
-from eshop.view_utils import OrderErrorHandler  # 統一錯誤處理器
-from eshop.time_calculation import unified_time_service  # 統一時區服務
+from ..models import CoffeeQueue, OrderModel
 
 # ==================== 导入统一的支付工具 ====================
-from ..payment_utils import (
-    get_payment_tools,          # 统一的支付工具获取器
-    get_payment_urls,           # URL获取
-    get_alipay_return_url,      # 支付宝URL
-    get_alipay_notify_url,
-    handle_payment_callback,    # 支付回调处理
-    update_order_payment_status,  # 更新订单状态
-    get_payment_method_display,  # 支付方式显示
-    is_payment_method_available, # 支付方式可用性
-    get_available_payment_methods, # 可用支付方式
-)
+from ..payment_utils import get_alipay_return_url  # 支付宝URL
+from ..payment_utils import get_available_payment_methods  # 可用支付方式
+from ..payment_utils import get_payment_method_display  # 支付方式显示
+from ..payment_utils import get_payment_tools  # 统一的支付工具获取器
+from ..payment_utils import get_payment_urls  # URL获取
+from ..payment_utils import handle_payment_callback  # 支付回调处理
+from ..payment_utils import is_payment_method_available  # 支付方式可用性
+from ..payment_utils import update_order_payment_status  # 更新订单状态
+from ..payment_utils import get_alipay_notify_url
 
 # 使用導WebSocket工具
 try:
-    from ..websocket_utils import send_order_update, send_queue_update, send_payment_update
+    from ..websocket_utils import (
+        send_order_update,
+        send_payment_update,
+        send_queue_update,
+    )
+
     WEBSOCKET_ENABLED = True
     # ✅ 這裡不要定義佔位函數，直接使用導入的
 except ImportError:
     WEBSOCKET_ENABLED = False
-    
+
     # 只有在導入失敗時才定義佔位函數
     def send_payment_update(order_id, payment_status, data=None):
-        logger.info(f"WebSocket占位: 支付更新 - {order_id}, {payment_status}, data={data}")
+        logger.info(
+            f"WebSocket占位: 支付更新 - {order_id}, {payment_status}, data={data}"
+        )
         return True
-    
+
     def send_order_update(order_id, update_type, data=None):
         logger.info(f"WebSocket占位: 订单更新 - {order_id}, {update_type}, data={data}")
         return True
-    
+
     def send_queue_update(update_type, data=None):
         logger.info(f"WebSocket占位: 队列更新 - {update_type}, data={data}")
         return True
+
 
 logger = logging.getLogger(__name__)
 
 # ==================== 辅助函数 ====================
 
+
 def clear_payment_session(request, order_id):
     """清理支付相关的session数据"""
-    if 'pending_paypal_order_id' in request.session:
-        del request.session['pending_paypal_order_id']
-    if 'pending_fps_order_id' in request.session:
-        del request.session['pending_fps_order_id']
-    if 'pending_cash_order_id' in request.session:
-        del request.session['pending_cash_order_id']
-    
-    request.session['last_order_id'] = order_id
+    if "pending_paypal_order_id" in request.session:
+        del request.session["pending_paypal_order_id"]
+    if "pending_fps_order_id" in request.session:
+        del request.session["pending_fps_order_id"]
+    if "pending_cash_order_id" in request.session:
+        del request.session["pending_cash_order_id"]
+
+    request.session["last_order_id"] = order_id
     request.session.modified = True
     logger.info(f"支付会话数据已清理，订单: {order_id}")
+
 
 def send_payment_notifications(order):
     """发送支付成功通知"""
@@ -88,278 +98,315 @@ def send_payment_notifications(order):
 
 # ==================== 支付宝支付视图 ====================
 
+
 def alipay_payment(request, order_id):
     """支付宝支付视图 - 使用统一的支付工具"""
     try:
         logger.info(f"=== 支付宝支付视图开始 ===")
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         # 验证用户权限
         if request.user.is_authenticated and order.user != request.user:
             messages.error(request, "您无权访问此订单")
-            return redirect('index')
-        
-        logger.info(f"订单详情: ID={order.id}, 状态={order.status}, 支付状态={order.payment_status}")
-        
+            return redirect("index")
+
+        logger.info(
+            f"订单详情: ID={order.id}, 状态={order.status}, 支付状态={order.payment_status}"
+        )
+
         if order.payment_status == "paid":
             logger.info(f"订单 {order.id} 已经支付，跳转到确认页面")
             messages.info(request, "订单已支付")
-            return redirect('eshop:order_payment_confirmation')
-        
+            return redirect("eshop:order_payment_confirmation")
+
         if order.is_payment_timeout():
             logger.warning(f"订单 {order.id} 支付超时")
             messages.warning(request, "支付已超时，请重新创建订单")
-            return redirect('cart:cart_detail')
-        
+            return redirect("cart:cart_detail")
+
         max_attempts = 5
         if order.payment_attempts >= max_attempts:
-            logger.warning(f"订单 {order.id} 支付尝试次数过多: {order.payment_attempts}")
+            logger.warning(
+                f"订单 {order.id} 支付尝试次数过多: {order.payment_attempts}"
+            )
             messages.warning(request, "支付尝试次数过多，请重新创建订单")
-            return redirect('cart:cart_detail')
-        
+            return redirect("cart:cart_detail")
+
         order.set_payment_timeout(minutes=5)
         logger.info(f"设置支付超时: {order.payment_timeout}")
-        
+
         logger.info(f"开始创建支付宝支付URL，订单: {order.id}")
-        
+
         # 使用统一的支付工具
-        payment_tools = get_payment_tools('alipay')
-        if not payment_tools or 'create' not in payment_tools:
+        payment_tools = get_payment_tools("alipay")
+        if not payment_tools or "create" not in payment_tools:
             logger.error("支付宝支付工具不可用")
-            messages.error(request, "支付宝支付系统暂时不可用，请稍后重试或选择其他支付方式")
-            return redirect('eshop:order_payment_confirmation_with_id', order_id=order.id)
-        
-        payment_url = payment_tools['create'](order, request)
-        
+            messages.error(
+                request, "支付宝支付系统暂时不可用，请稍后重试或选择其他支付方式"
+            )
+            return redirect(
+                "eshop:order_payment_confirmation_with_id", order_id=order.id
+            )
+
+        payment_url = payment_tools["create"](order, request)
+
         if payment_url:
             logger.info(f"支付宝支付URL生成成功，订单: {order.id}")
-            
+
             order.increment_payment_attempts()
             logger.info(f"支付尝试次数更新为: {order.payment_attempts}")
-            
-            request.session['current_payment_order_id'] = order.id
-            request.session['payment_start_time'] = timezone.now().isoformat()
+
+            request.session["current_payment_order_id"] = order.id
+            request.session["payment_start_time"] = timezone.now().isoformat()
             request.session.modified = True
-            
+
             logger.info(f"准备重定向到支付宝支付页面")
             return redirect(payment_url)
         else:
             logger.error(f"支付宝支付URL生成失败，订单: {order.id}")
-            messages.error(request, "支付宝支付系统暂时不可用，请稍后重试或选择其他支付方式")
-            return redirect('eshop:order_payment_confirmation_with_id', order_id=order.id)
-        
+            messages.error(
+                request, "支付宝支付系统暂时不可用，请稍后重试或选择其他支付方式"
+            )
+            return redirect(
+                "eshop:order_payment_confirmation_with_id", order_id=order.id
+            )
+
     except Exception as e:
         logger.error(f"Alipay payment error: {str(e)}")
         messages.error(request, f"支付系统错误: {str(e)}")
-        return redirect('eshop:order_payment_confirmation_with_id', order_id=order.id)
+        return redirect("eshop:order_payment_confirmation_with_id", order_id=order.id)
 
 
 def get_order_confirmation_url(order_id):
     """獲取訂單確認頁面URL（統一入口）"""
     # 優先使用帶參數版本，避免session依賴
     from django.urls import reverse
-    return reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order_id})
+
+    return reverse(
+        "eshop:order_payment_confirmation_with_id", kwargs={"order_id": order_id}
+    )
 
 
 # ==================== 支付成功處理函數 ====================
 
+
 def handle_payment_success(order_id, payment_method, request=None):
     """處理支付成功的統一函數"""
     try:
-        logger.info(f"=== 開始處理支付成功，訂單: {order_id}, 支付方式: {payment_method} ===")
-        
+        logger.info(
+            f"=== 開始處理支付成功，訂單: {order_id}, 支付方式: {payment_method} ==="
+        )
+
         # ✅ 修復：確保 OrderStatusManager 已導入
         try:
             from eshop.order_status_manager import OrderStatusManager
-            
+
             # 先檢查訂單當前狀態
             try:
                 from eshop.models import OrderModel
+
                 order = OrderModel.objects.get(id=order_id)
-                logger.info(f"訂單 {order_id} 當前狀態: status={order.status}, payment_status={order.payment_status}")
+                logger.info(
+                    f"訂單 {order_id} 當前狀態: status={order.status}, payment_status={order.payment_status}"
+                )
             except Exception as check_error:
                 logger.error(f"檢查訂單狀態失敗: {check_error}")
-            
+
             # 使用 OrderStatusManager 處理支付成功
             result = OrderStatusManager.process_payment_success(order_id, request)
-            
-            if not result.get('success'):
-                error_msg = result.get('message', '支付成功但更新訂單狀態失敗')
+
+            if not result.get("success"):
+                error_msg = result.get("message", "支付成功但更新訂單狀態失敗")
                 logger.error(f"支付成功但更新訂單狀態失敗: {error_msg}")
-                
+
                 # 嘗試記錄訂單狀態
                 try:
                     order = OrderModel.objects.get(id=order_id)
-                    logger.error(f"訂單 {order_id} 最終狀態: status={order.status}, payment_status={order.payment_status}")
+                    logger.error(
+                        f"訂單 {order_id} 最終狀態: status={order.status}, payment_status={order.payment_status}"
+                    )
                 except:
                     pass
-                
+
                 return False
-            
+
             logger.info(f"✅ 訂單 {order_id} 支付成功處理完成")
             return True
-            
+
         except ImportError as import_error:
             logger.error(f"導入 OrderStatusManager 失敗: {import_error}")
             # 如果導入失敗，直接返回 False
             return False
-        
+
     except Exception as e:
         logger.error(f"處理支付成功時發生錯誤: {str(e)}")
         logger.error(f"詳細錯誤: {traceback.format_exc()}")
         return False
-    
+
 
 @csrf_exempt
 def alipay_callback(request):
     """支付寶同步回調處理 - 專門處理同步回調（沒有 trade_status）"""
     logger.info("收到支付寶回調請求")
-    
+
     try:
         # 解析回調數據
         data = {}
         for key, value in request.GET.items():
             data[key] = unquote(value)
-        
+
         logger.info(f"支付寶回調參數: {data}")
-        
+
         # ✅ 修復：支付寶同步回調沒有 trade_status，只有方法標識
-        out_trade_no = data.get('out_trade_no')
-        method = data.get('method', '')
-        
+        out_trade_no = data.get("out_trade_no")
+        method = data.get("method", "")
+
         # 檢查是否為支付頁面返回（同步回調）
-        if method == 'alipay.trade.page.pay.return':
+        if method == "alipay.trade.page.pay.return":
             logger.info(f"這是支付寶同步回調（return），訂單: {out_trade_no}")
         else:
             logger.info(f"支付寶回調方法: {method}")
-        
+
         # ✅ 修復：同步回調中不檢查 trade_status，只驗證簽名和金額
-        required_params = ['out_trade_no', 'total_amount']
+        required_params = ["out_trade_no", "total_amount"]
         for param in required_params:
             if param not in data:
                 logger.error(f"缺少必要參數: {param}")
                 return redirect_to_payment_failed("支付回調參數不完整", out_trade_no)
-        
+
         # 驗證簽名
-        payment_tools = get_payment_tools('alipay')
-        if not payment_tools or 'verify' not in payment_tools:
+        payment_tools = get_payment_tools("alipay")
+        if not payment_tools or "verify" not in payment_tools:
             logger.error("支付寶驗證工具不可用")
-            return handle_payment_by_order_id(request, data.get('out_trade_no'))
-        
-        if not payment_tools['verify'](data):
+            return handle_payment_by_order_id(request, data.get("out_trade_no"))
+
+        if not payment_tools["verify"](data):
             logger.error("支付寶簽名驗證失敗")
-            return handle_payment_by_order_id(request, data.get('out_trade_no'))
-        
+            return handle_payment_by_order_id(request, data.get("out_trade_no"))
+
         # 獲取訂單
-        out_trade_no = data.get('out_trade_no')
-        
+        out_trade_no = data.get("out_trade_no")
+
         try:
             order = OrderModel.objects.get(id=out_trade_no)
-            
+
             # ✅ 添加詳細日誌
-            logger.info(f"✅ 找到訂單 {out_trade_no}, 當前狀態: status={order.status}, payment_status={order.payment_status}")
-            
-            if order.payment_status == 'paid':
+            logger.info(
+                f"✅ 找到訂單 {out_trade_no}, 當前狀態: status={order.status}, payment_status={order.payment_status}"
+            )
+
+            if order.payment_status == "paid":
                 logger.info(f"訂單 {out_trade_no} 已經支付過，跳轉到確認頁面")
                 # ✅ 即使已支付，也確保清空購物車
                 clear_user_cart_and_session(request)
                 return safe_redirect_to_confirmation(out_trade_no)
-            
+
             logger.info(f"開始處理訂單 {out_trade_no} 支付成功")
-            
+
             # ========== 關鍵修復：直接處理訂單，不依賴 handle_payment_success ==========
             try:
                 # 直接更新訂單狀態
                 logger.info(f"🔄 直接更新訂單 {out_trade_no} 狀態...")
-                
+
                 # 1. 更新支付狀態
-                order.payment_status = 'paid'
-                order.payment_method = 'alipay'
-                
+                order.payment_status = "paid"
+                order.payment_method = "alipay"
+
                 # 2. 分析訂單類型，設置正確的狀態
                 items = order.get_items()
-                has_coffee = any(item.get('type') == 'coffee' for item in items)
-                has_beans = any(item.get('type') == 'bean' for item in items)
-                
+                has_coffee = any(item.get("type") == "coffee" for item in items)
+                has_beans = any(item.get("type") == "bean" for item in items)
+
                 # 根據訂單類型設置狀態
                 if has_coffee:
                     # 包含咖啡的訂單：設置為 waiting，等待加入隊列
-                    order.status = 'waiting'
+                    order.status = "waiting"
                     logger.info(f"訂單 {out_trade_no} 包含咖啡，設置為 waiting")
                 elif has_beans:
                     # 純咖啡豆訂單：設置為 ready，可以直接提取
-                    order.status = 'ready'
+                    order.status = "ready"
                     logger.info(f"訂單 {out_trade_no} 純咖啡豆，設置為 ready")
                 else:
                     # 未知類型，默認為 waiting
-                    order.status = 'waiting'
+                    order.status = "waiting"
                     logger.warning(f"訂單 {out_trade_no} 未知商品類型，設置為 waiting")
-                
+
                 # 3. 保存訂單
                 order.save()
                 logger.info(f"✅ 直接更新訂單 {out_trade_no} 狀態成功")
-                
+
                 # 4. 清空購物車
                 clear_user_cart_and_session(request)
-                
+
                 # 5. 嘗試將訂單加入隊列
                 if has_coffee:
                     try:
                         from eshop.queue_manager_refactored import CoffeeQueueManager
+
                         queue_manager = CoffeeQueueManager()
                         queue_result = queue_manager.add_order_to_queue(order)
-                        
-                        if queue_result.get('success'):
-                            queue_item = queue_result['data']['queue_item']
-                            logger.info(f"✅ 訂單 {order.id} 已加入製作隊列，位置: {queue_item.position}")
+
+                        if queue_result.get("success"):
+                            queue_item = queue_result["data"]["queue_item"]
+                            logger.info(
+                                f"✅ 訂單 {order.id} 已加入製作隊列，位置: {queue_item.position}"
+                            )
                         else:
                             logger.warning(f"⚠️ 訂單 {order.id} 加入隊列失敗")
                     except Exception as queue_error:
                         logger.error(f"加入隊列失敗: {queue_error}")
-                
+
                 # 6. 發送WebSocket通知（恢復：通知員工端刷新）
                 try:
                     if WEBSOCKET_ENABLED:
                         send_payment_update(
                             order_id=order.id,
-                            payment_status='paid',
+                            payment_status="paid",
                             data={
-                                'payment_method': 'alipay',
-                                'message': '支付宝支付成功'
-                            }
+                                "payment_method": "alipay",
+                                "message": "支付宝支付成功",
+                            },
                         )
 
                         send_order_update(
                             order_id=order.id,
-                            update_type='status_change',
+                            update_type="status_change",
                             data={
-                                'status': order.status,
-                                'message': '支付成功，訂單已確認'
-                            }
+                                "status": order.status,
+                                "message": "支付成功，訂單已確認",
+                            },
                         )
-                        
+
                         # 如果有隊列項，發送隊列更新
                         try:
                             queue_item = CoffeeQueue.objects.get(order=order)
                             send_queue_update(
-                                update_type='add',
+                                update_type="add",
                                 data={
-                                    'order_id': order.id,
-                                    'position': queue_item.position,
-                                    'queue_type': 'waiting',
-                                    'estimated_start': queue_item.estimated_start_time.isoformat() if queue_item.estimated_start_time else None,
-                                    'estimated_complete': queue_item.estimated_completion_time.isoformat() if queue_item.estimated_completion_time else None,
-                                    'coffee_count': queue_item.coffee_count,
-                                    'preparation_time': queue_item.preparation_time_minutes
-                                }
+                                    "order_id": order.id,
+                                    "position": queue_item.position,
+                                    "queue_type": "waiting",
+                                    "estimated_start": (
+                                        queue_item.estimated_start_time.isoformat()
+                                        if queue_item.estimated_start_time
+                                        else None
+                                    ),
+                                    "estimated_complete": (
+                                        queue_item.estimated_completion_time.isoformat()
+                                        if queue_item.estimated_completion_time
+                                        else None
+                                    ),
+                                    "coffee_count": queue_item.coffee_count,
+                                    "preparation_time": queue_item.preparation_time_minutes,
+                                },
                             )
                         except CoffeeQueue.DoesNotExist:
                             logger.info(f"訂單 {order.id} 沒有隊列項，可能不包含咖啡")
                 except Exception as ws_error:
                     logger.error(f"發送WebSocket通知失敗: {ws_error}")
-                
+
                 logger.info(f"✅ 支付寶回調處理成功，訂單: {out_trade_no}")
-            
+
                 # 添加詳細調試日誌
                 logger.info(f"🔍 調試信息 - 訂單處理完成:")
                 logger.info(f"   訂單ID: {out_trade_no}")
@@ -368,58 +415,65 @@ def alipay_callback(request):
                 logger.info(f"   支付方式: {order.payment_method}")
                 logger.info(f"   是否包含咖啡: {has_coffee}")
                 logger.info(f"   是否純咖啡豆: {has_beans}")
-                
+
                 # ✅ 新增：添加會員積分（Alipay 支付成功後自動添加）
                 if order.user:
                     try:
                         from socialuser.models_enhanced import CustomerLoyalty
-                        loyalty, created = CustomerLoyalty.objects.get_or_create(user=order.user)
+
+                        loyalty, created = CustomerLoyalty.objects.get_or_create(
+                            user=order.user
+                        )
                         points_earned = loyalty.add_points_from_order(order)
-                        logger.info(f"✅ 用戶 {order.user.username} Alipay 訂單 #{order.id} 獲得 {points_earned} 積分")
+                        logger.info(
+                            f"✅ 用戶 {order.user.username} Alipay 訂單 #{order.id} 獲得 {points_earned} 積分"
+                        )
                     except Exception as e:
                         logger.error(f"添加會員積分失敗: {str(e)}")
-                
+
                 # 清理session
                 clear_payment_session(request, out_trade_no)
-                
+
                 # 記錄重定向前的最後狀態
                 logger.info(f"🔄 準備重定向到支付確認頁面，訂單ID: {out_trade_no}")
-                
+
                 # 使用安全的重定向函數
                 redirect_response = safe_redirect_to_confirmation(out_trade_no)
-                
+
                 # 記錄重定向目標
-                if hasattr(redirect_response, 'url'):
+                if hasattr(redirect_response, "url"):
                     logger.info(f"📍 重定向目標URL: {redirect_response.url}")
                 else:
                     logger.info(f"📍 重定向響應類型: {type(redirect_response)}")
-                
+
                 return redirect_response
-                    
+
             except Exception as direct_error:
                 logger.error(f"直接處理訂單失敗: {direct_error}")
-                return redirect_to_payment_failed(f"訂單處理失敗: {str(direct_error)}", out_trade_no)
-            
+                return redirect_to_payment_failed(
+                    f"訂單處理失敗: {str(direct_error)}", out_trade_no
+                )
+
         except OrderModel.DoesNotExist:
             logger.error(f"訂單不存在: {out_trade_no}")
             return redirect_to_payment_failed("訂單不存在", out_trade_no)
-            
+
     except Exception as e:
         logger.error(f"支付寶回調處理異常: {str(e)}")
         logger.error(f"詳細錯誤: {traceback.format_exc()}")
-        
+
         # 安全地獲取訂單ID
         try:
             out_trade_no = None
-            if 'out_trade_no' in request.GET:
-                out_trade_no = request.GET.get('out_trade_no')
-            elif hasattr(request, 'data') and 'out_trade_no' in request.data:
-                out_trade_no = request.data.get('out_trade_no')
-            
+            if "out_trade_no" in request.GET:
+                out_trade_no = request.GET.get("out_trade_no")
+            elif hasattr(request, "data") and "out_trade_no" in request.data:
+                out_trade_no = request.data.get("out_trade_no")
+
             error_msg = f"支付處理異常: {str(e)}"
             if len(error_msg) > 100:
                 error_msg = error_msg[:100] + "..."
-            
+
             return redirect_to_payment_failed(error_msg, out_trade_no)
         except Exception as inner_e:
             logger.error(f"處理異常時發生錯誤: {inner_e}")
@@ -429,35 +483,37 @@ def alipay_callback(request):
 @csrf_exempt
 def alipay_notify(request):
     """支付寶異步通知處理 - 簡化版本"""
-    if request.method == 'POST':
+    if request.method == "POST":
         # 解析數據
         data = {}
         for key, value in request.POST.items():
             data[key] = unquote(value)
-        
+
         logger.info(f"支付寶異步通知數據: {data}")
-        
+
         # 使用統一的支付工具驗證簽名
-        payment_tools = get_payment_tools('alipay')
-        if not payment_tools or 'verify' not in payment_tools:
+        payment_tools = get_payment_tools("alipay")
+        if not payment_tools or "verify" not in payment_tools:
             logger.error("支付寶驗證工具不可用")
             return HttpResponse("簽名驗證失敗", status=400)
-        
-        if not payment_tools['verify'](data):
+
+        if not payment_tools["verify"](data):
             logger.error("支付寶異步通知簽名驗證失敗")
             return HttpResponse("簽名驗證失敗", status=400)
-        
+
         # 處理支付成功
-        out_trade_no = data.get('out_trade_no')
-        trade_status = data.get('trade_status')
-        
-        if trade_status == 'TRADE_SUCCESS':
+        out_trade_no = data.get("out_trade_no")
+        trade_status = data.get("trade_status")
+
+        if trade_status == "TRADE_SUCCESS":
             try:
                 order = OrderModel.objects.get(id=out_trade_no)
                 if order.payment_status != "paid":
                     # 使用 OrderStatusManager 處理支付成功
-                    if handle_payment_success(out_trade_no, 'alipay'):
-                        logger.info(f"支付寶異步通知: 訂單 {out_trade_no} 支付狀態已更新")
+                    if handle_payment_success(out_trade_no, "alipay"):
+                        logger.info(
+                            f"支付寶異步通知: 訂單 {out_trade_no} 支付狀態已更新"
+                        )
                         return HttpResponse("success")
                     else:
                         return HttpResponse("訂單處理失敗", status=400)
@@ -465,99 +521,102 @@ def alipay_notify(request):
                     return HttpResponse("success")
             except OrderModel.DoesNotExist:
                 return HttpResponse("訂單不存在", status=400)
-    
+
     return HttpResponse("僅支持POST請求", status=400)
+
 
 @csrf_exempt
 def paypal_callback(request):
     """PayPal支付回調處理 - 使用 OrderStatusManager"""
     try:
         # 取得訂單ID和支付ID
-        order_id = request.session.get('pending_paypal_order_id')
-        payment_id = request.GET.get('token')
-        
+        order_id = request.session.get("pending_paypal_order_id")
+        payment_id = request.GET.get("token")
+
         if not order_id:
             messages.error(request, "支付會話已過期，請重新下單")
-            return redirect('cart:cart_detail')
-        
+            return redirect("cart:cart_detail")
+
         # 獲取訂單
         order = OrderModel.objects.get(id=order_id)
-        
+
         # 如果訂單已經支付，直接跳到成功頁面
         if order.payment_status == "paid":
             clear_user_cart_and_session(request)
             return redirect_to_confirmation(order.id)
-        
+
         # Capture 支付
-        payment_tools = get_payment_tools('paypal')
-        if not payment_tools or 'capture' not in payment_tools:
+        payment_tools = get_payment_tools("paypal")
+        if not payment_tools or "capture" not in payment_tools:
             messages.error(request, "PayPal支付系統暫時不可用")
             return redirect_to_payment_failed("PayPal支付系統不可用", order_id)
-        
-        if payment_tools['capture'](payment_id):
+
+        if payment_tools["capture"](payment_id):
             # ✅ 修復：直接更新訂單支付狀態，然後使用 OrderStatusManager
-            order.payment_status = 'paid'
-            order.payment_method = 'paypal'
+            order.payment_status = "paid"
+            order.payment_method = "paypal"
             order.save()
-            
+
             # ✅ 修復：使用 OrderStatusManager 處理後續邏輯，並添加異常處理
             try:
                 result = OrderStatusManager.process_payment_success(order_id, request)
-                
-                if not result.get('success'):
-                    error_msg = result.get('message', '未知錯誤')
+
+                if not result.get("success"):
+                    error_msg = result.get("message", "未知錯誤")
                     logger.error(f"PayPal支付成功但訂單處理失敗: {error_msg}")
                     messages.error(request, f"支付成功但訂單處理失敗: {error_msg}")
-                    return redirect_to_payment_failed(f"PayPal支付成功但訂單處理失敗: {error_msg}", order_id)
+                    return redirect_to_payment_failed(
+                        f"PayPal支付成功但訂單處理失敗: {error_msg}", order_id
+                    )
             except Exception as e:
-                logger.error(f"調用OrderStatusManager.process_payment_success失敗: {str(e)}")
+                logger.error(
+                    f"調用OrderStatusManager.process_payment_success失敗: {str(e)}"
+                )
                 messages.error(request, f"支付成功但訂單處理失敗: {str(e)}")
-                return redirect_to_payment_failed(f"PayPal支付成功但訂單處理失敗: {str(e)}", order_id)
-            
+                return redirect_to_payment_failed(
+                    f"PayPal支付成功但訂單處理失敗: {str(e)}", order_id
+                )
+
             # 清空購物車
             clear_user_cart_and_session(request)
-            
+
             # 發送通知（恢復：通知員工端刷新）
             try:
                 if WEBSOCKET_ENABLED:
                     send_payment_update(
                         order_id=order.id,
-                        payment_status='paid',
-                        data={
-                            'payment_method': 'paypal',
-                            'message': 'PayPal支付成功'
-                        }
+                        payment_status="paid",
+                        data={"payment_method": "paypal", "message": "PayPal支付成功"},
                     )
 
                     send_order_update(
                         order_id=order.id,
-                        update_type='status_change',
+                        update_type="status_change",
                         data={
-                            'status': order.status,
-                            'message': '支付成功，訂單已確認'
-                        }
+                            "status": order.status,
+                            "message": "支付成功，訂單已確認",
+                        },
                     )
             except Exception as ws_error:
                 logger.error(f"發送WebSocket通知失敗: {ws_error}")
-            
+
             # 清理session
             clear_payment_session(request, order_id)
-            
+
             # ✅ 修復：使用正確的重定向函數
             return redirect_to_confirmation(order.id)
         else:
             # 支付失敗
             messages.error(request, "支付失敗，請稍後重試或選擇其他支付方式")
             return redirect_to_payment_failed("PayPal支付失敗", order_id)
-            
+
     except OrderModel.DoesNotExist:
         messages.error(request, "訂單不存在")
-        return redirect('cart:cart_detail')
+        return redirect("cart:cart_detail")
     except Exception as e:
         logger.error(f"PayPal回調處理異常: {e}")
         messages.error(request, f"支付處理異常: {str(e)}")
         return redirect_to_payment_failed(f"PayPal處理異常: {str(e)}", order_id)
-
 
 
 def safe_redirect_to_confirmation(order_id):
@@ -566,17 +625,17 @@ def safe_redirect_to_confirmation(order_id):
         if not order_id:
             logger.error("safe_redirect_to_confirmation: 沒有提供訂單ID")
             return redirect_to_payment_failed("缺少訂單信息")
-        
+
         # 驗證訂單是否存在
         try:
             order = OrderModel.objects.get(id=order_id)
         except OrderModel.DoesNotExist:
             logger.error(f"訂單不存在: {order_id}")
             return redirect_to_payment_failed(f"訂單 {order_id} 不存在")
-        
+
         # 使用統一的重定向函數
         return redirect_to_confirmation(order_id)
-        
+
     except Exception as e:
         logger.error(f"safe_redirect_to_confirmation 失敗: {str(e)}")
         return redirect_to_payment_failed(f"重定向失敗: {str(e)}", order_id)
@@ -587,193 +646,199 @@ def clear_user_cart_and_session(request):
     """清除用戶購物車和相關session數據"""
     try:
         from cart.cart import Cart
-        
+
         # 1. 清空購物車對象
         cart = Cart(request)
         cart.clear()
-        
+
         # 2. 清除所有相關session鍵
         session_keys_to_clear = [
-            'cart',                    # 主購物車
-            'pending_order',           # 待處理訂單
-            'guest_cart',              # 遊客購物車
-            'quick_order_data',        # 快速訂單數據
-            'current_payment_order_id', # 當前支付訂單ID
-            'payment_start_time',      # 支付開始時間
-            'pending_paypal_order_id', # PayPal訂單ID
-            'pending_fps_order_id',    # FPS訂單ID
-            'pending_cash_order_id',   # 現金訂單ID
-            'last_order_id'            # 上次訂單ID
+            "cart",  # 主購物車
+            "pending_order",  # 待處理訂單
+            "guest_cart",  # 遊客購物車
+            "quick_order_data",  # 快速訂單數據
+            "current_payment_order_id",  # 當前支付訂單ID
+            "payment_start_time",  # 支付開始時間
+            "pending_paypal_order_id",  # PayPal訂單ID
+            "pending_fps_order_id",  # FPS訂單ID
+            "pending_cash_order_id",  # 現金訂單ID
+            "last_order_id",  # 上次訂單ID
         ]
-        
+
         cleared_keys = []
         for key in session_keys_to_clear:
             if key in request.session:
                 del request.session[key]
                 cleared_keys.append(key)
-        
+
         request.session.modified = True
-        
+
         logger.info(f"✅ 購物車和session已清除: {cleared_keys}")
-        
+
         return True
-        
+
     except Exception as e:
         logger.error(f"❌ 清空購物車失敗: {str(e)}")
         return False
-        
-
 
 
 # ==================== FPS支付视图 ====================
+
 
 def fps_payment(request, order_id):
     """FPS支付页面 - 顯示動態生成的QR Code"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         # 验证用户权限
         if request.user.is_authenticated and order.user != request.user:
             messages.error(request, "您无权访问此订单")
-            return redirect('index')
-        
+            return redirect("index")
+
         # 生成FPS参考号
-        payment_tools = get_payment_tools('fps')
-        if payment_tools and 'create_reference' in payment_tools:
-            fps_reference = payment_tools['create_reference'](order.id)
+        payment_tools = get_payment_tools("fps")
+        if payment_tools and "create_reference" in payment_tools:
+            fps_reference = payment_tools["create_reference"](order.id)
         else:
             fps_reference = f"BC{order.id:06d}"
-        
+
         # 生成動態QR Code
         from eshop.fps_utils import generate_fps_qr_code
+
         fps_qr_code = generate_fps_qr_code(order)
-        
+
         context = {
-            'order': order,
-            'fps_reference': order.fps_reference or fps_reference,
-            'fps_qr_code': fps_qr_code,
-            'amount': order.total_price,
-            'phone': order.phone or '',
+            "order": order,
+            "fps_reference": order.fps_reference or fps_reference,
+            "fps_qr_code": fps_qr_code,
+            "amount": order.total_price,
+            "phone": order.phone or "",
         }
-        
-        return render(request, 'eshop/fps_payment.html', context)
-        
+
+        return render(request, "eshop/fps_payment.html", context)
+
     except Exception as e:
         logger.error(f"FPS支付页面错误: {str(e)}")
         messages.error(request, f"FPS支付页面加载失败: {str(e)}")
-        return redirect('eshop:order_payment_confirmation', order_id=order_id)
+        return redirect("eshop:order_payment_confirmation", order_id=order_id)
+
 
 # ==================== FPS 支付確認視圖 ====================
+
 
 def fps_confirm_payment(request, order_id):
     """
     FPS支付確認 - 用戶點擊「我已完成支付」後處理
-    
+
     流程變更（2026-06-25）：
     1. 顧客按下「我已付款」→ payment_status = 'payment_pending'（等待員工確認）
     2. 員工在製作隊列頁面確認款項已收到 → payment_status = 'paid'
     3. 然後根據訂單類型進入對應流程（咖啡→waiting，咖啡豆→ready）
     """
     try:
-        if request.method != 'POST':
-            return redirect('eshop:fps_payment', order_id=order_id)
-        
+        if request.method != "POST":
+            return redirect("eshop:fps_payment", order_id=order_id)
+
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         # 驗證用戶權限
         if request.user.is_authenticated and order.user != request.user:
             messages.error(request, "您無權訪問此訂單")
-            return redirect('index')
-        
+            return redirect("index")
+
         # 如果已經支付，直接跳轉
-        if order.payment_status == 'paid':
+        if order.payment_status == "paid":
             clear_user_cart_and_session(request)
             return redirect_to_confirmation(order.id)
-        
+
         # 如果已經是付款待確認狀態，提示用戶
-        if order.payment_status == 'payment_pending':
+        if order.payment_status == "payment_pending":
             messages.info(request, "您的付款已提交，請等待員工確認。")
             return redirect_to_confirmation(order.id)
-        
+
         logger.info(f"FPS支付確認: 訂單 {order_id}, 用戶聲稱已完成支付")
-        
+
         # ====== 新流程：設為 payment_pending，等待員工確認 ======
-        order.payment_status = 'payment_pending'
+        order.payment_status = "payment_pending"
         order.save()
-        
+
         logger.info(f"✅ FPS訂單 #{order_id} 已設為 payment_pending，等待員工確認")
-        
+
         # 發送 WebSocket 通知給員工端
         try:
             from eshop.websocket_utils import send_order_update
+
             send_order_update(
                 order_id=order_id,
-                update_type='payment_pending',
+                update_type="payment_pending",
                 data={
-                    'order_id': order_id,
-                    'payment_method': 'fps',
-                    'payment_status': 'payment_pending',
-                    'message': f'FPS訂單 #{order_id} 等待付款確認'
-                }
+                    "order_id": order_id,
+                    "payment_method": "fps",
+                    "payment_status": "payment_pending",
+                    "message": f"FPS訂單 #{order_id} 等待付款確認",
+                },
             )
         except Exception as ws_error:
             logger.error(f"發送WebSocket通知失敗: {str(ws_error)}")
-        
+
         # 清空購物車和 session
         clear_user_cart_and_session(request)
-        
-        messages.success(request, "付款已提交！請等待員工確認付款後，訂單將自動進入製作流程。")
+
+        messages.success(
+            request, "付款已提交！請等待員工確認付款後，訂單將自動進入製作流程。"
+        )
         return redirect_to_confirmation(order.id)
-        
+
     except OrderModel.DoesNotExist:
         messages.error(request, "訂單不存在")
-        return redirect('index')
+        return redirect("index")
     except Exception as e:
         logger.error(f"FPS支付確認異常: {str(e)}")
         messages.error(request, f"支付確認異常: {str(e)}")
-        return redirect('eshop:fps_payment', order_id=order_id)
+        return redirect("eshop:fps_payment", order_id=order_id)
 
 
 # ==================== 现金支付视图 ====================
+
 
 def cash_payment(request, order_id):
     """现金支付确认页面"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         # 验证用户权限
         if request.user.is_authenticated and order.user != request.user:
             messages.error(request, "您无权访问此订单")
-            return redirect('index')
-        
+            return redirect("index")
+
         # 计算订单类型和制作时间
         items = order.get_items_with_chinese_options()
-        has_coffee = any(item.get('type') == 'coffee' for item in order.get_items())
-        has_beans = any(item.get('type') == 'bean' for item in order.get_items())
-        
+        has_coffee = any(item.get("type") == "coffee" for item in order.get_items())
+        has_beans = any(item.get("type") == "bean" for item in order.get_items())
+
         context = {
-            'order': order,
-            'items': items,
-            'total_price': order.total_price,
-            'has_coffee': has_coffee,
-            'has_beans': has_beans,
-            'preparation_time_display': order.get_preparation_time_display(),
-            'order_type_display': order.get_order_type_display(),
-            'should_show_preparation_time': order.should_show_preparation_time(),
+            "order": order,
+            "items": items,
+            "total_price": order.total_price,
+            "has_coffee": has_coffee,
+            "has_beans": has_beans,
+            "preparation_time_display": order.get_preparation_time_display(),
+            "order_type_display": order.get_order_type_display(),
+            "should_show_preparation_time": order.should_show_preparation_time(),
         }
-        
-        return render(request, 'eshop/cash_payment.html', context)
-        
+
+        return render(request, "eshop/cash_payment.html", context)
+
     except Exception as e:
         logger.error(f"现金支付页面错误: {str(e)}")
         messages.error(request, f"现金支付页面加载失败: {str(e)}")
-        return redirect('eshop:order_payment_confirmation', order_id=order_id)
+        return redirect("eshop:order_payment_confirmation", order_id=order_id)
 
 
 def cash_confirm_payment(request, order_id):
     """
     現金支付確認 - 用戶點擊「確認訂單」後處理
-    
+
     現金到店付款流程（方案 B：員工確認）：
     1. 顧客選擇現金支付 → 看到現金支付頁面
     2. 顧客點擊「確認訂單」→ 此視圖處理
@@ -784,73 +849,72 @@ def cash_confirm_payment(request, order_id):
     7. 訂單正式加入 CoffeeQueue 製作隊列
     """
     try:
-        if request.method != 'POST':
-            return redirect('eshop:cash_payment', order_id=order_id)
-        
+        if request.method != "POST":
+            return redirect("eshop:cash_payment", order_id=order_id)
+
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         # 驗證用戶權限
         if request.user.is_authenticated and order.user != request.user:
             messages.error(request, "您無權訪問此訂單")
-            return redirect('index')
-        
+            return redirect("index")
+
         # 如果已經支付，直接跳轉
-        if order.payment_status == 'paid':
+        if order.payment_status == "paid":
             clear_user_cart_and_session(request)
             return redirect_to_confirmation(order.id)
-        
+
         logger.info(f"現金支付確認: 訂單 {order_id}, 用戶確認到店付款（等待員工確認）")
-        
+
         # ====== 方案 B：設為 payment_pending，等待員工確認 ======
         # 不直接設為 paid，而是讓員工在收到現金後確認
-        order.payment_status = 'payment_pending'
-        order.payment_method = 'cash'
-        order.save(update_fields=['payment_status', 'payment_method'])
-        
+        order.payment_status = "payment_pending"
+        order.payment_method = "cash"
+        order.save(update_fields=["payment_status", "payment_method"])
+
         # 清空購物車和 session
         clear_user_cart_and_session(request)
-        
+
         logger.info(f"✅ 現金訂單 #{order_id} 已設為 payment_pending，等待員工確認")
         messages.success(
-            request, 
-            "訂單已提交！請到店後向店員出示二維碼並支付現金，店員確認後將開始製作。"
+            request,
+            "訂單已提交！請到店後向店員出示二維碼並支付現金，店員確認後將開始製作。",
         )
         return redirect_to_confirmation(order.id)
 
-        
     except OrderModel.DoesNotExist:
         messages.error(request, "訂單不存在")
-        return redirect('index')
+        return redirect("index")
     except Exception as e:
         logger.error(f"現金支付確認異常: {str(e)}")
         messages.error(request, f"支付確認異常: {str(e)}")
-        return redirect('eshop:cash_payment', order_id=order_id)
-
+        return redirect("eshop:cash_payment", order_id=order_id)
 
 
 # ==================== 支付状态检查视图 ====================
+
 
 def check_pending_orders(request):
     """
     檢查當前用戶是否有未支付的訂單
     用於 order_confirm.html 頁面加載時檢測
-    
+
     修復：查詢 payment_status 為 pending 或 payment_pending 的訂單，
     確保 FPS 等待確認的訂單也能被顯示和取消。
     """
     try:
         pending_orders = []
-        
+
         if request.user.is_authenticated:
             # 已登入用戶：查詢該用戶的未支付訂單
             # 排除已取消、已逾時、已支付的訂單
             # 修復：同時查詢 pending 和 payment_pending 狀態
             orders = OrderModel.objects.filter(
                 user=request.user,
-                payment_status__in=['pending', 'payment_pending'],
-                status='pending'
-            ).order_by('-created_at')[:5]
-            
+                payment_status__in=["pending", "payment_pending"],
+                status="pending",
+            ).order_by("-created_at")[:5]
+
             for order in orders:
                 # 跳過已超時的訂單，不提醒用戶（超時訂單不應再打擾用戶）
                 if order.is_payment_timeout():
@@ -862,41 +926,49 @@ def check_pending_orders(request):
                     remaining = order.payment_timeout - now
                     remaining_seconds = max(0, int(remaining.total_seconds()))
                 # 取得訂單商品名稱
-                items_data = order.get_items() if hasattr(order, 'get_items') else []
+                items_data = order.get_items() if hasattr(order, "get_items") else []
                 item_count = len(items_data)
                 if item_count == 1:
-                    item_name = items_data[0].get('name', '')
+                    item_name = items_data[0].get("name", "")
                 elif item_count > 1:
-                    last_name = items_data[-1].get('name', '')
+                    last_name = items_data[-1].get("name", "")
                     item_name = f"{last_name} 等多件"
                 else:
                     item_name = ""
-                pending_orders.append({
-                    'id': order.id,
-                    'total_price': float(order.total_price),
-                    'created_at': order.created_at.isoformat() if order.created_at else None,
-                    'payment_method': order.payment_method,
-                    'is_timeout': order.is_payment_timeout(),
-                    'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
-                    'remaining_seconds': remaining_seconds,
-                    'item_name': item_name,
-                    'item_count': item_count,
-                })
+                pending_orders.append(
+                    {
+                        "id": order.id,
+                        "total_price": float(order.total_price),
+                        "created_at": (
+                            order.created_at.isoformat() if order.created_at else None
+                        ),
+                        "payment_method": order.payment_method,
+                        "is_timeout": order.is_payment_timeout(),
+                        "payment_timeout": (
+                            order.payment_timeout.isoformat()
+                            if order.payment_timeout
+                            else None
+                        ),
+                        "remaining_seconds": remaining_seconds,
+                        "item_name": item_name,
+                        "item_count": item_count,
+                    }
+                )
         else:
             # 訪客用戶：從 session 中獲取最近訂單ID
-            last_order_id = request.session.get('last_order_id')
-            pending_paypal_id = request.session.get('pending_paypal_order_id')
-            
+            last_order_id = request.session.get("last_order_id")
+            pending_paypal_id = request.session.get("pending_paypal_order_id")
+
             order_ids = set()
             if last_order_id:
                 order_ids.add(last_order_id)
             if pending_paypal_id:
                 order_ids.add(pending_paypal_id)
-            
+
             for oid in order_ids:
                 try:
                     order = OrderModel.objects.get(id=oid)
-                    if order.payment_status == 'pending' and order.status == 'pending':
+                    if order.payment_status == "pending" and order.status == "pending":
                         # 計算剩餘秒數（用於前端倒數計時）
                         remaining_seconds = 0
                         if order.payment_timeout:
@@ -904,198 +976,209 @@ def check_pending_orders(request):
                             remaining = order.payment_timeout - now
                             remaining_seconds = max(0, int(remaining.total_seconds()))
                         # 取得訂單商品名稱
-                        items_data = order.get_items() if hasattr(order, 'get_items') else []
+                        items_data = (
+                            order.get_items() if hasattr(order, "get_items") else []
+                        )
                         item_count = len(items_data)
                         if item_count == 1:
-                            item_name = items_data[0].get('name', '')
+                            item_name = items_data[0].get("name", "")
                         elif item_count > 1:
-                            last_name = items_data[-1].get('name', '')
+                            last_name = items_data[-1].get("name", "")
                             item_name = f"{last_name} 等多件"
                         else:
                             item_name = ""
-                        pending_orders.append({
-                            'id': order.id,
-                            'total_price': float(order.total_price),
-                            'created_at': order.created_at.isoformat() if order.created_at else None,
-                            'payment_method': order.payment_method,
-                            'is_timeout': order.is_payment_timeout(),
-                            'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
-                            'remaining_seconds': remaining_seconds,
-                            'item_name': item_name,
-                            'item_count': item_count,
-                        })
+                        pending_orders.append(
+                            {
+                                "id": order.id,
+                                "total_price": float(order.total_price),
+                                "created_at": (
+                                    order.created_at.isoformat()
+                                    if order.created_at
+                                    else None
+                                ),
+                                "payment_method": order.payment_method,
+                                "is_timeout": order.is_payment_timeout(),
+                                "payment_timeout": (
+                                    order.payment_timeout.isoformat()
+                                    if order.payment_timeout
+                                    else None
+                                ),
+                                "remaining_seconds": remaining_seconds,
+                                "item_name": item_name,
+                                "item_count": item_count,
+                            }
+                        )
                 except OrderModel.DoesNotExist:
                     continue
-        
-        return JsonResponse({
-            'has_pending_orders': len(pending_orders) > 0,
-            'orders': pending_orders,
-        })
-        
+
+        return JsonResponse(
+            {
+                "has_pending_orders": len(pending_orders) > 0,
+                "orders": pending_orders,
+            }
+        )
+
     except Exception as e:
         logger.error(f"檢查未支付訂單失敗: {str(e)}")
-        return JsonResponse({
-            'has_pending_orders': False,
-            'orders': [],
-            'error': str(e)
-        })
+        return JsonResponse(
+            {"has_pending_orders": False, "orders": [], "error": str(e)}
+        )
 
 
 def check_and_update_payment_status(request, order_id):
     """检查和更新支付状态"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
-        return JsonResponse({
-            'success': True,
-            'order_id': order.id,
-            'status': order.status,
-            'payment_status': order.payment_status,
-            'payment_method': order.payment_method,
-        })
-        
+
+        return JsonResponse(
+            {
+                "success": True,
+                "order_id": order.id,
+                "status": order.status,
+                "payment_status": order.payment_status,
+                "payment_method": order.payment_method,
+            }
+        )
+
     except Exception as e:
         logger.error(f"检查支付状态错误: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        })
+        return JsonResponse({"success": False, "error": str(e)})
+
 
 def query_payment_status(request, order_id):
     """查询支付状态"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
-        return JsonResponse({
-            'order_id': order.id,
-            'payment_status': order.payment_status,
-            'payment_method': order.payment_method,
-            'created_at': order.created_at.isoformat(),
-            'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
-            'is_timeout': order.is_payment_timeout(),
-            'total_price': float(order.total_price),
-        })
-        
+
+        return JsonResponse(
+            {
+                "order_id": order.id,
+                "payment_status": order.payment_status,
+                "payment_method": order.payment_method,
+                "created_at": order.created_at.isoformat(),
+                "payment_timeout": (
+                    order.payment_timeout.isoformat() if order.payment_timeout else None
+                ),
+                "is_timeout": order.is_payment_timeout(),
+                "total_price": float(order.total_price),
+            }
+        )
+
     except Exception as e:
         logger.error(f"查询支付状态错误: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 # ==================== 支付超时处理 ====================
+
 
 def check_payment_timeout(request, order_id):
     """检查支付超时"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         if order.is_payment_timeout():
-            return JsonResponse({
-                'timeout': True,
-                'message': '支付已超时',
-                'redirect_url': f'/eshop/cancel_timeout_payment/{order.id}/'
-            })
+            return JsonResponse(
+                {
+                    "timeout": True,
+                    "message": "支付已超时",
+                    "redirect_url": f"/eshop/cancel_timeout_payment/{order.id}/",
+                }
+            )
         else:
             # 计算剩余时间
             now = timezone.now()
             remaining = order.payment_timeout - now if order.payment_timeout else None
-            
-            return JsonResponse({
-                'timeout': False,
-                'remaining_seconds': remaining.total_seconds() if remaining else None,
-                'payment_timeout': order.payment_timeout.isoformat() if order.payment_timeout else None,
-            })
-            
+
+            return JsonResponse(
+                {
+                    "timeout": False,
+                    "remaining_seconds": (
+                        remaining.total_seconds() if remaining else None
+                    ),
+                    "payment_timeout": (
+                        order.payment_timeout.isoformat()
+                        if order.payment_timeout
+                        else None
+                    ),
+                }
+            )
+
     except Exception as e:
         logger.error(f"检查支付超时错误: {str(e)}")
-        return JsonResponse({
-            'timeout': False,
-            'error': str(e)
-        })
+        return JsonResponse({"timeout": False, "error": str(e)})
+
 
 def cancel_timeout_payment(request, order_id):
     """取消支付 - 使用 OrderStatusManager（支援舊訂單手動取消）"""
     try:
         order = OrderModel.objects.get(id=order_id)
-        
+
         # 已支付的訂單不能取消
-        if order.payment_status == 'paid':
+        if order.payment_status == "paid":
             messages.info(request, "訂單已支付，無法取消")
-            return redirect('eshop:order_payment_confirmation_with_id', order_id=order.id)
-        
+            return redirect(
+                "eshop:order_payment_confirmation_with_id", order_id=order.id
+            )
+
         # 判斷取消原因
         if order.is_payment_timeout():
-            reason = '支付超時'
+            reason = "支付超時"
         else:
-            reason = '用戶手動取消'
-        
+            reason = "用戶手動取消"
+
         result = OrderStatusManager.mark_as_cancelled_manually(
-            order_id=order_id,
-            staff_name='system',
-            reason=reason
+            order_id=order_id, staff_name="system", reason=reason
         )
-        
-        if result['success']:
+
+        if result["success"]:
             messages.warning(request, f"訂單已取消（{reason}）")
         else:
             messages.error(request, f"取消訂單失敗: {result['message']}")
-            
-        return redirect('eshop:order_confirm')
-            
+
+        return redirect("eshop:order_confirm")
+
     except Exception as e:
         logger.error(f"取消支付錯誤: {str(e)}")
         messages.error(request, f"取消支付失敗: {str(e)}")
-        return redirect('eshop:order_payment_confirmation_with_id', order_id=order_id)
+        return redirect("eshop:order_payment_confirmation_with_id", order_id=order_id)
 
 
 @csrf_exempt
 def api_cancel_order(request, order_id):
     """
     API: 取消訂單（返回 JSON，供 order_confirm.html 前端調用）
-    
+
     修復：添加 @csrf_exempt 裝飾器，因為前端使用 fetch API 發送 POST 請求，
     CSRF token 在 JavaScript 中可能無法正確傳遞。
     """
     try:
         order = OrderModel.objects.get(id=order_id)
-        
-        if order.payment_status == 'paid':
-            return JsonResponse({
-                'success': False,
-                'error': '訂單已支付，無法取消'
-            })
-        
+
+        if order.payment_status == "paid":
+            return JsonResponse({"success": False, "error": "訂單已支付，無法取消"})
+
         if order.is_payment_timeout():
-            reason = '支付超時'
+            reason = "支付超時"
         else:
-            reason = '用戶手動取消'
-        
+            reason = "用戶手動取消"
+
         result = OrderStatusManager.mark_as_cancelled_manually(
-            order_id=order_id,
-            staff_name='system',
-            reason=reason
+            order_id=order_id, staff_name="system", reason=reason
         )
-        
-        if result['success']:
-            return JsonResponse({
-                'success': True,
-                'message': f'訂單已取消（{reason}）'
-            })
+
+        if result["success"]:
+            return JsonResponse({"success": True, "message": f"訂單已取消（{reason}）"})
         else:
-            return JsonResponse({
-                'success': False,
-                'error': result.get('message', '取消訂單失敗')
-            })
-            
+            return JsonResponse(
+                {"success": False, "error": result.get("message", "取消訂單失敗")}
+            )
+
     except OrderModel.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'error': '訂單不存在'
-        })
+        return JsonResponse({"success": False, "error": "訂單不存在"})
     except Exception as e:
         logger.error(f"API取消訂單錯誤: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': f'取消訂單失敗: {str(e)}'
-        })
+        return JsonResponse({"success": False, "error": f"取消訂單失敗: {str(e)}"})
 
 
 # ==================== 重新支付视图 ====================
@@ -1105,55 +1188,53 @@ def retry_payment(request, order_id):
     """重新尝试支付"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         if order.payment_status == "paid":
             messages.info(request, "订单已支付")
-            return redirect('eshop:order_payment_confirmation', order_id=order.id)
-        
+            return redirect("eshop:order_payment_confirmation", order_id=order.id)
+
         # 重置支付超时时间
         order.set_payment_timeout(minutes=5)
-        
+
         # 根据支付方式重定向
-        if order.payment_method == 'alipay':
-            return redirect('eshop:alipay_payment', order_id=order.id)
-        elif order.payment_method == 'fps':
-            return redirect('eshop:fps_payment', order_id=order.id)
-        elif order.payment_method == 'cash':
-            return redirect('eshop:cash_payment', order_id=order.id)
+        if order.payment_method == "alipay":
+            return redirect("eshop:alipay_payment", order_id=order.id)
+        elif order.payment_method == "fps":
+            return redirect("eshop:fps_payment", order_id=order.id)
+        elif order.payment_method == "cash":
+            return redirect("eshop:cash_payment", order_id=order.id)
         else:
             # 默认使用支付宝
-            return redirect('eshop:alipay_payment', order_id=order.id)
-            
+            return redirect("eshop:alipay_payment", order_id=order.id)
+
     except Exception as e:
         logger.error(f"重新支付错误: {str(e)}")
         messages.error(request, f"重新支付失败: {str(e)}")
-        return redirect('eshop:order_payment_confirmation', order_id=order_id)
+        return redirect("eshop:order_payment_confirmation", order_id=order_id)
+
 
 # ==================== 支付失败页面 ====================
 
+
 def payment_failed(request):
     """支付失败页面"""
-    error_message = request.GET.get('error', '支付失败')
-    order_id = request.GET.get('order_id')
-    
+    error_message = request.GET.get("error", "支付失败")
+    order_id = request.GET.get("order_id")
+
     order = None
     can_retry = False
-    
+
     if order_id:
         try:
             order = OrderModel.objects.get(id=order_id)
             if request.user.is_authenticated:
-                can_retry = order.can_retry_payment() and order.payment_status != 'paid'
+                can_retry = order.can_retry_payment() and order.payment_status != "paid"
         except OrderModel.DoesNotExist:
             pass
-    
-    context = {
-        'error_message': error_message,
-        'order': order,
-        'can_retry': can_retry
-    }
-    
-    return render(request, 'eshop/payment_failed.html', context)
+
+    context = {"error_message": error_message, "order": order, "can_retry": can_retry}
+
+    return render(request, "eshop/payment_failed.html", context)
 
 
 # ==================== 辅助函数 ====================
@@ -1161,22 +1242,23 @@ def payment_failed(request):
 
 def redirect_to_payment_failed(error_message, order_id=None):
     """重定向到支付失败页面"""
-    from django.urls import reverse
     from urllib.parse import quote
-    
-    url = reverse('eshop:payment_failed')
+
+    from django.urls import reverse
+
+    url = reverse("eshop:payment_failed")
     params = f"?error={quote(error_message)}"
-    
+
     if order_id:
         params += f"&order_id={order_id}"
-    
-    return redirect(url + params)
 
+    return redirect(url + params)
 
 
 def redirect_to_confirmation(order_id):
     """重定向到支付确认页面"""
     from django.urls import reverse
+
     try:
         if WEBSOCKET_ENABLED:
             # 暫時註釋掉此處的 WebSocket 發送，因為在事件循環中也會引發錯誤
@@ -1190,26 +1272,33 @@ def redirect_to_confirmation(order_id):
             pass
     except Exception as ws_error:
         logger.error(f"发送WebSocket通知失败: {ws_error}")
-    
+
     # ✅ 修復：確保正確構建URL
     try:
         # 嘗試使用帶參數的版本
-        return redirect(reverse('eshop:order_payment_confirmation_with_id', kwargs={'order_id': order_id}))
+        return redirect(
+            reverse(
+                "eshop:order_payment_confirmation_with_id",
+                kwargs={"order_id": order_id},
+            )
+        )
     except Exception as e:
         logger.error(f"使用帶參數版本重定向失敗: {str(e)}")
         try:
             # 備用方案：使用無參數版本 + GET參數
-            return redirect(reverse('eshop:order_payment_confirmation') + f'?order_id={order_id}')
+            return redirect(
+                reverse("eshop:order_payment_confirmation") + f"?order_id={order_id}"
+            )
         except Exception as e2:
             logger.error(f"所有重定向方法都失敗: {str(e2)}")
             # 最後的備用方案：直接構建URL
-            return redirect(f'/eshop/order/payment-confirmation/{order_id}/')
+            return redirect(f"/eshop/order/payment-confirmation/{order_id}/")
 
 
 def handle_payment_by_order_id(request, order_id):
     """
     根据订单ID处理支付（支付回調/返回時調用）
-    
+
     修復（2026-07-18）：
     原本直接設 payment_status='paid' 後調用 mark_as_waiting_manually，
     但 mark_as_waiting_manually 只更新狀態，不會：
@@ -1218,15 +1307,16 @@ def handle_payment_by_order_id(request, order_id):
     - 調用 recalculate_all_order_times() 重新計算時間
     - 發送 WebSocket 通知
     - 添加會員積分
-    
+
     修復後：統一使用 OrderStatusManager.process_payment_success() 處理所有邏輯
     """
     try:
         if not order_id:
             from django.urls import reverse
+
             # 如果沒有訂單ID，重定向到首頁
-            return redirect('index')
-        
+            return redirect("index")
+
         order = OrderModel.objects.get(id=order_id)
         if order.payment_status == "paid":
             return redirect_to_confirmation(order_id)
@@ -1234,173 +1324,201 @@ def handle_payment_by_order_id(request, order_id):
             # ✅ 修復：統一使用 OrderStatusManager.process_payment_success()
             # 它會處理：更新支付狀態 → 分析訂單類型 → 加入隊列 → 計算時間 → 發送WS → 添加積分
             from eshop.order_status_manager import OrderStatusManager
+
             result = OrderStatusManager.process_payment_success(order_id, request)
-            
-            if not result.get('success'):
-                error_msg = result.get('message', '處理支付成功失敗')
-                logger.error(f"❌ handle_payment_by_order_id: 處理訂單 {order_id} 支付成功失敗: {error_msg}")
+
+            if not result.get("success"):
+                error_msg = result.get("message", "處理支付成功失敗")
+                logger.error(
+                    f"❌ handle_payment_by_order_id: 處理訂單 {order_id} 支付成功失敗: {error_msg}"
+                )
                 # 降級處理：至少更新支付狀態
-                order.payment_status = 'paid'
-                order.save(update_fields=['payment_status'])
-            
+                order.payment_status = "paid"
+                order.save(update_fields=["payment_status"])
+
             clear_payment_session(request, order_id)
             return redirect_to_confirmation(order_id)
-            
+
     except OrderModel.DoesNotExist:
         logger.error(f"订单不存在: {order_id}")
         # 訂單不存在，重定向到首頁
-        return redirect('index')
+        return redirect("index")
 
 
 # ==================== 支付宝配置检查 ====================
 
+
 def check_alipay_keys(request):
     """检查支付宝密钥配置"""
     try:
-        payment_tools = get_payment_tools('alipay')
-        if not payment_tools or 'check_keys' not in payment_tools:
-            return JsonResponse({
-                'success': False,
-                'error': '支付宝检查工具不可用'
-            })
-        
-        result = payment_tools['check_keys']()
+        payment_tools = get_payment_tools("alipay")
+        if not payment_tools or "check_keys" not in payment_tools:
+            return JsonResponse({"success": False, "error": "支付宝检查工具不可用"})
+
+        result = payment_tools["check_keys"]()
         return JsonResponse(result)
     except Exception as e:
         logger.error(f"检查支付宝密钥错误: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        })
+        return JsonResponse({"success": False, "error": str(e)})
+
 
 def check_key_match(request):
     """检查支付宝密钥匹配"""
     try:
         from alipay import AliPay
-        
+
         # 创建测试签名
         test_data = {"test": "data"}
-        
+
         app_private_key_string = open(settings.ALIPAY_PRIVATE_KEY_PATH).read()
         alipay_public_key_string = open(settings.ALIPAY_PUBLIC_KEY_PATH).read()
-        
+
         alipay = AliPay(
             appid=settings.ALIPAY_APP_ID,
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
             alipay_public_key_string=alipay_public_key_string,
             sign_type="RSA2",
-            debug=settings.ALIPAY_DEBUG
+            debug=settings.ALIPAY_DEBUG,
         )
-        
+
         # 测试签名和验证
         import json
+
         test_string = json.dumps(test_data)
-        
-        return JsonResponse({
-            'success': True,
-            'message': '支付宝密钥匹配检查完成',
-            'note': '完整的密钥匹配需要实际支付测试'
-        })
-        
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "支付宝密钥匹配检查完成",
+                "note": "完整的密钥匹配需要实际支付测试",
+            }
+        )
+
     except Exception as e:
         logger.error(f"检查密钥匹配错误: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        })
+        return JsonResponse({"success": False, "error": str(e)})
+
 
 def check_alipay_config(request):
     """检查支付宝完整配置"""
     try:
         config_status = {
-            'ALIPAY_APP_ID': settings.ALIPAY_APP_ID if hasattr(settings, 'ALIPAY_APP_ID') else None,
-            'ALIPAY_DEBUG': settings.ALIPAY_DEBUG if hasattr(settings, 'ALIPAY_DEBUG') else None,
-            'ALIPAY_RETURN_URL': settings.ALIPAY_RETURN_URL if hasattr(settings, 'ALIPAY_RETURN_URL') else None,
-            'ALIPAY_NOTIFY_URL': settings.ALIPAY_NOTIFY_URL if hasattr(settings, 'ALIPAY_NOTIFY_URL') else None,
+            "ALIPAY_APP_ID": (
+                settings.ALIPAY_APP_ID if hasattr(settings, "ALIPAY_APP_ID") else None
+            ),
+            "ALIPAY_DEBUG": (
+                settings.ALIPAY_DEBUG if hasattr(settings, "ALIPAY_DEBUG") else None
+            ),
+            "ALIPAY_RETURN_URL": (
+                settings.ALIPAY_RETURN_URL
+                if hasattr(settings, "ALIPAY_RETURN_URL")
+                else None
+            ),
+            "ALIPAY_NOTIFY_URL": (
+                settings.ALIPAY_NOTIFY_URL
+                if hasattr(settings, "ALIPAY_NOTIFY_URL")
+                else None
+            ),
         }
-        
+
         # 检查文件是否存在
         import os
+
         key_files = {
-            'private_key': settings.ALIPAY_PRIVATE_KEY_PATH if hasattr(settings, 'ALIPAY_PRIVATE_KEY_PATH') else None,
-            'public_key': settings.ALIPAY_PUBLIC_KEY_PATH if hasattr(settings, 'ALIPAY_PUBLIC_KEY_PATH') else None,
+            "private_key": (
+                settings.ALIPAY_PRIVATE_KEY_PATH
+                if hasattr(settings, "ALIPAY_PRIVATE_KEY_PATH")
+                else None
+            ),
+            "public_key": (
+                settings.ALIPAY_PUBLIC_KEY_PATH
+                if hasattr(settings, "ALIPAY_PUBLIC_KEY_PATH")
+                else None
+            ),
         }
-        
+
         file_status = {}
         for key, path in key_files.items():
             if path and os.path.exists(path):
                 file_status[key] = True
                 # 检查文件是否可读
                 try:
-                    with open(path, 'r') as f:
+                    with open(path, "r") as f:
                         content = f.read()
-                    file_status[f'{key}_readable'] = True
+                    file_status[f"{key}_readable"] = True
                 except:
-                    file_status[f'{key}_readable'] = False
+                    file_status[f"{key}_readable"] = False
             else:
                 file_status[key] = False
-        
-        return JsonResponse({
-            'success': True,
-            'config': config_status,
-            'files': file_status,
-            'all_good': all(file_status.get(f, False) for f in ['private_key', 'public_key'])
-        })
-        
+
+        return JsonResponse(
+            {
+                "success": True,
+                "config": config_status,
+                "files": file_status,
+                "all_good": all(
+                    file_status.get(f, False) for f in ["private_key", "public_key"]
+                ),
+            }
+        )
+
     except Exception as e:
         logger.error(f"检查支付宝配置错误: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        })
+        return JsonResponse({"success": False, "error": str(e)})
+
 
 # ==================== 测试功能 ====================
+
 
 def test_payment_cancel(request, order_id):
     """测试支付取消（仅用于测试）"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         if order.payment_status != "paid":
             # ✅ 已修復：使用 OrderStatusManager
             from eshop.order_status_manager import OrderStatusManager
+
             result = OrderStatusManager.mark_as_cancelled_manually(
                 order_id=order.id,
-                staff_name=request.user.username if hasattr(request, 'user') else 'system',
-                reason='支付失敗或超時'
+                staff_name=(
+                    request.user.username if hasattr(request, "user") else "system"
+                ),
+                reason="支付失敗或超時",
             )
-            if not result.get('success'):
+            if not result.get("success"):
                 logger.error(f"取消訂單 {order.id} 失敗: {result.get('message')}")
-            order.payment_status = 'cancelled'
+            order.payment_status = "cancelled"
             order.save()
-            
+
             messages.info(request, "测试：订单已取消")
         else:
             messages.warning(request, "订单已支付，无法取消")
-        
-        return redirect('eshop:order_payment_confirmation', order_id=order.id)
-        
+
+        return redirect("eshop:order_payment_confirmation", order_id=order.id)
+
     except Exception as e:
         logger.error(f"测试支付取消错误: {str(e)}")
         messages.error(request, f"测试失败: {str(e)}")
-        return redirect('eshop:order_payment_confirmation', order_id=order_id)
+        return redirect("eshop:order_payment_confirmation", order_id=order_id)
+
 
 def simulate_alipay_cancel(request, order_id):
     """模拟支付宝取消支付（仅用于测试）"""
     try:
         order = get_object_or_404(OrderModel, id=order_id)
-        
+
         if order.payment_status != "paid":
             # 模拟支付宝取消回调
             messages.info(request, "模拟支付宝支付取消")
-            
+
             # 这里可以记录测试日志
             logger.info(f"模拟支付宝取消支付: 订单 {order_id}")
-            
-        return redirect('eshop:order_payment_confirmation', order_id=order.id)
-        
+
+        return redirect("eshop:order_payment_confirmation", order_id=order.id)
+
     except Exception as e:
         logger.error(f"模拟支付宝取消错误: {str(e)}")
         messages.error(request, f"模拟失败: {str(e)}")
-        return redirect('eshop:order_payment_confirmation', order_id=order_id)
+        return redirect("eshop:order_payment_confirmation", order_id=order_id)

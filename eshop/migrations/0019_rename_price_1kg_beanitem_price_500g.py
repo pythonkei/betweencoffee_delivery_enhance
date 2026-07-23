@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0018_add_pickup_time_fields'),
+        ("eshop", "0018_add_pickup_time_fields"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='beanitem',
-            old_name='price_1kg',
-            new_name='price_500g',
+            model_name="beanitem",
+            old_name="price_1kg",
+            new_name="price_500g",
         ),
     ]

@@ -6,18 +6,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0017_remove_ordermodel_pickup_time_choice_and_more'),
+        ("eshop", "0017_remove_ordermodel_pickup_time_choice_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ordermodel',
-            name='latest_start_time',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='最晚開始時間'),
+            model_name="ordermodel",
+            name="latest_start_time",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="最晚開始時間"
+            ),
         ),
         migrations.AddField(
-            model_name='ordermodel',
-            name='pickup_time_choice',
-            field=models.CharField(choices=[('5', '5分鐘後'), ('10', '10分鐘後'), ('15', '15分鐘後'), ('20', '20分鐘後'), ('30', '30分鐘後')], default='5', max_length=20, verbose_name='取貨時間選擇'),
+            model_name="ordermodel",
+            name="pickup_time_choice",
+            field=models.CharField(
+                choices=[
+                    ("5", "5分鐘後"),
+                    ("10", "10分鐘後"),
+                    ("15", "15分鐘後"),
+                    ("20", "20分鐘後"),
+                    ("30", "30分鐘後"),
+                ],
+                default="5",
+                max_length=20,
+                verbose_name="取貨時間選擇",
+            ),
         ),
     ]

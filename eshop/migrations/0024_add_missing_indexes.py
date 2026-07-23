@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     """
     添加缺失索引迁移
-    
+
     需要添加的索引：
     1. OrderModel(status, payment_status) - 活跃订单查询优化
     2. OrderModel(user_id, created_at DESC) - 用户订单历史优化
@@ -18,37 +18,46 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ('eshop', '0023_remove_deprecated_fields'),
+        ("eshop", "0023_remove_deprecated_fields"),
     ]
 
     operations = [
         # 1. OrderModel 状态和支付状态复合索引
         migrations.AddIndex(
-            model_name='ordermodel',
-            index=models.Index(fields=['status', 'payment_status'], name='eshop_ordermodel_status_payment_idx'),
+            model_name="ordermodel",
+            index=models.Index(
+                fields=["status", "payment_status"],
+                name="eshop_ordermodel_status_payment_idx",
+            ),
         ),
-        
         # 2. OrderModel 用户和创建时间复合索引（降序）
         migrations.AddIndex(
-            model_name='ordermodel',
-            index=models.Index(fields=['user', '-created_at'], name='eshop_ordermodel_user_created_idx'),
+            model_name="ordermodel",
+            index=models.Index(
+                fields=["user", "-created_at"], name="eshop_ordermodel_user_created_idx"
+            ),
         ),
-        
         # 3. OrderModel 状态和创建时间复合索引
         migrations.AddIndex(
-            model_name='ordermodel',
-            index=models.Index(fields=['status', 'created_at'], name='eshop_ordermodel_status_created_idx'),
+            model_name="ordermodel",
+            index=models.Index(
+                fields=["status", "created_at"],
+                name="eshop_ordermodel_status_created_idx",
+            ),
         ),
-        
         # 4. CoffeeQueue 更新时间索引
         migrations.AddIndex(
-            model_name='coffeequeue',
-            index=models.Index(fields=['updated_at'], name='eshop_coffeequeue_updated_idx'),
+            model_name="coffeequeue",
+            index=models.Index(
+                fields=["updated_at"], name="eshop_coffeequeue_updated_idx"
+            ),
         ),
-        
         # 5. OrderModel 支付方式和状态复合索引
         migrations.AddIndex(
-            model_name='ordermodel',
-            index=models.Index(fields=['payment_method', 'status'], name='eshop_ordermodel_payment_status_idx'),
+            model_name="ordermodel",
+            index=models.Index(
+                fields=["payment_method", "status"],
+                name="eshop_ordermodel_payment_status_idx",
+            ),
         ),
     ]

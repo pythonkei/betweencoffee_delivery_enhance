@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0034_remove_cartitem_strength_level_and_more'),
+        ("eshop", "0034_remove_cartitem_strength_level_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='ordermodel',
-            name='name',
+            model_name="ordermodel",
+            name="name",
         ),
     ]

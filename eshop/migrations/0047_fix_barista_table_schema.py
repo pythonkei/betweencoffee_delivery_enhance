@@ -22,7 +22,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0046_add_is_expedited_to_coffeequeue'),
+        ("eshop", "0046_add_is_expedited_to_coffeequeue"),
     ]
 
     operations = [
@@ -133,24 +133,28 @@ class Migration(migrations.Migration):
                 # State operations: no-op for renames since models.py already uses new names.
                 # We use AlterField to ensure Django's state matches the model.
                 migrations.AlterField(
-                    model_name='barista',
-                    name='is_active',
-                    field=models.BooleanField(default=True, verbose_name='是否可用'),
+                    model_name="barista",
+                    name="is_active",
+                    field=models.BooleanField(default=True, verbose_name="是否可用"),
                 ),
                 migrations.AlterField(
-                    model_name='barista',
-                    name='current_load',
-                    field=models.IntegerField(default=0, verbose_name='当前工作量'),
+                    model_name="barista",
+                    name="current_load",
+                    field=models.IntegerField(default=0, verbose_name="当前工作量"),
                 ),
                 migrations.AlterField(
-                    model_name='barista',
-                    name='max_concurrent_orders',
-                    field=models.IntegerField(default=2, verbose_name='最大同时制作量'),
+                    model_name="barista",
+                    name="max_concurrent_orders",
+                    field=models.IntegerField(default=2, verbose_name="最大同时制作量"),
                 ),
                 migrations.AddField(
-                    model_name='barista',
-                    name='efficiency_factor',
-                    field=models.FloatField(default=1.0, help_text='1.0为正常，<1.0为较快，>1.0为较慢', verbose_name='效率因子'),
+                    model_name="barista",
+                    name="efficiency_factor",
+                    field=models.FloatField(
+                        default=1.0,
+                        help_text="1.0为正常，<1.0为较快，>1.0为较慢",
+                        verbose_name="效率因子",
+                    ),
                 ),
             ],
         ),

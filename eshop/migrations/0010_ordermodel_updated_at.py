@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0009_beanitem_image_index'),
+        ("eshop", "0009_beanitem_image_index"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ordermodel',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, verbose_name='最后更新时间'),
+            model_name="ordermodel",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="最后更新时间"),
         ),
     ]

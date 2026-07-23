@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月23日（更新：models.py 拆分為 5 個子模組完成 + queue_manager 拆分為 6 個子模組完成 + order_status_manager 拆分為 4 個子模組完成 + Phase 3E 狀態更新）
+> **最後更新**: 2026年7月24日（更新：Supabase 資料庫遷移完成 + Phase 3F 完成）
 
 
 ## 開發者背景與方法論
@@ -283,9 +283,15 @@ Phase 3E：技術債務（優先級：P1）
 ├── [ ] 系統性能監控儀表板
 └── [ ] 代碼風格統一（flake8/black/isort）
 
-Phase 3F：基礎設施（優先級：P1）
-├── [ ] 資料庫遷移至 Supabase（Render PostgreSQL → Supabase）
-└── [ ] 更新 Django settings 與環境變量
+Phase 3F：基礎設施（優先級：P1）— ✅ 已完成
+├── [x] 資料庫遷移至 Supabase（Render PostgreSQL → Supabase）— ✅ 已於 2026-07-24 完成
+│   ├── [x] 建立 Supabase 專案（新加坡節點）
+│   ├── [x] 匯出 Render PostgreSQL 資料（pg_dump）
+│   ├── [x] 匯入 Supabase（psql）
+│   ├── [x] 更新 Django settings 支援 DATABASE_URL
+│   ├── [x] Render 部署驗證（migration 全部成功）
+│   └── [x] 資料完整性驗證（2,012 筆訂單、676 筆佇列記錄完整）
+└── [x] 更新 Django settings 與環境變量 — ✅ 已於 2026-07-24 完成
 ```
 
 ## 技術債務（已知）

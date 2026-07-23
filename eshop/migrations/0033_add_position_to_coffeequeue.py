@@ -6,23 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0032_rename_contact_email_to_email'),
+        ("eshop", "0032_rename_contact_email_to_email"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='coffeequeue',
-            name='queue_position',
-            field=models.PositiveIntegerField(default=0, verbose_name='队列位置'),
+            model_name="coffeequeue",
+            name="queue_position",
+            field=models.PositiveIntegerField(default=0, verbose_name="队列位置"),
         ),
         migrations.AddField(
-            model_name='ordermodel',
-            name='contact_name',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='聯絡人名稱'),
+            model_name="ordermodel",
+            name="contact_name",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="聯絡人名稱"
+            ),
         ),
         migrations.AlterField(
-            model_name='coffeequeue',
-            name='position',
-            field=models.PositiveIntegerField(default=0, verbose_name='位置'),
+            model_name="coffeequeue",
+            name="position",
+            field=models.PositiveIntegerField(default=0, verbose_name="位置"),
         ),
     ]

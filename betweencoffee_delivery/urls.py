@@ -1,4 +1,4 @@
-'''betweencoffee_delivery URL Configuration
+"""betweencoffee_delivery URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.1/topics/http/urls/
@@ -12,18 +12,32 @@ Class-based views
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-'''
+"""
+
+import os
+
+from django.conf import settings
+from django.conf.urls.static import static
 
 # betweencoffee_delivery/urls.py:
 from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-import os
-from .views import Index, About, CoffeeMenu, Coffee, BeanMenu, Bean, CoffeeMenuSearch, BeanMenuSearch # use own views render index and about
+from django.http import HttpResponse, JsonResponse
+from django.urls import include, path
+
 # from eshop.views import OrderConfirm
 from socialuser.views import profile_view
-from django.http import HttpResponse, JsonResponse
+
+from .views import Bean  # use own views render index and about
+from .views import (
+    About,
+    BeanMenu,
+    BeanMenuSearch,
+    Coffee,
+    CoffeeMenu,
+    CoffeeMenuSearch,
+    Index,
+)
+
 
 # 健康检查视图
 def health_check(request):
@@ -31,28 +45,26 @@ def health_check(request):
 
 
 urlpatterns = [
-    path('health/', health_check, name='health_check'),
-    path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    path('', Index.as_view(), name='index'),  # find own app html file
-    path('__debug__/', include('debug_toolbar.urls')),
-    path('profile/', include('socialuser.urls')),
-    path('@<username>/', profile_view, name="user_profile"),
-
-    path('eshop/', include('eshop.urls', namespace="eshop")),  # Include eshop URLs
-    path('cart/', include('cart.urls', namespace="cart")),
-
-    path('coffee_menu/', CoffeeMenu.as_view(), name='coffee_menu'),  # coffee list
-    path('coffee/<int:product_id>/', Coffee.as_view(), name='coffee'),  # coffee single with id
-    path('bean_menu/', BeanMenu.as_view(), name='bean_menu'),  # bean list
-    path('bean/<int:product_id>/', Bean.as_view(), name='bean'),  # bean single with id
-
+    path("health/", health_check, name="health_check"),
+    path("admin/", admin.site.urls),
+    path("accounts/", include("allauth.urls")),
+    path("", Index.as_view(), name="index"),  # find own app html file
+    path("__debug__/", include("debug_toolbar.urls")),
+    path("profile/", include("socialuser.urls")),
+    path("@<username>/", profile_view, name="user_profile"),
+    path("eshop/", include("eshop.urls", namespace="eshop")),  # Include eshop URLs
+    path("cart/", include("cart.urls", namespace="cart")),
+    path("coffee_menu/", CoffeeMenu.as_view(), name="coffee_menu"),  # coffee list
+    path(
+        "coffee/<int:product_id>/", Coffee.as_view(), name="coffee"
+    ),  # coffee single with id
+    path("bean_menu/", BeanMenu.as_view(), name="bean_menu"),  # bean list
+    path("bean/<int:product_id>/", Bean.as_view(), name="bean"),  # bean single with id
     # Keeping NOT use
-    path('coffee_menu/search/', CoffeeMenuSearch.as_view(), name='coffee_menu_search'),
-    path('bean_menu/search/', BeanMenuSearch.as_view(), name='bean_menu_search'),
-
+    path("coffee_menu/search/", CoffeeMenuSearch.as_view(), name="coffee_menu_search"),
+    path("bean_menu/search/", BeanMenuSearch.as_view(), name="bean_menu_search"),
     # restaurant app 已移除（功能已被 staff_order_management 取代）
-    path('about/', About.as_view(), name='about'),
+    path("about/", About.as_view(), name="about"),
 ]
 
 # static sources: css and image file root
@@ -66,5 +78,6 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 else:
     # 生產環境：使用 staticfiles/media/（由 Dockerfile 的 build 命令複製）
-    urlpatterns += static(settings.MEDIA_URL, document_root=os.path.join(settings.STATIC_ROOT, 'media'))
-
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=os.path.join(settings.STATIC_ROOT, "media")
+    )

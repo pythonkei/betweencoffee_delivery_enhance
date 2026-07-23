@@ -6,23 +6,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0007_ordermodel_payment_reminder_sent_and_more'),
+        ("eshop", "0007_ordermodel_payment_reminder_sent_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ordermodel',
-            name='picked_up_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='提取時間'),
+            model_name="ordermodel",
+            name="picked_up_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="提取時間"),
         ),
         migrations.AddField(
-            model_name='ordermodel',
-            name='picked_up_by',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='提取人員'),
+            model_name="ordermodel",
+            name="picked_up_by",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="提取人員"
+            ),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='status',
-            field=models.CharField(choices=[('pending', '待處理'), ('preparing', '制作中'), ('ready', '已就緒'), ('completed', '已提取')], default='pending', max_length=20),
+            model_name="ordermodel",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "待處理"),
+                    ("preparing", "制作中"),
+                    ("ready", "已就緒"),
+                    ("completed", "已提取"),
+                ],
+                default="pending",
+                max_length=20,
+            ),
         ),
     ]

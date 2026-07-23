@@ -2,7 +2,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月23日（更新：models.py 拆分為 5 個子模組完成 + queue_manager 拆分為 6 個子模組完成 + order_status_manager 拆分為 4 個子模組完成 + Phase 3E 狀態更新）
+> **最後更新**: 2026年7月24日（更新：Supabase 資料庫遷移完成 + Phase 3F 完成）
 
 
 ## 開發者背景與方法論

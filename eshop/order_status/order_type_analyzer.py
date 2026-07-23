@@ -37,25 +37,25 @@ class OrderTypeAnalyzer:
             has_beans = False
 
             for item in items:
-                item_type = item.get('type', '')
-                if item_type == 'coffee':
+                item_type = item.get("type", "")
+                if item_type == "coffee":
                     has_coffee = True
-                elif item_type == 'bean':
+                elif item_type == "bean":
                     has_beans = True
 
             return {
-                'has_coffee': has_coffee,
-                'has_beans': has_beans,
-                'is_mixed_order': has_coffee and has_beans,
-                'is_beans_only': has_beans and not has_coffee,
-                'is_coffee_only': has_coffee and not has_beans,
+                "has_coffee": has_coffee,
+                "has_beans": has_beans,
+                "is_mixed_order": has_coffee and has_beans,
+                "is_beans_only": has_beans and not has_coffee,
+                "is_coffee_only": has_coffee and not has_beans,
             }
         except Exception as e:
             logger.error(f"分析訂單類型時出錯: {str(e)}")
             return {
-                'has_coffee': False,
-                'has_beans': False,
-                'is_mixed_order': False,
-                'is_beans_only': False,
-                'is_coffee_only': False,
+                "has_coffee": False,
+                "has_beans": False,
+                "is_mixed_order": False,
+                "is_beans_only": False,
+                "is_coffee_only": False,
             }

@@ -1,15 +1,17 @@
 # cart/views.py - 修正版
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST, require_GET
-from django.http import JsonResponse
-from django.contrib import messages
-from decimal import Decimal
 import json
 import logging
+from decimal import Decimal
+
+from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_GET, require_POST
+
+from eshop.models import BeanItem, CoffeeItem
+from eshop.view_utils import handle_cart_error
 
 from .cart import Cart
-from eshop.models import CoffeeItem, BeanItem
-from eshop.view_utils import handle_cart_error
 
 logger = logging.getLogger(__name__)
 
@@ -19,26 +21,26 @@ def cart_detail(request):
     """購物車詳情頁面 - 直接重定向到訂單確認頁面"""
     try:
         cart = Cart(request)
-        
+
         if len(cart) == 0:
             messages.warning(request, "購物車是空的，請先選購商品")
-            return redirect('coffee_menu')
-        
+            return redirect("coffee_menu")
+
         # 保存購物車數據到 session
-        request.session['pending_order'] = {
-            'items': cart.cart,
-            'total_price': str(cart.get_total_price()),
-            'cart_item_count': len(cart)
+        request.session["pending_order"] = {
+            "items": cart.cart,
+            "total_price": str(cart.get_total_price()),
+            "cart_item_count": len(cart),
         }
-        
+
         # 清除快速訂單數據
-        if 'quick_order_data' in request.session:
-            del request.session['quick_order_data']
-        
+        if "quick_order_data" in request.session:
+            del request.session["quick_order_data"]
+
         request.session.modified = True
-        
-        return redirect('eshop:order_confirm')
-    
+
+        return redirect("eshop:order_confirm")
+
     except Exception as e:
         logger.error(f"購物車詳情錯誤: {str(e)}")
         return handle_cart_error(request, e)
@@ -49,56 +51,55 @@ def add_to_cart(request, product_id, product_type):
     """添加商品到購物車 - 修正版"""
     try:
         # 清除快速訂單數據（如果存在）
-        if 'quick_order_data' in request.session:
-            del request.session['quick_order_data']
+        if "quick_order_data" in request.session:
+            del request.session["quick_order_data"]
             request.session.modified = True
-        
+
         # 獲取商品
-        if product_type == 'coffee':
+        if product_type == "coffee":
             product = get_object_or_404(CoffeeItem, id=product_id)
             options = {
-                'cup_level': request.POST.get('cup_level', 'Medium'),
-                'milk_level': request.POST.get('milk_level', 'Medium'),
+                "cup_level": request.POST.get("cup_level", "Medium"),
+                "milk_level": request.POST.get("milk_level", "Medium"),
             }
-        elif product_type == 'bean':
+        elif product_type == "bean":
             product = get_object_or_404(BeanItem, id=product_id)
             options = {
-                'grinding_level': request.POST.get('grinding_level', 'Non'),
-                'weight': request.POST.get('weight', '200g'),
+                "grinding_level": request.POST.get("grinding_level", "Non"),
+                "weight": request.POST.get("weight", "200g"),
             }
         else:
-            return JsonResponse({
-                'success': False,
-                'message': '無效的商品類型'
-            })
-        
+            return JsonResponse({"success": False, "message": "無效的商品類型"})
+
         # 獲取數量
         try:
-            quantity = int(request.POST.get('quantity', 1))
+            quantity = int(request.POST.get("quantity", 1))
             if quantity < 1:
                 quantity = 1
         except (ValueError, TypeError):
             quantity = 1
-        
+
         cart = Cart(request)
         cart.add(product, product_type, quantity, **options)
-        
+
         # 計算單價
-        if product_type == 'bean' and 'weight' in options:
-            unit_price = product.get_price(options['weight'])
+        if product_type == "bean" and "weight" in options:
+            unit_price = product.get_price(options["weight"])
         else:
             unit_price = product.price
-        
-        return JsonResponse({
-            'success': True,
-            'cart_count': len(cart),
-            'cart_total_price': format_price(cart.get_total_price()),
-            'product_name': product.name,
-            'product_price': format_price(unit_price),
-            'quantity': quantity,
-            'image_url': product.image.url if product.image else '',
-        })
-    
+
+        return JsonResponse(
+            {
+                "success": True,
+                "cart_count": len(cart),
+                "cart_total_price": format_price(cart.get_total_price()),
+                "product_name": product.name,
+                "product_price": format_price(unit_price),
+                "quantity": quantity,
+                "image_url": product.image.url if product.image else "",
+            }
+        )
+
     except Exception as e:
         logger.error(f"添加到購物車錯誤: {str(e)}")
         return handle_cart_error(request, e)
@@ -108,25 +109,25 @@ def remove_from_cart(request, item_key):
     """從購物車移除商品 - 允許GET請求"""
     try:
         # 清除快速訂單數據（如果存在）
-        if 'quick_order_data' in request.session:
-            del request.session['quick_order_data']
+        if "quick_order_data" in request.session:
+            del request.session["quick_order_data"]
             request.session.modified = True
-        
+
         cart = Cart(request)
         cart.remove(item_key)
-        
+
         # 如果購物車為空，清除 pending_order
-        if len(cart) == 0 and 'pending_order' in request.session:
-            del request.session['pending_order']
+        if len(cart) == 0 and "pending_order" in request.session:
+            del request.session["pending_order"]
             request.session.modified = True
-        
+
         messages.success(request, "商品已從購物車移除")
-        return redirect('cart:cart_detail')
-    
+        return redirect("cart:cart_detail")
+
     except Exception as e:
         logger.error(f"移除購物車商品錯誤: {str(e)}")
         messages.error(request, "移除商品時發生錯誤")
-        return redirect('cart:cart_detail')
+        return redirect("cart:cart_detail")
 
 
 @require_POST
@@ -134,41 +135,46 @@ def update_cart(request):
     """更新購物車商品數量"""
     try:
         data = json.loads(request.body)
-        item_key = data.get('item_key')
-        quantity = int(data.get('quantity', 1))
-        
+        item_key = data.get("item_key")
+        quantity = int(data.get("quantity", 1))
+
         # 驗證數量
         if quantity < 1:
             quantity = 1
-        
+
         cart = Cart(request)
         cart.update(item_key, quantity)
-        
+
         # 計算該項目的總價
-        item_total = Decimal('0')
+        item_total = Decimal("0")
         if item_key in cart.cart:
             item_data = cart.cart[item_key]
             try:
-                price_str = item_data.get('price', '0')
+                price_str = item_data.get("price", "0")
                 if isinstance(price_str, str):
-                    price_str = price_str.replace('$', '').strip()
+                    price_str = price_str.replace("$", "").strip()
                 price = Decimal(str(price_str))
                 item_total = price * quantity
             except:
-                item_total = Decimal('0')
-        
+                item_total = Decimal("0")
+
         # 返回格式化的價格（不帶$符號）
-        return JsonResponse({
-            'success': True,
-            'item_total_price': format_price(item_total),  # 不帶$符號
-            'cart_total_price': format_price(cart.get_total_price()),  # 不帶$符號
-            'cart_total_items': len(cart),
-        })
-    
+        return JsonResponse(
+            {
+                "success": True,
+                "item_total_price": format_price(item_total),  # 不帶$符號
+                "cart_total_price": format_price(cart.get_total_price()),  # 不帶$符號
+                "cart_total_items": len(cart),
+            }
+        )
+
     except Exception as e:
         logger.error(f"更新購物車錯誤: {str(e)}")
         from eshop.view_utils import OrderErrorHandler
-        return OrderErrorHandler.handle_json_error(str(e), status=400, error_type='cart')
+
+        return OrderErrorHandler.handle_json_error(
+            str(e), status=400, error_type="cart"
+        )
 
 
 @require_POST
@@ -177,16 +183,18 @@ def clear_cart(request):
     try:
         cart = Cart(request)
         cart.clear()
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True, 'message': '購物車已清空'})
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True, "message": "購物車已清空"})
         messages.success(request, "購物車已清空")
-        return redirect('cart:cart_detail')
+        return redirect("cart:cart_detail")
     except Exception as e:
         logger.error(f"清空購物車錯誤: {str(e)}")
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': False, 'message': '清空購物車時發生錯誤'}, status=500)
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse(
+                {"success": False, "message": "清空購物車時發生錯誤"}, status=500
+            )
         messages.error(request, "清空購物車時發生錯誤")
-        return redirect('cart:cart_detail')
+        return redirect("cart:cart_detail")
 
 
 @require_GET
@@ -194,20 +202,20 @@ def checkout_page(request):
     """一頁式結帳頁面"""
     try:
         cart = Cart(request)
-        
+
         if len(cart) == 0:
             messages.warning(request, "購物車是空的，請先選購商品")
-            return redirect('coffee_menu')
-        
+            return redirect("coffee_menu")
+
         context = {
-            'cart': cart,
+            "cart": cart,
         }
-        return render(request, 'cart/checkout.html', context)
-    
+        return render(request, "cart/checkout.html", context)
+
     except Exception as e:
         logger.error(f"結帳頁面錯誤: {str(e)}")
         messages.error(request, "載入結帳頁面時發生錯誤")
-        return redirect('cart:cart_detail')
+        return redirect("cart:cart_detail")
 
 
 @require_POST
@@ -215,30 +223,31 @@ def create_order(request):
     """從購物車創建訂單"""
     try:
         cart = Cart(request)
-        
+
         if len(cart) == 0:
             messages.error(request, "購物車為空")
-            return redirect('cart:cart_detail')
-        
+            return redirect("cart:cart_detail")
+
         # 保存購物車數據到會話
-        request.session['pending_order'] = {
-            'items': cart.cart,
-            'total_price': str(cart.get_total_price()),
-            'cart_item_count': len(cart)
+        request.session["pending_order"] = {
+            "items": cart.cart,
+            "total_price": str(cart.get_total_price()),
+            "cart_item_count": len(cart),
         }
-        
+
         # 清除快速訂單數據
-        if 'quick_order_data' in request.session:
-            del request.session['quick_order_data']
-        
+        if "quick_order_data" in request.session:
+            del request.session["quick_order_data"]
+
         request.session.modified = True
-        
-        return redirect('eshop:order_confirm')
-    
+
+        return redirect("eshop:order_confirm")
+
     except Exception as e:
         logger.error(f"創建訂單錯誤: {str(e)}")
         from eshop.view_utils import handle_order_error
-        return handle_order_error(request, e, 'cart:cart_detail', 'cart')
+
+        return handle_order_error(request, e, "cart:cart_detail", "cart")
 
 
 @require_POST
@@ -246,78 +255,67 @@ def create_order_ajax(request):
     """一頁式結帳 AJAX 提交 - 創建訂單"""
     try:
         cart = Cart(request)
-        
+
         if len(cart) == 0:
-            return JsonResponse({
-                'success': False,
-                'message': '購物車為空'
-            })
-        
+            return JsonResponse({"success": False, "message": "購物車為空"})
+
         # 從 POST 數據獲取聯絡資訊
-        customer_name = request.POST.get('customer_name', '').strip()
-        customer_phone = request.POST.get('customer_phone', '').strip()
-        customer_email = request.POST.get('customer_email', '').strip()
-        payment_method = request.POST.get('payment_method', '')
-        pickup_time = request.POST.get('pickup_time', '10')
-        coupon_code = request.POST.get('coupon_code', '').strip()
-        
+        customer_name = request.POST.get("customer_name", "").strip()
+        customer_phone = request.POST.get("customer_phone", "").strip()
+        customer_email = request.POST.get("customer_email", "").strip()
+        payment_method = request.POST.get("payment_method", "")
+        pickup_time = request.POST.get("pickup_time", "10")
+        coupon_code = request.POST.get("coupon_code", "").strip()
+
         # 驗證必填欄位
         if not customer_name:
-            return JsonResponse({
-                'success': False,
-                'message': '請填寫姓名'
-            })
+            return JsonResponse({"success": False, "message": "請填寫姓名"})
         if not customer_phone:
-            return JsonResponse({
-                'success': False,
-                'message': '請填寫電話號碼'
-            })
+            return JsonResponse({"success": False, "message": "請填寫電話號碼"})
         if not payment_method:
-            return JsonResponse({
-                'success': False,
-                'message': '請選擇支付方式'
-            })
-        
+            return JsonResponse({"success": False, "message": "請選擇支付方式"})
+
         # 保存到會話供後續使用
-        request.session['pending_order'] = {
-            'items': cart.cart,
-            'total_price': str(cart.get_total_price()),
-            'cart_item_count': len(cart),
-            'customer_name': customer_name,
-            'customer_phone': customer_phone,
-            'customer_email': customer_email,
-            'payment_method': payment_method,
-            'pickup_time': pickup_time,
-            'coupon_code': coupon_code,
+        request.session["pending_order"] = {
+            "items": cart.cart,
+            "total_price": str(cart.get_total_price()),
+            "cart_item_count": len(cart),
+            "customer_name": customer_name,
+            "customer_phone": customer_phone,
+            "customer_email": customer_email,
+            "payment_method": payment_method,
+            "pickup_time": pickup_time,
+            "coupon_code": coupon_code,
         }
-        
-        if 'quick_order_data' in request.session:
-            del request.session['quick_order_data']
-        
+
+        if "quick_order_data" in request.session:
+            del request.session["quick_order_data"]
+
         request.session.modified = True
-        
+
         # 根據支付方式決定跳轉
-        if payment_method in ('paypal', 'alipay'):
+        if payment_method in ("paypal", "alipay"):
             # 需要支付跳轉
-            return JsonResponse({
-                'success': True,
-                'redirect_url': f'/order/create/?payment={payment_method}',
-                'order_id': None,
-            })
+            return JsonResponse(
+                {
+                    "success": True,
+                    "redirect_url": f"/order/create/?payment={payment_method}",
+                    "order_id": None,
+                }
+            )
         else:
             # FPS / 現金 - 直接創建訂單
-            return JsonResponse({
-                'success': True,
-                'redirect_url': f'/order/create/?payment={payment_method}',
-                'order_id': None,
-            })
-    
+            return JsonResponse(
+                {
+                    "success": True,
+                    "redirect_url": f"/order/create/?payment={payment_method}",
+                    "order_id": None,
+                }
+            )
+
     except Exception as e:
         logger.error(f"AJAX 創建訂單錯誤: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'message': '系統錯誤，請稍後再試'
-        })
+        return JsonResponse({"success": False, "message": "系統錯誤，請稍後再試"})
 
 
 @require_GET
@@ -327,29 +325,33 @@ def cart_count(request):
         cart = Cart(request)
         items = []
         for item in cart:
-            items.append({
-                'item_id': item['item_id'],
-                'name': item['name'],
-                'type': item['type'],
-                'quantity': item['quantity'],
-                'price': item['price'],
-                'total_price': item['total_price'],
-                'image': item['image'],
-                'cup_level': item.get('cup_level'),
-                'milk_level': item.get('milk_level'),
-                'grinding_level': item.get('grinding_level'),
-                'weight': item.get('weight'),
-            })
-        return JsonResponse({
-            'success': True,
-            'count': len(cart),
-            'cart_total_items': len(cart),
-            'cart_total_price': format_price(cart.get_total_price()),
-            'items': items,
-        })
+            items.append(
+                {
+                    "item_id": item["item_id"],
+                    "name": item["name"],
+                    "type": item["type"],
+                    "quantity": item["quantity"],
+                    "price": item["price"],
+                    "total_price": item["total_price"],
+                    "image": item["image"],
+                    "cup_level": item.get("cup_level"),
+                    "milk_level": item.get("milk_level"),
+                    "grinding_level": item.get("grinding_level"),
+                    "weight": item.get("weight"),
+                }
+            )
+        return JsonResponse(
+            {
+                "success": True,
+                "count": len(cart),
+                "cart_total_items": len(cart),
+                "cart_total_price": format_price(cart.get_total_price()),
+                "items": items,
+            }
+        )
     except Exception as e:
         logger.error(f"獲取購物車數量錯誤: {str(e)}")
-        return JsonResponse({'success': False, 'count': 0, 'items': []})
+        return JsonResponse({"success": False, "count": 0, "items": []})
 
 
 def format_price(value):
@@ -361,15 +363,15 @@ def format_price(value):
             decimal_value = Decimal(str(value))
         else:
             # 嘗試轉換字符串
-            value_str = str(value).replace('$', '').strip()
+            value_str = str(value).replace("$", "").strip()
             decimal_value = Decimal(value_str)
-        
+
         # 格式化為整數（如果沒有小數部分）
         if decimal_value == decimal_value.to_integral():
             return str(int(decimal_value))
         else:
             # 保留兩位小數，移除尾隨的0
-            formatted = str(decimal_value.quantize(Decimal('0.00')))
-            return formatted.rstrip('0').rstrip('.')
+            formatted = str(decimal_value.quantize(Decimal("0.00")))
+            return formatted.rstrip("0").rstrip(".")
     except:
         return "0"

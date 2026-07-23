@@ -1,7 +1,8 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render
-from django.views import View
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils.timezone import datetime
+from django.views import View
+
 from eshop.models import OrderModel
 
 
@@ -17,7 +18,8 @@ class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
         orders = OrderModel.objects.filter(
             created_at__year=today.year,
             created_at__month=today.month,
-            created_at__day=today.day)
+            created_at__day=today.day,
+        )
 
         # loop through the orders and add the price value, check if order is
         # not delivery
@@ -35,14 +37,14 @@ class Dashboard(LoginRequiredMixin, UserPassesTestMixin, View):
         # pass total number of orders and total revenue into template
         # 將context内data with variable, 放入dashboard.html的模板
         context = {
-            'orders': undelivery_orders,
-            'total_revenue': total_revenue,
-            'total_orders': len(orders)
+            "orders": undelivery_orders,
+            "total_revenue": total_revenue,
+            "total_orders": len(orders),
         }
-        return render(request, 'restaurant/dashboard.html', context)
+        return render(request, "restaurant/dashboard.html", context)
 
     def test_func(self):
-        return self.request.user.groups.filter(name='Staff').exists()
+        return self.request.user.groups.filter(name="Staff").exists()
         # 如果確定是 Staff群組 傳回 true, 它將允許使用者查看儀表板, 傳回 false, 傳回 403 錯誤
 
 
@@ -51,10 +53,8 @@ class OrderDetails(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         order = OrderModel.objects.get(pk=pk)
-        context = {
-            'order': order
-        }
-        return render(request, 'restaurant/order_details.html', context)
+        context = {"order": order}
+        return render(request, "restaurant/order_details.html", context)
 
     # 從url中取得pk，並將is_delivery設定為True, 然後我們保存物件並渲染order_details.html, then
     # 單擊按鈕後訂單已發貨
@@ -64,10 +64,8 @@ class OrderDetails(LoginRequiredMixin, UserPassesTestMixin, View):
         order.is_delivery = True
         order.save()
 
-        context = {
-            'order': order
-        }
-        return render(request, 'restaurant/order_details.html', context)
+        context = {"order": order}
+        return render(request, "restaurant/order_details.html", context)
 
     def test_func(self):
-        return self.request.user.groups.filter(name='Staff').exists()
+        return self.request.user.groups.filter(name="Staff").exists()

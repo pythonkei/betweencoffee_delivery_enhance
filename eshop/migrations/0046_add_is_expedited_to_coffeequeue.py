@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0045_sync_legacy_db_fields'),
+        ("eshop", "0045_sync_legacy_db_fields"),
     ]
 
     operations = [
@@ -17,25 +17,35 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.RemoveField(
-                    model_name='ordermodel',
-                    name='pickup_time',
+                    model_name="ordermodel",
+                    name="pickup_time",
                 ),
             ],
             database_operations=[],
         ),
         migrations.AddField(
-            model_name='coffeequeue',
-            name='is_expedited',
-            field=models.BooleanField(default=False, verbose_name='是否加速'),
+            model_name="coffeequeue",
+            name="is_expedited",
+            field=models.BooleanField(default=False, verbose_name="是否加速"),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='subtotal',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, verbose_name='小計（舊版）'),
+            model_name="ordermodel",
+            name="subtotal",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=10,
+                verbose_name="小計（舊版）",
+            ),
         ),
         migrations.AlterField(
-            model_name='ordermodel',
-            name='total',
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10, verbose_name='總計（舊版）'),
+            model_name="ordermodel",
+            name="total",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0.0,
+                max_digits=10,
+                verbose_name="總計（舊版）",
+            ),
         ),
     ]

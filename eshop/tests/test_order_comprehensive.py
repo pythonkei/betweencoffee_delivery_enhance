@@ -1,12 +1,14 @@
 """
 全面的订单功能测试
 """
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from eshop.models import OrderModel
-from eshop.order_status_manager import OrderStatusManager
 import json
 import warnings
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+
+from eshop.models import OrderModel
+from eshop.order_status_manager import OrderStatusManager
 
 User = get_user_model()
 

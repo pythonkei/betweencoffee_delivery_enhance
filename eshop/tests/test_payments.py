@@ -1,11 +1,13 @@
 """
 支付相关测试
 """
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-from eshop.models import OrderModel
 import json
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.urls import reverse
+
+from eshop.models import OrderModel
 
 User = get_user_model()
 
@@ -80,9 +82,10 @@ class PaymentTestCase(TestCase):
     
     def test_payment_timeout(self):
         """测试支付超时"""
-        from django.utils import timezone
         from datetime import timedelta
-        
+
+        from django.utils import timezone
+
         # 设置支付超时时间
         self.order.set_payment_timeout(minutes=5)
         self.assertIsNotNone(self.order.payment_timeout)

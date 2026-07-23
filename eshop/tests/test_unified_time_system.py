@@ -13,6 +13,7 @@ sys.path.insert(0, project_root)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'betweencoffee_delivery.settings')
 
 import django
+
 django.setup()
 
 from eshop.models import OrderModel
@@ -50,9 +51,11 @@ def format_pickup_time_for_order(order):
 
 def calculate_all_quick_order_times():
     """計算所有快速訂單時間"""
-    from eshop.models import OrderModel
     from datetime import datetime, timedelta
+
     import pytz
+
+    from eshop.models import OrderModel
     
     hk_tz = pytz.timezone('Asia/Hong_Kong')
     now = datetime.now().astimezone(hk_tz)
@@ -109,10 +112,10 @@ def update_order_pickup_times(order_ids):
     }
 try:
     from eshop.views.queue_views import (
-        process_waiting_queues,
+        process_completed_orders,
         process_preparing_queues,
         process_ready_orders,
-        process_completed_orders
+        process_waiting_queues,
     )
 except ImportError as e:
     print(f"注意: 無法導入隊列視圖函數: {e}")
@@ -127,6 +130,7 @@ except ImportError as e:
         return []
 
 import pytz
+
 
 def test_unified_time_system():
     """測試完整統一時間系統"""

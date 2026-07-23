@@ -10,3 +10,49 @@ python = "^3.11"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip = [".pants.d", ".nox", ".git", "node_modules", ".mypy_cache", "buck-out", "venv", ".bzr", "_build", ".hg", ".svn", ".direnv", ".tox", ".eggs", ".venv", "build", "dist", "__pypackages__", ".pytype"]
+
+[tool.black]
+line_length = 88
+target_version = ["py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.pants\.d
+  | \.nox
+  | \.git
+  | node_modules
+  | \.mypy_cache
+  | buck-out
+  | venv
+  | \.bzr
+  | _build
+  | \.hg
+  | \.svn
+  | \.direnv
+  | \.tox
+  | \.eggs
+  | \.venv
+  | build
+  | dist
+  | __pypackages__
+  | \.pytype
+)/
+'''
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = "E203, W503"
+exclude = ".pants.d,.nox,.git,node_modules,.mypy_cache,buck-out,venv,.bzr,_build,.hg,.svn,.direnv,.tox,.eggs,.venv,build,dist,__pypackages__,.pytype,migrations"
+per-file-ignores = """
+    __init__.py: F401
+"""

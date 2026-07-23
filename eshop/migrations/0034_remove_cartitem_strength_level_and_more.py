@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0033_add_position_to_coffeequeue'),
+        ("eshop", "0033_add_position_to_coffeequeue"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='cartitem',
-            name='strength_level',
+            model_name="cartitem",
+            name="strength_level",
         ),
         migrations.RemoveField(
-            model_name='coffeeitem',
-            name='strength_level',
+            model_name="coffeeitem",
+            name="strength_level",
         ),
     ]

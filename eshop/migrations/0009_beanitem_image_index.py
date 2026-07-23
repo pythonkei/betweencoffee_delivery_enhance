@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eshop', '0008_ordermodel_picked_up_at_ordermodel_picked_up_by_and_more'),
+        ("eshop", "0008_ordermodel_picked_up_at_ordermodel_picked_up_by_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='beanitem',
-            name='image_index',
-            field=models.ImageField(blank=True, null=True, upload_to='bean_images/index/', verbose_name='首页图片'),
+            model_name="beanitem",
+            name="image_index",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to="bean_images/index/",
+                verbose_name="首页图片",
+            ),
         ),
     ]

@@ -1,9 +1,11 @@
 # eshop/management/commands/test_websocket_api.py
-from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
-from django.test import Client
-from django.conf import settings
 import json
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+from django.test import Client
+
 
 class Command(BaseCommand):
     help = '測試 WebSocket 監控 API'
