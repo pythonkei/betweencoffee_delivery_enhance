@@ -75,3 +75,35 @@ class Command(BaseCommand):
         self.stdout.write('-' * 90)
 
         for order in expired_orders:
+            self.stdout.write(f'{order.id:>6} | {str(order.user or "訪客"):<15} | ${order.total_price:>7.2f} | {order.created_at.strftime("%Y-%m-%d %H:%M"):<25}')
+
+        self.stdout.write('-' * 90)
+
+        if dry_run:
+            self.stdout.write(self.style.WARNING(f'\n🔍 預覽模式：將取消 {total_count} 筆訂單（未實際執行）'))
+            return
+
+        # 實際執行取消
+        self.stdout.write(f'\n🔄 開始取消 {total_count} 筆過期訂單...')
+        cancelled_count = 0
+        failed_count = 0
+
+        for order in expired_orders:
+            try:
+                with transaction.atomic():
+                    status_manager = OrderStatusManager()
+                    status_manager.cancel_order(order)
+                    cancelled_count += 1
+                    self.stdout.write(f'  ✅ 訂單 #{order.id} 已取消')
+            except Exception as e:
+                failed_count += 1
+                self.stdout.write(self.style.ERROR(f'  ❌ 訂單 #{order.id} 取消失敗: {e}'))
+                logger.error(f'取消訂單 #{order.id} 失敗: {e}')
+
+        # 最終報告
+        self.stdout.write('\n' + '=' * 50)
+        self.stdout.write(self.style.SUCCESS(f'✅ 完成！成功取消 {cancelled_count} 筆訂單'))
+        if failed_count > 0:
+            self.stdout.write(self.style.ERROR(f'❌ 失敗 {failed_count} 筆訂單'))
+        self.stdout.write('=' * 50)
+

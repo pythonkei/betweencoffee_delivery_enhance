@@ -953,6 +953,32 @@ class OrderStatusManager:
                     f"狀態 → ready, 位置 {old_position} → 0"
                 )
 
+            # 發送 WebSocket 通知
+            try:
+                from .websocket_utils import send_order_update, send_staff_action
+                
+                # 通知顧客訂單狀態更新
+                send_order_update(
+                    order_id=order_id,
+                    update_type='status',
+                    data={
+                        'status': 'ready',
+                        'status_display': '已就緒',
+                        'message': f'訂單 #{order_id} 已就緒，請取餐！'
+                    }
+                )
+                
+                # 通知員工端
+                send_staff_action(
+                    order_id=order_id,
+                    action='marked_ready',
+                    staff_name=staff_name,
+                    message=f"訂單 #{order_id} 已就緒"
+                )
+                logger.info(f"✅ 已發送訂單 #{order_id} 就緒 WebSocket 通知")
+            except Exception as ws_error:
+                logger.error(f"❌ 發送 WebSocket 通知失敗: {str(ws_error)}")
+            
             logger.info(f"Order {order_id} marked as ready by {staff_name or 'system'}")
             return {'success': True, 'order': order, 'queue_item': queue_item}
 
