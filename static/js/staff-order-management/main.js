@@ -228,7 +228,7 @@ class OrderManagementSystem {
         }
     }
     
-    // 初始化渲染器（按需延迟加载）- 使用 v2 重構版本
+    // 初始化渲染器（使用 v2 重構版本）
     initRenderers() {
         const rendererConfigs = [
             { id: 'payment-pending', name: 'paymentPendingRenderer', Class: window.PaymentPendingRendererV2 },
@@ -250,35 +250,11 @@ class OrderManagementSystem {
                     console.log(`✅ ${config.name} (v2) 初始化成功`);
                 } catch (error) {
                     console.error(`❌ 初始化 ${config.name} (v2) 失败:`, error);
-                    
-                    // 降級：嘗試使用舊版渲染器
-                    console.log(`⚠️ 嘗試降級使用舊版 ${config.name}...`);
-                    try {
-                        const fallbackClass = this._getFallbackRenderer(config.name);
-                        if (fallbackClass) {
-                            const fallbackInstance = new fallbackClass();
-                            this.components[config.name] = fallbackInstance;
-                            window[config.name] = fallbackInstance;
-                            console.log(`✅ ${config.name} (降級) 初始化成功`);
-                        }
-                    } catch (fallbackError) {
-                        console.error(`❌ ${config.name} 降級也失敗:`, fallbackError);
-                    }
                 }
             }
         });
     }
-    
-    // 降級方案：獲取舊版渲染器類
-    _getFallbackRenderer(name) {
-        const fallbackMap = {
-            'paymentPendingRenderer': window.PaymentPendingRenderer,
-            'preparingRenderer': window.EnhancedPreparingOrdersRenderer,
-            'readyRenderer': window.DynamicReadyOrdersRenderer,
-            'completedRenderer': window.DynamicCompletedOrdersRenderer
-        };
-        return fallbackMap[name] || null;
-    }
+
     
     // ====== 修正：綁定全局事件 ======
     bindGlobalEvents() {
@@ -559,26 +535,10 @@ document.addEventListener('DOMContentLoaded', function() {
             window.OMS = window.orderManagementSystem;
         } catch (error) {
             console.error('❌ 初始化訂單管理系統失敗:', error);
-            
-            // 嘗試降級方案
-            try {
-                console.log('🔄 嘗試降級初始化...');
-                
-                // 只初始化關鍵組件
-                if (typeof BadgeManager !== 'undefined') {
-                    window.badgeManager = new BadgeManager();
-                }
-                if (typeof QueueManager !== 'undefined') {
-                    window.queueManager = new QueueManager();
-                }
-                
-                console.log('✅ 降級初始化完成');
-            } catch (fallbackError) {
-                console.error('❌ 降級初始化也失敗:', fallbackError);
-            }
         }
     }, 100);
 });
+
 
 // 页面卸载前清理
 window.addEventListener('beforeunload', function() {

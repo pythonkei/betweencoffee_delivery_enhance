@@ -5,7 +5,26 @@
 // 負責顯示已完成的訂單（顧客已取餐）
 // 提供查看詳情功能
 
+/**
+ * CompletedOrdersRendererV2 - 已完成訂單渲染器
+ * @class
+ * @extends BaseOrderRendererV2
+ * 
+ * 負責顯示已完成的訂單（顧客已取餐），提供：
+ * - 查看訂單詳情
+ * 
+ * UI 與原始 CompletedOrdersRenderer 完全一致。
+ */
 class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
+    /**
+     * @constructor
+     * 初始化已完成訂單渲染器，設定：
+     * - orderType: 'completed'
+     * - 容器 ID: 'completed-orders-list'
+     * - 空狀態 ID: 'completed-orders-empty'
+     * - 啟用排序，禁用倒計時
+     * - 刷新間隔 30 秒（較長，因為已完成訂單變化較少）
+     */
     constructor() {
         super('completed', 'completed', 'completed-orders-list', 'completed-orders-empty', {
             enableCountdown: false,
@@ -14,16 +33,31 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
             dataKey: 'completed_orders'
         });
 
+        /** @type {Object|null} API 服務實例 */
         this.apiService = window.apiService || null;
     }
 
     // ==================== 核心方法：創建訂單元素 ====================
 
+    /**
+     * 創建已完成訂單的 DOM 元素
+     * @override
+     * @param {Object} order - 訂單數據物件
+     * @param {number|string} order.id - 訂單 ID
+     * @param {number|string} [order.order_id] - 備用訂單 ID
+     * @param {number} [order.coffee_count] - 咖啡數量
+     * @param {number} [order.bean_count] - 咖啡豆數量
+     * @param {boolean} [order.is_quick_order] - 是否為快速訂單
+     * @param {boolean} [order.is_mixed_order] - 是否為混合訂單
+     * @param {string} [order.completed_at] - 完成時間 ISO 字串
+     * @param {string} [order.ready_at] - 就緒時間 ISO 字串
+     * @returns {HTMLElement} 訂單卡片 DOM 元素
+     */
     createOrderElement(order) {
         const div = this.createOrderCardDiv(order);
         
         // 設定 data 屬性（與原始 CompletedOrdersRenderer 一致）
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
         const coffeeCount = order.coffee_count || 0;
         const beanCount = order.bean_count || 0;
         const hasCoffee = order.has_coffee || coffeeCount > 0;
@@ -47,8 +81,14 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 構建訂單 HTML（與原始 CompletedOrdersRenderer.renderOrderCard 一致） ====================
 
+    /**
+     * 構建已完成訂單的 HTML 內容
+     * @private
+     * @param {Object} order - 訂單數據物件
+     * @returns {string} 訂單卡片的 HTML 字串
+     */
     _buildOrderHTML(order) {
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
         const pickupCode = order.pickup_code || 'N/A';
         const customerName = order.name || order.customer_name || '未知';
         const totalPrice = parseFloat(order.total_price || 0).toFixed(2);
@@ -258,8 +298,14 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 綁定操作按鈕 ====================
 
+    /**
+     * 綁定訂單卡片的操作按鈕事件
+     * @private
+     * @param {HTMLElement} div - 訂單卡片 DOM 元素
+     * @param {Object} order - 訂單數據物件
+     */
     _bindOrderActions(div, order) {
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
 
         // 查看詳情按鈕
         const detailsBtn = div.querySelector('.btn-view-details');
@@ -273,6 +319,12 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 操作處理 ====================
 
+    /**
+     * 處理查看訂單詳情操作
+     * 觸發自定義事件 'order:view-details'，由主控制器處理詳情顯示
+     * @private
+     * @param {Object} order - 訂單數據物件
+     */
     _handleViewDetails(order) {
         // 觸發事件，讓主控制器處理詳情顯示
         const event = new CustomEvent('order:view-details', {
@@ -283,7 +335,12 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 排序覆蓋 ====================
 
-
+    /**
+     * 按完成時間排序已完成訂單（最新的在前面）
+     * @override
+     * @param {Object[]} orders - 訂單數據陣列
+     * @returns {Object[]} 排序後的訂單陣列
+     */
     sortOrders(orders) {
         return [...orders].sort((a, b) => {
             const completedA = a.completed_at || a.ready_at || a.created_at_iso || a.created_at || '';

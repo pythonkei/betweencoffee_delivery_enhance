@@ -5,7 +5,28 @@
 // 負責顯示待確認付款的訂單（FPS/現金支付）
 // 提供「確認 FPS 付款」/「確認現金付款」和「取消訂單」操作按鈕
 
+/**
+ * PaymentPendingRendererV2 - 待確認付款訂單渲染器
+ * @class
+ * @extends BaseOrderRendererV2
+ * 
+ * 負責顯示待確認付款的訂單（FPS/現金支付），提供：
+ * - 確認 FPS 付款
+ * - 確認現金付款
+ * - 取消訂單
+ * 
+ * UI 與原始 PaymentPendingRenderer 完全一致。
+ */
 class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
+    /**
+     * @constructor
+     * 初始化待確認付款渲染器，設定：
+     * - orderType: 'payment_pending'
+     * - 容器 ID: 'payment-pending-orders-list'
+     * - 空狀態 ID: 'payment-pending-empty'
+     * - 啟用排序，禁用倒計時
+     * - 刷新間隔 15 秒
+     */
     constructor() {
         super('payment_pending', 'payment-pending', 'payment-pending-orders-list', 'payment-pending-empty', {
             enableCountdown: false,
@@ -14,16 +35,29 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
             dataKey: 'payment_pending_orders'
         });
 
+        /** @type {Object|null} API 服務實例 */
         this.apiService = window.apiService || null;
     }
 
     // ==================== 核心方法：創建訂單元素 ====================
 
+    /**
+     * 創建待確認付款訂單的 DOM 元素
+     * @override
+     * @param {Object} order - 訂單數據物件
+     * @param {number|string} order.id - 訂單 ID
+     * @param {number|string} [order.order_id] - 備用訂單 ID
+     * @param {number} [order.coffee_count] - 咖啡數量
+     * @param {number} [order.bean_count] - 咖啡豆數量
+     * @param {boolean} [order.is_quick_order] - 是否為快速訂單
+     * @param {boolean} [order.is_mixed_order] - 是否為混合訂單
+     * @returns {HTMLElement} 訂單卡片 DOM 元素
+     */
     createOrderElement(order) {
         const div = this.createOrderCardDiv(order);
         
         // 設定 data 屬性（與原始 PaymentPendingRenderer 一致）
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
         const coffeeCount = order.coffee_count || 0;
         const beanCount = order.bean_count || 0;
         const hasCoffee = order.has_coffee || coffeeCount > 0;
@@ -47,8 +81,14 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 構建訂單 HTML（與原始 PaymentPendingRenderer.renderOrderCard 一致） ====================
 
+    /**
+     * 構建待確認付款訂單的 HTML 內容
+     * @private
+     * @param {Object} order - 訂單數據物件
+     * @returns {string} 訂單卡片的 HTML 字串
+     */
     _buildOrderHTML(order) {
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
         const pickupCode = order.pickup_code || 'N/A';
         const customerName = order.name || order.customer_name || '未知';
         const totalPrice = parseFloat(order.total_price || 0).toFixed(2);
@@ -275,8 +315,14 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 綁定操作按鈕 ====================
 
+    /**
+     * 綁定訂單卡片的操作按鈕事件
+     * @private
+     * @param {HTMLElement} div - 訂單卡片 DOM 元素
+     * @param {Object} order - 訂單數據物件
+     */
     _bindOrderActions(div, order) {
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
 
         // 確認 FPS 付款按鈕
         const confirmFpsBtn = div.querySelector('.btn-confirm-fps-payment');
@@ -308,6 +354,13 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 操作處理 ====================
 
+    /**
+     * 處理確認付款操作
+     * @private
+     * @async
+     * @param {Object} order - 訂單數據物件
+     * @param {string} paymentMethod - 支付方式 ('fps' | 'cash')
+     */
     async _handleConfirmPayment(order, paymentMethod) {
         if (this.isProcessingAction) return;
         this.isProcessingAction = true;
@@ -334,18 +387,38 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
         }
     }
 
+    /**
+     * 調用 FPS 付款確認 API
+     * @private
+     * @async
+     * @param {Object} order - 訂單數據物件
+     * @returns {Promise<Object>} API 回應結果
+     */
     async _confirmFPSPayment(order) {
         const orderId = this._getOrderId(order);
         const url = `/eshop/api/fps/confirm-payment/${orderId}/`;
         return await this._apiPost(url, { order_id: orderId });
     }
 
+    /**
+     * 調用現金付款確認 API
+     * @private
+     * @async
+     * @param {Object} order - 訂單數據物件
+     * @returns {Promise<Object>} API 回應結果
+     */
     async _confirmCashPayment(order) {
         const orderId = this._getOrderId(order);
         const url = `/eshop/api/cash/confirm-payment/${orderId}/`;
         return await this._apiPost(url, { order_id: orderId });
     }
 
+    /**
+     * 處理取消訂單操作
+     * @private
+     * @async
+     * @param {Object} order - 訂單數據物件
+     */
     async _handleCancelOrder(order) {
         if (this.isProcessingAction) return;
 
@@ -376,7 +449,12 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
 
     // ==================== 排序覆蓋 ====================
 
-
+    /**
+     * 按創建時間排序待確認付款訂單（最早的在最前面）
+     * @override
+     * @param {Object[]} orders - 訂單數據陣列
+     * @returns {Object[]} 排序後的訂單陣列
+     */
     sortOrders(orders) {
         return [...orders].sort((a, b) => {
             const timeA = a.created_at_iso || a.created_at || '';

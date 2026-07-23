@@ -200,7 +200,7 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         const div = this.createOrderCardDiv(order);
         
         // 設定 data 屬性（與原始 PreparingOrdersRendererEnhanced 一致）
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
         const coffeeCount = order.coffee_count || 0;
         const beanCount = order.bean_count || 0;
         const hasCoffee = order.has_coffee || coffeeCount > 0;
@@ -250,7 +250,7 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
     // ==================== 構建訂單 HTML（與原始 PreparingOrdersRendererEnhanced.renderOrderCard 一致） ====================
 
     _buildOrderHTML(order) {
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
         const pickupCode = order.pickup_code || 'N/A';
         const customerName = order.name || order.customer_name || '未知';
         const totalPrice = parseFloat(order.total_price || 0).toFixed(2);
@@ -570,7 +570,7 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
     // ==================== 綁定操作按鈕 ====================
 
     _bindOrderActions(div, order) {
-        const orderId = order.id || order.order_id;
+        const orderId = this._getOrderId(order);
 
         // 完成製作按鈕
         const readyBtn = div.querySelector('.btn-mark-ready');

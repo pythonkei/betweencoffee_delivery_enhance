@@ -1,10 +1,10 @@
 // static/js/staff-order-management/base-order-renderer-v2.js
 // ==================== 統一基礎訂單渲染器 v2 ====================
-// 合併自：
-//   - BaseOrderRenderer (base-order-renderer.js) — 生命週期管理、數據流
-//   - OptimizedBaseRenderer (optimized-base-renderer.js) — DocumentFragment、倒計時、事件管理
+// 合併自（已移除孤兒檔案 base-order-renderer.js / optimized-base-renderer.js）：
 //   - BaseRenderer (renderers/base-renderer.js) — 支付方式徽章、格式化工具
 //   - CommonUtils (common-utils.js) — 靜態工具函數
+//   - 原 BaseOrderRenderer — 生命週期管理、數據流
+//   - 原 OptimizedBaseRenderer — DocumentFragment、倒計時、事件管理
 //
 // 設計原則：
 //   1. 子類只需實現 createOrderElement(order) 方法

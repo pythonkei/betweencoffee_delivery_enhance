@@ -330,16 +330,9 @@
 <!-- 5. 订单管理器 -->
 <script src="{% static 'js/staff-order-management/order-manager.js' %}"></script>
 
-<!-- 6. 基礎渲染器（所有渲染器的共用基礎類） -->
-<script src="{% static 'js/staff-order-management/renderers/base-renderer.js' %}"></script>
+<!-- 6. V2 基礎渲染器 + 各標籤頁渲染器（基於 BaseOrderRendererV2） -->
 
-<!-- 7. 各标签页渲染器（舊版，保留作為降級方案） -->
-<script src="{% static 'js/staff-order-management/payment-pending-renderer.js' %}"></script>
-<script src="{% static 'js/staff-order-management/preparing-orders-renderer-enhanced.js' %}"></script>
-<script src="{% static 'js/staff-order-management/ready-orders-renderer.js' %}"></script>
-<script src="{% static 'js/staff-order-management/completed-orders-renderer.js' %}"></script>
 
-<!-- 7b. V2 重構渲染器（基於 BaseOrderRendererV2） -->
 <script src="{% static 'js/staff-order-management/base-order-renderer-v2.js' %}"></script>
 <script src="{% static 'js/staff-order-management/renderers-v2/payment-pending-renderer-v2.js' %}"></script>
 <script src="{% static 'js/staff-order-management/renderers-v2/preparing-orders-renderer-v2.js' %}"></script>
