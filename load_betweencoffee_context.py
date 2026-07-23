@@ -34,8 +34,21 @@ def load_clinerules():
         print("⚠️  .clinerules 文件不存在")
     return None
 
-def load_ui_principles():
-    """加載 UI 設計原則文件內容"""
+def load_uiux_principles():
+    """加載 UI/UX 設計原則文件內容（優先使用合併後的 uiux-principles.md）"""
+    # 優先使用合併後的 uiux-principles.md
+    uiux_path = Path(".clinerules/uiux-principles.md")
+    if uiux_path.exists():
+        try:
+            with open(uiux_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            print(f"✅ 已加載 UI/UX 設計原則 ({len(content)} 字符)")
+            return content
+        except Exception as e:
+            print(f"❌ 加載 UI/UX 設計原則失敗: {e}")
+            return None
+    
+    # 後備：使用舊的 ui-principles.md
     ui_principles_path = Path(".clinerules/ui-principles.md")
     if ui_principles_path.exists():
         try:
@@ -46,7 +59,22 @@ def load_ui_principles():
         except Exception as e:
             print(f"❌ 加載 UI 設計原則失敗: {e}")
     else:
-        print("⚠️  UI 設計原則文件不存在 (.clinerules/ui-principles.md)")
+        print("⚠️  UI/UX 設計原則文件不存在 (.clinerules/uiux-principles.md)")
+    return None
+
+def load_task_progress():
+    """加載 task_progress.md 內容"""
+    task_progress_path = Path("task_progress.md")
+    if task_progress_path.exists():
+        try:
+            with open(task_progress_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            print(f"✅ 已加載 task_progress.md ({len(content)} 字符)")
+            return content
+        except Exception as e:
+            print(f"❌ 加載 task_progress.md 失敗: {e}")
+    else:
+        print("⚠️  task_progress.md 文件不存在")
     return None
 
 def load_memory_bank_summary():
@@ -172,8 +200,11 @@ def generate_context():
     # 加載 .clinerules
     clinerules_content = load_clinerules()
     
-    # 加載 UI 設計原則
-    ui_principles_content = load_ui_principles()
+    # 加載 UI/UX 設計原則
+    uiux_principles_content = load_uiux_principles()
+    
+    # 加載 task_progress.md
+    task_progress_content = load_task_progress()
     
     # 加載 Memory Bank 摘要
     memory_bank_summary = load_memory_bank_summary()
@@ -183,12 +214,17 @@ def generate_context():
     
     if clinerules_content:
         context_parts.append("# 📋 項目規範 (.clinerules)")
-        context_parts.append(clinerules_content[:2000] + "..." if len(clinerules_content) > 2000 else clinerules_content)
+        context_parts.append(clinerules_content[:3000] + "..." if len(clinerules_content) > 3000 else clinerules_content)
         context_parts.append("")
     
-    if ui_principles_content:
-        context_parts.append("# 🎨 UI 設計原則 (.clinerules/ui-principles.md)")
-        context_parts.append(ui_principles_content[:3000] + "..." if len(ui_principles_content) > 3000 else ui_principles_content)
+    if uiux_principles_content:
+        context_parts.append("# 🎨 UI/UX 設計原則 (.clinerules/uiux-principles.md)")
+        context_parts.append(uiux_principles_content[:4000] + "..." if len(uiux_principles_content) > 4000 else uiux_principles_content)
+        context_parts.append("")
+    
+    if task_progress_content:
+        context_parts.append("# 📋 任務進度 (task_progress.md)")
+        context_parts.append(task_progress_content)
         context_parts.append("")
     
     if memory_bank_summary:

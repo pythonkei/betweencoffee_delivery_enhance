@@ -2,6 +2,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
+> **最後更新**: 2026年7月23日（更新：models.py 拆分為 5 個子模組完成 + queue_manager 拆分為 6 個子模組完成 + order_status_manager 拆分為 4 個子模組完成 + Phase 3E 狀態更新）
 
 
 ## 開發者背景與方法論
@@ -74,13 +75,83 @@
 
 ### 系統主張
 - 專注單一地區咖啡店外帶場景，不追求大而全
-- 小店的人情味、地域親近感是核心...
+- 小店的人情味、地域親近感是核心競爭力
+- 簡單直覺的下單流程、即時狀態更新
+- 只賣咖啡和咖啡豆，非連鎖式店鋪產品
+- 不模仿連鎖品牌的複雜系統，保持輕量靈活
+- 以單一店鋪需求為基礎，可快速調整
 
-# 🎨 UI 設計原則 (.clinerules/ui-principles.md)
-# Between Coffee UI 設計原則
+### 店内營運參數
+- 咖啡機數量: 2 台
+- 製作員工: 2 名
+- 每名員工同時製作: 2 杯
+- 最大同時製作量: 4 杯
+- 商品類型: 咖啡、咖啡豆
 
-> 最後更新: 2026年7月6日
-> 來源: 全面分析網站現有模板與 CSS 使用情況 + 品牌視覺設計風格定義
+## 技術架構
+
+### 整體架構
+```
+前端層: HTML5 + CSS3 + Bootstrap 5 + JavaScript (ES6+)
+  └── WebSocket 三層架構: WebSocketCore → 橋接層 → 業務邏輯層
+後端層: Django 4.x + Django Channels + DRF
+  ├── eshop/ (核心業務: 商品、訂單、支付、隊列)
+  ├── cart/ (購物車管理)
+  ├── socialuser/ (用戶認證、會員、忠誠度)
+  ├── restaurant/ (餐廳/員工管理)
+  └── core/ (共用工具函數)
+數據層: PostgreSQL + InMemoryChannelLayer + MockCelery
+```
+
+### 技術棧
+| 層級 | 技術 | 用途 |
+|------|------|------|
+| 後端框架 | Django 4.x | Web 框架 |
+| 即時通訊 | Django Channels 4.x | WebSocket |
+| API | Django REST Framework 3.x | REST API |
+| 認證 | django-allauth | 社交登入 |
+| 數據庫 | PostgreSQL 13+ | 主要存儲 |
+| 緩存/通道 | InMemoryChannelLayer | WebSocket（無 Redis） |
+| 異步任務 | MockCelery | 同步降級（無 Redis） |
+| 前端框架 | Bootstrap 5.x | 響應式 UI |
+| 前端 JS | Vanilla JS ES6+ | 客戶端邏輯 |
+| 部署 | Render Docker | 生產環境 |
+
+## ...
+
+# 🎨 UI/UX 設計原則 (.clinerules/uiux-principles.md)
+# Between Coffee UI/UX 設計原則
+
+> **最後更新**: 2026年7月18日
+> **來源**: 合併自 `.clinerules/ui-principles.md` 與 `betweencoffee_memory_bank/08_UI_UX_DESIGN_GUIDE.md`
+>
+> **重要說明**: 本指南作為設計時的參考框架，並非 100% 強制性規範。接受開發過程中的合理建議和可能遺漏的細節，核心目標是產出精確、品牌一致、高品質的設計方案。
+
+---
+
+## 目錄
+
+- [一、品牌核心訊息](#一品牌核心訊息)
+- [二、品牌視覺設計風格](#二品牌視覺設計風格)
+- [三、品牌色系統](#三品牌色系統)
+- [四、字型系統](#四字型系統)
+- [五、間距系統](#五間距系統)
+- [六、圓角系統](#六圓角系統)
+- [七、購物車規範](#七購物車規範)
+- [八、結帳頁規範](#八結帳頁規範)
+- [九、圖示使用規範](#九圖示使用規範)
+- [十、響應式斷點](#十響應式斷點)
+- [十一、動畫與過渡](#十一動畫與過渡)
+- [十二、滾動條補償](#十二滾動條補償)
+- [十三、UI 開發設計注意事項](#十三ui-開發設計注意事項)
+- [十四、UX 設計原則](#十四ux-設計原則)
+- [十五、前後端無縫接合](#十五前後端無縫接合)
+- [十六、設計決策流程](#十六設計決策流程)
+- [十七、產出方案及策略關鍵](#十七產出方案及策略關鍵)
+- [十八、常見場景設計指引](#十八常見場景設計指引)
+- [十九、設計審查檢查清單](#十九設計審查檢查清單)
+- [附錄 A: 設計資源索引](#附錄-a-設計資源索引)
+- [附錄 B: 快速參考](#附錄-b-快速參考)
 
 ---
 
@@ -186,7 +257,38 @@
 |------|----------|------|
 | 咖啡詳情 (`coffee.html`) | `｛BREWED FAST｝` | 快速沖泡 |
 | 咖啡豆詳情 (`bean.html`) | `｛SERVED FRESH｝` | 新鮮供應 |
-| 關於我們 (`about.htm...
+| 關於我們 (`about.html`) | `｛US｝` | 品牌故事 |
+
+### 2.5 設計語言
+- 清晰且含空間感
+- 簡潔留白但不失設計感
+- 字體清晰可讀
+- 背景層次豐富：SVG 插畫 + noise_animation 動畫 + 背景訊息字體
+- 所有動畫僅限品牌已有的 `noise_animation`，不引入其他 CSS/JS 動畫
+- 不使用漸變色（`linear-gradient`、`radial-gradient` 等）
+- 功能優先，裝飾其次，不花巧
+
+---
+
+## 三、品牌色系統
+
+| 用途 | 顏色值 | CSS 變數 |
+|------|--------|----------|
+| 品牌金色（主要強調） | ...
+
+# 📋 任務進度 (task_progress.md)
+# 任務進度：拆分 order_status_manager.py（1259行）
+
+- [x] 步驟 1：分析 order_status_manager.py 結構，規劃拆分方案
+- [x] 步驟 2：創建 eshop/order_status/ 目錄及 __init__.py
+- [x] 步驟 3：創建 base.py（基礎類別 + 輔助方法）
+- [x] 步驟 4：創建 payment_handler.py（支付相關邏輯）
+- [x] 步驟 5：創建 status_manager.py（狀態管理邏輯）
+- [x] 步驟 6：將 order_status_manager.py 改為兼容性包裝器
+- [x] 步驟 7：確認所有外部引用正常（無需修改）
+- [x] 步驟 8：創建驗證腳本並執行（6/6 全部通過 ✅）
+- [x] 步驟 9：更新文檔（.clinerules、memory_bank）
+
 
 # Between Coffee 系統 - 上下文摘要
 **項目**: Between Coffee 咖啡店外帶網站與訂單製作管理系統

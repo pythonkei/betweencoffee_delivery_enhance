@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: BETWEEN_COFFEE_SYSTEM_REPORT.md
-> **最後更新**: 2026年7月23日（更新：models.py 拆分為 5 個子模組完成 + 全面驗證腳本通過 + Phase 3E 狀態更新）
+> **最後更新**: 2026年7月23日（更新：models.py 拆分為 5 個子模組完成 + queue_manager 拆分為 6 個子模組完成 + order_status_manager 拆分為 4 個子模組完成 + Phase 3E 狀態更新）
 
 
 ## 開發者背景與方法論
@@ -276,8 +276,8 @@ Phase 3D：新功能（優先級：低）
 
 Phase 3E：技術債務（優先級：P1）
 ├── [x] 拆分 models.py（1636行 → 5 個子模組）— ✅ 已於 2026-07-23 完成
-├── [ ] 拆分 queue_manager_refactored.py（1637行）
-├── [ ] 拆分 order_status_manager.py（1259行）
+├── [x] 拆分 queue_manager_refactored.py（1637行 → 6 個子模組）— ✅ 已於 2026-07-23 完成
+├── [x] 拆分 order_status_manager.py（1259行 → 4 個子模組）— ✅ 已於 2026-07-23 完成（驗證腳本 6/6 全部通過）
 ├── [ ] 增加單元測試覆蓋率
 ├── [ ] 系統性能監控儀表板
 └── [ ] 代碼風格統一（flake8/black/isort）
@@ -289,8 +289,8 @@ Phase 3F：基礎設施（優先級：P1）
 
 ## 技術債務（已知）
 - ~~`models.py` (1636行) - 需拆分~~ ✅ 已於 2026-07-23 拆分為 5 個子模組
-- `queue_manager_refactored.py` (1637行) - 需拆分
-- `order_status_manager.py` (1259行) - 需拆分
+- ~~`queue_manager_refactored.py` (1637行) - 需拆分~~ ✅ 已於 2026-07-23 拆分為 6 個子模組
+- ~~`order_status_manager.py` (1259行) - 需拆分~~ ✅ 已於 2026-07-23 拆分為 4 個子模組
 - ~~支付確認邏輯重複 (confirm_fps_payment / confirm_cash_payment)~~ ✅ 已於 2026-07-21 重構完成
 - 測試覆蓋率低
 

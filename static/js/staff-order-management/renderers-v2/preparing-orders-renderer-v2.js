@@ -468,17 +468,25 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         // 底部狀態資訊區塊
         let footerStatusHTML = '';
         if (isCountdownCompleted) {
-            // 已完成訂單：顯示「已完成」狀態，無操作按鈕
+            // 倒計時已結束的訂單：顯示「倒計時已完成」提示 + 「完成製作」按鈕
+            // 員工需要點擊「完成製作」按鈕來將訂單移動到「已就緒」頁面
             footerStatusHTML = `
                 <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                     <div>
                         ${completedTimeDisplay}
                         <div class="mt-1">
-                            <span class="text-success">
-                                <i class="fas fa-check-circle mr-1"></i>訂單已完成
+                            <span class="text-info">
+                                <i class="fas fa-hourglass-end mr-1"></i>倒計時已完成
                             </span>
                             ${baristaBadge}
                         </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-success btn-sm mr-2 btn-mark-ready" 
+                                data-order-id="${orderId}"
+                                title="標記為已就緒">
+                            <i class="fas fa-check mr-1"></i>完成製作
+                        </button>
                     </div>
                 </div>
             `;
@@ -664,82 +672,99 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         });
     }
 
-    // ==================== 覆蓋 markCountdownCompleted：倒計時結束時直接移動 DOM ====================
+    // ==================== 覆蓋 markCountdownCompleted：倒計時結束時只更新 UI，不移動 DOM ====================
 
     /**
      * 覆蓋父類的 markCountdownCompleted 方法。
-     * 當倒計時結束時，除了更新徽章樣式外，還直接將訂單卡片
-     * 從「進行中」容器移動到「已完成」容器，實現即時移動。
+     * 當倒計時結束時，只更新徽章樣式（顯示「已完成」），
+     * 但保留訂單在「進行中」子標籤頁，並保留「完成製作」按鈕。
+     *
+     * 員工需要點擊「完成製作」按鈕來將訂單移動到「已就緒」頁面，
+     * 而不是由倒計時自動移動。
+     *
+     * 注意：此方法不調用 super.markCountdownCompleted()，因為父類的版本
+     * 包含了 DOM 移動邏輯，而我們只需要更新 UI 樣式。
      */
     markCountdownCompleted(badge, estimatedTimeStr) {
-        // 先調用父類方法更新徽章樣式
-        super.markCountdownCompleted(badge, estimatedTimeStr);
+        const countdownText = badge.querySelector('.countdown-text');
+
+        // 更新徽章文字
+        let completedTimeDisplay = '已完成';
+        if (window.TimeUtils && typeof window.TimeUtils.formatHKTimeOnly === 'function') {
+            completedTimeDisplay = `已完成: ${window.TimeUtils.formatHKTimeOnly(new Date(estimatedTimeStr))}`;
+        } else {
+            try {
+                const estimatedTime = new Date(estimatedTimeStr);
+                const formattedTime = estimatedTime.toLocaleTimeString('zh-HK', {
+                    hour12: true,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                completedTimeDisplay = `已完成: ${formattedTime}`;
+            } catch (e) {
+                completedTimeDisplay = '已完成';
+            }
+        }
+
+        countdownText.textContent = completedTimeDisplay;
+        badge.classList.remove('active', 'badge-secondary');
+        badge.classList.add('badge-success');
+
+        const icon = badge.querySelector('i');
+        if (icon) {
+            icon.className = 'fas fa-check mr-1';
+        }
 
         // 找到訂單卡片元素
         const orderCard = badge.closest('[data-status="preparing"]');
         if (!orderCard) return;
 
-        const activeList = document.getElementById(this.listId);
-        const completedList = document.getElementById(this.completedListId);
-        const activeEmpty = document.getElementById(this.emptyId);
-        const completedEmpty = document.getElementById(this.completedEmptyId);
-
-        if (!activeList || !completedList) return;
-
-        // 更新卡片底部 HTML：將「製作中」狀態改為「已完成」狀態
-        // 移除倒計時徽章和操作按鈕，顯示已完成狀態
+        // 更新卡片底部：將倒計時 badge 替換為「已完成」顯示，但保留「完成製作」按鈕
         const footerSection = orderCard.querySelector('.d-flex.justify-content-between.align-items-center.mt-3.pt-3.border-top');
         if (footerSection) {
-            // 建立已完成狀態的底部 HTML
-            let completedText = '已完成';
-            if (window.TimeUtils && estimatedTimeStr) {
-                try {
-                    const estimatedDate = new Date(estimatedTimeStr);
-                    completedText = `已完成: ${window.TimeUtils.formatHKTimeOnly(estimatedDate)}`;
-                } catch (e) {
-                    completedText = '已完成';
-                }
-            }
-
             // 取得咖啡師名稱（如果有的話）
             const baristaBadge = orderCard.querySelector('.badge-barista');
             const baristaHTML = baristaBadge ? baristaBadge.outerHTML : '';
 
+            // 取得訂單 ID
+            const orderId = orderCard.getAttribute('data-order-id') || badge.getAttribute('data-order-id') || '';
+
             footerSection.innerHTML = `
                 <div>
                     <span class="badge badge-completed ml-1">
-                        <i class="fas fa-check mr-1"></i>${completedText}
+                        <i class="fas fa-check mr-1"></i>${completedTimeDisplay}
                     </span>
                     <div class="mt-1">
-                        <span class="text-success">
-                            <i class="fas fa-check-circle mr-1"></i>訂單已完成
+                        <span class="text-info">
+                            <i class="fas fa-hourglass-end mr-1"></i>倒計時已完成
                         </span>
                         ${baristaHTML}
                     </div>
                 </div>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-success btn-sm mr-2 btn-mark-ready" 
+                            data-order-id="${orderId}"
+                            title="標記為已就緒">
+                        <i class="fas fa-check mr-1"></i>完成製作
+                    </button>
+                </div>
             `;
         }
 
-        // 從進行中容器移動到已完成容器
-        activeList.removeChild(orderCard);
-        completedList.appendChild(orderCard);
-
-        // 更新進行中容器的顯示狀態
-        if (activeList.children.length === 0) {
-            activeList.style.display = 'none';
-            if (activeEmpty) activeEmpty.style.display = 'block';
+        // 重新綁定「完成製作」按鈕事件（因為 innerHTML 被替換了）
+        const readyBtn = orderCard.querySelector('.btn-mark-ready');
+        if (readyBtn) {
+            readyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // 從 data-order-id 屬性取得訂單 ID
+                const btnOrderId = readyBtn.getAttribute('data-order-id');
+                if (btnOrderId) {
+                    this._handleMarkReady({ id: parseInt(btnOrderId) || btnOrderId });
+                }
+            });
         }
 
-        // 更新已完成容器的顯示狀態
-        if (completedList.style.display === 'none' || completedList.children.length === 1) {
-            completedList.style.display = 'block';
-            if (completedEmpty) completedEmpty.style.display = 'none';
-        }
-
-        // 更新子標籤頁徽章
-        this._updateSubtabBadges();
-
-        console.log(`⏰ 倒計時結束，訂單已即時移動到「已完成」子標籤頁，底部狀態已更新`);
+        console.log(`⏰ 倒計時結束，訂單保留在「進行中」子標籤頁，等待員工點擊「完成製作」`);
     }
 
     // ==================== 更新子標籤頁徽章 ====================
@@ -773,4 +798,10 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
     afterRender(orders) {
         // 初始化倒計時（由 BaseOrderRendererV2 的 renderOrders 調用）
     }
+}
+
+// ==================== 全局註冊 ====================
+if (typeof window !== 'undefined') {
+    window.PreparingOrdersRendererV2 = PreparingOrdersRendererV2;
+    console.log('🌍 PreparingOrdersRendererV2 已註冊到 window 對象');
 }

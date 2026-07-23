@@ -936,6 +936,52 @@ class BaseOrderRendererV2 {
         if (icon) {
             icon.className = 'fas fa-check mr-1';
         }
+
+        // ===== 將訂單卡片從「進行中」容器移動到「已完成」容器 =====
+        // 從 badge 向上找到訂單卡片容器
+        const orderItem = badge.closest('.order-item');
+        if (!orderItem) {
+            console.warn('⚠️ markCountdownCompleted: 找不到訂單卡片容器');
+            return;
+        }
+
+        // 獲取訂單 ID
+        const orderId = orderItem.getAttribute('data-order-id');
+        if (!orderId) {
+            console.warn('⚠️ markCountdownCompleted: 訂單卡片缺少 data-order-id');
+            return;
+        }
+
+        // 找到「已完成」容器
+        const completedList = document.getElementById('countdown-completed-content');
+        const activeList = document.getElementById('countdown-active-content');
+        const completedEmpty = document.getElementById('countdown-completed-empty');
+        const activeEmpty = document.getElementById('countdown-active-empty');
+
+        if (!completedList || !activeList) {
+            console.warn('⚠️ markCountdownCompleted: 找不到子標籤頁容器');
+            return;
+        }
+
+        // 檢查訂單是否已經在「已完成」容器中（避免重複移動）
+        if (orderItem.parentNode === completedList) {
+            return;
+        }
+
+        // 將訂單卡片移動到「已完成」容器
+        completedList.appendChild(orderItem);
+
+        // 更新進行中容器的顯示/隱藏
+        if (activeList.children.length === 0) {
+            activeList.style.display = 'none';
+            if (activeEmpty) activeEmpty.style.display = 'block';
+        }
+
+        // 更新已完成容器的顯示/隱藏
+        completedList.style.display = 'block';
+        if (completedEmpty) completedEmpty.style.display = 'none';
+
+        console.log(`📦 訂單 ${orderId} 倒計時結束，已移動到「已完成」子標籤頁`);
     }
 
     cleanupTimers() {
