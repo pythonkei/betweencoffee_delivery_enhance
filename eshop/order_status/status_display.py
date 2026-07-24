@@ -14,7 +14,7 @@ import logging
 
 from django.utils import timezone
 
-from ..models import CoffeeQueue, OrderModel
+from ..models import CoffeeQueue
 from ..time_calculation import unified_time_service
 from .order_type_analyzer import OrderTypeAnalyzer
 

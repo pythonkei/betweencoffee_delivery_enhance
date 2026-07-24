@@ -4,11 +4,9 @@ Django settings for betweencoffee_delivery project.
 
 import logging
 import os
-import re
 import sys
 from urllib.parse import unquote, urlparse
 
-import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from environ import Env
 
@@ -160,7 +158,7 @@ class DebugMiddleware:
 
 # 检查daphne是否已安装（Render等无ASGI环境不需要）
 try:
-    import daphne
+    pass
 
     DAPHNE_INSTALLED = True
 except ImportError:
@@ -959,7 +957,7 @@ def check_environment():
 
 # 加载本地设置（如果存在）
 try:
-    from .local_settings import *
+    pass
 
     logger.info("Local settings loaded successfully")
 except ImportError:

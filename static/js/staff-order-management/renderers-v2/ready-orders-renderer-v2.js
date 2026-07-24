@@ -351,12 +351,10 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
      * @param {Object} order - 訂單數據物件
      */
     _bindOrderActions(div, order) {
-        const orderId = this._getOrderId(order);
-
         // 標記為已提取按鈕
         const completedBtn = div.querySelector('.btn-mark-completed');
         if (completedBtn) {
-            completedBtn.addEventListener('click', (e) => {
+            this._addManagedListener(completedBtn, 'click', (e) => {
                 e.stopPropagation();
                 this._handleMarkCompleted(order);
             });
@@ -372,26 +370,13 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
      * @param {Object} order - 訂單數據物件
      */
     async _handleMarkCompleted(order) {
-        if (this.isProcessingAction) return;
-        this.isProcessingAction = true;
+        const orderNumber = this._getOrderNumber(order);
 
-        try {
-            const orderId = this._getOrderId(order);
-            const url = `/eshop/api/orders/${orderId}/mark-completed/`;
-            const result = await this._apiPost(url, { order_id: orderId });
-
-            if (result && result.success) {
-                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已標記為已提取`, 'success');
-                this.forceRefresh();
-            } else {
-                this.showToast(`❌ 標記提取失敗: ${result?.error || '未知錯誤'}`, 'error');
-            }
-        } catch (error) {
-            console.error('❌ 標記提取錯誤:', error);
-            this.showToast('❌ 標記提取時發生錯誤', 'error');
-        } finally {
-            this.isProcessingAction = false;
-        }
+        await this._executeOrderAction(order, `/eshop/api/orders/{orderId}/mark-completed/`, {
+            successMessage: `✅ 訂單 #${orderNumber} 已標記為已提取`,
+            failMessage: '❌ 標記提取失敗',
+            errorMessage: '❌ 標記提取時發生錯誤'
+        });
     }
 
     // ==================== 排序覆蓋 ====================
@@ -432,10 +417,18 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
 
     /**
      * 啟動等待時間即時更新定時器（每 60 秒更新一次）
+     * 惰性更新：只在有 ready 訂單時才啟動定時器
      * @private
      */
     _startWaitingTimer() {
         this._stopWaitingTimer();
+
+        // 惰性更新：檢查是否有 ready 訂單，沒有則不啟動定時器
+        const cards = document.querySelectorAll('#ready-orders-list [data-status="ready"]');
+        if (!cards || cards.length === 0) {
+            return;
+        }
+
         this._waitingTimer = setInterval(() => {
             this._updateWaitingTimes();
         }, 60000); // 每分鐘更新一次

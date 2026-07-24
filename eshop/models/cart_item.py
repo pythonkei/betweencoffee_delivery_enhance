@@ -120,7 +120,7 @@ class CartItem(models.Model):
                         else:
                             product = None
                             item["image"] = "/static/images/default-product.png"
-                    except:
+                    except Exception:
                         item["image"] = "/static/images/default-product.png"
             except (TypeError, ValueError, KeyError) as e:
                 print(f"Error processing cart item: {item}, error: {e}")
@@ -159,6 +159,3 @@ class CartItem(models.Model):
             raise ValidationError("Items must be a JSON string or a list.")
         if isinstance(self.items, list):
             self.items = json.dumps(self.items)  # Convert list to JSON string
-
-    class Meta:
-        verbose_name_plural = "Order"

@@ -13,7 +13,6 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-from django.db.models import Avg, Count, Sum
 from django.utils import timezone
 
 logger = logging.getLogger("eshop.performance_optimizer")
@@ -143,7 +142,7 @@ class PerformanceOptimizer:
             barista_details = system_status["barista_details"]
             if barista_details:
                 loads = [b["current_load"] for b in barista_details]
-                avg_load = sum(loads) / len(loads)
+                _ = sum(loads) / len(loads)
                 max_load = max(loads)
                 min_load = min(loads)
 
@@ -289,7 +288,7 @@ class PerformanceOptimizer:
         分析並優化常見的數據庫查詢
         """
         try:
-            from .models import Barista, CoffeeQueue, OrderModel
+            from .models import CoffeeQueue, OrderModel
 
             optimization_suggestions = []
 

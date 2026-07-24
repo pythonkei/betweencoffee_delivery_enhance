@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 
 # betweencoffee_delivery/urls.py:
 from django.contrib import admin
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.urls import include, path
 
 # from eshop.views import OrderConfirm

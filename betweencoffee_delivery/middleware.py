@@ -2,7 +2,6 @@
 # This middleware to handle cart merging when users log in
 import logging
 
-from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
 from cart.cart import Cart

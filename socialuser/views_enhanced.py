@@ -1,14 +1,12 @@
 # socialuser/views_enhanced.py
 # 會員系統強化 - 視圖
 import json
-from decimal import Decimal
 
 from allauth.socialaccount.models import SocialAccount
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 

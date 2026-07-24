@@ -10,22 +10,18 @@
 
 import logging
 
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .smart_allocation import (
-    allocate_new_order,
     get_recommendations_for_order,
     get_smart_allocator,
     get_system_overview,
-    get_time_calculator,
     get_workload_manager,
     initialize_smart_system,
 )
-from .smart_allocation import optimize_order_preparation
-from .smart_allocation import optimize_order_preparation as optimize_order
 
 logger = logging.getLogger("eshop.smart_allocation")
 

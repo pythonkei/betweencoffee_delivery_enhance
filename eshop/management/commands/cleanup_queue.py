@@ -1,14 +1,15 @@
 # eshop/management/commands/cleanup_queue.py
 import logging
-import os
+
 from datetime import timedelta
 
-import django
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from eshop.models import CoffeeQueue, OrderModel
+
 from eshop.order_status_manager import OrderStatusManager
+from eshop.models import CoffeeQueue
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ class Command(BaseCommand):
 
                 if result.get("success"):
                     processed += 1
-                    self.stdout.write(self.style.SUCCESS(f"  已標記為就緒"))
+                    self.stdout.write(self.style.SUCCESS("  已標記為就緒"))
                 else:
                     failed += 1
                     self.stdout.write(
@@ -117,7 +118,7 @@ class Command(BaseCommand):
             from eshop.queue_manager_refactored import CoffeeQueueManager
 
             queue_manager = CoffeeQueueManager()
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all__times()
 
             if time_result.get("success"):
                 self.stdout.write(self.style.SUCCESS("✅ 隊列時間已重新計算"))

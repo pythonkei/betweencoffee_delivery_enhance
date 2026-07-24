@@ -5,14 +5,15 @@ import json
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from eshop.models import OrderModel
 
-from eshop.models import CoffeeQueue, OrderModel
 
 User = get_user_model()
 
+
 class QueueTestCase(TestCase):
     """队列测试用例"""
-    
+
     def setUp(self):
         """测试设置"""
         self.user = User.objects.create_user(
@@ -20,7 +21,7 @@ class QueueTestCase(TestCase):
             email='queue@example.com',
             password='testpass123'
         )
-        
+
         # 创建包含咖啡的订单
         self.coffee_order = OrderModel.objects.create(
             user=self.user,
@@ -39,7 +40,7 @@ class QueueTestCase(TestCase):
             payment_status='paid',
             status='waiting'
         )
-        
+
         # 创建纯咖啡豆订单
         self.beans_order = OrderModel.objects.create(
             user=self.user,
@@ -58,19 +59,19 @@ class QueueTestCase(TestCase):
             payment_status='paid',
             status='waiting'
         )
-    
+
     def test_order_type_detection(self):
         """测试订单类型检测"""
         # 咖啡订单应该包含咖啡
         self.assertTrue(self.coffee_order.has_coffee())
         self.assertFalse(self.coffee_order.is_beans_only())
-        
+
         # 咖啡豆订单不应该包含咖啡
         self.assertFalse(self.beans_order.has_coffee())
         self.assertTrue(self.beans_order.is_beans_only())
-        
+
         print("✅ 订单类型检测测试通过")
-    
+
     def test_queue_eligibility(self):
         """测试队列资格"""
         from eshop.order_status_manager import OrderStatusManager
@@ -78,21 +79,21 @@ class QueueTestCase(TestCase):
         # 咖啡订单应该可以加入队列
         coffee_manager = OrderStatusManager(self.coffee_order)
         self.assertTrue(coffee_manager.should_add_to_queue())
-        
+
         # 纯咖啡豆订单不应该加入队列
         beans_manager = OrderStatusManager(self.beans_order)
         self.assertFalse(beans_manager.should_add_to_queue())
-        
+
         print("✅ 队列资格测试通过")
-    
+
     def test_estimated_time_calculation(self):
         """测试预计时间计算"""
         # 咖啡订单应该有预计时间
         estimated_time = self.coffee_order.calculate_estimated_ready_time()
         self.assertIsNotNone(estimated_time)
-        
+
         # 纯咖啡豆订单不应该有预计时间
         beans_estimated_time = self.beans_order.calculate_estimated_ready_time()
         self.assertIsNone(beans_estimated_time)
-        
+
         print("✅ 预计时间计算测试通过")

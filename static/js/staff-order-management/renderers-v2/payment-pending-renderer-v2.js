@@ -322,12 +322,10 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
      * @param {Object} order - 訂單數據物件
      */
     _bindOrderActions(div, order) {
-        const orderId = this._getOrderId(order);
-
         // 確認 FPS 付款按鈕
         const confirmFpsBtn = div.querySelector('.btn-confirm-fps-payment');
         if (confirmFpsBtn) {
-            confirmFpsBtn.addEventListener('click', (e) => {
+            this._addManagedListener(confirmFpsBtn, 'click', (e) => {
                 e.stopPropagation();
                 this._handleConfirmPayment(order, 'fps');
             });
@@ -336,7 +334,7 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
         // 確認現金付款按鈕
         const confirmCashBtn = div.querySelector('.btn-confirm-cash-payment');
         if (confirmCashBtn) {
-            confirmCashBtn.addEventListener('click', (e) => {
+            this._addManagedListener(confirmCashBtn, 'click', (e) => {
                 e.stopPropagation();
                 this._handleConfirmPayment(order, 'cash');
             });
@@ -345,7 +343,7 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
         // 取消訂單按鈕
         const cancelBtn = div.querySelector('.btn-cancel-order');
         if (cancelBtn) {
-            cancelBtn.addEventListener('click', (e) => {
+            this._addManagedListener(cancelBtn, 'click', (e) => {
                 e.stopPropagation();
                 this._handleCancelOrder(order);
             });
@@ -362,55 +360,22 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
      * @param {string} paymentMethod - 支付方式 ('fps' | 'cash')
      */
     async _handleConfirmPayment(order, paymentMethod) {
-        if (this.isProcessingAction) return;
-        this.isProcessingAction = true;
+        const orderNumber = this._getOrderNumber(order);
+        const orderId = this._getOrderId(order);
 
-        try {
-            let result;
-            if (paymentMethod === 'fps') {
-                result = await this._confirmFPSPayment(order);
-            } else if (paymentMethod === 'cash') {
-                result = await this._confirmCashPayment(order);
-            }
-
-            if (result && result.success) {
-                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 付款已確認`, 'success');
-                this.forceRefresh();
-            } else {
-                this.showToast(`❌ 確認付款失敗: ${result?.error || '未知錯誤'}`, 'error');
-            }
-        } catch (error) {
-            console.error('❌ 確認付款錯誤:', error);
-            this.showToast('❌ 確認付款時發生錯誤', 'error');
-        } finally {
-            this.isProcessingAction = false;
+        if (paymentMethod === 'fps') {
+            await this._executeOrderAction(order, `/eshop/api/fps/confirm-payment/${orderId}/`, {
+                successMessage: `✅ 訂單 #${orderNumber} 付款已確認`,
+                failMessage: '❌ 確認付款失敗',
+                errorMessage: '❌ 確認付款時發生錯誤'
+            });
+        } else if (paymentMethod === 'cash') {
+            await this._executeOrderAction(order, `/eshop/api/cash/confirm-payment/${orderId}/`, {
+                successMessage: `✅ 訂單 #${orderNumber} 付款已確認`,
+                failMessage: '❌ 確認付款失敗',
+                errorMessage: '❌ 確認付款時發生錯誤'
+            });
         }
-    }
-
-    /**
-     * 調用 FPS 付款確認 API
-     * @private
-     * @async
-     * @param {Object} order - 訂單數據物件
-     * @returns {Promise<Object>} API 回應結果
-     */
-    async _confirmFPSPayment(order) {
-        const orderId = this._getOrderId(order);
-        const url = `/eshop/api/fps/confirm-payment/${orderId}/`;
-        return await this._apiPost(url, { order_id: orderId });
-    }
-
-    /**
-     * 調用現金付款確認 API
-     * @private
-     * @async
-     * @param {Object} order - 訂單數據物件
-     * @returns {Promise<Object>} API 回應結果
-     */
-    async _confirmCashPayment(order) {
-        const orderId = this._getOrderId(order);
-        const url = `/eshop/api/cash/confirm-payment/${orderId}/`;
-        return await this._apiPost(url, { order_id: orderId });
     }
 
     /**
@@ -420,31 +385,15 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
      * @param {Object} order - 訂單數據物件
      */
     async _handleCancelOrder(order) {
-        if (this.isProcessingAction) return;
+        const orderNumber = this._getOrderNumber(order);
 
-        if (!confirm(`確定要取消訂單 #${this._getOrderNumber(order)} 嗎？`)) {
-            return;
-        }
-
-        this.isProcessingAction = true;
-
-        try {
-            const orderId = this._getOrderId(order);
-            const url = `/eshop/api/orders/${orderId}/cancel/`;
-            const result = await this._apiPost(url, { order_id: orderId });
-
-            if (result && result.success) {
-                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已取消`, 'success');
-                this.forceRefresh();
-            } else {
-                this.showToast(`❌ 取消訂單失敗: ${result?.error || '未知錯誤'}`, 'error');
-            }
-        } catch (error) {
-            console.error('❌ 取消訂單錯誤:', error);
-            this.showToast('❌ 取消訂單時發生錯誤', 'error');
-        } finally {
-            this.isProcessingAction = false;
-        }
+        await this._executeOrderAction(order, `/eshop/api/orders/{orderId}/cancel/`, {
+            successMessage: `✅ 訂單 #${orderNumber} 已取消`,
+            failMessage: '❌ 取消訂單失敗',
+            errorMessage: '❌ 取消訂單時發生錯誤',
+            requireConfirm: true,
+            confirmMessage: `確定要取消訂單 #${orderNumber} 嗎？`
+        });
     }
 
     // ==================== 排序覆蓋 ====================

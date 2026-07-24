@@ -4,7 +4,7 @@
 """
 
 import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from django.http import JsonResponse
 from django.utils import timezone

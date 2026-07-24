@@ -57,6 +57,12 @@ class BaseOrderRendererV2 {
         this.isProcessingAction = false;
         this.refreshTimer = null;
 
+        // 模板快取（Phase 3C 效能優化）
+        /** @type {Map<string, string>} 模板快取 Map */
+        this._templateCache = new Map();
+        /** @type {number} 模板快取最大數量（防止記憶體洩漏） */
+        this._templateCacheMaxSize = 50;
+
         // 延遲初始化，確保 DOM 就緒
         setTimeout(() => this.initialize(), 100);
     }
@@ -329,6 +335,39 @@ class BaseOrderRendererV2 {
      */
     createOrderElement(order) {
         throw new Error('子類必須實現 createOrderElement 方法');
+    }
+
+    // ==================== 模板快取（Phase 3C 效能優化） ====================
+
+    /**
+     * 獲取快取的模板 HTML
+     * 避免重複拼接相同的模板字符串，減少 GC 壓力
+     * @param {string} key - 模板鍵名（例如 'order-card', 'badge-group'）
+     * @param {Function} builderFn - 模板建構函數，首次調用時執行並快取結果
+     * @returns {string} 模板 HTML
+     */
+    getCachedTemplate(key, builderFn) {
+        if (this._templateCache.has(key)) {
+            return this._templateCache.get(key);
+        }
+
+        // 檢查快取是否已滿，若已滿則刪除最早的一筆
+        if (this._templateCache.size >= this._templateCacheMaxSize) {
+            const firstKey = this._templateCache.keys().next().value;
+            this._templateCache.delete(firstKey);
+        }
+
+        const html = builderFn();
+        this._templateCache.set(key, html);
+        return html;
+    }
+
+    /**
+     * 清除模板快取
+     * 在需要強制重新生成模板時調用（例如語言切換、主題切換）
+     */
+    clearTemplateCache() {
+        this._templateCache.clear();
     }
 
     // ==================== 共用渲染方法 ====================
@@ -1209,6 +1248,75 @@ class BaseOrderRendererV2 {
         } catch (error) {
             console.error('❌ API 請求失敗:', error);
             throw error;
+        }
+    }
+
+    // ==================== 通用業務操作處理 ====================
+
+    /**
+     * 執行訂單操作（通用方法，減少各渲染器重複程式碼）
+     * 
+     * 統一處理所有訂單操作的通用模式：
+     * 1. isProcessingAction 檢查（防止重複提交）
+     * 2. 設定 isProcessingAction = true
+     * 3. try/catch/finally 包裹 API 調用
+     * 4. 成功/失敗 Toast 通知
+     * 5. forceRefresh() 刷新數據
+     * 6. finally 中重置 isProcessingAction = false
+     * 
+     * @protected
+     * @async
+     * @param {Object} order - 訂單數據物件
+     * @param {string} url - API URL（可使用 {orderId} 佔位符）
+     * @param {Object} [options] - 配置選項
+     * @param {string} [options.successMessage] - 成功時顯示的 Toast 訊息
+     * @param {string} [options.failMessage] - 失敗時顯示的 Toast 訊息前綴
+     * @param {string} [options.errorMessage] - 異常時顯示的 Toast 訊息
+     * @param {Object} [options.extraData] - 額外的請求數據
+     * @param {boolean} [options.requireConfirm=false] - 是否需要確認對話框
+     * @param {string} [options.confirmMessage] - 確認對話框訊息
+     * @returns {Promise<boolean>} 操作是否成功
+     */
+    async _executeOrderAction(order, url, options = {}) {
+        if (this.isProcessingAction) return false;
+        this.isProcessingAction = true;
+
+        const {
+            successMessage = '✅ 操作成功',
+            failMessage = '❌ 操作失敗',
+            errorMessage = '❌ 操作時發生錯誤',
+            extraData = {},
+            requireConfirm = false,
+            confirmMessage = '確定要執行此操作嗎？'
+        } = options;
+
+        // 需要確認對話框
+        if (requireConfirm) {
+            if (!confirm(confirmMessage)) {
+                this.isProcessingAction = false;
+                return false;
+            }
+        }
+
+        try {
+            const orderId = this._getOrderId(order);
+            const finalUrl = url.replace('{orderId}', orderId);
+            const result = await this._apiPost(finalUrl, { order_id: orderId, ...extraData });
+
+            if (result && result.success) {
+                this.showToast(successMessage, 'success');
+                this.forceRefresh();
+                return true;
+            } else {
+                this.showToast(`${failMessage}: ${result?.error || '未知錯誤'}`, 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error(`❌ ${errorMessage}:`, error);
+            this.showToast(errorMessage, 'error');
+            return false;
+        } finally {
+            this.isProcessingAction = false;
         }
     }
 

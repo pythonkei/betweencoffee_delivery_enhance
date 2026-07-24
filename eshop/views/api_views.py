@@ -25,13 +25,6 @@ from eshop.serializers import OrderDataSerializer
 from eshop.time_calculation import unified_time_service  # ✅ 唯一時間服務
 
 # ✅ 導入共用工具模塊
-from eshop.utils.common_utils import (
-    common_utils,
-    format_time_display,
-    get_hong_kong_time,
-    log_error,
-    log_info,
-)
 
 logger = logging.getLogger(__name__)
 

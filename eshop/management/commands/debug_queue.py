@@ -44,7 +44,7 @@ class Command(BaseCommand):
         """调试订单"""
         try:
             order = OrderModel.objects.get(id=order_id)
-            self.stdout.write(f"订单信息:")
+            self.stdout.write("订单信息:")
             self.stdout.write(f"  ID: {order.id}")
             self.stdout.write(f"  状态: {order.status}")
             self.stdout.write(
@@ -65,11 +65,11 @@ class Command(BaseCommand):
             # 检查是否在队列中
             try:
                 queue_item = CoffeeQueue.objects.get(order=order)
-                self.stdout.write(f"  在队列中: 是")
+                self.stdout.write("  在队列中: 是")
                 self.stdout.write(f"    队列状态: {queue_item.status}")
                 self.stdout.write(f"    队列位置: {queue_item.position}")
             except CoffeeQueue.DoesNotExist:
-                self.stdout.write(f"  在队列中: 否")
+                self.stdout.write("  在队列中: 否")
 
         except OrderModel.DoesNotExist:
             self.stdout.write(self.style.ERROR(f"订单 {order_id} 不存在"))
@@ -94,7 +94,7 @@ class Command(BaseCommand):
 
             # 加入队列
             queue_manager = CoffeeQueueManager()
-            queue_item = queue_manager.add_order_to_queue(order)
+            queue_item = queue_manager.add__to_queue(order)
 
             if queue_item:
                 self.stdout.write(

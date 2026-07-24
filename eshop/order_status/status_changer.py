@@ -18,7 +18,6 @@ from django.utils import timezone
 
 from ..models import CoffeeQueue, OrderModel
 from ..time_calculation import unified_time_service
-from .order_type_analyzer import OrderTypeAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -84,11 +83,11 @@ class StatusChanger:
 
             queue_manager = CoffeeQueueManager()
 
-            logger.info(f"🔄 訂單狀態變化，開始統一時間計算...")
-            time_result = queue_manager.recalculate_all_order_times()
+            logger.info("🔄 訂單狀態變化，開始統一時間計算...")
+            time_result = queue_manager.recalculate_all__times()
 
             if time_result.get("success"):
-                logger.info(f"✅ 訂單狀態變化後時間計算完成")
+                logger.info("✅ 訂單狀態變化後時間計算完成")
             else:
                 logger.warning(
                     f"⚠️ 訂單狀態變化後時間計算有問題: {time_result.get('message')}"
@@ -141,12 +140,12 @@ class StatusChanger:
                 results.append(result)
 
             # 批量處理後統一計算時間（只計算一次）
-            logger.info(f"🔄 批量處理完成，開始統一時間計算...")
+            logger.info("🔄 批量處理完成，開始統一時間計算...")
             from ..queue_manager_refactored import CoffeeQueueManager
 
             queue_manager = CoffeeQueueManager()
 
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all__times()
 
             logger.info(
                 f"✅ 批量處理完成，統一時間計算結果: {time_result.get('success')}"
@@ -292,7 +291,7 @@ class StatusChanger:
 
             # 3. 立即發送WebSocket通知（不等待其他處理）
             try:
-                from ..websocket_utils import send_order_update
+                from ..websocket_utils import send_order_update, send_queue_update
 
                 estimated_time = None
                 if order.estimated_ready_time:
@@ -310,6 +309,19 @@ class StatusChanger:
                     },
                 )
                 logger.info(f"✅ 已立即發送訂單 #{order_id} 狀態更新 WebSocket 通知")
+
+                # 同時發送隊列更新，讓員工端即時刷新
+                send_queue_update(
+                    update_type="preparation_started",
+                    data={
+                        "order_id": order_id,
+                        "status": "preparing",
+                        "barista": barista_name or "system",
+                        "estimated_ready_time": estimated_time,
+                        "timestamp": timezone.now().isoformat(),
+                    },
+                )
+                logger.info(f"✅ 已立即發送訂單 #{order_id} 隊列更新 WebSocket 通知")
             except Exception as ws_error:
                 logger.error(f"❌ 發送WebSocket通知失敗: {str(ws_error)}")
 

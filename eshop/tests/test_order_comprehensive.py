@@ -12,9 +12,10 @@ from eshop.order_status_manager import OrderStatusManager
 
 User = get_user_model()
 
+
 class ComprehensiveOrderTestCase(TestCase):
     """全面的订单测试"""
-    
+
     def setUp(self):
         """测试设置"""
         self.user = User.objects.create_user(
@@ -22,11 +23,11 @@ class ComprehensiveOrderTestCase(TestCase):
             email='comp@example.com',
             password='testpass123'
         )
-    
+
     def test_order_lifecycle(self):
         """测试订单完整生命周期"""
         print("\n=== 测试订单生命周期 ===")
-        
+
         # 1. 创建订单
         order_data = {
             'user': self.user,
@@ -45,50 +46,50 @@ class ComprehensiveOrderTestCase(TestCase):
             'payment_status': 'pending',
             'status': 'pending'
         }
-        
+
         order = OrderModel.objects.create(**order_data)
         print(f"✅ 1. 订单创建: #{order.id}")
-        
+
         # 2. 支付成功
         order.payment_status = 'paid'
         order.status = 'waiting'
         order.save()
-        
+
         self.assertEqual(order.payment_status, 'paid')
         self.assertEqual(order.status, 'waiting')
         print(f"✅ 2. 支付成功: 状态={order.status}")
-        
+
         # 3. 检查 OrderStatusManager
         manager = OrderStatusManager(order)
         display_status = manager.get_display_status()
         self.assertIn('progress_percentage', display_status)
         print(f"✅ 3. OrderStatusManager 工作正常: 进度={display_status['progress_percentage']}%")
-        
+
         # 4. 检查弃用字段访问
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             is_paid = order.is_paid
             self.assertTrue(is_paid)
             self.assertTrue(len(w) > 0)
-            print(f"✅ 4. 弃用字段访问正常并触发警告")
-        
+            print("✅ 4. 弃用字段访问正常并触发警告")
+
         # 5. 测试订单类型分析
         order_type = order.get_order_type_summary()
         self.assertTrue(order_type['has_coffee'])
         print(f"✅ 5. 订单类型分析: {order_type}")
-        
+
         print("🎉 订单生命周期测试完成！")
-    
+
     def test_payment_status_transitions(self):
         """测试支付状态转换"""
         print("\n=== 测试支付状态转换 ===")
-        
+
         status_transitions = [
             ('pending', '待支付'),
             ('paid', '已支付'),
             ('cancelled', '已取消'),
         ]
-        
+
         for status_code, status_name in status_transitions:
             order = OrderModel.objects.create(
                 user=self.user,
@@ -99,21 +100,21 @@ class ComprehensiveOrderTestCase(TestCase):
                 payment_status=status_code,
                 status='pending'
             )
-            
+
             # 测试显示文本
             display_text = order.get_payment_status_display()
             self.assertIsNotNone(display_text)
             print(f"✅ {status_name}: 显示文本='{display_text}'")
-            
+
             # 测试徽章颜色
             badge = order.payment_status_badge
             self.assertIsNotNone(badge)
             print(f"  徽章颜色: {badge}")
-    
+
     def test_order_display_methods(self):
         """测试订单显示方法"""
         print("\n=== 测试订单显示方法 ===")
-        
+
         order = OrderModel.objects.create(
             user=self.user,
             name='显示方法测试',
@@ -131,7 +132,7 @@ class ComprehensiveOrderTestCase(TestCase):
             payment_status='paid',
             status='preparing'
         )
-        
+
         # 测试各种显示方法
         methods_to_test = [
             ('get_status_display', '状态显示'),
@@ -139,12 +140,11 @@ class ComprehensiveOrderTestCase(TestCase):
             ('get_order_type_display', '订单类型显示'),
             ('get_preparation_time_display', '制作时间显示'),
         ]
-        
+
         for method_name, description in methods_to_test:
             method = getattr(order, method_name)
             result = method()
             self.assertIsNotNone(result)
             print(f"✅ {description}: {result}")
-        
-        print("所有显示方法测试完成！")
 
+        print("所有显示方法测试完成！")

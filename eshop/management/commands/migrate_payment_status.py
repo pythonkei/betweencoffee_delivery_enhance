@@ -14,7 +14,7 @@ python manage.py migrate_payment_status [--dry-run] [--batch-size=100]
 import logging
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+
 
 from eshop.models import OrderModel
 
@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
-        batch_size = options["batch_size"]
+        _ = options["batch_size"]
 
         self.stdout.write(f"開始支付狀態遷移檢查 (dry-run: {dry_run})")
 
@@ -49,8 +49,8 @@ class Command(BaseCommand):
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT column_name 
-                    FROM information_schema.columns 
+                    SELECT column_name
+                    FROM information_schema.columns
                     WHERE table_name='eshop_ordermodel' AND column_name='is_paid'
                 """
                 )

@@ -68,7 +68,7 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT 
+                SELECT
                     cq.id,
                     cq.order_id,
                     cq.status AS queue_status,
@@ -112,7 +112,7 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(self.style.WARNING("\n🔍 Dry-run 模式，未執行任何修改。"))
             self.stdout.write(
-                self.style.SUCCESS(f"使用 --no-dry-run 參數執行實際同步。")
+                self.style.SUCCESS("使用 --no-dry-run 參數執行實際同步。")
             )
             return
 

@@ -3,13 +3,14 @@ Tavily 搜索服務
 為 Between Coffee 系統提供智能搜索功能
 """
 
-import json
+
 import logging
 import os
-from typing import Any, Dict, List, Optional
+
 
 import requests
-from django.conf import settings
+from typing import Dict, Any, List
+
 
 # 設置日誌
 logger = logging.getLogger(__name__)
@@ -288,7 +289,7 @@ class TavilyService:
 
         # 簡單的價格提取邏輯
         for result in results.get("results", []):
-            content = result.get("content", "")
+            _ = result.get("content", "")
             # 這裡可以實現更複雜的價格提取邏輯
             pass
 

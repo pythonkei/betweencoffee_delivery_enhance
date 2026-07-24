@@ -8,12 +8,11 @@
 4. 提供學習建議
 """
 
-import json
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from django.db.models import Avg, Count, Sum
+from django.db.models import Avg, Count
 from django.utils import timezone
 
 logger = logging.getLogger("eshop.learning_optimizer")
@@ -113,7 +112,7 @@ class LearningOptimizer:
             分析結果字典
         """
         try:
-            from .models import Barista, CoffeeQueue
+            from .models import CoffeeQueue
 
             start_date = timezone.now() - timedelta(days=days)
 

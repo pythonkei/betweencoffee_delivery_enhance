@@ -15,8 +15,7 @@ import logging
 
 from django.utils import timezone
 
-from ..models import CoffeeQueue, OrderModel
-from ..time_calculation import unified_time_service
+from ..models import OrderModel
 from .order_type_analyzer import OrderTypeAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -96,7 +95,7 @@ class PaymentHandler:
                 from ..queue_manager_refactored import CoffeeQueueManager
 
                 queue_manager = CoffeeQueueManager()
-                queue_result = queue_manager.add_order_to_queue(order)
+                queue_result = queue_manager.add__to_queue(order)
 
                 if queue_result.get("success"):
                     queue_item = queue_result["data"]["queue_item"]
@@ -115,7 +114,7 @@ class PaymentHandler:
             from ..queue_manager_refactored import CoffeeQueueManager
 
             queue_manager = CoffeeQueueManager()
-            time_result = queue_manager.recalculate_all_order_times()
+            time_result = queue_manager.recalculate_all__times()
 
             # ✅ 修改：如果有request，清空購物車
             if request:
@@ -353,7 +352,7 @@ class PaymentHandler:
     def process_payment_and_update_status(cls, order_id, payment_method="unknown"):
         """處理支付成功並更新狀態（替換原有的支付成功邏輯）"""
         try:
-            from datetime import timedelta
+            pass
 
             order = OrderModel.objects.get(id=order_id)
 
@@ -384,7 +383,7 @@ class PaymentHandler:
             from ..queue_manager_refactored import CoffeeQueueManager
 
             queue_manager = CoffeeQueueManager()
-            queue_result = queue_manager.add_order_to_queue(order)
+            queue_result = queue_manager.add__to_queue(order)
             queue_item = (
                 queue_result["data"]["queue_item"]
                 if queue_result.get("success")
@@ -411,7 +410,6 @@ class PaymentHandler:
     @staticmethod
     def _trigger_payment_success_events(order, payment_method):
         """觸發支付成功相關事件"""
-        pass
 
     def should_add_to_queue(self):
         """判斷訂單是否應該加入隊列"""

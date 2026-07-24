@@ -29,7 +29,6 @@ class QueryOptimizer:
     @cached_query("queue_summary", timeout=30)
     def get_queue_summary_cached(cls):
         """缓存的队列摘要"""
-        from .models import CoffeeQueue
         from .queue_manager_refactored import CoffeeQueueManager
 
         queue_manager = CoffeeQueueManager()

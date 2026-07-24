@@ -14,7 +14,7 @@ python manage.py migrate_payment_status [--dry-run] [--batch-size=100]
 import logging
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+
 
 from eshop.models import OrderModel
 
@@ -93,7 +93,7 @@ class Command(BaseCommand):
             )
 
         # 3. 輸出結果
-        self.stdout.write(f"\n遷移完成!")
+        self.stdout.write("\n遷移完成!")
         self.stdout.write(f"成功遷移: {migrated_count} 個訂單")
 
         if errors:

@@ -1,24 +1,17 @@
 # eshop/views/staff_views.py
 
-import json
 import logging
-import traceback
 from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
-from django.db.models import Count
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST
 
-from eshop.models import CoffeeQueue, OrderModel
+from eshop.models import OrderModel
 from eshop.order_status_manager import OrderStatusManager
-from eshop.queue_manager_refactored import CoffeeQueueManager
-from eshop.time_calculation import unified_time_service
 
 # 嘗試導入WebSocket工具（移除 send_payment_update）
 try:

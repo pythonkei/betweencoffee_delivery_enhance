@@ -304,7 +304,7 @@ class WebSocketManager:
         """
         # 檢查是否在事件循環中
         try:
-            loop = asyncio.get_running_loop()
+            _ = asyncio.get_running_loop()
             # 如果在事件循環中，不能使用 async_to_sync
             logger.warning(
                 f"⚠️ 在事件循環中調用同步發送方法，跳過發送至 {channel_name}。"
@@ -379,7 +379,7 @@ class WebSocketManager:
         try:
             # 檢查是否在事件循環中
             try:
-                loop = asyncio.get_running_loop()
+                _ = asyncio.get_running_loop()
                 logger.warning(
                     f"⚠️ broadcast_to_group 在事件循環中被調用，但當前是同步方法。"
                     f"廣播至 {group_name} 將跳過，返回空字典。"

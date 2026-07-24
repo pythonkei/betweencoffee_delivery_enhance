@@ -45,7 +45,7 @@ def validate_and_format_phone(phone):
         return None
 
 
-def prepare_order_confirm_context(request, order=None, items=None, total_price=None):
+def prepare__confirm_context(request, order=None, items=None, total_price=None):
     """准备订单确认页面的上下文"""
     context = {}
     if order:
@@ -60,7 +60,7 @@ def prepare_order_confirm_context(request, order=None, items=None, total_price=N
                 "email": order.email,
                 "pickup_time": order.pickup_time,
             },
-            "is_quick_order": order.is_quick_order,
+            "is_quick_": order.is_quick_,
         }
     elif items is not None and total_price is not None:
         context = {
@@ -68,7 +68,7 @@ def prepare_order_confirm_context(request, order=None, items=None, total_price=N
             "total_price": total_price,
             "user": request.user,
             "initial_data": {},
-            "is_quick_order": False,
+            "is_quick_": False,
         }
     return context
 
@@ -120,7 +120,7 @@ def redirect_to_payment_failed(error_message, order_id=None):
     return redirect(url + params)
 
 
-def handle_payment_by_order_id(request, order_id):
+def handle_payment_by__id(request, order_id):
     """根據訂單ID處理支付 - 使用 OrderStatusManager"""
     try:
         if not order_id:
@@ -158,13 +158,13 @@ def clear_payment_session(request, order_id):
         if hasattr(request, "session") and "cart" in request.session:
             del request.session["cart"]
         if hasattr(request, "session"):
-            request.session["last_order_id"] = order_id
+            request.session["last__id"] = order_id
             session_keys_to_remove = [
-                "pending_paypal_order_id",
-                "current_payment_order_id",
+                "pending_paypal__id",
+                "current_payment__id",
                 "payment_start_time",
-                "pending_fps_order_id",
-                "pending_cash_order_id",
+                "pending_fps__id",
+                "pending_cash__id",
             ]
             for key in session_keys_to_remove:
                 if key in request.session:
@@ -195,7 +195,7 @@ def send_payment_notifications(order):
         logger.error(f"发送支付通知失败: {str(e)}")
 
 
-def are_orders_similar(
+def are_s_similar(
     order1_items, order2_items, total_price1, total_price2, tolerance=0.01
 ):
     """比較兩個訂單是否相似"""
@@ -230,14 +230,22 @@ def find_existing_pending_order(user, current_items, current_total_price):
     """查找可重用的未支付订单"""
     try:
         time_threshold = timezone.now() - timedelta(minutes=30)
-        pending_orders = OrderModel.objects.filter(
+        pending_s = OrderModel.objects.filter(
             user=user,
             payment_status="pending",
             status="pending",
             created_at__gte=time_threshold,
         ).order_by("-created_at")
-        for order in pending_orders:
-            if are_orders_similar(order, current_items, current_total_price):
+        for order in pending_s:
+            # 從訂單中提取商品列表用於比較（使用 get_items() 而非已不存在的 coffee_items/bean_items 關聯）
+            order_items = []
+            for item in order.get_items():
+                order_items.append({
+                    "type": item.get("type"),
+                    "id": item.get("id"),
+                    "quantity": item.get("quantity", 1),
+                })
+            if are_s_similar(order_items, current_items, order.total_price, current_total_price):
                 return order
         return None
     except Exception as e:
@@ -389,12 +397,12 @@ def process_cart_data(cart_data):
     return items, total_price
 
 
-def process_quick_order_data(quick_order_data):
+def process_quick__data(quick__data):
     """处理快速订单数据"""
-    if not quick_order_data:
+    if not quick__data:
         return [], Decimal("0.00")
-    items = quick_order_data.get("items", [])
-    total_price = Decimal(str(quick_order_data.get("total_price", "0.00")))
+    items = quick__data.get("items", [])
+    total_price = Decimal(str(quick__data.get("total_price", "0.00")))
     for item in items:
         if item.get("type") == "coffee" and item.get("id"):
             try:
@@ -412,7 +420,7 @@ def process_quick_order_data(quick_order_data):
 # ==================== 权限验证 ====================
 
 
-def verify_order_permission(request, order, allow_staff=True):
+def verify__permission(request, order, allow_staff=True):
     """验证订单访问权限"""
     if not request.user.is_authenticated:
         return False, "需要登录"
@@ -426,7 +434,7 @@ def verify_order_permission(request, order, allow_staff=True):
 # ==================== 日志记录辅助函数 ====================
 
 
-def log_order_event(order_id, event_type, message, user=None, extra_data=None):
+def log__event(order_id, event_type, message, user=None, extra_data=None):
     """记录订单事件日志"""
     log_message = f"订单 #{order_id}: {message}"
     if user:
@@ -448,7 +456,7 @@ def log_payment_attempt(order_id, payment_method, status, details=None):
     message = f"支付尝试 - 方式: {payment_method}, 状态: {status}"
     if details:
         message = f"{message}, 详情: {details}"
-    log_order_event(
+    log__event(
         order_id,
         "payment",
         message,
@@ -459,7 +467,7 @@ def log_payment_attempt(order_id, payment_method, status, details=None):
 # ==================== 订单处理函数 ====================
 
 
-def calculate_order_total(order_data):
+def calculate__total(order_data):
     """计算订单总金额"""
     try:
         total = 0
@@ -511,7 +519,7 @@ def calculate_order_total(order_data):
         return 0
 
 
-def create_order_items(order, items_data):
+def create__items(order, items_data):
     """创建订单项"""
     try:
         from ..models import OrderItem, Product
@@ -549,7 +557,7 @@ def create_order_items(order, items_data):
         raise
 
 
-def validate_order_data(order_data):
+def validate__data(order_data):
     """验证订单数据有效性"""
     try:
         if not isinstance(order_data, dict):
@@ -569,7 +577,7 @@ def validate_order_data(order_data):
             try:
                 if Decimal(str(order_data["total_amount"])) < 0:
                     return False
-            except:
+            except BaseException:
                 return False
         pickup_time = order_data.get("pickup_time")
         if pickup_time:
@@ -577,13 +585,13 @@ def validate_order_data(order_data):
                 from datetime import datetime
 
                 datetime.strptime(pickup_time, "%H:%M")
-            except:
+            except BaseException:
                 try:
                     from django.utils.dateparse import parse_datetime
 
                     if not parse_datetime(pickup_time):
                         return False
-                except:
+                except BaseException:
                     return False
         return True
     except Exception as e:
@@ -604,7 +612,7 @@ def validate_payment_data(payment_data):
             amount = Decimal(str(payment_data["amount"]))
             if amount <= 0:
                 return False
-        except:
+        except BaseException:
             return False
         valid_methods = ["alipay", "wechat", "fps", "cash", "paypal"]
         if payment_data["payment_method"] not in valid_methods:
@@ -634,7 +642,7 @@ def format_queue_data(queue_items, include_times=True):
                 ),
                 "estimated_wait_time": getattr(item, "estimated_wait_time", ""),
                 "customer_name": getattr(item.order.customer, "name", "顾客"),
-                "items_summary": get_order_items_summary(item.order),
+                "items_summary": get__items_summary(item.order),
             }
             if include_times:
                 queue_info.update(
@@ -664,7 +672,7 @@ def format_queue_data(queue_items, include_times=True):
         return []
 
 
-def get_order_items_summary(order):
+def get__items_summary(order):
     """获取订单项目摘要"""
     try:
         items = order.orderitem_set.all()[:3]
@@ -675,7 +683,7 @@ def get_order_items_summary(order):
         if order.orderitem_set.count() > 3:
             summary.append(f"...等{order.orderitem_set.count()}项")
         return "，".join(summary)
-    except:
+    except BaseException:
         return ""
 
 
@@ -693,14 +701,14 @@ def get_queue_statistics():
         }
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         today_stats = {
-            "total_orders": Order.objects.filter(created_at__gte=today_start).count(),
-            "completed_orders": Order.objects.filter(
+            "total_s": Order.objects.filter(created_at__gte=today_start).count(),
+            "completed_s": Order.objects.filter(
                 created_at__gte=today_start, status__in=["completed", "collected"]
             ).count(),
-            "pending_orders": Order.objects.filter(
+            "pending_s": Order.objects.filter(
                 created_at__gte=today_start, status="pending"
             ).count(),
-            "preparing_orders": Order.objects.filter(
+            "preparing_s": Order.objects.filter(
                 created_at__gte=today_start, status="preparing"
             ).count(),
         }
@@ -730,10 +738,10 @@ def get_queue_statistics():
         return {
             "queue_stats": {"waiting": 0, "preparing": 0, "ready": 0, "completed": 0},
             "today_stats": {
-                "total_orders": 0,
-                "completed_orders": 0,
-                "pending_orders": 0,
-                "preparing_orders": 0,
+                "total_s": 0,
+                "completed_s": 0,
+                "pending_s": 0,
+                "preparing_s": 0,
             },
             "avg_preparation_minutes": 0,
             "total_active": 0,
@@ -741,7 +749,7 @@ def get_queue_statistics():
         }
 
 
-def prepare_order_context(request, order_id=None):
+def prepare__context(request, order_id=None):
     """准备订单上下文数据"""
     from ..models import Order
 
@@ -871,18 +879,18 @@ class OrderErrorHandler:
 
     @staticmethod
     def handle_generic_error(
-        request, error, redirect_url="cart:cart_detail", error_type="general"
+        request, error, redirect_url="cart:cart_detail", _="general"
     ):
         """處理通用錯誤 - 改進備用重定向邏輯"""
         try:
             error_message = str(error) if error else "未知錯誤"
-            if error_type in ["payment", "validation"]:
-                logger.error(f"[{error_type.upper()} ERROR] {error_message}")
+            if _ in ["payment", "validation"]:
+                logger.error(f"[{_.upper()} ERROR] {error_message}")
             else:
-                logger.warning(f"[{error_type.upper()} ERROR] {error_message}")
+                logger.warning(f"[{_.upper()} ERROR] {error_message}")
 
             user_friendly_message = OrderErrorHandler.get_user_friendly_message(
-                error_type, error_message
+                _, error_message
             )
             messages.error(request, user_friendly_message)
 
@@ -905,7 +913,7 @@ class OrderErrorHandler:
             return redirect("/")  # 無論如何不讓頁面崩潰
 
     @staticmethod
-    def get_user_friendly_message(error_type, technical_message):
+    def get_user_friendly_message(_, technical_message):
         """將技術性錯誤訊息轉換為用戶友好訊息"""
         error_map = {
             "payment": {
@@ -937,25 +945,25 @@ class OrderErrorHandler:
                 "server": "伺服器錯誤，請稍後再試",
             },
         }
-        if error_type in error_map:
-            for key in error_map[error_type]:
+        if _ in error_map:
+            for key in error_map[_]:
                 if key.lower() in technical_message.lower():
-                    return error_map[error_type][key]
-            return error_map[error_type]["default"]
+                    return error_map[_][key]
+            return error_map[_]["default"]
         return error_map["general"]["default"]
 
     @staticmethod
-    def handle_json_error(message, status=400, error_type="general"):
+    def handle_json_error(message, status=400, _="general"):
         """處理JSON響應錯誤"""
         from django.http import JsonResponse
 
-        logger.error(f"[{error_type.upper()}] JSON錯誤: {message}")
+        logger.error(f"[{_.upper()}] JSON錯誤: {message}")
         response_data = {
             "success": False,
             "error": message,
-            "error_type": error_type,
+            "_": _,
             "user_friendly_message": OrderErrorHandler.get_user_friendly_message(
-                error_type, message
+                _, message
             ),
         }
         return JsonResponse(response_data, status=status)
@@ -972,10 +980,10 @@ class OrderErrorHandler:
             status_code = 404
         elif "validation" in error_message.lower() or "驗證" in error_message:
             status_code = 400
-            error_type = "validation"
+            _ = "validation"
         else:
             status_code = 500
-            error_type = "server"
+            _ = "server"
         logger.error(f"API錯誤 [{status_code}]: {error_message}")
         if request and hasattr(request, "user") and request.user.is_authenticated:
             from django.contrib import messages
@@ -985,23 +993,32 @@ class OrderErrorHandler:
                 OrderErrorHandler.get_user_friendly_message("general", error_message),
             )
         return OrderErrorHandler.handle_json_error(
-            error_message, status=status_code, error_type=error_type
+            error_message, status=status_code, _=_
         )
 
 
-def handle_order_error(
-    request, error_message, redirect_url="cart:cart_detail", error_type="general"
+def handle__error(
+    request, error_message, redirect_url="cart:cart_detail", _="general"
 ):
     """統一處理訂單錯誤（兼容舊代碼）"""
     return OrderErrorHandler.handle_generic_error(
-        request, error_message, redirect_url, error_type
+        request, error_message, redirect_url, _
+    )
+
+
+def handle_order_error(
+    request, error_message, redirect_url="cart:cart_detail", _="general"
+):
+    """統一處理訂單錯誤（別名，供 order_views.py 和 cart/views.py 使用）"""
+    return OrderErrorHandler.handle_generic_error(
+        request, error_message, redirect_url, _
     )
 
 
 # ==================== 裝飾器 - 統一錯誤處理 ====================
 
 
-def catch_order_errors(redirect_url="cart:cart_detail", error_type="general"):
+def catch__errors(redirect_url="cart:cart_detail", _="general"):
     """裝飾器：捕獲訂單相關錯誤並統一處理"""
     from functools import wraps
 
@@ -1014,7 +1031,7 @@ def catch_order_errors(redirect_url="cart:cart_detail", error_type="general"):
                 logger.error(f"視圖 {view_func.__name__} 執行錯誤: {str(e)}")
                 logger.error(f"錯誤詳情: {traceback.format_exc()}")
                 return OrderErrorHandler.handle_generic_error(
-                    request, e, redirect_url, error_type
+                    request, e, redirect_url, _
                 )
 
         return wrapper
@@ -1046,16 +1063,15 @@ def handle_payment_error(request, error, order_id=None):
     """處理支付錯誤"""
     error_message = str(error)
     if "timeout" in error_message.lower():
-        error_type = "payment"
+        _ = "payment"
         user_message = "支付超時，請重新嘗試"
     elif "insufficient" in error_message.lower():
-        error_type = "payment"
+        _ = "payment"
         user_message = "餘額不足，請使用其他支付方式"
     elif "network" in error_message.lower():
-        error_type = "payment"
+        _ = "payment"
         user_message = "網絡連接失敗，請檢查網絡後重試"
     else:
-        error_type = "payment"
         user_message = "支付處理失敗，請稍後重試"
     logger.error(f"支付錯誤 [訂單ID: {order_id}]: {error_message}")
     from django.contrib import messages
@@ -1065,9 +1081,9 @@ def handle_payment_error(request, error, order_id=None):
         try:
             from .models import OrderModel
 
-            order = OrderModel.objects.get(id=order_id)
+            _ = OrderModel.objects.get(id=order_id)
             return redirect("eshop:order_detail", order_id=order_id)
-        except:
+        except BaseException:
             pass
     return redirect("eshop:order_confirm")
 
@@ -1096,7 +1112,7 @@ def handle_cart_error(request, error):
     error_message = str(error)
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return OrderErrorHandler.handle_json_error(
-            error_message, status=400, error_type="cart"
+            error_message, status=400, _="cart"
         )
     else:
         messages.error(request, "購物車操作失敗，請重新嘗試")

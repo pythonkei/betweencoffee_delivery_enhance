@@ -1,7 +1,7 @@
 # eshop/management/commands/test_websocket_api.py
 import json
 
-from django.conf import settings
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.test import Client
@@ -9,15 +9,15 @@ from django.test import Client
 
 class Command(BaseCommand):
     help = '測試 WebSocket 監控 API'
-    
+
     def handle(self, *args, **options):
         self.stdout.write('=========================================')
         self.stdout.write('  WebSocket API 測試')
         self.stdout.write('=========================================\n')
-        
+
         # ✅ 建立測試客戶端，並設置允許的主機
         client = Client(HTTP_HOST='localhost:8081')  # 使用實際的主機名
-        
+
         # 登入管理員
         User = get_user_model()
         try:
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         except User.DoesNotExist:
             self.stdout.write(self.style.ERROR('❌ 用戶 kei 不存在'))
             return
-        
+
         # 測試 WebSocket 統計 API
         self.stdout.write('\n▶ 測試 WebSocket 統計 API...')
         try:
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'   回應: {response.content.decode()[:200]}')
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'❌ 例外錯誤: {e}'))
-        
+
         # 測試 WebSocket 連線列表
         self.stdout.write('\n▶ 測試 WebSocket 連線列表...')
         try:
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'   回應: {response.content.decode()[:200]}')
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'❌ 例外錯誤: {e}'))
-        
+
         # 測試系統廣播
         self.stdout.write('\n▶ 測試系統廣播...')
         try:
@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'   回應: {response.content.decode()[:200]}')
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'❌ 例外錯誤: {e}'))
-        
+
         self.stdout.write('\n=========================================')
         self.stdout.write(self.style.SUCCESS('✅ 測試完成'))
         self.stdout.write('=========================================')

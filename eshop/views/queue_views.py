@@ -4,7 +4,6 @@
 """
 
 import logging
-from datetime import timedelta
 
 import pytz
 from django.contrib.admin.views.decorators import staff_member_required
@@ -20,7 +19,6 @@ from eshop.queue_manager_refactored import (
     CoffeeQueueManager,
     force_sync_queue_and_orders,
 )
-from eshop.time_calculation import unified_time_service
 from eshop.views.queue_processors import (
     process_completed_orders,
     process_payment_pending_orders,
@@ -206,7 +204,7 @@ def recalculate_all_times_api(request):
         queue_manager = CoffeeQueueManager()
         logger.info("🔄 API: 手動觸發統一時間計算")
 
-        result = queue_manager.recalculate_all_order_times()
+        result = queue_manager.recalculate_all__times()
 
         if result.get("success"):
             try:
