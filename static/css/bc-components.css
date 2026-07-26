@@ -1060,7 +1060,7 @@
 
 .bc-option-btn {
   flex: 1;
-  padding: 8px 10px;
+  padding: 14px 10px;
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 500;
@@ -1079,7 +1079,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 40px;
+  height: 60px !important;
+  min-height: 60px !important;
 }
 
 .bc-option-btn:focus,
@@ -1123,14 +1124,14 @@
   position: absolute;
   top: 0;
   right: 0;
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   color: #fff;
   line-height: 1;
   transition: all var(--bc-transition);
   background: var(--bc-gold);
-  padding: 2px 5px;
-  margin: 3px;
-  border-radius: 0 3px 0 4px;
+  padding: 3px 6px;
+  margin: 0;
+  border-radius: 0 4px 0 5px;
   letter-spacing: 0.5px;
 }
 

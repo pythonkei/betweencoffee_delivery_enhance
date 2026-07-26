@@ -78,7 +78,7 @@
                             <div class="form-group d-flex">
                                 <p>杯量 :</p>
                                 <div class="bc-option-group" id="cup-level-group">
-                                    <button type="button" class="bc-option-btn" data-value="Small" data-oz="12oz">
+                                    <button type="button" class="bc-option-btn" data-value="Small" data-oz="12oz" hidden>
                                         <span class="bc-option-oz">12oz</span>
                                         <i class="bc-option-icon icon-coffee"></i>
                                         <span class="bc-option-label-text">少</span>
@@ -438,5 +438,18 @@ function debugLog(message) {
 // document.getElementById('debug-info').style.display = 'block';
 </script>
 
-
+<style>
+#cup-level-group .bc-option-btn {
+  height: 72px !important;
+  min-height: 72px !important;
+}
+#cup-level-group .bc-option-oz {
+  font-size: 0.72rem !important;
+  margin: 0 !important;
+  padding: 3px 6px !important;
+}
+.form-group.d-flex {
+  align-items: center;
+}
+</style>
 {% endblock %}

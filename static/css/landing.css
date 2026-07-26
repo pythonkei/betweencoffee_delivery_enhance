@@ -135,6 +135,10 @@
   display: flex;
 }
 
+.feed__layer-parts--02 {
+  margin-left: -2px;
+}
+
 .feed__layer-parts {
   top: 0;
   width: 2430px;
@@ -145,11 +149,6 @@
   -webkit-clip-path: url(#mask);
           clip-path: url(#mask);
   animation: feedScroll 60s infinite linear 0.5s both;
-  /* 防止 clip-path 邊緣漏光 */
-  position: relative;
-  z-index: 2;
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 
@@ -281,5 +280,3 @@
 .cls-1 {
     fill: transparent;
 }
-
-
