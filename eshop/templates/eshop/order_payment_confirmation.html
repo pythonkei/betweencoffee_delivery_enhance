@@ -437,9 +437,7 @@
                                 <h5 class="mb-1 text-white">{{ item.name }}</h5>
                                 <p class="mb-1 text-white">數量: {{ item.quantity }}</p>
                                 {% if item.options_display %}
-                                    <div class="text-muted">
-                                        {{ item.options_display }}
-                                    </div>
+                                    {{ item.options_display|safe }}
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1 align-self-baseline">

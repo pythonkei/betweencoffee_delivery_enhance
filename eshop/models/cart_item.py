@@ -27,6 +27,7 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     cup_level = models.CharField(max_length=10, blank=True, null=True)
     milk_level = models.CharField(max_length=10, blank=True, null=True)
+    strength_level = models.CharField(max_length=10, blank=True, null=True)
     grinding_level = models.CharField(max_length=10, blank=True, null=True)
     weight = models.CharField(max_length=10, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,6 +40,7 @@ class CartItem(models.Model):
             "product_id",
             "cup_level",
             "milk_level",
+            "strength_level",
             "grinding_level",
             "weight",
         )
@@ -147,7 +149,7 @@ class CartItem(models.Model):
 
             item_text = f"{item['name']} (Qty: {item['quantity']}, Price: ${price_str})"
             if item["type"] == "coffee":
-                item_text += f", Cup: {item['cup_level']}, Milk: {item['milk_level']}"
+                item_text += f", Cup: {item['cup_level']}, Milk: {item['milk_level']}, Strength: {item.get('strength_level', 'Normal')}"
             elif item["type"] == "bean":
                 item_text += f", Grinding: {item['grinding_level']}"
             display_text.append(item_text)

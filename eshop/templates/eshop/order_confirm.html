@@ -91,27 +91,37 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="meta pb-2 d-flex bc-order-item-meta">
                                     <div>
                                         <span class="icon material-symbols-outlined">water_full</span>
-                                        杯量 :
-                                        <strong>
-                                        {% if item.cup_level == 'Small' %}細
-                                        {% elif item.cup_level == 'Medium' %}中
-                                        {% elif item.cup_level == 'Large' %}大
-                                        {% else %}{{ item.cup_level|default:'中' }}
-                                        {% endif %}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <span class="icon material-symbols-outlined">humidity_mid</span>
-                                        奶量 :
-                                        <strong>
-                                        {% if item.milk_level == 'Light' %}少
-                                        {% elif item.milk_level == 'Medium' %}正常
-                                        {% elif item.milk_level == 'Extra' %}追加
-                                        {% else %}{{ item.milk_level|default:'正常' }}
-                                        {% endif %}
-                                        </strong>
-                                    </div>
+                                    杯量 :
+                                    <strong>
+                                    {% if item.cup_level == 'Small' %}細
+                                    {% elif item.cup_level == 'Medium' %}中
+                                    {% elif item.cup_level == 'Large' %}大
+                                    {% else %}{{ item.cup_level|default:'中' }}
+                                    {% endif %}
+                                    </strong>
                                 </div>
+                                <div>
+                                    <span class="icon material-symbols-outlined">bolt</span>
+                                    濃度 :
+                                    <strong>
+                                    {% if item.strength_level == 'Normal' %}預設
+                                    {% elif item.strength_level == 'Extra' %}特濃
+                                    {% else %}{{ item.strength_level|default:'預設' }}
+                                    {% endif %}
+                                    </strong>
+                                </div>
+                                <div>
+                                    <span class="icon material-symbols-outlined">humidity_mid</span>
+                                    奶量 :
+                                    <strong>
+                                    {% if item.milk_level == 'Light' %}少
+                                    {% elif item.milk_level == 'Medium' %}正常
+                                    {% elif item.milk_level == 'Extra' %}追加
+                                    {% else %}{{ item.milk_level|default:'正常' }}
+                                    {% endif %}
+                                    </strong>
+                                </div>
+                            </div>
                                 {% elif item.type == 'bean' %}
                                 <div class="meta pb-2 d-flex bc-order-item-meta">
 
@@ -492,6 +502,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                             {% elif item.cup_level == 'Medium' %}中
                                             {% elif item.cup_level == 'Large' %}大
                                             {% else %}{{ item.cup_level|default:'中' }}
+                                            {% endif %}
+                                            </strong>
+                                        </div>
+                                        <div>
+                                            <span class="icon material-symbols-outlined">bolt</span>
+                                            濃度 :
+                                            <strong>
+                                            {% if item.strength_level == 'Normal' %}預設
+                                            {% elif item.strength_level == 'Extra' %}特濃
+                                            {% else %}{{ item.strength_level|default:'預設' }}
                                             {% endif %}
                                             </strong>
                                         </div>

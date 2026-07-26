@@ -61,6 +61,7 @@ def add_to_cart(request, product_id, product_type):
             options = {
                 "cup_level": request.POST.get("cup_level", "Medium"),
                 "milk_level": request.POST.get("milk_level", "Medium"),
+                "strength_level": request.POST.get("strength_level", "Normal"),
             }
         elif product_type == "bean":
             product = get_object_or_404(BeanItem, id=product_id)
@@ -336,6 +337,7 @@ def cart_count(request):
                     "image": item["image"],
                     "cup_level": item.get("cup_level"),
                     "milk_level": item.get("milk_level"),
+                    "strength_level": item.get("strength_level"),
                     "grinding_level": item.get("grinding_level"),
                     "weight": item.get("weight"),
                 }

@@ -46,6 +46,14 @@ class CoffeeItem(models.Model):
     milk_level = models.CharField(
         max_length=10, choices=MILK_LEVEL_CHOICES, default="Medium"
     )
+    # Strength level choices
+    STRENGTH_CHOICES = [
+        ("Normal", "預設"),
+        ("Extra", "特濃"),
+    ]
+    strength_level = models.CharField(
+        max_length=10, choices=STRENGTH_CHOICES, default="Normal"
+    )
     is_published = models.BooleanField(default=True)
     is_shop_hot_item = models.BooleanField(default=False)
     # 排序字段

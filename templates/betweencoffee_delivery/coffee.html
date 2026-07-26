@@ -111,6 +111,18 @@
                             </div>
                         </div>
 
+                        <!-- Strength Level -->
+                        <div class="col-md-12">
+                            <div class="form-group d-flex">
+                                <p>濃度 :</p>
+                                <div class="bc-option-group" id="strength-level-group">
+                                    <button type="button" class="bc-option-btn active" data-value="Normal">預設</button>
+                                    <button type="button" class="bc-option-btn" data-value="Extra">特濃</button>
+                                </div>
+                                <input type="hidden" name="strength_level" id="strength_level" value="Normal">
+                            </div>
+                        </div>
+
                         <!-- Quantity -->
                         <div class="w-100 form-group">
 							<div class="input-group col col-md-8 d-flex mb-3">
@@ -213,6 +225,15 @@
                 document.querySelectorAll('#milk-level-group .bc-option-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById('milk_level').value = this.dataset.value;
+            });
+        });
+
+        // Option Button Toggle - 濃度
+        document.querySelectorAll('#strength-level-group .bc-option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('#strength-level-group .bc-option-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('strength_level').value = this.dataset.value;
             });
         });
 

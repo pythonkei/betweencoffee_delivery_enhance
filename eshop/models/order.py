@@ -391,10 +391,12 @@ class OrderModel(models.Model):
                 display_item["type_display"] = "咖啡"
                 options = []
                 if display_item.get("cup_level_cn"):
-                    options.append(f"杯型: {display_item['cup_level_cn']}")
+                    options.append(f'<span class="icon material-symbols-outlined">water_full</span> 杯量: {display_item["cup_level_cn"]}')
+                if display_item.get("strength_level_cn"):
+                    options.append(f'<span class="icon material-symbols-outlined">bolt</span> 濃度: {display_item["strength_level_cn"]}')
                 if display_item.get("milk_level_cn"):
-                    options.append(f"牛奶: {display_item['milk_level_cn']}")
-                display_item["options_display"] = " | ".join(options)
+                    options.append(f'<span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {display_item["milk_level_cn"]}')
+                display_item["options_display"] = '<span style="font-size:1.1rem !important;">' + "  ".join(options) + "</span>" if options else ""
 
             elif item_type == "bean":
                 display_item["type_display"] = "咖啡豆"
@@ -620,6 +622,10 @@ class OrderModel(models.Model):
                     item["milk_level_cn"] = self.translate_option(
                         "milk_level", item["milk_level"]
                     )
+                if "strength_level" in item:
+                    item["strength_level_cn"] = self.translate_option(
+                        "strength_level", item["strength_level"]
+                    )
                 if "weight" in item:
                     logger.debug(
                         f"咖啡商品 {item.get('name', '未知')} 包含重量選項: {item['weight']}"
@@ -662,6 +668,10 @@ class OrderModel(models.Model):
                 "Light": "細",
                 "Medium": "中",
                 "Deep": "粗",
+            },
+            "strength_level": {
+                "Normal": "預設",
+                "Extra": "特濃",
             },
         }
         return mappings.get(option_type, {}).get(value, value)

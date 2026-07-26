@@ -86,6 +86,7 @@ class Cart:
                 item.product_id,
                 item.cup_level,
                 item.milk_level,
+                item.strength_level,
                 item.grinding_level,
                 item.weight,
             )
@@ -101,6 +102,7 @@ class Cart:
                 "image": product.image.url if product.image else "",
                 "cup_level": item.cup_level,
                 "milk_level": item.milk_level,
+                "strength_level": item.strength_level,
                 "grinding_level": item.grinding_level,
                 "weight": item.weight or "200g",
             }
@@ -111,6 +113,7 @@ class Cart:
         product_id,
         cup_level=None,
         milk_level=None,
+        strength_level=None,
         grinding_level=None,
         weight=None,
     ):
@@ -122,6 +125,8 @@ class Cart:
                 key_parts.append(f"cup_{cup_level}")
             if milk_level:
                 key_parts.append(f"milk_{milk_level}")
+            if strength_level:
+                key_parts.append(f"strength_{strength_level}")
         elif product_type == "bean":
             if grinding_level:
                 key_parts.append(f"grinding_{grinding_level}")
@@ -161,6 +166,7 @@ class Cart:
             product.id,
             options.get("cup_level"),
             options.get("milk_level"),
+            options.get("strength_level"),
             options.get("grinding_level"),
             options.get("weight", "200g"),
         )
@@ -181,6 +187,7 @@ class Cart:
                 "image": product.image.url if product.image else "",
                 "cup_level": options.get("cup_level"),
                 "milk_level": options.get("milk_level"),
+                "strength_level": options.get("strength_level"),
                 "grinding_level": options.get("grinding_level"),
                 "weight": options.get("weight", "200g"),
             }
@@ -224,6 +231,7 @@ class Cart:
                 item.product_id,
                 item.cup_level,
                 item.milk_level,
+                item.strength_level,
                 item.grinding_level,
                 item.weight,
             )
@@ -241,6 +249,7 @@ class Cart:
             # 獲取選項
             cup_level = item_data.get("cup_level")
             milk_level = item_data.get("milk_level")
+            strength_level = item_data.get("strength_level")
             grinding_level = item_data.get("grinding_level")
             weight = item_data.get("weight", "200g")
 
@@ -260,6 +269,7 @@ class Cart:
                     quantity=item_data["quantity"],
                     cup_level=cup_level,
                     milk_level=milk_level,
+                    strength_level=strength_level,
                     grinding_level=grinding_level,
                     weight=weight,
                 )
@@ -342,6 +352,7 @@ class Cart:
                     "image": item_data["image"],
                     "cup_level": item_data.get("cup_level"),
                     "milk_level": item_data.get("milk_level"),
+                    "strength_level": item_data.get("strength_level"),
                     "grinding_level": item_data.get("grinding_level"),
                     "weight": item_data.get("weight"),
                     "total_price": item_total_str,  # 總價（不帶$符號）
