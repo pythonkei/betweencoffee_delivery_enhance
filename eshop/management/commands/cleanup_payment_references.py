@@ -6,9 +6,9 @@
 查找並報告對 is_paid 字段的引用。
 """
 
-import ast
+
 import logging
-import os
+
 from pathlib import Path
 
 from django.core.management.base import BaseCommand

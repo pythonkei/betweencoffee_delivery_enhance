@@ -7,7 +7,7 @@
 import logging
 import traceback
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 # 創建錯誤處理日誌器
 error_logger = logging.getLogger("eshop.error_handling")

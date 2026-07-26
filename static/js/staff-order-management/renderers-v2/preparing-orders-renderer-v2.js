@@ -570,12 +570,10 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
     // ==================== 綁定操作按鈕 ====================
 
     _bindOrderActions(div, order) {
-        const orderId = this._getOrderId(order);
-
         // 完成製作按鈕
         const readyBtn = div.querySelector('.btn-mark-ready');
         if (readyBtn) {
-            readyBtn.addEventListener('click', (e) => {
+            this._addManagedListener(readyBtn, 'click', (e) => {
                 e.stopPropagation();
                 this._handleMarkReady(order);
             });
@@ -584,7 +582,7 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         // 加速處理按鈕
         const expediteBtn = div.querySelector('.btn-expedite');
         if (expediteBtn) {
-            expediteBtn.addEventListener('click', (e) => {
+            this._addManagedListener(expediteBtn, 'click', (e) => {
                 e.stopPropagation();
                 this._handleExpedite(order);
             });
@@ -594,49 +592,23 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
     // ==================== 操作處理 ====================
 
     async _handleMarkReady(order) {
-        if (this.isProcessingAction) return;
-        this.isProcessingAction = true;
+        const orderNumber = this._getOrderNumber(order);
 
-        try {
-            const orderId = this._getOrderId(order);
-            const url = `/eshop/api/orders/${orderId}/mark-ready/`;
-            const result = await this._apiPost(url, { order_id: orderId });
-
-            if (result && result.success) {
-                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已標記為就緒`, 'success');
-                this.forceRefresh();
-            } else {
-                this.showToast(`❌ 標記就緒失敗: ${result?.error || '未知錯誤'}`, 'error');
-            }
-        } catch (error) {
-            console.error('❌ 標記就緒錯誤:', error);
-            this.showToast('❌ 標記就緒時發生錯誤', 'error');
-        } finally {
-            this.isProcessingAction = false;
-        }
+        await this._executeOrderAction(order, `/eshop/api/orders/{orderId}/mark-ready/`, {
+            successMessage: `✅ 訂單 #${orderNumber} 已標記為就緒`,
+            failMessage: '❌ 標記就緒失敗',
+            errorMessage: '❌ 標記就緒時發生錯誤'
+        });
     }
 
     async _handleExpedite(order) {
-        if (this.isProcessingAction) return;
-        this.isProcessingAction = true;
+        const orderNumber = this._getOrderNumber(order);
 
-        try {
-            const orderId = this._getOrderId(order);
-            const url = `/eshop/api/orders/${orderId}/expedite/`;
-            const result = await this._apiPost(url, { order_id: orderId });
-
-            if (result && result.success) {
-                this.showToast(`✅ 訂單 #${this._getOrderNumber(order)} 已加速`, 'success');
-                this.forceRefresh();
-            } else {
-                this.showToast(`❌ 加速失敗: ${result?.error || '未知錯誤'}`, 'error');
-            }
-        } catch (error) {
-            console.error('❌ 加速錯誤:', error);
-            this.showToast('❌ 加速時發生錯誤', 'error');
-        } finally {
-            this.isProcessingAction = false;
-        }
+        await this._executeOrderAction(order, `/eshop/api/orders/{orderId}/expedite/`, {
+            successMessage: `✅ 訂單 #${orderNumber} 已加速`,
+            failMessage: '❌ 加速失敗',
+            errorMessage: '❌ 加速時發生錯誤'
+        });
     }
 
     // ==================== 排序覆蓋 ====================
@@ -754,7 +726,7 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         // 重新綁定「完成製作」按鈕事件（因為 innerHTML 被替換了）
         const readyBtn = orderCard.querySelector('.btn-mark-ready');
         if (readyBtn) {
-            readyBtn.addEventListener('click', (e) => {
+            this._addManagedListener(readyBtn, 'click', (e) => {
                 e.stopPropagation();
                 // 從 data-order-id 屬性取得訂單 ID
                 const btnOrderId = readyBtn.getAttribute('data-order-id');
@@ -780,16 +752,10 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         const completedBadge = document.getElementById('countdown-completed-badge');
 
         if (activeBadge && activeList) {
-            const count = activeList.children.length || 0;
-            activeBadge.textContent = count;
-            activeBadge.style.display = 'inline-block';
-            activeBadge.style.visibility = 'visible';
+            activeBadge.textContent = activeList.children.length || 0;
         }
         if (completedBadge && completedList) {
-            const count = completedList.children.length || 0;
-            completedBadge.textContent = count;
-            completedBadge.style.display = 'inline-block';
-            completedBadge.style.visibility = 'visible';
+            completedBadge.textContent = completedList.children.length || 0;
         }
     }
 

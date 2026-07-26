@@ -71,7 +71,7 @@ urlpatterns = [
     "success": true,
     "data": {
         "waiting_orders": [...],      // 等待队列数据
-        "preparing_orders": [...],    // 制作中队列数据  
+        "preparing_orders": [...],    // 制作中队列数据
         "ready_orders": [...],        // 已就绪订单数据
         "badge_summary": {            // 徽章数据
             "waiting": 0,

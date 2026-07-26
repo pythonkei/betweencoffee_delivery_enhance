@@ -49,8 +49,6 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
      * @param {number} [order.bean_count] - 咖啡豆數量
      * @param {boolean} [order.is_quick_order] - 是否為快速訂單
      * @param {boolean} [order.is_mixed_order] - 是否為混合訂單
-     * @param {string} [order.completed_at] - 完成時間 ISO 字串
-     * @param {string} [order.ready_at] - 就緒時間 ISO 字串
      * @returns {HTMLElement} 訂單卡片 DOM 元素
      */
     createOrderElement(order) {
@@ -305,12 +303,10 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
      * @param {Object} order - 訂單數據物件
      */
     _bindOrderActions(div, order) {
-        const orderId = this._getOrderId(order);
-
         // 查看詳情按鈕
         const detailsBtn = div.querySelector('.btn-view-details');
         if (detailsBtn) {
-            detailsBtn.addEventListener('click', (e) => {
+            this._addManagedListener(detailsBtn, 'click', (e) => {
                 e.stopPropagation();
                 this._handleViewDetails(order);
             });

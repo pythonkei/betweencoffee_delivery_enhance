@@ -61,7 +61,7 @@ class SocialuserConfig(AppConfig):
         """连接会员系统信号"""
         try:
             # 导入信号模块，Django 的 @receiver decorator 会自动注册信号
-            from . import signals
+            pass
 
             logger.info("✅ 会员系统信号已成功连接")
 

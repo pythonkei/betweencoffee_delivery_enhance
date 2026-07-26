@@ -10,6 +10,7 @@ from eshop.models import OrderModel
 
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
     help = '检查支付超时的订单并自动取消，发送支付提醒'
 
@@ -24,15 +25,15 @@ class Command(BaseCommand):
             payment_status='pending',
             payment_timeout__lt=now
         )
-        
+
         count = expired_orders.count()
         for order in expired_orders:
             order.mark_as_cancelled()
             logger.info(f"订单 #{order.id} 因支付超时已自动取消")
-            
+
             # 发送取消通知（可选）
             self.send_cancellation_notification(order)
-        
+
         if count > 0:
             self.stdout.write(
                 self.style.SUCCESS(f'成功取消 {count} 个超时订单')
@@ -45,7 +46,7 @@ class Command(BaseCommand):
         orders_needing_reminder = OrderModel.objects.filter(
             payment_status='pending'
         )
-        
+
         reminder_count = 0
         for order in orders_needing_reminder:
             if order.should_send_payment_reminder():
@@ -53,7 +54,7 @@ class Command(BaseCommand):
                 order.mark_reminder_sent()
                 reminder_count += 1
                 logger.info(f"已发送支付提醒给订单 #{order.id}")
-        
+
         if reminder_count > 0:
             self.stdout.write(
                 self.style.SUCCESS(f'成功发送 {reminder_count} 个支付提醒')
@@ -75,7 +76,7 @@ class Command(BaseCommand):
 
 感谢您选择Between Coffee！
             """
-            
+
             if order.email:
                 send_mail(
                     subject,
@@ -84,15 +85,13 @@ class Command(BaseCommand):
                     [order.email],
                     fail_silently=True,
                 )
-            
+
             # 这里可以添加短信通知（如果配置了短信服务）
             # if order.phone:
             #     self.send_sms_reminder(order)
-                
+
         except Exception as e:
             logger.error(f"发送支付提醒失败: {str(e)}")
-
-
 
     def send_cancellation_notification(self, order):
         """发送订单取消通知"""
@@ -107,7 +106,7 @@ class Command(BaseCommand):
 
 感谢您对Between Coffee的关注！
             """
-            
+
             if order.email:
                 send_mail(
                     subject,
@@ -116,6 +115,6 @@ class Command(BaseCommand):
                     [order.email],
                     fail_silently=True,
                 )
-                
+
         except Exception as e:
             logger.error(f"发送取消通知失败: {str(e)}")

@@ -1,12 +1,10 @@
 # eshop/alipay_utils.py:
 import logging
-import os
 import time
-from urllib.parse import quote, unquote
+from urllib.parse import unquote
 
 from alipay import AliPay
 from django.conf import settings
-from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -39,10 +37,10 @@ def get_alipay_client():
 def create_alipay_payment(order, request):
     """创建支付宝支付订单"""
     try:
-        logger.info(f"=== 创建支付宝支付开始 ===")
+        logger.info("=== 创建支付宝支付开始 ===")
 
         alipay = get_alipay_client()
-        logger.info(f"支付宝客户端初始化成功")
+        logger.info("支付宝客户端初始化成功")
 
         # 生成商品标题
         subject = generate_order_subject(order)
@@ -124,7 +122,7 @@ def verify_alipay_notification(data):
                 try:
                     decoded_value = unquote(value)
                     decoded_data[key] = decoded_value
-                except:
+                except BaseException:
                     decoded_data[key] = value
             else:
                 decoded_data[key] = value

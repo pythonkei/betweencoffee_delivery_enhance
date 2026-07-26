@@ -1,11 +1,15 @@
 # eshop/scripts/monitor_performance.py
 
+from eshop.models import CoffeeQueue, OrderModel
+
+from django.db import connection
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+
 
 import django
+from datetime import datetime
 
 # 獲取項目根目錄的正確路徑
 # 腳本位置：/home/kei/Desktop/betweencoffee_delivery_enhance/eshop/scripts/analyze_queries.py
@@ -19,11 +23,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "betweencoffee_delivery.settings
 
 
 django.setup()
-
-from django.db import connection
-from django.db.models import Count, Q
-
-from eshop.models import CoffeeQueue, OrderModel
 
 
 def monitor_performance():

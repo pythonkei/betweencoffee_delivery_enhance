@@ -4,7 +4,6 @@
 """
 
 import logging
-from datetime import timedelta
 from typing import Any, Callable, Optional
 
 from django.core.cache import cache

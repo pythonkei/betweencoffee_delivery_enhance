@@ -17,11 +17,6 @@
 import logging
 from datetime import timedelta
 
-import pytz
-from django.db import models
-from django.db.models import Q
-from django.utils import timezone
-
 logger = logging.getLogger(__name__)
 
 

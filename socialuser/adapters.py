@@ -2,11 +2,8 @@ import logging
 
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailAddress
-from allauth.account.utils import send_email_confirmation
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialToken
-from django.conf import settings
-from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
 

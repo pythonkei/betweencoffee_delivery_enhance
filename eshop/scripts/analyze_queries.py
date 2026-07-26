@@ -1,5 +1,8 @@
 # eshop/scripts/analyze_queries.py
 
+
+from django.db import connection
+
 import os
 import sys
 
@@ -18,11 +21,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "betweencoffee_delivery.settings
 # 初始化 Django
 django.setup()
 
-from django.core.management import call_command
-from django.db import connection
-
-from eshop.models import CoffeeQueue, OrderModel
-
 
 def analyze_queries():
     print("=== 數據庫查詢分析 ===")
@@ -32,9 +30,9 @@ def analyze_queries():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT 
-                tablename, 
-                indexname, 
+            SELECT
+                tablename,
+                indexname,
                 indexdef
             FROM pg_indexes
             WHERE schemaname = 'public'

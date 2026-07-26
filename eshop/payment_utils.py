@@ -4,7 +4,6 @@
 """
 
 import logging
-from urllib.parse import unquote
 
 from django.conf import settings
 
@@ -26,7 +25,7 @@ def get_payment_tools(payment_method):
             "create": create_alipay_payment_url,
             "verify": verify_alipay_signature,
             "check_keys": check_alipay_keys,
-            "client": create_alipay_payment,  # 返回客户端
+            "client": create_alipay_client,  # 返回客户端
         },
         "paypal": {
             "get_token": get_paypal_access_token,
@@ -71,7 +70,7 @@ def get_alipay_notify_url():
 # ==================== 支付宝支付相关函数 ====================
 
 
-def create_alipay_payment():
+def create_alipay_client():
     """创建支付宝支付客户端"""
     try:
         from .alipay_utils import get_alipay_client
@@ -122,7 +121,7 @@ def check_alipay_keys():
             return {"success": False, "error": "ALIPAY_PUBLIC_KEY 未配置"}
 
         try:
-            alipay = AliPay(
+            _ = AliPay(
                 appid=settings.ALIPAY_APP_ID,
                 app_notify_url=None,
                 app_private_key_string=settings.ALIPAY_APP_PRIVATE_KEY,

@@ -1,5 +1,10 @@
 # eshop/scripts/system_health_report.py
 
+from eshop.models import CoffeeQueue, OrderModel
+from django.utils import timezone as django_timezone
+from django.db.models import Count, Q, Sum
+from django.db import connection
+import time
 import os
 import sys
 from datetime import datetime, timedelta
@@ -12,14 +17,6 @@ sys.path.insert(0, project_root)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "betweencoffee_delivery.settings")
 django.setup()
-
-import time
-
-from django.db import connection
-from django.db.models import Count, Q, Sum
-from django.utils import timezone as django_timezone
-
-from eshop.models import CoffeeQueue, OrderModel
 
 
 def generate_health_report():
@@ -46,7 +43,7 @@ def generate_health_report():
         # 檢查表大小
         cursor.execute(
             """
-            SELECT 
+            SELECT
                 tablename,
                 pg_size_pretty(pg_total_relation_size(quote_ident(tablename))) as total_size
             FROM pg_tables
@@ -55,7 +52,7 @@ def generate_health_report():
             LIMIT 5;
         """
         )
-        print(f"   主要表大小:")
+        print("   主要表大小:")
         for table, size in cursor.fetchall():
             print(f"     - {table}: {size}")
 
@@ -73,14 +70,14 @@ def generate_health_report():
         revenue=Sum("total_price", filter=Q(payment_status="paid")),
     )
 
-    print(f"   今日訂單:")
+    print("   今日訂單:")
     print(f"     - 總數: {today_stats['total'] or 0}")
     print(f"     - 已支付: {today_stats['paid'] or 0}")
     print(f"     - 快速訂單: {today_stats['quick'] or 0}")
     if today_stats["revenue"]:
         print(f"     - 營業額: HK$ {float(today_stats['revenue']):.2f}")
     else:
-        print(f"     - 營業額: HK$ 0.00")
+        print("     - 營業額: HK$ 0.00")
 
     # 3. 隊列狀態
     print("\n3. 隊列狀態:")
@@ -136,7 +133,7 @@ def generate_health_report():
             # 修正的查詢，使用正確的列名
             cursor.execute(
                 """
-                SELECT 
+                SELECT
                     schemaname,
                     relname as tablename,
                     indexrelname as indexname,
@@ -188,7 +185,7 @@ def generate_health_report():
     if quick_waiting > 5:
         print(f"   ⚠️  快速訂單等待較多: {quick_waiting} 個")
     else:
-        print(f"   ✓ 快速訂單處理正常")
+        print("   ✓ 快速訂單處理正常")
 
     # 7. 系統統計總覽
     print("\n7. 系統統計總覽:")

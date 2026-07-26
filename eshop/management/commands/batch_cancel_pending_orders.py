@@ -20,7 +20,7 @@ import logging
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
-from django.utils import timezone
+
 
 from eshop.models import CoffeeQueue, OrderModel
 from eshop.order_status_manager import OrderStatusManager

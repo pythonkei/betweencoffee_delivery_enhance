@@ -10,7 +10,6 @@ import json
 import logging
 import warnings
 from datetime import timedelta
-from decimal import Decimal
 
 import qrcode
 from django.conf import settings
@@ -592,7 +591,7 @@ class OrderModel(models.Model):
                             item["image"] = "/static/images/default-bean.png"
                     else:
                         item["image"] = "/static/images/default-product.png"
-            except (TypeError, ValueError, KeyError) as e:
+            except (TypeError, ValueError, KeyError):
                 item["price"] = 0.0
                 item["total_price"] = 0.0
                 item["image"] = "/static/images/default-product.png"
@@ -1098,20 +1097,17 @@ class OrderModel(models.Model):
                             )
                         else:
                             # 将订单加入队列
-                            queue_item = queue_manager.add_order_to_queue(self)
-                            if queue_item:
-                                # 修复：queue_item可能是字典或对象，需要检查类型
-                                if isinstance(queue_item, dict):
-                                    position = queue_item.get("queue_position", 0)
-                                    logger.info(
-                                        f"订单 {self.id} 已加入制作队列，位置: {position}"
-                                    )
-                                else:
-                                    logger.info(
-                                        f"订单 {self.id} 已加入制作队列，位置: {queue_item.queue_position}"
-                                    )
+                            queue_result = queue_manager.add__to_queue(self)
+                            if queue_result.get("success"):
+                                queue_item = queue_result["data"]["queue_item"]
+                                position = queue_result["data"].get("position", 0)
+                                logger.info(
+                                    f"订单 {self.id} 已加入制作队列，位置: {position}"
+                                )
                             else:
-                                logger.error(f"订单 {self.id} 加入队列失败")
+                                logger.error(
+                                    f"订单 {self.id} 加入队列失败: {queue_result.get('message', '未知错误')}"
+                                )
                     except Exception as e:
                         logger.error(f"队列处理失败: {str(e)}")
                         import traceback
@@ -1264,7 +1260,6 @@ class OrderModel(models.Model):
     # 队列相关方法
     def add_to_queue(self):
         """将订单添加到制作队列"""
-        from django.utils import timezone
 
         # 检查是否已加入队列
         if hasattr(self, "queue_item"):
@@ -1318,8 +1313,6 @@ class OrderModel(models.Model):
         """获取队列等待时间"""
         if not hasattr(self, "queue_item"):
             return 0
-
-        from django.utils import timezone
 
         from ..queue_manager_refactored import CoffeeQueueManager
 

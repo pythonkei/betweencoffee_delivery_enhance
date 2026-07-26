@@ -6,12 +6,10 @@ API視圖工具 - 提供統一的API處理函數
 import json
 import logging
 
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.http import require_http_methods
 
 from .serializers import ApiResponseFormatter, OrderDataSerializer
 

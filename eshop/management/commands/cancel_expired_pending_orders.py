@@ -22,8 +22,9 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
-from eshop.models import CoffeeQueue, OrderModel
+
 from eshop.order_status_manager import OrderStatusManager
+from eshop.models import OrderModel
 
 logger = logging.getLogger(__name__)
 

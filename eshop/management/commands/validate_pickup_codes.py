@@ -40,7 +40,7 @@ class Command(BaseCommand):
         # 显示统计信息
         total_codes = len(pickup_codes)
         unique_codes = len(code_counts)
-        self.stdout.write(f"\n统计信息:")
+        self.stdout.write("\n统计信息:")
         self.stdout.write(f"  总订单数: {total_codes}")
         self.stdout.write(f"  唯一取餐码数: {unique_codes}")
         self.stdout.write(f"  重复取餐码数: {len(duplicate_codes)}")

@@ -1,10 +1,14 @@
 # eshop/scripts/project_summary_report.py
 
+from eshop.models import CoffeeQueue, OrderModel
+
+from django.db import connection
 import os
 import sys
 from datetime import datetime
 
 import django
+from django.db.models import Count
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, "../../"))
@@ -12,11 +16,6 @@ sys.path.insert(0, project_root)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "betweencoffee_delivery.settings")
 django.setup()
-
-from django.db import connection
-from django.db.models import Count, Q
-
-from eshop.models import CoffeeQueue, OrderModel
 
 
 def generate_project_summary():
@@ -28,10 +27,10 @@ def generate_project_summary():
     print("=" * 70)
 
     print("\n📊 項目概況:")
-    print(f"   項目名稱: 咖啡店外賣外帶訂單管理系統")
-    print(f"   當前版本: v2.1（整合修復版）")
-    print(f"   最後更新: 2026年2月8日")
-    print(f"   系統狀態: 核心支付流程已修復，用戶界面優化與數據一致性驗證階段")
+    print("   項目名稱: 咖啡店外賣外帶訂單管理系統")
+    print("   當前版本: v2.1（整合修復版）")
+    print("   最後更新: 2026年2月8日")
+    print("   系統狀態: 核心支付流程已修復，用戶界面優化與數據一致性驗證階段")
 
     print("\n✅ 已完成的核心修復工作:")
     print("   1. 數據遷移與一致性修復")
@@ -85,9 +84,9 @@ def generate_project_summary():
 
         cursor.execute(
             """
-            SELECT COUNT(*) 
-            FROM eshop_ordermodel 
-            WHERE payment_status = 'paid' 
+            SELECT COUNT(*)
+            FROM eshop_ordermodel
+            WHERE payment_status = 'paid'
             AND DATE(created_at) = CURRENT_DATE;
         """
         )
@@ -134,7 +133,7 @@ def generate_project_summary():
 
         for stat in queue_stats:
             print(f"   {stat['status']}: {stat['count']} 個")
-    except:
+    except BaseException:
         print("   無法獲取隊列統計")
 
     print("\n✅ 已驗證功能:")

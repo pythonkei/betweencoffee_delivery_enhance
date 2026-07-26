@@ -135,7 +135,7 @@ class OrderDataSerializer:
                 order_data["is_beans_only"] = has_beans and not has_coffee
                 order_data["is_coffee_only"] = has_coffee and not has_beans
                 order_data["is_mixed_order"] = has_coffee and has_beans
-            except:
+            except BaseException:
                 order_data["has_coffee"] = False
                 order_data["has_beans"] = False
                 order_data["is_beans_only"] = False

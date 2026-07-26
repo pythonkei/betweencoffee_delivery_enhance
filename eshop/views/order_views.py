@@ -5,7 +5,6 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -21,7 +20,6 @@ from cart.cart import Cart
 from eshop.models import BeanItem, CoffeeItem, CoffeeQueue, OrderModel
 from eshop.order_status_manager import OrderStatusManager
 from eshop.payment_utils import get_payment_tools
-from eshop.view_utils import OrderErrorHandler  # 新增：統一錯誤處理器
 from eshop.view_utils import (
     find_existing_pending_order,
     handle_order_error,
@@ -30,18 +28,17 @@ from eshop.view_utils import (
     validate_and_format_phone,
 )
 
+# 设置日志
+logger = logging.getLogger(__name__)
+
 # 忠誠度系統導入
 try:
-    from socialuser.models_enhanced import CustomerActivity, CustomerLoyalty
+    from socialuser.models_enhanced import CustomerLoyalty
 
     LOYALTY_SYSTEM_AVAILABLE = True
 except ImportError:
     LOYALTY_SYSTEM_AVAILABLE = False
     logger.warning("忠誠度系統模組不可用，積分功能將被禁用")
-
-
-# 设置日志
-logger = logging.getLogger(__name__)
 
 
 # ==================== 優惠券和折扣處理函數 ====================
@@ -147,7 +144,7 @@ class OrderConfirm(View):
 
             # ✅ 修正：普通訂單不需要取貨時間選擇，所以不從 session 獲取
             # 只有快速訂單才需要從 session 獲取之前選擇的取貨時間
-            previous_pickup_time = "5"  # 普通訂單固定為5分鐘（隱藏）
+            _ = "5"  # 普通訂單固定為5分鐘（隱藏）
 
             if cart_data and quick_order_data:
                 logger.info(
@@ -235,7 +232,7 @@ class OrderConfirm(View):
                 if not customer_phone and request.user.is_authenticated:
                     try:
                         customer_phone = getattr(request.user, "phone", "")
-                    except:
+                    except BaseException:
                         pass
                 if not customer_email and request.user.is_authenticated:
                     customer_email = request.user.email or ""
@@ -618,7 +615,7 @@ class OrderConfirm(View):
             if payment_method == "alipay":
                 # 检查是否有创建支付的功能
                 if "create" not in payment_tools:
-                    logger.error(f"支付宝支付工具缺失创建函数")
+                    logger.error("支付宝支付工具缺失创建函数")
                     messages.error(request, "支付宝支付暂时不可用，请选择其他支付方式")
                     return redirect(
                         reverse("eshop:order_payment_confirmation")
@@ -658,7 +655,7 @@ class OrderConfirm(View):
             elif payment_method == "paypal":
                 try:
                     if "create" not in payment_tools:
-                        logger.error(f"PayPal支付工具缺失创建函数")
+                        logger.error("PayPal支付工具缺失创建函数")
                         messages.error(
                             request, "PayPal支付暂时不可用，请选择其他支付方式"
                         )
@@ -1074,7 +1071,7 @@ def order_payment_confirmation(request, order_id=None):
         try:
             order = OrderModel.objects.get(id=order_id)
             redirect_url = reverse("eshop:order_payment_confirmation", args=[order_id])
-        except:
+        except BaseException:
             redirect_url = "/"
         return handle_order_error(
             request, e, redirect_url=redirect_url, error_type="general"

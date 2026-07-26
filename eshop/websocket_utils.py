@@ -73,7 +73,7 @@ def broadcast_to_group(
     try:
         # 檢查是否在事件循環中
         try:
-            loop = asyncio.get_running_loop()
+            _ = asyncio.get_running_loop()
             # 在事件循環中，使用線程執行同步調用
             logger.warning(
                 f"⚠️ 在事件循環中調用 broadcast_to_group（{group_name}），"

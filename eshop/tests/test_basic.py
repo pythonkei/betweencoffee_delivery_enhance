@@ -6,14 +6,15 @@ from django.test import TestCase
 
 User = get_user_model()
 
+
 class BasicTestCase(TestCase):
     """基础测试用例"""
-    
+
     def test_environment(self):
         """测试环境设置"""
         self.assertTrue(True)
         print("✅ 环境测试通过")
-    
+
     def test_models_import(self):
         """测试模型导入"""
         try:

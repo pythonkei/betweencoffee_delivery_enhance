@@ -12,8 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.models import Site
-from django.core.mail import EmailMultiAlternatives, send_mail
-from django.http import HttpResponse
+from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -236,7 +235,6 @@ def profile_emailchange(request):
 @login_required
 def profile_emailverify(request):
     import logging
-    import traceback
 
     logger = logging.getLogger(__name__)
 
@@ -535,7 +533,6 @@ def order_history(request):
 
     # 如果是AJAX請求，返回JSON
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        from django.core import serializers
         from django.http import JsonResponse
 
         orders_data = []

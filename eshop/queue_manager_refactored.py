@@ -15,7 +15,6 @@
 import logging
 from datetime import timedelta
 
-import pytz
 from django.utils import timezone
 
 from .error_handling import (
@@ -24,17 +23,14 @@ from .error_handling import (
     handle_error,
     handle_success,
 )
-from .models import Barista, CoffeeQueue, OrderModel
+from .models import CoffeeQueue, OrderModel
 from .order_status_manager import OrderStatusManager
 from .smart_allocation import (
     allocate_new_order,
     get_recommendations_for_order,
     get_smart_allocator,
-    get_time_calculator,
-    get_workload_manager,
     initialize_smart_system,
     optimize_order_preparation,
-    update_barista_workload,
 )
 from .time_calculation import unified_time_service
 
@@ -53,7 +49,7 @@ class CoffeeQueueManager:
 
     # ==================== 遷移的核心隊列操作方法 ====================
 
-    def add_order_to_queue(self, order, use_priority=True):
+    def add__to_queue(self, order, use_priority=True):
         """
         將訂單添加到隊列 - 使用錯誤處理框架
 
@@ -95,7 +91,7 @@ class CoffeeQueueManager:
                 )
 
                 return handle_success(
-                    operation="add_order_to_queue",
+                    operation="add__to_queue",
                     data={
                         "queue_item_id": existing_queue.id,
                         "order_id": order.id,
@@ -117,7 +113,7 @@ class CoffeeQueueManager:
                 self.logger.info(f"⏭️ 訂單 #{order.id} 不包含咖啡，跳過加入隊列")
 
                 return handle_success(
-                    operation="add_order_to_queue",
+                    operation="add__to_queue",
                     data={
                         "order_id": order.id,
                         "coffee_count": 0,
@@ -181,7 +177,7 @@ class CoffeeQueueManager:
             )
 
             return handle_success(
-                operation="add_order_to_queue",
+                operation="add__to_queue",
                 data={
                     "queue_item_id": queue_item.id,
                     "order_id": order.id,
@@ -199,7 +195,7 @@ class CoffeeQueueManager:
         except Exception as e:
             return handle_database_error(
                 error=e,
-                operation="add_order_to_queue",
+                operation="add__to_queue",
                 query=f"添加訂單到隊列: 訂單 #{order.id if order else 'None'}",
                 model="CoffeeQueue",
             )
@@ -314,8 +310,8 @@ class CoffeeQueueManager:
                 'order_id': 0,
                 'old_queue_status': 'preparing',
                 'new_queue_status': 'ready',
-                'old_order_status': 'preparing',
-                'new_order_status': 'ready',
+                'old__status': 'preparing',
+                'new__status': 'ready',
                 'old_position': 0,
                 'new_position': 0,
                 'actual_completion_time': datetime,
@@ -353,7 +349,7 @@ class CoffeeQueueManager:
 
             # 記錄狀態轉換前信息
             old_queue_status = queue_item.status
-            old_order_status = order.status
+            old__status = order.status
             old_position = queue_item.position
 
             # 更新隊列項狀態 - 關鍵修復：清理隊列位置
@@ -406,7 +402,7 @@ class CoffeeQueueManager:
 
             self.logger.info(
                 f"✅ 訂單 #{order.id} OrderStatusManager標記成功: "
-                f"訂單狀態: {old_order_status} → ready"
+                f"訂單狀態: {old__status} → ready"
             )
 
             # 同步時間
@@ -437,8 +433,8 @@ class CoffeeQueueManager:
                     "order_id": order.id,
                     "old_queue_status": old_queue_status,
                     "new_queue_status": "ready",
-                    "old_order_status": old_order_status,
-                    "new_order_status": "ready",
+                    "old__status": old__status,
+                    "new__status": "ready",
                     "old_position": old_position,
                     "new_position": 0,
                     "actual_completion_time": queue_item.actual_completion_time,
@@ -569,8 +565,8 @@ class CoffeeQueueManager:
                         return queue.position
                     if (
                         queue.added_at
-                        and order.added_at
-                        and order.added_at < queue.added_at
+                        and order.created_at
+                        and order.created_at < queue.added_at
                     ):
                         self.logger.debug(
                             f"訂單 #{order.id} 優先級位置: {queue.position} (插入到較晚的快速訂單前)"
@@ -594,8 +590,8 @@ class CoffeeQueueManager:
                     for queue in waiting_queues:
                         if (
                             queue.added_at
-                            and order.added_at
-                            and order.added_at < queue.added_at
+                            and order.created_at
+                            and order.created_at < queue.added_at
                         ):
                             self.logger.debug(
                                 f"訂單 #{order.id} 優先級位置: {queue.position} (插入到較晚的普通訂單前)"
@@ -676,7 +672,7 @@ class CoffeeQueueManager:
 
     # ==================== 重要方法 ====================
 
-    def recalculate_all_order_times(self):
+    def recalculate_all__times(self):
         """
         統一重新計算所有訂單時間 - 使用錯誤處理框架
 
@@ -686,9 +682,9 @@ class CoffeeQueueManager:
             'message': '操作消息',
             'data': {
                 'queue_reordered': True/False,
-                'quick_orders_updated': 0,
-                'urgent_orders_found': 0,
-                'total_quick_orders': 0,
+                'quick_s_updated': 0,
+                'urgent_s_found': 0,
+                'total_quick_s': 0,
                 'time_update_success': True/False,
                 'integrity_issues': 0,
                 'timestamp': '...'
@@ -710,18 +706,18 @@ class CoffeeQueueManager:
                 self.logger.info("✅ 隊列順序正常，繼續時間計算")
 
             # 2. 更新快速訂單的取貨時間
-            quick_orders_updated = 0
-            quick_orders = OrderModel.objects.filter(
+            quick_s_updated = 0
+            quick_s = OrderModel.objects.filter(
                 order_type="quick", payment_status="paid"
             ).exclude(status__in=["completed", "cancelled"])
 
-            for order in quick_orders:
+            for order in quick_s:
                 try:
                     if (
                         hasattr(order, "pickup_time_choice")
                         and order.pickup_time_choice
                     ):
-                        time_info = unified_time_service.calculate_quick_order_times(
+                        time_info = unified_time_service.calculate_quick__times(
                             order
                         )
                         if time_info:
@@ -730,12 +726,12 @@ class CoffeeQueueManager:
                             ]
                             order.latest_start_time = time_info["latest_start_time"]
                             order.save()
-                            quick_orders_updated += 1
+                            quick_s_updated += 1
                 except Exception as e:
                     self.logger.error(f"更新快速訂單 #{order.id} 時間失敗: {str(e)}")
                     continue
 
-            self.logger.info(f"✅ 已更新 {quick_orders_updated} 個快速訂單的取貨時間")
+            self.logger.info(f"✅ 已更新 {quick_s_updated} 個快速訂單的取貨時間")
 
             # 3. 更新隊列預計時間
             time_update_success = self.update_estimated_times()
@@ -746,8 +742,8 @@ class CoffeeQueueManager:
                 self.logger.warning("⚠️ 隊列預計時間更新可能不完整")
 
             # 4. 檢查緊急訂單
-            urgent_orders_count = 0
-            for order in quick_orders:
+            urgent_s_count = 0
+            for order in quick_s:
                 try:
                     if (
                         hasattr(order, "should_be_in_queue_by_now")
@@ -757,12 +753,12 @@ class CoffeeQueueManager:
                             if not order.is_urgent:
                                 order.is_urgent = True
                                 order.save()
-                                urgent_orders_count += 1
+                                urgent_s_count += 1
                 except Exception as e:
                     self.logger.error(f"檢查訂單 #{order.id} 緊急狀態失敗: {str(e)}")
                     continue
 
-            self.logger.info(f"✅ 發現 {urgent_orders_count} 個緊急訂單需要立即處理")
+            self.logger.info(f"✅ 發現 {urgent_s_count} 個緊急訂單需要立即處理")
 
             # 5. 驗證數據完整性
             integrity_check_result = self.verify_queue_integrity()
@@ -789,20 +785,20 @@ class CoffeeQueueManager:
                 "message": "時間重新計算完成",
                 "details": {
                     "queue_reordered": needs_reorder,
-                    "quick_orders_updated": quick_orders_updated,
-                    "urgent_orders_found": urgent_orders_count,
-                    "total_quick_orders": quick_orders.count(),
+                    "quick_s_updated": quick_s_updated,
+                    "urgent_s_found": urgent_s_count,
+                    "total_quick_s": quick_s.count(),
                     "time_update_success": time_update_success,
                     "integrity_issues": len(issues),
                     "timestamp": unified_time_service.get_hong_kong_time().isoformat(),
                 },
             }
 
-            self.logger.info(f"✅ === 統一時間計算完成 ===")
+            self.logger.info("✅ === 統一時間計算完成 ===")
             self.logger.info(f"📊 結果: {result}")
 
             return handle_success(
-                operation="recalculate_all_order_times",
+                operation="recalculate_all__times",
                 data=result["details"],
                 message="時間重新計算完成",
             )
@@ -815,7 +811,7 @@ class CoffeeQueueManager:
 
             return handle_database_error(
                 error=e,
-                operation="recalculate_all_order_times",
+                operation="recalculate_all__times",
                 query="重新計算所有訂單時間",
                 model="OrderModel",
             )
@@ -829,7 +825,7 @@ class CoffeeQueueManager:
             'success': True/False,
             'message': '操作消息',
             'data': {
-                'waiting_orders_updated': 0,
+                'waiting_s_updated': 0,
                 'current_time': '...',
                 'total_preparation_minutes': 0,
                 'timestamp': '...'
@@ -846,7 +842,7 @@ class CoffeeQueueManager:
             )
 
             cumulative_time = timedelta(minutes=0)
-            waiting_orders_updated = 0
+            waiting_s_updated = 0
             total_preparation_minutes = 0
 
             for queue in waiting_queues:
@@ -858,24 +854,24 @@ class CoffeeQueueManager:
 
                 queue.save()
                 cumulative_time += prep_time
-                waiting_orders_updated += 1
+                waiting_s_updated += 1
                 total_preparation_minutes += queue.preparation_time_minutes
 
             self.logger.info(
                 f"⏰ 更新隊列預計時間完成: "
-                f"更新了 {waiting_orders_updated} 個等待訂單, "
+                f"更新了 {waiting_s_updated} 個等待訂單, "
                 f"總製作時間: {total_preparation_minutes} 分鐘"
             )
 
             return handle_success(
                 operation="update_estimated_times",
                 data={
-                    "waiting_orders_updated": waiting_orders_updated,
+                    "waiting_s_updated": waiting_s_updated,
                     "current_time": current_time.isoformat(),
                     "total_preparation_minutes": total_preparation_minutes,
                     "timestamp": current_time.isoformat(),
                 },
-                message=f"更新了 {waiting_orders_updated} 個訂單的預計時間",
+                message=f"更新了 {waiting_s_updated} 個訂單的預計時間",
             )
 
         except Exception as e:
@@ -986,7 +982,7 @@ class CoffeeQueueManager:
                 model="CoffeeQueue",
             )
 
-    def sync_order_queue_status(self):
+    def sync__queue_status(self):
         """
         同步訂單與隊列狀態 - 使用錯誤處理框架
 
@@ -1015,14 +1011,14 @@ class CoffeeQueueManager:
 
             with transaction.atomic():
                 # 添加缺失的隊列項
-                preparing_orders = OrderModel.objects.filter(
+                preparing_s = OrderModel.objects.filter(
                     payment_status="paid", status="preparing"
                 )
 
-                for order in preparing_orders:
+                for order in preparing_s:
                     orders_checked += 1
                     if not CoffeeQueue.objects.filter(order=order).exists():
-                        result = self.add_order_to_queue(order)
+                        result = self.add__to_queue(order)
                         if result.get("success"):
                             queue_items_added += 1
 
@@ -1052,7 +1048,7 @@ class CoffeeQueueManager:
             )
 
             return handle_success(
-                operation="sync_order_queue_status",
+                operation="sync__queue_status",
                 data={
                     "orders_checked": orders_checked,
                     "queue_items_added": queue_items_added,
@@ -1068,7 +1064,7 @@ class CoffeeQueueManager:
 
             return handle_database_error(
                 error=e,
-                operation="sync_order_queue_status",
+                operation="sync__queue_status",
                 query="同步訂單與隊列狀態",
                 model="OrderModel",
             )
@@ -1144,7 +1140,7 @@ class CoffeeQueueManager:
 
     # ==================== 智能分配方法 ====================
 
-    def add_order_to_queue_with_smart_allocation(self, order, use_priority=True):
+    def add__to_queue_with_smart_allocation(self, order, use_priority=True):
         """
         使用智能分配將訂單添加到隊列
 
@@ -1177,7 +1173,7 @@ class CoffeeQueueManager:
             self.logger.info(f"🤖 使用智能分配處理訂單 #{order.id}")
 
             # 1. 首先執行標準的隊列添加
-            standard_result = self.add_order_to_queue(order, use_priority)
+            standard_result = self.add__to_queue(order, use_priority)
 
             if not standard_result.get("success"):
                 return standard_result
@@ -1219,7 +1215,7 @@ class CoffeeQueueManager:
                 )
 
             return handle_success(
-                operation="add_order_to_queue_with_smart_allocation",
+                operation="add__to_queue_with_smart_allocation",
                 data=smart_data,
                 message=f"訂單 #{order.id} 已使用智能分配加入隊列",
             )
@@ -1233,7 +1229,7 @@ class CoffeeQueueManager:
             else:
                 return handle_database_error(
                     error=e,
-                    operation="add_order_to_queue_with_smart_allocation",
+                    operation="add__to_queue_with_smart_allocation",
                     query=f"智能分配訂單到隊列: 訂單 #{order.id if order else 'None'}",
                     model="CoffeeQueue",
                 )
@@ -1293,7 +1289,7 @@ class CoffeeQueueManager:
         try:
             from .models import OrderModel
 
-            order = OrderModel.objects.get(id=order_id)
+            _ = OrderModel.objects.get(id=order_id)
 
             # 獲取智能建議
             recommendations_result = get_recommendations_for_order(order_id)
@@ -1462,7 +1458,7 @@ class CoffeeQueueManager:
                 "recommendations_generated": recommendations_generated,
                 "system_status_before": system_status_before,
                 "system_status_after": system_status_after,
-                "total_waiting_orders": waiting_queues.count(),
+                "total_waiting_s": waiting_queues.count(),
             }
 
             self.logger.info(
@@ -1506,7 +1502,7 @@ def force_sync_queue_and_orders():
         manager = CoffeeQueueManager()
 
         # 執行同步操作
-        sync_result = manager.sync_order_queue_status()
+        sync_result = manager.sync__queue_status()
 
         if sync_result.get("success"):
             queue_logger.info("✅ 强制同步完成")
@@ -1533,7 +1529,7 @@ def repair_queue_data():
 
         # 執行修復操作
         fix_result = manager.fix_queue_positions()
-        sync_result = manager.sync_order_queue_status()
+        sync_result = manager.sync__queue_status()
 
         if fix_result.get("success") and sync_result.get("success"):
             return True
@@ -1556,7 +1552,7 @@ def get_hong_kong_time_now():
     return unified_time_service.get_hong_kong_time()
 
 
-def sync_ready_orders_timing():
+def sync_ready_s_timing():
     """
     同步已就緒訂單的時間 - 兼容性函數
 
@@ -1566,9 +1562,9 @@ def sync_ready_orders_timing():
         queue_logger.info("同步已就緒訂單的時間...")
 
         # 獲取所有已就緒訂單
-        ready_orders = OrderModel.objects.filter(status="ready", payment_status="paid")
+        ready_s = OrderModel.objects.filter(status="ready", payment_status="paid")
 
-        for order in ready_orders:
+        for order in ready_s:
             # 檢查對應的隊列項
             try:
                 queue_item = CoffeeQueue.objects.get(order=order)

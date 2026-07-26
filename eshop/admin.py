@@ -1,4 +1,6 @@
 # eshop/admin.py - 修正版
+import logging
+
 from django.contrib import admin, messages
 from django.shortcuts import redirect, render
 from django.urls import path
@@ -15,6 +17,8 @@ from .models import (
     CoffeeQueue,
     OrderModel,
 )
+
+logger = logging.getLogger(__name__)
 
 
 # 員工訂單管理視圖

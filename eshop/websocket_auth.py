@@ -13,7 +13,7 @@ eshop/websocket_auth.py - WebSocket 認證 Middleware（修復 Render PostgreSQL
 
 import logging
 
-from channels.auth import AuthMiddleware, AuthMiddlewareStack
+from channels.auth import AuthMiddleware
 from channels.db import database_sync_to_async
 
 logger = logging.getLogger(__name__)

@@ -3,8 +3,8 @@
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, Optional, Union
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 import pytz
 

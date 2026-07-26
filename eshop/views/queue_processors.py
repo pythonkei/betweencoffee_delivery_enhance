@@ -12,12 +12,6 @@ from django.utils import timezone
 
 from eshop.models import CoffeeQueue, OrderModel
 from eshop.order_status_manager import OrderStatusManager
-from eshop.query_optimizer_enhanced import (
-    BatchOrderProcessor,
-    QueryOptimizer,
-    batch_prepare_orders,
-    batch_prepare_ready_orders,
-)
 from eshop.time_calculation import unified_time_service
 from eshop.utils.order_item_processor import OrderItemProcessor
 from eshop.utils.time_formatter import TimeFormatter

@@ -146,7 +146,7 @@ def sync_payment_status(order_id):
                 return {"success": False, "status": "processing_failed"}
         else:
             # 支付未成功，檢查是否超時
-            from datetime import datetime, timedelta
+            from datetime import timedelta
 
             order_age = timezone.now() - order.created_at
 

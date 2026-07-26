@@ -14,10 +14,8 @@ OAuth Token 刷新機制
 """
 
 import logging
-import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from django.conf import settings
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)

@@ -96,7 +96,7 @@ class BaseOrderConsumer(AsyncWebsocketConsumer):
                     await self.channel_layer.group_add(
                         "queue_updates", self.channel_name
                     )
-                    logger.info(f"📋 客戶端訂閱隊列")
+                    logger.info("📋 客戶端訂閱隊列")
                     await self._send_json(
                         {
                             "type": "subscribed",

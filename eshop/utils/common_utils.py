@@ -10,16 +10,15 @@
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
 import pytz
 from django.http import JsonResponse
-from django.utils import timezone
 
-from core.api_response import ApiResponse, api_error, api_success
+from core.api_response import api_error, api_success
 
 # 導入統一的錯誤處理和API響應
-from eshop.error_handling import ErrorHandler, handle_error, handle_success
+from eshop.error_handling import handle_error
 
 logger = logging.getLogger(__name__)
 
