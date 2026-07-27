@@ -123,14 +123,11 @@ class BaseOrderRendererV2 {
             console.log(`📥 ${this.orderType} 訂單數據接收:`, orders?.length || 0, '個');
             this.hasInitialData = true;
 
-            // 初始加載時（hasInitialData 剛被設為 true），無論 tab 是否激活都直接渲染
-            // 後續更新則按 tab 激活狀態決定
-            if (this.isActiveTab() || !this.hasRenderedOnce) {
-                this.renderOrders(orders);
-                this.hasRenderedOnce = true;
-            } else {
-                this.cacheOrders(orders);
-            }
+            // 初始加載時（hasRenderedOnce 為 false），無論 tab 是否激活都直接渲染
+            // 後續更新也直接渲染，確保狀態轉換後目標頁面立即顯示訂單卡片
+            // 不再使用 cacheOrders，避免非活躍頁面的 UI 更新延遲
+            this.renderOrders(orders);
+            this.hasRenderedOnce = true;
         }, true);
 
         // 監聽所有數據更新
@@ -138,13 +135,9 @@ class BaseOrderRendererV2 {
             const orders = allData[dataKey];
             if (orders) {
                 this.hasInitialData = true;
-                // 初始加載時（hasRenderedOnce 為 false），無論 tab 是否激活都直接渲染
-                if (this.isActiveTab() || !this.hasRenderedOnce) {
-                    this.renderOrders(orders);
-                    this.hasRenderedOnce = true;
-                } else {
-                    this.cacheOrders(orders);
-                }
+                // 直接渲染，確保非活躍標籤頁也即時更新
+                this.renderOrders(orders);
+                this.hasRenderedOnce = true;
             }
         }, true);
 
@@ -1021,11 +1014,9 @@ class BaseOrderRendererV2 {
 
     cleanupTimers() {
         // 全域 timer 由靜態方法管理，不在實例層級清理
-        // 但檢查是否還有其他渲染器在使用，如果沒有則停止全域 timer
-        const rendererCount = document.querySelectorAll('[data-renderer-instance]').length;
-        if (rendererCount <= 1) {
-            BaseOrderRendererV2.stopGlobalCountdown();
-        }
+        // renderOrders 中的 cleanupTimers 不應停止全域 timer
+        // 因為全域 timer 是所有 renderer 共享的，不應由單次重建停止
+        // 全域 timer 只在 cleanup() 方法中停止
     }
 
     // ==================== 自動刷新 ====================
@@ -1300,8 +1291,19 @@ class BaseOrderRendererV2 {
             const result = await this._apiPost(finalUrl, { order_id: orderId, ...extraData });
 
             if (result && result.success) {
+                // Step 1: 等待 UnifiedDataManager 數據刷新完成
+                // 確保 forceRefresh 完成後才顯示成功訊息
+                if (window.unifiedDataManager) {
+                    await window.unifiedDataManager.loadUnifiedData(true);
+                }
+                
+                // Step 2: 強制通知所有渲染器（跳過 isActiveTab 檢查）
+                // 確保目標頁面的渲染器立即收到數據更新
+                if (window.unifiedDataManager?.currentData) {
+                    window.unifiedDataManager.notifyAllListeners();
+                }
+                
                 this.showToast(successMessage, 'success');
-                this.forceRefresh();
                 return true;
             } else {
                 this.showToast(`${failMessage}: ${result?.error || '未知錯誤'}`, 'error');

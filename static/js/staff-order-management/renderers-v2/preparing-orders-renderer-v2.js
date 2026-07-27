@@ -56,6 +56,8 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         if (!orders || orders.length === 0) {
             console.log(`📭 ${this.orderType} 訂單列表為空`);
             this._showBothEmpty();
+            // 更新子標籤頁徽章為 0
+            this._updateSubtabBadges();
             return;
         }
 

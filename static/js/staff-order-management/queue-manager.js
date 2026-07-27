@@ -637,9 +637,13 @@ class QueueManager {
                         }
                     }));
                     
-                    // 6. 觸發統一數據刷新
+                    // 6. 觸發統一數據刷新（等待完成 + 強制通知所有渲染器）
                     if (window.unifiedDataManager) {
-                        setTimeout(() => window.unifiedDataManager.loadUnifiedData(), 500);
+                        await window.unifiedDataManager.loadUnifiedData(true);
+                        // 強制通知所有渲染器，確保目標頁面立即顯示訂單卡片
+                        if (window.unifiedDataManager.currentData) {
+                            window.unifiedDataManager.notifyAllListeners();
+                        }
                     }
                     
                     // 7. 記錄成功操作

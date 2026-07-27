@@ -52,9 +52,10 @@ class UnifiedDataManager {
                 console.log('⚠️ 數據正在加載中，跳過重複請求');
                 return false;
             }
-            // force=true 時，強制中斷當前加載並重新開始
-            console.log('🔄 強制刷新：中斷當前加載並重新請求');
-            this.isLoading = false;
+            // 記錄有待處理的強制刷新，當前加載完成後將會執行額外刷新
+            this._pendingRefreshAfterLoad = true;
+            console.log('🔄 標記有待處理的強制刷新（當前加載完成後將執行）');
+            return false;
         }
         
         this.isLoading = true;
@@ -170,6 +171,13 @@ class UnifiedDataManager {
             
         } finally {
             this.isLoading = false;
+            
+            // 如果在加載期間有待處理的強制刷新請求，執行一次額外刷新
+            if (this._pendingRefreshAfterLoad) {
+                this._pendingRefreshAfterLoad = false;
+                console.log('🔄 有待處理的強制刷新，執行額外加載');
+                setTimeout(() => this.loadUnifiedData(true), 50);
+            }
         }
     }
     
