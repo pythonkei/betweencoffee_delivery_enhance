@@ -280,7 +280,7 @@ Phase 4：效能優化與架構精簡 — ✅ 2026-07-27
 ├── [x] A1: 統一 all_data 渲染，消除 redundant 通知
 ├── [x] A2: 消除 QueueManager 冗餘監聽
 ├── [x] A3: BadgeManager 只監聽 all_data，統一數據入口
-├── [ ] B1: 增量 DOM 更新
+├── [x] B1: 增量 DOM 更新
 ```
 
 ## UI 開發設計注意事項
