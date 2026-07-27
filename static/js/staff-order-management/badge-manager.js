@@ -42,19 +42,14 @@ class BadgeManager {
         
         // 註冊到統一數據管理器
         if (window.unifiedDataManager) {
-            // 監聽徽章數據更新
-            window.unifiedDataManager.registerListener('badge_summary', (badgeData) => {
-                this.updateBadgesFromData(badgeData);
-            });
-            
-            // 監聽所有數據更新（備用）
+            // Phase 4 A3: 只監聽 all_data，統一數據入口
             window.unifiedDataManager.registerListener('all_data', (allData) => {
                 if (allData.badge_summary) {
                     this.updateBadgesFromData(allData.badge_summary);
                 }
             });
             
-            console.log('✅ 徽章管理器已註冊到統一數據管理器');
+            console.log('✅ 徽章管理器已註冊到統一數據管理器（Phase 4 A3: 只監聽 all_data）');
         } else {
             console.error('❌ 未找到統一數據管理器，徽章更新將失敗');
         }
