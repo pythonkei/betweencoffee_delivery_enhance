@@ -210,46 +210,83 @@ class BaseOrderRendererV2 {
             return;
         }
 
-        // 清理現有計時器
-        this.cleanupTimers();
-
-        // 清空容器
-        orderList.innerHTML = '';
-        this.currentOrders.clear();
-
+        // Phase 4 B1: 增量 DOM 更新
         // 檢查是否有訂單
         if (!orders || orders.length === 0) {
             console.log(`📭 ${this.orderType} 訂單列表為空`);
             this.showEmpty();
+            this.currentOrders.clear();
             return;
         }
 
-        console.log(`🎨 渲染 ${this.orderType} 訂單: ${orders.length} 個`);
-
-        // beforeRender 鉤子
-        this.beforeRender(orders);
-
         // 對訂單進行排序
+        const ordersWithSortKey = orders.map(o => ({
+            id: this._getOrderId(o),
+            data: o,
+            sortKey: this._getSortKey(o)
+        }));
         const sortedOrders = this.sortOrders(orders);
 
-        // 使用 DocumentFragment 提高性能
-        const fragment = document.createDocumentFragment();
+        // 構建新的 ID 集合
+        const newOrderIds = new Set(ordersWithSortKey.map(o => o.id));
 
-        // 渲染每個訂單
-        sortedOrders.forEach(order => {
-            const orderElement = this.createOrderElement(order);
-            fragment.appendChild(orderElement);
-
-            // 更新當前訂單映射
-            this.currentOrders.set(this._getOrderId(order), {
-                element: orderElement,
-                data: order,
-                updated: new Date().getTime()
-            });
+        // 移除不再存在的訂單
+        let hasRemoved = false;
+        this.currentOrders.forEach((entry, id) => {
+            if (!newOrderIds.has(id)) {
+                entry.element.remove();
+                this.currentOrders.delete(id);
+                hasRemoved = true;
+            }
         });
 
-        // 一次性添加到 DOM
-        orderList.appendChild(fragment);
+        // 找出需要新增的訂單（比對現有 ID）
+        const newOrders = sortedOrders.filter(o => !this.currentOrders.has(this._getOrderId(o)));
+
+        // 如果沒有任何變化，跳過
+        if (!hasRemoved && newOrders.length === 0 && this.currentOrders.size === sortedOrders.length) {
+            console.log(`⏭️ ${this.orderType} 訂單無變化，跳過重建`);
+            return;
+        }
+
+        console.log(`🎨 ${this.orderType} 增量更新: 現有=${this.currentOrders.size}, 新增=${newOrders.length}, 總數=${sortedOrders.length}`);
+
+        // 清理現有計時器
+        this.cleanupTimers();
+
+        // 新增訂單
+        if (newOrders.length > 0) {
+            const fragment = document.createDocumentFragment();
+            newOrders.forEach(order => {
+                const orderElement = this.createOrderElement(order);
+                fragment.appendChild(orderElement);
+                this.currentOrders.set(this._getOrderId(order), {
+                    element: orderElement,
+                    data: order,
+                    updated: new Date().getTime()
+                });
+            });
+
+            // 根據排序找到正確的插入位置
+            sortedOrders.forEach(order => {
+                const id = this._getOrderId(order);
+                if (!this.currentOrders.has(id)) return;
+                const existingEl = this.currentOrders.get(id).element;
+                if (existingEl.parentNode !== orderList) {
+                    // 找到應該插入的位置
+                    let insertBefore = null;
+                    for (const sortedOrder of sortedOrders) {
+                        const sid = this._getOrderId(sortedOrder);
+                        if (sid === id) break;
+                        const existing = this.currentOrders.get(sid);
+                        if (existing && existing.element.parentNode === orderList) {
+                            insertBefore = existing.element.nextSibling;
+                        }
+                    }
+                    orderList.insertBefore(existingEl, insertBefore || null);
+                }
+            });
+        }
 
         // 顯示列表容器，隱藏空狀態
         orderList.style.display = 'block';
@@ -268,7 +305,15 @@ class BaseOrderRendererV2 {
         // afterRender 鉤子
         this.afterRender(orders);
 
-        console.log(`✅ ${this.orderType} 訂單渲染完成`);
+        console.log(`✅ ${this.orderType} 增量更新完成`);
+    }
+
+    /**
+     * 獲取排序鍵（默認使用創建時間）
+     * @protected
+     */
+    _getSortKey(order) {
+        return order.created_at_iso || order.created_at || '';
     }
 
     /**
