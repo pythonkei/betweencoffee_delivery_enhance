@@ -404,9 +404,9 @@ class QueueManager {
 
         // 構建訂單HTML（徽章修正版）
         orderDiv.innerHTML = `
-            <!-- 訂單類型徽章（左上角） -->
+            <!-- 訂單類型徽章（左上角）+ 支付方式（與 v2 Renderers 一致） -->
             <div class="order-type-badges-container">
-                ${orderTypeBadges}
+                ${orderTypeBadges}${paymentMethodBadge}
             </div>
             
             <div class="d-flex justify-content-between mb-3 mt-3">
@@ -415,7 +415,6 @@ class QueueManager {
                         <i class="fas fa-clock mr-1"></i>等待中
                     </span>
                     ${queuePositionBadge}
-                    ${paymentMethodBadge}
                 </div>
             </div>
 
