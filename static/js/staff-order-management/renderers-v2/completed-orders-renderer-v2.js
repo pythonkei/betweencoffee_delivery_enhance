@@ -242,7 +242,7 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
         return `
             <!-- 訂單類型徽章（左上角） -->
             <div class="order-type-badges-container">
-                ${orderTypeBadges}
+                ${orderTypeBadges}${paymentMethodBadge}
             </div>
             
             <div class="order-items">

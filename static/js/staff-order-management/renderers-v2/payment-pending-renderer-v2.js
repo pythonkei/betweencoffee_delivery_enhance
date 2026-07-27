@@ -242,7 +242,7 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
         return `
             <!-- 訂單類型徽章（左上角） -->
             <div class="order-type-badges-container">
-                ${orderTypeBadges}
+                ${orderTypeBadges}${paymentMethodBadge}${paymentMethodBadge}
             </div>
             
             <div class="d-flex justify-content-between mb-3 mt-3">
