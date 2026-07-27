@@ -441,6 +441,20 @@ class StatusChanger:
             except Exception as ws_error:
                 logger.error(f"❌ 發送 WebSocket 通知失敗: {str(ws_error)}")
 
+            # 發送 WhatsApp 通知（signal 可能不會觸發，所以直接在此調用）
+            try:
+                from ..whatsapp_notifier import send_order_ready_notification
+
+                whatsapp_result = send_order_ready_notification(order)
+                if whatsapp_result:
+                    logger.info(f"✅ WhatsApp 就緒通知已發送: 訂單 #{order_id}")
+                else:
+                    logger.info(f"ℹ️ WhatsApp 就緒通知跳過: 訂單 #{order_id}")
+            except ImportError:
+                logger.debug("WhatsApp 通知模組未安裝")
+            except Exception as wa_error:
+                logger.error(f"❌ 發送 WhatsApp 通知失敗: {str(wa_error)}")
+
             logger.info(f"Order {order_id} marked as ready by {staff_name or 'system'}")
             return {"success": True, "order": order, "queue_item": queue_item}
 

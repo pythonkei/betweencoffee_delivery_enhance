@@ -38,6 +38,11 @@ def send_whatsapp_message(to_phone: str, message: str) -> bool:
     # 清理電話號碼格式（移除 + 號和空格）
     to_phone = to_phone.strip().lstrip("+").replace(" ", "").replace("-", "")
 
+    # 🔧 修復：香港本地號碼（8 位數字）自動加上 852 國碼
+    if to_phone.isdigit() and len(to_phone) == 8:
+        to_phone = "852" + to_phone
+        logger.info(f"📞 自動補上香港國碼: 852...{to_phone[-4:]}")
+
     url = f"{WHATSAPP_API_BASE}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
 
     headers = {
