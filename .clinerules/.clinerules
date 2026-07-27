@@ -276,10 +276,10 @@ Phase 3G：渲染器狀態轉換即時同步修復（優先級：P1）— ✅ 20
 ├── [x] 子徽章空訂單歸零修復
 ├── [x] verify_flow_fix.py 端到端驗證腳本（50/50 測試通過）
 
-Phase 4：效能優化與架構精簡（待評估）
-├── [ ] A1: 統一 all_data 渲染，消除 redundant 通知
-├── [ ] A2: 消除 QueueManager 冗餘監聽
-├── [ ] A3: 移除 notifyAllListeners 逐個通知
+Phase 4：效能優化與架構精簡 — ✅ 2026-07-27
+├── [x] A1: 統一 all_data 渲染，消除 redundant 通知
+├── [x] A2: 消除 QueueManager 冗餘監聽
+├── [x] A3: BadgeManager 只監聽 all_data，統一數據入口
 ├── [ ] B1: 增量 DOM 更新
 ```
 
