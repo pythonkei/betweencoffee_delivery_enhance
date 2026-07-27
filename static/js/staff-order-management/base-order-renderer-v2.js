@@ -1321,24 +1321,37 @@ class BaseOrderRendererV2 {
             }
         }
 
+        // Step 3: 改用 OrderActionService 處理 API 調用 + 數據刷新 + 通知
+        if (window.orderActionService) {
+            const orderId = this._getOrderId(order);
+            const finalUrl = url.replace('{orderId}', orderId);
+            
+            const result = await window.orderActionService.executeOrderAction(
+                orderId, finalUrl, {
+                    successMessage,
+                    failMessage,
+                    errorMessage,
+                    extraData
+                }
+            );
+            
+            this.isProcessingAction = false;
+            return result;
+        }
+        
+        // 降級方案：保留原有邏輯
         try {
             const orderId = this._getOrderId(order);
             const finalUrl = url.replace('{orderId}', orderId);
             const result = await this._apiPost(finalUrl, { order_id: orderId, ...extraData });
 
             if (result && result.success) {
-                // Step 1: 等待 UnifiedDataManager 數據刷新完成
-                // 確保 forceRefresh 完成後才顯示成功訊息
                 if (window.unifiedDataManager) {
                     await window.unifiedDataManager.loadUnifiedData(true);
                 }
-                
-                // Step 2: 強制通知所有渲染器（跳過 isActiveTab 檢查）
-                // 確保目標頁面的渲染器立即收到數據更新
                 if (window.unifiedDataManager?.currentData) {
                     window.unifiedDataManager.notifyAllListeners();
                 }
-                
                 this.showToast(successMessage, 'success');
                 return true;
             } else {
