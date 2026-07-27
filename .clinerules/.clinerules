@@ -243,18 +243,6 @@ Phase 3C：效能優化（優先級：中）— ✅ 已完成
 ├── [x] 優化倒數計時（requestAnimationFrame vs setInterval）
 ├── [x] 減少不必要的重新渲染
 
-Phase 3D：新功能（優先級：低）
-├── [x] 濃度選擇功能顯示（所有前端頁面 + 員工管理頁面）— ✅ 2026-07-27
-├── [x] 選項行 bc-options-row 全面改版（CSS + JS + 後端）— ✅ 2026-07-27
-├── [x] 產品照片增大 10% — ✅ 2026-07-27
-├── [x] 選項文字值白色 — ✅ 2026-07-27
-├── [x] 選項組間距 8px — ✅ 2026-07-27
-├── [x] 浮動返回頂部按鈕（員工頁面）— ✅ 2026-07-27
-├── [ ] 訂單搜尋/過濾功能
-├── [ ] 批量操作（批量確認支付）
-├── [ ] 訂單匯出功能
-├── [ ] 操作日誌/審計追蹤
-
 Phase 3E：技術債務（優先級：P1）
 ├── [x] 拆分 models.py（1636行 → 5 個子模組）— ✅ 2026-07-23
 ├── [x] 拆分 queue_manager_refactored.py（1637行 → 6 個子模組）— ✅ 2026-07-23
@@ -266,6 +254,26 @@ Phase 3E：技術債務（優先級：P1）
 Phase 3F：基礎設施（優先級：P1）— ✅ 已完成
 ├── [x] 資料庫遷移至 Supabase（Render PostgreSQL → Supabase）— ✅ 2026-07-24
 ├── [x] 更新 Django settings 與環境變量
+
+Phase 3D：新功能（優先級：低）
+├── [x] 濃度選擇功能顯示（所有前端頁面 + 員工管理頁面）— ✅ 2026-07-27
+├── [x] 選項行 bc-options-row 全面改版（CSS + JS + 後端）— ✅ 2026-07-27
+├── [x] 產品照片增大 10% — ✅ 2026-07-27
+├── [x] 選項文字值白色 — ✅ 2026-07-27
+├── [x] 選項組間距 8px — ✅ 2026-07-27
+├── [x] 浮動返回頂部按鈕（員工頁面）— ✅ 2026-07-27
+├── [x] 四種支付方式顯示（所有頁面）— ✅ 2026-07-27
+│   ├── [x] order_history.html（客戶訂單歷史）
+│   ├── [x] order_payment_confirmation.html（客戶支付確認）
+│   ├── [x] queue-manager.js（員工等待子頁面）
+│   ├── [x] payment-pending-renderer-v2.js（員工待確認付款頁面）
+│   ├── [x] preparing-orders-renderer-v2.js（員工製作中頁面）
+│   ├── [x] ready-orders-renderer-v2.js（員工已就緒頁面）
+│   └── [x] completed-orders-renderer-v2.js（員工已完成頁面）
+├── [ ] 訂單搜尋/過濾功能
+├── [ ] 批量操作（批量確認支付）
+├── [ ] 訂單匯出功能
+├── [ ] 操作日誌/審計追蹤
 
 Phase 3G：渲染器狀態轉換即時同步修復（優先級：P1）— ✅ 2026-07-27
 ├── [x] _executeOrderAction await loadUnifiedData + notifyAllListeners
