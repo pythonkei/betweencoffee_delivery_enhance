@@ -87,11 +87,27 @@ def staff_order_management(request):
 
 
 def get_unified_queue_data(request):
-    """返回統一的隊列數據，格式符合前端 UnifiedDataManager 要求"""
+    """返回統一的隊列數據，格式符合前端 UnifiedDataManager 要求
+    
+    支持增量查詢：?since=<ISO timestamp>
+    - 首次請求（無 since）：返回全量數據
+    - 後續請求（有 since）：只返回 updated_at > since 的變更
+    """
     try:
         # 獲取香港時區與當前時間
         hk_tz = pytz.timezone("Asia/Hong_Kong")
         now = timezone.now().astimezone(hk_tz)
+        
+        # 檢查是否為增量查詢
+        since_str = request.GET.get('since')
+        since = None
+        is_incremental = False
+        if since_str:
+            try:
+                since = timezone.datetime.fromisoformat(since_str)
+                is_incremental = True
+            except (ValueError, TypeError):
+                pass
 
         # 使用現有的處理函數取得各類訂單數據
         payment_pending_orders = process_payment_pending_orders(now, hk_tz)
@@ -100,7 +116,7 @@ def get_unified_queue_data(request):
         ready_orders = process_ready_orders(now, hk_tz)
         completed_orders = process_completed_orders(now, hk_tz)
 
-        # 徽章摘要
+        # 徽章摘要（不區分增量/全量，總是返回最新）
         badge_summary = {
             "payment_pending": len(payment_pending_orders),
             "waiting": len(waiting_orders),
@@ -108,6 +124,29 @@ def get_unified_queue_data(request):
             "ready": len(ready_orders),
             "completed": len(completed_orders),
         }
+
+        # 增量模式：過濾出有變化的訂單
+        if is_incremental and since:
+            payment_pending_orders = [
+                o for o in payment_pending_orders 
+                if o.get('updated_at') and o['updated_at'] > since_str
+            ]
+            waiting_orders = [
+                o for o in waiting_orders 
+                if o.get('updated_at') and o['updated_at'] > since_str
+            ]
+            preparing_orders = [
+                o for o in preparing_orders 
+                if o.get('updated_at') and o['updated_at'] > since_str
+            ]
+            ready_orders = [
+                o for o in ready_orders 
+                if o.get('updated_at') and o['updated_at'] > since_str
+            ]
+            completed_orders = [
+                o for o in completed_orders 
+                if o.get('updated_at') and o['updated_at'] > since_str
+            ]
 
         # ✅ 關鍵：將所有數據包裝在 data 欄位中
         response_data = {
@@ -122,6 +161,7 @@ def get_unified_queue_data(request):
             },
             "timestamp": timezone.now().isoformat(),
             "message": "隊列數據加載成功",
+            "is_incremental": is_incremental,  # 標記是否為增量響應
         }
 
         return JsonResponse(response_data)
