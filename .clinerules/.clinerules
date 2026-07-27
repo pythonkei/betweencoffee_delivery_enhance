@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年7月27日（更新：渲染器狀態轉換即時同步修復 + Phase 4 規劃）
+> **最後更新**: 2026年7月27日（更新：Phase 3G + Phase 4 全部完成，合併至 main）
 
 ## 開發者背景與方法論
 
@@ -281,6 +281,21 @@ Phase 4：效能優化與架構精簡 — ✅ 2026-07-27
 ├── [x] A2: 消除 QueueManager 冗餘監聽
 ├── [x] A3: BadgeManager 只監聽 all_data，統一數據入口
 ├── [x] B1: 增量 DOM 更新
+│
+├── [x] refactor: 建立 OrderActionService 共用服務（329 行新檔案）
+│   ├── [x] 統一 7 個業務操作方法
+│   ├── [x] QueueManager startPreparation 改用共用服務（-135 行）
+│   └── [x] v2 Renderers _executeOrderAction 改用共用服務（保留降級方案）
+│
+├── [x] refactor: 淘汰 QueueManager 舊版 preparing/ready UI
+│   ├── [x] QueueManager 只監聽 waiting_orders（維持等待卡片 UI）
+│   ├── [x] preparing/ready/completed 全部由 v2 Renderers 管理
+│   └── [x] 消除雙重渲染（-66%）
+│
+└── [x] feat: API 增量返回（scheme B）
+    ├── [x] 支援 ?since=<ISO timestamp> 參數
+    ├── [x] 首次請求返回全量，後續返回增量
+    └── [x] 徽章摘要 always 返回最新
 ```
 
 ## UI 開發設計注意事項
