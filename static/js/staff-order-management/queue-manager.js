@@ -30,24 +30,10 @@ class QueueManager {
             return;
         }
         
-        console.log('✅ 隊列管理器註冊到統一數據管理器');
+        console.log('✅ 隊列管理器註冊到統一數據管理器（Phase 4 A2: 只保留 all_data）');
         
-        // 監聽等待隊列數據
-        window.unifiedDataManager.registerListener('waiting_orders', (waitingOrders) => {
-            this.updateWaitingQueueImmediately(waitingOrders);
-        });
-        
-        // 監聽製作中隊列數據
-        window.unifiedDataManager.registerListener('preparing_orders', (preparingOrders) => {
-            this.updatePreparingQueueImmediately(preparingOrders);
-        });
-        
-        // 監聽已就緒隊列數據
-        window.unifiedDataManager.registerListener('ready_orders', (readyOrders) => {
-            this.updateReadyQueueImmediately(readyOrders);
-        });
-        
-        // 監聽所有數據更新（備用）
+        // 只監聽 all_data，消除冗餘的三個獨立監聽器
+        // 因為 all_data 已經包含 waiting_orders、preparing_orders、ready_orders
         window.unifiedDataManager.registerListener('all_data', (allData) => {
             if (allData.waiting_orders) {
                 this.updateWaitingQueueImmediately(allData.waiting_orders);
