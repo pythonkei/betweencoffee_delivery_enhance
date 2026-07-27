@@ -41,6 +41,21 @@
                     </div>
                     <h3 class="{{ payment_info.icon_color }} mb-3">{{ payment_info.title }}</h3>
                     
+                    <!-- 四種支付方式顯示 -->
+                    <div class="mb-2">
+                        <span class="badge badge-success" style="font-size: 1rem; padding: 8px 16px;">
+                            {% if order.payment_method == 'alipay' %}
+                                <i class="fab fa-alipay mr-1"></i>支付寶
+                            {% elif order.payment_method == 'fps' %}
+                                <i class="fas fa-money-bill-wave mr-1"></i>FPS 轉數快
+                            {% elif order.payment_method == 'cash' %}
+                                <i class="fas fa-money-bill-alt mr-1"></i>現金
+                            {% elif order.payment_method == 'paypal' %}
+                                <i class="fab fa-paypal mr-1"></i>PayPal
+                            {% endif %}
+                        </span>
+                    </div>
+                    
                     {% if payment_info.status == 'paid' %}
                         <h5 class="mb-5">{{ payment_info.message }}</h5>
                         {% include 'eshop/order_status_display.html' with order=order %}
