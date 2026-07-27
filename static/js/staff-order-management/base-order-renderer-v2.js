@@ -117,20 +117,11 @@ class BaseOrderRendererV2 {
 
         const dataKey = this.options.dataKey;
 
-        // 直接使用 unifiedDataManager 的 registerListener
-
-        window.unifiedDataManager.registerListener(dataKey, (orders) => {
-            console.log(`📥 ${this.orderType} 訂單數據接收:`, orders?.length || 0, '個');
-            this.hasInitialData = true;
-
-            // 初始加載時（hasRenderedOnce 為 false），無論 tab 是否激活都直接渲染
-            // 後續更新也直接渲染，確保狀態轉換後目標頁面立即顯示訂單卡片
-            // 不再使用 cacheOrders，避免非活躍頁面的 UI 更新延遲
-            this.renderOrders(orders);
-            this.hasRenderedOnce = true;
-        }, true);
-
-        // 監聽所有數據更新
+        // Phase 4 A1: 統一 all_data 渲染
+        // 只監聽 all_data，不再獨立監聽 dataKey，消除冗餘渲染
+        // 使用 requestAnimationFrame 防抖，避免多次通知重複渲染
+        this._pendingAllDataRender = false;
+        
         window.unifiedDataManager.registerListener('all_data', (allData) => {
             const orders = allData[dataKey];
             if (orders) {
