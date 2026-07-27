@@ -1,8 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年7月26日（更新：新增濃度選擇功能 + 前端渲染顯示）
-
+> **最後更新**: 2026年7月27日（更新：選項行全面改版 + 員工管理功能增強）
 
 ## 開發者背景與方法論
 
@@ -56,8 +55,6 @@
    點擊它、確認狀態有按預期改變。
 3. **檢查瀏覽器主控台**：不能有新增的錯誤或警告。
 4. **使用 Chrome Devtools**，跑一次效能追蹤，並檢查核心網頁指標（Core Web Vitals）。
-
-
 
 ### GitHub 推送規則
 - **不要自動 push 到 GitHub** — 每個任務完成後，不要自行 push 到 GitHub，直到我通知你。
@@ -163,77 +160,45 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 | 文件 | 行數 | 重要性 |
 |------|:----:|:------:|
 | `betweencoffee_delivery/settings.py` | 979 | ⭐⭐⭐⭐⭐ |
-| `eshop/models.py` | 1636 | ⭐⭐⭐⭐⭐ |
-| `eshop/order_status_manager.py` | 1259 | ⭐⭐⭐⭐⭐ |
-| `eshop/queue_manager_refactored.py` | 1637 | ⭐⭐⭐⭐⭐ |
+| `eshop/models/base.py` | 拆分 | ⭐⭐⭐⭐⭐ |
+| `eshop/models/order.py` | 1330 | ⭐⭐⭐⭐⭐ |
+| `eshop/order_status_manager.py` | 拆分 | ⭐⭐⭐⭐⭐ |
+| `eshop/queue_manager_refactored.py` | 拆分 | ⭐⭐⭐⭐⭐ |
 | `eshop/consumers.py` | ~300 | ⭐⭐⭐⭐ |
 | `eshop/views/payment_views.py` | ~500 | ⭐⭐⭐⭐ |
 | `eshop/views/api_views.py` | ~400 | ⭐⭐⭐⭐ |
+| `eshop/serializers.py` | 297 | ⭐⭐⭐⭐ |
 
 #### 前端核心
 | 文件 | 行數 | 重要性 |
 |------|:----:|:------:|
 | `static/js/websocket-core.js` | ~200 | ⭐⭐⭐⭐⭐ |
-| `static/js/websocket-order.js` | ~150 | ⭐⭐⭐⭐ |
-| `static/js/websocket-staff.js` | ~150 | ⭐⭐⭐⭐ |
-| `static/js/order_status_cards.js` | ~300 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/main.js` | ~100 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/services/toast-service.js` | ~80 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/services/event-bus.js` | ~100 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/services/api-service.js` | ~120 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/renderers/base-renderer.js` | ~100 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/websocket-manager.js` | ~150 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/base-order-renderer-v2.js` | 1123 | ⭐⭐⭐⭐⭐ |
-| `static/js/staff-order-management/renderers-v2/payment-pending-renderer-v2.js` | ~400 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/renderers-v2/preparing-orders-renderer-v2.js` | ~500 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/renderers-v2/ready-orders-renderer-v2.js` | ~500 | ⭐⭐⭐⭐ |
-| `static/js/staff-order-management/renderers-v2/completed-orders-renderer-v2.js` | 334 | ⭐⭐⭐⭐ |
-| `static/js/bc-slideout-cart.js` | ~200 | ⭐⭐⭐⭐⭐ |
-| `static/js/bc-checkout.js` | ~200 | ⭐⭐⭐⭐⭐ |
-| `static/js/bc-toast.js` | ~100 | ⭐⭐⭐⭐ |
-| `static/js/main.js` | ~200 | ⭐⭐⭐⭐ |
-
-#### CSS 樣式文件
-| 文件 | 行數 | 重要性 |
-|------|:----:|:------:|
-| `static/css/style-bootstrap.css` | 4410 | ⭐⭐⭐ |
-| `static/css/style-custom.css` | 1850 | ⭐⭐⭐⭐ |
-| `static/css/style-utilities.css` | 2541 | ⭐⭐⭐ |
-| `static/css/animate.css` | 3591 | ⭐⭐⭐⭐ |
-| `static/css/bc-components.css` | ~500 | ⭐⭐⭐⭐⭐ |
-
-#### 模板文件
-| 文件 | 重要性 |
-|------|:------:|
-| `templates/betweencoffee_delivery/base.html` | ⭐⭐⭐⭐⭐ |
-| `eshop/templates/eshop/order_payment_confirmation.html` | ⭐⭐⭐⭐⭐ |
-| `templates/admin/staff_order_management.html` | ⭐⭐⭐⭐⭐ |
-| `templates/layouts/nav.html` | ⭐⭐⭐⭐ |
-| `templates/cart/checkout.html` | ⭐⭐⭐⭐ |
-| `templates/cart/slideout_cart.html` | ⭐⭐⭐⭐ |
+| `static/js/staff-order-management/base-order-renderer-v2.js` | 1405 | ⭐⭐⭐⭐⭐ |
+| `static/css/bc-components.css` | ~1900 | ⭐⭐⭐⭐⭐ |
+| `static/css/staff_order_management.css` | 1438 | ⭐⭐⭐⭐ |
 
 ## 常見開發任務速查
 
-### 新增 API 端點
-```python
-# 1. 在 eshop/views/api_views.py 新增視圖
-# 2. 在 eshop/urls_api.py 註冊路由
-# 3. 在前端 JS 中調用
-```
+### 新增選項顯示（如濃度）
+需修改 3 個層級：
+1. **後端序列化器** (`eshop/serializers.py`) — 在 `serialize_order` 的 items 循環新增 mapping
+2. **基礎渲染器** (`base-order-renderer-v2.js`) — 在 `_renderItemOptions()` 新增對應的 `option-item`
+3. **子渲染器** — 如果子類有硬編碼選項 HTML（如 `_buildOrderHTML()` 中的 inline 選項），也需要更新
+4. **共用工具** (`common-utils.js`) — 如果有 `renderOrderItems()` 也需要更新
 
-### 新增 WebSocket 事件
-```python
-# 後端: 在 eshop/consumers.py 新增事件處理
-async def handle_new_event(self, event):
-    await self.send_json({'type': 'new_event', 'data': event['data']})
-
-# 前端: 在 websocket-core.js 監聽事件
-WebSocketCore.getInstance().on('message:new_event', (data) => { ... });
-```
-
-### 新增數據庫遷移
-```bash
-python manage.py makemigrations && python manage.py migrate
+### CSS 選項行 class
+```css
+.bc-options-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  color: var(--bc-text-muted); margin: 0; font-size: 1rem; line-height: 1.6;
+}
+.bc-options-row .option-item {
+  display: inline-flex !important; align-items: center !important;
+  gap: 2px; white-space: nowrap;
+}
+.bc-options-row .ov {
+  color: #ffffff !important;
+}
 ```
 
 ## 除錯指南
@@ -251,61 +216,57 @@ python manage.py makemigrations && python manage.py migrate
 3. 檢查 `eshop/paypal_utils.py`, `eshop/alipay_utils.py`
 4. 檢查 `eshop/order_status_manager.py`
 
+### 渲染器濃度選項不顯示
+1. 檢查 `eshop/serializers.py` 是否 mapping `strength_level_cn`
+2. 檢查子渲染器是否有硬編碼選項（需逐一搜尋 `cup_level_cn`）
+3. 檢查渲染器使用的欄位名（API 回傳 `strength_level`，渲染器需檢查 `item.strength_level_cn || item.strength_level`）
+
 ## Phase 3 規劃
 
 ```
 Phase 3A：Phase 2 收尾（優先級：最高）— ✅ 已完成
-├── [x] 修復 URL bug（payment-pending-renderer-v2.js）
+├── [x] 修復 URL bug
 ├── [x] 加上 @staff_api_required 裝飾器
 ├── [x] cleanup 加 try-catch 保護
-├── [x] 執行降級方案測試
-├── [x] 執行端到端手動驗證
+├── [x] 執行降級方案測試 / 端到端手動驗證
 ├── [x] 子標籤頁徽章端到端驗證
-└── [x] verify_phase2.py 12/12 測試全部通過
+├── [x] verify_phase2.py 12/12 測試全部通過
 
 Phase 3B：代碼清理（優先級：高）— ✅ 已完成
-├── [x] 評估舊版渲染器是否可移除 — ✅ 已於 2026-07-23 完成（5 個舊版渲染器已移除）
-├── [x] 統一 order.id / order.order_id 使用 — ✅ 已於 2026-07-23 完成（4 個 V2 渲染器共 12 處已統一）
-└── [x] 添加 JSDoc 註釋 — ✅ 已於 2026-07-23 完成（4 個 V2 渲染器已添加 JSDoc）
-
+├── [x] 評估舊版渲染器是否可移除
+├── [x] 統一 order.id / order.order_id 使用
+├── [x] 添加 JSDoc 註釋
 
 Phase 3C：效能優化（優先級：中）— ✅ 已完成
-├── [x] 分析渲染器效能瓶頸 — ✅ 已於 2026-07-26 完成（工具：analyze_renderers.py + benchmark-renderer.js）
-├── [x] 優化 DOM 操作（DocumentFragment 批量插入）— ✅ 已於 2026-07-26 完成（6 月提交中完成）
-├── [x] 優化倒數計時（requestAnimationFrame vs setInterval）— ✅ 已於 2026-07-26 完成
-└── [x] 減少不必要的重新渲染 — ✅ 已於 2026-07-26 完成
+├── [x] 分析渲染器效能瓶頸
+├── [x] 優化 DOM 操作（DocumentFragment 批量插入）
+├── [x] 優化倒數計時（requestAnimationFrame vs setInterval）
+├── [x] 減少不必要的重新渲染
 
 Phase 3D：新功能（優先級：低）
+├── [x] 濃度選擇功能顯示（所有前端頁面 + 員工管理頁面）— ✅ 2026-07-27
+├── [x] 選項行 bc-options-row 全面改版（CSS + JS + 後端）— ✅ 2026-07-27
+├── [x] 產品照片增大 10% — ✅ 2026-07-27
+├── [x] 選項文字值白色 — ✅ 2026-07-27
+├── [x] 選項組間距 8px — ✅ 2026-07-27
+├── [x] 浮動返回頂部按鈕（員工頁面）— ✅ 2026-07-27
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
 ├── [ ] 訂單匯出功能
-└── [ ] 操作日誌/審計追蹤
+├── [ ] 操作日誌/審計追蹤
 
 Phase 3E：技術債務（優先級：P1）
-├── [x] 拆分 models.py（1636行 → 5 個子模組）— ✅ 已於 2026-07-23 完成
-├── [x] 拆分 queue_manager_refactored.py（1637行 → 6 個子模組）— ✅ 已於 2026-07-23 完成
-├── [x] 拆分 order_status_manager.py（1259行 → 4 個子模組）— ✅ 已於 2026-07-23 完成（驗證腳本 6/6 全部通過）
+├── [x] 拆分 models.py（1636行 → 5 個子模組）— ✅ 2026-07-23
+├── [x] 拆分 queue_manager_refactored.py（1637行 → 6 個子模組）— ✅ 2026-07-23
+├── [x] 拆分 order_status_manager.py（1259行 → 4 個子模組）— ✅ 2026-07-23
 ├── [ ] 增加單元測試覆蓋率
 ├── [ ] 系統性能監控儀表板
 └── [ ] 代碼風格統一（flake8/black/isort）
 
 Phase 3F：基礎設施（優先級：P1）— ✅ 已完成
-├── [x] 資料庫遷移至 Supabase（Render PostgreSQL → Supabase）— ✅ 已於 2026-07-24 完成
-│   ├── [x] 建立 Supabase 專案（新加坡節點）
-│   ├── [x] 匯出 Render PostgreSQL 資料（pg_dump）
-│   ├── [x] 匯入 Supabase（psql）
-│   ├── [x] 更新 Django settings 支援 DATABASE_URL
-│   ├── [x] Render 部署驗證（migration 全部成功）
-│   └── [x] 資料完整性驗證（2,012 筆訂單、676 筆佇列記錄完整）
-└── [x] 更新 Django settings 與環境變量 — ✅ 已於 2026-07-24 完成
+├── [x] 資料庫遷移至 Supabase（Render PostgreSQL → Supabase）— ✅ 2026-07-24
+├── [x] 更新 Django settings 與環境變量
 ```
-
-## 技術債務（已知）
-- ~~`models.py` (1636行) - 需拆分~~ ✅ 已於 2026-07-23 拆分為 5 個子模組
-- ~~`queue_manager_refactored.py` (1637行) - 需拆分~~ ✅ 已於 2026-07-23 拆分為 6 個子模組
-- ~~`order_status_manager.py` (1259行) - 需拆分~~ ✅ 已於 2026-07-23 拆分為 4 個子模組
-- ~~支付確認邏輯重複 (confirm_fps_payment / confirm_cash_payment)~~ ✅ 已於 2026-07-21 重構完成
-- 測試覆蓋率低
 
 ## UI 開發設計注意事項
 
@@ -332,6 +293,7 @@ Phase 3F：基礎設施（優先級：P1）— ✅ 已完成
 - **設計語言**: 清晰含空間感、簡潔留白、字體清晰
 - **背景裝飾**: 大多數頁面背景有透明度低的 SVG 插畫元素，附有 CSS 動畫 `noise_animation`，豐富視覺層次
 - **背景訊息字體**: 頁面背景有透明度低的品牌字體元素（`.title-bg-head`），與頁面內容相關
+
 ## 完整參考
 詳細系統分析請參閱根目錄 `.clinerules/.clinerules`
 UI 設計原則請參閱 `.clinerules/uiux-principles.md`

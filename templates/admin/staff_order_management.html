@@ -1,3 +1,4 @@
+
 <!-- betweencoffee_delivery/templates/admin/staff_order_management.html -->
 {% extends 'layouts/blank.html' %}
 {% load static %}
@@ -371,6 +372,47 @@ document.getElementById('check-badge-status').addEventListener('click', function
         window.badgeManager.checkStatus();
     }
 });
+
+// ===== 隱藏浮動購物車按鈕（員工頁面不需要） =====
+const floatingCart = document.getElementById('bc-floating-cart');
+if (floatingCart) {
+    floatingCart.style.display = 'none';
+}
+
+// ===== 浮動返回頂部按鈕 =====
+(function() {
+    // 創建按鈕
+    const backToTop = document.createElement('div');
+    backToTop.id = 'bc-back-to-top';
+    backToTop.className = 'bc-floating-cart';
+    backToTop.style.cssText = 'position:fixed;bottom:40px;right:40px;z-index:9999;pointer-events:none;opacity:0;transition:opacity 0.3s ease;';
+
+    backToTop.innerHTML = `
+        <button id="bc-back-to-top-btn" class="bc-floating-cart-btn" aria-label="返回頂部" style="pointer-events:auto;">
+            <span class="icon material-icons" style="font-size:1.76rem;">arrow_upward</span>
+        </button>
+    `;
+
+    document.body.appendChild(backToTop);
+
+    const btn = document.getElementById('bc-back-to-top-btn');
+
+    // 監聽滾動
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 200) {
+            backToTop.style.opacity = '1';
+            backToTop.style.pointerEvents = 'auto';
+        } else {
+            backToTop.style.opacity = '0';
+            backToTop.style.pointerEvents = 'none';
+        }
+    });
+
+    // 點擊返回頂部
+    btn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+})();
 </script>
 
 

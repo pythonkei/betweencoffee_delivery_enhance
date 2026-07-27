@@ -431,19 +431,15 @@ class BaseOrderRendererV2 {
      */
     _renderItemOptions(item) {
         const options = [
-            item.cup_level_cn ? `杯型: ${item.cup_level_cn}` : '',
-            item.milk_level_cn ? `牛奶: ${item.milk_level_cn}` : ''
+            item.cup_level_cn ? `<span class="option-item"><span class="icon material-symbols-outlined">water_full</span> 杯量: <span class="ov">${item.cup_level_cn}</span></span>` : '',
+            (item.strength_level_cn || item.strength_level) ? `<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: <span class="ov">${item.strength_level_cn || item.strength_level}</span></span>` : '',
+            item.milk_level_cn ? `<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: <span class="ov">${item.milk_level_cn}</span></span>` : '',
+            item.grinding_level_cn ? `<span class="option-item">研磨: <span class="ov">${item.grinding_level_cn}</span></span>` : '',
+            item.weight_cn ? `<span class="option-item">重量: <span class="ov">${item.weight_cn}</span></span>` : '',
+            item.weight ? `<span class="option-item">重量: <span class="ov">${item.weight}</span></span>` : ''
         ].filter(Boolean);
 
-        const options2 = [
-            item.grinding_level_cn ? `研磨: ${item.grinding_level_cn}` : '',
-            item.weight_cn ? `重量: ${item.weight_cn}` : '',
-            item.weight ? `重量: ${item.weight}` : ''
-        ].filter(Boolean);
-
-        const separator = (options.length > 0 && options2.length > 0) ? '&nbsp;&nbsp;&nbsp;' : '';
-
-        return options.join('&nbsp;&nbsp;') + separator + options2.join('&nbsp;&nbsp;');
+        return `<div class="bc-options-row">${options.join('')}</div>`;
     }
 
     /**

@@ -11,7 +11,32 @@
     font-size: 0.9rem;
 }
 
+/* 訂單卡片的 bc-options-row 與上方「數量」文字之間增加邊距 + 選項之間 10px 間距 */
+.order-item .bc-options-row {
+    margin-top: 4px !important;
+    gap: 10px !important;
+}
+.order-item .bc-options-row .option-item {
+    margin-right: 0 !important;
+}
+
+/* 訂單卡片產品照片增大 10%（用 !important 覆蓋 inline style） */
+.order-item .rounded.d-flex.align-items-center.justify-content-center {
+    width: 115px !important;
+    height: 121px !important;
+}
+.order-item .rounded.d-flex.align-items-center.justify-content-center img {
+    max-height: 106px !important;
+    max-width: 100% !important;
+}
+
+/* 訂單卡片選項組 - 文字值（選項內容）改為白色，名稱保留原色 */
+.order-item .bc-options-row .ov {
+    color: #ffffff !important;
+}
+
 /* 合并的已支付和制作中样式 */
+.badge-pending-payment {
     background-color: transparent !important;
     color: #d0a00f !important;
     border: 1px solid #d0a00f !important;

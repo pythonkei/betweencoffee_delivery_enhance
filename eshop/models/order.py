@@ -391,12 +391,12 @@ class OrderModel(models.Model):
                 display_item["type_display"] = "咖啡"
                 options = []
                 if display_item.get("cup_level_cn"):
-                    options.append(f'<span class="icon material-symbols-outlined">water_full</span> 杯量: {display_item["cup_level_cn"]}')
+                    options.append(f'<span class="option-item"><span class="icon material-symbols-outlined">water_full</span> 杯量: {display_item["cup_level_cn"]}</span>')
                 if display_item.get("strength_level_cn"):
-                    options.append(f'<span class="icon material-symbols-outlined">bolt</span> 濃度: {display_item["strength_level_cn"]}')
+                    options.append(f'<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: {display_item["strength_level_cn"]}</span>')
                 if display_item.get("milk_level_cn"):
-                    options.append(f'<span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {display_item["milk_level_cn"]}')
-                display_item["options_display"] = '<span style="font-size:1.1rem !important;">' + "  ".join(options) + "</span>" if options else ""
+                    options.append(f'<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {display_item["milk_level_cn"]}</span>')
+                display_item["options_display"] = '<div class="bc-options-row">' + "".join(options) + "</div>" if options else ""
 
             elif item_type == "bean":
                 display_item["type_display"] = "咖啡豆"

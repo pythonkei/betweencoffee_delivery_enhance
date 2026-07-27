@@ -1050,6 +1050,33 @@
   }
 }
 
+/* ===== 產品選項行（同一行 + 居中對齊） ===== */
+.bc-options-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--bc-text-muted);
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.bc-options-row .option-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px;
+  white-space: nowrap;
+  margin-right: 0;
+}
+.bc-options-row .icon,
+.bc-options-row .material-symbols-outlined,
+.bc-options-row .icon.material-symbols-outlined {
+  font-size: 0.9rem !important;
+  vertical-align: baseline !important;
+  position: relative !important;
+  top: 1px !important;
+}
+
 /* ===== 選項按鈕組（取代下拉選單） ===== */
 .bc-option-group {
   display: flex;

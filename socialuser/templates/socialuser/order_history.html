@@ -146,11 +146,11 @@
                                     <p class="mb-1">
                                         數量: {{ item.quantity }} 
                                     </p>
-                                    <div style="font-size:1rem;">
-                                        {% if item.cup_level_cn %}<span class="icon material-symbols-outlined">water_full</span> 杯量: {{ item.cup_level_cn }}{% endif %}
-                                        {% if item.strength_level_cn %} <span class="icon material-symbols-outlined">bolt</span> 濃度: {{ item.strength_level_cn }}{% endif %}
-                                        {% if item.milk_level_cn %} <span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {{ item.milk_level_cn }}{% endif %}
-                                        {% if item.grinding_level_cn %} 研磨: {{ item.grinding_level_cn }}{% endif %}
+                                    <div class="bc-options-row">
+                                        {% if item.cup_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">water_full</span> 杯量: {{ item.cup_level_cn }}</span>{% endif %}
+                                        {% if item.strength_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: {{ item.strength_level_cn }}</span>{% endif %}
+                                        {% if item.milk_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {{ item.milk_level_cn }}</span>{% endif %}
+                                        {% if item.grinding_level_cn %}<span class="option-item">研磨: {{ item.grinding_level_cn }}</span>{% endif %}
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -725,10 +725,10 @@ class OrderLoader {
     getItemHTML(item) {
         const imageSrc = item.image || '/static/images/default-product.png';
         const options = [];
-        if (item.cup_level_cn) options.push(`杯型: ${item.cup_level_cn}`);
-        if (item.strength_level_cn) options.push(`濃度: ${item.strength_level_cn}`);
-        if (item.milk_level_cn) options.push(`牛奶: ${item.milk_level_cn}`);
-        if (item.grinding_level_cn) options.push(`研磨: ${item.grinding_level_cn}`);
+        if (item.cup_level_cn) options.push(`<span class="option-item"><span class="icon material-symbols-outlined">water_full</span> 杯量: ${item.cup_level_cn}</span>`);
+        if (item.strength_level_cn) options.push(`<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: ${item.strength_level_cn}</span>`);
+        if (item.milk_level_cn) options.push(`<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: ${item.milk_level_cn}</span>`);
+        if (item.grinding_level_cn) options.push(`<span class="option-item">研磨: ${item.grinding_level_cn}</span>`);
         
         return `
             <div class="d-flex align-items-center mb-3">
@@ -740,7 +740,7 @@ class OrderLoader {
                 <div class="flex-grow-1">
                     <h6 class="mb-0">${item.name}</h6>
                     <p class="mb-1 text-muted">數量: ${item.quantity}</p>
-                    <div class="text-muted">${options.join(' | ')}</div>
+                    <div class="bc-options-row">${options.join('')}</div>
                 </div>
                 <div class="text-right">
                     <span class="h6">$${item.total_price.toFixed(2)}</span>

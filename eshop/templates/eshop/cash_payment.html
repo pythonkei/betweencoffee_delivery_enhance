@@ -76,12 +76,12 @@
                                     <div class="flex-grow-1 align-self-baseline">
                                         <h5 class="mb-1 text-white">{{ item.name }}</h5>
                                         <p class="mb-1 text-muted">數量: {{ item.quantity }}</p>
-                                        <p style="margin-bottom:0;color:rgba(255,255,255,0.6);font-size:1.1rem !important;">
-                                            {% if item.cup_level_cn %}<span class="icon material-symbols-outlined">water_full</span> 杯量: {{ item.cup_level_cn }}{% endif %}
-                                            {% if item.strength_level_cn %} &nbsp;<span class="icon material-symbols-outlined">bolt</span> 濃度: {{ item.strength_level_cn }}{% endif %}
-                                            {% if item.milk_level_cn %} &nbsp;<span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {{ item.milk_level_cn }}{% endif %}
-                                            {% if item.grinding_level_cn %} 研磨: {{ item.grinding_level_cn }}{% endif %}
-                                            {% if item.weight %} 重量: {{ item.weight }}{% endif %}
+                                        <div class="bc-options-row">
+                                            {% if item.cup_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">water_full</span> 杯量: {{ item.cup_level_cn }}</span>{% endif %}
+                                            {% if item.strength_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: {{ item.strength_level_cn }}</span>{% endif %}
+                                            {% if item.milk_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {{ item.milk_level_cn }}</span>{% endif %}
+                                            {% if item.grinding_level_cn %}<span class="option-item">研磨: {{ item.grinding_level_cn }}</span>{% endif %}
+                                            {% if item.weight %}<span class="option-item">重量: {{ item.weight }}</span>{% endif %}
                                         </div>
                                     </div>
                                     <div class="flex-grow-1 align-self-baseline">
