@@ -105,6 +105,21 @@
                                             </span>
                                         {% endif %}
                                     {% endif %}
+
+                                    <!-- 四種支付方式顯示（所有訂單都顯示） -->
+                                    <span class="badge badge-success ml-1">
+                                        {% if order.payment_method == 'alipay' %}
+                                            <i class="fab fa-alipay mr-1"></i>支付寶
+                                        {% elif order.payment_method == 'fps' %}
+                                            <i class="fas fa-money-bill-wave mr-1"></i>FPS
+                                        {% elif order.payment_method == 'cash' %}
+                                            <i class="fas fa-money-bill-alt mr-1"></i>現金
+                                        {% elif order.payment_method == 'paypal' %}
+                                            <i class="fab fa-paypal mr-1"></i>PayPal
+                                        {% elif order.payment_method %}
+                                            {{ order.payment_method }}
+                                        {% endif %}
+                                    </span>
                                     
                                     {% if order.is_quick_order %}
                                     <span class="badge badge-success ml-1" style="display: none;">
