@@ -1,6 +1,7 @@
 # eshop/notifications.py
 import logging
 
+from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -11,17 +12,37 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=OrderModel)
 def order_status_changed(sender, instance, **kwargs):
-    """订单状态变化时发送推送通知"""
+    """訂單狀態變化時發送推送通知 + WhatsApp 通知"""
     if kwargs.get("created", False):
-        return  # 新创建订单不发送通知
+        return  # 新創建訂單不發送通知
 
-    # 检查状态是否变化
-    if instance.tracker.has_changed("status"):
+    # 檢查狀態是否變化
+    if hasattr(instance, "tracker") and instance.tracker.has_changed("status"):
         send_order_notification(instance)
+
+        # 當訂單變為 ready（已就緒）時，一併發送 WhatsApp 通知
+        if instance.status == "ready":
+            send_whatsapp_ready_notification(instance)
+
+
+def send_whatsapp_ready_notification(order):
+    """訂單就緒時發送 WhatsApp 通知"""
+    try:
+        from .whatsapp_notifier import send_order_ready_notification
+
+        success = send_order_ready_notification(order)
+        if success:
+            logger.info(f"✅ WhatsApp 就緒通知已發送: 訂單 #{order.id}")
+        else:
+            logger.info(f"⚠️ WhatsApp 就緒通知跳過: 訂單 #{order.id}（無電話號碼或未配置）")
+    except ImportError:
+        logger.warning("WhatsApp 通知模組未安裝，跳過")
+    except Exception as e:
+        logger.error(f"發送 WhatsApp 通知失敗: {e}")
 
 
 def send_order_notification(order):
-    """发送订单通知到所有连接的客户端"""
+    """發送訂單通知到所有連接的客戶端"""
     from asgiref.sync import async_to_sync
     from channels.layers import get_channel_layer
 
