@@ -415,7 +415,7 @@ class QueueManager {
                         <i class="fas fa-clock mr-1"></i>等待中
                     </span>
                     ${queuePositionBadge}
-                    <!-- ${paymentMethodBadge} -->
+                    ${paymentMethodBadge}
                 </div>
             </div>
 
