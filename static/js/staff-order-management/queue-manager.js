@@ -553,157 +553,22 @@ class QueueManager {
     // ==================== 操作API方法（保持不變） ====================
     
     async startPreparation(orderId) {
-        try {
-            if (this.isLoading) {
-                console.log('⏳ 已有操作正在進行，跳過重複請求');
-                return;
-            }
-            this.isLoading = true;
-            
-            // ====== 階段1優化：樂觀更新 ======
-            // 1. 記錄開始時間用於性能監控
-            const startTime = Date.now();
-            
-            // 2. 立即更新UI（樂觀更新）
-            this.showImmediateFeedback(orderId, 'preparing');
-            
-            // 3. 記錄UI更新性能
-            if (window.recordUiUpdate) {
-                window.recordUiUpdate('queue-manager', 'showImmediateFeedback', 
-                    startTime, Date.now(), 1);
-            }
-            
-            const csrfToken = this.getCsrfToken();
-            if (!csrfToken) {
-                // 如果無法獲取token，回滾UI更新
-                this.rollbackImmediateFeedback(orderId);
-                throw new Error('無法獲取安全令牌，請刷新頁面重試');
-            }
-            
-            console.log(`🚀 開始製作訂單 #${orderId}，CSRF token: ${csrfToken.substring(0, 20)}...`);
-            
-            const response = await fetch(`/eshop/queue/start/${orderId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                },
-                body: JSON.stringify({}),
-            });
+        if (this.isLoading) {
+            console.log('⏳ 已有操作正在進行，跳過重複請求');
+            return;
+        }
         
-            // 計算HTTP請求耗時
-            const httpDuration = Date.now() - startTime;
-            console.log(`📡 開始製作 API 響應: HTTP ${response.status} ${response.statusText}, 耗時: ${httpDuration}ms`);
-            
-            // 記錄HTTP請求性能
-            if (window.recordHttpRequest) {
-                window.recordHttpRequest(
-                    `/eshop/queue/start/${orderId}/`,
-                    'POST',
-                    startTime,
-                    Date.now(),
-                    response.status,
-                    response.ok
-                );
-            }
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log('📊 API 響應數據:', data);
-                
-                if (data.success) {
-                    // 4. 請求成功，顯示成功提示
-                    this.showToast('✅ 已開始製作訂單 #' + orderId, 'success');
-                    
-                    // 5. 觸發事件，讓統一數據管理器刷新數據
-                    document.dispatchEvent(new CustomEvent('order_started_preparing', {
-                        detail: { 
-                            order_id: orderId,
-                            estimated_ready_time: data.estimated_ready_time
-                        }
-                    }));
-                    
-                    // 6. 觸發統一數據刷新（等待完成 + 強制通知所有渲染器）
-                    if (window.unifiedDataManager) {
-                        await window.unifiedDataManager.loadUnifiedData(true);
-                        // 強制通知所有渲染器，確保目標頁面立即顯示訂單卡片
-                        if (window.unifiedDataManager.currentData) {
-                            window.unifiedDataManager.notifyAllListeners();
-                        }
-                    }
-                    
-                    // 7. 記錄成功操作
-                    this.recordOperationSuccess('start_preparation', orderId, httpDuration);
-                    
-                    // 8. 記錄操作性能
-                    if (window.recordOperation) {
-                        window.recordOperation(
-                            'start_preparation',
-                            orderId,
-                            startTime,
-                            Date.now(),
-                            true,
-                            null
-                        );
-                    }
-                } else {
-                    // 9. 如果API返回失敗，回滾UI更新
-                    this.rollbackImmediateFeedback(orderId);
-                    throw new Error(data.message || data.error || '操作失敗');
-                }
-            } else if (response.status === 403) {
-                // 處理 403 Forbidden 錯誤
-                const errorText = await response.text();
-                console.error('❌ HTTP 403 Forbidden 錯誤詳情:', errorText);
-                
-                // 回滾UI更新
-                this.rollbackImmediateFeedback(orderId);
-                
-                try {
-                    const errorData = JSON.parse(errorText);
-                    throw new Error(`權限不足: ${errorData.error || errorData.message || '請確認您有足夠權限執行此操作'}`);
-                } catch {
-                    throw new Error(`權限不足或安全令牌無效 (HTTP 403)`);
-                }
-            } else {
-                const errorText = await response.text();
-                console.error(`❌ HTTP ${response.status} 錯誤詳情:`, errorText);
-                
-                // 回滾UI更新
-                this.rollbackImmediateFeedback(orderId);
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-        } catch (error) {
-            console.error('開始製作失敗:', error);
-            
-            // 記錄操作失敗性能
-            if (window.recordOperation) {
-                window.recordOperation(
-                    'start_preparation',
-                    orderId,
-                    startTime,
-                    Date.now(),
-                    false,
-                    error.message
-                );
-            }
-            
-            // 根據錯誤類型顯示不同的提示
-            let errorMessage = error.message;
-            if (errorMessage.includes('權限不足') || errorMessage.includes('403')) {
-                this.showToast('❌ 權限不足：請確認您已登錄並有足夠權限', 'error');
-            } else if (errorMessage.includes('安全令牌')) {
-                this.showToast('❌ 安全令牌錯誤：請刷新頁面重試', 'error');
-            } else if (errorMessage.includes('網絡')) {
-                this.showToast('❌ 網絡錯誤：請檢查網絡連接', 'error');
-            } else {
-                this.showToast('❌ 操作失敗: ' + errorMessage, 'error');
-            }
-            
-            // 記錄操作失敗
-            this.recordOperationFailure('start_preparation', orderId, errorMessage);
-        } finally {
-            this.isLoading = false;
+        // 樂觀更新：禁用按鈕
+        this.showImmediateFeedback(orderId, 'preparing');
+        
+        // 委派給共用服務
+        const result = await window.orderActionService.startPreparation(orderId);
+        
+        if (result) {
+            this.recordOperationSuccess('start_preparation', orderId, 0);
+        } else {
+            this.rollbackImmediateFeedback(orderId);
+            this.recordOperationFailure('start_preparation', orderId, '操作失敗');
         }
     }
     
