@@ -57,7 +57,7 @@
                 <div class="block-23 mb-3">
                     <p class="h3 bean-title"><span>{{ bean.name }}</span></p>
                     <p class="price">${{ bean.price_200g|floatformat:"0" }}</p>
-                    <p class="pb-2" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ bean.description }}</p>
+                    <p class="pb-2" class="bc-description-clamp">{{ bean.description }}</p>
                 </div>
 
                 <div class="block-23 mb-3">
@@ -67,23 +67,23 @@
 
                         <!-- roast level -->
                         <li><span class="icon material-symbols-outlined">Home_storage</span><span class="text">烘焙水平 :</span></li>
-                        <div class="roastrange-field" style="padding-bottom: 4vh;">
+                        <div class="roastrange-field" class="bc-roast-range-field">
                             <div class="roastrange">
                                 {% with level=bean.roast_level|default:'medium' %}
                                 <div class="roastrange-item{% if level == 'light' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'light' %} style="color:var(--brand-primary);"{% endif %}>浅</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'light' %} class="bc-roast-active"{% endif %}>浅</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'medium_light' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'medium_light' %} style="color:var(--brand-primary);"{% endif %}>中浅</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'medium_light' %} class="bc-roast-active"{% endif %}>中浅</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'medium' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'medium' %} style="color:var(--brand-primary);"{% endif %}>中</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'medium' %} class="bc-roast-active"{% endif %}>中</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'medium_dark' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'medium_dark' %} style="color:var(--brand-primary);"{% endif %}>中深</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'medium_dark' %} class="bc-roast-active"{% endif %}>中深</span></div>
                                 </div>
                                 <div class="roastrange-item{% if level == 'dark' %} roast{% endif %}">
-                                    <div class="roastrange-label"><span{% if level == 'dark' %} style="color:var(--brand-primary);"{% endif %}>深</span></div>
+                                    <div class="roastrange-label"><span{% if level == 'dark' %} class="bc-roast-active"{% endif %}>深</span></div>
                                 </div>
                                 {% endwith %}
                             </div>
@@ -145,9 +145,9 @@
 
                         <!-- Submit Buttons -->
                         <div class="col-md-12 mt-4">
-                            <div class="d-flex button-d-flex justify-content-between px-2" style="width: 100%; align-items: stretch !important;">
+                            <div class="d-flex button-d-flex justify-content-between px-2" class="bc-product-action-row">
                                 <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3" >立即購買</button>
-                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3" style="width: calc(50% - 16px) !important;white-space: nowrap;">加入購物車</button>
+                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3" class="bc-product-action-btn">加入購物車</button>
                             </div>
                             <div class="text-center mt-3">
                                 <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></span>

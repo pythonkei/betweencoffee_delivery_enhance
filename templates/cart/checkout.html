@@ -14,9 +14,9 @@
     <div class="row justify-content-center align-items-center">
       <span class="title-bg-head">&#65371;Checkout&#65373;</span>
       <div class="col-lg-12 col-md-12 col-sm-12">
-        <p class="d-flex mb-3" style="justify-content:space-between; align-items:center;">
-          <span class="h4" style="color:var(--bc-text);">一頁式結帳</span>
-          <a href="{% url 'coffee_menu' %}" style="font-size:1em; color:var(--bc-text-muted);">
+        <p class="d-flex mb-3" class="bc-checkout-header">
+          <span class="h4 bc-checkout-title">一頁式結帳</span>
+          <a href="{% url 'coffee_menu' %}" class="bc-checkout-back-link">
             <i class="icon material-symbols-outlined">undo</i> 繼續購物
           </a>
         </p>
@@ -54,7 +54,7 @@
             <span class="bc-checkout-item-total">${{ item.total_price|floatformat:"-2" }}</span>
           </div>
           {% empty %}
-          <p style="color:var(--bc-text-muted); text-align:center; padding:20px 0;">
+          <p class="bc-cart-empty-msg">
             購物車沒有物品
           </p>
           {% endfor %}
@@ -158,7 +158,7 @@
         <hr class="bc-divider">
 
         <button type="submit" class="bc-btn bc-btn-primary bc-btn-block bc-btn-lg" 
-                style="margin-top:8px; font-size:1.05rem;">
+                class="bc-btn bc-btn-primary bc-btn-block bc-btn-lg bc-checkout-submit">
           確認訂單並支付
         </button>
       </div>

@@ -38,7 +38,7 @@
                         <div class="card shadow-sm">
                             <div class="card-body text-center py-5">
                                 <div class="mb-4">
-                                    <i class="fas fa-envelope-open-text" style="font-size: 3rem; color: var(--primary-color, #c49b6c);"></i>
+                                    <i class="fas fa-envelope-open-text bc-email-icon"></i>
                                 </div>
                                 <h4 class="card-title mb-3">{% trans "Confirm Email Address" %}</h4>
                                 <p class="card-text text-muted mb-4">
@@ -60,7 +60,7 @@
                         <div class="card shadow-sm">
                             <div class="card-body text-center py-5">
                                 <div class="mb-4">
-                                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
+                                    <i class="fas fa-exclamation-triangle bc-warning-icon"></i>
                                 </div>
                                 <h4 class="card-title mb-3">{% trans "Unable to Confirm" %}</h4>
                                 <p class="card-text text-muted">
@@ -73,7 +73,7 @@
                     <div class="card shadow-sm">
                         <div class="card-body text-center py-5">
                             <div class="mb-4">
-                                <i class="fas fa-link" style="font-size: 3rem; color: #dc3545;"></i>
+                                <i class="fas fa-link bc-warning-icon"></i>
                             </div>
                             <h4 class="card-title mb-3">{% trans "Invalid Link" %}</h4>
                             {% url 'account_email' as email_url %}

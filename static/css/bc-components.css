@@ -1890,3 +1890,143 @@
   font-size: 0.8rem;
 }
 
+/* ==================== CSS 統一 Phase A+B：結帳頁 + 商品頁 inline → class ==================== */
+/* Phase A: checkout.html */
+.bc-checkout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bc-checkout-title {
+  color: var(--bc-text);
+}
+
+.bc-checkout-back-link {
+  font-size: 1em;
+  color: var(--bc-text-muted);
+}
+
+.bc-cart-empty-msg {
+  color: var(--bc-text-muted);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.bc-checkout-submit {
+  margin-top: 8px;
+  font-size: 1.05rem;
+}
+
+/* Phase B: coffee.html + bean.html 共用 */
+.bc-description-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bc-product-action-row {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+}
+
+.bc-product-action-btn {
+  width: calc(50% - 16px);
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* Phase B: bean.html 專用 */
+.bc-roast-active {
+  color: var(--brand-primary);
+}
+
+.bc-roast-range-field {
+  padding-bottom: 4vh;
+}
+
+/* ==================== CSS 統一 Phase C+D：購物車抽屜 + 全域模板 inline → class ==================== */
+/* 購物車背景裝飾文字 */
+.bc-cart-title-bg {
+  bottom: 2vw !important;
+  right: -5% !important;
+  top: auto !important;
+  left: auto !important;
+  opacity: 0.03;
+  font-size: clamp(94px, 12.3vw, 160px);
+  letter-spacing: -5px;
+}
+
+/* 購物車關閉按鈕圖示 */
+.bc-cart-close-icon {
+  font-size: 1.4rem;
+}
+
+/* 購物車空狀態圖示（已有 .bc-cart-empty-icon，此為確保覆蓋） */
+.bc-cart-empty-cart-icon {
+  font-size: 3rem;
+}
+
+/* 稍後處理按鈕 - 底部白色邊框透明按鈕 */
+.bc-dismiss-btn {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+}
+
+/* ==================== CSS 統一 Phase E：登入/註冊/首頁 inline → class ==================== */
+/* 頁面描述文字 */
+.bc-page-desc {
+  color: #ccc;
+}
+
+/* 登入頁 Remember Me 標籤 */
+.bc-remember-label {
+  margin-bottom: 0;
+}
+
+/* email 確認圖示 */
+.bc-email-icon {
+  font-size: 3rem;
+  color: var(--primary-color, #c49b6c);
+}
+
+/* 警告/錯誤圖示 */
+.bc-warning-icon {
+  font-size: 3rem;
+  color: #dc3545;
+}
+
+/* 首頁 Google Map 佔位 */
+.bc-map-placeholder {
+  height: 32px;
+}
+
+/* ==================== CSS 統一 Phase F：管理頁面 inline → class ==================== */
+/* 審計日誌返回連結 */
+.bc-audit-back-link {
+  color: #c49b63;
+  text-decoration: none;
+  font-size: .9rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* WebSocket 監控標籤 */
+.bc-monitor-label {
+  font-size: 0.9rem;
+}
+
+/* 連線列表容器 */
+.bc-connection-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 廣播類型選擇器 */
+.bc-broadcast-select {
+  max-width: 120px;
+}
+
