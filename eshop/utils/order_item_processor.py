@@ -311,6 +311,7 @@ class OrderItemProcessor:
             "position": queue_item.position,
             "status": queue_item.status,
             "preparation_time_minutes": queue_item.preparation_time_minutes,
+            "is_expedited": queue_item.is_expedited if hasattr(queue_item, "is_expedited") else False,
         }
 
         # 添加咖啡師信息
@@ -393,13 +394,16 @@ class OrderItemProcessor:
                 coffee_queue = (
                     CoffeeQueue.objects.filter(order=order).order_by("-id").first()
                 )
-                if coffee_queue and coffee_queue.barista:
-                    order_data["barista"] = coffee_queue.barista
+                if coffee_queue:
+                    order_data["barista"] = coffee_queue.barista or "未分配"
+                    order_data["is_expedited"] = coffee_queue.is_expedited
                 else:
                     order_data["barista"] = "未分配"
+                    order_data["is_expedited"] = False
             except Exception as e:
                 logger.warning(f"獲取訂單 {order.id} 的咖啡師信息失敗: {str(e)}")
                 order_data["barista"] = "未分配"
+                order_data["is_expedited"] = False
 
         # 添加就緒時間信息
         if order.ready_at and hk_tz:
@@ -450,13 +454,16 @@ class OrderItemProcessor:
             coffee_queue = (
                 CoffeeQueue.objects.filter(order=order).order_by("-id").first()
             )
-            if coffee_queue and coffee_queue.barista:
-                order_data["barista"] = coffee_queue.barista
+            if coffee_queue:
+                order_data["barista"] = coffee_queue.barista or "未分配"
+                order_data["is_expedited"] = coffee_queue.is_expedited
             else:
                 order_data["barista"] = "未分配"
+                order_data["is_expedited"] = False
         except Exception as e:
             logger.warning(f"獲取訂單 {order.id} 的咖啡師信息失敗: {str(e)}")
             order_data["barista"] = "未分配"
+            order_data["is_expedited"] = False
 
         # 添加取餐時間信息
         if order.picked_up_at and hk_tz:

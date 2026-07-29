@@ -6,7 +6,7 @@ function copyPickupCode(pickupCode) {
     console.log("複製提取碼:", pickupCode);
     
     if (!pickupCode || pickupCode === 'None' || pickupCode === '') {
-        alert("提取碼不存在");
+        console.log('提取碼不存在');
         return;
     }
     
@@ -23,13 +23,13 @@ function copyPickupCode(pickupCode) {
     try {
         const successful = document.execCommand('copy');
         if (successful) {
-            alert(`提取碼 ${pickupCode} 已複製到剪貼簿`);
+            console.log(`提取碼 ${pickupCode} 已複製到剪貼簿`);
         } else {
-            alert(`複製失敗，請手動複製提取碼: ${pickupCode}`);
+            console.log(`複製失敗，請手動複製提取碼: ${pickupCode}`);
         }
     } catch (err) {
         console.error('複製失敗:', err);
-        alert(`複製失敗，請手動複製提取碼: ${pickupCode}`);
+        console.log(`複製失敗，請手動複製提取碼: ${pickupCode}`);
     }
     
     document.body.removeChild(textArea);
@@ -41,13 +41,13 @@ function saveQRCodeImage() {
     
     // 檢查html2canvas是否可用
     if (typeof html2canvas === 'undefined') {
-        alert('圖片保存功能暫時不可用，請稍後重試');
+        console.log('圖片保存功能暫時不可用，請稍後重試');
         return;
     }
     
     const qrcodeSection = document.getElementById('qrcode-section');
     if (!qrcodeSection) {
-        alert('找不到保存區域');
+        console.log('找不到保存區域');
         return;
     }
     
@@ -85,20 +85,19 @@ function saveQRCodeImage() {
             saveBtn.innerHTML = originalText;
             saveBtn.disabled = false;
             
-            alert('圖片保存成功！');
-            console.log("圖片保存成功");
+            console.log('圖片保存成功！');
         }).catch(function(error) {
             console.error('生成圖片失敗:', error);
             saveBtn.innerHTML = originalText;
             saveBtn.disabled = false;
-            alert('生成圖片失敗，請稍後重試');
+            console.log('生成圖片失敗，請稍後重試');
         });
         
     } catch (error) {
         console.error('保存圖片失敗:', error);
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = false;
-        alert('保存圖片失敗，請稍後重試');
+        console.log('保存圖片失敗，請稍後重試');
     }
 }
 

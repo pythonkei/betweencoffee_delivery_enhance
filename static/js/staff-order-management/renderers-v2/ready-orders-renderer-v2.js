@@ -103,6 +103,8 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
         const itemCount = items.length || order.items_count || 0;
         const phone = order.phone || '';
         const readyAt = order.ready_at || order.completed_at || '';
+        const baristaName = order.barista_name || order.barista || '';
+        const isExpedited = order.is_expedited || false;
 
         // 格式化時間
         const orderTime = this.formatOrderTime(createdAt);
@@ -236,6 +238,26 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
             }
         }
 
+        // 優先處理徽章
+        let expediteBadge = '';
+        if (isExpedited) {
+            expediteBadge = `
+                <span class="badge badge-warning ml-1">
+                    <i class="fas fa-bolt mr-1"></i>優先處理
+                </span>
+            `;
+        }
+
+        // 咖啡師徽章
+        let baristaBadge = '';
+        if (baristaName) {
+            baristaBadge = `
+                <span class="badge badge-barista ml-1">
+                    <i class="fas fa-user mr-1"></i>${baristaName}
+                </span>
+            `;
+        }
+
         // 支付方式徽章
         let paymentMethodBadge = '';
         if (order.payment_method) {
@@ -289,6 +311,7 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
             <div class="d-flex justify-content-between mb-3 mt-3">
                 <div class="mt-2">
                     ${queuePositionBadge}
+                    ${expediteBadge}
                 </div>
             </div>
 
@@ -328,6 +351,7 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
                     <span class="text-success">
                         <i class="fas fa-check-circle mr-1"></i>已就緒
                     </span>
+                    ${baristaBadge}
                     ${readyTimeDisplay ? `<span class="ml-2 text-muted small">${readyTimeDisplay}</span>` : ''}
                     ${waitingTimeDisplay ? `<span class="ml-2 badge badge-warning">等待取餐 ${waitingTimeDisplay}</span>` : ''}
                 </div>
@@ -389,6 +413,13 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
      */
     sortOrders(orders) {
         return [...orders].sort((a, b) => {
+            // 第一優先級：優先處理的訂單排前面
+            const isExpA = a.is_expedited || false;
+            const isExpB = b.is_expedited || false;
+            if (isExpA !== isExpB) {
+                return isExpB ? 1 : -1;
+            }
+            // 第二優先級：按就緒時間排序（最早的在前）
             const readyA = a.ready_at || a.completed_at || a.created_at_iso || a.created_at || '';
             const readyB = b.ready_at || b.completed_at || b.created_at_iso || b.created_at || '';
             return new Date(readyA) - new Date(readyB);

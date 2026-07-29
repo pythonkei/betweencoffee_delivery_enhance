@@ -11,7 +11,11 @@
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col col-lg-12 mb-5">
-                <h1 class="mb-5">店鋪訂單製作</h1>
+                <h1 class="mb-5">店鋪訂單製作
+                    <a href="/eshop/staff/audit-log/" class="bc-btn bc-btn-gold" style="float:right;font-size:.85rem;padding:8px 16px;margin-top:4px;">
+                        <i class="icon-list-alt"></i> 審計日誌
+                    </a>
+                </h1>
 
                 <!-- 渲染器標籤頁導覽（不使用 Bootstrap data-toggle，改用自定義 JS 切換） -->
                 <ul class="staff-nav-tabs mb-4 pt-4" id="orderTabs" role="tablist">
@@ -77,8 +81,19 @@
                                         
                                         <!-- 空狀態 -->
                                         <div id="waiting-queue-empty" class="text-center py-5" style="display: none;">
-                                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
-                                            <p class="text-muted">暫無等待訂單</p>
+                                            <div class="mb-4">
+                                                <i class="fas fa-clock text-muted bc-empty-icon"></i>
+                                            </div>
+                                            <h4>暫無等待訂單</h4>
+                                            <p class="text-muted">所有等待訂單已開始製作</p>
+                                        </div>
+                                        
+                                        <!-- 刷新按鈕 -->
+                                        <div class="text-center mt-4">
+                                            <button class="btn btn-outline-warning btn-sm" id="refresh-waiting-orders-btn">
+                                                <i class="fas fa-sync-alt mr-1"></i> 刷新等待訂單
+                                            </button>
+                                            <small class="text-muted d-block mt-1">最後更新: <span id="waiting-orders-last-update">-</span></small>
                                         </div>
                                         
                                     </div>
@@ -96,7 +111,7 @@
                                         <!-- 空狀態 -->
                                         <div id="payment-pending-orders-empty" class="text-center py-5" style="display: none;">
                                             <div class="mb-4">
-                                                <i class="fas fa-check-circle fa-3x text-success"></i>
+                                                <i class="fas fa-check-circle text-success bc-empty-icon"></i>
                                             </div>
                                             <h4>暫無待確認付款的訂單</h4>
                                             <p class="text-muted">所有 FPS 付款訂單已確認</p>
@@ -153,10 +168,10 @@
                                         <!-- 空狀態 -->
                                         <div id="countdown-active-empty" class="text-center py-5" style="display: none;">
                                             <div class="mb-4">
-                                                <i class="fas fa-hourglass-half fa-3x text-info"></i>
+                                                <i class="fas fa-hourglass-half text-info bc-empty-icon"></i>
                                             </div>
-                                            <h4>暫無倒計時進行中的訂單</h4>
-                                            <p class="text-muted">當前沒有正在倒計時的訂單</p>
+                                            <h4>暫無進行中的訂單</h4>
+                                            <p class="text-muted">當前沒有正在製作的訂單</p>
                                         </div>
                                         
                                     </div>
@@ -174,10 +189,10 @@
                                         <!-- 空狀態 -->
                                         <div id="countdown-completed-empty" class="text-center py-5" style="display: none;">
                                             <div class="mb-4">
-                                                <i class="fas fa-hourglass-end fa-3x text-warning"></i>
+                                                <i class="fas fa-hourglass-end text-warning bc-empty-icon"></i>
                                             </div>
-                                            <h4>暫無倒計時已完成的訂單</h4>
-                                            <p class="text-muted">當前沒有等待確認的訂單</p>
+                                            <h4>暫無已完成倒數的訂單</h4>
+                                            <p class="text-muted">當前沒有等待確認完成的訂單</p>
                                         </div>
                                         
                                     </div>
@@ -214,10 +229,10 @@
                                 <!-- 動態內容將由JavaScript填充 -->
                             </div>
                             
-                            <!-- 空狀態 - 修改為默認顯示（初始狀態） -->
+                            <!-- 空狀態 -->
                             <div id="ready-orders-empty" class="text-center py-5" style="display: none;">
                                 <div class="mb-4">
-                                    <i class="fas fa-mug-hot h1 text-muted"></i>
+                                    <i class="fas fa-mug-hot text-muted bc-empty-icon"></i>
                                 </div>
                                 <h4>暫無已就緒的訂單</h4>
                                 <p class="text-muted">當前沒有等待提取的訂單</p>
@@ -251,10 +266,10 @@
                                 <!-- 動態內容將由JavaScript填充 -->
                             </div>
                             
-                                <!-- 空狀態 - 修改為默認顯示 -->
+                                <!-- 空狀態 -->
                                 <div id="completed-orders-empty" class="text-center py-5" style="display: none;">
                                     <div class="mb-4">
-                                        <i class="fas fa-box h1 text-muted"></i>
+                                        <i class="fas fa-box text-muted bc-empty-icon"></i>
                                     </div>
                                     <h4>暫無最近提取的訂單</h4>
                                     <p class="text-muted">最近4小時內沒有已提取的訂單</p>
@@ -312,6 +327,8 @@
 <script src="{% static 'js/staff-order-management/services/toast-service.js' %}"></script>
 <script src="{% static 'js/staff-order-management/services/event-bus.js' %}"></script>
 <script src="{% static 'js/staff-order-management/services/api-service.js' %}"></script>
+
+<!-- 0b. 订单操作服务（依赖基础服务层） -->
 <script src="{% static 'js/staff-order-management/services/order-action-service.js' %}"></script>
 
 <!-- 1. 共用工具模块（基础工具） -->
@@ -373,47 +390,6 @@ document.getElementById('check-badge-status').addEventListener('click', function
         window.badgeManager.checkStatus();
     }
 });
-
-// ===== 隱藏浮動購物車按鈕（員工頁面不需要） =====
-const floatingCart = document.getElementById('bc-floating-cart');
-if (floatingCart) {
-    floatingCart.style.display = 'none';
-}
-
-// ===== 浮動返回頂部按鈕 =====
-(function() {
-    // 創建按鈕
-    const backToTop = document.createElement('div');
-    backToTop.id = 'bc-back-to-top';
-    backToTop.className = 'bc-floating-cart';
-    backToTop.style.cssText = 'position:fixed;bottom:40px;right:40px;z-index:9999;pointer-events:none;opacity:0;transition:opacity 0.3s ease;';
-
-    backToTop.innerHTML = `
-        <button id="bc-back-to-top-btn" class="bc-floating-cart-btn" aria-label="返回頂部" style="pointer-events:auto;">
-            <span class="icon material-icons" style="font-size:1.76rem;">arrow_upward</span>
-        </button>
-    `;
-
-    document.body.appendChild(backToTop);
-
-    const btn = document.getElementById('bc-back-to-top-btn');
-
-    // 監聽滾動
-    window.addEventListener('scroll', function() {
-        if (window.pageYOffset > 200) {
-            backToTop.style.opacity = '1';
-            backToTop.style.pointerEvents = 'auto';
-        } else {
-            backToTop.style.opacity = '0';
-            backToTop.style.pointerEvents = 'none';
-        }
-    });
-
-    // 點擊返回頂部
-    btn.addEventListener('click', function() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-})();
 </script>
 
 

@@ -1,8 +1,13 @@
 /* static/css/staff-order-management.css */
 
-/* 确保隐藏的元素不会占用空间 */
+/* 確保隱藏的元素不會佔用空間 */
 [style*="display: none"] {
     display: none !important;
+}
+
+/* 空狀態圖示統一大小（3rem = 48px，與 fa-3x 等義但不受 Bootstrap 覆蓋） */
+.bc-empty-icon {
+    font-size: 3rem !important;
 }
 
 /* 商品数量文本样式 */

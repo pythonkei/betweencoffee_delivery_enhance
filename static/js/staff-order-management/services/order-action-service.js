@@ -295,6 +295,34 @@ class OrderActionService {
     }
     
     /**
+     * 切換優先處理狀態（toggle on/off）
+     * @returns {Object|null} {is_expedited: boolean} 或 null（失敗時）
+     */
+    async markAsExpedited(orderId) {
+        if (this.isProcessing) return null;
+        this.isProcessing = true;
+
+        try {
+            const result = await this.post(`/eshop/api/orders/${orderId}/expedite/`, {});
+
+            await this.refreshAndNotify();
+
+            document.dispatchEvent(new CustomEvent('order_expedited', {
+                detail: { 
+                    order_id: orderId,
+                    is_expedited: result.data?.is_expedited ?? true
+                }
+            }));
+
+            return result.data || { is_expedited: true };
+        } catch (error) {
+            return null;
+        } finally {
+            this.isProcessing = false;
+        }
+    }
+
+    /**
      * 取消訂單
      */
     async cancelOrder(orderId) {

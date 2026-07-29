@@ -3,6 +3,7 @@
 from django.urls import path
 
 from .views.staff_views import (
+    audit_log_page,
     mark_order_collected,
     mark_order_ready,
     staff_order_management,
@@ -17,5 +18,6 @@ urlpatterns = [
         mark_order_collected,
         name="mark_order_collected",
     ),
+    path("audit-log/", audit_log_page, name="audit_log_page"),
     path("websocket-monitor/", websocket_monitor_dashboard, name="websocket_monitor"),
 ]

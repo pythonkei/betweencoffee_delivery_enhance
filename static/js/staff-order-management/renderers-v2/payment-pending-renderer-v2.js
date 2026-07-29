@@ -28,7 +28,7 @@ class PaymentPendingRendererV2 extends BaseOrderRendererV2 {
      * - 刷新間隔 15 秒
      */
     constructor() {
-        super('payment_pending', 'payment-pending', 'payment-pending-orders-list', 'payment-pending-empty', {
+        super('payment_pending', 'payment-pending', 'payment-pending-orders-list', 'payment-pending-orders-empty', {
             enableCountdown: false,
             enableSorting: true,
             refreshInterval: 15000,

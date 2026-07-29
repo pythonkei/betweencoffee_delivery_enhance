@@ -16,6 +16,7 @@ from .views.api_views import (
     api_mark_order_as_ready,
     generate_fps_qr_api,
     get_active_orders,
+    get_audit_logs_api,
     get_dashboard_stats,
     get_quick_order_times,
     get_recent_orders,
@@ -23,6 +24,9 @@ from .views.api_views import (
     update_order_pickup_times_api,
 )
 from .views.payment_views import api_cancel_order, check_pending_orders
+
+# ==================== 導入加速訂單 API ====================
+from .views.api_views import api_expedite_order
 
 # ==================== 導入 WebSocket 監控視圖 ====================
 from .views.websocket_views import websocket_broadcast_test  # 系統廣播測試
@@ -82,10 +86,18 @@ urlpatterns = [
     # ==================== 兼容性 API（逐步遷移）====================
     path("recent-orders/", get_recent_orders, name="recent_orders"),
     path("active-orders/", get_active_orders, name="active_orders"),
+    # ==================== 審計日誌 API ====================
+    path("audit-logs/", get_audit_logs_api, name="get_audit_logs"),
     # ==================== 健康檢查 API ====================
     path("health/", health_check, name="health_check"),
     # ==================== 支付狀態檢查 API ====================
     path("check-pending-orders/", check_pending_orders, name="check_pending_orders"),
+    # ==================== 加速訂單 API ====================
+    path(
+        "orders/<int:order_id>/expedite/",
+        api_expedite_order,
+        name="api_expedite_order",
+    ),
     # ==================== 取消訂單 API ====================
     path("cancel-order/<int:order_id>/", api_cancel_order, name="api_cancel_order"),
     # ==================== FPS 動態 QR Code API ====================

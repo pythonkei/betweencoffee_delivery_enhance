@@ -126,6 +126,15 @@ def mark_order_ready(request, order_id):
         return redirect("eshop:staff_order_management")
 
 
+# ==================== 審計日誌頁面 ====================
+
+
+@staff_member_required
+def audit_log_page(request):
+    """審計日誌頁面 - 員工操作記錄查詢"""
+    return render(request, "admin/audit_log.html")
+
+
 @require_POST
 @login_required
 @staff_member_required

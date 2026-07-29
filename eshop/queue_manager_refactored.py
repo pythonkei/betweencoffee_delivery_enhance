@@ -717,7 +717,7 @@ class CoffeeQueueManager:
                         hasattr(order, "pickup_time_choice")
                         and order.pickup_time_choice
                     ):
-                        time_info = unified_time_service.calculate_quick__times(
+                        time_info = unified_time_service.calculate_quick_order_times(
                             order
                         )
                         if time_info:

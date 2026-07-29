@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年7月28日（更新：Phase 3D WhatsApp 通知功能完成，部署至 Render 生產環境）
+> **最後更新**: 2026年7月28日（更新：Phase 3D 審計日誌系統完成，部署至 Render 生產環境）
 
 ## 開發者背景與方法論
 
@@ -279,7 +279,16 @@ Phase 3D：新功能（優先級：低）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
 ├── [ ] 訂單匯出功能
-├── [ ] 操作日誌/審計追蹤
+├── [x] 審計日誌系統（Audit Log）— ✅ 2026-07-28
+│   ├── [x] AuditLog Model + Migration（action/order/staff/detail/IP/時間）
+│   ├── [x] audit_logger.py（log_audit 工具函數，try/except 保護）
+│   ├── [x] status_changer.py 整合審計日誌（7 個操作全部記錄）
+│   ├── [x] API 端點 /eshop/api/audit-logs/（過濾/分頁/CSV 匯出）
+│   ├── [x] 獨立前端頁面 templates/admin/audit_log.html
+│   ├── [x] 訂單號碼統一（全部顯示簡短 order.id #2702）
+│   ├── [x] WhatsApp 通知改為簡短訂單號
+│   ├── [x] 訂單管理頁面「審計日誌」入口按鈕
+│   └── [x] 端到端驗證通過（API Total: 12 筆）
 
 Phase 3G：渲染器狀態轉換即時同步修復（優先級：P1）— ✅ 2026-07-27
 ├── [x] _executeOrderAction await loadUnifiedData + notifyAllListeners

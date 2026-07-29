@@ -125,15 +125,14 @@ def send_order_ready_notification(order) -> bool:
     )
 
     # 取得取餐資訊
-    order_number = getattr(order, "order_number", None) or f"#{order.id}"
     pickup_code = getattr(order, "pickup_code", None)
 
-    # 組成通知訊息
+    # 組成通知訊息（使用簡短 order.id）
     message = (
         f"☕ Between Coffee 取餐通知\n\n"
         f"{customer_name} 您好！\n"
-        f"您的訂單 {order_number} 已準備就緒 🎉\n\n"
-        f"📋 訂單編號: {order_number}"
+        f"您的訂單 #{order.id} 已準備就緒 🎉\n\n"
+        f"📋 訂單編號: #{order.id}"
     )
 
     if pickup_code:

@@ -8,9 +8,11 @@ eshop.models 套件 - 模型模組拆分
 - cart_item.py: CartItem
 - order.py: OrderModel
 - queue_models.py: CoffeeQueue, Barista, CoffeePreparationTime
+- audit_log.py: AuditLog
 """
 
 # 從子模組匯入
+from .audit_log import AuditLog
 from .base import get_image_url, get_product_image_url
 from .cart_item import CartItem
 from .order import OrderModel

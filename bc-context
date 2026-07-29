@@ -270,3 +270,13 @@ main() {
 
 # 執行
 main "$@"
+=== Phase 3D Audit Log (2026-07-28) ===
+✅ AuditLog Model + Migration (eshop/models/audit_log.py + 0055)
+✅ audit_logger.py (log_audit 工具函數)
+✅ status_changer.py 整合 7 個操作審計日誌
+✅ API /eshop/api/audit-logs/ (過濾/分頁/CSV)
+✅ 前端 templates/admin/audit_log.html (獨立頁面)
+✅ 訂單號碼統一 (簡短 order.id)
+✅ 訂單管理頁面 → 審計日誌按鈕
+✅ whatsapp_notifier.py 改為簡短訂單號
+✅ API 鑑權改為 JSON 401

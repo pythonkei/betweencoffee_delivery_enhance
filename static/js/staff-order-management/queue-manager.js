@@ -68,9 +68,6 @@ class QueueManager {
             });
             
             // 顯示內容，隱藏空狀態
-            if (waitingList.parentElement) {
-                waitingList.parentElement.style.display = 'block';
-            }
             if (emptyElement) {
                 emptyElement.style.display = 'none';
             }
@@ -78,9 +75,6 @@ class QueueManager {
             console.log(`✅ 更新等待隊列: ${orders.length} 個訂單`);
         } else {
             // 顯示空狀態
-            if (waitingList.parentElement) {
-                waitingList.parentElement.style.display = 'none';
-            }
             if (emptyElement) {
                 emptyElement.style.display = 'block';
             }
@@ -391,16 +385,27 @@ class QueueManager {
             `;
         }
 
-        // ====== FPS 付款狀態徽章 ======
-        const isFpsPending = order.payment_method === 'fps' && order.payment_status === 'pending';
-        let fpsPaymentBadge = '';
-        if (isFpsPending) {
-            fpsPaymentBadge = `
-                <span class="badge badge-danger ml-1">
-                    <i class="fas fa-exclamation-circle mr-1"></i>FPS 待確認
-                </span>
-            `;
-        }
+    // ====== 優先處理徽章（等待中卡片頂部） ======
+    const isExpedited = order.is_expedited || false;
+    let expediteBadge = '';
+    if (isExpedited) {
+        expediteBadge = `
+            <span class="badge badge-warning ml-1">
+                <i class="fas fa-bolt mr-1"></i>優先處理
+            </span>
+        `;
+    }
+
+    // ====== FPS 付款狀態徽章 ======
+    const isFpsPending = order.payment_method === 'fps' && order.payment_status === 'pending';
+    let fpsPaymentBadge = '';
+    if (isFpsPending) {
+        fpsPaymentBadge = `
+            <span class="badge badge-danger ml-1">
+                <i class="fas fa-exclamation-circle mr-1"></i>FPS 待確認
+            </span>
+        `;
+    }
 
         // 構建訂單HTML（徽章修正版）
         orderDiv.innerHTML = `
@@ -415,6 +420,7 @@ class QueueManager {
                         <i class="fas fa-clock mr-1"></i>等待中
                     </span>
                     ${queuePositionBadge}
+                    ${expediteBadge}
                 </div>
             </div>
 
@@ -464,6 +470,12 @@ class QueueManager {
                     ${order.position ? `<span class="ml-2 badge badge-info">隊列位置: ${order.position}</span>` : ''}
                 </div>
                 <div class="d-flex align-items-center">
+                    <button class="btn ${isExpedited ? 'btn-success' : 'btn-primary'} btn-sm btn-expedite mr-2" 
+                            data-order-id="${order.id}"
+                            data-is-expedited="${isExpedited}"
+                            title="${isExpedited ? '點擊取消優先處理' : '優先處理此訂單'}">
+                        <i class="fas fa-bolt mr-1"></i>${isExpedited ? '已優先' : '優先處理'}
+                    </button>
                     ${isFpsPending ? `
                     <button class="btn btn-success btn-sm confirm-fps-payment-btn" data-order-id="${order.id}">
                         <i class="fas fa-check-circle mr-1"></i>確認 FPS 付款
@@ -994,6 +1006,13 @@ class QueueManager {
                 if (orderId) this.cancelOrder(orderId);
             }
             
+            if (e.target.closest('.btn-expedite')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const orderId = e.target.closest('[data-order-id]')?.dataset.orderId;
+                if (orderId) this.expediteOrder(orderId);
+            }
+            
             if (e.target.closest('.view-details-btn')) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1011,6 +1030,33 @@ class QueueManager {
                     setTimeout(() => window.unifiedDataManager.loadUnifiedData(), 300);
                 }
             });
+        }
+    }
+    
+    // ==================== 加速訂單方法 ====================
+    
+    async expediteOrder(orderId) {
+        if (this.isLoading) {
+            console.log('⏳ 已有操作正在進行，跳過重複請求');
+            return;
+        }
+        
+        // 委派給共用服務（toggle）
+        const result = await window.orderActionService.markAsExpedited(orderId);
+        
+        if (result) {
+            const isExpedited = result.is_expedited === true;
+            this.showToast(
+                isExpedited ? `✅ 訂單 #${orderId} 已設為優先處理` : `ℹ️ 訂單 #${orderId} 已取消優先處理`,
+                isExpedited ? 'success' : 'info'
+            );
+            
+            // 觸發統一數據刷新（重新排隊）
+            if (window.unifiedDataManager) {
+                setTimeout(() => window.unifiedDataManager.loadUnifiedData(true), 500);
+            }
+        } else {
+            this.showToast(`❌ 優先處理失敗`, 'error');
         }
     }
     

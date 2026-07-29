@@ -95,6 +95,8 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
         const itemCount = items.length || order.items_count || 0;
         const phone = order.phone || '';
         const completedAt = order.completed_at || order.ready_at || '';
+        const baristaName = order.barista_name || order.barista || '';
+        const isExpedited = order.is_expedited || false;
 
         // 格式化時間
         const orderTime = this.formatOrderTime(createdAt);
@@ -195,6 +197,26 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
             }
         }
 
+        // 優先處理徽章
+        let expediteBadge = '';
+        if (isExpedited) {
+            expediteBadge = `
+                <span class="badge badge-warning ml-1">
+                    <i class="fas fa-bolt mr-1"></i>優先處理
+                </span>
+            `;
+        }
+
+        // 咖啡師徽章
+        let baristaBadge = '';
+        if (baristaName) {
+            baristaBadge = `
+                <span class="badge badge-barista ml-1">
+                    <i class="fas fa-user mr-1"></i>${baristaName}
+                </span>
+            `;
+        }
+
         // 支付方式徽章
         let paymentMethodBadge = '';
         if (order.payment_method) {
@@ -245,6 +267,12 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
                 ${orderTypeBadges}${paymentMethodBadge}
             </div>
             
+            <div class="d-flex justify-content-between mb-3 mt-3">
+                <div class="mt-2">
+                    ${expediteBadge}
+                </div>
+            </div>
+
             <div class="order-items">
                 ${itemsHTML}
                 <div class="mt-4">
@@ -281,6 +309,7 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
                     <span class="text-muted">
                         <i class="fas fa-check-double mr-1"></i>已完成
                     </span>
+                    ${baristaBadge}
                     ${completedTimeDisplay ? `<span class="ml-2 text-muted small">${completedTimeDisplay}</span>` : ''}
                 </div>
                 <div class="d-flex align-items-center">

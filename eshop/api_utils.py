@@ -25,8 +25,12 @@ def staff_api_required(view_func=None, require_staff=True):
     """
 
     def decorator(view_func):
-        @login_required
         def _wrapped_view(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return JsonResponse(
+                    {"success": False, "error": "需要登入"},
+                    status=401,
+                )
             if require_staff and not request.user.is_staff:
                 return JsonResponse(
                     ApiResponseFormatter.error("需要員工權限"), status=403

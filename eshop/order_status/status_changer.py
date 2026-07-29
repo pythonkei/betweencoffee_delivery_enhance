@@ -8,6 +8,7 @@
 - 批量狀態變化處理
 - 手動標記：等待中/已取消/製作中/就緒/已完成
 - WebSocket 通知發送
+- 審計日誌記錄（AuditLog）
 """
 
 import logging
@@ -34,6 +35,8 @@ class StatusChanger:
     @classmethod
     def process_order_status_change(cls, order_id, new_status, staff_name=None):
         """處理訂單狀態變化的統一邏輯 - 包含統一時間計算"""
+        from ..audit_logger import log_audit  # 延遲導入，避免循環依賴
+
         try:
             logger.info(f"🔄 處理訂單 #{order_id} 狀態變化: {new_status}")
 
@@ -112,6 +115,24 @@ class StatusChanger:
             except Exception as ws_error:
                 logger.error(f"發送WebSocket通知失敗: {str(ws_error)}")
 
+            # 記錄審計日誌
+            action_map = {
+                "preparing": "order_preparing",
+                "ready": "order_ready",
+                "completed": "order_completed",
+                "waiting": "order_waiting",
+                "cancelled": "order_cancelled",
+            }
+            audit_action = action_map.get(new_status)
+            if audit_action:
+                log_audit(
+                    audit_action,
+                    order=order,
+                    staff_name=staff_name or "",
+                    old_status=old_status,
+                    new_status=new_status,
+                )
+
             return {
                 "success": True,
                 "order_id": order_id,
@@ -162,6 +183,8 @@ class StatusChanger:
     @classmethod
     def mark_as_waiting_manually(cls, order_id, staff_name=None):
         """手動將訂單標記為等待中"""
+        from ..audit_logger import log_audit  # 延遲導入，避免循環依賴
+
         try:
             order = OrderModel.objects.get(id=order_id)
             old_status = order.status
@@ -188,6 +211,15 @@ class StatusChanger:
                 queue_item.actual_start_time = None
                 queue_item.save()
 
+            # 記錄審計日誌
+            log_audit(
+                "order_waiting",
+                order=order,
+                staff_name=staff_name or "",
+                old_status=old_status,
+                new_status="waiting",
+            )
+
             logger.info(
                 f"Order {order_id} marked as waiting by {staff_name or 'system'}"
             )
@@ -200,6 +232,8 @@ class StatusChanger:
     @classmethod
     def mark_as_cancelled_manually(cls, order_id, staff_name=None, reason=None):
         """手動將訂單標記為已取消"""
+        from ..audit_logger import log_audit  # 延遲導入，避免循環依賴
+
         try:
             order = OrderModel.objects.get(id=order_id)
             old_status = order.status
@@ -219,6 +253,16 @@ class StatusChanger:
                 queue_item.status = "cancelled"
                 queue_item.save()
 
+            # 記錄審計日誌
+            log_audit(
+                "order_cancelled",
+                order=order,
+                staff_name=staff_name or "",
+                old_status=old_status,
+                new_status="cancelled",
+                reason=reason,
+            )
+
             logger.info(
                 f"Order {order_id} cancelled by {staff_name or 'system'}. Reason: {reason}"
             )
@@ -233,6 +277,8 @@ class StatusChanger:
         cls, order_id, barista_name=None, preparation_minutes=None
     ):
         """手動將訂單標記為製作中（員工操作）- 優化版本"""
+        from ..audit_logger import log_audit  # 延遲導入，避免循環依賴
+
         try:
             # 獲取訂單
             order = OrderModel.objects.get(id=order_id)
@@ -358,7 +404,17 @@ class StatusChanger:
             except Exception as queue_error:
                 logger.error(f"❌ 隊列時間更新失敗: {str(queue_error)}")
 
-            # 6. 記錄日誌
+            # 6. 記錄審計日誌
+            log_audit(
+                "order_preparing",
+                order=order,
+                staff_name=barista_name or "",
+                old_status=old_status,
+                new_status="preparing",
+                preparation_minutes=preparation_minutes,
+            )
+
+            # 7. 記錄日誌
             logger.info(
                 f"✅ 訂單 #{order_id} 已開始製作，操作員: {barista_name or 'system'}"
             )
@@ -385,6 +441,8 @@ class StatusChanger:
     @classmethod
     def mark_as_ready_manually(cls, order_id, staff_name=None):
         """手動將訂單標記為就緒"""
+        from ..audit_logger import log_audit  # 延遲導入，避免循環依賴
+
         try:
             order = OrderModel.objects.get(id=order_id)
 
@@ -455,6 +513,15 @@ class StatusChanger:
             except Exception as wa_error:
                 logger.error(f"❌ 發送 WhatsApp 通知失敗: {str(wa_error)}")
 
+            # 記錄審計日誌
+            log_audit(
+                "order_ready",
+                order=order,
+                staff_name=staff_name or "",
+                old_status="preparing",
+                new_status="ready",
+            )
+
             logger.info(f"Order {order_id} marked as ready by {staff_name or 'system'}")
             return {"success": True, "order": order, "queue_item": queue_item}
 
@@ -465,7 +532,10 @@ class StatusChanger:
     @classmethod
     def mark_as_completed_manually(cls, order_id, staff_name=None):
         """手動將訂單標記為已提取 - 員工操作"""
+        from ..audit_logger import log_audit  # 延遲導入，避免循環依賴
+
         try:
+            order = OrderModel.objects.get(id=order_id)
             logger.info(f"👨‍🍳 員工 {staff_name} 手動標記訂單 #{order_id} 為已提取")
 
             result = cls.process_order_status_change(
@@ -473,6 +543,7 @@ class StatusChanger:
             )
 
             if result.get("success"):
+                # 審計日誌已在 process_order_status_change 中記錄
                 logger.info(f"✅ 訂單 #{order_id} 已成功標記為已提取")
             else:
                 logger.error(

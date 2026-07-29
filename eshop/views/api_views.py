@@ -454,6 +454,46 @@ def api_mark_order_as_completed(request, order_id):
         )
 
 
+@csrf_exempt
+@require_POST
+@staff_api_required
+def api_expedite_order(request, order_id):
+    """API: 切換優先處理狀態 + 重新排隊"""
+    try:
+        from eshop.models import CoffeeQueue, OrderModel
+        from eshop.queue_manager_refactored import CoffeeQueueManager
+        from django.shortcuts import get_object_or_404
+
+        order = get_object_or_404(OrderModel, id=order_id)
+        queue_item = CoffeeQueue.objects.filter(order=order).first()
+
+        new_expedited = True
+        if queue_item:
+            # Toggle: if already expedited, remove it
+            new_expedited = not queue_item.is_expedited
+            queue_item.is_expedited = new_expedited
+            queue_item.save()
+            logger.info(f"✅ 優先處理切換訂單 #{order_id}: is_expedited={new_expedited}")
+
+            # 重新排隊：調用隊列管理器的重新計算
+            try:
+                manager = CoffeeQueueManager()
+                manager.recalculate_all__times()
+                logger.info(f"🔄 重新排隊完成（訂單 #{order_id} 優先處理切換後）")
+            except Exception as re_e:
+                logger.warning(f"⚠️ 重新排隊失敗: {str(re_e)}")
+        else:
+            logger.warning(f"⚠️ 優先處理 #{order_id}: 未找到對應隊列項")
+
+        return api_success(
+            data={"order_id": order_id, "is_expedited": new_expedited},
+            message=f"訂單 #{order_id} 已{'設為優先處理' if new_expedited else '取消優先處理'}",
+        )
+    except Exception as e:
+        logger.error(f"❌ 優先處理訂單 #{order_id} 失敗: {str(e)}")
+        return api_error(message=f"優先處理失敗: {str(e)}", status_code=500)
+
+
 # ==================== 倒計時API（保持不變） ====================
 
 
@@ -899,3 +939,127 @@ def api_confirm_fps_payment(request, order_id):
 def api_confirm_cash_payment(request, order_id):
     """保留向後兼容 - 調用統一的 api_confirm_offline_payment"""
     return api_confirm_offline_payment(request, order_id, "cash")
+
+
+# ==================== 審計日誌 API ====================
+
+
+@staff_api_required
+@require_GET
+def get_audit_logs_api(request):
+    """
+    獲取審計日誌 API
+
+    支援過濾：
+    - action: 動作類型過濾
+    - staff: 員工名稱過濾
+    - from: 開始日期 (ISO 格式或 YYYY-MM-DD)
+    - to: 結束日期 (ISO 格式或 YYYY-MM-DD)
+    - page: 頁碼 (預設 1)
+    - per_page: 每頁筆數 (預設 20, 最大 100)
+    - export: 設為 'csv' 匯出 CSV
+    """
+    try:
+        from ..models.audit_log import AuditLog
+
+        # 建立查詢
+        queryset = AuditLog.objects.all()
+
+        # 過濾：動作類型
+        action = request.GET.get("action")
+        if action:
+            queryset = queryset.filter(action=action)
+
+        # 過濾：員工名稱
+        staff = request.GET.get("staff")
+        if staff:
+            queryset = queryset.filter(staff_name__icontains=staff)
+
+        # 過濾：日期範圍（處理 timezone-aware 比對）
+        from django.utils import timezone
+        from datetime import datetime
+
+        from_date = request.GET.get("from")
+        to_date = request.GET.get("to")
+        if from_date:
+            try:
+                from_dt = datetime.fromisoformat(from_date) if "T" in from_date else datetime.strptime(from_date, "%Y-%m-%d")
+                from_dt = timezone.make_aware(from_dt) if timezone.is_naive(from_dt) else from_dt
+                queryset = queryset.filter(created_at__gte=from_dt)
+            except (ValueError, TypeError):
+                pass
+        if to_date:
+            try:
+                to_dt = datetime.fromisoformat(to_date) if "T" in to_date else datetime.strptime(to_date, "%Y-%m-%d")
+                to_dt = to_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
+                to_dt = timezone.make_aware(to_dt) if timezone.is_naive(to_dt) else to_dt
+                queryset = queryset.filter(created_at__lte=to_dt)
+            except (ValueError, TypeError):
+                pass
+
+        # CSV 匯出
+        export = request.GET.get("export")
+        if export and export.lower() == "csv":
+            import csv
+            import io
+
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(["時間", "員工", "操作", "訂單編號", "詳細資訊", "IP"])
+            for log in queryset[:10000]:  # 限制最多 10000 筆
+                writer.writerow(
+                    [
+                        log.created_at.isoformat(),
+                        log.staff_name,
+                        log.get_action_display(),
+                        log.order_id or "",
+                        str(log.detail),
+                        log.ip_address or "",
+                    ]
+                )
+            response = JsonResponse(
+                {"csv": output.getvalue()}, content_type="application/json"
+            )
+            return response
+
+        # 分頁
+        page = int(request.GET.get("page", 1))
+        per_page = min(int(request.GET.get("per_page", 20)), 100)
+        total = queryset.count()
+
+        start = (page - 1) * per_page
+        end = start + per_page
+        logs = queryset.select_related("order").only(
+            "action", "staff_name", "order_id", "created_at", "ip_address", "detail"
+        )[start:end]
+
+        results = []
+        for log in logs:
+            results.append(
+                {
+                    "id": log.id,
+                    "action": log.action,
+                    "action_display": log.get_action_display(),
+                    "staff_name": log.staff_name,
+                    "order_id": log.order_id,
+                    "order_number": log.order_id,
+                    "detail": log.detail,
+                    "ip_address": log.ip_address,
+                    "created_at": log.created_at.isoformat(),
+                }
+            )
+
+        return JsonResponse(
+            {
+                "success": True,
+                "data": results,
+                "total": total,
+                "page": page,
+                "per_page": per_page,
+                "total_pages": (total + per_page - 1) // per_page,
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"❌ 獲取審計日誌失敗: {str(e)}", exc_info=True)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)

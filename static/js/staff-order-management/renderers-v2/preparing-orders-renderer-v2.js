@@ -336,12 +336,12 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
             `;
         }
 
-        // 加速徽章
+        // 優先處理徽章
         let expediteBadge = '';
         if (isExpedited) {
             expediteBadge = `
                 <span class="badge badge-warning ml-1">
-                    <i class="fas fa-bolt mr-1"></i>加速中
+                    <i class="fas fa-bolt mr-1"></i>優先處理
                 </span>
             `;
         }
@@ -511,11 +511,6 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
                                 title="標記為已就緒">
                             <i class="fas fa-check mr-1"></i>完成製作
                         </button>
-                        <button class="btn btn-outline-warning btn-sm btn-expedite" 
-                                data-order-id="${orderId}"
-                                title="加速處理此訂單">
-                            <i class="fas fa-bolt mr-1"></i>加速
-                        </button>
                     </div>
                 </div>
             `;
@@ -581,14 +576,6 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
             });
         }
 
-        // 加速處理按鈕
-        const expediteBtn = div.querySelector('.btn-expedite');
-        if (expediteBtn) {
-            this._addManagedListener(expediteBtn, 'click', (e) => {
-                e.stopPropagation();
-                this._handleExpedite(order);
-            });
-        }
     }
 
     // ==================== 操作處理 ====================
@@ -603,15 +590,6 @@ class PreparingOrdersRendererV2 extends BaseOrderRendererV2 {
         });
     }
 
-    async _handleExpedite(order) {
-        const orderNumber = this._getOrderNumber(order);
-
-        await this._executeOrderAction(order, `/eshop/api/orders/{orderId}/expedite/`, {
-            successMessage: `✅ 訂單 #${orderNumber} 已加速`,
-            failMessage: '❌ 加速失敗',
-            errorMessage: '❌ 加速時發生錯誤'
-        });
-    }
 
     // ==================== 排序覆蓋 ====================
 
