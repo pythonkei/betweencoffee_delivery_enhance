@@ -1,0 +1,220 @@
+/* ============================================================
+   animate-custom.css — Between Coffee 客製化動畫
+   取代完整 animate.css (3,591行)，只保留實際使用的 class
+   原始檔案 animate.css 保留備用
+   ============================================================ */
+
+.animated {
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+.animated-fast {
+  -webkit-animation-duration: .2s;
+  animation-duration: .2s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+.ftco-animated {
+  -webkit-animation-duration: .5s;
+  animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+/* fadeIn — 用於 main.js 滾動動畫、lazy-load.js */
+@-webkit-keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* fadeInLeft — 用於 main.js 滾動動畫 */
+@-webkit-keyframes fadeInLeft {
+  from { opacity: 0; -webkit-transform: translate3d(-100%, 0, 0); transform: translate3d(-100%, 0, 0); }
+  to { opacity: 1; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
+}
+@keyframes fadeInLeft {
+  from { opacity: 0; -webkit-transform: translate3d(-100%, 0, 0); transform: translate3d(-100%, 0, 0); }
+  to { opacity: 1; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
+}
+
+/* fadeInRight — 用於 main.js 滾動動畫 */
+@-webkit-keyframes fadeInRight {
+  from { opacity: 0; -webkit-transform: translate3d(100%, 0, 0); transform: translate3d(100%, 0, 0); }
+  to { opacity: 1; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; -webkit-transform: translate3d(100%, 0, 0); transform: translate3d(100%, 0, 0); }
+  to { opacity: 1; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
+}
+
+/* fadeInUp — 用於 main.js owl carousel animateIn + 滾動動畫 */
+@-webkit-keyframes fadeInUp {
+  from { opacity: 0; -webkit-transform: translate3d(0, 100%, 0); transform: translate3d(0, 100%, 0); }
+  to { opacity: 1; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; -webkit-transform: translate3d(0, 100%, 0); transform: translate3d(0, 100%, 0); }
+  to { opacity: 1; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
+}
+
+/* fadeOutUpBig — 用於 main.js owl carousel animateOut */
+@-webkit-keyframes fadeOutUpBig {
+  from { opacity: 1; }
+  to { opacity: 0; -webkit-transform: translate3d(0, -2000px, 0); transform: translate3d(0, -2000px, 0); }
+}
+@keyframes fadeOutUpBig {
+  from { opacity: 1; }
+  to { opacity: 0; -webkit-transform: translate3d(0, -2000px, 0); transform: translate3d(0, -2000px, 0); }
+}
+
+/* 對應的 animation class */
+.fadeIn {
+  animation-name: fadeIn;
+}
+.fadeInLeft {
+  animation-name: fadeInLeft;
+}
+.fadeInRight {
+  animation-name: fadeInRight;
+}
+.fadeInUp {
+  animation-name: fadeInUp;
+}
+.fadeOutUpBig {
+  animation-name: fadeOutUpBig;
+}
+
+/* ============================================================
+   非動畫 class（原誤放在 animate.css 末尾，保留以確保運作）
+   ============================================================ */
+
+/* bean/coffee bg animation containers */
+.ani_bean_line_il {
+	position: absolute;
+  display: flex;
+	overflow: hidden;
+	width: 98.5vw;
+  flex-wrap: nowwrap;
+	height: 30vw;
+	z-index: -1;
+}
+.ani_bean_line_il:after {
+  position: absolute;
+	content: '';
+	width: 200vw;
+	height: 2vw;
+	left: -20vw;
+	background: repeat-x left center;
+	background-size: auto 100%;
+  filter: brightness(0) invert(1);
+  opacity: .1;
+	z-index: 0;
+}
+.post_archive:nth-child(odd) .ani_bean_line_il:after {
+	background-image: url(../images/ani_bean.svg);
+	animation: loop-line01 2s infinite cubic-bezier(0.87, 0, 0.13, 1) 0s both;
+	bottom: calc(8vw - 2vw);
+}
+.ani_coffee_line_il {
+	position: absolute;
+  display: flex;
+	overflow: hidden;
+	width: 98.5vw;
+  flex-wrap: nowwrap;
+	height: 30vw;
+	z-index: -1;
+}
+.ani_coffee_line_il:after {
+  position: absolute;
+	content: '';
+	width: 200vw;
+	height: 2vw;
+	left: -20vw;
+	background: repeat-x left center;
+	background-size: auto 100%;
+  filter: brightness(0) invert(1);
+  opacity: .1;
+	z-index: 0;
+}
+.post_archive:nth-child(odd) .ani_coffee_line_il:after {
+	background-image: url(../images/ani_coffee.svg);
+	animation: loop-line01 2s infinite cubic-bezier(0.87, 0, 0.13, 1) 0s both;
+	bottom: calc(8vw - 2vw);
+}
+.post_archive {
+	width: calc(var(--glid) * 19);
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	flex-direction: row-reverse;
+	position: relative;
+}
+@keyframes loop-line01 {
+  from { transform: rotate(15deg) translateX(-3.29vw); }
+  to { transform: rotate(15deg) translateX(3.29vw); }
+}
+
+/* ============================================================
+   noise_animation 核心 — 品牌 SVG SVG filter 背景動畫
+   原分散在 animate.css 末尾的各種品牌 class
+   ============================================================ */
+
+/* SVG filter 容器（隱藏） */
+.noise-filiter {
+    position: absolute;
+    display: none;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    z-index: -1;
+}
+
+/* noise_animation — 桌面版 */
+.noise_animation {
+  animation: desktop_noise_animation 1s linear infinite;
+  will-change: filter;
+  transform: translate3d(0, 0px, 0px);
+}
+
+.smart_noise_animation {
+  animation: smart_noise_animation 1s linear infinite;
+  will-change: filter;
+  transform: translate3d(0, 0px, 0px);
+}
+
+.logo_animation {
+  animation: logo_animation 1s linear infinite;
+  will-change: filter;
+  transform: translate3d(0, 0px, 0px);
+}
+
+@keyframes desktop_noise_animation {
+  0% { filter: url("#noise-0"); -webkit-filter: url("#noise-0"); }
+  20% { filter: url("#noise-1"); }
+  40% { filter: url("#noise-2"); }
+  60% { filter: url("#noise-3"); }
+  80% { filter: url("#noise-4"); }
+  100% { filter: url("#noise-0"); -webkit-filter: url("#noise-0"); }
+}
+
+@keyframes smart_noise_animation {
+  0% { filter: url("#noise-5"); }
+  25% { filter: url("#noise-6"); }
+  50% { filter: url("#noise-7"); }
+  75% { filter: url("#noise-8"); }
+  100% { filter: url("#noise-9"); }
+}
+
+@keyframes logo_animation {
+  0% { filter: url("#jitter-0"); }
+  25% { filter: url("#jitter-1"); }
+  50% { filter: url("#jitter-2"); }
+  75% { filter: url("#jitter-3"); }
+  100% { filter: url("#jitter-4"); }
+}

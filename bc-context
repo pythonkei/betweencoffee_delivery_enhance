@@ -80,14 +80,22 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: Phase 3D CSS 三步統一方案 ✅（2026-07-29）"
+        echo "├── 最新改動: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│"
-        echo "│   Phase 3D — WhatsApp 訂單就緒通知（全新功能）"
-        echo "│   ├── whatsapp_notifier.py（WhatsApp Cloud API 發送核心）"
-        echo "│   ├── notifications.py + status_changer.py（整合觸發）"
-        echo "│   ├── 香港電話自動補國碼（8 位 → 852）"
-        echo "│   ├── 本機測試 + Render 部署"
-        echo "│   └── 生產環境測試成功 ✅"
+        echo "│   Phase A: 刪除 7 個無引用檔案（-3,412行）"
+        echo "│   ├── temp.css / core.css / module.css"
+        echo "│   ├── bootstrap-datepicker.css / colorbox.css / _jquery.timepicker.css"
+        echo "│   └── static/_styles.css"
+        echo "│   Phase B: 合併 3 檔案到 bc-components.css（-546行）"
+        echo "│   ├── toast.css → bc-components.css"
+        echo "│   ├── payment-methods.css → bc-components.css"
+        echo "│   └── member-nav.css → bc-components.css"
+        echo "│   Phase C: animate.css 客製化（-3,339行）"
+        echo "│   ├── 建立 animate-custom.css（252行）替代 animate.css（3,591行）"
+        echo "│   ├── 保留 animate.css 備用，補充缺失非動畫 class"
+        echo "│   └── style-utilities.css 與 Bootstrap 重複評估完成"
+        echo "│   Phase D: ftco- class 淘汰 — 未來優化（7 class / 53 處模板）"
+        echo "│   └── 清理總結: 28,776行/31檔案 → 25,052行/22檔案（-13%行, -29%檔案）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
         echo "├── Phase 3C 進度: 效能優化 ✅ 已完成"
@@ -270,13 +278,3 @@ main() {
 
 # 執行
 main "$@"
-=== Phase 3D Audit Log (2026-07-28) ===
-✅ AuditLog Model + Migration (eshop/models/audit_log.py + 0055)
-✅ audit_logger.py (log_audit 工具函數)
-✅ status_changer.py 整合 7 個操作審計日誌
-✅ API /eshop/api/audit-logs/ (過濾/分頁/CSV)
-✅ 前端 templates/admin/audit_log.html (獨立頁面)
-✅ 訂單號碼統一 (簡短 order.id)
-✅ 訂單管理頁面 → 審計日誌按鈕
-✅ whatsapp_notifier.py 改為簡短訂單號
-✅ API 鑑權改為 JSON 401

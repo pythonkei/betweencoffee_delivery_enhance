@@ -276,6 +276,13 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] preparing-orders-renderer-v2.js（員工製作中頁面）
 │   ├── [x] ready-orders-renderer-v2.js（員工已就緒頁面）
 │   └── [x] completed-orders-renderer-v2.js（員工已完成頁面）
+├── [x] CSS 全域清理 Phase A-C（2026-07-30）— ✅
+│   ├── [x] Phase A: 刪除 7 個無引用 CSS 檔案（temp.css, core.css, module.css, bootstrap-datepicker.css, colorbox.css, _jquery.timepicker.css, _styles.css）
+│   ├── [x] Phase B: 合併 toast.css + payment-methods.css + member-nav.css → bc-components.css
+│   ├── [x] Phase C: animate.css 客製化（建立 animate-custom.css 252行替代 3591行）
+│   ├── [x] Phase C: style-utilities.css 與 Bootstrap 重複評估（建議保留，等待舊模板淘汰）
+│   └── [ ] Phase D: ftco- class 逐步淘汰 — 未來優化（涉及 7 class / 53 處模板）
+│       28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
 ├── [ ] 訂單匯出功能

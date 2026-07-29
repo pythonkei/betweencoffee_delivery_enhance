@@ -1,0 +1,95 @@
+============================================
+CSS 檔案引用分析報告
+生成時間: Thu 30 Jul 2026 01:22:51 AM HKT
+============================================
+
+=== 搜尋所有 HTML/PY/JS 檔案中的 CSS 引用 ===
+
+❌ temp.css (0行) → 未在任何模板/JS 中被引用
+
+✅ blobs.css (1676行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+❌ core.css (0行) → 未在任何模板/JS 中被引用
+
+❌ module.css (0行) → 未在任何模板/JS 中被引用
+
+✅ animate.css (3591行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/index.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/static/js/main.js
+
+✅ owl.carousel.min.css (229行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ owl.theme.default.min.css (14行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ magnific-popup.css (350行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ aos.css (1行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ flaticon.css (41行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ ionicons.min.css (10行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ jquery.timepicker.min.css (95行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ select2.min.css (1行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+✅ open-iconic-bootstrap.min.css (0行) → 被引用於:
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/admin/audit_log.html
+    - /home/kei/Desktop/betweencoffee_delivery_enhance/templates/betweencoffee_delivery/base.html
+
+❌ bootstrap-datepicker.css (0行) → 未在任何模板/JS 中被引用
+
+❌ colorbox.css (0行) → 未在任何模板/JS 中被引用
+
+❌ _jquery.timepicker.css (0行) → 未在任何模板/JS 中被引用
+
+
+=== base.html 載入的所有 CSS 檔案清單 ===
+'css/open-iconic-bootstrap.min.css' %} />
+'css/style-bootstrap.css' %} />
+'css/style-custom.css' %} />
+'css/style-utilities.css' %} />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== dist-aggressive 目錄內容（PurgeCSS 輸出）===
+total 156
+drwxrwxr-x 2 kei kei   4096 Jul 18 16:18 .
+drwxr-xr-x 6 kei kei   4096 Jul 30 01:21 ..
+-rw-rw-r-- 1 kei kei 151292 Jul 18 16:18 style.css
+
+============================================
