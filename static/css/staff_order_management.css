@@ -1466,3 +1466,97 @@ td:contains("杯") {
     vertical-align: middle;
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
+
+/* ==================== CSS 統一 Step 3：HTML 樣板 inline style → CSS class ==================== */
+/* 頁面頂部空白間隔 */
+.ftco-section-blank-staff {
+    padding-top: 16vh;
+}
+
+/* 審計日誌按鈕 - 置於 h1 標題右側 */
+.btn-audit-log {
+    float: right;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    margin-top: 4px;
+}
+
+/* ==================== CSS 統一 Step 1 & 2：產品圖片 container + img class ==================== */
+/* 取代重複的 inline style 統一管理圖片容器尺寸
+   Step 1: 105x110 / 96px（v2 渲染器 + queue-manager）
+   Step 2: 80x80 / 75px 小圖版本（common-utils.js）
+   base-order-renderer-v2.js 使用動態尺寸，保留 inline style */
+:root {
+    --bc-order-img-width: 105px;
+    --bc-order-img-height: 110px;
+    --bc-order-img-max-height: 96px;
+    --bc-order-img-sm-width: 80px;
+    --bc-order-img-sm-height: 80px;
+    --bc-order-img-sm-max-height: 75px;
+}
+
+/* 大圖（預設）：v2 渲染器、queue-manager 使用 */
+.bc-order-item-img-container {
+    width: var(--bc-order-img-width);
+    height: var(--bc-order-img-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.bc-order-item-img {
+    max-height: var(--bc-order-img-max-height);
+    width: auto;
+    object-fit: contain;
+}
+
+/* 小圖：common-utils.js renderOrderItems 使用 */
+.bc-order-item-img-sm-container {
+    width: var(--bc-order-img-sm-width);
+    height: var(--bc-order-img-sm-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.bc-order-item-img-sm {
+    max-height: var(--bc-order-img-sm-max-height);
+    width: auto;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .bc-order-item-img-container {
+        width: 80px;
+        height: 85px;
+    }
+    .bc-order-item-img {
+        max-height: 75px;
+    }
+    .bc-order-item-img-sm-container {
+        width: 60px;
+        height: 65px;
+    }
+    .bc-order-item-img-sm {
+        max-height: 55px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bc-order-item-img-container {
+        width: 60px;
+        height: 65px;
+    }
+    .bc-order-item-img {
+        max-height: 55px;
+    }
+    .bc-order-item-img-sm-container {
+        width: 50px;
+        height: 50px;
+    }
+    .bc-order-item-img-sm {
+        max-height: 45px;
+    }
+}

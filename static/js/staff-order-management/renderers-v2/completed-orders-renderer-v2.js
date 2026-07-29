@@ -129,11 +129,10 @@ class CompletedOrdersRendererV2 extends BaseOrderRendererV2 {
                 itemsHTML += `
                     <div class="d-flex align-items-center mb-3">
                         <div class="mr-3">
-                            <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 105px; height: 110px;">
+                            <div class="bc-order-item-img-container">
                                 <img src="${itemImage}" 
                                     alt="${item.name || '商品'}" 
-                                    class="img-fluid" 
-                                    style="max-height: 96px;">
+                                    class="img-fluid bc-order-item-img">
                             </div>
                         </div>
                         <div class="flex-grow-1">

@@ -80,7 +80,7 @@ load_context() {
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 啟用）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
         echo "├── 系統狀態: 已部署到 Render，核心功能完整"
-        echo "├── 最新改動: Phase 3D WhatsApp 通知 ✅（2026-07-28）"
+        echo "├── 最新改動: Phase 3D CSS 三步統一方案 ✅（2026-07-29）"
         echo "│"
         echo "│   Phase 3D — WhatsApp 訂單就緒通知（全新功能）"
         echo "│   ├── whatsapp_notifier.py（WhatsApp Cloud API 發送核心）"

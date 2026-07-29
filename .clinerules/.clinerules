@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年7月28日（更新：Phase 3D 審計日誌系統完成，部署至 Render 生產環境）
+> **最後更新**: 2026年7月29日（更新：Phase 3D CSS 三步統一方案完成）
 
 ## 開發者背景與方法論
 
@@ -289,6 +289,11 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] WhatsApp 通知改為簡短訂單號
 │   ├── [x] 訂單管理頁面「審計日誌」入口按鈕
 │   └── [x] 端到端驗證通過（API Total: 12 筆）
+├── [x] CSS 三步統一方案（2026-07-29）— ✅
+│   ├── [x] Step 1: 大圖 105x110 inline → bc-order-item-img-container（5 JS 檔）
+│   ├── [x] Step 2: 小圖 80x80 inline → bc-order-item-img-sm（common-utils.js）
+│   ├── [x] Step 3: HTML inline → btn-audit-log class（staff_order_management.html）
+│   └── [x] 共 8 檔受影響，驗證腳本 verify_css_unify.js
 
 Phase 3G：渲染器狀態轉換即時同步修復（優先級：P1）— ✅ 2026-07-27
 ├── [x] _executeOrderAction await loadUnifiedData + notifyAllListeners

@@ -150,11 +150,11 @@ class CommonUtils {
             itemsHTML += `
                 <div class="d-flex align-items-center mb-3">
                     <div class="mr-3">
-                        <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <div class="p-2 rounded d-flex align-items-center justify-content-center" class="bc-order-item-img-sm-container">
                             <img src="${itemImage}" 
                                  alt="${item.name || '商品'}" 
-                                 class="img-fluid" 
-                                 style="max-height: 75px;"
+                                 class="img-fluid bc-order-item-img-sm"
+
                                  loading="lazy">
                         </div>
                     </div>
