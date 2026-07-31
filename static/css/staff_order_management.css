@@ -1560,3 +1560,65 @@ td:contains("杯") {
         max-height: 45px;
     }
 }
+
+/* ============================================================
+   浮動返回頂部按鈕（UI 參考 bc-floating-cart-btn）
+   ============================================================ */
+.bc-staff-back-top {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 9999;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: rgba(196, 155, 99, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(196, 155, 99, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    color: #fff;
+    font-size: 1.7rem;
+    padding: 0;
+    line-height: 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.8);
+    transition: opacity 0.3s, transform 0.3s, visibility 0.3s, box-shadow 0.25s ease, background 0.25s ease;
+}
+.bc-staff-back-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+.bc-staff-back-top:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(196, 155, 99, 0.4);
+    background: #fff;
+    color: var(--bc-gold);
+}
+.bc-staff-back-top:active {
+    transform: translateY(0);
+}
+.bc-staff-back-top .material-icons {
+    font-size: 1.7rem;
+}
+
+/* 手機版調整 */
+@media (max-width: 768px) {
+    .bc-staff-back-top {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.4rem;
+    }
+    .bc-staff-back-top .material-icons {
+        font-size: 1.4rem;
+    }
+}

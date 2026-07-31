@@ -25,12 +25,12 @@ class QueueTestCase(TestCase):
         # 创建包含咖啡的订单
         self.coffee_order = OrderModel.objects.create(
             user=self.user,
-            name='队列测试用户',
+            contact_name='队列测试用户',
             phone='33333333',
             items=json.dumps([{
                 'type': 'coffee',
                 'id': 1,
-                'name': '美式咖啡',
+                'contact_name': '美式咖啡',
                 'price': 25.00,
                 'quantity': 1,
                 'cup_level': 'Medium',
@@ -44,7 +44,7 @@ class QueueTestCase(TestCase):
         # 创建纯咖啡豆订单
         self.beans_order = OrderModel.objects.create(
             user=self.user,
-            name='咖啡豆订单',
+            contact_name='咖啡豆订单',
             phone='44444444',
             items=json.dumps([{
                 'type': 'bean',

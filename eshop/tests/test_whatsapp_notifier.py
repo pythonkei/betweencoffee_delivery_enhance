@@ -218,9 +218,9 @@ class WhatsAppNotifierTest(TestCase):
             call_data = mock_post.call_args[1]['json']
             self.assertEqual(call_data['to'], "85298092384")
 
-            # 確認訊息包含訂單資訊
+            # 確認訊息包含訂單資訊（實際使用簡短訂單號 #<id>）
             body = call_data['text']['body']
-            self.assertIn("O-123", body)
+            self.assertIn("#123", body)
             self.assertIn("A1B2", body)
             self.assertIn("測試用戶", body)
             self.assertIn("Between Coffee", body)
@@ -270,7 +270,7 @@ class WhatsAppNotifierTest(TestCase):
             self.assertEqual(call_data['to'], "85291234567")
 
     def test_ready_notification_uses_order_number(self):
-        """訂單編號優先於 ID"""
+        """統一使用簡短訂單號 #<id>（2026-07-28 訂單號碼統一）"""
         order = MagicMock()
         order.id = 111
         order.phone = "85298092384"
@@ -289,5 +289,5 @@ class WhatsAppNotifierTest(TestCase):
             send_order_ready_notification(order)
 
             body = mock_post.call_args[1]['json']['text']['body']
-            self.assertIn("BC-001", body)
-            self.assertNotIn("#111", body)
+            self.assertIn("#111", body)
+            self.assertNotIn("BC-001", body)

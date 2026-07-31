@@ -28,12 +28,12 @@ class PaymentTestCase(TestCase):
         # 创建测试订单
         self.order = OrderModel.objects.create(
             user=self.user,
-            name='支付测试用户',
+            contact_name='支付测试用户',
             phone='87654321',
             items=json.dumps([{
                 'type': 'coffee',
                 'id': 1,
-                'name': '拿铁咖啡',
+                'contact_name': '拿铁咖啡',
                 'price': 35.00,
                 'quantity': 2,
                 'cup_level': 'Large',
@@ -69,7 +69,7 @@ class PaymentTestCase(TestCase):
         for method in payment_methods:
             order = OrderModel.objects.create(
                 user=self.user,
-                name=f'测试-{method}',
+                contact_name=f'测试-{method}',
                 phone='11111111',
                 items=json.dumps([{'type': 'coffee', 'id': 1, 'name': '咖啡', 'price': 25.00, 'quantity': 1}]),
                 total_price=25.00,

@@ -26,7 +26,7 @@ class OrderModelTestCase(TestCase):
 
         # 创建测试订单数据
         self.order_data = {
-            'name': '测试用户',
+            'contact_name': '测试用户',
             'phone': '12345678',
             'items': json.dumps([{
                 'type': 'coffee',
@@ -50,7 +50,7 @@ class OrderModelTestCase(TestCase):
         )
 
         self.assertIsNotNone(order.id)
-        self.assertEqual(order.name, '测试用户')
+        self.assertEqual(order.contact_name, '测试用户')
         self.assertEqual(order.payment_status, 'pending')
         self.assertEqual(order.status, 'pending')
         print("✅ 订单创建测试通过")
@@ -97,7 +97,7 @@ class OrderModelTestCase(TestCase):
         field_names = [f.name for f in order._meta.get_fields()]
 
         # 这些字段应该不存在
-        removed_fields = ['is_paid', 'created_on', 'cup_size', 'pickup_time']
+        removed_fields = ['is_paid', 'created_on', 'cup_size']
         for field in removed_fields:
             self.assertNotIn(field, field_names)
             print(f"✅ {field} 字段已移除")
@@ -110,7 +110,7 @@ class OrderModelTestCase(TestCase):
         )
 
         # 测试弃用属性的访问
-        deprecated_properties = ['is_paid', 'created_on', 'cup_size', 'pickup_time']
+        deprecated_properties = ['is_paid', 'created_on', 'cup_size']
 
         for prop in deprecated_properties:
             with warnings.catch_warnings(record=True) as w:

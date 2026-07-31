@@ -2030,6 +2030,82 @@
   max-width: 120px;
 }
 
+/* ============================================================
+   Phase D: ftco- class → .bc- class 對應（逐步淘汰舊前綴）
+   ============================================================ */
+
+/* Section 系列（取代 .ftco-section） */
+.bc-section {
+  padding: 7em 0;
+  position: relative;
+}
+
+/* Footer 系列（取代 .ftco-footer / .ftco-footer-widget / .ftco-footer-social / .ftco-heading-2） */
+.bc-footer {
+  font-size: 16px;
+  padding: 7em 0;
+  background: #0e0e0e;
+  background-size: auto;
+  background-repeat: no-repeat;
+}
+.bc-footer .bc-footer-widget h2,
+.bc-footer .bc-footer-title {
+  font-weight: normal;
+  color: #fff;
+  margin-bottom: 40px;
+  font-size: 16px;
+  font-weight: 400;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.bc-footer .bc-footer-widget ul li a span,
+.bc-footer-social a span {
+  color: #fff;
+}
+.bc-footer .bc-footer-widget .btn-primary {
+  background: #fff !important;
+  border: 2px solid #fff !important;
+}
+.bc-footer .bc-footer-widget .btn-primary:hover {
+  background: #fff;
+  border: 2px solid #fff !important;
+}
+.bc-footer p {
+  color: rgba(255, 255, 255, 0.7);
+}
+.bc-footer a {
+  color: rgba(255, 255, 255, 0.7);
+}
+.bc-footer a:hover {
+  color: #fff;
+}
+.bc-footer .bc-footer-title {
+  font-size: 17px;
+  font-weight: 400;
+  color: #000;
+}
+.bc-footer .block-21 .text .heading {
+  font-size: 16px;
+  font-weight: 300;
+}
+.bc-footer .block-21 .text .heading a {
+  color: rgba(255, 255, 255, 0.9);
+}
+.bc-footer .block-21 .text .heading a:hover,
+.bc-footer .block-21 .text .heading a:active,
+.bc-footer .block-21 .text .heading a:focus {
+  color: var(--brand-primary);
+}
+.bc-footer .block-21 .text .meta > div {
+  display: inline-block;
+  font-size: 12px;
+  margin-right: 5px;
+}
+.bc-footer .block-21 .text .meta > div a {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 /* ==================== Phase B: 從獨立檔案合併的樣式 ==================== */
 /* 來源: toast.css — Toast 提示系統 */
 #toast-container {

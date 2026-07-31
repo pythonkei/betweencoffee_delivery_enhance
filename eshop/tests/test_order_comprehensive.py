@@ -31,7 +31,7 @@ class ComprehensiveOrderTestCase(TestCase):
         # 1. 创建订单
         order_data = {
             'user': self.user,
-            'name': '生命周期测试',
+            'contact_name': '生命周期测试',
             'phone': '55555555',
             'items': json.dumps([{
                 'type': 'coffee',
@@ -93,7 +93,7 @@ class ComprehensiveOrderTestCase(TestCase):
         for status_code, status_name in status_transitions:
             order = OrderModel.objects.create(
                 user=self.user,
-                name=f'状态测试-{status_name}',
+                contact_name=f'状态测试-{status_name}',
                 phone='66666666',
                 items=json.dumps([{'type': 'coffee', 'id': 1, 'name': '咖啡', 'price': 25.00, 'quantity': 1}]),
                 total_price=25.00,
@@ -117,7 +117,7 @@ class ComprehensiveOrderTestCase(TestCase):
 
         order = OrderModel.objects.create(
             user=self.user,
-            name='显示方法测试',
+            contact_name='显示方法测试',
             phone='77777777',
             items=json.dumps([{
                 'type': 'coffee',
