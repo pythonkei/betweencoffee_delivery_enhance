@@ -7,7 +7,6 @@
 
 import logging
 import traceback
-from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
@@ -239,9 +238,11 @@ def alipay_callback(request):
 
     try:
         # 解析回調數據
+        # 注意（2026-07-31 修復）：Django request.GET 已經自動解碼 URL 參數，
+        # 這裡**不可以**再 unquote，否則會把 sign 簽名中的 '+' 轉成空格，破壞簽名。
         data = {}
         for key, value in request.GET.items():
-            data[key] = unquote(value)
+            data[key] = value
 
         logger.info(f"支付寶回調參數: {data}")
 
@@ -473,9 +474,11 @@ def alipay_notify(request):
     """支付寶異步通知處理 - 簡化版本"""
     if request.method == "POST":
         # 解析數據
+        # 注意（2026-07-31 修復）：Django request.POST 已經自動解碼表單參數，
+        # 這裡**不可以**再 unquote，否則會把 sign 簽名中的 '+' 轉成空格，破壞簽名。
         data = {}
         for key, value in request.POST.items():
-            data[key] = unquote(value)
+            data[key] = value
 
         logger.info(f"支付寶異步通知數據: {data}")
 

@@ -1,7 +1,6 @@
 # eshop/alipay_utils.py:
 import logging
 import time
-from urllib.parse import unquote
 
 from alipay import AliPay
 from django.conf import settings
@@ -112,25 +111,18 @@ def generate_order_subject(order):
 
 
 def verify_alipay_notification(data):
-    """验证支付宝通知"""
+    """验证支付宝通知
+
+    注意（2026-07-31 修復）：
+    所有調用方（alipay_callback / alipay_notify）已經對參數做過 unquote 解碼，
+    這裡**不可以**再次解碼，否則會破壞 sign 簽名（例如 '+' 會被解碼成空格），
+    導致簽名驗證失敗。
+    """
     try:
-        # 确保正确处理编码 - 简化处理
-        decoded_data = {}
-        for key, value in data.items():
-            if isinstance(value, str):
-                # 只进行必要的URL解码
-                try:
-                    decoded_value = unquote(value)
-                    decoded_data[key] = decoded_value
-                except BaseException:
-                    decoded_data[key] = value
-            else:
-                decoded_data[key] = value
+        logger.debug(f"验证使用的数据: {data}")
 
-        logger.debug(f"验证使用的数据: {decoded_data}")
-
-        # 使用调试模式验证
-        return debug_verification(decoded_data)
+        # 使用调试模式验证（直接使用已解碼的數據）
+        return debug_verification(data)
 
     except Exception as e:
         logger.error(f"Alipay verification error: {str(e)}")

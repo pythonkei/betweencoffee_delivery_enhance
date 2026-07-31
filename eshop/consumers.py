@@ -335,8 +335,22 @@ class OrderConsumer(BaseOrderConsumer):
                 'order_id': 123,
                 'data': {...}
             }
+
+        修復（2026-07-31）：send_order_update 的 message 將實際資料放在 'data' 欄位
+        （例如 data.status / data.status_display），而下游 handler（如 order_status_update）
+        會直接讀取 event.status。若不將 data 展開到 event 頂層，
+        event.get("status") 將永遠是 None，導致前端收到 status=null 而丟棄即時更新，
+        只能依賴輪詢，造成 10-15 秒延遲。
         """
         update_type = event.get("update_type", "")
+
+        # 🔧 修復：將 event['data'] 展開到 event 頂層（不覆蓋已存在的欄位）
+        # 這讓 order_status_update / payment_status_update 等 handler
+        # 能直接透過 event.get('status') / event.get('payment_status') 取得實際值
+        if "data" in event and isinstance(event["data"], dict):
+            for key, value in event["data"].items():
+                if key not in event or event[key] is None:
+                    event[key] = value
 
         # 根據 update_type 分發到對應的處理方法
         if update_type in ("status", "status_change"):
@@ -724,8 +738,18 @@ class QueueConsumer(BaseOrderConsumer):
 
         當 QueueConsumer 的客戶端通過 subscribe_order 訂閱了特定訂單時，
         會收到 order_update 訊息。此方法將其轉發為 queue_update 格式，
-        確保前端能正確處理。
+        確保員工端前端能正確處理。
+
+        修復（2026-07-31）：
+        客戶端訂單狀態卡（order_status_cards.js）是透過 WebSocketCore 連到
+        /ws/queue/（QueueConsumer）並 subscribe_order 訂閱訂單，但它監聽的是
+        message:order_status / message:order_status_update 事件，而非 queue_update。
+        若此方法只發送 queue_update 格式，訂單狀態卡會收不到即時更新，
+        只能依賴 30 秒輪詢，造成 10+ 秒延遲。
+        因此額外發送 order_status / order_status_update 雙格式（同 OrderConsumer），
+        讓訂單狀態卡能立即更新，同時保留 queue_update 給員工端。
         """
+        # 1. 保留員工端格式：queue_update
         await self._send_json(
             {
                 "type": "queue_update",
@@ -736,6 +760,39 @@ class QueueConsumer(BaseOrderConsumer):
                 "timestamp": timezone.now().isoformat(),
             }
         )
+
+        # 2. 修復：同時發送客戶端訂單狀態卡格式（只在狀態變更時）
+        if event.get("update_type") in ("status", "status_change"):
+            # 將 event['data'] 展開（data.status 等）
+            data = event.get("data", {}) or {}
+            status = data.get("status") or event.get("status")
+            status_display = data.get("status_display") or event.get("status_display")
+
+            if status:
+                await self._send_json(
+                    {
+                        "type": "order_status",
+                        "data": {
+                            "order_id": event.get("order_id"),
+                            "status": status,
+                            "status_display": status_display,
+                            "message": data.get("message", ""),
+                        },
+                        "timestamp": timezone.now().isoformat(),
+                    }
+                )
+        elif event.get("update_type") == "payment_status":
+            payment_data = event.get("data", {}) or {}
+            await self._send_json(
+                {
+                    "type": "payment_status",
+                    "order_id": event.get("order_id"),
+                    "payment_status": payment_data.get("payment_status"),
+                    "payment_method": payment_data.get("payment_method", ""),
+                    "message": payment_data.get("message", ""),
+                    "timestamp": timezone.now().isoformat(),
+                }
+            )
 
     async def system_message(self, event):
         """系統訊息廣播"""

@@ -713,64 +713,13 @@ class OrderStatusCardsManager {
         }
     }
     
-    // 顯示Toast提示（使用全局 Toast 管理器）
+    // 顯示Toast提示（靜默版，客戶看不到）
+    // 修復（2026-07-31）：
+    // 先前決策：order_payment_confirmation.html 內聯 showToast 已改為靜默（僅 console.log），
+    // 但此類內 showToast 仍會呼叫 window.toast.info() 顯示真實 Toast。
+    // 統一改為靜默，僅輸出到主控台，避免訂單確認頁彈出打擾顧客。
     showToast(message) {
-        // 優先使用全局 toast-manager.js 提供的 API
-        if (window.toast) {
-            window.toast.info(message, '訂單狀態更新');
-            return;
-        }
-        
-        // 回退方案：創建Toast元素
-        const toast = document.createElement('div');
-        toast.className = 'status-toast';
-        toast.innerHTML = `
-            <div class="toast-content">
-                <i class="fas fa-bell mr-2"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        // 添加樣式
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(196, 155, 99, 0.9);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            max-width: 300px;
-        `;
-        
-        // 添加動畫
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes fadeOut {
-                from { opacity: 1; }
-                to { opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        document.body.appendChild(toast);
-        
-        // 3秒後自動消失
-        setTimeout(() => {
-            toast.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }, 3000);
+        console.log(`[訂單狀態更新] ${message}`);
     }
     
     // 設置WebSocket狀態指示器

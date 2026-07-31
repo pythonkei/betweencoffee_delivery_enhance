@@ -283,6 +283,16 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] Phase C: style-utilities.css 與 Bootstrap 重複評估（建議保留，等待舊模板淘汰）
 │   └── [ ] Phase D: ftco- class 逐步淘汰 — 未來優化（涉及 7 class / 53 處模板）
 │       28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）
+├── [x] 客戶端訂單狀態卡即時更新修復（10-15s 延遲 → 即時）— ✅ 2026-07-31
+│   ├── [x] consumers.py OrderConsumer.order_update 展開 event['data']（status 不再為 None）
+│   ├── [x] consumers.py QueueConsumer.order_update 同時發送 queue_update + order_status + payment_status
+│   └── [x] test_queue_consumer_order_update.py 單元驗證通過
+├── [x] 支付寶 Whitelabel 404 診斷（確認是 sandbox 伺服器 404，非我們系統）— ✅ 2026-07-31
+│   ├── [x] Render 環境變數設定 ALIPAY_RETURN_URL/NOTIFY_URL（onrender.com）
+│   ├── [x] .env 還原 localhost:8081（本地測試適配）
+│   └── [x] 移除 alipay 簽名驗證 double-unquote bug（alipay_utils.py + payment_views.py）
+├── [x] 訂單確認頁 Toast 狀態變更靜默化 — ✅ 2026-07-31
+│   └── [x] order_status_cards.js showToast 改為僅 console.log（不再 window.toast.info）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
 ├── [ ] 訂單匯出功能
