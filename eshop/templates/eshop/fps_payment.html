@@ -37,12 +37,75 @@
                             <p class="text-muted mt-3">或</p>
                             <p class="text-muted card-text-md">本店轉數快識別碼 :<br> <span class="card-text-lg text-primary mt-2">68492033</span></p>
                             <p class="text-muted card-text-md">商戶名稱: <br><span class="card-text-lg text-primary mt-2">Between Coffee</span></b></p>
-                            <p class="text-muted card-text-md mt-2">參考編號: <br><span class="card-text-lg text-primary mt-2">{{ fps_reference }}</span></p>
+                            <p hidden class="text-muted card-text-md mt-2">參考編號: <br><span class="card-text-lg text-primary mt-2">{{ fps_reference }}</span></p>
                         </div>
                         {% endif %}
 
+                        <!-- 訂單詳情（商品明細） -->
+                        <div class="order-item mb-5 p-4 rounded">
+                            <h5 class="mb-4 pb-2">商品明细</h5>
+                            
+                            <div class="order-items">
+                                {% for item in items %}
+                                <div class="d-flex align-items-center mb-4 pb-3">
+                                    <div class="mr-3">
+                                        <div class="p-2 rounded d-flex align-items-center justify-content-center" style="width: 98px; height: 98px;">
+                                            <img src="{{ item.image|default:'/static/images/default-product.png' }}" 
+                                                alt="{{ item.name }}" 
+                                                class="img-fluid" 
+                                                style="max-height: 110px;">
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 align-self-baseline">
+                                        <h5 class="mb-1 text-white">{{ item.name }}</h5>
+                                        <p class="mb-1 text-muted">數量: {{ item.quantity }}</p>
+                                        <div class="bc-options-row">
+                                            {% if item.cup_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">water_full</span> 杯量: {{ item.cup_level_cn }}</span>{% endif %}
+                                            {% if item.strength_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: {{ item.strength_level_cn }}</span>{% endif %}
+                                            {% if item.milk_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {{ item.milk_level_cn }}</span>{% endif %}
+                                            {% if item.grinding_level_cn %}<span class="option-item">研磨: {{ item.grinding_level_cn }}</span>{% endif %}
+                                            {% if item.weight %}<span class="option-item">重量: {{ item.weight }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 align-self-baseline">
+                                        <div class="text-right">
+                                            <span class="h5 text-white">HK$ {{ item.total_price|default:item.price|floatformat:2 }}</span>
+                                            <div class="text-muted">${{ item.price|floatformat:2 }} / 單價</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="alert alert-warning">
+                                    没有商品信息
+                                </div>
+                                {% endfor %}
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                    <h5 class="mb-0">總計:</h5>
+                                    <h5 class="mb-0" style="color: #c49b63;">HK$ {{ order.total_price|floatformat:2 }}</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 訂單資訊 -->
+                        <div class="order-item-v2 mb-4 rounded p-4">
+                            <div class="d-flex justify-content-between mb-3">
+                                <div>
+                                    <h5 class="mb-2">訂單資訊</h5>
+                                    <p class="mb-1"><strong>訂單編號:</strong> #{{ order.id }}</p>
+                                    <p class="mb-1"><strong>下單時間:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+                                </div>
+                                <div class="text-md-right">
+                                    <p class="mb-3">
+                                        <strong>支付状态:</strong> <span class="badge badge-warning">待支付</span>
+                                    </p>
+                                    <p class="h5 mb-0" style="color: #c49b63;">HK$ {{ order.total_price|floatformat:2 }}</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- 支付說明（Accordion 樣式，與 order_confirm.html 舊版支付方式設計一致） -->
-                        <div class="payment-item-fps" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; width: 70%; margin-left: auto; margin-right: auto;">
+                        <div class="payment-item-fps" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem;">
                             <div class="payment-item" data-payment="fps-instructions">
                                 <input type="radio" name="fps_instructions" id="fps-instructions-toggle" value="open" checked
                                        style="display: none;">
@@ -70,17 +133,15 @@
 
                         <!-- 操作按钮 -->
                         <div class="text-center pt-4">
-                            <div class="btn-group" role="group">
-                                <form method="POST" action="{% url 'eshop:fps_confirm_payment' order.id %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary btn-outline-primary mr-3" id="fps-confirm-btn">
-                                        <i class="fas fa-check mr-2"></i>我已完成支付
-                                    </button>
-                                </form>
-                                <a href="{% url 'eshop:order_confirm' %}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-arrow-left mr-2"></i>返回修改
-                                </a>
-                            </div>
+                            <form method="POST" action="{% url 'eshop:fps_confirm_payment' order.id %}" style="display: inline-block;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 d-inline-flex align-items-center justify-content-center mr-3" id="fps-confirm-btn">
+                                    <i class="fas fa-check mr-2"></i>我已完成支付
+                                </button>
+                            </form>
+                            <a href="{% url 'eshop:order_confirm' %}" class="btn btn-outline-secondary calltoaction-btn px-4 py-3 d-inline-flex align-items-center justify-content-center ml-2" style="--bs-btn-hover-color: #6c757d; --bs-btn-hover-bg: rgba(108,117,125,0.15); --bs-btn-hover-border-color: #6c757d; --bs-btn-active-color: #6c757d; --bs-btn-active-bg: rgba(108,117,125,0.15); --bs-btn-active-border-color: #6c757d;">
+                                <i class="fas fa-arrow-left mr-2"></i>返回修改
+                            </a>
                         </div>
                     </div>
                 </div>

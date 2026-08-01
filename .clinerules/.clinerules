@@ -296,6 +296,19 @@ Phase 3D：新功能（優先級：低）
 ├── [x] 首頁 feed 區塊兩層設計（形狀輪廓捲動 + 底部照片固定）— ✅ 2026-08-01
 │   ├── [x] 上層 .feed__layer-parts：形狀外部深黑 #0e0e0e（移除 bg_4.jpg）＋反相裁切＋feedScroll 捲動
 │   └── [x] 下層 .feed：index_feed_image.png 固定（無動畫）
+├── [x] 全站安全審查與修復 + 支付寶金鑰輪換 — ✅ 2026-08-01
+│   ├── [x] 移除 git 追蹤 4 個敏感金鑰 + .gitignore 排除 keys/
+│   ├── [x] settings.py 移除明文密碼/API keys/資料庫憑證 + 硬編碼 PayPal 憑證
+│   ├── [x] DebugMiddleware 移除（不再記錄個資）
+│   ├── [x] 加入 HSTS + Referrer Policy + 強化密碼驗證
+│   ├── [x] 支付寶金鑰輪換（新 RSA2 金鑰對 + 控制台加簽變更）
+│   ├── [x] settings.py 環境變數優先 read_alipay_key()
+│   └── [x] Render 環境變數設定新金鑰（需手動 Deploy latest commit，autoDeploy=off）
+├── [x] FPS/Cash 付款頁面 UI 改良 — ✅ 2026-08-01
+│   ├── [x] FPS 新增商品明細 + 訂單資訊區域、隱藏參考編號、付款說明全寬
+│   ├── [x] Cash 付款說明全寬
+│   └── [x] 按鈕統一 calltoaction-btn（主按鈕金色、返回修改灰色）
+├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
 ├── [ ] 訂單匯出功能

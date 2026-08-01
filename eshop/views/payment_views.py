@@ -698,12 +698,28 @@ def fps_payment(request, order_id):
 
         fps_qr_code = generate_fps_qr_code(order)
 
+        # 訂單商品與狀態資訊（與現金付款頁面一致）
+        items = order.get_items_with_chinese_options()
+        has_coffee = any(
+            item.get("type") == "coffee" for item in order.get_items()
+        )
+        has_beans = any(
+            item.get("type") == "bean" for item in order.get_items()
+        )
+
         context = {
             "order": order,
             "fps_reference": order.fps_reference or fps_reference,
             "fps_qr_code": fps_qr_code,
             "amount": order.total_price,
             "phone": order.phone or "",
+            "items": items,
+            "total_price": order.total_price,
+            "has_coffee": has_coffee,
+            "has_beans": has_beans,
+            "preparation_time_display": order.get_preparation_time_display(),
+            "order_type_display": order.get_order_type_display(),
+            "should_show_preparation_time": order.should_show_preparation_time(),
         }
 
         return render(request, "eshop/fps_payment.html", context)
