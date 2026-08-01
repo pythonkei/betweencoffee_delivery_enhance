@@ -252,12 +252,17 @@ def ws_fallback_api(request):
     HTTP Fallback API - 當 WebSocket 不可用時，前端透過此 API 輪詢獲取最新狀態
 
     URL: /eshop/api/ws-fallback/
-    權限: 公開（僅返回訂單基本狀態，無敏感資訊）
+    權限: 需登入（僅返回自己的訂單狀態）
 
     查詢參數:
         order_ids: 逗號分隔的訂單 ID 列表（可選）
         queue: 是否返回隊列狀態（1 或 0）
         since: ISO 格式時間戳，只返回此時間後的更新
+
+    安全修復（2026-08-01）：
+    - 已登入用戶：只能查詢自己的訂單
+    - 訪客用戶：限制為 session 中綁定的訂單 ID
+    - 員工：可查詢所有訂單
 
     返回:
         {
@@ -279,12 +284,46 @@ def ws_fallback_api(request):
             "timestamp": timezone.now().isoformat(),
         }
 
-        # 1. 查詢訂單狀態
+        user = request.user
+
+        # 員工可以查詢所有訂單
+        is_staff = user.is_authenticated and user.is_staff
+
+        # 1. 查詢訂單狀態（🔐 加入所有權驗證）
         order_ids_str = request.GET.get("order_ids", "")
         if order_ids_str:
             order_ids = [
                 int(x.strip()) for x in order_ids_str.split(",") if x.strip().isdigit()
             ]
+
+            # 🔐 安全：非員工用戶只允許查詢自己擁有的訂單
+            if not is_staff:
+                if user.is_authenticated:
+                    # 已登入用戶：查詢自己的訂單
+                    allowed_order_ids = list(
+                        OrderModel.objects.filter(
+                            user=user, id__in=order_ids
+                        ).values_list("id", flat=True)
+                    )
+                else:
+                    # 訪客用戶：從 session 獲取允許的訂單 ID
+                    allowed_order_ids = set()
+                    for key in ["last__id", "pending_paypal_order_id"]:
+                        oid = request.session.get(key)
+                        if oid:
+                            allowed_order_ids.add(int(oid))
+                    # 交集：只返回 session 中授權且請求的訂單
+                    allowed_order_ids = list(
+                        allowed_order_ids.intersection(set(order_ids))
+                    )
+                    if not allowed_order_ids:
+                        logger.warning(
+                            f"⚠️ 安全: 訪客嘗試查詢未授權訂單: {order_ids}"
+                        )
+                        return JsonResponse(response_data)
+
+                order_ids = allowed_order_ids
+
             if order_ids:
                 orders = OrderModel.objects.filter(id__in=order_ids).select_related()
                 for order in orders:
@@ -319,18 +358,26 @@ def ws_fallback_api(request):
                         ),
                     }
 
-        # 2. 查詢隊列狀態
+        # 2. 查詢隊列狀態（🔐 僅員工可查看完整隊列）
         if request.GET.get("queue") == "1":
-            waiting_count = CoffeeQueue.objects.filter(status="waiting").count()
-            preparing_count = CoffeeQueue.objects.filter(status="preparing").count()
-            ready_count = CoffeeQueue.objects.filter(status="ready").count()
+            if is_staff:
+                waiting_count = CoffeeQueue.objects.filter(status="waiting").count()
+                preparing_count = CoffeeQueue.objects.filter(status="preparing").count()
+                ready_count = CoffeeQueue.objects.filter(status="ready").count()
 
-            response_data["queue"] = {
-                "waiting_count": waiting_count,
-                "preparing_count": preparing_count,
-                "ready_count": ready_count,
-                "total_active": waiting_count + preparing_count,
-            }
+                response_data["queue"] = {
+                    "waiting_count": waiting_count,
+                    "preparing_count": preparing_count,
+                    "ready_count": ready_count,
+                    "total_active": waiting_count + preparing_count,
+                }
+            else:
+                # 非員工：僅返回等待數量（不暴露內部隊列細節）
+                response_data["queue"] = {
+                    "waiting_count": CoffeeQueue.objects.filter(
+                        status="waiting"
+                    ).count(),
+                }
 
         return JsonResponse(response_data)
 

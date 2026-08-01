@@ -141,6 +141,16 @@ class OrderConsumer(BaseOrderConsumer):
         self.order_id = self.scope["url_route"]["kwargs"]["order_id"]
         self.room_group_name = f"order_{self.order_id}"
 
+        # 🔐 安全修復（2026-08-01）：驗證訂單所有權，防止 IDOR 攻擊
+        # 任何用戶用任意 order_id 都可以讀取訂單資料（含取餐碼）
+        order_access = await self._check_order_access()
+        if order_access is False:
+            logger.warning(
+                f"⚠️ 安全: 用戶 {self.scope.get('user', 'anonymous')} 嘗試訪問未授權的訂單 #{self.order_id}"
+            )
+            await self.close()
+            return
+
         # 檢查訂單是否存在
         order_exists = await self._check_order_exists()
         if not order_exists:
@@ -175,6 +185,43 @@ class OrderConsumer(BaseOrderConsumer):
         logger.info(
             f"✅ 訂單 Consumer 連線成功: {self.connection_id}, 用戶: {user_info['username']}"
         )
+
+    @database_sync_to_async
+    def _check_order_access(self):
+        """
+        檢查用戶是否有權限訪問此訂單
+
+        Returns:
+            True: 有權限
+            False: 無權限（拒絕連線）
+        """
+        try:
+            from .models import OrderModel
+
+            user = self.scope.get("user")
+
+            # 員工可以訪問所有訂單
+            if user and user.is_authenticated and user.is_staff:
+                return True
+
+            order = OrderModel.objects.get(id=self.order_id)
+
+            # 已登入用戶：只能訪問自己的訂單
+            if user and user.is_authenticated:
+                return order.user == user
+
+            # 訪客用戶：
+            # 由於 WebSocket 無法訪問 session 中的訂單 ID（需要 HTTP session 驗證），
+            # 保守策略：拒絕訪客連線到訂單 WS（前端改為僅登入用戶可用）
+            # 訪客用戶的訂單狀態可通過 HTTP API / 輪詢獲取
+            return False
+
+        except OrderModel.DoesNotExist:
+            # 訂單不存在由 _check_order_exists 處理
+            return True
+        except Exception as e:
+            logger.error(f"檢查訂單訪問權限失敗: {e}")
+            return False
 
     async def _handle_sync_request(self, data):
         """
@@ -594,6 +641,15 @@ class QueueConsumer(BaseOrderConsumer):
     async def connect(self):
         """處理 WebSocket 連線"""
         self.room_group_name = "queue_updates"
+
+        # 🔐 安全修復（2026-08-01）：隊列資訊（訂單、客戶資料）只允許員工訪問
+        user = self.scope.get("user")
+        if not user or not user.is_authenticated or not user.is_staff:
+            logger.warning(
+                f"⚠️ 安全: 未授權用戶嘗試連接隊列 WebSocket（user={getattr(user, 'username', 'anonymous')}）"
+            )
+            await self.close()
+            return
 
         # 🔧 修復：在 accept() 之前先初始化資料庫連線
         # Render 生產環境中，PostgreSQL 連線在空閒後會被關閉，

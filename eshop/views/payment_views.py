@@ -1132,9 +1132,41 @@ def api_cancel_order(request, order_id):
 
     修復：添加 @csrf_exempt 裝飾器，因為前端使用 fetch API 發送 POST 請求，
     CSRF token 在 JavaScript 中可能無法正確傳遞。
+
+    安全修復（2026-08-01）：加入訂單所有權驗證，防止 IDOR 攻擊。
+    - 已登入用戶：只能取消自己的訂單
+    - 訪客用戶：只能取消 session 中記錄的自己的訂單
     """
     try:
         order = OrderModel.objects.get(id=order_id)
+
+        # 🔐 安全修復：訂單所有權驗證（防止 IDOR）
+        if request.user.is_authenticated:
+            # 已登入用戶：驗證訂單屬於自己（員工可存取所有訂單）
+            if not (request.user.is_staff or order.user == request.user):
+                logger.warning(
+                    f"⚠️ 安全: 用戶 {request.user.username} 嘗試取消他人的訂單 #{order_id}"
+                )
+                return JsonResponse(
+                    {"success": False, "error": "無權取消此訂單"}, status=403
+                )
+        else:
+            # 訪客用戶：檢查 session 中的訂單 ID
+            session_order_ids = set()
+            last_order_id = request.session.get("last__id")
+            pending_paypal_id = request.session.get("pending_paypal_order_id")
+            if last_order_id:
+                session_order_ids.add(last_order_id)
+            if pending_paypal_id:
+                session_order_ids.add(pending_paypal_id)
+
+            if order_id not in session_order_ids:
+                logger.warning(
+                    f"⚠️ 安全: 訪客嘗試取消未授權的訂單 #{order_id}"
+                )
+                return JsonResponse(
+                    {"success": False, "error": "無權取消此訂單"}, status=403
+                )
 
         if order.payment_status == "paid":
             return JsonResponse({"success": False, "error": "訂單已支付，無法取消"})

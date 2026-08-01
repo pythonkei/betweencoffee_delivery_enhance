@@ -609,6 +609,7 @@ def get_dashboard_stats(request):
 
 @csrf_exempt
 @require_GET
+@login_required
 def get_recent_orders(request):
     """獲取最近訂單（兼容舊API）"""
     try:
@@ -630,6 +631,7 @@ def get_recent_orders(request):
 # 在适当的地方使用缓存查询
 @csrf_exempt
 @require_GET
+@login_required
 def get_active_orders(request):
     """获取活动订单（使用缓存）"""
     try:
@@ -687,8 +689,9 @@ def get_quick_order_times(request):
 
 @csrf_exempt
 @require_POST
+@staff_api_required
 def update_order_pickup_times_api(request):
-    """更新訂單取貨時間API"""
+    """更新訂單取貨時間API（僅限員工）"""
     try:
         data = json.loads(request.body)
         order_ids = data.get("order_ids", [])
@@ -803,10 +806,13 @@ def health_check(request):
 
 
 @csrf_exempt
+@login_required
 def generate_fps_qr_api(request):
     """
     FPS 動態 QR Code 生成 API
     用於 order_confirm.html 頁面中 FPS 支付選項展開時動態加載 QR Code
+
+    安全修復（2026-08-01）：加入登入要求，防止任意用戶生成 QR Code
     """
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "僅支持 POST 請求"}, status=405)
