@@ -308,6 +308,17 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] FPS 新增商品明細 + 訂單資訊區域、隱藏參考編號、付款說明全寬
 │   ├── [x] Cash 付款說明全寬
 │   └── [x] 按鈕統一 calltoaction-btn（主按鈕金色、返回修改灰色）
+├── [x] 訂單狀態卡 Icon 全面優化（前後端一致）— ✅ 2026-08-02
+│   ├── [x] 已完成：`fa-trophy`/`fa-check-double` → `fa-circle-check`（4 檔案統一）
+│   ├── [x] 製作中：`fa-coffee` → `fa-mug-hot`
+│   ├── [x] 待取餐：`fa-check-circle` → `fa-bell`
+│   └── [x] 最終流程：📋 → ☕ → 🔔 → ✅
+├── [x] 優先處理徽章統一 `.badge-expedited` — ✅ 2026-08-01
+│   └── [x] 4 JS + staff_order_management.css
+├── [x] WhatsApp Token 診斷與更新 — ✅ 2026-08-01
+│   ├── [x] Token 過期診斷（test_whatsapp_diagnosis.py）
+│   ├── [x] 更新 .env（驗證 HTTP 200）
+│   └── [x] ⚠️ Render 環境變數待更新
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

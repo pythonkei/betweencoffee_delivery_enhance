@@ -311,7 +311,7 @@ class OrderModel(models.Model):
                 "status": "paid",
                 "title": "已完成！",
                 "message": "讓我們的咖啡保持您的節奏, 同步呼吸！",
-                "icon": "fa-trophy",
+                "icon": "fa-circle-check",
                 "icon_color": "text-success",
                 "icon_size": "3rem",
             }

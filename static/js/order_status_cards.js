@@ -696,9 +696,9 @@ class OrderStatusCardsManager {
             
             if (iconElement) {
                 // 更新圖示為獎盃
-                iconElement.className = 'fas fa-trophy text-success';
-                iconElement.style.fontSize = '3rem';
-                console.log("更新圖示: fa-trophy");
+                iconElement.className = 'fas fa-circle-check text-success';
+
+                console.log("更新圖示: fa-circle-check");
             }
             
             // 添加動畫效果

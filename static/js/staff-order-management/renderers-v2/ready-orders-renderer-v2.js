@@ -241,7 +241,7 @@ class ReadyOrdersRendererV2 extends BaseOrderRendererV2 {
         let expediteBadge = '';
         if (isExpedited) {
             expediteBadge = `
-                <span class="badge badge-warning ml-1">
+                <span class="badge badge-expedited ml-1">
                     <i class="fas fa-bolt mr-1"></i>優先處理
                 </span>
             `;
