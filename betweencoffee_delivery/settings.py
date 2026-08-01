@@ -140,20 +140,12 @@ if IS_RENDER:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
-
-
-# 临时调试中间件
-class DebugMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        if request.path == "/eshop/order_confirm/" and request.method == "POST":
-            print("=== 中间件检测到订单确认POST请求 ===")
-            print(f"请求体: {request.POST}")
-
-        response = self.get_response(request)
-        return response
+    # HSTS（HTTP Strict Transport Security）
+    SECURE_HSTS_SECONDS = 31536000  # 一年
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    # Referrer 政策
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 
 # 检查daphne是否已安装（Render等无ASGI环境不需要）
@@ -211,7 +203,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "betweencoffee_delivery.middleware.CartMiddleware",
-    "betweencoffee_delivery.middleware.DebugMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "betweencoffee_delivery.middleware.AdminSessionMiddleware",
@@ -433,7 +424,7 @@ LOGIN_URL = "/accounts/login/"
 LOGOUT_REDIRECT_URL = "/"
 
 
-# 密码验证
+# 密码验证（強化：加入常用密碼檢查，提升安全性）
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -443,6 +434,12 @@ AUTH_PASSWORD_VALIDATORS = [
         "OPTIONS": {
             "min_length": 6,
         },
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -789,9 +786,14 @@ LOGGING = {
 ALIPAY_APP_ID = env("ALIPAY_APP_ID", default="9021000151625966")
 
 
-# 从文件读取密钥
-def read_key_file(filename):
-    """从文件读取密钥"""
+#   安全優先：環境變數優先於檔案（2026-08-01 修改）
+#   確保 Render 上使用環境變數設定的新金鑰，而不是 repo 歷史遺留的舊金鑰檔案
+def read_alipay_key(env_name, filename):
+    """安全地讀取支付寶金鑰：環境變數優先，檔案為 fallback（僅供本地開發）"""
+    key_from_env = env(env_name, default="").strip()
+    if key_from_env:
+        return key_from_env
+
     key_path = os.path.join(BASE_DIR, "keys", filename)
     try:
         with open(key_path, "r") as f:
@@ -801,14 +803,8 @@ def read_key_file(filename):
         return ""
 
 
-ALIPAY_APP_PRIVATE_KEY = read_key_file("alipay_private_key.pem")
-ALIPAY_PUBLIC_KEY = read_key_file("alipay_public_key.pem")
-
-# 如果文件读取失败，回退到环境变量
-if not ALIPAY_APP_PRIVATE_KEY:
-    ALIPAY_APP_PRIVATE_KEY = env("ALIPAY_APP_PRIVATE_KEY", default="")
-if not ALIPAY_PUBLIC_KEY:
-    ALIPAY_PUBLIC_KEY = env("ALIPAY_PUBLIC_KEY", default="")
+ALIPAY_APP_PRIVATE_KEY = read_alipay_key("ALIPAY_APP_PRIVATE_KEY", "alipay_private_key.pem")
+ALIPAY_PUBLIC_KEY = read_alipay_key("ALIPAY_PUBLIC_KEY", "alipay_public_key.pem")
 
 ALIPAY_DEBUG = True
 ALIPAY_SIGN_TYPE = "RSA2"
@@ -820,21 +816,10 @@ ALIPAY_NOTIFY_URL = env(
     "ALIPAY_NOTIFY_URL", default="http://localhost:8081/eshop/payment/alipay/notify/"
 )
 
-# PayPal配置
+# PayPal配置（僅從環境變數讀取，不設硬編碼 fallback）
 PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID", default="")
 PAYPAL_CLIENT_SECRET = env("PAYPAL_CLIENT_SECRET", default="")
-PAYPAL_ENVIRONMENT = env("PAYPAL_ENVIRONMENT", default="sandbox")  # 添加这行
-
-# 如果环境变量为空，使用硬编码值作为后备（仅用于开发）
-if not PAYPAL_CLIENT_ID:
-    PAYPAL_CLIENT_ID = "AZPAFBc3xr01Ap4DUkDj0P6pGhPwizG93cXocVlQv-PJQ87BROpjqxxRXgYpI82guz3Aebq9uhvIaUp-"
-    logger.warning("使用后备PayPal Client ID")
-
-if not PAYPAL_CLIENT_SECRET:
-    PAYPAL_CLIENT_SECRET = "EPwY7G6-uAKNjmDUhy-Awa_HC-MjaU3VHN8d4K4eQ3n67_2ndR_3A8TFrC8O-ZL3QVFIELPlB81XAWwS"
-    logger.warning("使用后备PayPal Client Secret")
-
-print(f"DEBUG - 最终PayPal配置: {PAYPAL_CLIENT_ID[:20]}...")
+PAYPAL_ENVIRONMENT = env("PAYPAL_ENVIRONMENT", default="sandbox")
 
 # FPS配置
 FPS_MERCHANT_ID = env("FPS_MERCHANT_ID", default="BETWEENCOFFEE")
@@ -986,57 +971,5 @@ if not SECRET_KEY.startswith("django-insecure-") and DEBUG:
     logger.info("Production SECRET_KEY is being used")
 
 
-"""
-For myself reference
-
-virtualenvwrapper path:
-/home/kei/.virtualenvs/betweencoffee_delivery/bin/python
-/home/kei/.virtualenvs/betweencoffee_delivery/bin/python
-Check 日志 command：
-tail -f /home/kei/Desktop/betweencoffee_delivery_enhance/cron.log 
-
-HK Alipay bussiness ac
-pythonkei@gmail.com, Password_123
-Alipay Sandbox:
-https://global.alipay.com/docs/ac/hk_auto_debit/sandbox
-https://noter.tw/5445/php-%E4%B8%B2%E6%8E%A5-alipayhk-%E8%B8%A9%E5%9D%91%E8%A8%98%E9%8C%84/
-
-
-
-DeepSeek API key
-sk-362506ad6b114bf8a9c944bec5e2dd1e
-
-Paypal_pass_829919
-
-Alipay bussiness ac
-pythonkei@gmail.com, Password_123
-设置支付宝国际账户支付密码:Alipaypass123_
-
-china mobile:
-19168604470
-
-csdn account
-id:heyeahheyeah
-
-
-Fully Tutorial for social login (followed):
-OAuth - Social Logins with Django and Allauth - Google, Github, X and Facebook
-https://www.youtube.com/watch?v=dASjmItZcWE
-
-
-#FB:
-#PassPassPassFB999
-#meta for developers ac and my app info:
-#app name: kei_production
-"""
-
-"""
-ollama ac:
-pythonkei
-pythonkei@gmail.com
-"""
-
-"""
-supabase database pw:
-hFEUGy1tIX15ALrz
-"""
+# Sensitive credentials removed for security
+# 所有明文密碼/API keys/資料庫憑證已移除（2026-08-01 安全審查）

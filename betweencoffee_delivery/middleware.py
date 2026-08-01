@@ -64,22 +64,6 @@ class AdminSessionMiddleware:
         return response
 
 
-class DebugMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        # 请求前
-        if request.path == "/eshop/order_confirm/" and request.method == "POST":
-            logger.info(f"订单确认POST请求: {request.POST}")
-            logger.info(f"Session内容: {dict(request.session)}")
-
-        response = self.get_response(request)
-
-        # 请求后
-        if request.path == "/eshop/order_confirm/" and request.method == "POST":
-            logger.info(f"响应状态: {response.status_code}")
-            if hasattr(response, "url"):
-                logger.info(f"重定向到: {response.url}")
-
-        return response
+# DebugMiddleware 已移除（2026-08-01 安全審查）
+# 原因：會記錄訂單 POST 資料（電話/地址/個資）與完整 Session 內容到日誌
+# 如需除錯，請在本地開發環境自行加回，並確保生產環境不啟用

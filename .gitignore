@@ -28,6 +28,13 @@ db.sqlite3
 *.swp
 *.swo
 
+# Sensitive keys and certificates
+keys/
+betweencoffee_delivery/keys/
+*.pem
+*.key
+*.crt
+
 # OS
 .DS_Store
 Thumbs.db
