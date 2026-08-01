@@ -293,6 +293,9 @@ Phase 3D：新功能（優先級：低）
 │   └── [x] 移除 alipay 簽名驗證 double-unquote bug（alipay_utils.py + payment_views.py）
 ├── [x] 訂單確認頁 Toast 狀態變更靜默化 — ✅ 2026-07-31
 │   └── [x] order_status_cards.js showToast 改為僅 console.log（不再 window.toast.info）
+├── [x] 首頁 feed 區塊兩層設計（形狀輪廓捲動 + 底部照片固定）— ✅ 2026-08-01
+│   ├── [x] 上層 .feed__layer-parts：形狀外部深黑 #0e0e0e（移除 bg_4.jpg）＋反相裁切＋feedScroll 捲動
+│   └── [x] 下層 .feed：index_feed_image.png 固定（無動畫）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
 ├── [ ] 訂單匯出功能

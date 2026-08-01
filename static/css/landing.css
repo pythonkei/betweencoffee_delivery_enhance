@@ -106,6 +106,10 @@
 
 .feed {
   position: relative;
+  /* 修復（2026-07-31，兩層設計）：
+     第二層（底層）：顯示固定的 index_feed_image.png 照片，無動畫。
+     第一層（上層 .feed__layer-parts）會以反相裁切（形狀挖洞）蓋在上方，
+     因此底層照片只透過「形狀輪廓內部」顯示出來。 */
   background-image: url(../images/index_feed_image.png);
   background-position: center center;
   background-repeat: no-repeat;
@@ -139,12 +143,17 @@
   margin-left: -2px;
 }
 
+/* 修復（2026-07-31，兩層設計）：
+   第一層（上層）：移除 bg_4.jpg 照片，改為品牌深黑純色（不透明）＋反相裁切（clip-path 是「填滿矩形 + 挖空咖啡形狀」）。
+   因此「形狀輪廓內部」是透明洞 → 透出底層 .feed 的 index_feed_image.png 固定照片；
+   「形狀外部」顯示深黑純色 → 不再出現 bg_4.jpg，形狀輪廓因深黑對比而清晰。 */
 .feed__layer-parts {
   top: 0;
   width: 2430px;
   height: 570px;
   flex-shrink: 0;
-  background: rgba(18,18,18,1) none !important;
+  background: rgba(17,16,19,1) none !important;
+  background-image: none !important;
   content: "";
   -webkit-clip-path: url(#mask);
           clip-path: url(#mask);
@@ -197,7 +206,7 @@
   border-radius: 12px;
   padding: 14px 18px;
   z-index: 1000;
-  box-shadow: 
+  box-shadow:
     0 6px 20px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
