@@ -325,9 +325,10 @@
       .block-21 .text .heading a:hover, .block-21 .text .heading a:active, .block-21 .text .heading a:focus  { 
         color: var(--brand-primary); }
 
-  .block-21 .text .meta > div  { 
+  .block-21 .text .meta > div  {
     font-size: 15px;
-    margin-right: 16px; }
+    /* margin-right: 16px; */
+    }
 
     .block-21 .text .meta > div a  { 
       color: gray; }

@@ -1,8 +1,8 @@
 <!-- socialuser/templates/socialuser/includes/member_nav.html -->
-<!-- 會員專區水平標籤頁導航菜單 -->
+<!-- 會員專區水平標籤頁導航菜單（樣式統一在 bc-components.css 管理） -->
 {% load static %}
 
-<div class="member-nav-wrapper mb-4">
+<div class="member-nav-wrapper">
     <div class="member-nav-container">
         <a href="{% url 'socialuser:profile' %}" 
            class="member-nav-item {% if request.path == '/socialuser/' or 'profile' in request.path and 'loyalty' not in request.path and 'orders' not in request.path %}active{% endif %}">

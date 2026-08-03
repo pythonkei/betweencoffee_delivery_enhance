@@ -915,6 +915,14 @@ button.alert:hover {
   position: relative;
 }
 
+/* 獨立背景文字容器（置於頁面頂部、導覽列與內容之間，高度 0 不佔文件流空間） */
+.bc-bg-text-top {
+  position: relative;
+  height: 0;
+  min-height: 0;
+  z-index: 0;
+}
+
 .bc-section-with-bg-text::before {
   content: attr(data-bg-text);
   position: absolute;
@@ -930,6 +938,13 @@ button.alert:hover {
   z-index: 0;
   pointer-events: none;
   white-space: pre-wrap;
+}
+
+/* 背景文字向下移動 150px + 大小改為 16vw + 左側 1vw — 必須在 .bc-section-with-bg-text::before 之後以覆蓋 */
+.bc-bg-text-top::before {
+  top: 130px;
+  left: -10vw;
+  font-size: 16vw;
 }
 
 .title-bg-head-v2 {

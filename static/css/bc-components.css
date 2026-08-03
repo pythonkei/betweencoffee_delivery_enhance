@@ -17,6 +17,13 @@
   height: auto;
 }
 
+/* ===== Cash 支付頁圖標 ===== */
+.payment-icon-cash {
+  font-size: 78px;
+  line-height: 1;
+  color: #c49b63;
+}
+
 /* ===== FPS/Cash 支付頁操作按鈕（主要 +12%、次要 -12%、間距） ===== */
 .bc-payment-actions {
   gap: 12px;
@@ -88,6 +95,9 @@
 @media (max-width: 768px) {
   .payment-logo {
     width: 110px;
+  }
+  .payment-icon-cash {
+    font-size: 78px;
   }
 }
 
@@ -1493,10 +1503,20 @@
   color: #fff;
   font-size: 0.95rem;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
 .payment-label-icon {
   color: var(--bc-gold);
-  margin-right: 6px;
+}
+
+/* ===== 訂單確認頁支付 Icon（獨立類，1.3rem，與文字水平對齊 + gap 間隙） ===== */
+.bc-payment-label-icon {
+  font-size: 1.3rem;
+  color: var(--bc-gold);
+  vertical-align: middle;
+  line-height: 1;
 }
 
 
@@ -2295,18 +2315,23 @@
 /* 來源: member-nav.css — 會員導航標籤頁樣式 */
 .member-nav-wrapper { display: flex; justify-content: center; width: 100%; }
 .member-nav-container {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
+    justify-content: center;
     background-color: var(--brand-primary);
     border-radius: 50px;
     padding: 4px;
     gap: 4px;
     box-shadow: 0 2px 8px rgba(196, 155, 99, 0.3);
+    box-sizing: border-box;
 }
 a.member-nav-item {
     display: inline-flex;
+    flex: 1;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 10px 46px;
+    padding: 10px 24px;
     border-radius: 50px;
     font-size: 0.95rem;
     font-weight: 500;
@@ -2314,11 +2339,14 @@ a.member-nav-item {
     text-decoration: none !important;
     transition: none !important;
     white-space: nowrap;
+    min-width: 0;
+    box-sizing: border-box;
 }
 a.member-nav-item:hover { color: #ffffff !important; text-decoration: none !important; background-color: rgba(255, 255, 255, 0.15); }
 a.member-nav-item.active { background-color: #ffffff; color: var(--brand-primary) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 a.member-nav-item.active i { color: var(--brand-primary) !important; }
-a.member-nav-item i { font-size: 1rem; color: rgba(255,255,255,0.9) !important; }
+a.member-nav-item i { font-size: 1rem; color: rgba(255,255,255,0.9) !important; flex-shrink: 0; }
+a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .profile-avatar-img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid rgba(196,155,99,0.3); }
 .profile-username { font-size: 1.5rem; font-weight: 600; color: #f8f9fa; margin: 0 0 0.75rem 0; }
 .profile-detail-item { font-size: 0.95rem; color: #adb5bd; display: flex; align-items: center; justify-content: center; margin-bottom: 0.35rem; }
@@ -2340,8 +2368,8 @@ a.member-nav-item i { font-size: 1rem; color: rgba(255,255,255,0.9) !important; 
 .avatar-upload-overlay span { font-size: 0.75rem; font-weight: 500; }
 .avatar-upload-hint { font-size: 0.85rem; color: #adb5bd; margin-top: 0.75rem; margin-bottom: 0; }
 @media (max-width: 576px) {
-    .member-nav-container { width: 100%; justify-content: center; }
-    a.member-nav-item { padding: 8px 14px; font-size: 0.85rem; }
+    .member-nav-container { width: 100%; justify-content: center; gap: 3px; }
+    a.member-nav-item { padding: 10px 12px; font-size: 0.85rem; flex: 1 1 auto; }
     a.member-nav-item i { font-size: 0.9rem; }
 }
 

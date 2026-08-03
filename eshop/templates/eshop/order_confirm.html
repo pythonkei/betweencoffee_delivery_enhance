@@ -4,6 +4,8 @@
 {% load tz %} 
 
 {% block content %}
+<!-- 背景文字：置於導覽列與內容之間 -->
+<div class="bc-section-with-bg-text bc-bg-text-top" data-bg-text="&#65371;Hug&#xa;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Caffeine!&#65373;"></div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Django messages 顯示區塊 - 使用 BcToast 或自定義 showToast -->
@@ -161,9 +163,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 
-<section class="ftco-section-billing" style="position: relative; overflow: hidden;">
+<section class="ftco-section-billing">
     <div class="container">
-        <span class="title-bg-head-v3 bc-title-bg-order">｛Hug<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Caffeine!｝</span>
         <div class="row">
             <!-- info from -->
             <div class="col-xl-7">
@@ -333,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <span class="payment-radio-dot"></span>
                                             </span>
                                             <div class="payment-label-text">
-                                                <i class="fab fa-alipay payment-label-icon"></i> Alipay 支付宝
+                                                <i class="fab fa-alipay bc-payment-label-icon"></i> Alipay 支付宝
                                             </div>
                                         </label>
                                     </div>
@@ -346,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <span class="payment-radio-dot"></span>
                                             </span>
                                             <div class="payment-label-text">
-                                                <i class="fab fa-paypal payment-label-icon"></i> PayPal 支付
+                                                <i class="fab fa-paypal bc-payment-label-icon"></i> PayPal 支付
                                             </div>
                                         </label>
                                     </div>
@@ -359,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <span class="payment-radio-dot"></span>
                                             </span>
                                             <div class="payment-label-text">
-                                                <i class="fas fa-mobile-alt payment-label-icon"></i> FPS 轉數快
+                                                <i class="fas fa-mobile-alt bc-payment-label-icon"></i> FPS 轉數快
                                             </div>
                                         </label>
                                     </div>
@@ -372,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <span class="payment-radio-dot"></span>
                                             </span>
                                             <div class="payment-label-text">
-                                                <i class="fas fa-money-bill-wave payment-label-icon"></i> 現金支付
+                                                <i class="fas fa-money-bill-wave bc-payment-label-icon"></i> 現金支付
                                             </div>
                                         </label>
                                     </div>
