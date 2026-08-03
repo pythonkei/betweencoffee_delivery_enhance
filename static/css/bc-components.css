@@ -6,6 +6,103 @@
    設計語言: 深色主題、半透明玻璃卡片、金色點綴
    ============================================================ */
 
+/* ===== svg-bg-container：裁切固定寬度 SVG（.svg-bg-5 680px）造成的水平溢出，防止 body 被撐寬 ===== */
+.svg-bg-container {
+  overflow: hidden;
+}
+
+/* ===== FPS 支付頁 logo（替代 inline style，SVG 原色顯示） ===== */
+.payment-logo {
+  width: 128px;
+  height: auto;
+}
+
+/* ===== FPS/Cash 支付頁操作按鈕（主要 +12%、次要 -12%、間距） ===== */
+.bc-payment-actions {
+  gap: 12px;
+}
+.bc-payment-actions form {
+  flex: 1.12;          /* 主要按鈕（我已完成支付/確認訂單，CTA）+12% */
+  max-width: 246px;
+}
+.bc-payment-actions a.bc-payment-action-btn {
+  flex: 0.88;          /* 次要按鈕（返回修改）-12% */
+  width: 100%;
+  max-width: 194px;
+  min-width: 0;
+}
+.bc-payment-actions .bc-payment-action-btn {
+  width: 100%;
+  min-width: 0;
+}
+
+/* 行動螢幕（≤768px）：CTA/次要按鈕改用百分比 fit 螢幕，避免 .calltoaction-btn 固定 230px 溢出 */
+@media (max-width: 768px) {
+  .bc-payment-actions {
+    gap: 10px;
+  }
+  .bc-payment-actions form {
+    flex: 1.12;
+    max-width: 56%;
+  }
+  .bc-payment-actions a.bc-payment-action-btn {
+    flex: 0.88;
+    max-width: 44%;
+  }
+  .bc-payment-actions .bc-payment-action-btn {
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .bc-payment-actions .calltoaction-btn {
+    width: 100%;
+  }
+}
+
+/* ===== .ftco-section-blank-small 響應式修復（漸進縮減空白間距） =====
+   原始 CSS 存在 bug：
+   1. ≤991px 時 padding: 5em 7em 7em 7em → 左右 7em(112px) 內縮造成大留白
+   2. min-height: 26vh 在所有螢幕都相同，行動螢幕上過度佔高
+   修復：修正左右內縮 + 依螢幕尺寸逐級減少間距 */
+@media (max-width: 991px) {
+  .ftco-section-blank-small {
+    padding: 4em 1em;
+    min-height: 18vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .ftco-section-blank-small {
+    padding: 2.5em 0;
+    min-height: 12vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .ftco-section-blank-small {
+    padding: 1.5em 0;
+    min-height: 8vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-logo {
+    width: 110px;
+  }
+}
+
+/* ===== 行動螢幕導航背景透明化 + 漢堡圖標白色 ===== */
+@media (max-width: 991.98px) {
+  .navbar.ftco-navbar-light.bg-dark,
+  .ftco-navbar-light {
+    background: transparent !important;
+  }
+
+  .navbar-dark .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+  }
+}
+
 /* ===== CSS 變數 ===== */
 :root {
   --bc-gold: #c49b63;

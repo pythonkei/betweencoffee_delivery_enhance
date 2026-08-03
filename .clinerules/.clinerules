@@ -319,6 +319,15 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] Token 過期診斷（test_whatsapp_diagnosis.py）
 │   ├── [x] 更新 .env（驗證 HTTP 200）
 │   └── [x] ⚠️ Render 環境變數待更新
+├── [x] 全站行動響應式修復 — ✅ 2026-08-03
+│   ├── [x] 支付確認頁 Y 軸滾動條（.svg-bg-4，還原原始結構）
+│   ├── [x] 行動導航背景透明化 + 漢堡圖標白色
+│   ├── [x] profile 3 頁面 body 外部邊距（.svg-bg-container overflow hidden）
+│   ├── [x] .ftco-section-blank-small 響應式（991/768/480 三級漸進）
+│   └── [x] FPS/Cash 付款頁按鈕（flex 容器 + CTA +12%/-12% + 行動 56%/44%）
+├── [x] FPS 付款頁 logo 更換（fps-logo.png → fps_icon.svg，128px 桌面/110px 行動）— ✅ 2026-08-03
+├── [x] 支付確認頁頂部圖標修復（fa-badge-check Pro-only → fa-circle-check Free）— ✅ 2026-08-03
+├── [x] MCP 伺服器修復（django-manager 重建 + chrome-devtools 指向 Chromium）— ✅ 2026-08-03
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

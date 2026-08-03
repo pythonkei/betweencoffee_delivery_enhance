@@ -321,7 +321,7 @@ class OrderModel(models.Model):
                     "status": "paid",
                     "title": "支付成功！",
                     "message": "您的訂單我們已收到，感謝您的購買！",
-                    "icon": "fa-check-circle",
+                    "icon": "fa-circle-check",
                     "icon_color": "text-success",
                     "icon_size": "3rem",
                 },
