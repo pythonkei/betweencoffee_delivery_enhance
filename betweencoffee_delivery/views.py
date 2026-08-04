@@ -39,6 +39,22 @@ class Index(View):
         return render(request, "betweencoffee_delivery/index.html", context)
 
 
+# 新 Landing 頁面：讀取實際咖啡/咖啡豆資料（原型 B）
+class LandingNew(View):
+    def get(self, request, *args, **kwargs):
+        hot_coffees = CoffeeItem.objects.filter(
+            is_shop_hot_item=True, is_published=True
+        )[:4]
+        all_coffees = CoffeeItem.objects.filter(is_published=True)[:9]
+        beans = BeanItem.objects.filter(is_published=True)[:3]
+
+        context = {
+            "shop_hot_coffees": hot_coffees,
+            "hot_coffees": hot_coffees,
+            "all_coffees": all_coffees,
+            "beans": beans,
+        }
+        return render(request, "betweencoffee_delivery/landing_v3.html", context)
 # List out coffee item
 class CoffeeMenu(View):
     def get(self, request, *args, **kwargs):

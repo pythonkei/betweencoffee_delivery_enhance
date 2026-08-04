@@ -296,6 +296,28 @@ Phase 3D：新功能（優先級：低）
 ├── [x] 首頁 feed 區塊兩層設計（形狀輪廓捲動 + 底部照片固定）— ✅ 2026-08-01
 │   ├── [x] 上層 .feed__layer-parts：形狀外部深黑 #0e0e0e（移除 bg_4.jpg）＋反相裁切＋feedScroll 捲動
 │   └── [x] 下層 .feed：index_feed_image.png 固定（無動畫）
+├── [x] 首頁深金容器 UI 全面調整（landing_v3.html）— ✅ 2026-08-04
+│   ├── [x] 深金容器 .bc-welcome-panel：顏色 #774606、max-width 630px、高度經多次縮減約 40%
+│   ├── [x] 容器中心垂直對齊 carousel banner 底部（margin-top -55px，響應式 -50/-45px）
+│   ├── [x] wakemeup.png 160px + top:-92px 上移，與「上次訂單慣常口味」文字垂直對齊
+│   ├── [x] 文字 margin-bottom -30px 上移靠近照片（響應式 -22/-16px）
+│   ├── [x] 響應式 ≤768/≤480 兩級漸進縮放（容器、圖片、文字等比縮小）
+│   ├── [x] 全部使用 .bc-welcome-* UI 類別（bc-components.css），無內聯 CSS
+│   └── [x] 容器寬度 54% 已註解（改為 max-width 630px 由內容撐開）
+├── [x] Home Slider 改為左側滾動循環動畫（2026-08-05）— ✅
+│   ├── [x] static/js/main.js：移除 fadeOutUpBig/fadeInUp → 預設 translate 水平滑動（向左滾動）
+│   ├── [x] smartSpeed: 700（滑動 0.7s）、autoplayTimeout: 7000（每 7 秒）
+│   └── [x] loop:true + autoplay:true → 無縫左側循環
+├── [x] Carousel 層級修復：gif/SVG 固定底層（2026-08-05）— ✅
+│   ├── [x] .img-owl-bg z-index 1→0、.gif-box/.noise-img z-index:0（style-utilities + bc-components）
+│   ├── [x] .slider-text z-index:10（資訊+按鈕最頂層）＋ pointer-events
+│   └── [x] chrome-devtools 驗證：noiseZ:0, gifZ:0, imgOwlZ:0, textZ:10 ✅
+├── [x] bc-welcome-panel 細部：user icon 加大 + 兩列文字模組（2026-08-05）— ✅
+│   ├── [x] user icon 46px（font-size 1.8rem），響應式 47/41px
+│   ├── [x] .bc-welcome-text 兩列組合模組（gap:2px）、積分校列對齊 padding-left = avatar+gap
+│   └── [x] 容器背景改為 #292623
+├── [x] Best Sell 最強人氣顯示 4 件（2026-08-05）— ✅
+│   └── [x] betweencoffee_delivery/views.py LandingNew.hot_coffees [:3]→[:4]
 ├── [x] 全站安全審查與修復 + 支付寶金鑰輪換 — ✅ 2026-08-01
 │   ├── [x] 移除 git 追蹤 4 個敏感金鑰 + .gitignore 排除 keys/
 │   ├── [x] settings.py 移除明文密碼/API keys/資料庫憑證 + 硬編碼 PayPal 憑證

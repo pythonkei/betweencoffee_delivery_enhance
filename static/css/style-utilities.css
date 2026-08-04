@@ -1026,8 +1026,14 @@ button.alert:hover {
   left: 0;
   right: 0;
   position: absolute;
-  z-index: 1;
-} 
+  z-index: 0;  /* 降到 0，避免蓋住資訊文字 */
+}
+
+/* 資訊文字 + 按鈕必須在最頂層（高於 img-owl-bg、overlay、gif-box） */
+.owl-carousel.home-slider .slider-item .slider-text {
+  position: relative;
+  z-index: 10;
+}
 
 .slider-item .img-owl-bg .gif-box img {
   display: flex;
@@ -1549,7 +1555,6 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .asymmetric-btn-v1:hover {
   background: transparent;
   color: var(--brand-primary);
-  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(196, 155, 99, 0.3);
 }
 
@@ -2361,7 +2366,6 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .social-login-btn:hover {
     background-color: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 

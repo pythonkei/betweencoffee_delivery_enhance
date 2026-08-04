@@ -51,10 +51,9 @@
 		$('.home-slider').owlCarousel({
 	    loop:true,
 	    autoplay: true,
-		autoplayTimeout:8000, // time per slide
+		autoplayTimeout:7000, // time per slide
 	    margin:0,
-	    animateOut: 'fadeOutUpBig ',
-	    animateIn: 'fadeInUp',
+	    smartSpeed:700,      // 滑動速度（移除 fade → 使用預設 translate 水平滑動 = 向左滾動）
 	    nav:false,
 	    autoplayHoverPause: false,
 	    items: 1,

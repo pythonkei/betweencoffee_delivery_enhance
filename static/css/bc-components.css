@@ -11,6 +11,28 @@
   overflow: hidden;
 }
 
+/* ===== Carousel slider 層級修復（最後載入，確保覆蓋其他樣式）
+   資訊文字 + 按鈕（.slider-text）必須在最頂層（z-index:10），
+   gif 層（.img-owl-bg/.gif-box）與 SVG 裝飾層（.noise-img）固定在底層（z-index:0） */
+.owl-carousel.home-slider .slider-item .img-owl-bg {
+  z-index: 0;
+}
+.owl-carousel.home-slider .slider-item .gif-box,
+.owl-carousel.home-slider .slider-item .gif-box img {
+  position: relative;
+  z-index: 0;
+}
+.owl-carousel.home-slider .slider-item .noise-img {
+  position: relative;
+  z-index: 0;
+  pointer-events: none;
+}
+.owl-carousel.home-slider .slider-item .slider-text {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
+
 /* ===== FPS 支付頁 logo（替代 inline style，SVG 原色顯示） ===== */
 .payment-logo {
   width: 128px;
@@ -174,7 +196,6 @@
 }
 .bc-btn-primary:hover {
   background: var(--bc-gold-hover);
-  transform: translateY(-1px);
   box-shadow: 0 4px 15px var(--bc-gold-glow);
 }
 .bc-btn-primary:active {
@@ -292,7 +313,6 @@
 .bc-product-card:hover {
   border-color: var(--bc-gold-light);
   background: var(--bc-bg-card-hover);
-  transform: translateY(-2px);
 }
 
 .bc-product-image-wrap {
@@ -1116,8 +1136,7 @@
 }
 
 .bc-floating-cart-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(196, 155, 99, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   background: #fff;
   color: var(--bc-gold);
 }
@@ -2313,7 +2332,7 @@
 }
 
 /* 來源: member-nav.css — 會員導航標籤頁樣式 */
-.member-nav-wrapper { display: flex; justify-content: center; width: 100%; }
+.member-nav-wrapper { display: flex; justify-content: center; width: 100%; padding:0.75rem 1.25rem;}
 .member-nav-container {
     display: flex;
     width: 100%;
@@ -2354,7 +2373,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .profile-section { border-top: 1px solid rgba(196,155,99,0.15); padding-top: 1.5rem; margin-bottom: 1.5rem; }
 .profile-section-title { font-size: 0.9rem; font-weight: 600; color: var(--brand-primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem; }
 .profile-section-content { font-size: 0.95rem; color: #ced4da; line-height: 1.6; }
-.profile-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; border-top: 1px solid rgba(196,155,99,0.15); padding-top: 1.5rem; }
+.profile-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; padding-top: 1.5rem; }
 .profile-btn { display: inline-flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 500; color: var(--brand-primary); background: transparent; border: 1px solid var(--brand-primary); border-radius: 4px; text-decoration: none; transition: background 0.15s ease, color 0.15s ease; }
 .profile-btn:hover { background: var(--brand-primary); color: #1a1a1a; text-decoration: none; }
 .profile-btn i { margin-right: 0.35rem; }
@@ -2371,5 +2390,208 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     .member-nav-container { width: 100%; justify-content: center; gap: 3px; }
     a.member-nav-item { padding: 10px 12px; font-size: 0.85rem; flex: 1 1 auto; }
     a.member-nav-item i { font-size: 0.9rem; }
+}
+
+/* ===== 首頁深金歡迎容器（landing_v3.html 快速訂單區） =====
+   深金底色 #774606，寬度 54%（max 630px），
+   高度經由 padding/avatar/間距縮減約 15%，
+   容器中心垂直對齊 carousel banner 底部（margin-top = 容器高度一半） */
+.bc-welcome-section {
+  position: relative;
+  z-index: 2;
+  margin-top: -55px;  /* 容器高約 113px，上移一半使中心貼齊 banner 底部 */
+}
+
+.bc-welcome-wrap {
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.bc-welcome-panel {
+  position: relative;
+  /* width: 54%; */
+  max-width: 630px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #292623;
+  border-radius: 16px;
+  padding: 14px 12px 14px 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  overflow: visible;
+}
+
+/* 左側：歡迎訊息 + 積分（組合為一個模組） */
+.bc-welcome-left {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+}
+
+/* 兩列文字共用模組：歡迎列 + 積分列（減少行距） */
+.bc-welcome-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bc-welcome-name {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bc-welcome-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.8rem;  /* user icon 再加大 20%（38→46px） */
+  flex-shrink: 0;
+}
+
+.bc-welcome-greeting {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.bc-welcome-points {
+  color: #ffffff;
+  font-size: 0.9rem;
+  padding-left: 60px;  /* 與 greeting 對齊（avatar 46px + gap 14px） */
+}
+
+/* 右側：wakemeup.png 照片 + 慣常口味文字（垂直對齊） */
+.bc-welcome-imgbox {
+  position: relative;
+  flex-shrink: 0;
+  width: 160px;
+  align-self: stretch;
+  min-height: 97px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.bc-welcome-img {
+  position: absolute;
+  top: -92px;
+  right: 0;
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  z-index: 4;
+  display: block;
+}
+
+.bc-last-order {
+  position: relative;
+  z-index: 5;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 400;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  margin-bottom: 4px;  /* 上移靠近照片（配合圖片 top:-92px） */
+}
+
+.bc-last-order i {
+  color: #ffffff;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.bc-last-order span {
+  vertical-align: middle;
+}
+
+/* ===== 響應式：深金歡迎容器（平板/手機漸進縮放） ===== */
+@media (max-width: 768px) {
+  .bc-welcome-section {
+    margin-top: -50px;  /* 平板容器較矮（約 100px），上移一半 */
+  }
+  .bc-welcome-panel {
+    width: 92%;
+    max-width: none;
+    gap: 10px;
+    padding: 7px 12px;
+  }
+  .bc-last-order {
+    margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
+  }
+  .bc-welcome-avatar {
+    width: 47px;
+    height: 47px;
+    font-size: 1.5rem;  /* user icon 再加大 20%（39→47px） */
+  }
+  .bc-welcome-greeting {
+    font-size: 0.82rem;
+  }
+  .bc-welcome-points {
+    font-size: 0.9rem;
+    padding-left: 61px;  /* 與 greeting 對齊（avatar 47px + gap 14px） */
+  }
+  .bc-welcome-imgbox {
+    width: 140px;
+    min-height: 86px;
+    margin-right: 0;  /* 移除負邊距，避免超出容器 */
+  }
+  .bc-welcome-img {
+    width: 140px;
+    height: 140px;
+    top: -77px;  /* 上移避免與文字重疊（bottom 63px，距文字約 8px） */
+  }
+  .bc-last-order {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bc-welcome-section {
+    margin-top: -45px;  /* 手機容器最矮（約 90px），上移一半 */
+  }
+  .bc-welcome-panel {
+    width: 96%;
+    gap: 7px;
+    padding: 6px 8px;
+  }
+  .bc-last-order {
+    margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
+  }
+  .bc-welcome-avatar {
+    width: 41px;
+    height: 41px;
+    font-size: 1.3rem;  /* user icon 再加大 20%（34→41px） */
+  }
+  .bc-welcome-greeting {
+    font-size: 0.75rem;
+  }
+  .bc-welcome-points {
+    font-size: 0.68rem;
+    padding-left: 55px;  /* 與 greeting 對齊（avatar 41px + gap 14px） */
+  }
+  .bc-welcome-imgbox {
+    width: 110px;
+    min-height: 76px;
+    margin-right: 0;  /* 移除負邊距，避免超出容器 */
+  }
+  .bc-welcome-img {
+    width: 110px;
+    height: 110px;
+    top: -55px;  /* 上移避免與文字重疊（bottom 55px，距文字約 8px） */
+  }
+  .bc-last-order {
+    font-size: 0.7rem;
+  }
 }
 

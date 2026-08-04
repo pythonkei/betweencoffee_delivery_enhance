@@ -1,0 +1,304 @@
+{% extends 'layouts/blank.html' %}
+{% load static %}
+{% block title %}Between Coffee - Index{% endblock %}
+
+{% block content %}
+
+<!-- owl-carousel config file: main.js, animate.css -->
+<section class="home-slider owl-carousel">
+    <div class="slider-item" style="background-image: url({% static 'images/section_bg_01.svg' %});">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+                <div class="col-md-12 col-sm-12 text-center">
+                    <h2 class="subheading">No bullsh*t... Just Caffeine!!</h2>
+                    <h2 class="mb-2">恰度好的一杯</h2>
+                    <h5 class=" mb-md-4"></h5>
+                    <p class="mb-4 mb-md-5">保存自己節奏<br>其實。不難</p>
+                    <p><a href="{% url 'coffee_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">立即落單</a></p>
+                </div>
+            </div>
+            <span class="img-owl-bg">
+                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+            </span>
+            <span class="img-owl-bg">
+                <div class="noise-img"><img src= {% static 'images/bg_coffee_menu.svg' %} class="noise_animation"></div>
+            </span>
+        </div>
+    </div>
+
+    <div class="slider-item" style="background-image: url({% static 'images/bg_5.jpg' %});">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+                <div class="col-md-12 col-sm-12 text-center">
+                    <span class="subheading">More than ... </span>
+                    <h1 class="mb-4">好豆 &#8226; 造就好生活</h1>
+                    <p class="mb-4 mb-md-5">配方咖啡豆<br>孕育出其獨特的風味特性</p>
+                    <p><a href="{% url 'bean_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">我們的配方</a></p>
+                </div>
+            </div>
+            <span class="img-owl-bg">
+                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+            </span>
+            <span class="img-owl-bg">
+                <div class="noise-img"><img src= {% static 'images/section_bg_02.svg' %} class="noise_animation"></div>
+            </span>
+        </div>
+    </div>
+
+    <div class="slider-item" style="background-image: url({% static 'images/bg_3.jpg' %});">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+                <div class="col-md-12 col-sm-12 text-center">
+                    <span class="subheading">~ Brew with Soul ~</span>
+                    <h1 class="mb-4">啡咖師的日常</h1>
+                    <p class="mb-4 mb-md-5">不只是余韻，更是生命!</p>
+                    <p><a href="#" class="btn btn-primary p-3 px-xl-4 py-xl-3">了解更多</a></p>
+                </div>
+            </div>
+            <span class="img-owl-bg">
+                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+            </span>
+            <span class="img-owl-bg">
+                <div class="noise-img"><img src= {% static 'images/owl_title_bg_01.svg' %} class="noise_animation"></div>
+            </span>
+        </div>
+    </div>
+</section>
+<!-- end owl-carousel -->
+
+
+<!-- Shop info & 快速訂單 -->
+<section class="ftco-intro bc-welcome-section">
+    <div class="container-wrap bc-welcome-wrap">
+        <div class="bc-welcome-panel">
+            <!-- 左側：歡迎訊息 + 積分（組合為一個模組） -->
+            <div class="bc-welcome-left">
+                <div class="bc-welcome-text">
+                    <div class="bc-welcome-name">
+                        <span class="bc-welcome-avatar"><i class="icon-user"></i></span>
+                        <span class="bc-welcome-greeting">Hey, 歡迎回來, 隨時來一杯</span>
+                    </div>
+                    <div class="bc-welcome-points">
+                        您的當前積分可以減 -5
+                    </div>
+                </div>
+            </div>
+            <!-- 右側：wakemeup.png 照片（浮出容器右上角，與底部慣常口味文字垂直對齊） -->
+            <div class="bc-welcome-imgbox">
+                <img src="{% static 'images/wakemeup.png' %}" class="img bc-welcome-img" alt="WakeMeUp">
+                <div class="bc-last-order">
+                    <i class="icon-history"></i><span>按照之前口味落單?</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="ftco-section-blank-small"></section>
+
+
+<!-- Best Sell -->
+<section class="ftco-section overflow-hidden">
+    <div class="container">
+        <div class="imgbox">
+            <img hidden src="{% static 'images/section_bg_01.svg' %}" class="section-bg-img">
+        </div>
+        <div class="row justify-content-center mb-5 pb-3">
+            <div class="col-md-7 heading-section text-center">
+                <span class="subheading">Between<br>Selections</span>
+                <h2 class="mb-4">&#65371;最強人氣&#65373;</h2>
+                <p>上班上到打恰睡 @@<br>來一杯續命啡! 立即充滿能量!</p>
+            </div>
+        </div>
+
+        <!-- 方案1 -->
+        <div class="asymmetric-grid asymmetric-grid-v1">
+            {% for coffee in shop_hot_coffees %}
+            <div class="asymmetric-item">
+                <div class="modern-card-v1">
+                    <div class="card-header-v1">
+                        <div class="name-corner-v1" style="display: none;">{{ coffee.name }}</div>
+                        {% if coffee.get_index_image %}
+                        <a href="{% url 'coffee' coffee.id %}" class="card-link" id="svg_over">
+                            
+                            <canvas id="mouse_hit"></canvas>
+                            <span id="svg_over_on"><img src="{% static 'images/product_hover.svg' %}" class="noise_animation"></span>
+                            <!-- 灵活的图片容器 -->
+                            <div class="coffee-image-container">
+                                <img 
+                                    src="{{ coffee.get_index_image }}" 
+                                    alt="{{ coffee.name }}"
+                                    {% comment %} 可选：手动指定图片类型以获得最佳效果 {% endcomment %}
+                                    {% comment %} data-image-size="large" {% endcomment %}
+                                    {% comment %} data-orientation="landscape" {% endcomment %}
+                                >
+                            </div>
+                        </a>
+                        {% else %}
+                        <!-- 无图片时的容器 -->
+                        <div class="coffee-image-container">
+                            <!-- 纯CSS错误处理会在这里显示 -->
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-content-v1">
+                        <h3 class="coffee-name-v1">{{ coffee.name }}</h3>
+                        <p class="introduction-text-v1 mb-3">{{ coffee.introduction }}</p>
+                        <p hidden class="price-v1 pt-2">{{ coffee.price|floatformat:"-2"|default:"0" }}</p>
+                        <a href="{% url 'coffee' coffee.id %}" class="btn asymmetric-btn-v1">落單</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- end Best Sell-->
+
+
+<!-- Shop message -->
+<section class="ftco-counter" id="section-counter" style="background-image: url('{% static 'images/deco_01_v3.png' %}'); background-repeat: no-repeat; background-size: cover">
+    <div class="container">
+        <div class="row align-items-xl-end pr-md-5">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="mid-banner">
+                        <span>Between Say:</span>
+                        <div class="menu-entry playfair_deco" >
+                            <p hidden class="lg_message">Caffeine first, then the work, You Know Priorities?? You're Doing Okay ~!!! What Between Coffee Wants to Convey Through Its Coffee</p>
+                            <p class="lg_message">We made the rules,<br>No bullsh*t.....<br> Just good Caffeine!!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end Shop message -->
+
+
+<div class="flexable-vh-20"></div>
+
+
+<!-- Bean -->
+<section class="ftco-section overflow-hidden">
+    <div class="articleStyle_08 nullWay active activeAfter">
+        <div class="eyecatch">
+            <div class="blobsVideo">
+                <div class="inner">
+                    <div class="videoWrap">
+                        <video class="video" muted playsinline loop autoplay >
+                        <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end eyecatch -->
+
+        <div class="inner">
+            <div class="content">
+                <div class="svg-box"><img src= {% static 'images/owl_title_bg_02.svg' %} class="noise_animation"></div>
+
+                <h2 class="subheading">Handcrafted<br />Roastery</h2>
+                <h2 class="mb-4">&#65371; 咖啡豆是會呼吸的 &#65373;</h2>
+                <p class="my-4">從「火」與「嚴謹」出發 -<br>曲線烘焙設計與適切度</p>
+                <div class="summaryStyle_01 summary">
+                    <p class=""><a href="{% url 'bean_menu' %}" class="btn btn-primary btn-outline-primary px-4 py-3 mr-4">詳細</a>
+                    <a href="{% url 'bean_menu' %}" class="btn btn-primary btn-outline-primary px-4 py-3">定期購入</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end Bean -->
+
+
+<section class="ftco-section-blank-small"></section>
+
+
+<!-- branding Deco -->
+<section class="feed overflow-hidden">
+    <div class="feed__layer">
+        <div class="feed__layer-parts feed__layer-parts--01"></div>
+        <div class="feed__layer-parts feed__layer-parts--02"></div>
+    </div>
+    <div class="feed__mask_middle">
+        <svg id="_レイヤー_1" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
+            <clipPath id="mask" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
+            <path id="Exclude" d="M2430 570H0V0H2430V570ZM10 564H131.451V167.571H135.5C137.659 168.1 138.874 169.422 139.144 171.536C139.413 173.122 139.549 177.086 139.549 183.429V564H261V203.25C261 164.136 260.595 132.422 259.785 108.107C259.245 83.7931 257.491 64.7643 254.522 51.0215C251.554 37.2787 246.561 27.4998 239.544 21.6855C232.527 15.8712 222.675 12.436 209.99 11.3789C197.575 9.79318 181.517 9 161.814 9H10V564ZM367.79 87C348.167 87 332.038 87.7948 319.403 89.3848C307.038 90.4447 297.36 93.8898 290.371 99.7197C283.382 105.55 278.408 115.355 275.451 129.135C272.494 142.915 270.613 162.26 269.807 187.17C269.269 211.55 269 243.085 269 281.775V369.225C269 407.915 269.269 439.715 269.807 464.625C270.613 489.005 272.494 508.085 275.451 521.865C278.408 535.645 283.382 545.45 290.371 551.28C297.36 557.11 307.038 560.82 319.403 562.41C332.038 563.47 348.167 564 367.79 564H420.21C440.102 564 456.231 563.47 468.597 562.41C480.962 560.82 490.64 557.11 497.629 551.28C504.618 545.45 509.592 535.645 512.549 521.865C515.506 508.085 517.252 489.005 517.79 464.625C518.596 439.715 519 407.915 519 369.225V281.775C519 242.555 518.596 210.755 517.79 186.375C517.252 161.995 515.506 142.915 512.549 129.135C509.592 115.355 504.618 105.55 497.629 99.7197C490.64 93.8898 480.828 90.4447 468.193 89.3848C455.828 87.7948 439.833 87 420.21 87H367.79ZM529 564H680.21C700.102 564 716.231 563.471 728.597 562.414C740.962 560.828 750.64 557.129 757.629 551.314C764.618 545.5 769.592 535.721 772.549 521.979C775.506 508.236 777.252 489.207 777.79 464.893C778.596 440.05 779 408.336 779 369.75V282.536C779 243.422 778.596 211.707 777.79 187.393C777.252 163.078 775.506 144.049 772.549 130.307C769.592 116.564 764.618 106.786 757.629 100.972C750.64 95.1574 740.828 91.7212 728.193 90.6641C715.828 89.0784 699.833 88.2861 680.21 88.2861H649.968V9H529V564ZM787 369.225C787 407.915 787.27 439.715 787.81 464.625C788.619 489.005 790.509 508.085 793.478 521.865C796.446 535.645 801.439 545.45 808.456 551.28C815.473 557.11 825.19 560.82 837.604 562.41C850.289 563.47 866.483 564 886.186 564H1038V87H916.549V325.5H912.5C910.611 324.97 909.396 323.91 908.856 322.32C908.587 320.2 908.451 315.96 908.451 309.6V87H787V369.225ZM1046 369.75C1046 408.336 1046.27 440.05 1046.81 464.893C1047.63 489.207 1049.52 508.236 1052.51 521.979C1055.49 535.721 1060.5 545.5 1067.55 551.314C1074.6 557.129 1084.36 560.828 1096.83 562.414C1109.58 563.471 1125.84 564 1145.63 564H1168V9H1046V369.75ZM1176 369.75C1176 408.336 1176.27 440.05 1176.81 464.893C1177.61 489.207 1179.5 508.236 1182.45 521.979C1185.41 535.721 1190.39 545.5 1197.38 551.314C1204.37 557.129 1214.05 560.828 1226.42 562.414C1239.05 563.471 1255.19 564 1274.82 564H1297V9H1176V369.75ZM1306 325.5H1456.94C1456.94 333.449 1456.67 338.219 1456.13 339.81C1455.59 340.87 1453.3 341.4 1449.27 341.4H1306V564H1433.12C1453.03 564 1469.18 563.47 1481.55 562.41C1493.93 560.82 1503.62 557.11 1510.61 551.28C1517.61 545.45 1522.58 535.645 1525.54 521.865C1528.5 508.085 1530.25 489.005 1530.79 464.625C1531.6 439.715 1532 407.915 1532 369.225V246H1388.73C1384.7 246 1382.41 245.47 1381.87 244.41C1381.33 242.82 1381.06 238.05 1381.06 230.1H1532V87H1306V325.5ZM1540 564H1661.94V246.857H1666C1668.17 246.857 1669.39 247.914 1669.66 250.028C1669.93 252.143 1670.06 256.371 1670.06 262.714V564H1792V282.536C1792 243.422 1791.59 211.707 1790.78 187.393C1790.24 163.078 1788.48 144.049 1785.5 130.307C1782.52 116.564 1777.5 106.786 1770.46 100.972C1763.41 95.1574 1753.52 91.7212 1740.79 90.6641C1728.32 89.0783 1712.2 88.2861 1692.42 88.2861H1661.94V9H1540V564ZM1907 369.75C1907 408.336 1907.27 440.05 1907.81 464.893C1908.62 489.207 1910.51 508.236 1913.48 521.979C1916.45 535.721 1921.44 545.5 1928.46 551.314C1935.48 557.129 1945.21 560.828 1957.62 562.414C1970.31 563.471 1986.51 564 2006.22 564H2069V342H2035.79C2031.47 342 2029.04 340.942 2028.5 338.828C2028.23 337.242 2028.09 333.013 2028.09 326.143H2069V88.2861H2028.5V9H1907V369.75ZM2177.47 140.198C2137.27 231.345 2098.67 318.407 2086 419.099C2086 419.099 2086 494.494 2086 530.499C2086 566.504 2292.64 572.178 2316.42 540.634C2321.15 502.563 2327.47 457.134 2332.42 419.099C2341.33 350.567 2353.43 298.268 2386.31 225C2386.37 224.891 2429.03 140.196 2422.28 133.637C2422.27 133.631 2422.26 133.624 2422.26 133.618L2177.47 140.198ZM2220.42 380.232C2285.83 375.024 2265.8 494.678 2198.8 480.622C2157.34 471.924 2172.25 384.069 2220.42 380.232ZM2238.85 394.569C2210.74 373.436 2163.5 435.76 2191.88 464.417C2225.43 498.282 2271.42 419.076 2238.85 394.569ZM2087.6 346.5C2098.3 306 2109.91 270.001 2124.5 235C2132.8 215.116 2165.08 151.195 2164.08 135.32C2162.8 114.93 2105.99 74.2764 2090.18">
+        </svg>
+    </div>
+    <div hidden class="feed__triangle">
+        <img src="https://wondercrecue.com/wp-content/themes/wondercrecue2025/assets/images/index_feed_triangle.svg" alt="Wonder Crecue（ワンダークリック）">
+    </div>
+</section>
+<!-- end branding Deco -->
+
+
+<!-- noise active filter for noise_animation -->
+<div class="noise-filiter">
+	<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+		<defs>
+			<filter id="noise-0">
+				<feTurbulence id="turbulence_0_desktop" baseFrequency="0.02" numOctaves="2" result="noise" seed="0" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-1">
+				<feTurbulence id="turbulence_1_desktop" baseFrequency="0.04" numOctaves="1" result="noise" seed="1" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"></feDisplacementMap>
+			</filter>
+			<filter id="noise-2">
+				<feTurbulence id="turbulence_2_desktop" baseFrequency="0.02" numOctaves="3" result="noise" seed="2" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="2.4"></feDisplacementMap>
+			</filter>
+			<filter id="noise-3">
+				<feTurbulence id="turbulence_3_desktop" baseFrequency="0.04" numOctaves="1" result="noise" seed="3" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-4">
+				<feTurbulence id="turbulence_4_desktop" baseFrequency="0.02" numOctaves="3" result="noise" seed="4" type="turbulence"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"></feDisplacementMap>
+			</filter>
+		</defs>
+	</svg>
+	<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+		<defs>
+			<filter id="noise-5">
+				<feTurbulence id="turbulence_0_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="0"></feTurbulence>
+				<feDisplacementMap id="displacement_smart" in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-6">
+				<feTurbulence id="turbulence_1_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="1"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-7">
+				<feTurbulence id="turbulence_2_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="2"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+			<filter id="noise-8">
+				<feTurbulence id="turbulence_3_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="3"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6"></feDisplacementMap>
+			</filter>
+			<filter id="noise-9">
+				<feTurbulence id="turbulence_4_smart" baseFrequency="0.02" numOctaves="5" result="noise" seed="4"></feTurbulence>
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap>
+			</filter>
+		</defs> 
+	</svg>
+</div>
+<!-- end noise active filter for noise_animation -->
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* select2 樣式 */
+</style>
+{% endblock %}
