@@ -57,7 +57,7 @@
                 <div class="block-23 mb-3">
                     <p class="h3 bean-title"><span>{{ bean.name }}</span></p>
                     <p class="price">${{ bean.price_200g|floatformat:"0" }}</p>
-                    <p class="pb-2" class="bc-description-clamp">{{ bean.description }}</p>
+                    <p class="pb-2 bc-description-clamp">{{ bean.description }}</p>
                 </div>
 
                 <div class="block-23 mb-3">
@@ -67,7 +67,7 @@
 
                         <!-- roast level -->
                         <li><span class="icon material-symbols-outlined">Home_storage</span><span class="text">烘焙水平 :</span></li>
-                        <div class="roastrange-field mb-4" class="bc-roast-range-field">
+                        <div class="roastrange-field mb-4 bc-roast-range-field">
                             <div class="roastrange">
                                 {% with level=bean.roast_level|default:'medium' %}
                                 <div class="roastrange-item{% if level == 'light' %} roast{% endif %}">
@@ -145,9 +145,9 @@
 
                         <!-- Submit Buttons -->
                         <div class="col-md-12 mt-4">
-                            <div class="d-flex button-d-flex justify-content-between px-2" class="bc-product-action-row" style="gap: 1rem;">
-                                <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3">立即購買</button>
-                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3" class="bc-product-action-btn">加入購物車</button>
+                            <div class="d-flex button-d-flex justify-content-between px-2 bc-product-action-row" style="gap: 1rem;">
+                                <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">立即購買</button>
+                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">加入購物車</button>
                             </div>
                             <div class="text-center mt-3">
                                 <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></span>

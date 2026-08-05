@@ -1045,6 +1045,23 @@ button.alert:hover {
   width: 50%;
 }
 
+/* ===== Carousel 響應式放大：平板/手機 GIF 與 SVG 顯示加大 ===== */
+/* 平板（≤991px） */
+@media screen and (max-width: 991.98px) {
+  .slider-item .img-owl-bg .gif-box img { width: 70%; }
+  .slider-item .noise-img { width: 55vw; min-width: 0; }
+}
+/* 手機平板（≤768px） */
+@media screen and (max-width: 767.98px) {
+  .slider-item .img-owl-bg .gif-box img { width: 80%; }
+  .slider-item .noise-img { width: 65vw; min-width: 0; }
+}
+/* 小手機（≤576px） */
+@media screen and (max-width: 575.98px) {
+  .slider-item .img-owl-bg .gif-box img { width: 90%; }
+  .slider-item .noise-img { width: 75vw; min-width: 0; }
+}
+
 @media screen and  (min-width: 767.98px) {
   .slider-item .img-owl-bg  {
     width: auto;
@@ -2694,3 +2711,17 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .d-flex { display: flex !important; }
 .d-inline-block { display: inline-block !important; }
 .d-inline-flex { display: inline-flex !important; }
+
+/* ===== Carousel 響應式放大：最後載入確保覆蓋既有 .noise-img 規則 ===== */
+/* 平板 ≤991px */
+@media screen and (max-width: 991.98px) {
+  .slider-item .noise-img { width: 55vw !important; min-width: 0 !important; }
+}
+/* 手機平板 ≤768px */
+@media screen and (max-width: 767.98px) {
+  .slider-item .noise-img { width: 65vw !important; min-width: 0 !important; }
+}
+/* 小手機 ≤576px */
+@media screen and (max-width: 575.98px) {
+  .slider-item .noise-img { width: 75vw !important; min-width: 0 !important; }
+}

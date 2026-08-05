@@ -59,7 +59,7 @@
                 <div class="block-23 mb-3">
                     <p class="h3 coffee-title">{{ coffee.name }}</p>
                     <p class="price">${{ coffee.price|floatformat:"-2"|default:"0"  }}</p>
-                    <p class="pb-2" class="bc-description-clamp">{{ coffee.description }}</p>
+                    <p class="pb-2 bc-description-clamp">{{ coffee.description }}</p>
                 </div>
 
                 <div class="block-23 mb-3">
@@ -143,9 +143,9 @@
 
                         <!-- Submit Buttons -->
                         <div class="col-md-12 mt-4">
-                            <div class="d-flex button-d-flex justify-content-between px-2" class="bc-product-action-row" style="gap: 1rem;">
-                                <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3">立即購買</button>
-                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3" class="bc-product-action-btn">加入購物車</button>
+                            <div class="d-flex button-d-flex justify-content-between px-2 bc-product-action-row" style="gap: 1rem;">
+                                <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">立即購買</button>
+                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">加入購物車</button>
                             </div>
                             <div class="text-center mt-3">
                                 <span class="r-btn btn"><a href="{% url 'coffee_menu' %}">返回</a></span>
@@ -209,6 +209,31 @@
 
 <!-- Handle option -->
 <script>
+    /* 從 URL query 預選上次訂單選項（來自首頁最後訂單圖片連結） */
+    (function preselectLastOrderOptions() {
+        var params = new URLSearchParams(window.location.search);
+        var map = {
+            'cup_level': 'cup-level-group',
+            'milk_level': 'milk-level-group',
+            'strength_level': 'strength-level-group'
+        };
+        Object.keys(map).forEach(function(key) {
+            var val = params.get(key);
+            if (!val) return;
+            var group = document.getElementById(map[key]);
+            if (!group) return;
+            group.querySelectorAll('.bc-option-btn').forEach(function(btn) {
+                var active = btn.getAttribute('data-value') === val;
+                btn.classList.toggle('active', active);
+            });
+            var hiddenInput = group.closest('.form-group');
+            if (hiddenInput) {
+                var hid = hiddenInput.querySelector('input[type="hidden"]');
+                if (hid) hid.value = val;
+            }
+        });
+    })();
+
     document.addEventListener('DOMContentLoaded', function () {
         // Option Button Toggle - 杯量
         document.querySelectorAll('#cup-level-group .bc-option-btn').forEach(btn => {

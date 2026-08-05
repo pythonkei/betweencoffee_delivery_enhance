@@ -36,6 +36,7 @@ from .views import (
     CoffeeMenu,
     CoffeeMenuSearch,
     Index,
+    LandingNew,
 )
 
 
@@ -49,6 +50,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("", Index.as_view(), name="index"),  # find own app html file
+    path("landing/", LandingNew.as_view(), name="landing_new"),  # 新 Landing 原型
     path("__debug__/", include("debug_toolbar.urls")),
     path("profile/", include("socialuser.urls")),
     path("@<username>/", profile_view, name="user_profile"),

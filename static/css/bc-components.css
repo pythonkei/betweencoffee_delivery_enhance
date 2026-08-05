@@ -33,6 +33,72 @@
   pointer-events: auto;
 }
 
+/* ===== 第一個 Slider：咖啡產品圖片（居中顯示，位於 GIF 底層之上） ===== */
+.owl-carousel.home-slider .slider-item .slider-coffee-img {
+  position: relative;
+  z-index: 10;
+  display: block;
+  margin: 0 auto;
+  width: min(320px, 55vw);
+  height: auto;
+  max-width: 100%;
+}
+@media screen and (max-width: 991.98px) {
+  .owl-carousel.home-slider .slider-item .slider-coffee-img { width: min(280px, 50vw); }
+}
+@media screen and (max-width: 767.98px) {
+  .owl-carousel.home-slider .slider-item .slider-coffee-img { width: min(240px, 55vw); }
+}
+@media screen and (max-width: 575.98px) {
+  .owl-carousel.home-slider .slider-item .slider-coffee-img { width: min(200px, 60vw); }
+}
+
+/* ===== 第一個 Slider：文字移動到左下角對齊（左對齊 + 內邊距），圖片保持居中 ===== */
+.owl-carousel.home-slider .slider-item .slider-first-text {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 10;
+  text-align: left;
+  padding: 74px 92px;
+  max-width: 60%;
+  pointer-events: auto;
+}
+/* 與第二/第三 Slider（.slider-text）一致的子元素字體樣式 */
+.owl-carousel.home-slider .slider-item .slider-first-text .subheading {
+  font-family: "Mogra", cursive;
+  font-size: 28px;
+  letter-spacing: -2px;
+  color: var(--brand-primary);
+  padding-bottom: 12px;
+}
+.owl-carousel.home-slider .slider-item .slider-first-text h2 {
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1.5;
+  font-weight: normal;
+  letter-spacing: 1px;
+  text-transform: none;
+}
+.owl-carousel.home-slider .slider-item .slider-first-text p {
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 300;
+  color: white;
+}
+@media (max-width: 991.98px) {
+  .owl-carousel.home-slider .slider-item .slider-first-text h2 { font-size: 30px; }
+}
+@media screen and (max-width: 991.98px) {
+  .owl-carousel.home-slider .slider-item .slider-first-text { padding: 36px 40px; max-width: 65%; }
+}
+@media screen and (max-width: 767.98px) {
+  .owl-carousel.home-slider .slider-item .slider-first-text { padding: 28px 24px; max-width: 70%; }
+}
+@media screen and (max-width: 575.98px) {
+  .owl-carousel.home-slider .slider-item .slider-first-text { padding: 20px 16px; max-width: 100%; }
+}
+
 /* ===== FPS 支付頁 logo（替代 inline style，SVG 原色顯示） ===== */
 .payment-logo {
   width: 128px;
@@ -2417,7 +2483,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   gap: 18px;
   background: #292623;
   border-radius: 16px;
-  padding: 14px 12px 14px 20px;
+  padding: 14px 14px 14px 24px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
   overflow: visible;
 }
@@ -2429,18 +2495,21 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   align-items: stretch;
 }
 
-/* 兩列文字共用模組：歡迎列 + 積分列（減少行距） */
+/* 水平並列：頭像 + 兩行文字組（頭像垂直中心對齊兩行文字整體中心） */
 .bc-welcome-text {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.bc-welcome-name {
-  display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 14px;
+}
+
+/* 兩行文字組：greeting + points 垂直排列（保留適度行距） */
+.bc-welcome-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
 .bc-welcome-avatar {
@@ -2455,18 +2524,44 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   color: #ffffff;
   font-size: 1.8rem;  /* user icon 再加大 20%（38→46px） */
   flex-shrink: 0;
+  overflow: hidden;  /* 確保社群頭像 img 圓形裁切 */
+}
+
+/* 社群用戶頭像（登入後顯示，Facebook/Google 頭像） */
+.bc-welcome-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 登入前狀態：登入連結（下底線樣式） */
+.bc-welcome-login-link {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color 0.25s ease;
+  margin-left: 4px;
+}
+.bc-welcome-login-link:hover {
+  color: var(--bc-gold);
 }
 
 .bc-welcome-greeting {
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 1.1rem;  /* 加大 20%（1rem→1.2rem） */
   font-weight: 500;
+  line-height: 1;  /* 讓文字高度貼近字體大小，垂直中心與頭像對齊 */
+  display: inline-flex;
+  align-items: center;
 }
 
 .bc-welcome-points {
   color: #ffffff;
   font-size: 0.9rem;
-  padding-left: 60px;  /* 與 greeting 對齊（avatar 46px + gap 14px） */
+  line-height: 1.2;  /* 緊湊行距 */
 }
 
 /* 右側：wakemeup.png 照片 + 慣常口味文字（垂直對齊） */
@@ -2491,6 +2586,26 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   object-fit: contain;
   z-index: 4;
   display: block;
+}
+
+/* 最後訂單商品圖片連結（點選跳轉到詳情頁並預選上次選項）
+   接管圖片原本的 absolute 定位（top:-92px 與 wakemeup 相同位置），
+   內層圖片填滿整個連結區塊，避免被 <a> 包住後位移 */
+.bc-welcome-img-link {
+  position: absolute;
+  top: -92px;
+  right: 0;
+  width: 160px;
+  height: 160px;
+  z-index: 4;
+  display: block;
+  cursor: pointer;
+}
+.bc-welcome-img-link .bc-welcome-img {
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .bc-last-order {
@@ -2535,11 +2650,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     font-size: 1.5rem;  /* user icon 再加大 20%（39→47px） */
   }
   .bc-welcome-greeting {
-    font-size: 0.82rem;
+    font-size: 0.98rem;  /* 加大 20%（0.82→0.98rem） */
   }
   .bc-welcome-points {
     font-size: 0.9rem;
-    padding-left: 61px;  /* 與 greeting 對齊（avatar 47px + gap 14px） */
   }
   .bc-welcome-imgbox {
     width: 140px;
@@ -2550,6 +2664,11 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     width: 140px;
     height: 140px;
     top: -77px;  /* 上移避免與文字重疊（bottom 63px，距文字約 8px） */
+  }
+  .bc-welcome-img-link {
+    top: -77px;
+    width: 140px;
+    height: 140px;
   }
   .bc-last-order {
     font-size: 0.8rem;
@@ -2574,11 +2693,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     font-size: 1.3rem;  /* user icon 再加大 20%（34→41px） */
   }
   .bc-welcome-greeting {
-    font-size: 0.75rem;
+    font-size: 0.9rem;  /* 加大 20%（0.75→0.9rem） */
   }
   .bc-welcome-points {
     font-size: 0.68rem;
-    padding-left: 55px;  /* 與 greeting 對齊（avatar 41px + gap 14px） */
   }
   .bc-welcome-imgbox {
     width: 110px;
@@ -2589,6 +2707,11 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     width: 110px;
     height: 110px;
     top: -55px;  /* 上移避免與文字重疊（bottom 55px，距文字約 8px） */
+  }
+  .bc-welcome-img-link {
+    top: -55px;
+    width: 110px;
+    height: 110px;
   }
   .bc-last-order {
     font-size: 0.7rem;

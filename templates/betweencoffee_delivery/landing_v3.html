@@ -9,20 +9,24 @@
     <div class="slider-item" style="background-image: url({% static 'images/section_bg_01.svg' %});">
         <div class="overlay"></div>
         <div class="container">
+            <!-- 第一個 Slider：文字移到整個橫幅左下角（直接子層級，相對於 .slider-item 定位） -->
+            <div class="slider-first-text">
+                <h2 class="subheading">No bullsh*t... Just Caffeine!!</h2>
+                <h2 class="mb-2">恰度好的一杯</h2>
+                <h5 class=" mb-md-4"></h5>
+                <p class="mb-4 mb-md-5">保存自己節奏<br>其實。不難</p>
+                <p><a href="{% url 'coffee_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">立即落單</a></p>
+            </div>
             <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
                 <div class="col-md-12 col-sm-12 text-center">
-                    <h2 class="subheading">No bullsh*t... Just Caffeine!!</h2>
-                    <h2 class="mb-2">恰度好的一杯</h2>
-                    <h5 class=" mb-md-4"></h5>
-                    <p class="mb-4 mb-md-5">保存自己節奏<br>其實。不難</p>
-                    <p><a href="{% url 'coffee_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">立即落單</a></p>
+                    <img src="{% static 'images/coffee_04.png' %}" class="slider-coffee-img" alt="Between Coffee">
                 </div>
             </div>
             <span class="img-owl-bg">
-                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+                <div class="gif-box"><img src= {% static 'images/_cup_360.gif' %} class=""></div>
             </span>
             <span class="img-owl-bg">
-                <div class="noise-img"><img src= {% static 'images/bg_coffee_menu.svg' %} class="noise_animation"></div>
+                <div class="noise-img"><img src= {% static 'images/product_hover.svg' %} class="noise_animation"></div>
             </span>
         </div>
     </div>
@@ -77,18 +81,43 @@
             <!-- 左側：歡迎訊息 + 積分（組合為一個模組） -->
             <div class="bc-welcome-left">
                 <div class="bc-welcome-text">
-                    <div class="bc-welcome-name">
-                        <span class="bc-welcome-avatar"><i class="icon-user"></i></span>
-                        <span class="bc-welcome-greeting">Hey, 歡迎回來, 隨時來一杯</span>
+                    {% if is_authenticated %}
+                    <span class="bc-welcome-avatar">
+                        {% if user_avatar %}
+                        <img src="{{ user_avatar }}" alt="avatar" class="bc-welcome-avatar-img">
+                        {% else %}
+                        <i class="icon-user"></i>
+                        {% endif %}
+                    </span>
+                    <div class="bc-welcome-info">
+                        <span class="bc-welcome-greeting">Hey, 歡迎回來, 喝返杯先!</span>
+                        <div class="bc-welcome-points">
+                            您的當前積分可以減 -5
+                        </div>
                     </div>
-                    <div class="bc-welcome-points">
-                        您的當前積分可以減 -5
+                    {% else %}
+                    <span class="bc-welcome-avatar"><i class="icon-user"></i></span>
+                    <div class="bc-welcome-info">
+                        <span class="bc-welcome-greeting">
+                            Buddy! 是時間補充咖啡因!
+                            <a href="{% url 'account_login' %}" class="bc-welcome-login-link">登入</a>
+                        </span>
+                        <div class="bc-welcome-points">
+                            為自己充充電!
+                        </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             <!-- 右側：wakemeup.png 照片（浮出容器右上角，與底部慣常口味文字垂直對齊） -->
             <div class="bc-welcome-imgbox">
+                {% if last_order_image %}
+                <a href="{{ last_order_link }}" class="bc-welcome-img-link">
+                    <img src="{{ last_order_image }}" class="img bc-welcome-img" alt="上次訂單商品">
+                </a>
+                {% else %}
                 <img src="{% static 'images/wakemeup.png' %}" class="img bc-welcome-img" alt="WakeMeUp">
+                {% endif %}
                 <div class="bc-last-order">
                     <i class="icon-history"></i><span>按照之前口味落單?</span>
                 </div>

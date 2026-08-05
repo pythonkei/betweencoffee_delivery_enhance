@@ -1,0 +1,274 @@
+{% extends 'layouts/blank.html' %}
+{% load static %}
+{% block title %}Between Coffee - 新 Landing{% endblock %}
+
+{% block content %}
+<!-- ① 人氣咖啡橫幅 + ② 歡迎訊息瓷片 -->
+<section class="feed overflow-hidden home-hero" style="position:relative;">
+    <div class="feed__layer" style="position:absolute;inset:0;z-index:0;">
+        <div class="feed__layer-parts" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#0e0e0e;"></div>
+        <div class="feed__layer-parts" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#161616;clip-path:polygon(0 62%, 12% 52%, 26% 70%, 42% 58%, 100% 40%, 100% 100%, 0 100%);"></div>
+    </div>
+    <div class="hero-welcome-wrap" style="position:relative;z-index:2;">
+        <div class="container">
+            <div class="hero-welcome">
+                <span class="hero-welcome-icon"><i class="icon-coffee"></i></span>
+                <div class="hero-welcome-text">
+                    Hey, {% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else %}咖啡愛好者{% endif %}
+                    <small>隨時來一杯，5 分鐘準備就緒</small>
+                </div>
+            </div>
+            <div class="tiles">
+                <a href="#split" class="tile"><i class="icon-bolt"></i>現在下單</a>
+                <button type="button" class="tile" id="coupon-tile"><i class="icon-ticket"></i>領券中心</button>
+                <button type="button" class="tile" id="order-tile"><i class="icon-list-alt"></i>我的訂單</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ③ 左右分欄點單區 -->
+<section class="ftco-section split-section" id="split">
+    <div class="container">
+        <div class="split-panel">
+            <div class="split-cats" id="cat-list">
+                <button type="button" class="split-cat" data-cat="hot">🔥 熱銷</button>
+                <button type="button" class="split-cat active" data-cat="coffee">☕ 咖啡</button>
+                <button type="button" class="split-cat" data-cat="all">全部</button>
+            </div>
+            <div class="split-items" id="item-list">
+                {% for coffee in all_coffees %}
+                <a href="{% url 'coffee' coffee.id %}" class="item-card{% if coffee.is_shop_hot_item %} dim{% endif %}" data-cat="{% if coffee.is_shop_hot_item %}hot{% else %}coffee{% endif %}">
+                    <div class="item-img">
+                        {% if coffee.get_small_image %}<img src="{{ coffee.get_small_image }}" alt="{{ coffee.name }}">{% endif %}
+                    </div>
+                    <h4>{{ coffee.name }}</h4>
+                    <p>${{ coffee.price|floatformat:"-2" }}</p>
+                </a>
+                {% empty %}
+                <p class="text-muted">暫無商品</p>
+                {% endfor %}
+                <div class="coupon-card">
+                    <span>🎟 週週有券！<b>首杯 9.9</b> 等你領</span>
+                    <button type="button" class="btn btn-primary bc-btn" id="coupon-btn">領取優惠券</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ④ 人不對稱網格（與 index.html 相同 asymmetric-grid-v1） -->
+<section class="ftco-section overflow-hidden">
+    <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+            <div class="col-md-7 heading-section text-center">
+                <span class="subheading">Between<br>Selections</span>
+                <h2 class="mb-4">&#65371;最強人氣&#65373;</h2>
+                <p>上班上到打恰睡 @@<br>來一杯續命啡! 立即充滿能量!</p>
+            </div>
+        </div>
+        <div class="asymmetric-grid asymmetric-grid-v1">
+            {% for coffee in hot_coffees %}
+            <div class="asymmetric-item">
+                <div class="modern-card-v1">
+                    <div class="card-header-v1">
+                        <div class="name-corner-v1" style="display: none;">{{ coffee.name }}</div>
+                        {% if coffee.get_index_image %}
+                        <a href="{% url 'coffee' coffee.id %}" class="card-link" id="svg_over">
+                            <div class="coffee-image-container">
+                                <img src="{{ coffee.get_index_image }}" alt="{{ coffee.name }}">
+                            </div>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-content-v1">
+                        <h3 class="coffee-name-v1">{{ coffee.name }}</h3>
+                        <p class="introduction-text-v1 mb-3">{{ coffee.introduction }}</p>
+                        <a href="{% url 'coffee' coffee.id %}" class="btn asymmetric-btn-v1">落單</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ⑤ 咖啡豆區（與 index.html 相同 articleStyle_08） -->
+<section class="ftco-section overflow-hidden">
+    <div class="articleStyle_08 nullWay active activeAfter">
+        <div class="eyecatch">
+            <div class="blobsVideo">
+                <div class="inner">
+                    <div class="videoWrap">
+                        <video class="video" muted playsinline loop autoplay>
+                            <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="inner">
+            <div class="content">
+                <div class="svg-box"><img src="{% static 'images/owl_title_bg_02.svg' %}" class="noise_animation"></div>
+                <h2 class="subheading">Handcrafted<br>Roastery</h2>
+                <h2 class="mb-4">&#65371; 咖啡豆是會呼吸的 &#65373;</h2>
+                <p class="my-4">從「火」與「嚴謹」出發 -<br>曲線烘焙設計與適切度</p>
+                <div class="summaryStyle_01 summary">
+                    <p>
+                        <a href="{% url 'bean_menu' %}" class="btn btn-primary btn-outline-primary px-4 py-3 mr-4">詳細</a>
+                        <a href="{% url 'bean_menu' %}" class="btn btn-primary btn-outline-primary px-4 py-3">定期購入</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ⑥ 品牌訊息區（Between Say） -->
+<section class="ftco-counter" id="section-counter" style="background-image: url('{% static 'images/deco_01_v3.png' %}'); background-repeat: no-repeat; background-size: cover">
+    <div class="container">
+        <div class="row align-items-xl-end pr-md-5">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="mid-banner">
+                        <span>Between Say:</span>
+                        <div class="menu-entry playfair_deco">
+                            <p class="lg_message">We made the rules,<br>No bullsh*t.....<br>Just good Caffeine!!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 極速落單（WakeMeUp） -->
+<section class="ftco-intro">
+    <div class="container-wrap">
+        <div class="wrap d-md-flex align-items-xl-end">
+            <div class="book p-4 align-items-md-end">
+                <div class="imgbox">
+                    <img src="{% static 'images/wakemeup.png' %}" class="img">
+                </div>
+                <div class="contentbox">
+                    <h3>[極速落單] -- WakeMeup 醒神配方<br>專為早上或午飯後, 5分鐘即時享用 !!</h3>
+                    <form class="appointment-form-home" id="quick-order-form">
+                        {% csrf_token %}
+                        <div class="d-md-flex">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control" placeholder="名稱" autocomplete="off" required
+                                    {% if user.is_authenticated %}value="{{ user.get_full_name|default:user.username }}"{% endif %}>
+                            </div>
+                        </div>
+                        <div class="d-md-flex">
+                            <div class="form-group">
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="icon material-symbols-outlined">schedule</span></div>
+                                    <select name="pickup_time" class="form-control" autocomplete="off" required>
+                                        <option value="5">5 分鐘後</option>
+                                        <option value="10" selected>10 分鐘後</option>
+                                        <option value="15">15 分鐘後</option>
+                                        <option value="20">20 分鐘後</option>
+                                        <option value="30">30 分鐘後</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group ml-md-4">
+                                <div class="icon"><span class="icon material-symbols-outlined">mobile_friendly</span></div>
+                                <input name="phone" type="text" class="form-control" placeholder="電話 / WhatsApp" autocomplete="off" required
+                                    pattern="[0-9]{8}" title="請輸入8位數字電話號碼">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-white py-3 px-5">立即落單</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+(function () {
+    // ③ 左右分欄品類切換
+    const catList = document.getElementById('cat-list');
+    const itemList = document.getElementById('item-list');
+
+    function filter(cat) {
+        itemList.querySelectorAll('.item-card').forEach(function (card) {
+            card.classList.toggle('dim', !(cat === 'all' || card.dataset.cat === cat));
+        });
+    }
+    catList.addEventListener('click', function (e) {
+        const btn = e.target.closest('.split-cat');
+        if (!btn) return;
+        catList.querySelectorAll('.split-cat').forEach(function (c) { c.classList.remove('active'); });
+        btn.classList.add('active');
+        filter(btn.dataset.cat);
+    });
+
+    // ② 瓷片
+    document.getElementById('coupon-tile').addEventListener('click', function () {
+        alert('🎟 領券中心：週週有券，首杯 9.9！');
+    });
+    document.getElementById('order-tile').addEventListener('click', function () {
+        alert('📋 我的訂單：登入後可查看訂單狀態。');
+    });
+    document.getElementById('coupon-btn').addEventListener('click', function () {
+        alert('🎟 已領取新人專享券！');
+    });
+
+    // 極速落單演示
+    document.getElementById('quick-order-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = this.querySelector('[name="name"]').value.trim();
+        const phone = this.querySelector('[name="phone"]').value.trim();
+        const time = this.querySelector('[name="pickup_time"]').value;
+        if (!name || phone.length !== 8) {
+            alert('請輸入名稱與 8 位數字電話號碼');
+            return;
+        }
+        alert('⚡ WakeMeUp 已下單！' + time + ' 分鐘後可取（演示）');
+    });
+})();
+</script>
+
+<style>
+/* 新 Landing 專用（僅新增區塊樣式，其餘沿用全站 CSS） */
+.home-hero { position: relative; min-height: 33vh; display: flex; align-items: flex-end; }
+.hero-welcome-wrap { position: relative; z-index: 2; width: 100%; padding: 30px 0; }
+.hero-welcome { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.hero-welcome-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--gold-light, rgba(196,155,99,.15)); border: 1px solid rgba(196,155,99,.35); display: flex; align-items: center; justify-content: center; color: #c49b63; font-size: 1.3rem; }
+.hero-welcome-text { font-size: 1.5rem; font-weight: 600; }
+.hero-welcome-text small { display: block; font-size: .85rem; font-weight: 400; color: rgba(255,255,255,.5); }
+.tiles { display: flex; gap: 14px; flex-wrap: wrap; }
+.tile { flex: 1; min-width: 140px; max-width: 220px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 18px; background: rgba(14,14,14,.75); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; cursor: pointer; color: rgba(255,255,255,.9); font-family: inherit; font-size: .9rem; text-decoration: none; transition: border-color .25s, background .25s; }
+.tile i { font-size: 1.5rem; color: #c49b63; font-style: normal; }
+.tile:hover { border-color: rgba(196,155,99,.4); background: rgba(255,255,255,.07); }
+
+/* 左右分欄 */
+.split-panel { display: grid; grid-template-columns: 160px 1fr; gap: 20px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 24px; }
+.split-cats { display: flex; flex-direction: column; gap: 6px; }
+.split-cat { padding: 12px 14px; background: transparent; border: 1px solid transparent; border-radius: 8px; color: rgba(255,255,255,.5); font-family: inherit; font-size: .95rem; cursor: pointer; text-align: left; transition: all .25s; }
+.split-cat:hover { color: rgba(255,255,255,.9); }
+.split-cat.active { background: rgba(196,155,99,.15); border-color: rgba(196,155,99,.35); color: #c49b63; font-weight: 600; }
+.split-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; align-content: start; }
+.item-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; text-decoration: none; color: inherit; transition: border-color .25s, background .25s; }
+.item-card:hover { border-color: rgba(196,155,99,.4); background: rgba(255,255,255,.07); }
+.item-card.dim { display: none; }
+.item-card .item-img { min-height: 70px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.item-card img { max-height: 68px; object-fit: contain; }
+.item-card h4 { font-size: .95rem; font-weight: 600; margin-bottom: 4px; color: rgba(255,255,255,.9); }
+.item-card p { font-size: .9rem; color: #c49b63; font-weight: 600; margin: 0; }
+.coupon-card { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 20px; background: rgba(196,155,99,.08); border: 1px dashed rgba(196,155,99,.4); border-radius: 12px; margin-top: 4px; }
+.coupon-card span { font-size: .95rem; }
+.coupon-card b { color: #c49b63; }
+
+@media (max-width: 768px) {
+  .split-panel { grid-template-columns: 1fr; }
+  .split-cats { flex-direction: row; overflow-x: auto; }
+  .split-cat { white-space: nowrap; }
+  .tiles .tile { min-width: 100px; }
+}
+</style>
+{% endblock %}

@@ -316,8 +316,23 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] user icon 46px（font-size 1.8rem），響應式 47/41px
 │   ├── [x] .bc-welcome-text 兩列組合模組（gap:2px）、積分校列對齊 padding-left = avatar+gap
 │   └── [x] 容器背景改為 #292623
+├── [x] bc-welcome-panel 社交登入 + 最後訂單快速下單（2026-08-05 深夜）— ✅
+│   ├── [x] 社交登入邏輯：登入後「Hey, 歡迎回來」+社群頭像／登入前「Buddy!」+登入連結（views.py 共用 _build_landing_context/_get_user_avatar）
+│   ├── [x] Facebook 頭像修復：Graph API 附加 access_token（extra_data 無 picture + 未帶 token 回傳預設頭像）
+│   ├── [x] 最後訂單圖片：wakemeup.png → 最後訂單咖啡/咖啡豆產品圖（_get_last_order_image）
+│   ├── [x] 最後訂單圖片包成連結：跳轉 /coffee/{id}/ 或 /bean/{id}/ 並預選杯量/奶量/濃度（_get_last_order_link + coffee.html query 預選 JS）
+│   ├── [x] 驗證：LAST ORDER LINK: /coffee/8/?cup_level=Medium&milk_level=Medium&strength_level=Normal ✅
+│   ├── [x] UI：兩行文字行距 5px、頭像與文字組水平居中（avatarCenter=infoCenter=758px offset 0）、移除 points 三處縮排
+│   └── [x] 圖片位移修正：.bc-welcome-img-link 接管絕對定位（桌面 -92px/160px、平板 -77px/140px、手機 -55px/110px）
 ├── [x] Best Sell 最強人氣顯示 4 件（2026-08-05）— ✅
 │   └── [x] betweencoffee_delivery/views.py LandingNew.hot_coffees [:3]→[:4]
+├── [x] bc-welcome-panel 細部：greeting 加大 20% + 行距縮減（2026-08-05 下午）— ✅
+│   ├── [x] greeting 1→1.2rem（響應式 0.98/0.9rem）、.bc-welcome-text gap 2→1px
+│   └── [x] 檔案：bc-components.css
+├── [x] Carousel GIF 響應式放大（2026-08-05 下午）— ✅
+│   ├── [x] .gif-box img 70%/80%/90%、.noise-img 55/65/75vw（三級響應）
+│   ├── [x] !important 置檔案末尾覆蓋 min-width:238px
+│   └── [x] devtools 驗證 768px：noise 422px、gif 537px ✅
 ├── [x] 全站安全審查與修復 + 支付寶金鑰輪換 — ✅ 2026-08-01
 │   ├── [x] 移除 git 追蹤 4 個敏感金鑰 + .gitignore 排除 keys/
 │   ├── [x] settings.py 移除明文密碼/API keys/資料庫憑證 + 硬編碼 PayPal 憑證
