@@ -2718,3 +2718,139 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 }
 
+/* ============================================
+   Best Sell 區塊：hover 淡入 / 移出淡出動畫
+   覆蓋 style-utilities.css 的 display:none + 瞬間切換，
+   改用 opacity transition 實現平滑淡入淡出：
+   - 滑鼠移入：效果 0.3s 淡入
+   - 滑鼠移出：效果 0.3s 淡出（不再瞬間消失）
+   ============================================ */
+.asymmetric-grid-v1 .card-link #svg_over_on {
+  display: block;          /* 覆蓋 display:none → 改用 opacity 控制可見性 */
+  opacity: 0;
+  width: 80%;
+  height: 80%;
+  margin: auto;
+  top: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;    /* 不阻擋卡片連結點擊 */
+}
+.asymmetric-grid-v1 .card-link:hover #svg_over_on {
+  opacity: 1;
+}
+
+.asymmetric-grid-v1 .card-link #mouse_hit {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.asymmetric-grid-v1 .card-link:hover #mouse_hit {
+  opacity: 1;
+}
+
+/* ============================================
+   咖啡菜單頁：Z 字對角主副卡（新方案 B）
+   每 4 個一組（DOM 順序 = 大、小、小、大），
+   2x2 網格自然形成 Z 字對角：
+   ┌──────┬──────┐
+   │ 大(1)│ 小(2)│   ← 左上大、右上小
+   ├──────┼──────┤
+   │ 小(3)│ 大(4)│   ← 左下小、右下大（對角反轉）
+   └──────┴──────┘
+   大卡圖片較大強調焦點，與首頁 Best Sell 明確不同。
+   專屬 class，不影響首頁 asymmetric-grid-v1。
+   ============================================ */
+.coffee-menu-zgrid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+/* 每組 4 個商品的 2x2 容器 */
+.coffee-z-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 3rem;
+  margin-bottom: 1rem;
+}
+
+.coffee-z-cell {
+  min-width: 0;
+}
+
+/* Z 字對角：依 DOM 順序明確指定位置
+   cell1 大(左上) → cell2 小(右上) → cell3 小(左下) → cell4 大(右下) */
+.coffee-z-cell:nth-child(1) { grid-column: 1; grid-row: 1; }
+.coffee-z-cell:nth-child(2) { grid-column: 2; grid-row: 1; }
+.coffee-z-cell:nth-child(3) { grid-column: 1; grid-row: 2; }
+.coffee-z-cell:nth-child(4) { grid-column: 2; grid-row: 2; }
+
+/* 位置落差：右欄小卡與左欄大卡下移，形成交錯階梯
+   （cell2 右上小、cell3 左下小各下移 6rem，製造更明顯的垂直落差；非照片尺寸） */
+.coffee-z-cell:nth-child(2),
+.coffee-z-cell:nth-child(3) {
+  margin-top: 6rem;
+}
+
+/* 大卡：圖片放大 +15%（280 → 322px）
+   覆蓋 style-bootstrap.css 的 .menu-img img height:36vh / min-height:32vh
+   （強制 width/height !important + min-height:0 避免被覆蓋或拉伸） */
+.coffee-z-cell.coffee-z-large .menu-wrap .menu-img img {
+  width: 322px !important;
+  max-width: 90%;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* 小卡：圖片放大 +15%（225 → 260px，原 +10% 再加 +5%） */
+.coffee-z-cell.coffee-z-small .menu-wrap .menu-img img {
+  width: 260px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* 保留現有 .menu-wrap 樣式 */
+.coffee-z-cell .menu-wrap {
+  height: 100%;
+}
+
+/* 咖啡描述文字：增加內邊距 + 輕度限寬（兼顧閱讀舒適與版面呼吸感）
+   內邊距讓文字與卡片邊緣留白，max-width 控制最佳閱讀行長 */
+.coffee-menu-desc {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 1rem;
+}
+
+/* 響應式：≤768px 降為單欄堆疊 */
+@media (max-width: 768px) {
+  .coffee-menu-zgrid {
+    padding: 1rem 0;
+  }
+  .coffee-z-row {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 2.5rem;
+  }
+  /* 單欄時清除定位，依 DOM 順序自然堆疊 */
+  .coffee-z-cell:nth-child(n) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .coffee-z-cell.coffee-z-large .menu-wrap .menu-img img {
+    width: min(300px, 90%);
+    max-height: 36vh;
+  }
+  .coffee-z-cell.coffee-z-small .menu-wrap .menu-img img {
+    width: min(300px, 90%);
+    max-height: 36vh;
+  }
+}
+

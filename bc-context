@@ -123,14 +123,21 @@ load_context() {
         echo "│   ├── greeting 加大 20%（1.2rem）+ 行距 gap 1px（下午）"
         echo "│   └── Carousel GIF 響應式放大：gif 70/80/90%、noise 55/65/75vw ✅"
         echo "│   9. bc-welcome-panel 社交登入 + 最後訂單快速下單（2026-08-05 深夜）✅"
-        echo "│   ├── 社交登入：登入後社羣頭像+「Hey, 歡迎回來」/登入前登入連結+「Buddy!」（views.py 共用 context）
-        echo "│   ├── Facebook 頭像修復：Graph API 附加 access_token
-        echo "│   ├── 最後訂單圖片：wakemeup.png → 最後訂單產品圖（_get_last_order_image）
-        echo "│   ├── 最後訂單圖片包成連結：預選杯量/奶量/濃度（_get_last_order_link + coffee.html query JS）
-        echo "│   ├── 驗證：LAST ORDER LINK: /coffee/8/?cup_level=Medium&milk_level=Medium&strength_level=Normal ✅
-        echo "│   ├── 圖片位移修正：.bc-welcome-img-link 接管絕對定位（桌面/平板/手機三斷點）
-        echo "│   └── 涉及：views.py / index+index_backup / landing_v3 / coffee.html / bc-components.css
-        echo "│   10. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
+        echo "│   ├── 社交登入：登入後社羣頭像+「Hey, 歡迎回來」/登入前登入連結+「Buddy!」（views.py 共用 context）"
+        echo "│   ├── Facebook 頭像修復：Graph API 附加 access_token"
+        echo "│   ├── 最後訂單圖片：wakemeup.png → 最後訂單產品圖（_get_last_order_image）"
+        echo "│   ├── 最後訂單圖片包成連結：預選杯量/奶量/濃度（_get_last_order_link + coffee.html query JS）"
+        echo "│   ├── 驗證：LAST ORDER LINK: /coffee/8/?cup_level=Medium&milk_level=Medium&strength_level=Normal ✅"
+        echo "│   ├── 圖片位移修正：.bc-welcome-img-link 接管絕對定位（桌面/平板/手機三斷點）"
+        echo "│   └── 涉及：views.py / index+index_backup / landing_v3 / coffee.html / bc-components.css"
+        echo "│   10. 咖啡菜單 Z 字對角 + 描述 CSS（2026-08-06）✅"
+        echo "│   ├── 咖啡菜單改 2x2 網格 Z 字對角主副卡（DOM=大 小 小 大，左上大右上小左下小右下大）"
+        echo "│   ├── 圖片尺寸：大卡 +15%（顯示 290px）、小卡 +10% 再 +5%（260px），比例全 1.00"
+        echo "│   ├── 位置落差：cell2/cell3 margin-top 6rem（96px 階梯錯位），響應式 ≤768 單欄"
+        echo "│   ├── 修正拉長：強制 height:auto + min-height:0（覆蓋 style-bootstrap height:36vh）"
+        echo "│   ├── 咖啡描述 .coffee-menu-desc：padding 1rem + max-width 75% + font-size 1rem"
+        echo "│   └── 涉及：coffee_menu.html + bc-components.css"
+        echo "│   11. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"

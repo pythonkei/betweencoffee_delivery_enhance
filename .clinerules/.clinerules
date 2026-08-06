@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年7月30日（更新：全站 CSS 統一 Phase A-F 完成）
+> **最後更新**: 2026年8月6日（更新：咖啡菜單 Z 字對角主副卡 + 描述 CSS 類）
 
 ## 開發者背景與方法論
 
@@ -333,6 +333,16 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] .gif-box img 70%/80%/90%、.noise-img 55/65/75vw（三級響應）
 │   ├── [x] !important 置檔案末尾覆蓋 min-width:238px
 │   └── [x] devtools 驗證 768px：noise 422px、gif 537px ✅
+├── [x] 咖啡菜單頁 Z 字對角主副卡（2026-08-06）— ✅
+│   ├── [x] 每 4 個一組 2x2 網格（DOM = 大 小 小 大）：左上大、右上小、左下小、右下大
+│   ├── [x] 圖片尺寸：大卡 +15%（顯示 290px）、小卡 +10% 再 +5%（260px）
+│   ├── [x] 位置落差：cell2/cell3 margin-top 6rem（96px 階梯錯位）
+│   ├── [x] 修正拉長：強制 height:auto + min-height:0（覆蓋 style-bootstrap height:36vh）
+│   └── [x] chrome-devtools 驗證：8 商品比例 1.00、落差每組 +96px ✅
+├── [x] 咖啡描述 CSS 類 .coffee-menu-desc（2026-08-06）— ✅
+│   ├── [x] 方案分析：增加內邊距優於減少寬度（不破壞卡片對齊/自然縮短行長/增加呼吸感）
+│   ├── [x] padding 1rem + max-width 75% + font-size 1rem + line-height 1.7
+│   └── [x] chrome-devtools 驗證：maxWidth:75%、fontSize:16px ✅
 ├── [x] 全站安全審查與修復 + 支付寶金鑰輪換 — ✅ 2026-08-01
 │   ├── [x] 移除 git 追蹤 4 個敏感金鑰 + .gitignore 排除 keys/
 │   ├── [x] settings.py 移除明文密碼/API keys/資料庫憑證 + 硬編碼 PayPal 憑證
