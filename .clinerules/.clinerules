@@ -333,6 +333,14 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] .gif-box img 70%/80%/90%、.noise-img 55/65/75vw（三級響應）
 │   ├── [x] !important 置檔案末尾覆蓋 min-width:238px
 │   └── [x] devtools 驗證 768px：noise 422px、gif 537px ✅
+├── [x] 首頁 Banner 烘焙影片 + 效能優化 P0/P1 + Render 診斷（2026-08-07）— ✅
+│   ├── [x] 咖啡豆烘焙影片放入 owl-carousel 第二個 slider（webm 優先 2.2MB / mp4 fallback）
+│   ├── [x] blobsVideo morph 遮罩動畫（border-radius 變形 + morph 7s infinite）
+│   ├── [x] 影片 1080×608 置中：margin auto（避免 morph transform 覆蓋）+ 外層滿版深黑
+│   ├── [x] P0：Whitenoise 長快取 WHITENOISE_MAX_AGE=31536000（影片下載 4次→1次，-6.6MB）
+│   ├── [x] P1：WebSocket fallback 輪詢 5s→30s、baseDelay 1s→5s（-83% 請求）
+│   ├── [x] Render 診斷：WebSocketManager 初始化 2 次 = 多 Daphne worker（建議 WEB_CONCURRENCY=1）
+│   └── [x] 涉及：landing_v3/index.html、style-utilities.css、settings.py、websocket-core.js
 ├── [x] 咖啡菜單頁 Z 字對角主副卡（2026-08-06）— ✅
 │   ├── [x] 每 4 個一組 2x2 網格（DOM = 大 小 小 大）：左上大、右上小、左下小、右下大
 │   ├── [x] 圖片尺寸：大卡 +15%（顯示 290px）、小卡 +10% 再 +5%（260px）

@@ -48,7 +48,7 @@
                 url: options.url || this._getDefaultUrl(),
                 heartbeatInterval: options.heartbeatInterval || 30000,
                 heartbeatTimeout: options.heartbeatTimeout || 10000,
-                baseDelay: options.baseDelay || 1000,
+                baseDelay: options.baseDelay || 5000,
                 maxDelay: options.maxDelay || 300000, // 5分鐘
                 enableJitter: options.enableJitter !== false,
                 jitterFactor: options.jitterFactor || 0.2,
@@ -56,7 +56,7 @@
                 showIndicator: options.showIndicator !== false,
                 enableFallback: options.enableFallback !== false,
                 fallbackUrl: options.fallbackUrl || this._getDefaultFallbackUrl(),
-                fallbackInterval: options.fallbackInterval || 5000,
+                fallbackInterval: options.fallbackInterval || 30000,
                 enablePersistence: options.enablePersistence !== false,
                 storageKey: options.storageKey || 'ws_core_',
                 ...options

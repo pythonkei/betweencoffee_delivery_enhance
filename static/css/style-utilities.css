@@ -1016,6 +1016,61 @@ button.alert:hover {
   opacity: .2;
 }
 
+/* ===== Carousel Banner 烘焙影片背景（blobsVideo morph 遮罩動畫） ===== */
+/* 外層滿版深黑容器：覆蓋整個 banner 避免露出空隙 */
+.bc-banner-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  /* background-color: #0e0e0e; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* morph 動畫遮罩：不規則圓角 + 流動變形（與咖啡豆 section blobsVideo 一致） */
+.bc-banner-video.blobsVideo {
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: morph 7s linear infinite alternate;
+}
+
+.bc-banner-video.blobsVideo > .inner {
+  width: 1080px;
+  height: 608px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: morph 7s linear infinite alternate;
+  flex-shrink: 0;
+}
+
+.bc-banner-video video {
+  width: 1080px;
+  height: 608px;
+  object-fit: cover;
+  display: block;
+}
+
+/* 響應式：<1080px 螢幕時等比縮小置中 */
+@media screen and (max-width: 1079.98px) {
+  .bc-banner-video.blobsVideo > .inner,
+  .bc-banner-video video {
+    width: 92vw;
+    height: auto;
+  }
+}
+
+/* 平板/手機：影片維持覆蓋，避免拉伸 */
+@media screen and (max-width: 767.98px) {
+  .bc-banner-video video {
+    object-fit: cover;
+  }
+}
+
 .slider-item .img-owl-bg {
   display: flex;
   justify-content: center;

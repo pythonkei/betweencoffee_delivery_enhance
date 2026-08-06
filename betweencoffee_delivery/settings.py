@@ -470,6 +470,10 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_ALLOW_ALL_ORIGINS = True
+# 靜態資源（影片）1 年長快取：owl-carousel loop 複製 DOM 導致同一 webm 被多次請求，
+# 設長快取讓瀏覽器只實際下載一次，後續請求全部由 cache 提供（transferSize=0）
+WHITENOISE_MAX_AGE = 31536000
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ("jpg", "jpeg", "png", "gif", "ico", "webm", "mp4")
 
 # 媒体文件
 # MEDIA_URL 根據環境動態設置：

@@ -31,8 +31,16 @@
         </div>
     </div>
 
-    <div class="slider-item" style="background-image: url({% static 'images/bg_5.jpg' %});">
-        <div class="overlay"></div>
+    <div class="slider-item">
+        <!-- 咖啡豆烘焙影片背景（webm 優先 2.2MB，mp4 fallback；blobsVideo morph 遮罩動畫） -->
+        <div class="bc-banner-video blobsVideo loadEnd">
+            <div class="inner">
+                <video class="video" muted playsinline loop autoplay preload="metadata">
+                    <source src="{% static 'roasting.webm' %}" type="video/webm">
+                </video>
+            </div>
+        </div>
+        {% comment %} <div class="overlay"></div> {% endcomment %}
         <div class="container">
             <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
                 <div class="col-md-12 col-sm-12 text-center">
@@ -221,7 +229,8 @@
             <div class="blobsVideo">
                 <div class="inner">
                     <div class="videoWrap">
-                        <video class="video" muted playsinline loop autoplay >
+                        <video class="video" muted playsinline loop autoplay preload="metadata">
+                        <source src="{% static 'roasting.webm' %}" type="video/webm">
                         <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
                         </video>
                     </div>
