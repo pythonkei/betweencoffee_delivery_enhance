@@ -152,8 +152,8 @@
   pointer-events: auto;
 }
 /* ===== 第二個 Slider：咖啡豆烘焙影片上的 SVG 裝飾（owl_title_bg_02.svg）
-   - 縮小 40%（原本 640px → width:60% ≈ 384px）
-   - 左下角對齊 + 邊距（不貼齊邊緣）
+   - 縮小 20%（原本 640px → width:80% ≈ 512px，2026-08-07 由 40% 調整）
+   - 影片左下角對齊 + 邊距（不貼齊邊緣，left 以影片容器為準）
    - position:absolute 以 .slider-item 為錨點
    - z-index:0 低於 slider-text(z:10)，pointer-events:none 不阻擋按鈕點擊 */
 .owl-carousel.home-slider .slider-item {
@@ -163,8 +163,8 @@
   position: absolute;
   left: 3rem;      /* 左邊距 48px，不貼齊左緣 */
   bottom: 2.5rem;  /* 下邊距 40px，不貼齊底緣 */
-  width: 60%;      /* 縮小 40% */
-  max-width: 384px;
+  width: 80%;      /* 縮小 20% */
+  max-width: 512px;
   z-index: 0;
   pointer-events: none;
 }
@@ -173,19 +173,19 @@
   height: auto;
   display: block;
 }
-/* 響應式：≤768 縮至 55%、≤576 縮至 50%，邊距同步縮小 */
+/* 響應式：≤768 縮至 70%、≤576 縮至 60%，邊距同步縮小 */
 @media screen and (max-width: 767.98px) {
   .owl-carousel.home-slider .slider-item .svg-box {
-    width: 55%;
-    max-width: 300px;
+    width: 70%;
+    max-width: 400px;
     left: 1.5rem;
     bottom: 1.5rem;
   }
 }
 @media screen and (max-width: 575.98px) {
   .owl-carousel.home-slider .slider-item .svg-box {
-    width: 50%;
-    max-width: 240px;
+    width: 60%;
+    max-width: 300px;
     left: 1rem;
     bottom: 1rem;
   }
