@@ -14,6 +14,47 @@
 /* ===== Carousel slider 層級修復（最後載入，確保覆蓋其他樣式）
    資訊文字 + 按鈕（.slider-text）必須在最頂層（z-index:10），
    gif 層（.img-owl-bg/.gif-box）與 SVG 裝飾層（.noise-img）固定在底層（z-index:0） */
+/* ===== 修復（2026-08-07）：首屏抖動縮放 + 延遲 1-3 秒
+   1. owl 初始化前 .slider-item 高度由 style-bootstrap.css（載入順序靠後）定義，
+      早期載入時無 750px 高度 → 內容堆疊塌陷造成抖動。
+      此處提前鎖定相同高度（750px），初始化前後版面一致。
+   2. 深色背景佔位，避免 CSS/圖片載入前白屏閃爍。
+   3. aspect-ratio 防 CLS：coffee_04.png(860×1100)、GIF(1500×1450)
+      載入瞬間不再改變版面尺寸。 */
+.owl-carousel.home-slider,
+.owl-carousel.home-slider .slider-item {
+  height: 750px;
+  /* 修復（2026-08-07）：鎖死內部內容，防止 GIF(1450px 高)/咖啡杯圖/大 SVG
+     把 750px 撐高，導致 owl 初始化時 .owl-stage 高度跳動 → 抖動縮放 */
+  overflow: hidden;
+}
+.owl-carousel.home-slider {
+  background-color: #0e0e0e;
+}
+.owl-carousel.home-slider .slider-item {
+  background-color: #0e0e0e;
+}
+/* 確保 owl 捲動容器也不溢出 */
+.owl-carousel.home-slider .owl-stage-outer,
+.owl-carousel.home-slider .owl-stage,
+.owl-carousel.home-slider .owl-item,
+.owl-carousel.home-slider .owl-item .slider-item {
+  overflow: hidden;
+}
+/* 響應式高度縮減（≤768 手機，內容較矮） */
+@media screen and (max-width: 767.98px) {
+  .owl-carousel.home-slider,
+  .owl-carousel.home-slider .slider-item {
+    height: 560px;
+  }
+}
+@media screen and (max-width: 575.98px) {
+  .owl-carousel.home-slider,
+  .owl-carousel.home-slider .slider-item {
+    height: 480px;
+  }
+}
+
 .owl-carousel.home-slider .slider-item .img-owl-bg {
   z-index: 0;
 }
@@ -33,8 +74,19 @@
   pointer-events: auto;
 }
 
+/* ===== 修復（2026-08-07）：圖片載入前預留空間（透明佔位）
+   aspect-ratio 只預留空間，不縮小檔案，也不加顏色/動畫背景。
+   注意：只設在 <img> 上，不可設在 .gif-box（<div>）—
+   div 是塊級元素（寬度撐滿容器），自帶 aspect-ratio 會使
+   div 高度 ≠ 內部 img 高度（img 寬度由 width:50% 規則控制），
+   造成 img 上移不居中（2026-08-07 修復）。 */
+.owl-carousel.home-slider .slider-item .gif-box img {
+  aspect-ratio: 1500 / 1450;
+}
+
 /* ===== 第一個 Slider：咖啡產品圖片（居中顯示，位於 GIF 底層之上） ===== */
 .owl-carousel.home-slider .slider-item .slider-coffee-img {
+  aspect-ratio: 860 / 1100;
   position: relative;
   z-index: 10;
   display: block;
@@ -2508,7 +2560,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bc-welcome-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 

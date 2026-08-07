@@ -48,7 +48,29 @@
 
 // owl-carousel slider control & transitions > config file: animate.css
 	var carousel = function() {
-		$('.home-slider').owlCarousel({
+		// 影片延遲載入共用函式（初始化後立即執行 + 每次切換時執行）
+		var loadActiveVideo = function() {
+			var $el = $('.home-slider');
+			var activeSlide = $el.find('.owl-item.active').find('.slider-item');
+			var video = activeSlide.find('video[data-lazy-video]').get(0);
+			// 不暫停其他影片（owl clone 會複製影片，pause 所有 = 暫停剛載入的）
+			if (video) {
+				// video 有 muted + playsinline + autoplay attribute：
+				// muted 下的 autoplay 在真實瀏覽器是允許的。
+				// 標準做法：play()（play 本身會等待資料載入）。
+				var playPromise = video.play();
+				if (playPromise !== undefined) {
+					playPromise.catch(function() { /* autoplay 被拒時忽略 */ });
+				}
+			}
+		};
+		// 修復（2026-08-07）：隱藏 owl 初始化 reflow 造成的抖動縮放
+		// owl 初始化前 .slider-item 是垂直堆疊、初始化後變水平輪播，
+		// 這個瞬間重新佈局會讓首屏「跳一下」。解法：先 opacity:0 隱藏，
+		// 等 owlCarousel() 同步完成佈局後再淡入，使用者看不見初始化過程。
+		var $homeSlider = $('.home-slider');
+		$homeSlider.css('opacity', 0);
+		$homeSlider.owlCarousel({
 	    loop:true,
 	    autoplay: true,
 		autoplayTimeout:7000, // time per slide
@@ -72,7 +94,17 @@
 	        nav:false
 	      }
 	    }
-		});
+		})
+		// 修復（2026-08-07）：延遲載入第二格烘焙影片
+		// 首屏不載入 2.2MB webm（preload="none"），輪播切到此格時才設定
+		// preload="auto" 並播放，離開時暫停，節省首屏頻寬。
+		// owl changed 事件在每次切換後觸發（event.item.index 為新顯示格索引，loop 下會 +1）
+		// 每次切換後載入目前格影片（.owl-item.active 直接定位，避開 loop clone index）
+		.on('changed.owl.carousel', loadActiveVideo);
+		// 初始化完成後立即執行一次（因 .on 綁定晚於 owlCarousel 同步初始化，改用直接呼叫）
+		loadActiveVideo();
+		// owlCarousel() 已同步完成初始佈局 → 淡入顯示（連同初始化 reflow 一起隱藏）
+		$homeSlider.css('opacity', 1);
 		$('.carousel-work').owlCarousel({
 			autoplay: true,
 			center: true,

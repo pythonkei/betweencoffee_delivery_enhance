@@ -143,7 +143,17 @@ load_context() {
         echo "│   ├── P0: Whitenoise 長快取 WHITENOISE_MAX_AGE（影片下載 4次→1次，-6.6MB）"
         echo "│   ├── P1: WS fallback 輪詢 5s→30s、baseDelay 1s→5s（-83% 請求）"
         echo "│   └── Render 診斷：多 Daphne worker 建議 WEB_CONCURRENCY=1"
-        echo "│   12. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
+        echo "│   12. home-slider 抖動縮放+延遲顯示+影片自動播放全面修復（2026-08-07 傍晚）✅"
+        echo "│   ├── ⚠️ 重要教訓：WHITENOISE 1 年長快取，改 CSS/JS 後必須加 ?v= 版本參數（bc-components.css?v=20260807e / main.js?v=20260807h），否則瀏覽器永遠顯示舊版"
+        echo "│   ├── Phase 1 消除抖動：.home-slider/.slider-item 鎖定 750px（響應式 560/480px）+ overflow:hidden（.owl-stage 系列全鎖死）+ 深色佔位"
+        echo "│   ├── Phase 2 加速：影片 data-lazy-video preload=none（省 2.2MB）+ 圖片 loading=lazy + 首屏 3 資產 preload"
+        echo "│   ├── 影片自動播放：owl loop 會 clone 複製影片 → 原 pause 所有影片把剛載入的暫停（currentTime 0.4 被 pause 回 0）→ 移除 pause + 直接 video.play()"
+        echo "│   ├── 金色掃光佔位移除（使用者指定）：.gif-box 改透明（保留 img aspect-ratio）"
+        echo "│   ├── GIF 上移不居中：.gif-box(div) 也被設 aspect-ratio → div 高度≠img 高度 → 只保留 <img> 上的 aspect-ratio"
+        echo "│   ├── 教訓：不要用 Pillow 縮小 GIF 原檔（顯示靠 CSS width:50%，原檔 1500px 才是畫質）"
+        echo "│   ├── 實際首頁是 index.html（/ 路由），非 landing_v3.html（/landing/）"
+        echo "│   └── 涉及：bc-components.css、main.js、base.html、index.html、landing_v3.html"
+        echo "│   13. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
         echo "├── WebSocket: Channels + InMemoryChannelLayer"
@@ -185,11 +195,11 @@ check_status() {
         echo "├── 修改時間: $MOD_TIME"
         echo "└── 環境變量: ${BETWEENCOFFEE_CONTEXT_LOADED:-未設置}"
         
-        # 檢查內容
-        if grep -q "項目規範 (.clinerules)" "$CONTEXT_FILE"; then
-            success "內容驗證: 包含 .clinerules"
+        # 檢查內容（優化版 2026-08-07：.clinerules 由 Cline 自動注入，不再重複載入）
+        if grep -q "任務進度" "$CONTEXT_FILE"; then
+            success "內容驗證: 包含 task_progress"
         else
-            warn "內容驗證: 缺少 .clinerules"
+            warn "內容驗證: 缺少 task_progress"
         fi
         
         if grep -q "Between Coffee 系統 - 上下文摘要" "$CONTEXT_FILE"; then

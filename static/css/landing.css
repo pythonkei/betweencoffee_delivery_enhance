@@ -122,8 +122,13 @@
 .feed::before, .feed::after {
   display: block;
   width: 100%;
-  background-color: rgba(18,18,18,1);
-  background-image: url(../images/bg_4.jpg);
+  /* 修復（2026-08-07，v3）：頂部漏光真源
+     原本 ::before 帶 bg_4.jpg 背景圖。蒙版頂部邊緣（124px 處）因 GPU
+     合成微抖動產生縫隙時，縫內露出 ::before 的 bg_4.jpg（較亮），
+     視覺上成為漏光線。改為純深色 rgba(17,16,19,1)（與蒙版同色）後，
+     即使縫隙存在，縫內上下皆為深色，肉眼不可察覺。 */
+  background-color: rgba(17,16,19,1);
+  background-image: none;
   content: "";
 }
 
@@ -150,7 +155,16 @@
 .feed__layer-parts {
   top: 0;
   width: 2430px;
-  height: 570px;
+  height: 576px;
+  /* 修復（2026-08-07，v2）：頂部漏光仍存在
+     問題：transform translateX 動畫時，合成層（compositing layer）以整數像素
+     對齊邊界並隨 DPI 縮放抖動，頂部產生 1~4px 不穩定縫隙露出底層照片。
+     v1 只覆蓋 2px 不夠 → v2 加大到 6px 安全邊際：
+     - margin-top: -6px 讓蒙版頂部深入 .feed::before 深色帶（130px）6px
+     - height 570→576px 補償上移量，底部多出 6px 由 .feed overflow-hidden 裁掉
+     - will-change: transform 提示瀏覽器預先建立合成層，減少邊緣抖動 */
+  margin-top: -6px;
+  will-change: transform;
   flex-shrink: 0;
   background: rgba(17,16,19,1) none !important;
   background-image: none !important;
@@ -256,7 +270,7 @@
   }
   .feed__layer-parts {
     width: 1704px;
-    height: 400px;
+    height: 406px; /* 400 + 6px 補償 margin-top -6px */
   }
   .feed__triangle {
     width: 440px;
@@ -269,7 +283,7 @@
   }
   .feed__layer-parts {
     width: 1022px;
-    height: 240px;
+    height: 246px; /* 240 + 6px 補償 margin-top -6px */
   }
   .feed__triangle {
     width: 340px;

@@ -29,8 +29,10 @@
     <link rel="stylesheet" href={% static "css/ionicons.min.css" %} />
     <link rel="stylesheet" href={% static "css/flaticon.css" %} />
     <link rel="stylesheet" href={% static "css/icomoon.css" %} />
-    <!-- Between Coffee 品牌元件庫（含 toast、payment-methods、member-nav） -->
-    <link rel="stylesheet" href={% static "css/bc-components.css" %} />
+    <!-- Between Coffee 品牌元件庫（含 toast、payment-methods、member-nav）
+         2026-08-07: 加 ?v= 版本參數，因 WHITENOISE_MAX_AGE=31536000（1 年）長快取，
+         改檔後不需手動清除瀏覽器快取即可生效 -->
+    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20260807e />
 
     <link rel='stylesheet' href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
@@ -41,6 +43,12 @@
     <!-- enable django htmx -->
     <script src="https://unpkg.com/htmx.org@2.0.2"></script> 
     {% django_htmx_script %}
+    {% comment %}
+    Phase 3（2026-08-07）：首屏關鍵資源 preload — 子模板可覆寫此 block 宣告
+    <link rel="preload" ...>，在 <body> 解析前優先下載第一個 slider 需要的資產，
+    避免被底部非關鍵資源（footer 圖等）搶頻寬。
+    {% endcomment %}
+    {% block extra_head %}{% endblock %}
     <!-- Use for layout extra_css -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -249,7 +257,7 @@
     <!-- delivery tut -->
 
     {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script> {% endcomment %}
-    <script src={% static "js/main.js" %}></script>
+    <script src={% static "js/main.js" %}?v=20260807h></script>
 
     <!-- 移除 Facebook OAuth 回調的 #_=_ 片段 -->
     <script>

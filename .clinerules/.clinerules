@@ -341,6 +341,16 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] P1：WebSocket fallback 輪詢 5s→30s、baseDelay 1s→5s（-83% 請求）
 │   ├── [x] Render 診斷：WebSocketManager 初始化 2 次 = 多 Daphne worker（建議 WEB_CONCURRENCY=1）
 │   └── [x] 涉及：landing_v3/index.html、style-utilities.css、settings.py、websocket-core.js
+├── [x] home-slider 抖動縮放 + 延遲顯示 + 影片自動播放全面修復（2026-08-07 傍晚）— ✅
+│   ├── [x] ⚠️ 重要教訓：WHITENOISE_MAX_AGE=1 年長快取，改 CSS/JS 後必須加 ?v= 版本參數（base.html bc-components.css?v=20260807e / main.js?v=20260807h），否則瀏覽器永遠顯示舊版（反覆「看似無效」的根因）
+│   ├── [x] Phase 1 消除抖動：.home-slider/.slider-item 提前鎖定 750px（響應式 560/480px）+ overflow:hidden（.owl-stage 系列全鎖死）+ 深色佔位
+│   ├── [x] Phase 2 加速：影片 data-lazy-video preload=none（省 2.2MB）+ 圖片 loading=lazy + base.html extra_head block + 首屏 3 資產 preload
+│   ├── [x] 影片自動播放：owl loop 會 clone 複製影片 → 原 `pause 所有影片` 邏輯把剛載入的暫停（currentTime 0.4 被 pause 回 0）→ 移除 pause + 直接 video.play()（muted+playsinline 下真實瀏覽器允許 autoplay）
+│   ├── [x] 金色掃光佔位移除：使用者指定不需 shimmer → .gif-box 改透明（保留 img aspect-ratio）
+│   ├── [x] GIF 上移不居中：.gif-box(div) 也被設 aspect-ratio → div 高度≠img 高度 → 只保留 <img> 上的 aspect-ratio
+│   ├── [x] 教訓：不要用 Pillow 縮小 GIF 原檔存檔（顯示靠 CSS width:50%，原檔 1500px 才是畫質）
+│   ├── [x] 實際首頁是 index.html（/ 路由渲染），非 landing_v3.html（/landing/ → LandingNew）
+│   └── [x] 涉及：bc-components.css、main.js、base.html、index.html、landing_v3.html
 ├── [x] 咖啡菜單頁 Z 字對角主副卡（2026-08-06）— ✅
 │   ├── [x] 每 4 個一組 2x2 網格（DOM = 大 小 小 大）：左上大、右上小、左下小、右下大
 │   ├── [x] 圖片尺寸：大卡 +15%（顯示 290px）、小卡 +10% 再 +5%（260px）

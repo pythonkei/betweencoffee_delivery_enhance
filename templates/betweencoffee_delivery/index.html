@@ -2,6 +2,20 @@
 {% load static %}
 {% block title %}Between Coffee - Index{% endblock %}
 
+{% block extra_head %}
+{% comment %}
+Phase 3（2026-08-07）：首屏關鍵資源 preload
+在 <body> 解析前優先下載第一個 slider 的三個資產，
+避免被 footer/其他非關鍵資源搶頻寬，縮短空窗期。
+- section_bg_01.svg 第一格背景（17KB）
+- _cup_360.gif 第一格 GIF 動畫（494KB）
+- coffee_04.png 第一格咖啡杯圖（704KB）
+{% endcomment %}
+<link rel="preload" as="image" href="{% static 'images/section_bg_01.svg' %}">
+<link rel="preload" as="image" href="{% static 'images/_cup_360.gif' %}">
+<link rel="preload" as="image" href="{% static 'images/coffee_04.png' %}">
+{% endblock %}
+
 {% block content %}
 
 <!-- owl-carousel config file: main.js, animate.css -->
@@ -32,10 +46,11 @@
     </div>
 
     <div class="slider-item">
-        <!-- 咖啡豆烘焙影片背景（webm 優先 2.2MB，mp4 fallback；blobsVideo morph 遮罩動畫） -->
+        <!-- 咖啡豆烘焙影片背景（webm 2.2MB；延遲載入：preload=none 首屏不載入，
+             輪播切到這格時由 main.js 設 preload=auto + play()，節省首屏 2.2MB） -->
         <div class="bc-banner-video blobsVideo loadEnd">
             <div class="inner">
-                <video class="video" muted playsinline loop autoplay preload="metadata">
+                <video class="video" muted playsinline loop autoplay preload="none" data-lazy-video>
                     <source src="{% static 'roasting.webm' %}" type="video/webm">
                 </video>
             </div>
@@ -44,17 +59,14 @@
         <div class="container">
             <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
                 <div class="col-md-12 col-sm-12 text-center">
-                    <span class="subheading">More than ... </span>
-                    <h1 class="mb-4">好豆 &#8226; 造就好生活</h1>
-                    <p class="mb-4 mb-md-5">配方咖啡豆<br>孕育出其獨特的風味特性</p>
+                    <span class="subheading">Handcrafted Roastery</span>
+                    <h1 class="mb-4">好豆 &#8226; 是會呼吸的</h1>
+                    <p class="mb-4 mb-md-5">從「火」與「嚴謹」出發<br>曲線烘焙設計與適切度</p>
                     <p><a href="{% url 'bean_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">我們的配方</a></p>
                 </div>
             </div>
             <span class="img-owl-bg">
-                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
-            </span>
-            <span class="img-owl-bg">
-                <div class="noise-img"><img src= {% static 'images/section_bg_02.svg' %} class="noise_animation"></div>
+                <div class="svg-box"><img src= {% static 'images/owl_title_bg_02.svg' %} class="noise_animation" loading="lazy"></div>
             </span>
         </div>
     </div>
@@ -71,10 +83,10 @@
                 </div>
             </div>
             <span class="img-owl-bg">
-                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class="" loading="lazy"></div>
             </span>
             <span class="img-owl-bg">
-                <div class="noise-img"><img src= {% static 'images/owl_title_bg_01.svg' %} class="noise_animation"></div>
+                <div class="noise-img"><img src= {% static 'images/owl_title_bg_01.svg' %} class="noise_animation" loading="lazy"></div>
             </span>
         </div>
     </div>

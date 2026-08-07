@@ -1,9 +1,9 @@
 {
   "memory_bank": {
     "name": "Between Coffee System Memory Bank",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "created": "2026-04-05",
-    "last_updated": "2026-07-29",
+    "last_updated": "2026-08-07",
     "description": "持久化項目上下文和知識庫，為Cline AI助理提供完整的項目信息"
   },
   
@@ -18,9 +18,9 @@
   },
   
   "technology_stack": {
-    "backend": ["Django 4.x", "Django Channels", "PostgreSQL", "Redis"],
+    "backend": ["Django 4.x", "Django Channels", "PostgreSQL", "MockCelery (無 Redis)"],
     "frontend": ["HTML5", "CSS3", "JavaScript", "Bootstrap 5", "jQuery"],
-    "deployment": ["Railway → Render（已遷移）"],
+    "deployment": ["Render（Docker 運行時）"],
     "payments": ["PayPal", "Alipay", "FPS", "現金支付"],
     "authentication": ["django-allauth", "Google OAuth", "Facebook OAuth"]
   },
@@ -56,7 +56,8 @@
     ],
     "max_tokens_per_file": 8000,
     "summarize_large_files": true,
-    "include_file_paths": true
+    "include_file_paths": true,
+    "note": ".clinerules 由 Cline 自動注入，不在 bc-context 重複載入（2026-08-07 優化）"
   },
   
   "validation": {

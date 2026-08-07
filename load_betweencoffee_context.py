@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Between Coffee 上下文自動加載器
+Between Coffee 上下文自動加載器（優化版 2026-08-07）
 
-這個腳本用於在 Cline 任務開始時自動加載項目上下文。
-可以集成到 Cline 的啟動流程中，或作為手動命令使用。
+優化重點：
+1. 移除重複載入 .clinerules / uiux-principles.md（Cline 已自動注入，無需重複）
+2. task_progress.md 只載入「最新任務 section」，不再載入歷史日誌
+3. Memory Bank 摘要移除與 .clinerules 重疊的技術棧/核心模塊
+4. 統一資訊源：.clinerules = 規範/架構/速查、task_progress.md = 目前任務進度、Memory Bank = 系統狀態
 
 使用方法:
 1. 直接運行: python load_betweencoffee_context.py
@@ -17,62 +20,27 @@ import sys
 from pathlib import Path
 
 
-def load_clinerules():
-    """加載 .clinerules 文件內容"""
-    # 支援檔案和目錄兩種結構
-    clinerules_path = Path(".clinerules/.clinerules")
-    if not clinerules_path.exists():
-        clinerules_path = Path(".clinerules")
-    if clinerules_path.exists() and clinerules_path.is_file():
-        try:
-            with open(clinerules_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            print(f"✅ 已加載 .clinerules ({len(content)} 字符)")
-            return content
-        except Exception as e:
-            print(f"❌ 加載 .clinerules 失敗: {e}")
-    else:
-        print("⚠️  .clinerules 文件不存在")
-    return None
-
-
-def load_uiux_principles():
-    """加載 UI/UX 設計原則文件內容（優先使用合併後的 uiux-principles.md）"""
-    # 優先使用合併後的 uiux-principles.md
-    uiux_path = Path(".clinerules/uiux-principles.md")
-    if uiux_path.exists():
-        try:
-            with open(uiux_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            print(f"✅ 已加載 UI/UX 設計原則 ({len(content)} 字符)")
-            return content
-        except Exception as e:
-            print(f"❌ 加載 UI/UX 設計原則失敗: {e}")
-            return None
-
-    # 後備：使用舊的 ui-principles.md
-    ui_principles_path = Path(".clinerules/ui-principles.md")
-    if ui_principles_path.exists():
-        try:
-            with open(ui_principles_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            print(f"✅ 已加載 UI 設計原則 ({len(content)} 字符)")
-            return content
-        except Exception as e:
-            print(f"❌ 加載 UI 設計原則失敗: {e}")
-    else:
-        print("⚠️  UI/UX 設計原則文件不存在 (.clinerules/uiux-principles.md)")
-    return None
-
-
 def load_task_progress():
-    """加載 task_progress.md 內容"""
+    """加載 task_progress.md 內容（只取最新任務 section，避免歷史日誌佔用上下文）"""
     task_progress_path = Path("task_progress.md")
     if task_progress_path.exists():
         try:
             with open(task_progress_path, "r", encoding="utf-8") as f:
                 content = f.read()
-            print(f"✅ 已加載 task_progress.md ({len(content)} 字符)")
+
+            # 只取第一個「今日任務總覽」section（即最新任務）
+            first_marker = content.find("# 今日任務總覽")
+            if first_marker != -1:
+                # 找下一個頂級標題（# ...），停在歷史任務之前
+                second_marker = content.find("\n# ", first_marker + 1)
+                if second_marker != -1:
+                    content = content[first_marker:second_marker].strip()
+                else:
+                    content = content[first_marker:].strip()
+                print(f"✅ 已加載 task_progress.md 最新任務 ({len(content)} 字符)")
+            else:
+                print(f"✅ 已加載 task_progress.md ({len(content)} 字符)")
+
             return content
         except Exception as e:
             print(f"❌ 加載 task_progress.md 失敗: {e}")
@@ -82,7 +50,7 @@ def load_task_progress():
 
 
 def load_memory_bank_summary():
-    """加載 Memory Bank 摘要內容"""
+    """加載 Memory Bank 摘要內容（精簡版：移除與 .clinerules 重疊的技術棧/核心模塊）"""
     memory_bank_path = Path("betweencoffee_memory_bank")
     if not memory_bank_path.exists():
         print("⚠️  Memory Bank 目錄不存在")
@@ -102,30 +70,15 @@ def load_memory_bank_summary():
             f"✅ 已加載 Memory Bank 配置 (版本: {config.get('memory_bank', {}).get('version', '未知')})"
         )
 
-        # 創建摘要內容
+        # 創建摘要內容（精簡，不重複 .clinerules 已有的技術棧/核心模塊）
         summary_parts = []
 
         # 項目信息
         project_info = config.get("project", {})
-        summary_parts.append(f"# Between Coffee 系統 - 上下文摘要")
+        summary_parts.append("# Between Coffee 系統 - 上下文摘要")
         summary_parts.append(f"**項目**: {project_info.get('name', '未知')}")
         summary_parts.append(f"**狀態**: {project_info.get('status', '未知')}")
         summary_parts.append(f"**版本**: {project_info.get('version', '未知')}")
-        summary_parts.append("")
-
-        # 技術棧
-        tech_stack = config.get("technology_stack", {})
-        summary_parts.append(f"## 技術棧")
-        for category, items in tech_stack.items():
-            if items:
-                summary_parts.append(f"- **{category}**: {', '.join(items)}")
-        summary_parts.append("")
-
-        # 核心模塊
-        core_modules = config.get("core_modules", {})
-        summary_parts.append(f"## 核心模塊")
-        for module, description in core_modules.items():
-            summary_parts.append(f"- **{module}**: {description}")
         summary_parts.append("")
 
         # 系統狀態摘要（從 04_SYSTEM_STATE.md 提取關鍵信息）
@@ -158,8 +111,8 @@ def load_memory_bank_summary():
                     key_sections.append("\n".join(current_section))
 
                 if key_sections:
-                    summary_parts.append(f"## 系統狀態摘要")
-                    summary_parts.extend(key_sections[:3])  # 只取前3個關鍵部分
+                    summary_parts.append("## 系統狀態摘要")
+                    summary_parts.extend(key_sections[:2])  # 只取前2個關鍵部分（原本3個）
                     summary_parts.append("")
             except Exception as e:
                 print(f"⚠️  加載系統狀態摘要失敗: {e}")
@@ -184,7 +137,7 @@ def load_memory_bank_summary():
                         high_priority.append(line.strip())
 
                 if high_priority:
-                    summary_parts.append(f"## 高優先級任務")
+                    summary_parts.append("## 高優先級任務")
                     for task in high_priority[:5]:  # 只取前5個
                         summary_parts.append(f"- {task}")
                     summary_parts.append("")
@@ -201,43 +154,19 @@ def load_memory_bank_summary():
 
 
 def generate_context():
-    """生成完整的上下文內容"""
+    """生成完整的上下文內容（優化版：不重複載入 .clinerules）"""
     print("=" * 60)
-    print("🚀 Between Coffee 上下文加載器")
+    print("🚀 Between Coffee 上下文加載器（優化版）")
     print("=" * 60)
 
-    # 加載 .clinerules
-    clinerules_content = load_clinerules()
-
-    # 加載 UI/UX 設計原則
-    uiux_principles_content = load_uiux_principles()
-
-    # 加載 task_progress.md
+    # 加載 task_progress.md（只取最新任務）
     task_progress_content = load_task_progress()
 
-    # 加載 Memory Bank 摘要
+    # 加載 Memory Bank 摘要（精簡版）
     memory_bank_summary = load_memory_bank_summary()
 
     # 組合上下文
     context_parts = []
-
-    if clinerules_content:
-        context_parts.append("# 📋 項目規範 (.clinerules)")
-        context_parts.append(
-            clinerules_content[:3000] + "..."
-            if len(clinerules_content) > 3000
-            else clinerules_content
-        )
-        context_parts.append("")
-
-    if uiux_principles_content:
-        context_parts.append("# 🎨 UI/UX 設計原則 (.clinerules/uiux-principles.md)")
-        context_parts.append(
-            uiux_principles_content[:4000] + "..."
-            if len(uiux_principles_content) > 4000
-            else uiux_principles_content
-        )
-        context_parts.append("")
 
     if task_progress_content:
         context_parts.append("# 📋 任務進度 (task_progress.md)")
@@ -253,33 +182,22 @@ def generate_context():
 
     full_context = "\n".join(context_parts)
 
-    # 添加使用說明
+    # 添加精簡使用說明
     usage_note = """
 ## 📖 使用說明
 
-此上下文提供了 Between Coffee 系統的關鍵信息：
+此上下文提供 Between Coffee 系統的「目前任務進度」與「系統狀態」。
+項目規範（.clinerules / UI/UX 原則）由 Cline 自動注入，不在此重複，以節省上下文空間。
 
 ### 包含內容
-1. **系統報告** (BETWEEN_COFFEE_SYSTEM_REPORT.md): 1185行完整系統分析
-2. **項目規範** (.clinerules): 開發標準、安全要求、性能優化
-3. **UI 設計原則** (.clinerules/ui-principles.md): 品牌色、字型、間距、元件規範
-4. **項目總覽**: 業務背景、技術棧、核心模塊
-5. **系統狀態**: 當前狀態、已知問題、性能指標
-6. **優先任務**: 高優先級待處理問題
-
-### 使用建議
-- 在開始任何任務前，先查看相關規範
-- 參考系統狀態了解當前限制
-- 優先處理高優先級任務
-- 遵循項目開發標準
-- 開發 UI 時參考設計原則
+1. **任務進度** (task_progress.md): 最新任務進度 + 進行中事項
+2. **系統狀態** (Memory Bank): 當前狀態、已知問題、優先任務
 
 ### 完整信息
 如需完整信息，請查看：
-- `BETWEEN_COFFEE_SYSTEM_REPORT.md` - 完整系統分析報告（1185行）
+- `.clinerules/.clinerules` — 項目規範（Cline 已自動載入）
+- `.clinerules/uiux-principles.md` — UI/UX 設計原則（Cline 已自動載入）
 - `betweencoffee_memory_bank/` 目錄下的詳細文件
-- `docs/` 目錄下的技術文檔和報告
-- `.clinerules/ui-principles.md` - UI 設計原則
 """
 
     full_context += usage_note

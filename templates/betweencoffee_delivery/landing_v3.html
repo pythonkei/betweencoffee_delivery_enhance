@@ -32,10 +32,11 @@
     </div>
 
     <div class="slider-item">
-        <!-- 咖啡豆烘焙影片背景（webm 優先 2.2MB，mp4 fallback；blobsVideo morph 遮罩動畫） -->
+        <!-- 咖啡豆烘焙影片背景（webm 2.2MB；延遲載入：preload=none 首屏不載入，
+             輪播切到這格時由 main.js 設 preload=auto + play()，節省首屏 2.2MB） -->
         <div class="bc-banner-video blobsVideo loadEnd">
             <div class="inner">
-                <video class="video" muted playsinline loop autoplay preload="metadata">
+                <video class="video" muted playsinline loop autoplay preload="none" data-lazy-video>
                     <source src="{% static 'roasting.webm' %}" type="video/webm">
                 </video>
             </div>
@@ -51,10 +52,7 @@
                 </div>
             </div>
             <span class="img-owl-bg">
-                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
-            </span>
-            <span class="img-owl-bg">
-                <div class="noise-img"><img src= {% static 'images/section_bg_02.svg' %} class="noise_animation"></div>
+                <div class="noise-img"><img src= {% static 'images/owl_title_bg_02.svg' %} class="noise_animation" loading="lazy"></div>
             </span>
         </div>
     </div>
@@ -71,10 +69,10 @@
                 </div>
             </div>
             <span class="img-owl-bg">
-                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
+                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class="" loading="lazy"></div>
             </span>
             <span class="img-owl-bg">
-                <div class="noise-img"><img src= {% static 'images/owl_title_bg_01.svg' %} class="noise_animation"></div>
+                <div class="noise-img"><img src= {% static 'images/owl_title_bg_01.svg' %} class="noise_animation" loading="lazy"></div>
             </span>
         </div>
     </div>
