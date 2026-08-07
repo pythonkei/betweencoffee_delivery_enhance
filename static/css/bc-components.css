@@ -151,6 +151,45 @@
   z-index: 10;
   pointer-events: auto;
 }
+/* ===== 第二個 Slider：咖啡豆烘焙影片上的 SVG 裝飾（owl_title_bg_02.svg）
+   - 縮小 40%（原本 640px → width:60% ≈ 384px）
+   - 左下角對齊 + 邊距（不貼齊邊緣）
+   - position:absolute 以 .slider-item 為錨點
+   - z-index:0 低於 slider-text(z:10)，pointer-events:none 不阻擋按鈕點擊 */
+.owl-carousel.home-slider .slider-item {
+  position: relative;
+}
+.owl-carousel.home-slider .slider-item .svg-box {
+  position: absolute;
+  left: 3rem;      /* 左邊距 48px，不貼齊左緣 */
+  bottom: 2.5rem;  /* 下邊距 40px，不貼齊底緣 */
+  width: 60%;      /* 縮小 40% */
+  max-width: 384px;
+  z-index: 0;
+  pointer-events: none;
+}
+.owl-carousel.home-slider .slider-item .svg-box img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+/* 響應式：≤768 縮至 55%、≤576 縮至 50%，邊距同步縮小 */
+@media screen and (max-width: 767.98px) {
+  .owl-carousel.home-slider .slider-item .svg-box {
+    width: 55%;
+    max-width: 300px;
+    left: 1.5rem;
+    bottom: 1.5rem;
+  }
+}
+@media screen and (max-width: 575.98px) {
+  .owl-carousel.home-slider .slider-item .svg-box {
+    width: 50%;
+    max-width: 240px;
+    left: 1rem;
+    bottom: 1rem;
+  }
+}
 
 /* ===== 修復（2026-08-07）：圖片載入前預留空間（透明佔位）
    aspect-ratio 只預留空間，不縮小檔案，也不加顏色/動畫背景。
