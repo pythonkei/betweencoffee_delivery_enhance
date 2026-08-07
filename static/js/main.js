@@ -66,10 +66,12 @@
 		};
 		// 修復（2026-08-07）：隱藏 owl 初始化 reflow 造成的抖動縮放
 		// owl 初始化前 .slider-item 是垂直堆疊、初始化後變水平輪播，
-		// 這個瞬間重新佈局會讓首屏「跳一下」。解法：先 opacity:0 隱藏，
-		// 等 owlCarousel() 同步完成佈局後再淡入，使用者看不見初始化過程。
+		// 這個瞬間重新佈局會讓首屏「跳一下」。
+		// 解法：CSS 偽元素遮罩（.home-slider::before/::after）蓋住初始化過程
+		// + .owl-stage-outer:not(.is-loaded) opacity:0 隱藏內容，等 owlCarousel()
+		// 同步完成佈局後加 is-loaded class 淡入。此處不再用 inline opacity
+		// （會與 CSS .is-loaded 機制衝突，造成 slider 永遠隱藏）。
 		var $homeSlider = $('.home-slider');
-		$homeSlider.css('opacity', 0);
 		$homeSlider.owlCarousel({
 	    loop:true,
 	    autoplay: true,
@@ -103,8 +105,14 @@
 		.on('changed.owl.carousel', loadActiveVideo);
 		// 初始化完成後立即執行一次（因 .on 綁定晚於 owlCarousel 同步初始化，改用直接呼叫）
 		loadActiveVideo();
-		// owlCarousel() 已同步完成初始佈局 → 淡入顯示（連同初始化 reflow 一起隱藏）
-		$homeSlider.css('opacity', 1);
+		// owlCarousel() 已同步完成初始佈局 → 加 is-loaded class：
+		// bc-components.css 的 ::before/::after 遮罩淡出（transition 0.45s），
+		// .owl-stage-outer 由 opacity:0 → 1 淡入。
+		$homeSlider.addClass('is-loaded');
+		// 保險：若 JS 執行異常或 CSS 未載入，3 秒後仍強制顯示內容（避免卡在遮罩）
+		window.setTimeout(function() {
+			$homeSlider.addClass('is-loaded');
+		}, 3000);
 		$('.carousel-work').owlCarousel({
 			autoplay: true,
 			center: true,

@@ -19,7 +19,13 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 {% block content %}
 
 <!-- owl-carousel config file: main.js, animate.css -->
-<section class="home-slider owl-carousel">
+<!-- 2026-08-07：inline style 鎖定高度（HTML 首字節即生效，不等 CSS 載入），
+     避免 owl 初始化前 .slider-item 無高度 → 內容堆疊 → 首屏抖動縮放。
+     min-height 雙保險；響應式由 bc-components.css media query + !important 覆蓋。
+     載入動畫層由 CSS 偽元素（.home-slider::before/::after）實作：
+     深黑背景 + 品牌 Mogra 字 + 金色 spinner，owl 初始化後由 main.js
+     加上 is-loaded class 淡出。不使用實體 div（會被 owl 包成 slide）。 -->
+<section class="home-slider owl-carousel" style="height:750px; min-height:750px; overflow:hidden; background-color:#0e0e0e;">
     <div class="slider-item" style="background-image: url({% static 'images/section_bg_01.svg' %});">
         <div class="overlay"></div>
         <div class="container">

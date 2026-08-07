@@ -5,7 +5,10 @@
 {% block content %}
 
 <!-- owl-carousel config file: main.js, animate.css -->
-<section class="home-slider owl-carousel">
+<!-- 2026-08-07：inline style 鎖定高度（HTML 首字節即生效，不等 CSS 載入），
+     與 index.html 相同：載入動畫層由 CSS 偽元素實作（.home-slider::before/::after），
+     main.js owl 初始化後加 is-loaded class 淡出。 -->
+<section class="home-slider owl-carousel" style="height:750px; min-height:750px; overflow:hidden; background-color:#0e0e0e;">
     <div class="slider-item" style="background-image: url({% static 'images/section_bg_01.svg' %});">
         <div class="overlay"></div>
         <div class="container">
