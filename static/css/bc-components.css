@@ -152,42 +152,43 @@
   pointer-events: auto;
 }
 /* ===== 第二個 Slider：咖啡豆烘焙影片上的 SVG 裝飾（owl_title_bg_02.svg）
-   - 縮小 40% 後再減少 30%（384px × 0.7 ≈ 269px，width:42%）
-   - 影片左下角對齊 + 邊距（不貼齊邊緣，left 以影片容器為準）
-   - position:absolute 以 .slider-item 為錨點
+   - 縮小 40% 後再減少 30%（384px × 0.7 ≈ 269px，width:25%）
+   - 影片左下角對齊 + 邊距（不貼齊邊緣）
+   - 2026-08-07：.svg-box 已移入 .inner 內，以 .inner（影片實際範圍）為錨點
+     → .inner position:relative，.svg-box absolute 相對定位
    - z-index:0 低於 slider-text(z:10)，pointer-events:none 不阻擋按鈕點擊 */
-.owl-carousel.home-slider .slider-item {
-  position: relative;
+.bc-banner-video .inner {
+  position: relative;  /* .svg-box absolute 的錨點（影片 1080×608） */
 }
-.owl-carousel.home-slider .slider-item .svg-box {
+.bc-banner-video .svg-box {
   position: absolute;
-  left: 3rem;      /* 左邊距 48px，不貼齊左緣 */
-  bottom: 2.5rem;  /* 下邊距 40px，不貼齊底緣 */
-  width: 42%;      /* 384px 再 -30% ≈ 269px */
+  left: 2rem;      /* 影片內左邊距 32px，不貼齊左緣 */
+  bottom: 2rem;    /* 影片內下邊距 32px，不貼齊底緣 */
+  width: 25%;      /* 269px / 1080px ≈ 25% */
   max-width: 269px;
   z-index: 0;
   pointer-events: none;
 }
-.owl-carousel.home-slider .slider-item .svg-box img {
+.bc-banner-video .svg-box img {
   width: 100%;
   height: auto;
   display: block;
 }
-/* 響應式：≤768 縮至 38%（210px）、≤576 縮至 35%（168px），邊距同步縮小 */
+/* 響應式：≤768 縮至 22%（180px）、≤576 縮至 20%（140px），邊距同步縮小 */
 @media screen and (max-width: 767.98px) {
-  .owl-carousel.home-slider .slider-item .svg-box {
-    width: 38%;
-    max-width: 210px;
-    left: 1.5rem;
-    bottom: 1.5rem;
+  .bc-banner-video .svg-box {
+    width: 22%;
+    max-width: 180px;
+    left: 1rem;
+    bottom: 1rem;
   }
 }
 @media screen and (max-width: 575.98px) {
-  .owl-carousel.home-slider .slider-item .svg-box {
-    width: 35%;
-    max-width: 168px;
-    left: 1rem;
-    bottom: 1rem;
+  .bc-banner-video .svg-box {
+    width: 20%;
+    max-width: 140px;
+    left: 0.75rem;
+    bottom: 0.75rem;
   }
 }
 
