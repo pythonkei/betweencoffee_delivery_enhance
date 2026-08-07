@@ -32,6 +32,11 @@
 }
 .owl-carousel.home-slider {
   background-color: #0e0e0e;
+  /* 修復（2026-08-08）：owl.carousel.min.css 預設 .owl-carousel { display:none }，
+     JS 初始化前橫幅高度 0，下方 bc-welcome-panel 先顯示、初始化後被推下（首屏跳動）。
+     覆蓋為 block：HTML 解析即佔 750px 高度，載入遮罩（::before/::after）同步顯示，
+     初始化完成後 is-loaded 淡出，bc-welcome-panel 全程位置穩定。 */
+  display: block;
 }
 .owl-carousel.home-slider .slider-item {
   background-color: #0e0e0e;
@@ -60,11 +65,10 @@
   }
 }
 
-/* ===== 首屏載入動畫層（2026-08-07 晚）
+/* ===== 首屏載入動畫層（2026-08-07 晚建立；2026-08-08 移除文字）
    以 CSS 偽元素覆蓋在 slider 之上（不影響 owl DOM）：
-   - ::before 深黑底 + 品牌 Mogra 字 + 金色 spinner（純 CSS，無漸變、
-     無外部圖，符合品牌「不花巧/無動畫」原則；noise 由品牌既有
-     noise_animation 提供，此處僅用旋轉 spinner 表示載入中）
+   - ::before 深黑底遮罩（純色；依使用者指示移除 "Brewing... 沖泡中" 文字，
+     只保留遮罩與金色 spinner，無漸變、無外部圖，符合品牌「不花巧」原則）
    - owl 初始化完成 + 首圖載入後，main.js 對 .home-slider 加 is-loaded
      class → ::before 淡出移除，slider 內容淡入。
    回應式：載入層高度跟隨 .home-slider（750/560/480px）。 */
@@ -72,20 +76,13 @@
   position: relative;
 }
 .owl-carousel.home-slider::before {
-  content: "Brewing... 沖泡中";
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 1000; /* 最高層，蓋過 slider-text(z:10)/img-owl-bg(z:0) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Mogra", cursive;
-  font-size: 1.3rem;
-  letter-spacing: 2px;
-  color: var(--bc-gold, #c49b63);
   background-color: #0e0e0e;
   transition: opacity 0.45s ease, visibility 0.45s ease;
 }
@@ -98,7 +95,7 @@
   z-index: 1001;
   width: 44px;
   height: 44px;
-  margin: -38px 0 0 -22px; /* 文字上方留出 spinner 空間 */
+  margin: -22px 0 0 -22px; /* 置中（2026-08-08：移除文字後不需留文字空間） */
   border: 3px solid rgba(196, 155, 99, 0.25);
   border-top-color: var(--bc-gold, #c49b63);
   border-radius: 50%;
@@ -121,15 +118,12 @@
 .owl-carousel.home-slider.is-loaded .owl-stage-outer {
   opacity: 1;
 }
-/* 手機窄螢幕：spinner 調小、文字縮小 */
+/* 手機窄螢幕：spinner 調小 */
 @media screen and (max-width: 575.98px) {
-  .owl-carousel.home-slider::before {
-    font-size: 1.1rem;
-  }
   .owl-carousel.home-slider::after {
     width: 36px;
     height: 36px;
-    margin: -32px 0 0 -18px;
+    margin: -18px 0 0 -18px;
   }
 }
 

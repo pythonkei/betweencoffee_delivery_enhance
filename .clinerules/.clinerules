@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月6日（更新：咖啡菜單 Z 字對角主副卡 + 描述 CSS 類）
+> **最後更新**: 2026年8月8日（更新：owl_title_bg_02.svg 疊影片容器上方 + home-slider 首屏跳動根因修復 + 移除 Brewing 文字）
 
 ## 開發者背景與方法論
 
@@ -400,6 +400,19 @@ Phase 3D：新功能（優先級：低）
 │   │   └── 獨立 div 置於導覽列/內容間、height:0 不佔文件流、top:150px、16vw、left:1vw
 │   ├── [x] profile 3 頁面導航列統一 col-12 col-lg-8（與卡片同寬）
 │   └── [x] 會員導航列響應式統一（移除 member_nav inline style，集中 bc-components.css：容器 flex 撐滿、按鈕 flex:1、行動 ≤576px 文字不縮放）
+├── [x] owl_title_bg_02.svg 疊在影片動畫容器上方 + 向下微調 — ✅ 2026-08-08（commit 29b8527 已 push）
+│   ├── [x] index.html 第二個 slider 新增 .banner-stage 定位層，SVG 移到 .inner（morph 容器）之外
+│   ├── [x] style-utilities.css：.banner-stage 承接尺寸/置中角色，.inner absolute 填滿（morph+overflow 僅裁影片）
+│   ├── [x] bc-components.css：錨點 .inner → .banner-stage；svg-box bottom 2rem→1.25rem 向下微調
+│   └── [x] 驗證：SVG 四角完整不被 morph 裁剪 ✅
+├── [x] home-slider 首屏跳動根因修復（bc-welcome-panel 被推下）— ✅ 2026-08-08
+│   ├── [x] 根因：owl.carousel.min.css 的 .owl-carousel { display:none } → 初始化前橫幅高度 0
+│   ├── [x] 修復：.owl-carousel.home-slider { display:block }（bc-components.css 後載入覆蓋）
+│   ├── [x] 重要發現：Brewing 載入遮罩因 display:none 從未真正顯示過
+│   └── [x] 驗證：無 JS vs 有 JS 面板位置 Y=695~819 完全一致 ✅
+├── [x] 移除「Brewing 沖泡中」載入文字 — ✅ 2026-08-08
+│   ├── [x] .home-slider::before content:"" 僅保留深黑遮罩；::after spinner 精確置中（-22px）
+│   └── [x] 驗證：spinner 置中 X=737/Y=362、金色像素僅 40 個（無文字）✅
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
