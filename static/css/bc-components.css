@@ -154,16 +154,23 @@
 /* ===== 第二個 Slider：咖啡豆烘焙影片上的 SVG 裝飾（owl_title_bg_02.svg）
    - 縮小 40% 後再減少 30%（384px × 0.7 ≈ 269px，width:25%）
    - 影片左下角對齊 + 邊距（不貼齊邊緣）
-   - 2026-08-07：.svg-box 已移入 .inner 內，以 .inner（影片實際範圍）為錨點
-     → .inner position:relative，.svg-box absolute 相對定位
-   - z-index:0 低於 slider-text(z:10)，pointer-events:none 不阻擋按鈕點擊 */
-.bc-banner-video .inner {
-  position: relative;  /* .svg-box absolute 的錨點（影片 1080×608） */
+   - 2026-08-08：.svg-box 在 .inner（morph 動畫容器）之外、.banner-stage 內，
+     疊在動畫容器上方不被裁剪 → .banner-stage position:relative 是定位錨點
+   - z-index:1 高於 .inner，pointer-events:none 不阻擋按鈕點擊 */
+.bc-banner-video .banner-stage {
+  position: relative;  /* .img-owl-bg/.svg-box absolute 的錨點（影片動畫容器 .inner 所在範圍） */
+}
+/* 2026-08-07：.img-owl-bg 全域 z-index:0 會建立 stacking context，
+   導致內部 .svg-box 的 z-index 無法與外部 video 比較。
+   此處將 .bc-banner-video 內的 .img-owl-bg 提升至 z:1，
+   讓整個 span（含 svg）疊在影片上方。 */
+.bc-banner-video .img-owl-bg {
+  z-index: 1;
 }
 .bc-banner-video .svg-box {
   position: absolute;
   left: 2rem;      /* 影片內左邊距 32px，不貼齊左緣 */
-  bottom: 2rem;    /* 影片內下邊距 32px，不貼齊底緣 */
+  bottom: 1.25rem; /* 2026-08-08：向下移動一點（2rem→1.25rem，距底 20px） */
   width: 25%;      /* 269px / 1080px ≈ 25% */
   max-width: 269px;
   z-index: 1;      /* 2026-08-07：高於影片（video 為 static 無 z-index，z:1 即疊在影片上方） */
@@ -180,7 +187,7 @@
     width: 22%;
     max-width: 180px;
     left: 1rem;
-    bottom: 1rem;
+    bottom: 0.6rem;
   }
 }
 @media screen and (max-width: 575.98px) {
@@ -188,7 +195,7 @@
     width: 20%;
     max-width: 140px;
     left: 0.75rem;
-    bottom: 0.75rem;
+    bottom: 0.4rem;
   }
 }
 
@@ -230,7 +237,7 @@
   bottom: 0;
   z-index: 10;
   text-align: left;
-  padding: 74px 92px;
+  padding: 108px 138px;
   max-width: 60%;
   pointer-events: auto;
 }

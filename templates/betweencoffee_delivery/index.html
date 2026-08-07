@@ -55,18 +55,19 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         <!-- 咖啡豆烘焙影片背景（webm 2.2MB；延遲載入：preload=none 首屏不載入，
              輪播切到這格時由 main.js 設 preload=auto + play()，節省首屏 2.2MB） -->
         <div class="bc-banner-video blobsVideo loadEnd">
-            <div class="inner">
-                <video class="video" muted playsinline loop autoplay preload="none" data-lazy-video>
-                    <source src="{% static 'roasting.webm' %}" type="video/webm">
-                </video>
-                <!-- 2026-08-07：.svg-box 移入影片容器 .inner 內，以 .inner 為錨點
-                     精確對齊影片畫面左下角（.inner = 1080×608 影片實際顯示範圍） -->
+            <div class="banner-stage">
+                <div class="inner">
+                    <video class="video" muted playsinline loop autoplay preload="none" data-lazy-video>
+                        <source src="{% static 'roasting.webm' %}" type="video/webm">
+                    </video>
+                </div>
+                <!-- 2026-08-08：owl_title_bg_02.svg 移到 .inner（morph 動畫容器）之外、.banner-stage 內，
+                     疊在動畫容器上方，避免被 morph 圓角 + overflow:hidden 裁剪，SVG 完整顯示 -->
                 <span class="img-owl-bg">
                     <div class="svg-box"><img src= {% static 'images/owl_title_bg_02.svg' %} class="noise_animation" loading="lazy"></div>
                 </span>
             </div>
         </div>
-        {% comment %} <div class="overlay"></div> {% endcomment %}
         <div class="container">
             <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
                 <div class="col-md-12 col-sm-12 text-center">

@@ -1038,29 +1038,42 @@ button.alert:hover {
   animation: morph 7s linear infinite alternate;
 }
 
-.bc-banner-video.blobsVideo > .inner {
+/* 2026-08-08：新增 .banner-stage 定位層（被 blobsVideo flex 置中），
+   .inner（morph 動畫容器）與 owl_title_bg_02.svg 都相對它定位。
+   原尺寸/置中角色從 .inner 移到 .banner-stage。 */
+.bc-banner-video.blobsVideo > .banner-stage {
   width: 1080px;
   height: 608px;
-  overflow: hidden;
   position: relative;
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-  animation: morph 7s linear infinite alternate;
   flex-shrink: 0;
 }
 
+/* .inner 填滿 stage：保留 morph 圓角 + overflow:hidden 裁剪影片。
+   注意：SVG 在 .inner 之外（同層級 sibling），故不被裁剪、完整疊在動畫容器上方。 */
+.bc-banner-video.blobsVideo > .banner-stage > .inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: morph 7s linear infinite alternate;
+}
+
 .bc-banner-video video {
-  width: 1080px;
-  height: 608px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
 
 /* 響應式：<1080px 螢幕時等比縮小置中 */
 @media screen and (max-width: 1079.98px) {
-  .bc-banner-video.blobsVideo > .inner,
-  .bc-banner-video video {
+  .bc-banner-video.blobsVideo > .banner-stage {
     width: 92vw;
     height: auto;
+    aspect-ratio: 1080 / 608;
   }
 }
 
