@@ -627,14 +627,14 @@ select.form-control:focus::-ms-value  {
   height: 12em;
 }
 
-@media screen and (min-width: 1196px) { 
+@media screen and (min-width: 1200px) {  /* 2026-08-08 斷點統一：1196 → 1200（Bootstrap xl） */
   .flexable-vh-20  {
     display: block;
     height: 2em;
   }
 }
 
-@media all and (max-width: 1197px) { 
+@media all and (max-width: 1199.98px) {  /* 2026-08-08 斷點統一：1197 → 1199.98 */
   .flexable-vh-20  { 
     display: block;
     height: 12em;
@@ -1757,6 +1757,14 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+/* 2026-08-08 響應式修復：手機上 min-width:600px 超出視窗（fixed 元素雖不造成捲動，但顯示時超寬），改全寬 */
+@media screen and (max-width: 575.98px) {
+  .cart-popup {
+    min-width: 0;
+    width: 92vw;
+  }
 }
 
 .cart-popup.hide {

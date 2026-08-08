@@ -6,6 +6,29 @@
    設計語言: 深色主題、半透明玻璃卡片、金色點綴
    ============================================================ */
 
+/* ===== 品牌響應式斷點基準（2026-08-08 統一）
+   標準斷點（Bootstrap 對齊 + 品牌手機斷點）：
+     ≤480px   品牌手機（bc-components 常用）
+     ≤575.98px Bootstrap sm（手機）
+     ≤767.98px Bootstrap md（平板直）
+     ≤991.98px Bootstrap lg（平板橫/小筆電）
+     ≤1199.98px Bootstrap xl（桌面）
+     ≥1200px  Bootstrap 大桌面
+   既有兼容斷點（保留不更動，避免回歸）：
+     880px   .cm-fixedbtn 第三檔
+     1024px  平板/桌面過渡（style-custom/utilities 大量使用）
+     1250px  大桌面（style-custom）
+     1920px  超大螢幕背景（style-custom .ftco-counter）
+   原則：新 CSS 一律使用標準斷點；既有 CSS 保留但盡量靠攏。 */
+
+/* ===== 全域響應式防護（2026-08-08）
+   防止任何元素水平溢出造成 body 橫向捲動（右側漏邊）。
+   此為最後防線；根因逐一在對應區塊修復。 */
+html,
+body {
+  overflow-x: hidden;
+}
+
 /* ===== svg-bg-container：裁切固定寬度 SVG（.svg-bg-5 680px）造成的水平溢出，防止 body 被撐寬 ===== */
 .svg-bg-container {
   overflow: hidden;

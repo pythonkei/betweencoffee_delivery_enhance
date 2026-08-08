@@ -525,6 +525,7 @@
 
 .playfair_deco .lg_message {
   display: flex;
+  flex-wrap: wrap;  /* 2026-08-08 修復：flex 下長文字不換行會撐開 .mid-banner 造成手機橫向溢出 */
   font-size: 6em;
   letter-spacing: -6px;
   line-height: 0.8; /* 修正：负值无效，现为合理值 */
@@ -802,7 +803,9 @@ optgroup  {
 /* 拆分嵌套规则为独立选择器 */
 
 .img-box .img-4  {
-  height: 56vh; 
+  height: 56vh;
+  max-width: 100%;   /* 2026-08-08 修復：寬圖在手機上溢出（455px > 容器），限制寬度 */
+  object-fit: contain;  /* 保持比例不變形 */
 }
 
 /* Add to Cart Popup box */
@@ -1036,8 +1039,8 @@ optgroup  {
 /* Individual cell sizing */   /* 修正：添加 % 单位 */
 
 /* 移除 Less 变量 @breakpoint，直接使用具体值 */
-/* Responsive */
-@media all and (max-width: 578px)  { 
+/* Responsive（2026-08-08 斷點統一：578 → 575.98 Bootstrap 標準手機斷點） */
+@media all and (max-width: 575.98px)  { 
   .Rtable--collapse   { 
     display: block;
   }
