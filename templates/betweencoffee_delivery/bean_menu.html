@@ -57,7 +57,7 @@
                 <div class="text text-center">
                   <h5 class="mt-3 text-uppercase">{{ bean.name }}</h5>
                   <p class="price"><span>${{ bean.price_200g|floatformat:"0" }}</span></p>
-                  <p style="m-4">{{ bean.description }}</p>
+                  <p class="coffee-menu-desc" style="m-4">{{ bean.description }}</p>
                   <form action="{% url 'bean' bean.id %}" method="post" class="pt-2">
                       {% csrf_token %}
                       <a href="{% url 'bean' bean.id %}" class="btn btn-primary btn-outline-primary">落單</a>

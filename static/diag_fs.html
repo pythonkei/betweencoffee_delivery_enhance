@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>FS Audit</title>
+<style>body{margin:0;background:#111;color:#ccc;font-family:monospace;font-size:11px;}</style>
+</head>
+<body>
+<script>document.write('<iframe id="f" src="' + (new URLSearchParams(location.search).get('t')||'/') + '" style="width:' + (new URLSearchParams(location.search).get('w')||375) + 'px;height:844px;position:absolute;left:0;top:0;border:0;"></iframe>');</script>
+<pre id="result" style="position:absolute;right:0;top:0;width:420px;white-space:pre-wrap;"></pre>
+<script>
+var ifr = document.getElementById('f');
+function scan() {
+  var out = [];
+  try {
+    var idoc = ifr.contentDocument;
+    var w = ifr.contentWindow;
+    function fs(sel) {
+      var el = idoc.querySelector(sel);
+      return el ? w.getComputedStyle(el).fontSize : 'NA';
+    }
+    out.push('W=' + w.innerWidth);
+    out.push('overflow=' + (idoc.documentElement.scrollWidth > w.innerWidth + 1));
+    out.push('headingH2=' + fs('.heading-section h2'));
+    out.push('subheading=' + fs('.heading-section .subheading'));
+    out.push('menuTitle=' + fs('.menu-wrap .text h5'));
+    out.push('price=' + fs('.menu-wrap .text .price'));
+    out.push('desc=' + fs('.coffee-menu-desc'));
+    out.push('beanDesc=' + fs('.text p'));      // bean_menu 描述（無 class）
+    out.push('btn=' + fs('.btn'));
+    out.push('h1=' + fs('h1'));
+    out.push('coffeeTitle=' + fs('.coffee-title'));
+    out.push('beanTitle=' + fs('.bean-title'));
+    out.push('prodPrice=' + fs('.product-details .price'));
+    out.push('descClamp=' + fs('.bc-description-clamp'));
+  } catch (e) { out.push('ERR ' + e.message); }
+  document.getElementById('result').textContent = out.join('\n');
+}
+ifr.addEventListener('load', function() { setTimeout(scan, 1200); });
+setTimeout(scan, 6000);
+</script>
+</body>
+</html>

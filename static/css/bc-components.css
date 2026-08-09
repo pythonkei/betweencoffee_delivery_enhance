@@ -2795,8 +2795,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 
 .bc-welcome-greeting {
   color: #ffffff;
-  font-size: 1.1rem;  /* 加大 20%（1rem→1.2rem） */
-  font-weight: 500;
+  font-size: 1rem;  /* 加大 20%（1rem→1.2rem） */
+  font-weight: 400;
   line-height: 1;  /* 讓文字高度貼近字體大小，垂直中心與頭像對齊 */
   display: inline-flex;
   align-items: center;
@@ -2937,20 +2937,20 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     font-size: 1.3rem;  /* user icon 再加大 20%（34→41px） */
   }
   .bc-welcome-greeting {
-    font-size: 0.7rem;  /* 加大 20%（0.75→0.9rem） */
+    font-size: 0.6rem;  /* 加大 20%（0.75→0.9rem） */
   }
   .bc-welcome-points {
     font-size: 0.68rem;
   }
   .bc-welcome-imgbox {
     width: 110px;
-    min-height: 76px;
+    min-height: 70px;
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
-    width: 110px;
-    height: 110px;
-    top: -55px;  /* 上移避免與文字重疊（bottom 55px，距文字約 8px） */
+    width: 98px;
+    height: 98px;
+    top: -45px;  /* 上移避免與文字重疊（bottom 55px，距文字約 8px） */
   }
   .bc-welcome-img-link {
     top: -55px;

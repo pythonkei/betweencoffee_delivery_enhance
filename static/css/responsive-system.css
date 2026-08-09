@@ -71,3 +71,11 @@ img {
 .bc-btn,
 .bc-btn-lg,
 .bc-btn-sm { font-size: var(--bc-fs-md); }
+
+/* ===== 詳情頁（coffee.html / bean.html）===== */
+.heading-single-product h2 { font-size: var(--bc-fs-2xl); }
+.heading-single-product h4 { font-size: var(--bc-fs-lg); }
+.coffee-title,
+.bean-title { font-size: var(--bc-fs-2xl); }
+.product-details .price { font-size: var(--bc-fs-xl); }
+.bc-description-clamp { font-size: var(--bc-fs-md); }
