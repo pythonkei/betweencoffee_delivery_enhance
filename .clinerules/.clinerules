@@ -430,6 +430,10 @@ Phase 3D：新功能（優先級：低）
 ├── [x] 導覽列 navbar-brand 手機響應式縮小 — ✅ 2026-08-09
 │   ├── [x] ≤767.98 30px、≤575.98 22px（桌面 40px）
 │   └── [x] 驗證：375/390/430px=22px、700px=30px、與 hamburger 無重疊（base.html v=20260808e）
+├── [x] navbar logo 與菜單垂直居中強化 — ✅ 2026-08-09
+│   ├── [x] .ftco_navbar .container align-items:center；brand/toggler/nav/nav-item align-self:center
+│   ├── [x] .nav-link 改 flex + align-items:center（icon 與文字垂直對齊）
+│   └── [x] 驗證：375px logo 46.5=toggler 46、1200px logo 70=菜單 70.5（base.html v=20260808f）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
