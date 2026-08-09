@@ -64,7 +64,7 @@ img {
 .menu-wrap .text h5 a { font-size: var(--bc-fs-lg); }
 .menu-wrap .text .price { font-size: var(--bc-fs-md); }
 .menu-wrap .text .coffee-menu-desc,
-.coffee-menu-desc { font-size: var(--bc-fs-sm); }
+.coffee-menu-desc { font-size: var(--bc-fs-md); }
 
 /* 按鈕（Bootstrap .btn + 品牌 .bc-btn 系列） */
 .btn,
