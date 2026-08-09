@@ -1,0 +1,48 @@
+/* ============================================================
+   responsive-system.css — Between Coffee 全域響應式設計尺度系統
+   建立日期: 2026-08-09
+   目的: 統一全站字體/間距/圖片的響應式縮放，取代逐元件 @media 覆蓋。
+   載入順序: 必須放在所有 CSS 之後（最後載入），以覆蓋既有固定值。
+
+   斷點基準（與 bc-components.css 頂部一致）:
+     ≤480px    品牌手機
+     ≤575.98px Bootstrap sm（手機）
+     ≤767.98px Bootstrap md（平板直）
+     ≤991.98px Bootstrap lg（平板橫/小筆電）
+     ≤1199.98px Bootstrap xl（桌面）
+     ≥1200px   大桌面
+   ============================================================ */
+
+:root {
+  /* ===== 響應式字體尺度（clamp: 375px→~75%、1440px→100%）===== */
+  --bc-fs-xs:   clamp(9px,  0.3vw + 7.9px,  12px);   /* 徽章/小標籤 */
+  --bc-fs-sm:   clamp(10px, 0.35vw + 9.2px, 14px);   /* 輔助文字/欄位標籤 */
+  --bc-fs-md:   clamp(12px, 0.4vw + 10.6px, 16px);   /* 內文（1rem） */
+  --bc-fs-base: clamp(13px, 0.45vw + 11.9px, 18px);  /* 主要內文/按鈕 */
+  --bc-fs-lg:   clamp(15px, 0.5vw + 13.1px, 20px);   /* 子標題/商品名稱 */
+  --bc-fs-xl:   clamp(19px, 0.65vw + 17px, 26px);    /* 標題/價格強調 */
+  --bc-fs-2xl:  clamp(25px, 0.85vw + 22px, 34px);    /* 大標題 */
+  --bc-fs-3xl:  clamp(31px, 1.05vw + 27px, 42px);    /* 區塊標題 */
+  --bc-fs-4xl:  clamp(37px, 1.25vw + 32px, 50px);    /* 頁首/橫幅標題 */
+
+  /* ===== 響應式間距尺度 ===== */
+  --bc-space-xs:  clamp(8px,  0.3vw + 6.8px,  12px);
+  --bc-space-sm:  clamp(12px, 0.5vw + 10px,   20px);
+  --bc-space-md:  clamp(20px, 1vw + 16px,     32px);
+  --bc-space-lg:  clamp(32px, 2vw + 24px,     56px);
+  --bc-space-xl:  clamp(48px, 4vw + 32px,     96px);
+  --bc-space-2xl: clamp(64px, 6vw + 40px,     128px);
+}
+
+/* ===== html 基準字體（讓所有 rem 單位隨視窗自動縮放）===== */
+html {
+  font-size: clamp(14px, 0.3vw + 13.5px, 16px);
+}
+
+/* ===== 全域圖片響應式（防止圖片溢出容器）===== */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===== P2 將陸續加入：高影響元件（標題/按鈕/卡片/導覽）套用變數 ===== */
