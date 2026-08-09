@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月9日（更新：全域響應式審計修復 + 斷點統一）
+> **最後更新**: 2026年8月9日（更新：全域響應式審計修復 + slider/navbar 響應式調整 + 按鈕/Bean 隱藏 + 分支合併推送）
 
 ## 開發者背景與方法論
 
@@ -442,6 +442,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] .owl-carousel.home-slider .slider-item .btn { display:none }（3 個 slider 按鈕全隱藏）
 │   ├── [x] 順帶修復 navbar-brand 註解 /* 丟失的無效 CSS
 │   └── [x] 驗證：7 個按鈕皆 display:none、visible=false（base.html v=20260808h）
+├── [x] 隱藏首頁 Bean 咖啡豆區塊 + 分支合併推送 — ✅ 2026-08-09
+│   ├── [x] index.html Bean 區塊 <section hidden>（使用者並行修改）
+│   ├── [x] fix/responsive-breakpoints（7 commits）Fast-forward 合併回 main
+│   └── [x] 推送 547abc5..263b052 main -> main（Render autoDeploy 已觸發）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
