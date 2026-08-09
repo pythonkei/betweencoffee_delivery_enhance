@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月9日（更新：全域響應式審計修復 + slider/navbar 響應式調整 + 按鈕/Bean 隱藏 + 分支合併推送）
+> **最後更新**: 2026年8月9日（更新：響應式系統分支 feat/responsive-system 完成並合併 + 各項修復）
 
 ## 開發者背景與方法論
 
@@ -455,6 +455,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] ftco-subpage-banner 手機 padding 7em→1em（heading 375px 101→269px）
 │   ├── [x] coffee_menu 新增 .bc-coffee-all-grid（名稱/描述/按鈕，3欄→2欄→1欄）
 │   └── [x] 驗證：無溢出、btn 12.1/13.7/15.4px（base.html v=20260809g）
+├── [x] 響應式系統分支 feat/responsive-system 完成並合併 — ✅ 2026-08-09
+│   ├── [x] 9 commits：P1 系統 + P2 元件 + P3 驗證 + 各項修復（heading 寬度/卡片網格/按鈕/圖片/desc 字體）
+│   ├── [x] 使用者並行：subpage-banner 手機高度 82vw、背景位置、bc-welcome 字體
+│   └── [x] 合併推送 263b052..e28fb94 main -> main（Render autoDeploy 已觸發）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
