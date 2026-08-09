@@ -244,7 +244,7 @@ body {
   .owl-carousel.home-slider .slider-item .slider-coffee-img { width: min(240px, 55vw); }
 }
 @media screen and (max-width: 575.98px) {
-  .owl-carousel.home-slider .slider-item .slider-coffee-img { width: min(200px, 60vw); }
+  .owl-carousel.home-slider .slider-item .slider-coffee-img { width: min(150px, 45vw); }  /* 2026-08-09：200px→150px 縮小 */
 }
 
 /* ===== 第一個 Slider：文字移動到左下角對齊（左對齊 + 內邊距），圖片保持居中 ===== */
@@ -290,7 +290,17 @@ body {
   .owl-carousel.home-slider .slider-item .slider-first-text { padding: 28px 24px; max-width: 70%; }
 }
 @media screen and (max-width: 575.98px) {
-  .owl-carousel.home-slider .slider-item .slider-first-text { padding: 20px 16px; max-width: 100%; }
+  .owl-carousel.home-slider .slider-item .slider-first-text { padding: 20px 16px; max-width: 65%; }  /* 2026-08-09：100%→65% 讓出空間給照片 */
+  /* 2026-08-09：文字相應縮小（照片縮小後整體協調） */
+  .owl-carousel.home-slider .slider-item .slider-first-text .subheading { font-size: 20px; padding-bottom: 6px; }
+  .owl-carousel.home-slider .slider-item .slider-first-text h2 { font-size: 22px; }
+  .owl-carousel.home-slider .slider-item .slider-first-text p { font-size: 14px; }
+  .owl-carousel.home-slider .slider-item .slider-first-text .btn-primary { padding: 0.5rem 1rem; font-size: 0.9rem; }
+  /* 2026-08-09：.slider-text（照片/文字容器）手機高度 = 橫幅高（原 750px 桌面值 → 內容偏下與文字重疊） */
+  .owl-carousel.home-slider .slider-item .slider-text { height: 480px; }
+}
+@media screen and (min-width: 576px) and (max-width: 767.98px) {
+  .owl-carousel.home-slider .slider-item .slider-text { height: 560px; }  /* 2026-08-09：平板高度 = 橫幅高 */
 }
 
 /* ===== FPS 支付頁 logo（替代 inline style，SVG 原色顯示） ===== */
@@ -2887,7 +2897,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     font-size: 1.3rem;  /* user icon 再加大 20%（34→41px） */
   }
   .bc-welcome-greeting {
-    font-size: 0.9rem;  /* 加大 20%（0.75→0.9rem） */
+    font-size: 0.7rem;  /* 加大 20%（0.75→0.9rem） */
   }
   .bc-welcome-points {
     font-size: 0.68rem;
