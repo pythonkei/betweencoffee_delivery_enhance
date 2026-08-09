@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月9日（更新：響應式系統分支 feat/responsive-system 完成並合併 + 各項修復）
+> **最後更新**: 2026年8月10日（更新：SALON SEARCH 區塊整合 + 菜單網格響應式優化 + 各項修復）
 
 ## 開發者背景與方法論
 
@@ -459,6 +459,30 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 9 commits：P1 系統 + P2 元件 + P3 驗證 + 各項修復（heading 寬度/卡片網格/按鈕/圖片/desc 字體）
 │   ├── [x] 使用者並行：subpage-banner 手機高度 82vw、背景位置、bc-welcome 字體
 │   └── [x] 合併推送 263b052..e28fb94 main -> main（Render autoDeploy 已觸發）
+├── [x] bean_menu 使用 Z 字對角網格（與 coffee_menu 相同）— ✅ 2026-08-10
+│   ├── [x] bean_menu.html extends 改 layouts/blank.html + 商品區換 .coffee-menu-zgrid（每 4 個一組 = 大 小 小 大）
+│   ├── [x] 零新增 CSS：完全複用 .coffee-z-*（bc-components.css）響應式規則
+│   └── [x] 驗證：cell 結構與 coffee_menu 逐標籤一致、7 斷點響應式狀態一致、無溢出
+├── [x] title_bg_img_02.svg 行動端裁切修復 — ✅ 2026-08-10
+│   ├── [x] 根因：.svg-bg-2 基礎 background-size:cover + 手機 width:300px → 直式 SVG 放大裁切
+│   ├── [x] responsive-system.css ≤767px 手機改 auto+650px+top:-20px（與 .svg-bg 一致）+ base.html?v=20260809k
+│   └── [x] 驗證：375/767px 兩頁一致無裁切；桌面維持 cover 不受影響
+├── [x] 移除「所有咖啡/所有烘焙豆」section — ✅ 2026-08-10
+│   ├── [x] coffee_menu/bean_menu.html 移除 .bc-coffee-all-grid section；responsive-system.css 清理 -46 行
+│   └── [x] 驗證：兩頁無 bc-coffee 殘留、Z 網格保留、無溢出（base.html?v=20260809l）
+├── [x] ani_bean_line_il 動畫全頁面橫跨修復 — ✅ 2026-08-10
+│   ├── [x] 根因：absolute 無 left/top 落在 .post_archive（flex row-reverse）→ static position 偏移（只顯示 2/3）
+│   ├── [x] 移到 .ftco-subpage-section 直接子層 + left:0 + width:100vw；selector 加 .ftco-subpage-section >
+│   └── [x] 驗證：1280/768/390px 全寬、無溢出（animate-custom.css?v=20260810a）
+├── [x] demido.jp SALON SEARCH aside 整合至首頁 — ✅ 2026-08-10
+│   ├── [x] 新增 bc-search.css/js + search_img01/02/03.png（咖啡圖）+ bc_search_txt_pc/sp.svg；GSAP CDN
+│   ├── [x] index.html 加 <aside class="bc-search">（連結→coffee_menu、文字品牌化、SALON_SEARCH SVG 保留原樣）
+│   └── [x] 驗證：桌面 480px/手機 1160-900px、PC/SP 標題切換、hover is-on/is-out 正常、無溢出
+├── [x] SALON SEARCH 滑鼠移出動畫修復 — ✅ 2026-08-10
+│   ├── [x] 根因 1：.is-out 缺 transform（demido 有 -60%/-60%/-150%）
+│   ├── [x] 根因 2：JS getComputedStyle transitionDuration 恆 0s → 立即移除 class 中斷動畫
+│   ├── [x] 修復：補 is-out transform（桌面/手機 SP 位移）+ JS 改監聽 transitionend + setTimeout 保險 + done 旗標
+│   └── [x] 驗證：CDP 追蹤 transform 序列完整播放（is-on 浮入→is-out 上移→1.3s 重置）（index.html?v=20260810b）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

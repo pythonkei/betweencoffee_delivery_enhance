@@ -99,7 +99,8 @@
 	position: absolute;
   display: flex;
 	overflow: hidden;
-	width: 98.5vw;
+	width: 100vw;
+	left: 0;
   flex-wrap: nowwrap;
 	height: 30vw;
 	z-index: -1;
@@ -116,7 +117,8 @@
   opacity: .1;
 	z-index: 0;
 }
-.post_archive:nth-child(odd) .ani_bean_line_il:after {
+.post_archive:nth-child(odd) .ani_bean_line_il:after,
+.ftco-subpage-section > .ani_bean_line_il:after {
 	background-image: url(../images/ani_bean.svg);
 	animation: loop-line01 2s infinite cubic-bezier(0.87, 0, 0.13, 1) 0s both;
 	bottom: calc(8vw - 2vw);
@@ -125,7 +127,8 @@
 	position: absolute;
   display: flex;
 	overflow: hidden;
-	width: 98.5vw;
+	width: 100vw;
+	left: 0;
   flex-wrap: nowwrap;
 	height: 30vw;
 	z-index: -1;
@@ -142,7 +145,8 @@
   opacity: .1;
 	z-index: 0;
 }
-.post_archive:nth-child(odd) .ani_coffee_line_il:after {
+.post_archive:nth-child(odd) .ani_coffee_line_il:after,
+.ftco-subpage-section > .ani_coffee_line_il:after {
 	background-image: url(../images/ani_coffee.svg);
 	animation: loop-line01 2s infinite cubic-bezier(0.87, 0, 0.13, 1) 0s both;
 	bottom: calc(8vw - 2vw);

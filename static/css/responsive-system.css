@@ -89,51 +89,22 @@ img {
   .ftco-subpage-banner { padding: 5em 1em 1.5em 1em; }
 }
 
-/* ===== 所有咖啡 小卡片網格（2026-08-09，coffee_menu Z 網格下方）===== */
-.bc-coffee-all-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--bc-space-md);
-  margin-top: var(--bc-space-lg);
+/* ===== bean_menu banner SVG（title_bg_img_02.svg）手機端裁切修復（2026-08-09）
+   style-bootstrap.css `.subpage-banner-h500 .svg-bg-2` 基礎規則 background-size:cover
+   + 手機 width:300px / top:-150px → 直式 SVG(540×700) 被強制放大、上下裁切。
+   與 coffee_menu `.svg-bg` 手機端一致：background-size:auto + width:650px 完整顯示不裁切。 */
+@media screen and (max-width: 767px) {
+  .subpage-banner-h500 .svg-bg-2 {
+    background-size: auto;
+    background-position: center;
+    top: -20px;
+    left: -18em;
+    right: 0;
+    width: 650px;
+    height: auto;
+  }
 }
-.bc-coffee-card {
-  background: var(--bc-bg-card);
-  border: 1px solid var(--bc-border);
-  border-radius: var(--bc-radius);
-  padding: var(--bc-space-md);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--bc-space-sm);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.bc-coffee-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  background: var(--bc-bg-card-hover);
-}
-.bc-coffee-card-name {
-  font-size: var(--bc-fs-lg);
-  color: var(--bc-text);
-  font-weight: 600;
-  margin: 0;
-}
-.bc-coffee-card-desc {
-  font-size: var(--bc-fs-sm);
-  color: var(--bc-text-muted);
-  line-height: 1.6;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.bc-coffee-card .bc-coffee-card-btn {
-  margin-top: auto;
-}
+
 /* Z 網格卡片按鈕：手機避免全寬（display:block 撐滿 → inline-block） */
 .coffee-z-cell .menu-wrap .text form .btn {
   display: inline-block;
@@ -146,10 +117,4 @@ img {
     width: 180px !important;
     max-width: none !important;  /* 避免 % 相對 .menu-img 造成循環縮小 */
   }
-}
-@media screen and (max-width: 767.98px) {
-  .bc-coffee-all-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media screen and (max-width: 575.98px) {
-  .bc-coffee-all-grid { grid-template-columns: 1fr; }
 }

@@ -1,0 +1,241 @@
+/* ============================================================
+   bc-search.css — 首頁 SALON/STORE SEARCH 大區塊
+   參考 demido.jp <aside class="search"> 佈局（保留原樣風格）
+   + 品牌色系統（金色 #c49b63 / 黑底 #0e0e0e）
+   + 背景圖替換為咖啡主題（search_img01/02/03.png）
+   動畫：GSAP is-on/is-out hover 浮動 + CSS floating 上浮
+   ============================================================ */
+
+/* ===== 容器與外層 ===== */
+.bc-search {
+  padding: 40px;
+}
+@media screen and (max-width: 768px) {
+  .bc-search { padding: 24px; }
+}
+
+.bc-search-link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  height: 480px;
+  padding: 40px;
+  border-radius: 24px;
+  color: var(--bc-text);
+  text-decoration: none;
+  background-color: var(--bc-bg);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bc-search-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+.bc-search-link:hover,
+.bc-search-link:focus,
+.bc-search-link:active {
+  color: var(--bc-text);
+}
+
+/* ===== 背景浮動圖層 ===== */
+.bc-search-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bc-search-bg-img {
+  position: absolute;
+  transition-property: transform;
+  transition-duration: 0ms;
+}
+.bc-search-link.is-on .bc-search-bg-img {
+  transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+.bc-search-link.is-out .bc-search-bg-img {
+  transition-timing-function: cubic-bezier(0.895, 0.03, 0.685, 0.22);
+}
+/* 浮入/浮出 + 旋轉位移（對應 demido is-on/is-out）
+   is-on = 浮入原位；is-out = 向上移出（對應 demido transform 目標） */
+.bc-search-bg-img-01 {
+  top: -258px;
+  left: 718px;
+  width: 262px;
+  transform: translate3d(0, 135%, 0) rotate(10deg);
+}
+.bc-search-link.is-on .bc-search-bg-img-01 {
+  transition-delay: 250ms;
+  transition-duration: 1000ms;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+}
+.bc-search-link.is-out .bc-search-bg-img-01 {
+  transition-delay: 0ms;
+  transition-duration: 1000ms;
+  transform: translate3d(0, -60%, 0) rotate(-10deg);
+}
+.bc-search-bg-img-02 {
+  top: -375px;
+  left: -554px;
+  width: 671px;
+  transform: translate3d(0, 95%, 0) rotate(-20deg);
+}
+.bc-search-link.is-on .bc-search-bg-img-02 {
+  transition-delay: 0ms;
+  transition-duration: 1000ms;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+}
+.bc-search-link.is-out .bc-search-bg-img-02 {
+  transition-delay: 150ms;
+  transition-duration: 1000ms;
+  transform: translate3d(0, -60%, 0) rotate(20deg);
+}
+.bc-search-bg-img-03 {
+  top: 118px;
+  right: -71px;
+  width: 260px;
+  transform: translate3d(0, 140%, 0) rotate(-20deg);
+}
+.bc-search-link.is-on .bc-search-bg-img-03 {
+  transition-delay: 0ms;
+  transition-duration: 1000ms;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+}
+.bc-search-link.is-out .bc-search-bg-img-03 {
+  transition-delay: 300ms;
+  transition-duration: 1000ms;
+  transform: translate3d(0, -150%, 0) rotate(20deg);
+}
+
+/* 背景圖內部：持續上下浮動（floating-type01/02/03） */
+.bc-search-bg-img-01 img { animation: bc-floating-type01 6s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate; }
+.bc-search-bg-img-02 img { animation: bc-floating-type02 10s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate; }
+.bc-search-bg-img-03 img { animation: bc-floating-type03 5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate; }
+
+@keyframes bc-floating-type01 {
+  0%   { transform: translate3d(0, -2.5%, 0) rotate(2deg); }
+  100% { transform: translate3d(0, 2.5%, 0) rotate(-2deg); }
+}
+@keyframes bc-floating-type02 {
+  0%   { transform: translate3d(0, -2.5%, 0); }
+  100% { transform: translate3d(0, 2.5%, 0); }
+}
+@keyframes bc-floating-type03 {
+  0%   { transform: translate3d(0, -5%, 0); }
+  100% { transform: translate3d(0, 5%, 0); }
+}
+
+/* ===== 內文層 ===== */
+.bc-search-inner {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+.bc-search-inner-top { align-items: flex-start; }
+.bc-search-inner-bottom { align-items: flex-end; }
+
+.bc-search-ttl { width: 717px; max-width: 100%; color: #fff; }
+.bc-search-ttl svg { width: 100%; height: auto; display: block; }
+
+.bc-search-lead { width: 156px; }
+.bc-search-lead img,
+.bc-search-lead picture,
+.bc-search-lead picture img { width: 100%; height: auto; display: block; }
+
+/* 響應式標題切換：PC/SP 各顯示一版（對應 demido c-display-pc/sp） */
+@media screen and (max-width: 768px) {
+  .bc-search-ttl .c-display-pc { display: none; }
+  .bc-search-ttl .c-display-sp { display: block; }
+}
+@media screen and (min-width: 768.02px) {
+  .bc-search-ttl .c-display-pc { display: block; }
+  .bc-search-ttl .c-display-sp { display: none; }
+}
+
+.bc-search-txt {
+  width: 480px;
+  margin-bottom: -8px;
+  font-size: 1rem;
+  line-height: 2;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* 圓形箭頭 icon */
+.bc-search-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+  color: var(--bc-bg);
+  flex-shrink: 0;
+}
+.bc-search-icon::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  content: "";
+  background-color: var(--bc-gold);
+  border-radius: 50%;
+  transition: transform 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.bc-search-link:hover .bc-search-icon::before {
+  transform: scale(0.9);
+}
+.bc-search-icon svg {
+  position: relative;
+  width: 32px;
+  height: auto;
+}
+.bc-search-link:hover .bc-search-icon svg {
+  animation: bc-btn-hover-arrow02 500ms cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+/* 箭頭 hover 動畫 keyframes */
+@keyframes bc-btn-hover-arrow02 {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(0, -30%, 0); opacity: 0; }
+  51%  { transform: translate3d(0, 30%, 0); opacity: 0; }
+  100% { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+/* ===== 響應式（≤768px 手機）===== */
+@media screen and (max-width: 768px) {
+  .bc-search-link {
+    height: 1160px;
+    padding: 60px;
+  }
+  .bc-search-bg-img-01 { top: 420px; left: 283px; width: 225px; }
+  .bc-search-bg-img-02 { top: -30px; left: -560px; width: 672px; }
+  .bc-search-bg-img-03 { top: 151px; right: -99px; width: 263px; }
+  /* 手機版 is-out：對應 demido SP 移出位移（較大幅度向上移出） */
+  .bc-search-link.is-out .bc-search-bg-img-01 { transform: translate3d(0, -140%, 0) rotate(-10deg); }
+  .bc-search-link.is-out .bc-search-bg-img-02 { transform: translate3d(0, -95%, 0) rotate(20deg); }
+  .bc-search-link.is-out .bc-search-bg-img-03 { transform: translate3d(0, -160%, 0) rotate(20deg); }
+  .bc-search-inner-top { flex-direction: column; }
+  .bc-search-inner-bottom { align-items: flex-end; }
+  .bc-search-ttl { width: 100%; }
+  .bc-search-lead { width: 539px; max-width: 100%; margin-top: 30px; }
+  .bc-search-txt { width: 360px; font-size: 1.25rem; }
+  .bc-search-icon { width: 150px; height: 150px; }
+  .bc-search-icon svg { width: 30px; }
+}
+
+/* ===== 響應式（≤575.98px）===== */
+@media screen and (max-width: 575.98px) {
+  .bc-search-link { padding: 40px; height: 900px; }
+  .bc-search-ttl { width: 100%; }
+  .bc-search-txt { width: 100%; font-size: 1.1rem; }
+  .bc-search-icon { width: 120px; height: 120px; }
+  .bc-search-bg-img-01 { left: auto; right: 20px; width: 180px; }
+  .bc-search-bg-img-02 { left: -420px; width: 500px; }
+  .bc-search-bg-img-03 { right: -60px; width: 200px; }
+}
+
