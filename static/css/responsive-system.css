@@ -46,3 +46,28 @@ img {
 }
 
 /* ===== P2 將陸續加入：高影響元件（標題/按鈕/卡片/導覽）套用變數 ===== */
+
+/* ===== P2：高影響元件套用響應式字體變數（2026-08-09） ===== */
+
+/* 區塊/頁面標題（首頁「最強人氣」、菜單/咖啡豆 banner 共用 .heading-section） */
+.heading-section h2 { font-size: var(--bc-fs-3xl); }
+.heading-section p  { font-size: var(--bc-fs-md); }
+/* Mogra 裝飾 subheading（58px 桌面 → 手機 ~36px，特例用 clamp） */
+.heading-section .subheading {
+  font-size: clamp(34px, 2vw + 28px, 58px);
+}
+
+/* 商品卡片標題/價格（coffee_menu 用 h5、menu-wrap 通用 h3/h5） */
+.menu-wrap .text h3,
+.menu-wrap .text h5,
+.menu-wrap .text h3 a,
+.menu-wrap .text h5 a { font-size: var(--bc-fs-lg); }
+.menu-wrap .text .price { font-size: var(--bc-fs-md); }
+.menu-wrap .text .coffee-menu-desc,
+.coffee-menu-desc { font-size: var(--bc-fs-sm); }
+
+/* 按鈕（Bootstrap .btn + 品牌 .bc-btn 系列） */
+.btn,
+.bc-btn,
+.bc-btn-lg,
+.bc-btn-sm { font-size: var(--bc-fs-md); }
