@@ -134,6 +134,11 @@ img {
 .bc-coffee-card .bc-coffee-card-btn {
   margin-top: auto;
 }
+/* Z 網格卡片按鈕：手機避免全寬（display:block 撐滿 → inline-block） */
+.coffee-z-cell .menu-wrap .text form .btn {
+  display: inline-block;
+  width: auto;
+}
 @media screen and (max-width: 767.98px) {
   .bc-coffee-all-grid { grid-template-columns: repeat(2, 1fr); }
 }
