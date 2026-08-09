@@ -3168,9 +3168,10 @@ h1, h2, h3, h4, h5,
       top: 0; }
 }
 
-  .ftco-navbar-light .navbar-brand  { 
+  .ftco-navbar-light .navbar-brand  {
     color: #fff;
-    font-family: "Mogra", Arial, sans-serif; }
+    font-family: "Mogra", Arial, sans-serif;
+    }
 
     @media (min-width: 768px)  { 
       .ftco-navbar-light .navbar-brand  { 
@@ -3235,14 +3236,15 @@ h1, h2, h3, h4, h5,
       opacity: 1;
       background: var(--brand-primary); }
 
-  .ftco-navbar-light .navbar-toggler  { 
+  .ftco-navbar-light .navbar-toggler  {
     border: none;
     color: rgba(255, 255, 255, 0.8) !important;
     cursor: pointer;
     padding-right: 0;
     text-transform: uppercase;
-    font-size: 16px;
-    letter-spacing: .1em; }
+    font-size: 15px;
+    /* letter-spacing: .1em; */
+    }
 
     .ftco-navbar-light .navbar-toggler:hover, .ftco-navbar-light .navbar-toggler:focus  { 
       outline: none !important; }
