@@ -434,6 +434,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] .ftco_navbar .container align-items:center；brand/toggler/nav/nav-item align-self:center
 │   ├── [x] .nav-link 改 flex + align-items:center（icon 與文字垂直對齊）
 │   └── [x] 驗證：375px logo 46.5=toggler 46、1200px logo 70=菜單 70.5（base.html v=20260808f）
+├── [x] navbar logo 略高修正（glyph 垂直補償）— ✅ 2026-08-09
+│   ├── [x] 根因：Mogra glyph ascent 大 + line-height:1 → 視覺偏上 4px
+│   ├── [x] 修正：navbar-brand padding-top +4px / padding-bottom -4px（box 高不變）
+│   └── [x] 驗證：375px logo 47=navbar 47、768px 52≈54、1200px 73≈71（base.html v=20260808g）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

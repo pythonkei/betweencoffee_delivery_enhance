@@ -56,6 +56,12 @@ body {
   justify-content: center;
   gap: 6px;
 }
+/* 2026-08-09：logo 略高修正 — Mogra glyph ascent 較大，line-height:1 下視覺偏上 ~4px
+   增加 padding-top / 減少 padding-bottom（總和維持 box 高），讓文字下移垂直居中 */
+.ftco_navbar .navbar-brand {
+  padding-top: 0.5625rem;    /* 0.3125rem + 0.25rem（下移補償） */
+  padding-bottom: 0.0625rem; /* 0.3125rem - 0.25rem */
+}
 
 /* ===== svg-bg-container：裁切固定寬度 SVG（.svg-bg-5 680px）造成的水平溢出，防止 body 被撐寬 ===== */
 .svg-bg-container {
