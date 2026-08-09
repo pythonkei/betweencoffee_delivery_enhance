@@ -446,6 +446,11 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] index.html Bean 區塊 <section hidden>（使用者並行修改）
 │   ├── [x] fix/responsive-breakpoints（7 commits）Fast-forward 合併回 main
 │   └── [x] 推送 547abc5..263b052 main -> main（Render autoDeploy 已觸發）
+├── [x] 全域響應式設計尺度系統（P1-P3）— ✅ 2026-08-09（分支 feat/responsive-system）
+│   ├── [x] P1: responsive-system.css（--bc-fs-* / --bc-space-* 變數 + html 基準 + img max-width）
+│   ├── [x] P2: heading-section / menu-wrap / btn 套用變數（375px h2 40→31px、subheading 58→35.5px）
+│   ├── [x] P3: 全站驗證矩陣 9 頁面 × 3 斷點無溢出
+│   └── [x] 教訓：覆蓋需注意 specificity（.coffee-menu-desc）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
