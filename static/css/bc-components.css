@@ -29,6 +29,15 @@ body {
   overflow-x: hidden;
 }
 
+/* ===== 導覽列 logo（navbar-brand）響應式縮小（2026-08-09）
+   桌面 40px（style-bootstrap）在手機過大，依斷點漸進縮小 */
+@media screen and (max-width: 767.98px) {
+  .navbar-brand { font-size: 30px; }
+}
+@media screen and (max-width: 575.98px) {
+  .navbar-brand { font-size: 22px; }
+}
+
 /* ===== svg-bg-container：裁切固定寬度 SVG（.svg-bg-5 680px）造成的水平溢出，防止 body 被撐寬 ===== */
 .svg-bg-container {
   overflow: hidden;
@@ -2918,7 +2927,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     height: 110px;
   }
   .bc-last-order {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 }
 
