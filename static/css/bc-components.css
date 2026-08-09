@@ -63,6 +63,12 @@ body {
   padding-bottom: 0.0625rem; /* 0.3125rem - 0.25rem */
 }
 
+/* ===== 隱藏 home-slider 橫幅內按鈕（2026-08-09）
+   三個 slider 的「立即落單/我們的配方/了解更多」按鈕全部隱藏 */
+.owl-carousel.home-slider .slider-item .btn {
+  display: none;
+}
+
 /* ===== svg-bg-container：裁切固定寬度 SVG（.svg-bg-5 680px）造成的水平溢出，防止 body 被撐寬 ===== */
 .svg-bg-container {
   overflow: hidden;
