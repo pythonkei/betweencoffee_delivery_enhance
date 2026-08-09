@@ -139,6 +139,14 @@ img {
   display: inline-block;
   width: auto;
 }
+/* Z 網格卡片圖片：手機縮小（原大卡 281px/小卡 260px 佔 cell 90% 太大） */
+@media screen and (max-width: 575.98px) {
+  .coffee-z-cell.coffee-z-large .menu-wrap .menu-img img,
+  .coffee-z-cell.coffee-z-small .menu-wrap .menu-img img {
+    width: 180px !important;
+    max-width: none !important;  /* 避免 % 相對 .menu-img 造成循環縮小 */
+  }
+}
 @media screen and (max-width: 767.98px) {
   .bc-coffee-all-grid { grid-template-columns: repeat(2, 1fr); }
 }
