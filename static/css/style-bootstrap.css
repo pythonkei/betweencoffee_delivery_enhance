@@ -3349,11 +3349,12 @@ h1, h2, h3, h4, h5,
     z-index: 0; }
 
   @media (max-width: 767.98px)  { 
-    .subpage-banner-h500  { 
+    .subpage-banner-h500  {
       position: relative;
       display: block;
-      /* height: 300px; */
-      z-index: 0; }
+      height: 82vw;
+      z-index: 0;
+      }
 }
 
 
@@ -3453,14 +3454,14 @@ h1, h2, h3, h4, h5,
       background-position: center, center, 100%, 100%;
       top: -20px;
       bottom: 0;
-      left: -23em;
+      left: -18em;
       right: 0;
       width: 650px;
       height: auto; }
 }
 
 
-  .subpage-banner-h500 .svg-bg-2 { 
+  .subpage-banner-h500 .svg-bg-2 {
     position: absolute;
     /* top: -30em; */
     /* bottom: 0; */
@@ -3490,13 +3491,13 @@ h1, h2, h3, h4, h5,
 }
 
   @media screen and (max-width: 767px) { 
-    .subpage-banner-h500 .svg-bg-2 { 
-      top: -280px;
+    .subpage-banner-h500 .svg-bg-2 {
+      top: -150px;
       bottom: 0;
-      left: -18em;
+      left: -19em;
       right: 0;
-      width: 490px;
-      height: auto;
+      width: 300px;
+      /* height: auto; */
     }
 }
 
