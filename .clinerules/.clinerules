@@ -451,6 +451,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] P2: heading-section / menu-wrap / btn 套用變數（375px h2 40→31px、subheading 58→35.5px）
 │   ├── [x] P3: 全站驗證矩陣 9 頁面 × 3 斷點無溢出
 │   └── [x] 教訓：覆蓋需注意 specificity（.coffee-menu-desc）
+├── [x] heading-section 手機寬度修復 + 所有咖啡卡片網格 — ✅ 2026-08-09
+│   ├── [x] ftco-subpage-banner 手機 padding 7em→1em（heading 375px 101→269px）
+│   ├── [x] coffee_menu 新增 .bc-coffee-all-grid（名稱/描述/按鈕，3欄→2欄→1欄）
+│   └── [x] 驗證：無溢出、btn 12.1/13.7/15.4px（base.html v=20260809g）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

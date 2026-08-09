@@ -79,3 +79,64 @@ img {
 .bean-title { font-size: var(--bc-fs-2xl); }
 .product-details .price { font-size: var(--bc-fs-xl); }
 .bc-description-clamp { font-size: var(--bc-fs-md); }
+
+/* ===== subpage banner 手機 padding 修復（2026-08-09）
+   原 7em（112px）左右 padding 在手機擠壓內容（heading-section 只剩 101px → 文字換行） */
+@media screen and (max-width: 767.98px) {
+  .ftco-subpage-banner { padding: 6em 1.5em 2em 1.5em; }
+}
+@media screen and (max-width: 575.98px) {
+  .ftco-subpage-banner { padding: 5em 1em 1.5em 1em; }
+}
+
+/* ===== 所有咖啡 小卡片網格（2026-08-09，coffee_menu Z 網格下方）===== */
+.bc-coffee-all-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--bc-space-md);
+  margin-top: var(--bc-space-lg);
+}
+.bc-coffee-card {
+  background: var(--bc-bg-card);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius);
+  padding: var(--bc-space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--bc-space-sm);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bc-coffee-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  background: var(--bc-bg-card-hover);
+}
+.bc-coffee-card-name {
+  font-size: var(--bc-fs-lg);
+  color: var(--bc-text);
+  font-weight: 600;
+  margin: 0;
+}
+.bc-coffee-card-desc {
+  font-size: var(--bc-fs-sm);
+  color: var(--bc-text-muted);
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bc-coffee-card .bc-coffee-card-btn {
+  margin-top: auto;
+}
+@media screen and (max-width: 767.98px) {
+  .bc-coffee-all-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media screen and (max-width: 575.98px) {
+  .bc-coffee-all-grid { grid-template-columns: 1fr; }
+}
