@@ -524,6 +524,11 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 根因：letter-spacing 0.5px（亞像素字距累積）+ will-change transform（合成層子像素抖動）+ inline-flex sub-pixel 間隙
 │   ├── [x] 修正：移除 letter-spacing、移除 will-change、track 改 display:flex + width:fit-content（與 footer scroller 一致）
 │   └── [x] CDP 驗證 letter_spacing normal、will_change auto、4 次取樣位移完全均勻（每 800ms -16.4px）monotonic true 無跳動（bc-components.css?v=20260810l）
+├── [x] bc-marquee 抖動終極修復：JS rAF 整數像素驅動 — ✅ 2026-08-10
+│   ├── [x] 根因：CSS animation 線性插值非整數位移（-107.306px）→ 文字子像素渲染抖動
+│   ├── [x] 新增 bc-marquee.js：rAF 每幀位移累積 + Math.round 整數像素（物理不抖）+ 模循環 x+=itemW（連續變數無縫）+ resize/fonts.ready 重算 + reduced-motion 停用
+│   ├── [x] CSS animation 保留為無 JS fallback（JS 接管後 animation:none）
+│   └── [x] CDP 驗證 JS 接管、位移全部整數（-82,-83,-84...）、步進均勻 -1px、模循環無跳變（bc-marquee.js?v=20260810a + bc-components.css?v=20260810m）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

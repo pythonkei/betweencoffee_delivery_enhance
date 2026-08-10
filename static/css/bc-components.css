@@ -3227,12 +3227,12 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    bean_menu banner 內的 Mogra 品牌字跑馬燈（取代 footer 複製的 .scroller-box）：
    - Mogra 字體 20px、白色、右→左連續滾動（無縫無限循環）
    - 無縫原理：2 個相同 item（無 padding、無 gap、item 內部與接縫統一 &nbsp; 間距），
-     track translateX(-50%) 恰好移動一個 item 寬 → 接縫 = 內部，視覺連續不中斷
-   - 抖動修復（2026-08-10）：移除 letter-spacing（非整數字距造成亞像素寬度）、
-     移除 will-change:transform（強制合成層在非整數位移時子像素抖動）、
-     track 用 display:flex + width:fit-content（與 footer scroller 一致，寬度確定）
-   - 精簡 padding-block 0.75rem（原 .scroller-box 2rem，避免 banner 被撐過高）
-   - 純 CSS animation，不依賴 main.js */
+     track 位移恰好一個 item 寬時 item2 對齊 item1 → 視覺連續
+   - 抖動修復 v2（2026-08-10）：CSS animation 的線性插值產生非整數位移
+     （如 -107.306px）→ 文字子像素渲染抖動。改為 JS rAF 驅動：
+     每幀位移累積 + Math.round 整數像素 + 模循環（bc-marquee.js）→ 永不抖動。
+   - CSS animation 保留為無 JS fallback（JS 載入後關閉）
+   - 精簡 padding-block 0.75rem（原 .scroller-box 2rem，避免 banner 被撐過高） */
 .bc-marquee {
   overflow: hidden;
   white-space: nowrap;
@@ -3245,7 +3245,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bc-marquee__track {
   display: flex;
   width: fit-content;
-  animation: bcMarqueeScroll 28s linear infinite;
+  animation: bcMarqueeScroll 28s linear infinite;  /* 無 JS fallback（JS 接管後關閉） */
 }
 .bc-marquee__item {
   /* 無 padding/gap：接縫間距與 item 內部（&nbsp;）一致，確保無縫循環 */
@@ -3254,7 +3254,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-/* 減少動態偏好：停止跑馬燈 */
+/* 減少動態偏好：停止跑馬燈（JS 亦會偵測停用） */
 @media (prefers-reduced-motion: reduce) {
   .bc-marquee__track {
     animation: none;
