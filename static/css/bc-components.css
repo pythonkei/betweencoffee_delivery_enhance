@@ -2730,7 +2730,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   gap: 18px;
   background: #292623;
   border-radius: 16px;
-  padding: 14px 14px 14px 24px;
+  padding: 12px 14px 12px 24px;  /* 2026-08-10：上下 14→12px（整體高度降 15%） */
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
   overflow: visible;
 }
@@ -2755,13 +2755,13 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bc-welcome-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;  /* 2026-08-10：10→8px（整體高度降 15%） */
   min-width: 0;
 }
 
 .bc-welcome-avatar {
-  width: 46px;
-  height: 46px;
+  width: 39px;   /* 2026-08-10：46→39px（整體高度降 15%） */
+  height: 39px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -2769,7 +2769,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font-size: 1.8rem;  /* user icon 再加大 20%（38→46px） */
+  font-size: 1.55rem;  /* user icon 再加大 20%（38→46px）；2026-08-10 隨容器縮小 */
   flex-shrink: 0;
   overflow: hidden;  /* 確保社群頭像 img 圓形裁切 */
 }
@@ -2798,7 +2798,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 
 .bc-welcome-greeting {
   color: #ffffff;
-  font-size: 1rem;  /* 加大 20%（1rem→1.2rem） */
+  font-size: 0.85rem;  /* 2026-08-10：1rem→0.85rem（整體高度降 15%） */
   font-weight: 400;
   line-height: 1;  /* 讓文字高度貼近字體大小，垂直中心與頭像對齊 */
   display: inline-flex;
@@ -2807,7 +2807,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 
 .bc-welcome-points {
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.77rem;  /* 2026-08-10：0.9→0.77rem（整體高度降 15%） */
   line-height: 1.2;  /* 緊湊行距 */
 }
 
@@ -2817,7 +2817,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   flex-shrink: 0;
   width: 160px;
   align-self: stretch;
-  min-height: 97px;
+  min-height: 82px;  /* 2026-08-10：97→82px（整體高度降 15%） */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2826,10 +2826,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 
 .bc-welcome-img {
   position: absolute;
-  top: -92px;
+  top: -78px;  /* 2026-08-10：-92→-78px（隨圖片縮小） */
   right: 0;
-  width: 160px;
-  height: 160px;
+  width: 136px;   /* 2026-08-10：160→136px（整體高度降 15%） */
+  height: 136px;
   object-fit: contain;
   z-index: 4;
   display: block;
@@ -2840,10 +2840,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    內層圖片填滿整個連結區塊，避免被 <a> 包住後位移 */
 .bc-welcome-img-link {
   position: absolute;
-  top: -92px;
+  top: -78px;   /* 2026-08-10：-92→-78px（隨圖片縮小） */
   right: 0;
-  width: 160px;
-  height: 160px;
+  width: 136px;  /* 2026-08-10：160→136px（整體高度降 15%） */
+  height: 136px;
   z-index: 4;
   display: block;
   cursor: pointer;
@@ -2864,7 +2864,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   width: 100%;
   text-align: center;
   white-space: nowrap;
-  margin-bottom: 4px;  /* 上移靠近照片（配合圖片 top:-92px） */
+  margin-bottom: 3px;  /* 2026-08-10：4→3px（配合圖片縮小上移） */
 }
 
 .bc-last-order i {
@@ -2886,36 +2886,36 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     width: 92%;
     max-width: none;
     gap: 10px;
-    padding: 7px 12px;
+    padding: 6px 12px;  /* 2026-08-10：7→6px（整體高度降 15%） */
   }
   .bc-last-order {
     margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
   }
   .bc-welcome-avatar {
-    width: 47px;
-    height: 47px;
-    font-size: 1.5rem;  /* user icon 再加大 20%（39→47px） */
+    width: 40px;  /* 2026-08-10：47→40px（整體高度降 15%） */
+    height: 40px;
+    font-size: 1.28rem;  /* user icon 再加大 20%（39→47px）；2026-08-10 隨容器縮小 */
   }
   .bc-welcome-greeting {
-    font-size: 0.98rem;  /* 加大 20%（0.82→0.98rem） */
+    font-size: 0.83rem;  /* 2026-08-10：0.98→0.83rem（整體高度降 15%） */
   }
   .bc-welcome-points {
-    font-size: 0.9rem;
+    font-size: 0.77rem;  /* 2026-08-10：0.9→0.77rem（整體高度降 15%） */
   }
   .bc-welcome-imgbox {
-    width: 140px;
-    min-height: 86px;
+    width: 119px;  /* 2026-08-10：140→119px（整體高度降 15%） */
+    min-height: 73px;  /* 2026-08-10：86→73px */
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
-    width: 140px;
-    height: 140px;
-    top: -77px;  /* 上移避免與文字重疊（bottom 63px，距文字約 8px） */
+    width: 119px;  /* 2026-08-10：140→119px */
+    height: 119px;
+    top: -65px;  /* 2026-08-10：-77→-65px（隨圖片縮小） */
   }
   .bc-welcome-img-link {
-    top: -77px;
-    width: 140px;
-    height: 140px;
+    top: -65px;  /* 2026-08-10：-77→-65px */
+    width: 119px;  /* 2026-08-10：140→119px */
+    height: 119px;
   }
   .bc-last-order {
     font-size: 0.8rem;
@@ -2929,36 +2929,36 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .bc-welcome-panel {
     width: 96%;
     gap: 7px;
-    padding: 6px 8px;
+    padding: 5px 8px;  /* 2026-08-10：6→5px（整體高度降 15%） */
   }
   .bc-last-order {
     margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
   }
   .bc-welcome-avatar {
-    width: 41px;
-    height: 41px;
-    font-size: 1.3rem;  /* user icon 再加大 20%（34→41px） */
+    width: 35px;  /* 2026-08-10：41→35px（整體高度降 15%） */
+    height: 35px;
+    font-size: 1.1rem;  /* user icon 再加大 20%（34→41px）；2026-08-10 隨容器縮小 */
   }
   .bc-welcome-greeting {
-    font-size: 0.6rem;  /* 加大 20%（0.75→0.9rem） */
+    font-size: 0.51rem;  /* 2026-08-10：0.6→0.51rem（整體高度降 15%） */
   }
   .bc-welcome-points {
-    font-size: 0.68rem;
+    font-size: 0.58rem;  /* 2026-08-10：0.68→0.58rem（整體高度降 15%） */
   }
   .bc-welcome-imgbox {
-    width: 110px;
-    min-height: 70px;
+    width: 94px;  /* 2026-08-10：110→94px（整體高度降 15%） */
+    min-height: 60px;  /* 2026-08-10：70→60px */
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
-    width: 98px;
-    height: 98px;
-    top: -45px;  /* 上移避免與文字重疊（bottom 55px，距文字約 8px） */
+    width: 83px;  /* 2026-08-10：98→83px */
+    height: 83px;
+    top: -38px;  /* 2026-08-10：-45→-38px（隨圖片縮小） */
   }
   .bc-welcome-img-link {
-    top: -55px;
-    width: 110px;
-    height: 110px;
+    top: -47px;  /* 2026-08-10：-55→-47px */
+    width: 94px;  /* 2026-08-10：110→94px */
+    height: 94px;
   }
   .bc-last-order {
     font-size: 0.6rem;

@@ -535,6 +535,8 @@ Phase 3D：新功能（優先級：低）
 │   └── [x] CDP 驗證 continuous true（buffer 前後視窗內容一致）、transform 整數無跳變（bc-marquee.js?v=20260810b）
 ├── [x] 首頁第 3 個 slider 影片更改為 coffee_machine.webm — ✅ 2026-08-10
 │   └── [x] index.html 第 3 格 source → static/images/coffee_machine.webm（video/webm，8.3MB/20.4s）；CDP 驗證 currentSrc 正確、readyState 4、無錯誤
+├── [x] bc-welcome-panel 整體高度降低 15% — ✅ 2026-08-10
+│   └── [x] bc-components.css 各斷點高度元素等比縮小 ×0.85（padding/avatar/文字/imgbox/img）；CDP 量測 125→106px / 100→85px / 82→70px（bc-components.css?v=20260810n）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
