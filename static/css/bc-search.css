@@ -23,20 +23,19 @@
   height: 480px;
   padding: 40px;
   border-radius: 24px;
-  color: var(--bc-text);
+  color: #0e0e0e;
   text-decoration: none;
-  background-color: var(--bc-bg);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #171617;
+  /* 2026-08-10：容器改白底 + 取消 hover 上移動畫（移除 transform transition） */
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .bc-search-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 .bc-search-link:hover,
 .bc-search-link:focus,
 .bc-search-link:active {
-  color: var(--bc-text);
+  color: #0e0e0e;
 }
 
 /* ===== 背景浮動圖層 ===== */
@@ -53,6 +52,16 @@
   position: absolute;
   transition-property: transform;
   transition-duration: 0ms;
+  opacity: 0.7;
+}
+/* 2026-08-10：白底容器 → 背景圖柔化（img-02/03 模糊 3px；img-01 取消模糊保持清晰） */
+.bc-search-bg-img img {
+  filter: blur(3px);
+  -webkit-filter: blur(3px);
+}
+.bc-search-bg-img-01 img {
+  filter: none;
+  -webkit-filter: none;
 }
 .bc-search-link.is-on .bc-search-bg-img {
   transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
@@ -63,9 +72,9 @@
 /* 浮入/浮出 + 旋轉位移（對應 demido is-on/is-out）
    is-on = 浮入原位；is-out = 向上移出（對應 demido transform 目標） */
 .bc-search-bg-img-01 {
-  top: -258px;
+  top: -30px;
   left: 718px;
-  width: 262px;
+  width: 320px;
   transform: translate3d(0, 135%, 0) rotate(10deg);
 }
 .bc-search-link.is-on .bc-search-bg-img-01 {
@@ -76,23 +85,23 @@
 .bc-search-link.is-out .bc-search-bg-img-01 {
   transition-delay: 0ms;
   transition-duration: 1000ms;
-  transform: translate3d(0, -60%, 0) rotate(-10deg);
+  transform: translate3d(0, -150%, 0) rotate(-10deg);
 }
 .bc-search-bg-img-02 {
-  top: -375px;
-  left: -554px;
+  top: -20px;
+  left: -354px;
   width: 671px;
-  transform: translate3d(0, 95%, 0) rotate(-20deg);
+  transform: translate3d(0, 95%, 0) rotate(-32deg);
 }
 .bc-search-link.is-on .bc-search-bg-img-02 {
   transition-delay: 0ms;
   transition-duration: 1000ms;
-  transform: translate3d(0, 0, 0) rotate(0deg);
+  transform: translate3d(0, 0, 0) rotate(-18deg);
 }
 .bc-search-link.is-out .bc-search-bg-img-02 {
   transition-delay: 150ms;
   transition-duration: 1000ms;
-  transform: translate3d(0, -60%, 0) rotate(20deg);
+  transform: translate3d(0, -120%, 0) rotate(28deg);
 }
 .bc-search-bg-img-03 {
   top: 118px;
@@ -138,30 +147,40 @@
 .bc-search-inner-top { align-items: flex-start; }
 .bc-search-inner-bottom { align-items: flex-end; }
 
-.bc-search-ttl { width: 717px; max-width: 100%; color: #fff; }
-.bc-search-ttl svg { width: 100%; height: auto; display: block; }
+.bc-search-ttl {
+  width: 717px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* 2026-08-10：取代 SALON_SEARCH SVG 字樣，改用 branding Deco 文字（Between Say 風格） */
+}
+.bc-search-ttl-label {
+  font-family: 'Mogra', cursive;
+  font-size: 2.2rem;
+  letter-spacing: -1px;
+  line-height: 1;
+  color: var(--bc-gold);
+}
+.bc-search-ttl-message {
+  font-family: 'Playfair', 'Noto Serif TC', serif;
+  font-size: 3.4rem;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  color: #ffffff;
+}
 
 .bc-search-lead { width: 156px; }
 .bc-search-lead img,
 .bc-search-lead picture,
 .bc-search-lead picture img { width: 100%; height: auto; display: block; }
 
-/* 響應式標題切換：PC/SP 各顯示一版（對應 demido c-display-pc/sp） */
-@media screen and (max-width: 768px) {
-  .bc-search-ttl .c-display-pc { display: none; }
-  .bc-search-ttl .c-display-sp { display: block; }
-}
-@media screen and (min-width: 768.02px) {
-  .bc-search-ttl .c-display-pc { display: block; }
-  .bc-search-ttl .c-display-sp { display: none; }
-}
-
 .bc-search-txt {
   width: 480px;
   margin-bottom: -8px;
   font-size: 1rem;
   line-height: 2;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* 圓形箭頭 icon */
@@ -184,26 +203,31 @@
   content: "";
   background-color: var(--bc-gold);
   border-radius: 50%;
-  transition: transform 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.bc-search-link:hover .bc-search-icon::before {
-  transform: scale(0.9);
+  transition: transform 500ms cubic-bezier(0.19, 1, 0.22, 1);
 }
 .bc-search-icon svg {
   position: relative;
   width: 32px;
   height: auto;
 }
-.bc-search-link:hover .bc-search-icon svg {
-  animation: bc-btn-hover-arrow02 500ms cubic-bezier(0.19, 1, 0.22, 1) both;
+
+/* hover 動畫（2026-08-10 修正：對齊 demido 原始效果）
+   demido 在 @media(hover:hover) 內：
+   - ::before → scale(0.9) translate3d(0,0,0)
+   - svg → btn-hover-arrow02（箭頭從左下角 -300%,300% 滑入原位） */
+@media (hover: hover) {
+  .bc-search-link:hover .bc-search-icon::before {
+    transform: scale(0.9) translate3d(0, 0, 0);
+  }
+  .bc-search-link:hover .bc-search-icon svg {
+    animation: bc-btn-hover-arrow02 500ms cubic-bezier(0.19, 1, 0.22, 1) both;
+  }
 }
 
-/* 箭頭 hover 動畫 keyframes */
+/* 箭頭 hover 動畫 keyframes（對應 demido btn-hover-arrow02：左下角滑入） */
 @keyframes bc-btn-hover-arrow02 {
-  0%   { transform: translate3d(0, 0, 0); }
-  50%  { transform: translate3d(0, -30%, 0); opacity: 0; }
-  51%  { transform: translate3d(0, 30%, 0); opacity: 0; }
-  100% { transform: translate3d(0, 0, 0); opacity: 1; }
+  0% { transform: translate3d(-300%, 300%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
 /* ===== 響應式（≤768px 手機）===== */
@@ -222,6 +246,8 @@
   .bc-search-inner-top { flex-direction: column; }
   .bc-search-inner-bottom { align-items: flex-end; }
   .bc-search-ttl { width: 100%; }
+  .bc-search-ttl-label { font-size: 1.8rem; }
+  .bc-search-ttl-message { font-size: 2.6rem; }
   .bc-search-lead { width: 539px; max-width: 100%; margin-top: 30px; }
   .bc-search-txt { width: 360px; font-size: 1.25rem; }
   .bc-search-icon { width: 150px; height: 150px; }
@@ -232,6 +258,8 @@
 @media screen and (max-width: 575.98px) {
   .bc-search-link { padding: 40px; height: 900px; }
   .bc-search-ttl { width: 100%; }
+  .bc-search-ttl-label { font-size: 1.5rem; }
+  .bc-search-ttl-message { font-size: 2.2rem; }
   .bc-search-txt { width: 100%; font-size: 1.1rem; }
   .bc-search-icon { width: 120px; height: 120px; }
   .bc-search-bg-img-01 { left: auto; right: 20px; width: 180px; }

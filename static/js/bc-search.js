@@ -25,28 +25,12 @@
             return;
         }
         searchLink.classList.add('is-out');
-        // 等待背景圖（img-03）的 transition 完成後再移除 is-on/is-out，
-        // 讓 is-out 移出動畫完整播放（對應 demido 等待 transitionend）
-        var img03 = searchLink.querySelector('.bc-search-bg-img-03');
-        var done = false;
-        var onTransitionEnd = function () {
-            if (done) {
-                return;
-            }
-            done = true;
+        // 等待 is-out 移出動畫完整播放後移除 class（回到初始隱藏狀態）
+        // 以 setTimeout 為準（多圖 transition-delay 不同，transitionend 不可靠）
+        setTimeout(function () {
             searchLink.classList.remove('is-on', 'is-out');
             isShow = false;
-            if (img03) {
-                img03.removeEventListener('transitionend', onTransitionEnd);
-            }
-        };
-        // transition 可能因 class 衝突而未啟動 → 用 setTimeout 保險移除
-        if (img03) {
-            img03.addEventListener('transitionend', onTransitionEnd);
-            setTimeout(onTransitionEnd, 1500); // is-out 1000ms + delay 300ms
-        } else {
-            onTransitionEnd();
-        }
+        }, 1500); // is-out 1000ms + 最大 delay 300ms
     }
 
     // 桌面 hover
