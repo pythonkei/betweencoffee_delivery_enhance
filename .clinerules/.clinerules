@@ -506,6 +506,11 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] CSS：.slider-item.slider-first .noise-img（index.html 加 slider-first class）各斷點 ×1.61（17vw→27.4vw/min 238→383px、55→88.6vw、65→104.7vw、75→120.8vw；手機維持 92vw cap = container 滿寬）
 │   ├── [x] 教訓：不用 .slider-item:first-child（owl 結構每個 slider-item 都是其 owl-item 的 :first-child 會誤匹配全部），用明確 class
 │   └── [x] CDP 1280/768/375/320 驗證 slider1 383/383/345/294px、slider3 不受影響、svg 白色、無溢出（style-utilities.css?v=20260810f）
+├── [x] bean_menu banner 複製 footer .scroller-box 水平遮罩動畫 — ✅ 2026-08-10
+│   ├── [x] banner container 內加 .scroller-box > .scroller > ul.tag-list.scroller__inner > 2×li；文案品牌化 ROASTED FRESH・BREWED FAST・SERVED FRESH・HUG IN A CUP
+│   ├── [x] 零新增 CSS/JS：複用 .scroller-box 樣式；main.js querySelectorAll('.scroller') 全域初始化（data-animated=true + 複製 li 無縫循環）
+│   ├── [x] 注意：banner 高度被內容自然撐高（桌面 500→701px、手機 82vw→482px），非 overflow 可接受
+│   └── [x] CDP 驗證 data-animated=true、li 4 個、scroll 60s transform 位移中、footer 不受影響、無水平溢出
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
