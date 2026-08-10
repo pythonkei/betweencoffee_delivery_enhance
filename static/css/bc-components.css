@@ -3223,3 +3223,37 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 }
 
+/* ===== 水平跑馬燈 .bc-marquee（2026-08-10）
+   bean_menu banner 內的 Mogra 品牌字跑馬燈（取代 footer 複製的 .scroller-box）：
+   - Mogra 字體 20px、白色、右→左連續滾動（無縫循環，兩個相同 item translateX(-50%)）
+   - 精簡 padding-block 0.75rem（原 .scroller-box 2rem，避免 banner 被撐過高）
+   - 純 CSS animation，不依賴 main.js */
+.bc-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: 'Mogra', cursive;
+  font-size: 20px;
+  color: #fff;
+  letter-spacing: 0.5px;
+  padding-block: 0.75rem;
+  user-select: none;
+}
+.bc-marquee__track {
+  display: inline-flex;
+  will-change: transform;
+  animation: bcMarqueeScroll 28s linear infinite;
+}
+.bc-marquee__item {
+  padding-inline: 0.5rem;
+}
+@keyframes bcMarqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+/* 減少動態偏好：停止跑馬燈 */
+@media (prefers-reduced-motion: reduce) {
+  .bc-marquee__track {
+    animation: none;
+  }
+}
+

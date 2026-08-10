@@ -511,6 +511,11 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 零新增 CSS/JS：複用 .scroller-box 樣式；main.js querySelectorAll('.scroller') 全域初始化（data-animated=true + 複製 li 無縫循環）
 │   ├── [x] 注意：banner 高度被內容自然撐高（桌面 500→701px、手機 82vw→482px），非 overflow 可接受
 │   └── [x] CDP 驗證 data-animated=true、li 4 個、scroll 60s transform 位移中、footer 不受影響、無水平溢出
+├── [x] bean_menu banner 跑馬燈換新：移除 .scroller-box → 自訂 .bc-marquee — ✅ 2026-08-10
+│   ├── [x] 使用者選 Mogra 品牌字 20px、右→左、精簡 padding
+│   ├── [x] bean_menu.html 換 .bc-marquee（2× item 無縫循環）；bc-components.css 新增 .bc-marquee（bcMarqueeScroll 28s、padding-block 0.75rem、prefers-reduced-motion 停用）
+│   ├── [x] 純 CSS animation 不依賴 main.js（vs scroller-box 需 JS 複製 li）
+│   └── [x] CDP 驗證 scroller-box 移除、動畫執行、banner 高度降（701→654px）、跑馬燈 60px、footer 不受影響（bc-components.css?v=20260810j）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
