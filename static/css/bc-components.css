@@ -3228,6 +3228,9 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    - Mogra 字體 20px、白色、右→左連續滾動（無縫無限循環）
    - 無縫原理：2 個相同 item（無 padding、無 gap、item 內部與接縫統一 &nbsp; 間距），
      track translateX(-50%) 恰好移動一個 item 寬 → 接縫 = 內部，視覺連續不中斷
+   - 抖動修復（2026-08-10）：移除 letter-spacing（非整數字距造成亞像素寬度）、
+     移除 will-change:transform（強制合成層在非整數位移時子像素抖動）、
+     track 用 display:flex + width:fit-content（與 footer scroller 一致，寬度確定）
    - 精簡 padding-block 0.75rem（原 .scroller-box 2rem，避免 banner 被撐過高）
    - 純 CSS animation，不依賴 main.js */
 .bc-marquee {
@@ -3236,14 +3239,12 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   font-family: 'Mogra', cursive;
   font-size: 20px;
   color: #fff;
-  letter-spacing: 0.5px;
   padding-block: 0.75rem;
   user-select: none;
 }
 .bc-marquee__track {
-  display: inline-flex;
-  white-space: nowrap;
-  will-change: transform;
+  display: flex;
+  width: fit-content;
   animation: bcMarqueeScroll 28s linear infinite;
 }
 .bc-marquee__item {

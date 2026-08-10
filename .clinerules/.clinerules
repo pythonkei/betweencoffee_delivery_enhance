@@ -520,6 +520,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 問題：跑馬燈「斷開連接」→ 根因 .bc-marquee__item padding-inline 0.5rem 造成接縫 1rem 空白
 │   ├── [x] 修正：移除 item padding、HTML 內容統一 &nbsp; 間距；無縫保證 = 2 item 等寬 + track 2×item + gap 0 + translateX(-50%)
 │   └── [x] CDP 驗證 item 等寬、接縫 gap 0、動畫連續位移 -74→-128 無跳動（bc-components.css?v=20260810k）
+├── [x] bc-marquee 抖動跳動修復 — ✅ 2026-08-10
+│   ├── [x] 根因：letter-spacing 0.5px（亞像素字距累積）+ will-change transform（合成層子像素抖動）+ inline-flex sub-pixel 間隙
+│   ├── [x] 修正：移除 letter-spacing、移除 will-change、track 改 display:flex + width:fit-content（與 footer scroller 一致）
+│   └── [x] CDP 驗證 letter_spacing normal、will_change auto、4 次取樣位移完全均勻（每 800ms -16.4px）monotonic true 無跳動（bc-components.css?v=20260810l）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

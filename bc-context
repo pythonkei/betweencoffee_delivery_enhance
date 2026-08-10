@@ -246,6 +246,7 @@ load_context() {
         echo "│   └── 38. bean_menu banner 複製 footer .scroller-box 水平遮罩動畫：banner container 加 scroller-box（ROASTED FRESH・BREWED FAST 品牌文案）；零新增 CSS/JS（main.js 全域初始化 .scroller）；注意 banner 高度被內容撐高（500→701px）非 overflow；CDP 驗證動畫執行中、footer 不受影響"
         echo "│   └── 39. bean_menu banner 跑馬燈換新：移除 .scroller-box → 自訂 .bc-marquee（Mogra 20px、右→左、精簡 padding、純 CSS 不依賴 main.js）；CDP 驗證 scroller-box 移除、動畫執行、banner 高度降 701→654px、footer 不受影響（bc-components.css?v=20260810j）"
         echo "│   └── 40. bc-marquee 無縫無限循環修正：移除 item padding-inline（根因：接縫 1rem 空白）＋HTML 統一 &nbsp; 間距；無縫保證 = 2 item 等寬 + track 2×item + gap 0 + translateX(-50%)；CDP 驗證連續位移無跳動（bc-components.css?v=20260810k）"
+        echo "│   └── 41. bc-marquee 抖動跳動修復：根因 letter-spacing 0.5px（亞像素字距）＋will-change transform（合成層子像素抖動）＋inline-flex sub-pixel；修正移除 letter-spacing/will-change、track 改 flex+fit-content；CDP 驗證位移完全均勻 -16.4px/800ms monotonic 無跳動（bc-components.css?v=20260810l）"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
