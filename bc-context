@@ -249,7 +249,7 @@ load_context() {
         echo "│   └── 41. bc-marquee 抖動跳動修復：根因 letter-spacing 0.5px（亞像素字距）＋will-change transform（合成層子像素抖動）＋inline-flex sub-pixel；修正移除 letter-spacing/will-change、track 改 flex+fit-content；CDP 驗證位移完全均勻 -16.4px/800ms monotonic 無跳動（bc-components.css?v=20260810l）"
         echo "│   └── 42. bc-marquee 抖動終極修復：CSS animation 插值非整數位移（-107.3px）→ 文字子像素渲染抖動；新增 bc-marquee.js（rAF 每幀累積 + Math.round 整數像素 + 模循環 x+=itemW 無縫）；CDP 驗證位移全整數、步進 -1px 均勻、JS 接管 animation none（bc-marquee.js?v=20260810a）"
         echo "│   └── 43. bc-marquee 閃出修復：模循環 x+=itemW 跳變「• 」前綴閃失 → 第2段閃出接1段；改循環 buffer（item1 移出視窗時 appendChild 到尾端 + x 補償 → track 成環形、視窗任意時刻連續、確保 ≥3 item）；CDP 驗證 continuous true（bc-marquee.js?v=20260810b）"
-        echo "│   └── 44. 首頁第 3 個 slider 影片更改為 coffee_machine.mp4：第 3 格 source 改 static/images/coffee_machine.mp4（video/mp4）；CDP 驗證 currentSrc 正確、播放中 readyState 4"
+        echo "│   └── 44. 首頁第 3 個 slider 影片更改為 coffee_machine.webm：第 3 格 source 改 static/images/coffee_machine.webm（video/webm，8.3MB/20.4s）；CDP 驗證 currentSrc 正確、readyState 4、無錯誤"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"

@@ -533,8 +533,8 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 問題：模循環 x+=itemW 跳變時「• 」前綴閃失 → 「第2段閃出接1段」
 │   ├── [x] 修復：item1 完全移出視窗時 appendChild 移到尾端 + x+=itemW 補償 → track 成環形、視窗任意時刻連續；確保 ≥3 item
 │   └── [x] CDP 驗證 continuous true（buffer 前後視窗內容一致）、transform 整數無跳變（bc-marquee.js?v=20260810b）
-├── [x] 首頁第 3 個 slider 影片更改為 coffee_machine.mp4 — ✅ 2026-08-10
-│   └── [x] index.html 第 3 格 source → static/images/coffee_machine.mp4（video/mp4）；CDP 驗證 currentSrc 正確、播放中 readyState 4
+├── [x] 首頁第 3 個 slider 影片更改為 coffee_machine.webm — ✅ 2026-08-10
+│   └── [x] index.html 第 3 格 source → static/images/coffee_machine.webm（video/webm，8.3MB/20.4s）；CDP 驗證 currentSrc 正確、readyState 4、無錯誤
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
