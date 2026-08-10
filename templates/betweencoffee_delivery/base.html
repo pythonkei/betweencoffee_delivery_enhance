@@ -281,8 +281,8 @@
     <!-- 2026-08-10: 流動選單（c-attract）動畫（依賴 GSAP，head 已載入；defer 確保 GSAP 先就緒） -->
     <script defer src={% static "js/bc-attract.js" %}?v=20260810l></script>
 
-    <!-- 2026-08-10: 水平跑馬燈（bc-marquee，JS rAF 整數像素驅動避免抖動） -->
-    <script src={% static "js/bc-marquee.js" %}?v=20260810a></script>
+    <!-- 2026-08-10: 水平跑馬燈（bc-marquee，JS rAF 整數像素 + 循環 buffer 避免抖動/閃出） -->
+    <script src={% static "js/bc-marquee.js" %}?v=20260810b></script>
 
     <!-- 移除 Facebook OAuth 回調的 #_=_ 片段 -->
     <script>

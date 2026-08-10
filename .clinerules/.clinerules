@@ -529,6 +529,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 新增 bc-marquee.js：rAF 每幀位移累積 + Math.round 整數像素（物理不抖）+ 模循環 x+=itemW（連續變數無縫）+ resize/fonts.ready 重算 + reduced-motion 停用
 │   ├── [x] CSS animation 保留為無 JS fallback（JS 接管後 animation:none）
 │   └── [x] CDP 驗證 JS 接管、位移全部整數（-82,-83,-84...）、步進均勻 -1px、模循環無跳變（bc-marquee.js?v=20260810a + bc-components.css?v=20260810m）
+├── [x] bc-marquee 閃出修復：循環 buffer 取代模循環 — ✅ 2026-08-10
+│   ├── [x] 問題：模循環 x+=itemW 跳變時「• 」前綴閃失 → 「第2段閃出接1段」
+│   ├── [x] 修復：item1 完全移出視窗時 appendChild 移到尾端 + x+=itemW 補償 → track 成環形、視窗任意時刻連續；確保 ≥3 item
+│   └── [x] CDP 驗證 continuous true（buffer 前後視窗內容一致）、transform 整數無跳變（bc-marquee.js?v=20260810b）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
