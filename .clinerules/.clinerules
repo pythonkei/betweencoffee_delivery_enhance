@@ -501,11 +501,11 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 獨立 class .bean-mix-*（不影響 coffee_menu .coffee-menu-zgrid）；大卡 340px/小卡 260px
 │   ├── [x] 教訓：小卡用 sibling 選擇器（.bean-mix-main + .bean-mix-sub），不用 nth-of-type（依賴 div 類型計數會錯位）
 │   └── [x] 響應式 ≤1080 大卡整行+小卡並排、≤768 單欄；CDP 375/768/1280 驗證無溢出、coffee_menu 不受影響（bc-components.css?v=20260810i）
-├── [x] 首頁第 1 個 slider coffee_border_01.svg 增大 40% + 改白色 — ✅ 2026-08-10
+├── [x] 首頁第 1 個 slider coffee_border_01.svg 增大（×1.61）+ 改白色 — ✅ 2026-08-10
 │   ├── [x] SVG：兩 path 加 fill="#ffffff"（原無 fill = 黑色，深色背景不可見）
-│   ├── [x] CSS：.slider-item.slider-first .noise-img（index.html 加 slider-first class）各斷點 ×1.4（17vw→23.8vw/min 238→333px、55→77vw、65→91vw、75→105vw cap 92vw）
+│   ├── [x] CSS：.slider-item.slider-first .noise-img（index.html 加 slider-first class）各斷點 ×1.61（17vw→27.4vw/min 238→383px、55→88.6vw、65→104.7vw、75→120.8vw；手機維持 92vw cap = container 滿寬）
 │   ├── [x] 教訓：不用 .slider-item:first-child（owl 結構每個 slider-item 都是其 owl-item 的 :first-child 會誤匹配全部），用明確 class
-│   └── [x] CDP 1280/768/375/320 驗證 slider1 ×1.4、slider3 不受影響、svg 白色、無溢出（style-utilities.css?v=20260810e）
+│   └── [x] CDP 1280/768/375/320 驗證 slider1 383/383/345/294px、slider3 不受影響、svg 白色、無溢出（style-utilities.css?v=20260810f）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
