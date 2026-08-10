@@ -84,10 +84,10 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         <!-- 2026-08-10: 全幅背景影片（填滿整個橫幅，無橢圓遮罩）
              使用 .bc-banner-video 基礎樣式（非 blobsVideo 橢圓 morph 遮罩），
              video object-fit:cover 鋪滿全幅，取代原本 bg_3.jpg 背景圖片；
-             影片與第 2 個相同（roasting.webm） -->
+             影片更改為 coffee_machine.mp4（2026-08-10） -->
         <div class="bc-banner-video loadEnd">
             <video class="video" muted playsinline loop autoplay preload="none" data-lazy-video>
-                <source src="{% static 'roasting.webm' %}" type="video/webm">
+                <source src="{% static 'images/coffee_machine.mp4' %}" type="video/mp4">
             </video>
         </div>
         <div class="overlay"></div>
