@@ -516,6 +516,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] bean_menu.html 換 .bc-marquee（2× item 無縫循環）；bc-components.css 新增 .bc-marquee（bcMarqueeScroll 28s、padding-block 0.75rem、prefers-reduced-motion 停用）
 │   ├── [x] 純 CSS animation 不依賴 main.js（vs scroller-box 需 JS 複製 li）
 │   └── [x] CDP 驗證 scroller-box 移除、動畫執行、banner 高度降（701→654px）、跑馬燈 60px、footer 不受影響（bc-components.css?v=20260810j）
+├── [x] bc-marquee 無縫無限循環修正 — ✅ 2026-08-10
+│   ├── [x] 問題：跑馬燈「斷開連接」→ 根因 .bc-marquee__item padding-inline 0.5rem 造成接縫 1rem 空白
+│   ├── [x] 修正：移除 item padding、HTML 內容統一 &nbsp; 間距；無縫保證 = 2 item 等寬 + track 2×item + gap 0 + translateX(-50%)
+│   └── [x] CDP 驗證 item 等寬、接縫 gap 0、動畫連續位移 -74→-128 無跳動（bc-components.css?v=20260810k）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

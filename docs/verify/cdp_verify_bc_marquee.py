@@ -29,31 +29,34 @@ async def main():
           var out = {};
           var banner = document.querySelector('.ftco-subpage-banner');
           var mq = banner ? banner.querySelector('.bc-marquee') : null;
-          var oldScroller = banner ? banner.querySelector('.scroller-box') : null;
-          out.banner_scroller_removed = oldScroller === null;
-          if (!mq) { out.error = 'banner 內找不到 .bc-marquee'; return out; }
+          if (!mq) { out.error = '找不到 .bc-marquee'; return out; }
           var track = mq.querySelector('.bc-marquee__track');
+          var items = mq.querySelectorAll('.bc-marquee__item');
+          if (items.length !== 2) { out.item_error = 'item 數: ' + items.length; return out; }
+          var r1 = items[0].getBoundingClientRect();
+          var r2 = items[1].getBoundingClientRect();
+          var rt = track.getBoundingClientRect();
+          out.item1_w = Math.round(r1.width * 100) / 100;
+          out.item2_w = Math.round(r2.width * 100) / 100;
+          out.items_equal_width = r1.width === r2.width;
+          out.track_w = Math.round(rt.width * 100) / 100;
+          out.track_equals_2x_item = Math.abs(rt.width - 2 * r1.width) < 0.5;
+          out.gap_between_items = Math.round((r2.left - (r1.left + r1.width)) * 100) / 100;
           var cs = getComputedStyle(track);
-          var mcs = getComputedStyle(mq);
-          out.marquee = {
-            font_family: mcs.fontFamily,
-            font_size: mcs.fontSize,
-            color: mcs.color,
-            padding_block: mcs.paddingTop + ' / ' + mcs.paddingBottom
-          };
           out.animation_name = cs.animationName;
           out.animation_duration = cs.animationDuration;
-          out.item_count = mq.querySelectorAll('.bc-marquee__item').length;
-          out.track_transform = cs.transform;
-          // banner 幾何
-          var bRect = banner.getBoundingClientRect();
-          var mRect = mq.getBoundingClientRect();
-          out.banner_rect = { w: Math.round(bRect.width), h: Math.round(bRect.height) };
-          out.marquee_rect = { w: Math.round(mRect.width), h: Math.round(mRect.height) };
-          out.no_horizontal_overflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
-          // footer scroller 對照
-          out.footer_scroller = document.querySelector('footer .scroller-box') ? '存在' : '不存在';
+          out.padding_item = getComputedStyle(items[0]).paddingLeft;
+          // 連續性檢查：兩次取樣 transform 差值（應為平滑負增長，無跳動）
+          out.transform_1 = cs.transform;
           return out;
+        })()
+        """
+        # 連續性：兩次取樣 transform
+        js_again = """
+        (function(){
+          var mq = document.querySelector('.bc-marquee');
+          var track = mq ? mq.querySelector('.bc-marquee__track') : null;
+          return track ? getComputedStyle(track).transform : 'none';
         })()
         """
         async def run_vp(w, h, m):
@@ -62,7 +65,14 @@ async def main():
             await send(msg("Page.navigate", {"url": "http://localhost:8081/bean_menu/"}))
             await asyncio.sleep(4)
             r = await send(msg("Runtime.evaluate", {"expression": js_check, "returnByValue": True}))
-            return r.get("result", {}).get("value")
+            res = r.get("result", {}).get("value")
+            # 兩次取樣 transform（間隔 2.5s，確認連續位移無跳動）
+            await asyncio.sleep(2.5)
+            r2 = await send(msg("Runtime.evaluate", {"expression": js_again, "returnByValue": True}))
+            t1, t2 = (res.get('transform_1') or 'none'), r2.get("result", {}).get("value")
+            res['transform_t2'] = t2
+            res['transform_continuity'] = (t1 != 'none' and t1 != t2)
+            return res
 
         for w, h, m in [(1280, 800, False), (375, 700, True)]:
             print(f"=== {w}px ===")

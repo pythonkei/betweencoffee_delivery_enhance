@@ -21,11 +21,13 @@
           <p class="icon_text"><a href="{% url 'index' %}"><i class="icon material-symbols-outlined icon_vert-align-middle">undo</i> 首頁</a></p>
         </div>
 
-        <!-- 2026-08-10: 水平跑馬燈（Mogra 品牌字 20px、右→左滾動、精簡 padding；取代原 footer 複製的 .scroller-box） -->
+        <!-- 2026-08-10: 水平跑馬燈（Mogra 品牌字 20px、右→左滾動、無縫無限循環；取代原 footer 複製的 .scroller-box）
+             無縫原理：2 個相同 item、無 padding/gap，item 內部與接縫統一用 &nbsp; 間距，
+             track translateX(-50%) 恰好移動一個 item 寬 → 接縫與內部完全一致 -->
         <div class="bc-marquee">
           <div class="bc-marquee__track">
-            <span class="bc-marquee__item">ROASTED FRESH &#8226; BREWED FAST &#8226; SERVED FRESH &#8226; HUG IN A CUP &#8226;&nbsp;</span>
-            <span class="bc-marquee__item" aria-hidden="true">ROASTED FRESH &#8226; BREWED FAST &#8226; SERVED FRESH &#8226; HUG IN A CUP &#8226;&nbsp;</span>
+            <span class="bc-marquee__item">ROASTED FRESH&nbsp;&#8226;&nbsp;BREWED FAST&nbsp;&#8226;&nbsp;SERVED FRESH&nbsp;&#8226;&nbsp;HUG IN A CUP&nbsp;&#8226;&nbsp;</span>
+            <span class="bc-marquee__item" aria-hidden="true">ROASTED FRESH&nbsp;&#8226;&nbsp;BREWED FAST&nbsp;&#8226;&nbsp;SERVED FRESH&nbsp;&#8226;&nbsp;HUG IN A CUP&nbsp;&#8226;&nbsp;</span>
           </div>
         </div>
     </div>
