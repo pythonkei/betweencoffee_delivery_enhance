@@ -10,8 +10,10 @@
 
 /* ===== #borders 全屏虛線邊框（對應 cheesetart #borders）
    右側垂直虛線（dots_40.svg mask），固定全屏、pointer-events:none
-   z-index:9999（最高層）→ 2px 細線 + 半透明 + pointer-events:none = 純裝飾引導線
-   虛線從頁面頂部延伸至底部，對齊 Buy 按鈕中心 ===== */
+   z-index:9999（位於 Buy 按鈕之下、一般內容之上）
+   2px 細線 + 半透明 + pointer-events:none = 純裝飾引導線
+   虛線從頁面頂部延伸至底部，對齊 Buy 按鈕中心
+   層級：.bc-attract-buy(99999, body 直接子層) > #borders(9999) > 內容 ===== */
 #borders {
   z-index: 9999;
   width: 100%;
@@ -84,7 +86,11 @@
   transform: translateY(-50%);
   width: 50px;
   height: 225px;
-  z-index: 99999;         /* 最頂（高於右側虛線 z-index:9999） */
+  /* z-index:99999 最頂（高於右側虛線 #borders z-index:9999）。
+     重要：此元素必須是 body 直接子層（見 nav.html 註解），
+     若巢狀在 #ftco-navbar（position:absolute;z-index:3 的 stacking context）內，
+     99999 會被鎖在層級 3，低於 #borders(9999) 而被虛線蓋住。 */
+  z-index: 99999;
 }
 .bc-attract-buy > div {
   width: 100%;

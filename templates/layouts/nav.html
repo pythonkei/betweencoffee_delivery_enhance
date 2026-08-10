@@ -77,17 +77,20 @@
                 </li>
             </ul>
         </div>
-        <!-- 2026-08-10: Buy & Order 流動按鈕（c-attract，參考 cheesetart.com）
-             置於 navbar 折疊區之外，手機版常駐顯示 -->
-        <div class="bc-attract-nav">
-            <div class="bc-attract-buy">
-                <div class="c-attract">
-                    <a href="{% url 'coffee_menu' %}" class="bc-attract-buy__link c-attract__layer">
-                        <span class="icon material-icons c-icon">shopping_bag</span>
-                        <span lang="en">Buy &amp; Order</span>
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 </nav>
+<!-- 2026-08-10: Buy & Order 流動按鈕（c-attract，參考 cheesetart.com）
+     移至 <nav> 外、body 直接子層（z-index 修復）：
+     #ftco-navbar 為 position:absolute + z-index:3，會建立 stacking context，
+     按鈕若在 nav 內 z-index:99999 會被鎖在層級 3，低於 #borders(9999) 而被虛線蓋住。
+     移出後與 #borders 同層比較 → 99999 > 9999 → 按鈕在最頂、右側虛線在下。 -->
+<div class="bc-attract-nav">
+    <div class="bc-attract-buy">
+        <div class="c-attract">
+            <a href="{% url 'coffee_menu' %}" class="bc-attract-buy__link c-attract__layer">
+                <span class="icon material-icons c-icon">shopping_bag</span>
+                <span lang="en">Buy &amp; Order</span>
+            </a>
+        </div>
+    </div>
+</div>

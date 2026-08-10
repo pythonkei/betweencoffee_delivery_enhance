@@ -1083,6 +1083,13 @@ button.alert:hover {
     object-fit: cover;
   }
 }
+/* ===== 第三個 Slider：全幅背景影片（2026-08-10）
+   - 需求：整面橫幅背景圖片（bg_3.jpg）改為影片容器，無橢圓遮罩
+   - 實作：複用 .bc-banner-video 基礎樣式（position:absolute 全幅 + flex 置中 +
+     video object-fit:cover 鋪滿），不加 blobsVideo（無 morph 橢圓遮罩）
+   - 影片：與第 2 個相同 roasting.webm，data-lazy-video 延遲載入（main.js 通用處理）
+   - 色調：保留 .overlay（黑 0.6）蓋在影片上 → 暗色調（第 2 個無 overlay 明亮） */
+
 
 .slider-item .img-owl-bg {
   display: flex;

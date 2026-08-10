@@ -1442,7 +1442,7 @@ body {
 }
 
 .bc-floating-cart-btn .material-icons {
-  font-size: 1.5rem !important;  /* 縮小 15%（原 1.76rem → ×0.85） */
+  font-size: 1.35rem !important;  /* 縮小 10%（原 1.5rem → ×0.9，2026-08-10） */
 }
 
 .bc-floating-cart-btn:hover {
@@ -1457,7 +1457,7 @@ body {
 
 .bc-floating-cart-badge {
   position: absolute;
-  top: -3px;
+  top: -6px;   /* 向上移動 3px（原 -3px，2026-08-10） */
   right: -3px;
   min-width: 22px;   /* 縮小 10%（原 24px → ×0.9） */
   height: 22px;
@@ -1485,7 +1485,7 @@ body {
     font-size: 1.11rem;
   }
   .bc-floating-cart-btn .material-icons {
-    font-size: 1.3rem !important;
+    font-size: 1.17rem !important;  /* 縮小 10%（原 1.3rem → ×0.9，2026-08-10） */
   }
 }
 

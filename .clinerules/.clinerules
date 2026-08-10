@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月10日（更新：cheesetart c-attract 流動選單整合 + 浮動購物車調整）
+> **最後更新**: 2026年8月10日（更新：c-attract z-index 修復 + 浮動購物車細部 + 第 3 橫幅全幅影片）
 
 ## 開發者背景與方法論
 
@@ -491,7 +491,10 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] #borders 右側全屏虛線（dots mask、z:9999、pointer-events:none、中心對齊按鈕）；左側隱藏
 │   ├── [x] 按鈕：純黑背景、白色 1px 邊框、hover 邊框不變色、z-index 99999（最頂）
 │   ├── [x] 浮動購物車：縮小 15%、黑底、白邊框、徽章縮小 10% 金底白字
-│   └── [x] 驗證：CDP 位置/顏色/z-index/動畫正確、無溢出
+│   ├── [x] 驗證：CDP 位置/顏色/z-index/動畫正確、無溢出
+│   ├── [x] z-index 層級修復：`#ftco-navbar`（absolute + z:3）建立 stacking context → 按鈕 99999 被鎖在層級 3、低於虛線 9999；移到 `</nav>` 外 body 直接子層 → 99999 > 9999 按鈕最頂、虛線在下（nav.html）
+│   ├── [x] 浮動購物車細部：徽章上移 3px（top -6px）、圖示縮小 10%（桌面 1.35rem/手機 1.17rem）
+│   └── [x] 首頁第 3 個輪播橫幅：背景圖片 bg_3.jpg → 全幅背景影片（`.bc-banner-video` 複用，無橢圓遮罩/無 morph，roasting.webm 與第 2 個相同）；移除 .banner-video-3 橢圓死碼（index.html + style-utilities.css?v=20260810c）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
