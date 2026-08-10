@@ -1421,33 +1421,33 @@ body {
 }
 
 .bc-floating-cart-btn {
-  width: 68px;
-  height: 68px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  background: rgba(196, 155, 99, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(196, 155, 99, 0.3);
+  background: #0e0e0e;  /* 黑色背景 */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #fff;  /* 白色邊框 */
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: none;  /* 移除陰影 */
   transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
   position: relative;
   color: #fff;
-  font-size: 1.96rem;
+  font-size: 1.66rem;  /* 縮小 15%（原 1.96rem → ×0.85） */
   padding: 0;
   line-height: 1;
 }
 
 .bc-floating-cart-btn .material-icons {
-  font-size: 1.76rem !important;
+  font-size: 1.5rem !important;  /* 縮小 15%（原 1.76rem → ×0.85） */
 }
 
 .bc-floating-cart-btn:hover {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-  background: #fff;
+  background: #0e0e0e;  /* hover 維持黑色 */
   color: var(--bc-gold);
 }
 
@@ -1457,19 +1457,19 @@ body {
 
 .bc-floating-cart-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 24px;
-  height: 24px;
-  border-radius: 12px;
-  background: #e74c3c;
-  color: #fff;
-  font-size: 0.88rem;
+  top: -3px;
+  right: -3px;
+  min-width: 22px;   /* 縮小 10%（原 24px → ×0.9） */
+  height: 22px;
+  border-radius: 11px;
+  background: var(--bc-gold);  /* 金色背景 */
+  color: #fff;   /* 白色文字 */
+  font-size: 0.79rem;  /* 縮小 10%（原 0.88rem → ×0.9） */
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 7px;
+  padding: 0 6px;  /* 縮小 10%（原 7px → ×0.9） */
   line-height: 1;
 }
 
@@ -1480,9 +1480,12 @@ body {
     right: 20px;
   }
   .bc-floating-cart-btn {
-    width: 58px;
-    height: 58px;
-    font-size: 1.3rem;
+    width: 49px;
+    height: 49px;
+    font-size: 1.11rem;
+  }
+  .bc-floating-cart-btn .material-icons {
+    font-size: 1.3rem !important;
   }
 }
 

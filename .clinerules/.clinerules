@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月10日（更新：SALON SEARCH 區塊整合 + 菜單網格響應式優化 + 各項修復）
+> **最後更新**: 2026年8月10日（更新：cheesetart c-attract 流動選單整合 + 浮動購物車調整）
 
 ## 開發者背景與方法論
 
@@ -483,6 +483,15 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] 根因 2：JS getComputedStyle transitionDuration 恆 0s → 立即移除 class 中斷動畫
 │   ├── [x] 修復：補 is-out transform（桌面/手機 SP 位移）+ JS 改監聽 transitionend + setTimeout 保險 + done 旗標
 │   └── [x] 驗證：CDP 追蹤 transform 序列完整播放（is-on 浮入→is-out 上移→1.3s 重置）（index.html?v=20260810b）
+├── [x] cheesetart.com c-attract 流動選單整合 — ✅ 2026-08-10
+│   ├── [x] 逆向分析：.c-attract 容器（負 margin 熱區 + perspective）+ .c-attract__layer（preserve-3d）+ UnifiedEffect（hover 3D tilt + elastic 回彈）
+│   ├── [x] 新增 bc-attract.css/js + dots_40.svg；GSAP 全域化（base.html）
+│   ├── [x] nav.html：漢堡選單三條線 c-attract + Buy & Order 按鈕（fixed 右側、垂直長條、白邊框、垂直文字）
+│   ├── [x] hover「吸引」動畫：純位移跟隨游標（48px）+ proximity 60px 熱區；修復 maxTouchPoints 誤停用
+│   ├── [x] #borders 右側全屏虛線（dots mask、z:9999、pointer-events:none、中心對齊按鈕）；左側隱藏
+│   ├── [x] 按鈕：純黑背景、白色 1px 邊框、hover 邊框不變色、z-index 99999（最頂）
+│   ├── [x] 浮動購物車：縮小 15%、黑底、白邊框、徽章縮小 10% 金底白字
+│   └── [x] 驗證：CDP 位置/顏色/z-index/動畫正確、無溢出
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

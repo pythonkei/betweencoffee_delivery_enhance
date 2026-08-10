@@ -4,7 +4,16 @@
     <div class="container">
         <a class="navbar-brand" href="{% url 'index' %}">&#65371; Between &#65373; </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+            <!-- 2026-08-10: 漢堡選單套用 c-attract 動畫（三條線，參考 cheesetart.com） -->
+            <div class="bc-attract-menu">
+                <div class="c-attract">
+                    <div class="bc-attract-menu__body c-attract__layer">
+                        <span data-position="top"></span>
+                        <span data-position="middle"></span>
+                        <span data-position="bottom"></span>
+                    </div>
+                </div>
+            </div>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
@@ -67,6 +76,18 @@
                     </div>
                 </li>
             </ul>
+        </div>
+        <!-- 2026-08-10: Buy & Order 流動按鈕（c-attract，參考 cheesetart.com）
+             置於 navbar 折疊區之外，手機版常駐顯示 -->
+        <div class="bc-attract-nav">
+            <div class="bc-attract-buy">
+                <div class="c-attract">
+                    <a href="{% url 'coffee_menu' %}" class="bc-attract-buy__link c-attract__layer">
+                        <span class="icon material-icons c-icon">shopping_bag</span>
+                        <span lang="en">Buy &amp; Order</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
