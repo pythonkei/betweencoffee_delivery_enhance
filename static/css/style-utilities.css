@@ -2808,3 +2808,32 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 @media screen and (max-width: 575.98px) {
   .slider-item .noise-img { width: 75vw !important; min-width: 0 !important; }
 }
+
+/* ===== 第 1 個 slider 的 coffee_border_01.svg 增大 40% + 改白色（2026-08-10）
+   只影響第 1 個 slider（.slider-item.slider-first，index.html 已加 class），
+   不影響第 3 個 slider 的 noise-img（owl_title_bg_01.svg）。
+   ⚠️ 不用 .slider-item:first-child：owl 結構中每個 .slider-item 都是其 .owl-item
+   的 :first-child，會誤匹配全部。各斷點 ×1.4（17vw/55vw/65vw/75vw → 23.8vw/77vw/91vw/105vw）；
+   小手機 105vw 可能溢出 → max-width:92vw 保護（cap 後視覺仍明顯加大）。 */
+@media screen and (max-width: 991.98px) {
+  .owl-carousel.home-slider .slider-item.slider-first .noise-img {
+    width: 77vw !important;
+    max-width: 92vw !important;
+  }
+}
+@media screen and (max-width: 767.98px) {
+  .owl-carousel.home-slider .slider-item.slider-first .noise-img {
+    width: 91vw !important;
+  }
+}
+@media screen and (max-width: 575.98px) {
+  .owl-carousel.home-slider .slider-item.slider-first .noise-img {
+    width: 105vw !important;   /* ×1.4，受 max-width 92vw 保護 */
+  }
+}
+@media screen and (min-width: 767.98px) {
+  .owl-carousel.home-slider .slider-item.slider-first .noise-img {
+    width: 23.8vw !important;   /* 17vw × 1.4 */
+    min-width: 333px !important; /* 238px × 1.4 */
+  }
+}

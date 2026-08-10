@@ -3101,3 +3101,125 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 }
 
+/* ===== bean_menu 產品區域：A+C 混合不對稱網格（瀑布 × 棋盤翻轉，2026-08-10）
+   每 3 個一組（DOM = 大 小 小），6 商品 = 2 組對稱：
+   - A 瀑布：大卡左側跨 2 欄（grid-column 1/3）+ 小卡右側上下、第二張下移錯落（4rem）
+   - C 棋盤：組 2 翻轉（.bean-mix-flip：大卡右側 2/4、小卡左側）
+   獨立 class（.bean-mix-*），不影響 coffee_menu（.coffee-menu-zgrid）。
+   圖片尺寸覆蓋 style-bootstrap.css 的 .menu-img img height:36vh（沿用 zgrid 做法）。 */
+.bean-mix-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+/* 每組 3 個的 2fr+1fr+1fr 容器 */
+.bean-mix-group {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 3rem;
+}
+
+/* A：大卡左側跨 2 欄（瀑布主視覺） */
+.bean-mix-main {
+  grid-column: 1 / 3;
+  grid-row: 1;
+  min-width: 0;
+}
+
+/* 小卡：右側上下兩張，第二張下移錯落
+   用 sibling 選擇器明確定位（避免 nth-of-type 依賴 div 類型計數） */
+.bean-mix-sub {
+  grid-column: 3;
+  min-width: 0;
+}
+.bean-mix-main + .bean-mix-sub { grid-row: 1; }
+.bean-mix-main + .bean-mix-sub + .bean-mix-sub {
+  grid-row: 2;
+  transform: translateY(4rem);
+}
+
+/* C：組 2 翻轉（大卡右側、小卡左側） */
+.bean-mix-flip .bean-mix-main { grid-column: 2 / 4; }
+.bean-mix-flip .bean-mix-sub { grid-column: 1; }
+
+/* 圖片尺寸（大卡 340px、小卡 260px，覆蓋 style-bootstrap 36vh） */
+.bean-mix-main .menu-wrap .menu-img img {
+  width: 340px !important;
+  max-width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+.bean-mix-sub .menu-wrap .menu-img img {
+  width: 260px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* menu-wrap 填滿 */
+.bean-mix-group .menu-wrap {
+  height: 100%;
+}
+
+/* 響應式 ≤1080px：大卡整行、兩小卡並排第二行 */
+@media screen and (max-width: 1079.98px) {
+  .bean-mix-group {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .bean-mix-main,
+  .bean-mix-flip .bean-mix-main {
+    grid-column: 1 / 3;
+    grid-row: 1;
+  }
+  .bean-mix-sub,
+  .bean-mix-flip .bean-mix-sub {
+    grid-column: auto;
+  }
+  .bean-mix-main + .bean-mix-sub {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
+    grid-row: 2;
+    grid-column: 2;
+    transform: none;
+  }
+}
+
+/* 響應式 ≤768px：單欄堆疊（品牌基準） */
+@media screen and (max-width: 767.98px) {
+  .bean-mix-grid {
+    padding: 1rem 0;
+    gap: 3rem;
+  }
+  .bean-mix-group {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .bean-mix-main,
+  .bean-mix-flip .bean-mix-main {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .bean-mix-sub,
+  .bean-mix-flip .bean-mix-sub,
+  .bean-mix-main + .bean-mix-sub,
+  .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
+    grid-column: 1;
+    grid-row: auto;
+    transform: none;
+  }
+  .bean-mix-main .menu-wrap .menu-img img,
+  .bean-mix-sub .menu-wrap .menu-img img {
+    width: min(300px, 90%);
+    max-height: 36vh;
+  }
+}
+

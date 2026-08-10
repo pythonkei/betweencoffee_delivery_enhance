@@ -495,6 +495,17 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] z-index 層級修復：`#ftco-navbar`（absolute + z:3）建立 stacking context → 按鈕 99999 被鎖在層級 3、低於虛線 9999；移到 `</nav>` 外 body 直接子層 → 99999 > 9999 按鈕最頂、虛線在下（nav.html）
 │   ├── [x] 浮動購物車細部：徽章上移 3px（top -6px）、圖示縮小 10%（桌面 1.35rem/手機 1.17rem）
 │   └── [x] 首頁第 3 個輪播橫幅：背景圖片 bg_3.jpg → 全幅背景影片（`.bc-banner-video` 複用，無橢圓遮罩/無 morph，roasting.webm 與第 2 個相同）；移除 .banner-video-3 橢圓死碼（index.html + style-utilities.css?v=20260810c）
+├── [x] bean_menu A+C 混合不對稱網格（瀑布 × 棋盤翻轉）— ✅ 2026-08-10
+│   ├── [x] 方案：瀑布交錯 A / 蛇形對角 B / L 形棋盤 C → 使用者選 A+C 混合
+│   ├── [x] 每 3 個一組（大 小 小）：A 瀑布（大卡左側 1/3 + 小卡右側錯落 4rem）+ C 棋盤（組 2 翻轉 .bean-mix-flip 大卡右側 2/4）
+│   ├── [x] 獨立 class .bean-mix-*（不影響 coffee_menu .coffee-menu-zgrid）；大卡 340px/小卡 260px
+│   ├── [x] 教訓：小卡用 sibling 選擇器（.bean-mix-main + .bean-mix-sub），不用 nth-of-type（依賴 div 類型計數會錯位）
+│   └── [x] 響應式 ≤1080 大卡整行+小卡並排、≤768 單欄；CDP 375/768/1280 驗證無溢出、coffee_menu 不受影響（bc-components.css?v=20260810i）
+├── [x] 首頁第 1 個 slider coffee_border_01.svg 增大 40% + 改白色 — ✅ 2026-08-10
+│   ├── [x] SVG：兩 path 加 fill="#ffffff"（原無 fill = 黑色，深色背景不可見）
+│   ├── [x] CSS：.slider-item.slider-first .noise-img（index.html 加 slider-first class）各斷點 ×1.4（17vw→23.8vw/min 238→333px、55→77vw、65→91vw、75→105vw cap 92vw）
+│   ├── [x] 教訓：不用 .slider-item:first-child（owl 結構每個 slider-item 都是其 owl-item 的 :first-child 會誤匹配全部），用明確 class
+│   └── [x] CDP 1280/768/375/320 驗證 slider1 ×1.4、slider3 不受影響、svg 白色、無溢出（style-utilities.css?v=20260810e）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

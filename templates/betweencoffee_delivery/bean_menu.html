@@ -42,16 +42,21 @@
             </div>
         </div>
 
-        <!-- Bean item list : Z 字對角主副卡（每 4 個一組 = 大 小 小 大） -->
-        <div class="coffee-menu-zgrid">
+        <!-- Bean item list : A+C 混合不對稱網格（瀑布 × 棋盤翻轉，每 3 個一組 = 大 小 小）
+             組 1 大卡左側（跨 2 欄）+ 小卡右側上下錯落；組 2 翻轉（大卡右側、小卡左側） -->
+        <div class="bean-mix-grid">
             {% for bean in bean_items %}
-            {% if forloop.counter0|divisibleby:4 %}
-            <div class="coffee-z-row">
-            {% endif %}
-            {% if forloop.counter0|add:1|divisibleby:4 or forloop.counter0|divisibleby:4 %}
-            <div class="coffee-z-cell coffee-z-large">
+            {% if forloop.counter0|divisibleby:3 %}
+            {% if forloop.counter0|add:3|divisibleby:6 %}
+            <div class="bean-mix-group bean-mix-flip">
             {% else %}
-            <div class="coffee-z-cell coffee-z-small">
+            <div class="bean-mix-group">
+            {% endif %}
+            {% endif %}
+            {% if forloop.counter0|divisibleby:3 %}
+            <div class="bean-mix-main">
+            {% else %}
+            <div class="bean-mix-sub">
             {% endif %}
               <div class="menu-wrap">
                 <!-- bean_menu.html - 使用详情页图片 -->
@@ -74,12 +79,12 @@
                 </div>
               </div>
             </div>
-            {% if forloop.counter|divisibleby:4 %}
-            </div><!-- end coffee-z-row -->
+            {% if forloop.counter|divisibleby:3 %}
+            </div><!-- end bean-mix-group -->
             {% endif %}
             {% endfor %}
-            {% if bean_items|length|divisibleby:4 == False %}
-            </div><!-- 尾數未滿 4 個：補上未關閉的 row -->
+            {% if bean_items|length|divisibleby:3 == False %}
+            </div><!-- 尾數未滿 3 個：補上未關閉的 group -->
             {% endif %}
         </div>
         <!-- end Bean item list -->
