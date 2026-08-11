@@ -260,6 +260,7 @@ load_context() {
         echo "│   └── 52. bc-welcome-imgbox/bc-last-order 垂直居中修復：last-order 靠底部（flex-end）→ imgbox 改 justify-content:center；CDP 驗證 lastOrder center = panel center（746/743/470）與左側 avatar 對齊（bc-components.css?v=20260810s）"
         echo "│   └── 53. bc-welcome-imgbox 圖片與 last-order 文字水平對齊修復：需求澄清為圖片與文字對齊（非容器垂直位置）；圖片 right:0 靠右偏 12/6px → 改 left:50%+translateX(-50%) 水平居中；CDP 驗證 centerX_diff=0（bc-components.css?v=20260810t）"
         echo "│   └── 54. /accounts/login/ deco_01.svg 抖動修復 + 改白色：login.html deco_01 移除 noise_animation（噪點 filter 動畫）；deco_01.svg stroke/fill #000→#ffffff 深色背景可見；signup 同步受益"
+        echo "│   └── 55. /accounts/login/ deco_01 抖動追加修復：非 CSS 順序問題，根因 Stellar.js 視差（data-stellar-background-ratio=0.73，blank.html 繼承 base.html 的 parallaxBackgrounds）→ 移除屬性 → CDP 驗證 stable true（背景恆定無動畫）"
         echo "│   └── 55. bc-welcome 登入後顯示 username + 積分連結：greeting 加 {{ user.username }}；points 改「當前積分可以減免 -5 訂單及帳戶詳情」（bc-welcome-link → socialuser:profile，金色下底線）；test client 登入驗證通過（bc-components.css?v=20260810u）"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
