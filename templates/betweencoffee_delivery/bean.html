@@ -46,16 +46,15 @@
 
             <!-- Right side Product content -->
             <div class="col-lg-6 product-details pl-md-5 position-relative">
-                <div class="sticker-box">
-                    <div class="sticker">
-                        <div class="front"><img src= {% static 'images/float_bean.png' %}></div>
-                        <div class="bg"></div>
-                        <p><span>Crafting<br>Perfection</span>打造完美<br>新鮮質量!</p>
-                    </div>
-                </div>
-
-                <div class="block-23 mb-3">
+                <div class="block-23 mb-3 position-relative">
                     <p class="h3 bean-title"><span>{{ bean.name }}</span></p>
+                    <div class="sticker-box">
+                        <div class="sticker">
+                            <div class="front"><img src= {% static 'images/float_bean.png' %}></div>
+                            <div class="bg"></div>
+                            <p><span>Crafting<br>Perfection</span>打造完美<br>新鮮質量!</p>
+                        </div>
+                    </div>
                     <p class="price">${{ bean.price_200g|floatformat:"0" }}</p>
                     <p class="pb-2 bc-description-clamp">{{ bean.description }}</p>
                 </div>

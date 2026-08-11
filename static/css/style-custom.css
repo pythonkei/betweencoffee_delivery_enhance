@@ -803,9 +803,15 @@ optgroup  {
 /* 拆分嵌套规则为独立选择器 */
 
 .img-box .img-4  {
-  height: 56vh;
+  /* height: 56vh; */
   max-width: 100%;   /* 2026-08-08 修復：寬圖在手機上溢出（455px > 容器），限制寬度 */
   object-fit: contain;  /* 保持比例不變形 */
+}
+
+/* 產品照片響應式：行動端縮小（2026-08-11，原 91% → 70%）
+   範圍涵蓋 ≤767.98px（手機 + 平板），避免 576-767px 視窗照片維持 100% 反而更大 */
+@media all and (max-width: 767.98px) {
+  .img-box .img-4 { max-width: 70%; }
 }
 
 /* Add to Cart Popup box */
@@ -1053,23 +1059,27 @@ optgroup  {
 
 /* Subpage spaceing */
 
-/* Rotating Sticker */
+/* Rotating Sticker（2026-08-11 重構 v3：貼紙錨定名稱右側 + 中心對齊）
+   容器 absolute 錨定在名稱區（.block-23 position-relative 內，名稱是其第一個子元素）；
+   top:-107px 讓貼紙中心 = block 頂 + 23px = 名稱中心（名稱高 ~46px：46/2 - 260/2 = -107）；
+   right 靠右；pointer-events:none 純裝飾不阻擋互動。 */
 .sticker-box { 
-  position: relative;
-  display: flex;
-  justify-content: flex-end;
-  top: -160px;
-  right: auto;
-  left: 10%;
-  background-image: url(../images/takeaway_cup.png);
+  position: absolute;
+  top: -124px;
+  right: -50px;
+  width: 260px;
+  height: 260px;
+  z-index: 5;
+  pointer-events: none;
 }
 
 .sticker  { 
   position: absolute;
+  inset: 0;
   width: 260px;
   height: 260px;
   transform: scale(0.8);
-  display: inline-grid;
+  display: block;
 }
 
 /* 拆分所有嵌套规则 */
@@ -1154,6 +1164,36 @@ optgroup  {
   }
   100%  { 
     transform: rotate(-30deg);
+  }
+}
+
+/* Sticker 響應式（2026-08-11）：手機縮小貼紙 + 調整位置 */
+@media all and (max-width: 575.98px) {
+  .sticker-box { 
+    width: 170px;
+    height: 170px;
+    top: -67px;            /* 名稱高 ~35px：35/2 - 170/2 = -67.5 */
+    right: -6px;
+  }
+  .sticker { 
+    transform: scale(0.65);   /* 170/260：貼紙視覺約 111px */
+  }
+  .sticker .front { 
+    left: 115px;              /* 176 × 170/260 */
+  }
+  .sticker .front img  { 
+    width: 58px;
+    height: 68px;
+  }
+  .sticker p  { 
+    font-size: 16px;
+    line-height: 21px;
+    margin: 46px 12px 12px 12px;
+  }
+  .sticker p span  { 
+    font-size: 11px;
+    line-height: 14px;
+    padding-bottom: 8px;
   }
 }
 
