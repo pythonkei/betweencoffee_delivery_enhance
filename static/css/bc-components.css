@@ -2825,7 +2825,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   color: var(--bc-gold);
   text-decoration: underline;
   text-underline-offset: 2px;
-  margin-left: 4px;
+  margin-left: 16px;
   font-weight: 300;
   transition: color 0.25s ease;
 }
