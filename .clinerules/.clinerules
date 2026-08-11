@@ -541,6 +541,8 @@ Phase 3D：新功能（優先級：低）
 │   └── [x] nav.html 未登入狀態「登入」dropdown-item 加 hidden（與註冊一致）；bc-welcome-panel 登入連結保留
 ├── [x] bc-welcome-greeting/points 縮放動畫（加入後移除）— ✅ 2026-08-10
 │   └── [x] 曾加 bcWelcomePop（transform scale 0.5→1、不需 !important）；使用者指示「不需要動畫」→ 已刪除無殘留（bc-components.css?v=20260810p）
+├── [x] bc-welcome-greeting/points 文字大小抖動修復（rem→固定 px）— ✅ 2026-08-10
+│   └── [x] 根因 rem 依賴 html clamp（responsive-system 最後載入覆蓋基準）；!important 無法解決；改固定 px（14/13、13/12、8/8px）脫離依賴（bc-components.css?v=20260810q）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
