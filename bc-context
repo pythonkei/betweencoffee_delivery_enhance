@@ -252,7 +252,7 @@ load_context() {
         echo "│   └── 44. 首頁第 3 個 slider 影片更改為 coffee_machine.webm：第 3 格 source 改 static/images/coffee_machine.webm（video/webm，8.3MB/20.4s）；CDP 驗證 currentSrc 正確、readyState 4、無錯誤"
         echo "│   └── 45. bc-welcome-panel 整體高度降低 15%：各斷點高度元素等比縮小 ×0.85（padding/avatar/文字/imgbox/img）；CDP 量測 125→106px / 100→85px / 82→70px（bc-components.css?v=20260810n）"
         echo "│   └── 46. 隱藏導航選單「登入」：nav.html 未登入狀態登入 dropdown-item 加 hidden（與註冊一致）；bc-welcome-panel 登入連結保留"
-        echo "│   └── 47. bc-welcome-greeting/points 初始縮小→放大動畫：transform scale(0.5→1)+opacity（不動 font-size、不需 !important、順序放系列後）；0.6s ease both；reduced-motion 停用；CDP 驗證 bcWelcomePop 套用（bc-components.css?v=20260810o）"
+        echo "│   └── 47. bc-welcome-greeting/points 縮放動畫（加入後移除）：曾加 bcWelcomePop（transform scale 0.5→1、不需 !important）；使用者指示「不需要動畫」→ 已刪除無殘留（bc-components.css?v=20260810p）"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"

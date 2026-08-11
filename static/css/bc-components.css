@@ -2965,30 +2965,6 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 }
 
-/* ===== bc-welcome-greeting/points 初始縮小→放大動畫（2026-08-10）
-   需求：歡迎訊息與積分文字初始狀態由小放大到正常。
-   實作選擇：transform: scale（不動 font-size）→ 與響應式 font-size 覆蓋不衝突，
-   故不需要 !important（animation 為獨立屬性，無層疊衝突）。
-   - 順序：放於 bc-welcome 系列響應式之後（此處），確保層疊明確
-   - fill-mode both：動畫前套用 from、結束保留 to
-   - 曲線：品牌預設 ease（cubic-bezier(0.4, 0, 0.2, 1)）
-   - prefers-reduced-motion 停用（尊重無障礙） */
-.bc-welcome-greeting,
-.bc-welcome-points {
-  transform-origin: left center;
-  animation: bcWelcomePop 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-@keyframes bcWelcomePop {
-  from { transform: scale(0.5); opacity: 0.3; }
-  to { transform: scale(1); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .bc-welcome-greeting,
-  .bc-welcome-points {
-    animation: none;
-  }
-}
-
 /* ============================================
    Best Sell 區塊：hover 淡入 / 移出淡出動畫
    覆蓋 style-utilities.css 的 display:none + 瞬間切換，
