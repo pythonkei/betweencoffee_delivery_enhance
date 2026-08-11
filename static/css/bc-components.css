@@ -2798,16 +2798,16 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 
 .bc-welcome-greeting {
   color: #ffffff;
-  font-size: 0.85rem;  /* 2026-08-10：1rem→0.85rem（整體高度降 15%） */
+  font-size: 0.9rem;  /* 2026-08-10：1rem→0.85rem（整體高度降 15%） */
   font-weight: 400;
-  line-height: 1;  /* 讓文字高度貼近字體大小，垂直中心與頭像對齊 */
+  line-height: 1.2;  /* 讓文字高度貼近字體大小，垂直中心與頭像對齊 */
   display: inline-flex;
   align-items: center;
 }
 
 .bc-welcome-points {
   color: #ffffff;
-  font-size: 0.77rem;  /* 2026-08-10：0.9→0.77rem（整體高度降 15%） */
+  font-size: 0.85rem;  /* 2026-08-10：0.9→0.77rem（整體高度降 15%） */
   line-height: 1.2;  /* 緊湊行距 */
 }
 
@@ -2962,6 +2962,30 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bc-last-order {
     font-size: 0.6rem;
+  }
+}
+
+/* ===== bc-welcome-greeting/points 初始縮小→放大動畫（2026-08-10）
+   需求：歡迎訊息與積分文字初始狀態由小放大到正常。
+   實作選擇：transform: scale（不動 font-size）→ 與響應式 font-size 覆蓋不衝突，
+   故不需要 !important（animation 為獨立屬性，無層疊衝突）。
+   - 順序：放於 bc-welcome 系列響應式之後（此處），確保層疊明確
+   - fill-mode both：動畫前套用 from、結束保留 to
+   - 曲線：品牌預設 ease（cubic-bezier(0.4, 0, 0.2, 1)）
+   - prefers-reduced-motion 停用（尊重無障礙） */
+.bc-welcome-greeting,
+.bc-welcome-points {
+  transform-origin: left center;
+  animation: bcWelcomePop 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes bcWelcomePop {
+  from { transform: scale(0.5); opacity: 0.3; }
+  to { transform: scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bc-welcome-greeting,
+  .bc-welcome-points {
+    animation: none;
   }
 }
 
