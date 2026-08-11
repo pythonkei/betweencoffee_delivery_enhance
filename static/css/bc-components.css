@@ -2728,7 +2728,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   display: flex;
   align-items: center;
   gap: 18px;
-  background: #292623;
+  background: #202020;
   border-radius: 16px;
   padding: 12px 14px 12px 24px;  /* 2026-08-10：上下 14→12px（整體高度降 15%） */
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
@@ -2748,7 +2748,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
 }
 
 /* 兩行文字組：greeting + points 垂直排列（保留適度行距） */
@@ -2806,7 +2806,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 }
 
 .bc-welcome-points {
-  color: #ffffff;
+  color: #bfbfbf;
   font-size: 15px;  /* 2026-08-10：13→15px 文字加大（容器高度保持） */
   line-height: 1.2;  /* 緊湊行距 */
 }
@@ -2817,7 +2817,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   text-decoration: underline;
   text-underline-offset: 2px;
   margin-left: 4px;
-  font-weight: 500;
+  font-weight: 300;
   transition: color 0.25s ease;
 }
 .bc-welcome-points .bc-welcome-link:hover {

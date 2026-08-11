@@ -34,18 +34,27 @@ async def main():
           var out = {};
           var $sl = $('.home-slider');
           $sl.trigger('to.owl.carousel', [2, 0]);
-          await new Promise(function(res){ setTimeout(res, 2000); });
-          var active = $sl.find('.owl-item.active').find('.slider-item');
-          out.slide_text = (active.find('.subheading').first().text() || '').trim();
-          var video = active.find('video').get(0);
-          if (!video) { out.error = '第3格無 video'; return out; }
+          await new Promise(function(res){ setTimeout(res, 5000); });  // webm 8.3MB 需時間載入
+          // 遍歷所有 video，找含 coffee_machine source 的
+          var target = null;
+          document.querySelectorAll('.home-slider video').forEach(function(v){
+            v.querySelectorAll('source').forEach(function(s){
+              if ((s.getAttribute('src')||'').indexOf('coffee_machine') !== -1) target = v;
+            });
+          });
+          if (!target) { out.error = '找不到 coffee_machine 影片'; return out; }
           var srcs = [];
-          video.querySelectorAll('source').forEach(function(s){ srcs.push(s.getAttribute('src')); });
+          target.querySelectorAll('source').forEach(function(s){ srcs.push(s.getAttribute('src')); });
           out.source_srcs = srcs;
-          out.video_currentSrc = video.currentSrc;
-          out.video_paused = video.paused;
-          out.video_readyState = video.readyState;
-          out.is_coffee_machine = (video.currentSrc || '').indexOf('coffee_machine.mp4') !== -1;
+          out.video_currentSrc = target.currentSrc;
+          out.video_paused = target.paused;
+          out.video_readyState = target.readyState;
+          out.video_error = target.error ? (target.error.code + ':' + target.error.message) : null;
+          out.video_duration = target.duration;
+          out.is_coffee_machine = (target.currentSrc || '').indexOf('coffee_machine') !== -1;
+          // 確認是第 3 個 slider（啡咖師的日常）
+          var slide3 = target.closest('.slider-item');
+          out.slide_text = (slide3.querySelector('.subheading')||{}).textContent || '';
           return out;
         })()
         """
