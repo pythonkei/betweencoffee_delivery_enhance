@@ -2760,8 +2760,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 }
 
 .bc-welcome-avatar {
-  width: 45px;   /* 2026-08-10：39→45px（+15%，容器高度保持） */
-  height: 45px;
+  width: 50px;   /* 2026-08-11：45→50px（+10%，容器高度保持） */
+  height: 50px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -2769,7 +2769,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font-size: 1.8rem;  /* user icon 隨容器加大 */
+  font-size: 2.0rem;  /* user icon 隨容器加大（50/45 × 1.8rem） */
   flex-shrink: 0;
   overflow: hidden;  /* 確保社群頭像 img 圓形裁切 */
 }
@@ -2831,6 +2831,12 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 }
 .bc-welcome-points .bc-welcome-link:hover {
   color: var(--bc-gold-hover);
+}
+
+/* 積分減免金額「-5」（2026-08-11）：金色粗體 */
+.bc-welcome-points .bc-welcome-discount {
+  color: var(--bc-gold);
+  font-weight: 700;
 }
 
 /* 右側：wakemeup.png 照片 + 慣常口味文字（垂直對齊） */
@@ -2918,9 +2924,9 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
   }
   .bc-welcome-avatar {
-    width: 46px;  /* 2026-08-10：40→46px（+15%，容器高度保持） */
-    height: 46px;
-    font-size: 1.5rem;  /* user icon 隨容器加大 */
+    width: 51px;  /* 2026-08-11：46→51px（+10%，容器高度保持） */
+    height: 51px;
+    font-size: 1.65rem;  /* user icon 隨容器加大（51/46 × 1.5rem） */
   }
   .bc-welcome-greeting {
     font-size: 15px;  /* 2026-08-10：13→15px 文字加大 */
@@ -2961,9 +2967,9 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
   }
   .bc-welcome-avatar {
-    width: 40px;  /* 2026-08-10：35→40px（+15%，容器高度保持） */
-    height: 40px;
-    font-size: 1.25rem;  /* user icon 隨容器加大 */
+    width: 44px;  /* 2026-08-11：40→44px（+10%，容器高度保持） */
+    height: 44px;
+    font-size: 1.375rem;  /* user icon 隨容器加大（44/40 × 1.25rem） */
   }
   .bc-welcome-greeting {
     font-size: 10px;  /* 2026-08-10：8→10px 文字加大 */
