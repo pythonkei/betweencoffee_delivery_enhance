@@ -2723,7 +2723,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bc-welcome-panel {
   position: relative;
   /* width: 54%; */
-  max-width: 630px;
+  max-width: 599px;  /* 2026-08-10：630→599px（寬度 -5%） */
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -2900,7 +2900,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-top: -50px;  /* 平板容器較矮（約 100px），上移一半 */
   }
   .bc-welcome-panel {
-    width: 92%;
+    width: 87%;  /* 2026-08-10：92→87%（寬度 -5%） */
     max-width: none;
     gap: 10px;
     padding: 6px 12px;  /* 2026-08-10：7→6px（整體高度降 15%） */
@@ -2944,7 +2944,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-top: -45px;  /* 手機容器最矮（約 90px），上移一半 */
   }
   .bc-welcome-panel {
-    width: 96%;
+    width: 91%;  /* 2026-08-10：96→91%（寬度 -5%） */
     gap: 7px;
     padding: 5px 8px;  /* 2026-08-10：6→5px（整體高度降 15%） */
   }

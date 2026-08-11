@@ -262,6 +262,7 @@ load_context() {
         echo "│   └── 54. /accounts/login/ deco_01.svg 抖動修復 + 改白色：login.html deco_01 移除 noise_animation（噪點 filter 動畫）；deco_01.svg stroke/fill #000→#ffffff 深色背景可見；signup 同步受益"
         echo "│   └── 55. /accounts/login/ deco_01 抖動追加修復：非 CSS 順序問題，根因 Stellar.js 視差（data-stellar-background-ratio=0.73，blank.html 繼承 base.html 的 parallaxBackgrounds）→ 移除屬性 → CDP 驗證 stable true（背景恆定無動畫）"
         echo "│   └── 55. bc-welcome 登入後顯示 username + 積分連結：greeting 加 {{ user.username }}；points 改「當前積分可以減免 -5 訂單及帳戶詳情」（bc-welcome-link → socialuser:profile，金色下底線）；test client 登入驗證通過（bc-components.css?v=20260810u）"
+        echo "│   └── 56. bc-welcome-panel 容器寬度 -5%：桌面 630→599px、平板 92→87%、手機 96→91%（×0.95，使用者澄清 -5% 非 -15%）；CDP 驗證約 -5%、高度保持（bc-components.css?v=20260810w）"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"

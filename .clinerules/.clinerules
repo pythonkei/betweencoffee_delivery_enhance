@@ -560,6 +560,8 @@ Phase 3D：新功能（優先級：低）
 │   └── [x] 追加：仍抖動 → 根因 Stellar.js 視差（data-stellar-background-ratio=0.73）→ 移除 → CDP stable true
 ├── [x] bc-welcome 登入後顯示 username + 積分連結 — ✅ 2026-08-10
 │   └── [x] greeting 加 {{ user.username }}；points 改「當前積分可以減免 -5 訂單及帳戶詳情」（bc-welcome-link → socialuser:profile，金色下底線）；test client 登入驗證通過（bc-components.css?v=20260810u）
+├── [x] bc-welcome-panel 容器寬度 -5% — ✅ 2026-08-10
+│   └── [x] 桌面 630→599px、平板 92→87%、手機 96→91%（×0.95，使用者澄清 -5% 非 -15%）；CDP 驗證約 -5%、高度保持（bc-components.css?v=20260810w）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
