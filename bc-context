@@ -257,6 +257,8 @@ load_context() {
         echo "│   └── 49. 文字抖動最終修復：px 化後仍輕微抖動、bc-search-txt 也抖 → 根因 FOUT（display=swap 字體交換字寬變化）；Google Fonts 改 display=block（載入前隱藏、載入後顯示 → 無交換抖動）；取捨首次載入文字短暫空白"
         echo "│   └── 50. 全域文字穩定修復：scripts/audit_text_stability.py 審計全域 339 rem font-size + HTTP 7 頁面；<html> 加 inline font-size clamp（HTML 解析即設定基準、rem 載入即穩定不依賴 CSS 順序）；清理 display=swap 死碼；審計全部通過"
         echo "│   └── 51. bc-welcome-panel avatar +15% + 文字加大 + 容器高度保持：avatar 45/46/40（+15%）、greeting 16/15/10px、points 15/14/10px；左側內容 < imgbox 不撐高；CDP 驗證容器 106/85/70 保持（bc-components.css?v=20260810r）"
+        echo "│   └── 52. bc-welcome-imgbox/bc-last-order 垂直居中修復：last-order 靠底部（flex-end）→ imgbox 改 justify-content:center；CDP 驗證 lastOrder center = panel center（746/743/470）與左側 avatar 對齊（bc-components.css?v=20260810s）"
+        echo "│   └── 53. bc-welcome-imgbox 圖片與 last-order 文字水平對齊修復：需求澄清為圖片與文字對齊（非容器垂直位置）；圖片 right:0 靠右偏 12/6px → 改 left:50%+translateX(-50%) 水平居中；CDP 驗證 centerX_diff=0（bc-components.css?v=20260810t）"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"

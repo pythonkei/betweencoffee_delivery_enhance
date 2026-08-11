@@ -2821,13 +2821,15 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-end;  /* 回復 2026-08-10：誤改 center（使用者需求為圖片與文字對齊，非容器垂直位置） */
 }
 
 .bc-welcome-img {
   position: absolute;
   top: -78px;  /* 2026-08-10：-92→-78px（隨圖片縮小） */
-  right: 0;
+  left: 50%;                 /* 2026-08-10：right:0→水平居中（圖片與 last-order 文字中心對齊） */
+  transform: translateX(-50%);
+  right: auto;
   width: 136px;   /* 2026-08-10：160→136px（整體高度降 15%） */
   height: 136px;
   object-fit: contain;
@@ -2841,7 +2843,9 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bc-welcome-img-link {
   position: absolute;
   top: -78px;   /* 2026-08-10：-92→-78px（隨圖片縮小） */
-  right: 0;
+  left: 50%;                 /* 2026-08-10：right:0→水平居中（與圖片一致） */
+  transform: translateX(-50%);
+  right: auto;
   width: 136px;  /* 2026-08-10：160→136px（整體高度降 15%） */
   height: 136px;
   z-index: 4;

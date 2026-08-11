@@ -42,32 +42,39 @@ async def main():
           };
         })()
         """
+        js_fs = """
+        (function(){
+          var imgbox = document.querySelector('.bc-welcome-imgbox');
+          var img = imgbox.querySelector('.bc-welcome-img');
+          var lastOrder = imgbox.querySelector('.bc-last-order');
+          var ib = imgbox.getBoundingClientRect();
+          var im = img.getBoundingClientRect();
+          var lo = lastOrder.getBoundingClientRect();
+          function r(e, label){ return { label: label, left: Math.round(e.left), right: Math.round(e.right), centerX: Math.round(e.left + e.width/2), top: Math.round(e.top), bottom: Math.round(e.bottom), centerY: Math.round(e.top + e.height/2), w: Math.round(e.width), h: Math.round(e.height) }; }
+          return {
+            imgbox: r(ib, 'imgbox'),
+            img: r(im, 'img'),
+            lastOrder: r(lo, 'lastOrder'),
+            centerX_diff_img_vs_text: Math.round((im.left + im.width/2) - (lo.left + lo.width/2)),
+            img_bottom_to_text_top: Math.round(im.bottom - lo.top),
+            viewport: window.innerWidth
+          };
+        })()
+        """
         async def run_vp(w, h, m):
             await send(msg("Emulation.setDeviceMetricsOverride",
                            {"width": w, "height": h, "deviceScaleFactor": 1, "mobile": m}))
             await send(msg("Page.navigate", {"url": "http://localhost:8081/"}))
             await asyncio.sleep(4)
             r = await send(msg("Runtime.evaluate", {"expression": js, "returnByValue": True}))
-            return r.get("result", {}).get("value")
+            res = r.get("result", {}).get("value")
+            r2 = await send(msg("Runtime.evaluate", {"expression": js_fs, "returnByValue": True}))
+            res['align'] = r2.get("result", {}).get("value")
+            return res
 
         for w, h, m in [(1280, 900, False), (768, 900, True), (375, 700, True)]:
             print(f"=== {w}px ===")
             print(json.dumps(await run_vp(w, h, m), ensure_ascii=False))
-
-        js_fs = """
-        (function(){
-          var g = document.querySelector('.bc-welcome-greeting');
-          var p = document.querySelector('.bc-welcome-points');
-          if (!g || !p) return { error: '元素不存在' };
-          return {
-            greeting_fs: getComputedStyle(g).fontSize,
-            points_fs: getComputedStyle(p).fontSize,
-            avatar_w: document.querySelector('.bc-welcome-avatar').getBoundingClientRect().width
-          };
-        })()
-        """
-        r = await send(msg("Runtime.evaluate", {"expression": js_fs, "returnByValue": True}))
-        print(json.dumps(r.get("result", {}).get("value"), ensure_ascii=False, indent=1))
 
         await send(msg("Page.close"))
 

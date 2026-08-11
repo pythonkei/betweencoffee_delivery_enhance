@@ -551,6 +551,10 @@ Phase 3D：新功能（優先級：低）
 │   └── [x] 清理 display=swap 死碼註解；審計結果全部通過
 ├── [x] bc-welcome-panel avatar +15% + 文字加大 + 容器高度保持 — ✅ 2026-08-10
 │   └── [x] avatar 45/46/40（+15%）、greeting 16/15/10px、points 15/14/10px；左側 < imgbox 不撐高；CDP 驗證容器 106/85/70 保持（bc-components.css?v=20260810r）
+├── [x] bc-welcome-imgbox/bc-last-order 垂直居中修復 — ✅ 2026-08-10
+│   └── [x] last-order 靠底部（flex-end）→ imgbox 改 justify-content:center；CDP 驗證 lastOrder center = panel center（746/743/470）與左側對齊（bc-components.css?v=20260810s）
+├── [x] bc-welcome-imgbox 圖片與 last-order 文字水平對齊修復 — ✅ 2026-08-10
+│   └── [x] 需求澄清：圖片與文字對齊（非容器垂直位置）；圖片 right:0 靠右偏 12/6px → 改 left:50%+translateX(-50%) 水平居中；CDP 驗證 centerX_diff=0（bc-components.css?v=20260810t）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
