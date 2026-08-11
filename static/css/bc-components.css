@@ -2806,9 +2806,13 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 }
 
 /* 登入後 greeting 分段字重（2026-08-10）：
-   歡迎回來(300) / username(400) / , 喝返杯先!(300) */
+   歡迎回來(300) / username(400) / , 喝返杯先!(300)
+   bc-greet-user 加 margin-left：歡迎回來 與 username 之間新增間距（2026-08-10） */
 .bc-welcome-greeting .bc-greet-normal { font-weight: 300; }
-.bc-welcome-greeting .bc-greet-user { font-weight: 400; }
+.bc-welcome-greeting .bc-greet-user {
+  font-weight: 400;
+  margin-left: 6px;  /* 2026-08-10：歡迎回來 與 (username) 之間間距 */
+}
 
 .bc-welcome-points {
   color: #bfbfbf;

@@ -264,6 +264,7 @@ load_context() {
         echo "│   └── 55. bc-welcome 登入後顯示 username + 積分連結：greeting 加 {{ user.username }}；points 改「當前積分可以減免 -5 訂單及帳戶詳情」（bc-welcome-link → socialuser:profile，金色下底線）；test client 登入驗證通過（bc-components.css?v=20260810u）"
         echo "│   └── 56. bc-welcome-panel 容器寬度 -5%：桌面 630→599px、平板 92→87%、手機 96→91%（×0.95，使用者澄清 -5% 非 -15%）；CDP 驗證約 -5%、高度保持（bc-components.css?v=20260810w）"
         echo "│   └── 57. bc-welcome-greeting 登入後文案與字重調整：文案改「歡迎回來 (username) , 喝返杯先!」；拆三 span（bc-greet-normal 300 / bc-greet-user 400）；test client 驗證（bc-components.css?v=20260810x）"
+        echo "│   └── 58. 追加：歡迎回來 與 username 之間間距 → bc-greet-user margin-left 6px、移除前導空格（bc-components.css?v=20260810y）"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
