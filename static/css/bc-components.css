@@ -3138,7 +3138,9 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    - A 瀑布：大卡左側跨 2 欄（grid-column 1/3）+ 小卡右側上下、第二張下移錯落（4rem）
    - C 棋盤：組 2 翻轉（.bean-mix-flip：大卡右側 2/4、小卡左側）
    獨立 class（.bean-mix-*），不影響 coffee_menu（.coffee-menu-zgrid）。
-   圖片尺寸覆蓋 style-bootstrap.css 的 .menu-img img height:36vh（沿用 zgrid 做法）。 */
+   圖片尺寸覆蓋 style-bootstrap.css 的 .menu-img img height:36vh（沿用 zgrid 做法）。
+   2026-08-11：grid 2fr 1fr 1fr → 1.7fr 1.15fr 1.15fr、小卡圖 260→280px（小卡組加大，
+   小卡欄 249→286px 完整呈現 280px 圖，小卡/大卡視覺比 82%）。 */
 .bean-mix-grid {
   max-width: 1400px;
   margin: 0 auto;
@@ -3148,10 +3150,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   gap: 4rem;
 }
 
-/* 每組 3 個的 2fr+1fr+1fr 容器 */
+/* 每組 3 個的 1.7fr+1.15fr+1.15fr 容器（2026-08-11：原 2fr+1fr+1fr） */
 .bean-mix-group {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 1.7fr 1.15fr 1.15fr;
   grid-template-rows: auto auto;
   gap: 3rem;
 }
@@ -3179,7 +3181,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bean-mix-flip .bean-mix-main { grid-column: 2 / 4; }
 .bean-mix-flip .bean-mix-sub { grid-column: 1; }
 
-/* 圖片尺寸（大卡 340px、小卡 260px，覆蓋 style-bootstrap 36vh） */
+/* 圖片尺寸（大卡 340px、小卡 280px，覆蓋 style-bootstrap 36vh） */
 .bean-mix-main .menu-wrap .menu-img img {
   width: 340px !important;
   max-width: 100%;
@@ -3188,7 +3190,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   max-height: none !important;
 }
 .bean-mix-sub .menu-wrap .menu-img img {
-  width: 260px !important;
+  width: 280px !important;  /* 2026-08-11：260→280px（小卡組加大） */
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -3254,6 +3256,34 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     max-height: 36vh;
   }
 }
+
+/* ===== bean-mix 描述文字寬度平衡（2026-08-11）
+   小卡描述加寬（max-width 75%→100%，充分利用卡片寬度）、大卡描述減寬（75%→55%，
+   緊湊居中），改善大小卡描述視覺不平衡（原組1：大 568px vs 小 215px）。
+   手機單欄（<768px）大小卡同寬，沿用全域 .coffee-menu-desc 75% 自然平衡，不需覆蓋。
+   限定 .bean-mix-*，不影響 coffee_menu zgrid。
+   2026-08-11 追加：小卡描述 padding 1rem→4px（文字區再加大：組1 246→278px、
+   組2 383→415px；固定 px 脫離 rem/html clamp 依賴）。 */
+@media screen and (min-width: 768px) {
+  .bean-mix-sub .coffee-menu-desc {
+    max-width: 100%;
+    padding-left: 4px;   /* 原 1rem（≈20px）→ 4px：文字區再次加大 */
+    padding-right: 4px;
+  }
+  .bean-mix-main .coffee-menu-desc { max-width: 55%; }
+}
+
+/* ===== bean-mix 卡片文字加大（2026-08-11）
+   名稱 lg→xl、價格 md→lg、描述 md→base（響應式變數，手機自動縮小）。
+   ⚠️ bc-components.css 在 responsive-system.css 之前載入 → 需高 specificity：
+   名稱 (0,4,1)、價格 (0,5,0) 已足夠；描述與 responsive 同為 3 class (0,3,0)
+   → 後載入的 responsive 勝出 → 描述需加 .menu-wrap 前綴到 (0,4,0)。 */
+.bean-mix-group .bean-mix-main .menu-wrap .text h5,
+.bean-mix-group .bean-mix-sub .menu-wrap .text h5 { font-size: var(--bc-fs-xl); }
+.bean-mix-group .bean-mix-main .menu-wrap .text .price,
+.bean-mix-group .bean-mix-sub .menu-wrap .text .price { font-size: var(--bc-fs-lg); }
+.bean-mix-group .bean-mix-main .menu-wrap .coffee-menu-desc,
+.bean-mix-group .bean-mix-sub .menu-wrap .coffee-menu-desc { font-size: var(--bc-fs-base); }
 
 /* ===== 水平跑馬燈 .bc-marquee（2026-08-10）
    bean_menu banner 內的 Mogra 品牌字跑馬燈（取代 footer 複製的 .scroller-box）：
