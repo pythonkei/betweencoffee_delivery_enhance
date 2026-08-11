@@ -545,6 +545,10 @@ Phase 3D：新功能（優先級：低）
 │   └── [x] 根因 rem 依賴 html clamp（responsive-system 最後載入覆蓋基準）；!important 無法解決；改固定 px（14/13、13/12、8/8px）脫離依賴（bc-components.css?v=20260810q）
 ├── [x] 文字抖動最終修復（Google Fonts display=block 消除 FOUT）— ✅ 2026-08-10
 │   └── [x] px 化後仍輕微抖動、bc-search-txt 也抖 → 根因 FOUT（display=swap 字體交換）；改 display=block（載入前隱藏、載入後顯示 → 無交換抖動）；取捨：首次載入文字短暫空白
+├── [x] 全域文字穩定修復（<html> inline font-size clamp + 審計腳本）— ✅ 2026-08-10
+│   ├── [x] scripts/audit_text_stability.py：審計全域 339 rem font-size + base.html 標記 + HTTP 7 頁面
+│   ├── [x] <html> inline style font-size clamp → HTML 解析即設定基準、rem 載入即穩定（不依賴 CSS 順序）
+│   └── [x] 清理 display=swap 死碼註解；審計結果全部通過
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

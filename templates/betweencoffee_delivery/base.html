@@ -2,7 +2,7 @@
 {% load django_htmx %}
 
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" style="font-size: clamp(14px, 0.3vw + 13.5px, 16px);">
 <head>
     <title>{% block title %}Between Coffee{% endblock title %}</title>
     <meta charset="utf-8">
@@ -49,7 +49,6 @@
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">  {% endcomment %}
-    {% comment %} <link href="https://fonts.googleapis.com/css2?family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap" rel="stylesheet"> {% endcomment %}
     <!-- enable django htmx -->
     <script src="https://unpkg.com/htmx.org@2.0.2"></script> 
     {% django_htmx_script %}
