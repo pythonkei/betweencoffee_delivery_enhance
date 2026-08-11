@@ -2805,6 +2805,11 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   align-items: center;
 }
 
+/* 登入後 greeting 分段字重（2026-08-10）：
+   歡迎回來(300) / username(400) / , 喝返杯先!(300) */
+.bc-welcome-greeting .bc-greet-normal { font-weight: 300; }
+.bc-welcome-greeting .bc-greet-user { font-weight: 400; }
+
 .bc-welcome-points {
   color: #bfbfbf;
   font-size: 15px;  /* 2026-08-10：13→15px 文字加大（容器高度保持） */
