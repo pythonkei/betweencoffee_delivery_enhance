@@ -565,6 +565,7 @@ Phase 3D：新功能（優先級：低）
 ├── [x] bc-welcome-greeting 登入後文案與字重調整 — ✅ 2026-08-10
 │   └── [x] 文案改「歡迎回來 (username) , 喝返杯先!」；拆三 span（bc-greet-normal 300 / bc-greet-user 400）；test client 驗證（bc-components.css?v=20260810x）
 │   └── [x] 追加：歡迎回來 與 username 之間間距（bc-greet-user margin-left 6px、移除前導空格；?v=20260810y）
+│   └── [x] 追加2：文案「歡迎回來!」(username) 「, 喝返杯先~~」（驚嘆號 + ~~）；test client 驗證
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）
