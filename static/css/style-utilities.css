@@ -2809,31 +2809,31 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   .slider-item .noise-img { width: 75vw !important; min-width: 0 !important; }
 }
 
-/* ===== 第 1 個 slider 的 coffee_border_01.svg 增大（40% → 再 +15% = ×1.61）+ 改白色（2026-08-10）
+/* ===== 第 1 個 slider 的 coffee_border_02.svg 增大（40% → 再 +15% = ×1.61 → 再 +5% = ×1.69；2026-08-11）
    只影響第 1 個 slider（.slider-item.slider-first，index.html 已加 class），
    不影響第 3 個 slider 的 noise-img（owl_title_bg_01.svg）。
    ⚠️ 不用 .slider-item:first-child：owl 結構中每個 .slider-item 都是其 .owl-item
-   的 :first-child，會誤匹配全部。各斷點 ×1.61（17vw/55vw/65vw/75vw → 27.4vw/88.6vw/104.7vw/120.8vw）；
-   手機/小手機 104.7vw/120.8vw 可能溢出 → max-width:92vw 保護（手機已達 container 滿寬，維持 cap）。 */
+   的 :first-child，會誤匹配全部。各斷點 ×1.61×1.05（17vw/55vw/65vw/75vw → 28.8vw/93vw/110vw/126.8vw）；
+   手機/小手機 110vw/126.8vw 可能溢出 → max-width:92vw 保護（手機已達 container 滿寬，維持 cap）。 */
 @media screen and (max-width: 991.98px) {
   .owl-carousel.home-slider .slider-item.slider-first .noise-img {
-    width: 88.6vw !important;   /* 55vw × 1.61 */
+    width: 93vw !important;     /* 55vw × 1.61 × 1.05 */
     max-width: 92vw !important;
   }
 }
 @media screen and (max-width: 767.98px) {
   .owl-carousel.home-slider .slider-item.slider-first .noise-img {
-    width: 104.7vw !important;  /* 65vw × 1.61，受 max-width 92vw 保護 */
+    width: 110vw !important;    /* 65vw × 1.61 × 1.05，受 max-width 92vw 保護 */
   }
 }
 @media screen and (max-width: 575.98px) {
   .owl-carousel.home-slider .slider-item.slider-first .noise-img {
-    width: 120.8vw !important;  /* 75vw × 1.61，受 max-width 92vw 保護 */
+    width: 126.8vw !important;  /* 75vw × 1.61 × 1.05，受 max-width 92vw 保護 */
   }
 }
 @media screen and (min-width: 767.98px) {
   .owl-carousel.home-slider .slider-item.slider-first .noise-img {
-    width: 27.4vw !important;   /* 17vw × 1.61 */
-    min-width: 383px !important; /* 238px × 1.61 */
+    width: 28.8vw !important;   /* 17vw × 1.61 × 1.05 */
+    min-width: 402px !important; /* 238px × 1.61 × 1.05 */
   }
 }

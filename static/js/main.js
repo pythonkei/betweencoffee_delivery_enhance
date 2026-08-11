@@ -75,7 +75,7 @@
 		$homeSlider.owlCarousel({
 	    loop:true,
 	    autoplay: true,
-		autoplayTimeout:7000, // time per slide
+		autoplayTimeout:10000, // time per slide（2026-08-11：7000→10000，橫幅停留 10 秒）
 	    margin:0,
 	    smartSpeed:700,      // 滑動速度（移除 fade → 使用預設 translate 水平滑動 = 向左滾動）
 	    nav:false,
