@@ -1087,7 +1087,7 @@ optgroup  {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: url('/static/images/sticker_v1.png') center top no-repeat;
+  background: url('/static/images/sticker_v1.png') center top / contain no-repeat;  /* 2026-08-11：加 / contain，背景圖隨容器縮放（否則手機縮小時維持 260px 固有尺寸被裁切） */
   animation-name: spin;
   animation-duration: 2s; /* speed */
   animation-iteration-count: infinite;
