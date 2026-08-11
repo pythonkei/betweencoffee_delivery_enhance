@@ -128,9 +128,10 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                         {% endif %}
                     </span>
                     <div class="bc-welcome-info">
-                        <span class="bc-welcome-greeting">Hey, 歡迎回來, 喝返杯先!</span>
+                        <span class="bc-welcome-greeting">Hey, {{ user.username }} 歡迎回來, 喝返杯先!</span>
                         <div class="bc-welcome-points">
-                            您的當前積分可以減 -5
+                            當前積分可以減免 -5
+                            <a href="{% url 'socialuser:profile' %}" class="bc-welcome-link">訂單及帳戶詳情</a>
                         </div>
                     </div>
                     {% else %}

@@ -557,6 +557,8 @@ Phase 3D：新功能（優先級：低）
 │   └── [x] 需求澄清：圖片與文字對齊（非容器垂直位置）；圖片 right:0 靠右偏 12/6px → 改 left:50%+translateX(-50%) 水平居中；CDP 驗證 centerX_diff=0（bc-components.css?v=20260810t）
 ├── [x] /accounts/login/ deco_01.svg 抖動修復 + 改白色 — ✅ 2026-08-10
 │   └── [x] login.html deco_01 移除 noise_animation（噪點動畫抖動源）；deco_01.svg stroke/fill #000→#ffffff；signup 同步受益
+├── [x] bc-welcome 登入後顯示 username + 積分連結 — ✅ 2026-08-10
+│   └── [x] greeting 加 {{ user.username }}；points 改「當前積分可以減免 -5 訂單及帳戶詳情」（bc-welcome-link → socialuser:profile，金色下底線）；test client 登入驗證通過（bc-components.css?v=20260810u）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

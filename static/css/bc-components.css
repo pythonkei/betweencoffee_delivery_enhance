@@ -2811,6 +2811,19 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   line-height: 1.2;  /* 緊湊行距 */
 }
 
+/* 積分區塊內「訂單及帳戶詳情」連結（2026-08-10） */
+.bc-welcome-points .bc-welcome-link {
+  color: var(--bc-gold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-left: 4px;
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+.bc-welcome-points .bc-welcome-link:hover {
+  color: var(--bc-gold-hover);
+}
+
 /* 右側：wakemeup.png 照片 + 慣常口味文字（垂直對齊） */
 .bc-welcome-imgbox {
   position: relative;
