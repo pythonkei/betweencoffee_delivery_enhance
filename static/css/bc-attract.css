@@ -109,15 +109,15 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  row-gap: 8px;
-  border: 1px solid #fff;   /* 邊框 1px（原 2px 減 1px） */
+  row-gap: 9px;
+  border: 1px solid #999;   /* 邊框 1px（原 2px 減 1px） */
   border-radius: 24px;
-  background-color: #000000;   /* 黑色背景 */
+  background-color: #151515;   /* 黑色背景 */
   color: #fff;
   text-decoration: none;
   font-family: 'Noto Sans TC', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 500;
   letter-spacing: 0.5px;
   white-space: nowrap;
   transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
