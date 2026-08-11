@@ -251,6 +251,7 @@ load_context() {
         echo "│   └── 43. bc-marquee 閃出修復：模循環 x+=itemW 跳變「• 」前綴閃失 → 第2段閃出接1段；改循環 buffer（item1 移出視窗時 appendChild 到尾端 + x 補償 → track 成環形、視窗任意時刻連續、確保 ≥3 item）；CDP 驗證 continuous true（bc-marquee.js?v=20260810b）"
         echo "│   └── 44. 首頁第 3 個 slider 影片更改為 coffee_machine.webm：第 3 格 source 改 static/images/coffee_machine.webm（video/webm，8.3MB/20.4s）；CDP 驗證 currentSrc 正確、readyState 4、無錯誤"
         echo "│   └── 45. bc-welcome-panel 整體高度降低 15%：各斷點高度元素等比縮小 ×0.85（padding/avatar/文字/imgbox/img）；CDP 量測 125→106px / 100→85px / 82→70px（bc-components.css?v=20260810n）"
+        echo "│   └── 46. 隱藏導航選單「登入」：nav.html 未登入狀態登入 dropdown-item 加 hidden（與註冊一致）；bc-welcome-panel 登入連結保留"
         echo "│   16. 前次: CSS 全域清理 Phase A-C ✅（2026-07-30）"
         echo "│   └── 28,776行/31檔案 → 25,052行/22檔案（-13%行數, -29%檔案數）"
         echo "├── Celery: MockCelery 降級（無 Redis），任務同步執行"
