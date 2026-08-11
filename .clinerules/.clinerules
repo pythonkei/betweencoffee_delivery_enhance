@@ -549,6 +549,8 @@ Phase 3D：新功能（優先級：低）
 │   ├── [x] scripts/audit_text_stability.py：審計全域 339 rem font-size + base.html 標記 + HTTP 7 頁面
 │   ├── [x] <html> inline style font-size clamp → HTML 解析即設定基準、rem 載入即穩定（不依賴 CSS 順序）
 │   └── [x] 清理 display=swap 死碼註解；審計結果全部通過
+├── [x] bc-welcome-panel avatar +15% + 文字加大 + 容器高度保持 — ✅ 2026-08-10
+│   └── [x] avatar 45/46/40（+15%）、greeting 16/15/10px、points 15/14/10px；左側 < imgbox 不撐高；CDP 驗證容器 106/85/70 保持（bc-components.css?v=20260810r）
 ├── [ ] 咖啡/咖啡豆詳情頁按鈕間距（進行中，CSS 覆蓋/順序診斷）
 ├── [ ] 訂單搜尋/過濾功能
 ├── [ ] 批量操作（批量確認支付）

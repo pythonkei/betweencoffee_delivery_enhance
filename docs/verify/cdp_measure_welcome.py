@@ -54,6 +54,21 @@ async def main():
             print(f"=== {w}px ===")
             print(json.dumps(await run_vp(w, h, m), ensure_ascii=False))
 
+        js_fs = """
+        (function(){
+          var g = document.querySelector('.bc-welcome-greeting');
+          var p = document.querySelector('.bc-welcome-points');
+          if (!g || !p) return { error: '元素不存在' };
+          return {
+            greeting_fs: getComputedStyle(g).fontSize,
+            points_fs: getComputedStyle(p).fontSize,
+            avatar_w: document.querySelector('.bc-welcome-avatar').getBoundingClientRect().width
+          };
+        })()
+        """
+        r = await send(msg("Runtime.evaluate", {"expression": js_fs, "returnByValue": True}))
+        print(json.dumps(r.get("result", {}).get("value"), ensure_ascii=False, indent=1))
+
         await send(msg("Page.close"))
 
 asyncio.run(main())
