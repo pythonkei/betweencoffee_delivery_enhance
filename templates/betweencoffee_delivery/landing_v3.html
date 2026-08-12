@@ -337,6 +337,10 @@
 {% endblock %}
 
 {% block extra_css %}
+<!-- 2026-08-11：landing_v3 輪播 owl-carousel + landing 樣式（條件載入） -->
+<link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
 <!-- 2026-08-11：landing_v3 morph 影片動畫樣式（條件載入） -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}">
 <style>
