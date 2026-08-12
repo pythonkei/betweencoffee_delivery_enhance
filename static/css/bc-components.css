@@ -1670,6 +1670,7 @@ body {
 .product-details .block-23 ul li .icon {
   font-size: 24px;
   width: 32px;
+  color: rgb(108, 108, 108);   /* 2026-08-11：詳情頁資訊圖示顏色（按鈕內圖示除外）78→108 */
 }
 
 
@@ -2393,7 +2394,7 @@ body {
 }
 
 .bc-roast-range-field {
-  padding-bottom: 4vh;
+  padding: 4px 0 0 0;
 }
 
 /* ===== 詳情頁行動端 UI 整體縮小（2026-08-11）
@@ -2491,6 +2492,8 @@ body {
 
   /* 烘焙水平 label */
   .roastrange-label { font-size: 11px; }
+  /* 烘焙範圍區塊行動端間距：4vh（=33.8px @844）過大 → 固定 16px */
+  .bc-roast-range-field {padding: 4px 0 0 0;}
 
   /* 資訊圖示 */
   .product-details .block-23 ul li .icon {
@@ -2499,11 +2502,13 @@ body {
   }
 
   /* 數量行外層左對齊（.w-100.form-group 無 col 包裝 → 補 row 負 margin 15px，
-     原 x=39 與其他行 x=54 不對齊） */
+     原 x=39 與其他行 x=54 不對齊）
+     ⚠️ 2026-08-11 修復：先前註解把閉合 } 也註解掉 → @media(767.98) 未閉合
+     吞掉後續規則（含 .bc-welcome-panel）→ 恢復正常結構 */
   .product-details .w-100.form-group {
     /* margin-left: 15px; */
-    /* margin-right: 15px;
-  } */
+    /* margin-right: 15px; */
+  }
   /* 內部 input-group 不再額外偏移（外層已對齊） */
   .product-details .input-group.col {
     padding-left: 0;
