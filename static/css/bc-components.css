@@ -2396,6 +2396,164 @@ body {
   padding-bottom: 4vh;
 }
 
+/* ===== 詳情頁行動端 UI 整體縮小（2026-08-11）
+   coffee.html / bean.html 的 product-details 在行動端過大 → 統一縮小：
+   文字 20/17/14px、選項按鈕 40px、數量 38px、購買按鈕 40px、圖示 18px。
+   ⚠️ 需 !important 覆蓋：.bc-option-btn 60px、#cup-level-group 72px（inline）、
+   .product-details button/.form-control 54px（style-bootstrap）；
+   文字需高 specificity 覆蓋最後載入的 responsive-system。 */
+@media all and (max-width: 767.98px) {
+  /* 文字（第三輪縮小） */
+  .product-details .coffee-title,
+  .product-details .bean-title { font-size: 17px; }
+  .product-details .block-23 .price { font-size: 15px; }
+  /* 描述需 (0,4,1) 勝過 .product-details .block-23 p.pb-2 (0,3,1) 的 1.1rem */
+  .product-details .block-23 p.bc-description-clamp { font-size: 12px; }
+  .product-details .block-23 ul li span.text { font-size: 12px; }
+  .product-details .form-group > p {font-size: 12px;}
+  /* 數量行的 label 在 .input-group 內（非 .form-group 直接子），統一 13px */
+  .product-details .input-group > p { font-size: 12px; }
+
+  /* 選項按鈕（需 .product-details 前綴勝過 .product-details button 54px !important） */
+  .product-details .bc-option-btn,
+  .product-details #cup-level-group .bc-option-btn {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 3px 6px;
+  }
+
+  /* 數量 */
+  .product-details .input-number {
+    width: 56px !important;
+    height: 36px !important;
+  }
+  .product-details .quantity-left-minus,
+  .product-details .quantity-right-plus {
+    height: 36px !important;
+    padding: 4px 8px;
+  }
+
+  /* 購買/加入購物車按鈕（padding 需 !important 覆蓋 Bootstrap .px-4/.py-3） */
+  .product-details .bc-product-action-btn {
+    height: 36px !important;
+    padding: 5px 10px !important;
+    font-size: 10px;
+  }
+
+  /* 全部按鈕文字縮小（2026-08-11：11px → 10px 再縮小） */
+  .product-details .bc-option-btn,
+  .product-details #cup-level-group .bc-option-btn,
+  .product-details .quantity-left-minus,
+  .product-details .quantity-right-plus,
+  .product-details .input-number {
+    font-size: 10px;
+  }
+  /* .r-btn 需 .product-details 前綴勝過 responsive .btn；oz 需 (1,2,0)!important 勝過
+     coffee.html inline <style> 的 #cup-level-group .bc-option-oz (1,1,0)!important */
+  .product-details .r-btn { font-size: 10px; }
+  .product-details #cup-level-group .bc-option-oz { font-size: 8px !important; }
+
+  /* 按鈕內部圖示縮小（2026-08-11：杯量 icon 13px→11px、+/- 9px→8px、
+     option label 11px→10px 統一） */
+  .product-details .bc-option-icon { font-size: 11px; }
+  .product-details .quantity-left-minus i,
+  .product-details .quantity-right-plus i { font-size: 8px; }
+  .product-details .bc-option-label-text { font-size: 10px; }
+
+  /* 標籤文字與按鈕文字水平中心對齊（2026-08-11）
+     label 被 style-bootstrap 設 align-self:flex-end（貼行底）→ 覆蓋為 center，
+     讓 label 文字 cy = 行中心 = 按鈕文字 cy */
+  .product-details .form-group > p,
+  .product-details .input-group > p {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    line-height: 1.2;
+    margin: 0;
+  }
+  /* 杯量按鈕含 icon+label（內容較高），固定 padding 讓內容偏上 → padding-top/bottom 0
+      + inline-flex align-center 讓內容 cy = 按鈕中心（對齊 label）；
+      2026-08-11：杯量按鈕增加高度 36→44px（oz+icon+label 三層內容需要空間） */
+  .product-details #cup-level-group .bc-option-btn {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  /* 杯量按鈕內 label-text：移除 translateY（原 11px 過度把文字推下），
+     自然居中 cy=596 = icon/label 水平線 */
+  .product-details #cup-level-group .bc-option-btn .bc-option-label-text {
+    align-self: center;
+  }
+
+  /* 返回按鈕 */
+  .r-btn { height: 32px; padding: 4px 12px; }
+
+  /* 烘焙水平 label */
+  .roastrange-label { font-size: 11px; }
+
+  /* 資訊圖示 */
+  .product-details .block-23 ul li .icon {
+    font-size: 16px;
+    width: 24px;
+  }
+
+  /* 數量行外層左對齊（.w-100.form-group 無 col 包裝 → 補 row 負 margin 15px，
+     原 x=39 與其他行 x=54 不對齊） */
+  .product-details .w-100.form-group {
+    /* margin-left: 15px; */
+    /* margin-right: 15px;
+  } */
+  /* 內部 input-group 不再額外偏移（外層已對齊） */
+  .product-details .input-group.col {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* ===== navbar 行動端 logo 文字與漢堡水平中心點對齊（2026-08-11） */
+@media all and (max-width: 767.98px) {
+  .ftco_navbar .container {
+    justify-content: initial;
+  }
+  .ftco_navbar .navbar-toggler {
+    margin-left: auto !important;
+  }
+  .ftco_navbar .navbar-brand {
+    padding-top: 4px;
+    padding-bottom: 5px;
+  }
+}
+
+/* ===== Footer 行動端響應式（2026-08-11 二次縮小）
+   跑馬燈 16px→14px、social 40px→34px/icon 20→16px、文字 14→13px、copyright→12px */
+@media all and (max-width: 767.98px) {
+  /* 水平跑馬燈（max-content 單行無縫） */
+  .tag-list li { font-size: 14px; width: max-content; white-space: nowrap; padding: 0.05rem; }
+  .scroller__inner { padding-block: 0.75rem; }
+  /* footer 文字 */
+  .ftco-footer-widget > p { font-size: 13px; }
+  .ftco-footer .col-md-12 p { font-size: 12px; }
+  /* social 圖示（40px → 34px、icon 20px → 16px） */
+  .ftco-footer-social li a { height: 34px; width: 34px; }
+  .ftco-footer-social li a span { font-size: 16px; }
+}
+
+/* ===== 詳情頁返回按鈕水平居中（2026-08-11）
+   bean.html 的 .text-center 無 w-100 包裝（coffee 有）→ 容器僅 46px 靠左；
+   flex + justify-content:center 強制居中 */
+@media all and (max-width: 767.98px) {
+  .product-details .text-center.mt-3 {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
 /* ==================== CSS 統一 Phase C+D：購物車抽屜 + 全域模板 inline → class ==================== */
 /* 購物車背景裝飾文字 */
 .bc-cart-title-bg {
