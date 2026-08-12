@@ -52,7 +52,7 @@
                         <div class="sticker">
                             <div class="front"><img src= {% static 'images/float_bean.png' %}></div>
                             <div class="bg"></div>
-                            <p><span>Crafting<br>Perfection</span>打造完美<br>新鮮質量!</p>
+                            <p class="bc-sticker-text"><span class="bc-sticker-text-sub">Crafting<br>Perfection</span>打造完美<br>新鮮質量!</p>
                         </div>
                     </div>
                     <p class="price">${{ bean.price_200g|floatformat:"0" }}</p>
@@ -99,8 +99,7 @@
                     {% csrf_token %}
                     <div class="row mt-4">
                         <!-- Weight Level -->
-                        <div class="col-md-12">
-                            <div class="form-group d-flex">
+                            <div class="w-100 form-group d-flex">
                                 <p>淨量 :</p>
                                 <div class="bc-option-group" id="weight-group">
                                     <button type="button" class="bc-option-btn active" data-value="200g" data-price="{{ bean.price_200g|floatformat:'0' }}">200g - ${{ bean.price_200g|floatformat:"0" }}</button>
@@ -108,11 +107,9 @@
                                 </div>
                                 <input type="hidden" name="weight" id="weight" value="200g">
                             </div>
-                        </div>
 
                         <!-- Grinding Level -->
-                        <div class="col-md-12">
-                            <div class="form-group d-flex">
+                            <div class="w-100 form-group d-flex">
                                 <p>研磨 :</p>
                                 <div class="bc-option-group" id="grinding-group">
                                     <button type="button" class="bc-option-btn active" data-value="Non">免研磨</button>
@@ -122,11 +119,10 @@
                                 </div>
                                 <input type="hidden" name="grinding_level" id="grinding_level" value="Non">
                             </div>
-                        </div>
 
                         <!-- Quantity -->
                         <div class="w-100 form-group">
-							<div class="input-group col col-md-8 d-flex mb-3">
+							<div class="input-group mb-3">
                                 <p>數量 :</p>
                                 <span class="input-group-btn mr-2">
                                     <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
@@ -143,17 +139,16 @@
                         </div>
 
                         <!-- Submit Buttons -->
-                        <div class="col-md-12 mt-4">
-                            <div class="d-flex button-d-flex justify-content-between px-2 bc-product-action-row" style="gap: 1rem;">
-                                <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">立即購買</button>
-                                <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">加入購物車</button>
-                            </div>
-                            <div class="text-center mt-3">
-                                <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></span>
-                            </div>
+                        <div class="d-flex button-d-flex justify-content-between px-2 bc-product-action-row" style="gap: 1rem;">
+                            <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">立即購買</button>
+                            <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">加入購物車</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></span>
                         </div>
                     </div>
                 </form>
+
                 <!-- info -->
                 <div class="block-23 mt-5 mb-3">
                     <ul>

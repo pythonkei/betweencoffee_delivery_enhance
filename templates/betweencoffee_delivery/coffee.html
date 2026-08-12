@@ -54,7 +54,7 @@
                         <div class="sticker">
                             <div class="front"><img src= {% static 'images/takeaway_cup.png' %}></div>
                             <div class="bg"></div>
-                            <p><span>Follow <br>Your Rhythm</span>5分鐘內<br>準備就緒!!</p>
+                            <p class="bc-sticker-text"><span class="bc-sticker-text-sub">Follow <br>Your Rhythm</span>5分鐘內<br>準備就緒!!</p>
                         </div>
                     </div>
                     <p class="price">${{ coffee.price|floatformat:"-2"|default:"0"  }}</p>
@@ -73,8 +73,7 @@
                     {% csrf_token %}
                     <div class="row mt-4">
                         <!-- Cup Level -->
-                        <div class="col-md-12">
-                            <div class="form-group d-flex">
+                            <div class="w-100 form-group d-flex">
                                 <p>杯量 :</p>
                                 <div class="bc-option-group" id="cup-level-group">
                                     <button type="button" class="bc-option-btn" data-value="Small" data-oz="12oz" hidden>
@@ -95,11 +94,9 @@
                                 </div>
                                 <input type="hidden" name="cup_level" id="cup_level" value="Medium">
                             </div>
-                        </div>
 
                         <!-- Milk Level -->
-                        <div class="col-md-12">
-                            <div class="form-group d-flex">
+                            <div class="w-100 form-group d-flex">
                                 <p>奶量 :</p>
                                 <div class="bc-option-group" id="milk-level-group">
                                     <button type="button" class="bc-option-btn" data-value="Light">少</button>
@@ -108,11 +105,9 @@
                                 </div>
                                 <input type="hidden" name="milk_level" id="milk_level" value="Medium">
                             </div>
-                        </div>
 
                         <!-- Strength Level -->
-                        <div class="col-md-12">
-                            <div class="form-group d-flex">
+                            <div class="w-100 form-group d-flex">
                                 <p>濃度 :</p>
                                 <div class="bc-option-group" id="strength-level-group">
                                     <button type="button" class="bc-option-btn active" data-value="Normal">預設</button>
@@ -120,11 +115,10 @@
                                 </div>
                                 <input type="hidden" name="strength_level" id="strength_level" value="Normal">
                             </div>
-                        </div>
 
                         <!-- Quantity -->
-                        <div class="w-100 form-group">
-							<div class="input-group col col-md-8 d-flex mb-3">
+                        <div class="w-100 form-group d-flex">
+							<div class="input-group mb-3">
                                 <p>數量 :</p>
                                 <span class="input-group-btn mr-2">
                                     <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
@@ -141,7 +135,7 @@
                         </div>
 
                         <!-- Submit Buttons -->
-                        <div class="col-md-12 mt-4">
+                        <div class="w-100 form-group mt-4">
                             <div class="d-flex button-d-flex justify-content-between px-2 bc-product-action-row" style="gap: 1rem;">
                                 <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">立即購買</button>
                                 <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">加入購物車</button>

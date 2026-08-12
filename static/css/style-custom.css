@@ -809,9 +809,19 @@ optgroup  {
 }
 
 /* 產品照片響應式：行動端縮小（2026-08-11，原 91% → 70%）
-   範圍涵蓋 ≤767.98px（手機 + 平板），避免 576-767px 視窗照片維持 100% 反而更大 */
+   範圍涵蓋 ≤767.98px（手機 + 平板），避免 576-767px 視窗照片維持 100% 反而更大
+   2026-08-11 追加：max-height 56vw 限制直向圖（coffee 860×1100）高度，
+   參考 bean 方形圖手機高度（~218px），避免直向圖過高（原 279px）
+   2026-08-11 追加2：桌面/平板也限高（直向圖 660px 過高）→ 平板 max-height 600px、
+   桌面 516px（= bean 方形圖各斷點高度），直向圖高度與 bean 視覺協調 */
 @media all and (max-width: 767.98px) {
-  .img-box .img-4 { max-width: 70%; }
+  .img-box .img-4 { max-width: 70%; max-height: 56vw; }
+}
+@media screen and (min-width: 768px) and (max-width: 1079.98px) {
+  .img-box .img-4 { max-height: 600px; }
+}
+@media screen and (min-width: 1080px) {
+  .img-box .img-4 { max-height: 516px; }
 }
 
 /* Add to Cart Popup box */
@@ -1059,16 +1069,16 @@ optgroup  {
 
 /* Subpage spaceing */
 
-/* Rotating Sticker（2026-08-11 重構 v3：貼紙錨定名稱右側 + 中心對齊）
-   容器 absolute 錨定在名稱區（.block-23 position-relative 內，名稱是其第一個子元素）；
-   top:-107px 讓貼紙中心 = block 頂 + 23px = 名稱中心（名稱高 ~46px：46/2 - 260/2 = -107）；
-   right 靠右；pointer-events:none 純裝飾不阻擋互動。 */
+/* Rotating Sticker（2026-08-11 重構 v4：clamp 響應式，無 media query 依賴）
+   容器尺寸 clamp(170px, 44vw, 260px)：手機自動 ~170px、桌面 260px，
+   任何視窗寬度都響應式（不再依賴 @media 邊界）；移除 scale 縮放（transform 不改變
+   layout 尺寸，會使 .bg 的 background-size:contain 以錯誤容器計算）。 */
 .sticker-box { 
   position: absolute;
   top: -124px;
   right: -50px;
-  width: 260px;
-  height: 260px;
+  width: clamp(109px, 28.16vw, 208px);    /* 2026-08-11：桌面/平板 max 260→208（-20%），手機 109/28.16vw 不變 */
+  height: clamp(109px, 28.16vw, 208px);
   z-index: 5;
   pointer-events: none;
 }
@@ -1076,9 +1086,8 @@ optgroup  {
 .sticker  { 
   position: absolute;
   inset: 0;
-  width: 260px;
-  height: 260px;
-  transform: scale(0.8);
+  width: 100%;
+  height: 100%;
   display: block;
 }
 
@@ -1099,14 +1108,14 @@ optgroup  {
   display: block;
   position: absolute;
   z-index: 101;
-  left: 176px;
+  left: 68%;               /* ≈176/260，隨容器等比 */
   top: -6px;
   /* transform: rotate(4deg); */
 }
 
 .sticker .front img  { 
-  width: 84px;
-  height: 98px;
+  width: clamp(37px, 10.24vw, 67px);    /* 2026-08-11：桌面/平板 max 84→67（-20%） */
+  height: clamp(43px, 12.16vw, 78px);
 }
 
 /* clears default br height */
@@ -1122,30 +1131,39 @@ optgroup  {
   content: ""; /* clears default height */
   color: var(--brand-primary);
   font-family: "Noto Sans TC", Arial, sans-serif;
-  font-size: 25px;
   font-weight: 700;
-  line-height: 32px;
+  line-height: 1.28;
   text-align: center;
   z-index: 200;
   vertical-align: middle; 
-  margin: 72px 20px 20px 20px;
+  margin: 27% 7.7% 7.7% 7.7%;           /* ≈72px/20px @260，隨容器等比 */
   font-style: italic;
   letter-spacing: -1px;
 }
 
-.sticker p span  { 
+/* 響應式文字 class（2026-08-11）：sticker 內部文字，與容器同步縮放
+   行動端 10px → 桌面/平板 20px（原 25px -20%） */
+.bc-sticker-text {
+  font-size: clamp(10px, 2.56vw, 20px);
+}
+
+.sticker p span  {
   display: block; /* makes it have a width */
   content: ""; /* clears default height */
   color:#333;
   font-family: "Noto Sans TC", Arial, sans-serif;
   text-transform: uppercase;
-  font-size: 17px;
   text-align: center;
   z-index: 200;
   vertical-align: middle;
-  line-height: 20px;
-  padding-bottom: 12px;
+  /* line-height: 1.18; */
+  padding-bottom: 5px;
   font-style: normal;
+}
+
+/* 響應式子標題 class（2026-08-11）：行動端 7px → 桌面/平板 14px（原 17px -20%） */
+.bc-sticker-text-sub {
+  font-size: clamp(7px, 1.92vw, 14px);
 }
 
 /* Sticker animation */
@@ -1167,33 +1185,11 @@ optgroup  {
   }
 }
 
-/* Sticker 響應式（2026-08-11）：手機縮小貼紙 + 調整位置 */
+/* Sticker 響應式（2026-08-11 v4：尺寸已由 clamp 自動處理，此處僅微調手機位置） */
 @media all and (max-width: 575.98px) {
   .sticker-box { 
-    width: 170px;
-    height: 170px;
-    top: -67px;            /* 名稱高 ~35px：35/2 - 170/2 = -67.5 */
+    top: -67px;
     right: -6px;
-  }
-  .sticker { 
-    transform: scale(0.65);   /* 170/260：貼紙視覺約 111px */
-  }
-  .sticker .front { 
-    left: 115px;              /* 176 × 170/260 */
-  }
-  .sticker .front img  { 
-    width: 58px;
-    height: 68px;
-  }
-  .sticker p  { 
-    font-size: 16px;
-    line-height: 21px;
-    margin: 46px 12px 12px 12px;
-  }
-  .sticker p span  { 
-    font-size: 11px;
-    line-height: 14px;
-    padding-bottom: 8px;
   }
 }
 

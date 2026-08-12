@@ -907,7 +907,7 @@ button.alert:hover {
   max-width: 100%;
   opacity: .045;
   font-family: 'Mogra';
-  letter-spacing: -10px;
+  letter-spacing: -0.04em;   /* 2026-08-11：-10px 固定 → em 隨字體縮放（行動端 78px 時 -3px，桌面 256px 時 -10px） */
 }
 
 /* 使用 ::before 偽元素實現背景文字，避免 overflow: hidden 裁切問題 */
@@ -934,7 +934,7 @@ button.alert:hover {
   line-height: 1.1;
   color: #fff;
   opacity: .045;
-  letter-spacing: -10px;
+  letter-spacing: -0.04em;   /* 2026-08-11：-10px 固定 → em 隨字體縮放（行動端文字不重疊） */
   z-index: 0;
   pointer-events: none;
   white-space: pre-wrap;
@@ -945,6 +945,17 @@ button.alert:hover {
   top: 130px;
   left: -10vw;
   font-size: 16vw;
+}
+
+/* 行動端背景文字字距再加大（2026-08-11）：桌面 -0.04em（略縮）、行動端 0.05em（正值，文字分散開）
+   大字 Mogra 背景字在行動端（78px）正值字距更有設計感、避免黏在一起 */
+@media all and (max-width: 767.98px) {
+  .title-bg-head,
+  .title-bg-head-v2,
+  .title-bg-head-v3,
+  .bc-section-with-bg-text::before {
+    letter-spacing: -0.04em;
+  }
 }
 
 .title-bg-head-v2 {
@@ -966,7 +977,7 @@ button.alert:hover {
   justify-content: flex-start;
   opacity: .03;
   font-family: 'Mogra';
-  letter-spacing: -10px;
+  letter-spacing: -0.04em;   /* 2026-08-11：-10px 固定 → em 隨字體縮放 */
 }
 
 
@@ -988,7 +999,7 @@ button.alert:hover {
   max-width: 100%;
   opacity: .03;
   font-family: 'Mogra';
-  letter-spacing: -10px;
+  letter-spacing: -0.04em;   /* 2026-08-11：-10px 固定 → em 隨字體縮放 */
 }
 
 .img-deco-bg {
