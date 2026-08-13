@@ -3534,16 +3534,34 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   #pickup-code-display {
     font-size: 2.4rem !important;         /* 覆蓋 bootstrap display-4 3.5rem */
   }
-  #pickup-code-display + p { font-size: 0.85rem; }
+  #pickup-code-display + p { font-size: 0.9.5rem; }
 
-  /* ---- payment-confirmation：商品明細 ---- */
+  /* ---- payment-confirmation：商品明細（與 order_confirm 訂單詳情一致） ---- */
   .mb-5.p-4.rounded > h5.mb-4 { font-size: 1rem; }   /* 「商品明細」標題 */
   .bc-product-img-box {
-    width: 72px;
-    height: 72px;
+    width: 70px;
+    height: 70px;
   }
-  .order-items h5 { font-size: 0.95rem; }
-  .order-items .text-muted { font-size: 0.8rem; }
+  .order-items .d-flex.align-items-center {
+    margin-bottom: 8px !important;      /* 24px → 8px */
+    padding-bottom: 4px !important;     /* 16px → 4px */
+  }
+  .order-items h5 { font-size: 0.88rem !important; }  /* 商品名（覆蓋 .mb-1.text-white 0.8rem） */
+  .order-items .mb-1.text-white { font-size: 0.8rem; } /* 數量 */
+  .order-items .flex-grow-1 { font-size: 0.72rem; }    /* bean 純文字選項 */
+  .order-items .text-right .h5 { font-size: 0.9rem; }  /* 價格 */
+  .order-items .text-right .text-muted { font-size: 0.72rem; }  /* 單價 */
+  .order-items .bc-options-row {
+    font-size: 0.65rem;                   /* coffee 選項：單行壓縮 */
+    flex-wrap: nowrap;                    /* 強制單行 */
+    gap: 3px;
+    overflow: hidden;
+  }
+  .order-items .bc-options-row .option-item { white-space: nowrap; }
+  .order-items .bc-options-row .icon {
+    font-size: 0.7rem !important;         /* 覆蓋全域 .bc-options-row .icon 0.9rem !important */
+    top: 0 !important;                    /* 對齊 */
+  }
 
   /* ---- payment-confirmation：摘要 ---- */
   .bc-summary-label,

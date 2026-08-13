@@ -285,7 +285,7 @@
                 <!-- ========== end 訂單狀態卡片區 ========== -->
 
                 <!-- 二維碼和提取碼區 -->
-                <div class="order-item mb-5 p-5 rounded text-center" id="qrcode-section">
+                <div class="order-item mb-5 rounded text-center" id="qrcode-section">
                     <h5 class="mb-4">請向店員出示此二維碼提取</h5>
                     
                     <!-- 二維碼 -->
@@ -413,8 +413,7 @@
 
                 <!-- ========== 積分獎勵顯示區 ========== -->
                 {% if earned_points > 0 and loyalty_info %}
-                <div class="row justify-content-center mb-4">
-                    <div class="col-12">
+                <div class="row justify-content-center mb-5">
                         <div class="d-flex align-items-center justify-content-center bc-points-bar">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-star text-white mr-3 bc-points-star"></i>
@@ -423,14 +422,13 @@
                                 </span>
                             </div>
                         </div>
-                    </div>
                 </div>
                 {% endif %}
                 <!-- ========== end 積分獎勵顯示區 ========== -->
 
                 <!-- 商品明细 -->
-                <div class=" mb-5 p-4 rounded">
-                    <h5 class="mb-4">商品明細</h5>
+                <div class=" b-5 rounded">
+                    <div class="h5 mb-4">商品明細</div>
                     <div class="order-items">
                         {% for item in order.get_order_display_items %}
                         <div class="d-flex align-items-center mb-4 pb-3">
@@ -450,8 +448,8 @@
                             </div>
                             <div class="flex-grow-1 align-self-baseline">
                                 <div class="text-right">
-                                    <span class="h5 text-white">{{ item.total_price_formatted|default:item.price_formatted }}</span>
-                                    <div class="text-muted">{{ item.price_formatted }} / 單價</div>
+                                    <span class="h5 text-white">{{ item.total_price_formatted|default:item.price_formatted|cut:"HK$" }}</span>
+                                    <div class="text-muted">{{ item.price_formatted|cut:"HK$" }} / 單價</div>
                                 </div>
                             </div>
                         </div>

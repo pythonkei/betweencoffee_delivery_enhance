@@ -212,6 +212,7 @@
     --attract: 8px;
     width: 32px;
     height: 32px;
+    left: 8px;            /* 與右側虛線中心對齊（2026-08-13） */
   }
   /* 手機版：漢堡選單維持在 navbar 內（原 ml-auto） */
   .bc-attract-nav {

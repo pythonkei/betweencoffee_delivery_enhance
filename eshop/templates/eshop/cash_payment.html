@@ -3,13 +3,21 @@
 {% load static %}
 
 {% block content %}
+<style>
+/* Cash 付款頁：隱藏全站懸浮按鈕（右側 Buy & Order + 浮動購物車）與右側虛線——付款流程中不需顯示 */
+.bc-attract-nav,
+.bc-floating-cart,
+#borders {
+  display: none !important;
+}
+</style>
 
 <section class="ftco-section-blank-small"></section>
 
 <section class="ftco-subpage-section">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-10 col-md-8">
+            <div class="col-lg-10 col-md-12">
                 <div class="card shadow-sm">
                     <div hidden class="card-header bg-theme text-dark text-center">
                         <h4 class="mb-0">現金支付</h4>
@@ -17,8 +25,8 @@
                     <div class="card-body p-5">
                         <!-- 訂單資訊 -->
                         <div class="text-center mb-4">
-                            <div class="mb-4">
-                                <i class="fas fa-money-bill-wave payment-icon-cash"></i>
+                            <div class="mb-3">
+                                <i class="fas fa-money-bill-wave fa-3x" style="color: #c49b63;"></i>
                             </div>
                             <h5>到店支付現金</h5>
                             <p hidden class="text-muted">訂單編號: #{{ order.id }}</p>
@@ -59,7 +67,7 @@
                         </div>
 
                         <!-- 訂單詳情 -->
-                        <div class="order-item mb-5 p-4 rounded">
+                        <div class="order-item mb-5 rounded">
                             <h5 class="mb-4 pb-2">商品明细</h5>
                             
                             <div class="order-items">
@@ -105,7 +113,7 @@
                         </div>
 
                         <!-- 客户信息 -->
-                        <div class="order-item-v2 mb-4 rounded p-4">
+                        <div class="order-item-v2 mb-4 rounded">
                             <div class="d-flex justify-content-between mb-3">
                                 <div>
                                     <h5 class="mb-2">訂單資訊</h5>

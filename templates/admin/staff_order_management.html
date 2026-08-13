@@ -4,6 +4,14 @@
 {% load static %}
 
 {% block content %}
+<style>
+/* 員工訂單管理頁：隱藏全站懸浮按鈕（右側 Buy & Order + 浮動購物車）與右側虛線——管理介面不需顯示 */
+.bc-attract-nav,
+.bc-floating-cart,
+#borders {
+  display: none !important;
+}
+</style>
 <!-- blank header spacing-->
 <section class="ftco-section-blank-staff"></section>
 
