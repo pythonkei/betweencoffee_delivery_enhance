@@ -30,7 +30,7 @@ class Index(View):
     def get(self, request, *args, **kwargs):
         shop_hot_coffees = CoffeeItem.objects.filter(
             is_shop_hot_item=True, is_published=True
-        )[:4]
+        ).order_by("hot_item_order", "id")[:4]
 
         # 简化：上下文处理器已经处理了cart，这里不需要重复
         context = _build_landing_context(request)
@@ -48,7 +48,7 @@ def _build_landing_context(request):
     """共用：首頁 / landing 的商品 + 登入狀態 + 社交頭像 context"""
     hot_coffees = CoffeeItem.objects.filter(
         is_shop_hot_item=True, is_published=True
-    )[:4]
+    ).order_by("hot_item_order", "id")[:4]
     all_coffees = CoffeeItem.objects.filter(is_published=True)[:9]
     beans = BeanItem.objects.filter(is_published=True)[:3]
 

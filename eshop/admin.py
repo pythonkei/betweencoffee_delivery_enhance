@@ -370,12 +370,18 @@ class CoffeeItemAdmin(admin.ModelAdmin):
         "price",
         "is_published",
         "is_shop_hot_item",
+        "hot_item_order",
         "image_preview",
         "index_image_preview",
     )
     list_filter = ("is_published", "is_shop_hot_item", "list_date")
     search_fields = ("name", "introduction", "description")
-    list_editable = ("sort_order", "is_published", "is_shop_hot_item")  # 允许直接编辑排序字段
+    list_editable = (
+        "sort_order",
+        "is_published",
+        "is_shop_hot_item",
+        "hot_item_order",
+    )  # 允许直接编辑排序字段
     fieldsets = (
         (
             "基本信息",
