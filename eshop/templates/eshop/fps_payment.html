@@ -144,11 +144,11 @@
                             <div class="d-flex justify-content-center align-items-stretch bc-payment-actions">
                                 <form method="POST" action="{% url 'eshop:fps_confirm_payment' order.id %}" class="d-flex">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 d-inline-flex align-items-center justify-content-center bc-payment-action-btn" id="fps-confirm-btn">
+                                    <button type="submit" class="btn btn-primary btn-outline-primary d-inline-flex align-items-center justify-content-center bc-payment-action-btn" id="fps-confirm-btn">
                                         <i class="fas fa-check mr-2"></i>我已完成支付
                                     </button>
                                 </form>
-                                <a href="{% url 'eshop:order_confirm' %}" class="btn btn-outline-secondary calltoaction-btn px-4 py-3 d-inline-flex align-items-center justify-content-center bc-payment-action-btn" style="--bs-btn-hover-color: #6c757d; --bs-btn-hover-bg: rgba(108,117,125,0.15); --bs-btn-hover-border-color: #6c757d; --bs-btn-active-color: #6c757d; --bs-btn-active-bg: rgba(108,117,125,0.15); --bs-btn-active-border-color: #6c757d;">
+                                <a href="{% url 'eshop:order_confirm' %}" class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center bc-payment-action-btn">
                                     <i class="fas fa-arrow-left mr-2"></i>返回修改
                                 </a>
                             </div>

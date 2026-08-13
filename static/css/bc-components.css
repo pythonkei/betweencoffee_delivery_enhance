@@ -360,41 +360,43 @@ body {
 .bc-payment-actions {
   gap: 12px;
 }
+/* 2026-08-13：付款頁按鈕改內容寬度（參考 coffee_menu 落單按鈕樣式），
+   不再強制 246/194px 固定寬 + calltoaction-btn 230×48 */
 .bc-payment-actions form {
-  flex: 1.12;          /* 主要按鈕（我已完成支付/確認訂單，CTA）+12% */
-  max-width: 246px;
+  flex: 0 0 auto;
 }
 .bc-payment-actions a.bc-payment-action-btn {
-  flex: 0.88;          /* 次要按鈕（返回修改）-12% */
-  width: 100%;
-  max-width: 194px;
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
   min-width: 0;
 }
 .bc-payment-actions .bc-payment-action-btn {
-  width: 100%;
+  width: auto;
+  max-width: none;
   min-width: 0;
 }
 
-/* 行動螢幕（≤768px）：CTA/次要按鈕改用百分比 fit 螢幕，避免 .calltoaction-btn 固定 230px 溢出 */
+/* 行動螢幕（≤768px）：按鈕維持內容寬度並排 */
 @media (max-width: 768px) {
   .bc-payment-actions {
     gap: 10px;
   }
   .bc-payment-actions form {
-    flex: 1.12;
-    max-width: 56%;
+    flex: 0 0 auto;
+    max-width: none;
   }
   .bc-payment-actions a.bc-payment-action-btn {
-    flex: 0.88;
-    max-width: 44%;
+    flex: 0 0 auto;
+    max-width: none;
   }
   .bc-payment-actions .bc-payment-action-btn {
-    width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
+    width: auto;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   .bc-payment-actions .calltoaction-btn {
-    width: 100%;
+    width: auto;
   }
 }
 
