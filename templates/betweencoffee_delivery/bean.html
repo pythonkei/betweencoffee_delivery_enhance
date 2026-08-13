@@ -224,6 +224,30 @@
             priceElement.textContent = '$' + unitPrice.toFixed(0);
         }
 
+        // 從 URL query 預選上次訂單選項（來自首頁最後訂單圖片連結：weight / grinding_level）
+        (function preselectLastOrderOptions() {
+            var params = new URLSearchParams(window.location.search);
+            var map = {
+                'weight': 'weight-group',
+                'grinding_level': 'grinding-group'
+            };
+            Object.keys(map).forEach(function(key) {
+                var val = params.get(key);
+                if (!val) return;
+                var group = document.getElementById(map[key]);
+                if (!group) return;
+                group.querySelectorAll('.bc-option-btn').forEach(function(btn) {
+                    var active = btn.getAttribute('data-value') === val;
+                    btn.classList.toggle('active', active);
+                });
+                var hiddenInput = group.closest('.form-group');
+                if (hiddenInput) {
+                    var hid = hiddenInput.querySelector('input[type="hidden"]');
+                    if (hid) hid.value = val;
+                }
+            });
+        })();
+
         // Option Button Toggle - 淨量
         document.querySelectorAll('#weight-group .bc-option-btn').forEach(btn => {
             btn.addEventListener('click', function () {

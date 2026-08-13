@@ -85,7 +85,11 @@ def _get_last_order_image(user):
 
 
 def _get_last_order_link(user):
-    """產生最後訂單商品詳細頁連結（含預先選取上次選項的 query string）"""
+    """產生最後訂單商品詳細頁連結（含預先選取上次選項的 query string）
+
+    - 咖啡（coffee）: cup_level / milk_level / strength_level
+    - 咖啡豆（bean）: weight / grinding_level
+    """
     try:
         last_order = user.orders.order_by("-id").first()
         if last_order:
@@ -97,10 +101,16 @@ def _get_last_order_link(user):
                 if not pid or ptype not in ("coffee", "bean"):
                     return ""
                 opts = []
-                for key in ("cup_level", "milk_level", "strength_level"):
-                    val = item.get(key)
-                    if val:
-                        opts.append(f"{key}={val}")
+                if ptype == "bean":
+                    for key in ("weight", "grinding_level"):
+                        val = item.get(key)
+                        if val:
+                            opts.append(f"{key}={val}")
+                else:
+                    for key in ("cup_level", "milk_level", "strength_level"):
+                        val = item.get(key)
+                        if val:
+                            opts.append(f"{key}={val}")
                 qs = "?" + "&".join(opts) if opts else ""
                 base = "/coffee/" if ptype == "coffee" else "/bean/"
                 return f"{base}{pid}/{qs}"
