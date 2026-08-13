@@ -2408,9 +2408,13 @@ body {
   flex: 1;
 }
 
-/* Phase B: bean.html 專用 */
-.bc-roast-active {
+/* Phase B: bean.html 專用（2026-08-13：active 烘焙水平文字/圓點改金色）
+   需 .roastrange-item span 前綴勝過 style-custom.css 的 .roastrange-item span { color:#666 } */
+.roastrange-item span.bc-roast-active {
   color: var(--brand-primary);
+}
+.roast .roastrange-label::before {
+  background-color: var(--brand-primary);
 }
 
 .bc-roast-range-field {
