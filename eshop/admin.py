@@ -366,6 +366,7 @@ class OrderModelAdmin(admin.ModelAdmin):
 class CoffeeItemAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "sort_order",
         "price",
         "is_published",
         "is_shop_hot_item",
@@ -374,7 +375,7 @@ class CoffeeItemAdmin(admin.ModelAdmin):
     )
     list_filter = ("is_published", "is_shop_hot_item", "list_date")
     search_fields = ("name", "introduction", "description")
-    list_editable = ("is_published", "is_shop_hot_item")  # 允许直接编辑排序字段
+    list_editable = ("sort_order", "is_published", "is_shop_hot_item")  # 允许直接编辑排序字段
     fieldsets = (
         (
             "基本信息",
@@ -430,6 +431,7 @@ class CoffeeItemAdmin(admin.ModelAdmin):
 class BeanItemAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "sort_order",
         "price_200g",
         "price_500g",
         "roast_level",
@@ -440,7 +442,7 @@ class BeanItemAdmin(admin.ModelAdmin):
     )
     list_filter = ("is_published", "is_shop_hot_item", "roast_level", "list_date")
     search_fields = ("name", "introduction", "description")
-    list_editable = ("is_published", "is_shop_hot_item")  # 允许直接编辑排序字段
+    list_editable = ("sort_order", "is_published", "is_shop_hot_item")  # 允许直接编辑排序字段
     fieldsets = (
         (
             "基本信息",

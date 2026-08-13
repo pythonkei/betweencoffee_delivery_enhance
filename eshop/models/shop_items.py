@@ -60,6 +60,10 @@ class CoffeeItem(models.Model):
     hot_item_order = models.PositiveIntegerField(
         default=0, verbose_name="热门商品排序", help_text="数字越小显示越靠前"
     )
+    # 菜單卡片排序（2026-08-13）：coffee_menu 頁面顯示順序，數字越小越靠前
+    sort_order = models.PositiveIntegerField(
+        default=0, verbose_name="菜單排序", help_text="數字越小顯示越靠前"
+    )
 
     def __str__(self):
         return self.name
@@ -138,6 +142,10 @@ class BeanItem(models.Model):
     # 排序字段
     hot_item_order = models.PositiveIntegerField(
         default=0, verbose_name="热门商品排序", help_text="数字越小显示越靠前"
+    )
+    # 菜單卡片排序（2026-08-13）：bean_menu 頁面顯示順序，數字越小越靠前
+    sort_order = models.PositiveIntegerField(
+        default=0, verbose_name="菜單排序", help_text="數字越小顯示越靠前"
     )
 
     def __str__(self):

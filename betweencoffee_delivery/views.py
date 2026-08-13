@@ -175,7 +175,7 @@ def _get_user_avatar(user):
 # List out coffee item
 class CoffeeMenu(View):
     def get(self, request, *args, **kwargs):
-        coffee_menu = CoffeeItem.objects.all()
+        coffee_menu = CoffeeItem.objects.all().order_by("sort_order", "id")
         cart = Cart(request)  # Initialize the cart
 
         context = {
@@ -200,7 +200,7 @@ class Coffee(View):
 # List out bean item
 class BeanMenu(View):
     def get(self, request, *args, **kwargs):
-        bean_items = BeanItem.objects.all()
+        bean_items = BeanItem.objects.all().order_by("sort_order", "id")
         cart = Cart(request)  # Initialize the cart
 
         context = {
@@ -231,7 +231,7 @@ class CoffeeMenuSearch(View):
             Q(name__icontains=query)
             | Q(price__icontains=query)
             | Q(description__icontains=query)
-        )
+        ).order_by("sort_order", "id")
 
         context = {"search_items": search_items}
         return render(request, "betweencoffee_delivery/coffee_menu.html", context)
@@ -245,7 +245,7 @@ class BeanMenuSearch(View):
             Q(name__icontains=query)
             | Q(price__icontains=query)
             | Q(description__icontains=query)
-        )
+        ).order_by("sort_order", "id")
 
         context = {"search_items": search_items}
         return render(request, "betweencoffee_delivery/bean_menu.html", context)
