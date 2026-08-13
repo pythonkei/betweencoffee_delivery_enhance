@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月11日（更新：詳情頁行動端 UI 縮小對齊 + CSS 全域審計清理 Phase 1-3 + bc-welcome-panel 崩潰修復）
+> **最後更新**: 2026年8月13日（更新：首頁 bc-welcome-panel 最後訂單咖啡豆選項預選修復 + 行動端文字排版 + bc-search hover 動畫提速；訂單流程行動端 UI 全面優化；付款頁/員工頁響應式）
 
 ## 開發者背景與方法論
 
