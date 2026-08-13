@@ -2556,15 +2556,14 @@ body {
   .ftco-footer-social li a span { font-size: 16px; }
 }
 
-/* ===== 詳情頁返回按鈕水平居中（2026-08-11）
-   bean.html 的 .text-center 無 w-100 包裝（coffee 有）→ 容器僅 46px 靠左；
-   flex + justify-content:center 強制居中 */
-@media all and (max-width: 767.98px) {
-  .product-details .text-center.mt-3 {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
+/* ===== 詳情頁返回按鈕水平居中（2026-08-11 行動端 → 2026-08-13 改全域）
+   bean.html 的 .text-center.mt-3 是 .row(flex) 的直接子元素（無 coffee 的 w-100 包裝）
+   → flex item 寬度=內容寬 → 桌面端靠左偏離 form 中心；
+   width:100% + flex justify-content:center 強制居中（桌面 + 行動一致） */
+.product-details .text-center.mt-3 {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 /* ==================== CSS 統一 Phase C+D：購物車抽屜 + 全域模板 inline → class ==================== */
