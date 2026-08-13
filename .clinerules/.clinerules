@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月13日（更新：coffee_menu 產品區域改為 A+C 混合不對稱網格（bean-mix 共用、與 bean_menu 鏡像反轉 + 小卡向上錯落）；首頁最後訂單咖啡豆選項預選；bc-welcome-panel 行動端文字排版；bc-search hover 動畫提速；訂單流程行動端 UI 全面優化；付款頁/員工頁響應式）
+> **最後更新**: 2026年8月13日（更新：Django admin 咖啡/咖啡豆卡片排序功能（sort_order + list_editable）；coffee_menu 產品區域改為 A+C 混合不對稱網格（bean-mix 共用、與 bean_menu 鏡像反轉 + 小卡向上錯落）；首頁最後訂單咖啡豆選項預選；bc-welcome-panel 行動端文字排版；bc-search hover 動畫提速；訂單流程行動端 UI 全面優化；付款頁/員工頁響應式）
 
 ## 開發者背景與方法論
 
