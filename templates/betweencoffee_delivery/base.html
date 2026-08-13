@@ -8,13 +8,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <!-- 防快取：確保訂單流程頁面（order_confirm 等）取得最新版，避免瀏覽器/bfcache 顯示舊版 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Between Coffee 品牌字體: Noto Serif TC (標題/裝飾), Noto Sans TC (內文), Mogra (Logo) -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Mogra&display=block" rel="stylesheet">
     <link rel="stylesheet" href={% static 'css/style-bootstrap.css' %} />
     <link rel="stylesheet" href={% static 'css/style-custom.css' %}?v=20260811u />
-    <link rel="stylesheet" href={% static 'css/style-utilities.css' %}?v=20260811e />
+    <link rel="stylesheet" href={% static 'css/style-utilities.css' %}?v=20260813a />
     <link rel="stylesheet" href={% static "css/animate-custom.css" %}?v=20260810a />
     <link rel="stylesheet" href={% static "css/magnific-popup.css" %} />
     <link rel="stylesheet" href={% static "css/jquery.timepicker.min.css" %} />
@@ -24,7 +28,7 @@
     <!-- Between Coffee 品牌元件庫（含 toast、payment-methods、member-nav）
          2026-08-07: 加 ?v= 版本參數，因 WHITENOISE_MAX_AGE=31536000（1 年）長快取，
          改檔後不需手動清除瀏覽器快取即可生效 -->
-    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20260811aa />
+    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20260813aa />
 
     <!-- 2026-08-09: 全域響應式設計尺度系統（最後載入，覆蓋既有固定尺寸） -->
     <link rel="stylesheet" href={% static "css/responsive-system.css" %}?v=20260809l />
@@ -266,7 +270,7 @@
     <!-- delivery tut -->
 
     {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script> {% endcomment %}
-    <script src={% static "js/main.js" %}?v=20260811b></script>
+    <script src={% static "js/main.js" %}?v=20260813e></script>
 
     <!-- 2026-08-10: 流動選單（c-attract）動畫（依賴 GSAP，head 已載入；defer 確保 GSAP 先就緒） -->
     <script defer src={% static "js/bc-attract.js" %}?v=20260810l></script>

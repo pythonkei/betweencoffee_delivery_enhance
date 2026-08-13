@@ -6,7 +6,6 @@
 {% block content %}
 <!-- 背景文字：置於導覽列與內容之間 -->
 <div class="bc-section-with-bg-text bc-bg-text-top" data-bg-text="&#65371;Hug&#xa;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Caffeine!&#65373;"></div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Django messages 顯示區塊 - 使用 BcToast 或自定義 showToast -->
 {% if messages %}
@@ -63,107 +62,105 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endif %}
 
 
-<div class="hiddenLarge">
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-7 Rtable Rtable--4cols Rtable--collapse js-RtableAccordions w-100">
-                <div class="d-flex w-100 position-relative">
-                    <div class="w-50">
-                        <button class="Accordion fontsize-md" role="tab" aria-selected="false">訂單詳情<span class="arrow"></span></button>
-                    </div>
-                    <div class="w-50">
-                        <div class="total-price mb-5 text-right">
-                            <span class="h5">${{ total_price|floatformat:"-2" }}</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- table content -->
-                <div class="Rtable-cell sidebar-box ftco-animate mt-6 hiddenSmall">
-                    {% for item in items %}
-                        <div class="block-21 mb-5 d-flex bc-order-item">
-                            <div class="blog-img mr-4 bc-order-item-img">
-                                <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
-                                <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
-                            </div>
-                            <div class="text bc-order-item-text">
-                                <h3 class="heading">{{ item.name }}</h3>
-                                <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
 
-                                {% if item.type == 'coffee' %}
-                                <div class="meta pb-2 d-flex bc-order-item-meta">
-                                    <div>
-                                        <span class="icon material-symbols-outlined">water_full</span>
-                                    杯量 :
-                                    <strong>
-                                    {% if item.cup_level == 'Small' %}細
-                                    {% elif item.cup_level == 'Medium' %}中
-                                    {% elif item.cup_level == 'Large' %}大
-                                    {% else %}{{ item.cup_level|default:'中' }}
-                                    {% endif %}
-                                    </strong>
-                                </div>
-                                <div>
-                                    <span class="icon material-symbols-outlined">bolt</span>
-                                    濃度 :
-                                    <strong>
-                                    {% if item.strength_level == 'Normal' %}預設
-                                    {% elif item.strength_level == 'Extra' %}特濃
-                                    {% else %}{{ item.strength_level|default:'預設' }}
-                                    {% endif %}
-                                    </strong>
-                                </div>
-                                <div>
-                                    <span class="icon material-symbols-outlined">humidity_mid</span>
-                                    奶量 :
-                                    <strong>
-                                    {% if item.milk_level == 'Light' %}少
-                                    {% elif item.milk_level == 'Medium' %}正常
-                                    {% elif item.milk_level == 'Extra' %}追加
-                                    {% else %}{{ item.milk_level|default:'正常' }}
-                                    {% endif %}
-                                    </strong>
-                                </div>
-                            </div>
-                                {% elif item.type == 'bean' %}
-                                <div class="meta pb-2 d-flex bc-order-item-meta">
-
-                                    <div>
-                                        <span class="icon material-symbols-outlined">roller_shades</span>
-                                        研磨 :
-                                        <strong>
-                                        {% if item.grinding_level == 'Non' %}免研磨
-                                        {% elif item.grinding_level == 'Light' %}細
-                                        {% elif item.grinding_level == 'Medium' %}中
-                                        {% elif item.grinding_level == 'Deep' %}粗
-                                        {% endif %}
-                                        </strong>
-                                    </div>
-                                    {% if item.weight %}
-                                    <div>
-                                        <span class="icon material-symbols-outlined">scale</span>
-                                        重量 :
-                                        <strong>
-                                        {% if item.weight == '200g' %}200g
-                                        {% elif item.weight == '500g' %}500g
-                                        {% elif item.weight == '1kg' %}1kg
-                                        {% endif %}
-                                        </strong>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                <!-- table content -->
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <section class="ftco-section-billing">
+
+    <!-- 行動端訂單詳情折疊面板（預設關閉，點擊「訂單詳情」或向下箭頭展開） -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+    <div class="bc-order-collapse">
+        <button type="button" class="bc-order-collapse__header" id="bc-order-collapse-toggle" aria-expanded="false">
+            <span class="bc-order-collapse__title">訂單詳情</span>
+            <span class="bc-order-collapse__arrow" aria-hidden="true"></span>
+            <span class="bc-order-collapse__total">${{ total_price|floatformat:"-2" }}</span>
+        </button>
+        <div class="bc-order-collapse__body">
+            {% for item in items %}
+            <div class="block-21 mb-4 d-flex bc-order-item">
+                <div class="blog-img mr-4 bc-order-item-img">
+                    <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
+                    <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
+                </div>
+                <div class="text bc-order-item-text">
+                    <h3 class="heading">{{ item.name }}</h3>
+                    <p class="h5">${{ item.total_price |floatformat:"-2" }}</p>
+                    {% if item.type == 'coffee' %}
+                    <div class="meta pb-2 d-flex bc-order-item-meta-sm">
+                        <div>
+                            <span class="icon material-symbols-outlined">water_full</span>
+                            杯量 :
+                            <strong>
+                            {% if item.cup_level == 'Small' %}細
+                            {% elif item.cup_level == 'Medium' %}中
+                            {% elif item.cup_level == 'Large' %}大
+                            {% else %}{{ item.cup_level|default:'中' }}
+                            {% endif %}
+                            </strong>
+                        </div>
+                        <div>
+                            <span class="icon material-symbols-outlined">bolt</span>
+                            濃度 :
+                            <strong>
+                            {% if item.strength_level == 'Normal' %}預設
+                            {% elif item.strength_level == 'Extra' %}特濃
+                            {% else %}{{ item.strength_level|default:'預設' }}
+                            {% endif %}
+                            </strong>
+                        </div>
+                        <div>
+                            <span class="icon material-symbols-outlined">humidity_mid</span>
+                            奶量 :
+                            <strong>
+                            {% if item.milk_level == 'Light' %}少
+                            {% elif item.milk_level == 'Medium' %}正常
+                            {% elif item.milk_level == 'Extra' %}追加
+                            {% else %}{{ item.milk_level|default:'正常' }}
+                            {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                    {% elif item.type == 'bean' %}
+                    <div class="meta pb-2 d-flex bc-order-item-meta-sm">
+                        <div>
+                            <span class="icon material-symbols-outlined">roller_shades</span>
+                            研磨 :
+                            <strong>
+                            {% if item.grinding_level == 'Non' %}免研磨
+                            {% elif item.grinding_level == 'Light' %}細
+                            {% elif item.grinding_level == 'Medium' %}中
+                            {% elif item.grinding_level == 'Deep' %}粗
+                            {% endif %}
+                            </strong>
+                        </div>
+                        {% if item.weight %}
+                        <div>
+                            <span class="icon material-symbols-outlined">scale</span>
+                            重量 :
+                            <strong>
+                            {% if item.weight == '200g' %}200g
+                            {% elif item.weight == '500g' %}500g
+                            {% elif item.weight == '1kg' %}1kg
+                            {% endif %}
+                            </strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">購物車中沒有商品</p>
+            {% endfor %}
+        </div>
+    </div>
+            </div>
+        </div>
+    </div>
+
+    
     <div class="container">
         <div class="row">
             <!-- info from -->
@@ -195,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <input type="radio" name="pickup_time" id="pickup-5" value="5" {% if initial_data.pickup_time == "5" %}checked{% endif %} class="bc-radio-hidden">
                                         <label for="pickup-5" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3 bc-pickup-label">
                                             <div class="d-flex align-items-center">
-                                                <span class="pickup-radio-circle mr-3 bc-pickup-radio-circle">
+                                                <span class="pickup-radio-circle mr-4 bc-pickup-radio-circle">
                                                     <span class="pickup-radio-dot bc-pickup-radio-dot"></span>
                                                 </span>
                                                 <div>
@@ -211,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <input type="radio" name="pickup_time" id="pickup-10" value="10" {% if initial_data.pickup_time == "10" %}checked{% endif %} class="bc-radio-hidden">
                                         <label for="pickup-10" class="pickup-time-label mb-0 d-flex align-items-center justify-content-between px-3 py-3 bc-pickup-label">
                                             <div class="d-flex align-items-center">
-                                                <span class="pickup-radio-circle mr-3 bc-pickup-radio-circle">
+                                                <span class="pickup-radio-circle mr-4 bc-pickup-radio-circle">
                                                     <span class="pickup-radio-dot bc-pickup-radio-dot"></span>
                                                 </span>
                                                 <div>
@@ -436,34 +433,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         <!-- ========== 聯絡資訊（使用 bc-components 風格，從 checkout.html 搬過來） ========== -->
                         <div class="col-md-12 px-0 mb-4">
                             <div class="form-group">
-                                <label class="mb-3 bc-section-title">
+                                <label hidden class="mb-3 bc-section-title">
                                     <i class="icon-user bc-section-icon-gold mr-2"></i> 聯絡資訊
                                 </label>
                                 <div class="bc-field-row-custom">
-                                    <div class="bc-field bc-field-custom">
+                                    <div hidden class="bc-field bc-field-custom">
                                         <label class="bc-field-label">姓名 *</label>
                                         <input type="text" name="name" class="bc-input" required
                                                value="{% if initial_data.contact_name %}{{ initial_data.contact_name }}{% elif user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
                                                placeholder="您的姓名">
                                     </div>
                                     <div class="bc-field bc-field-custom">
-                                        <label class="bc-field-label">電話 *</label>
+                                        <label class="bc-field-label">聯絡電話 *</label>
                                         <input type="tel" name="phone" class="bc-input" required
                                                value="{% if initial_data.phone %}{{ initial_data.phone }}{% elif user.is_authenticated and user.profile.phone %}{{ user.profile.hk_phone }}{% endif %}"
                                                placeholder="91234567"
                                                pattern="[0-9]{8}"
                                                title="請輸入8位數字香港電話號碼">
+                                                                               <small class="form-text text-muted bc-contact-hint mt-1">
+                                    <i class="icon-whatsapp mr-1"></i>默認以 WhatsApp 通知
+                                </small>
                                     </div>
                                 </div>
-                                <div class="bc-field bc-field-mt">
+                                <div hidden class="bc-field bc-field-mt">
                                     <label class="bc-field-label">Email（選填，用於接收取餐通知）</label>
                                     <input type="email" name="email" class="bc-input"
                                            value="{% if initial_data.email %}{{ initial_data.email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}"
                                            placeholder="your@email.com">
                                 </div>
-                                <small class="form-text text-muted mt-2 bc-contact-hint">
-                                    <i class="icon-whatsapp mr-1"></i>默認以 WhatsApp 通知
-                                </small>
+
                             </div>
                         </div>
 
@@ -626,55 +624,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
-// table config //
-(function ($) {
-    "use strict";
-    $.fn.responsiveTable = function() { 
-      var toggleColumns = function($table) {
-        var isExpanded = $table.find(".Accordion").attr("aria-selected") === "true";
-        $table.find(".Rtable-cell").toggleClass("hiddenSmall", !isExpanded);
-      };
-      
-      $(this).each(function(){ 
-        toggleColumns($(this)); 
-      });
-  
-      $(this).find(".Accordion").click(function() {
-        var $accordion = $(this);
-        var isSelected = $accordion.attr("aria-selected") !== "true";
-        $accordion.attr("aria-selected", isSelected);
-        toggleColumns($accordion.parents(".Rtable"));
-      });
-    };
-  }(jQuery));
-  
-  // 初始化 - 確保DOM完全加載後執行
-  $(document).ready(function() {
-    // 初始化響應式表格
-    $(".js-RtableAccordions").responsiveTable();
-    
-    // 確保初始狀態正確（折疊狀態）
-    $(".js-RtableAccordions").each(function() {
-      var $table = $(this);
-      var $accordion = $table.find(".Accordion");
-      var $cells = $table.find(".Rtable-cell");
-      
-      // 初始設置為折疊狀態
-      $accordion.attr("aria-selected", "false");
-      $cells.addClass("hiddenSmall");
-      
-      // 添加點擊事件
-      $accordion.on('click', function() {
-        var isSelected = $(this).attr("aria-selected") === "true";
-        $(this).attr("aria-selected", !isSelected);
-        $cells.toggleClass("hiddenSmall", isSelected);
-        
-        // 切換active類
-        $(this).toggleClass("active", !isSelected);
-      });
-    });
-  });
 </script>
 
 
@@ -704,13 +653,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 </script>
-
-
-<style>
-    @media all and (min-width: 1200px) { 
-    .hiddenLarge {display: none; }
-    }
-</style>
 
 
 
@@ -1476,6 +1418,19 @@ function cancelPendingOrder(orderId) {
     });
 }
 
+</script>
+
+<!-- 行動端訂單詳情折疊面板：點擊切換展開/收合（vanilla JS，不依賴 jQuery） -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var toggle = document.getElementById('bc-order-collapse-toggle');
+    if (toggle) {
+        toggle.addEventListener('click', function() {
+            var expanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', String(!expanded));
+        });
+    }
+});
 </script>
 
 {% endblock content %}

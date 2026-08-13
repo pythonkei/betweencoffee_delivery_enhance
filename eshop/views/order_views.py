@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
@@ -101,6 +102,7 @@ def apply_coupon_discounts(
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(never_cache, name="dispatch")
 class OrderConfirm(View):
     """訂單確認與付款頁面 - 修改後版本使用統一支付工具"""
 
@@ -813,6 +815,7 @@ def order_status_api(request, order_id):
 # ==================== 訂單支付確認頁面 ====================
 
 
+@never_cache
 def order_payment_confirmation(request, order_id=None):
     if order_id is None:
         order_id = request.GET.get("order_id") or request.session.get("last_order_id")

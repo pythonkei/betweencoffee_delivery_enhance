@@ -316,7 +316,7 @@
   .block-21 .text .heading  { 
     font-size: 16px;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 7px;
     color: #fff; }
 
     .block-21 .text .heading a  { 
@@ -340,10 +340,10 @@
     color: #777; }
 
 
-.order-amount-label  { 
+.order-amount-label  {
   position: absolute;
   top: 0px;
-  left: 68px;
+  left: 51px;
   padding: 0.2em 0.2em 0.1em 0.1em;
   font-size: 72%;
   font-weight: 700;
@@ -352,9 +352,10 @@
   white-space: nowrap;
   vertical-align: text-bottom;
   border-radius: 0.25rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   color: #fff;
-  background-color: var(--brand-primary); }
+  background-color: var(--brand-primary);
+  }
 
 
 .order-amount-label:empty  { 

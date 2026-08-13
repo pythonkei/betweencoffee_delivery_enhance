@@ -1804,8 +1804,8 @@ body {
 }
 
 .payment-radio-circle {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   display: flex;
@@ -1818,8 +1818,8 @@ body {
   border-color: #c49b63;
 }
 .payment-radio-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: transparent;
   transition: all 0.2s ease;
@@ -1834,8 +1834,8 @@ body {
 
 .payment-label-text {
   color: #fff;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 400;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -3484,5 +3484,277 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .bc-marquee__track {
     animation: none;
   }
+}
+
+
+/* ============================================================
+   訂單流程頁行動端統一調整（2026-08-13）
+   適用頁面：order_payment_confirmation.html + order_confirm.html
+   目標：行動端（≤767.98px）統一縮小文字/圖示/按鈕/間距，
+   使整體比例平衡，與品牌 UI/UX 尺寸系統一致。
+   ============================================================ */
+@media (max-width: 767.98px) {
+
+  /* ---- payment-confirmation：支付狀態區 ---- */
+  .shadow-sm.mb-5.rounded.text-center > div.mb-4 > i {
+    font-size: 2.25rem !important;   /* 覆蓋行內 3rem */
+  }
+  .shadow-sm.mb-5.rounded.text-center h3 {
+    font-size: 1.5rem;
+  }
+  .shadow-sm.mb-5.rounded.text-center h5 {
+    font-size: 1rem;
+  }
+
+  /* ---- payment-confirmation：倒計時/按鈕 ---- */
+  .payment-countdown-text { font-size: 0.85rem; }
+  .payment-countdown-time { font-size: 1rem; }
+  .bc-btn-continue-payment,
+  .bc-btn-cancel-payment { padding: 5px 12px; font-size: 0.8rem; }
+  .payment-support-text,
+  .payment-support-order-id { font-size: 0.9rem; }
+  .payment-pending-icon { font-size: 1.6rem; }
+  .payment-pending-message { font-size: 0.95rem; }
+  .payment-pending-order-id { font-size: 1.1rem; }
+
+  /* ---- payment-confirmation：二維碼區 ---- */
+  .order-item.p-5 {
+    padding: 1.5rem 1.25rem !important;   /* 原 p-5=3rem 行動端過大 */
+  }
+  .order-item.p-5 h5 { font-size: 1rem; }
+  .bc-qr-img { max-width: 170px; }        /* 原 250px 溢出容器 */
+  #pickup-code-display {
+    font-size: 2.4rem !important;         /* 覆蓋 bootstrap display-4 3.5rem */
+  }
+  #pickup-code-display + p { font-size: 0.85rem; }
+
+  /* ---- payment-confirmation：商品明細 ---- */
+  .mb-5.p-4.rounded > h5.mb-4 { font-size: 1rem; }   /* 「商品明細」標題 */
+  .bc-product-img-box {
+    width: 72px;
+    height: 72px;
+  }
+  .order-items h5 { font-size: 0.95rem; }
+  .order-items .text-muted { font-size: 0.8rem; }
+
+  /* ---- payment-confirmation：摘要 ---- */
+  .bc-summary-label,
+  .bc-summary-value,
+  .bc-summary-discount { font-size: 0.9rem; }
+  .bc-summary-total-label { font-size: 1rem; }
+  .bc-summary-total-value { font-size: 1.1rem; }
+  .shadow-sm.mb-5.rounded .badge-success {
+    font-size: 0.85rem !important;
+    padding: 6px 12px !important;         /* 覆蓋行內 1rem / 8px 16px */
+  }
+
+  /* ---- payment-confirmation：積分獎勵條 ---- */
+  .bc-points-bar { height: 40px; }
+  .bc-points-star { font-size: 1.25rem; }
+  .bc-points-label { font-size: 0.9rem; }
+  .bc-points-number { font-size: 1.05rem; }
+
+  /* ---- payment-confirmation：返回首頁按鈕 ---- */
+  .ftco-subpage-section .d-flex.justify-content-center .btn-outline-primary {
+    width: auto;                /* 原行動端被撐成全寬，改為內容寬度居中 */
+    padding: 8px 22px;
+    font-size: 0.9rem;
+  }
+
+  /* ---- order_confirm：區塊標題 / 欄位標籤 ---- */
+  .bc-section-title { font-size: 0.95rem; }
+  .bc-field-label { font-size: 0.8rem; }
+
+  /* ---- order_confirm：輸入框 ---- */
+  .bc-input {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  /* ---- order_confirm：折疊面板內容縮小（2026-08-13） ---- */
+  .bc-order-collapse__body .bc-order-item {
+    margin-bottom: 24px !important;
+  }
+  .bc-order-collapse__body .bc-order-item-img {
+    width: 70px !important;               /* 照片保持不縮小 */
+    height: 70px !important;
+    flex: 0 0 70px !important;            /* 覆蓋 .blog-img flex: 0 0 90px */
+  }
+  .bc-order-collapse__body .bc-order-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;                  /* 容器內保持比例居中 */
+    display: block;
+  }
+  .bc-order-collapse__body .heading {
+    font-size: 0.88rem !important;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+  .bc-order-collapse__body .bc-order-item-text > .h5 {
+    font-size: 0.9rem;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .bc-order-collapse__body .meta {
+    font-size: 0.72rem;
+    gap: 6px 10px;
+    flex-wrap: wrap;                      /* 窄屏選項換行，避免溢出裁切 */
+    line-height: 1.3;
+    padding-top: 6px !important;       /* 覆蓋 bootstrap .pb-2 的 0.5rem */
+  }
+  .bc-order-collapse__body .meta > div {
+    font-size: 0.72rem !important;        /* 覆蓋 .block-21 .text .meta > div 的 15px */
+    display: flex;
+    align-items: center;                  /* 圖示與文字水平中心對齊 */
+  }
+  .bc-order-collapse__body .meta .icon,
+  .bc-order-collapse__body .meta .material-symbols-outlined {
+    font-size: 0.8rem;
+    padding-top: 0;                       /* 移除 .block-21 .icon 的 5px 偏移 */
+    line-height: 1;
+  }
+  .bc-order-collapse__body .order-amount-label {
+    font-size: 0.6rem;
+    padding: 2px 8px;
+  }
+
+  /* ---- order_confirm：支付方式選項 ---- */
+  .payment-section-label { font-size: 0.95rem; }    /* 支付方式標題 */
+  .payment-label-simple {
+    padding: 9px 12px !important;                   /* 原 11px 14px 過高 */
+    font-size: 0.88rem;
+  }
+  .bc-payment-label-icon { font-size: 1rem; }       /* 原 1.1rem */
+  .payment-radio-circle { width: 14px; height: 14px; }
+  .payment-radio-dot { width: 6px; height: 6px; }
+
+  /* ---- order_confirm：取貨時間選項 ---- */
+  .bc-pickup-label {
+    padding: 11px 14px !important;
+  }
+  .bc-pickup-title { font-size: 0.9rem; }
+  .bc-pickup-subtitle { font-size: 0.75rem; }
+  .bc-pickup-radio-circle {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ---- order_confirm：積分兌換選項 ---- */
+  .reward-select-label { padding: 11px 14px; }
+  .bc-reward-name { font-size: 0.9rem; }
+  .bc-reward-detail { font-size: 0.75rem; }
+
+  /* ---- order_confirm：確認並支付 / 返回購物車按鈕 ---- */
+  .ftco-section-billing .block-21.justify-content-end .form-group {
+    width: 100%;                            /* 父容器全寬，按鈕才能頁面居中 */
+  }
+  .bc-payment-btn {
+    display: block;                           /* 頁面居中對齊 */
+    width: fit-content;
+    margin: 16px auto 0;
+    padding: 12px 28px !important;        /* 原 pr-8/pl-8=6rem 過寬 */
+    font-size: 0.95rem !important;
+  }
+  .ftco-section-billing .sidebar-box .btn {
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 9px 22px;
+    font-size: 0.9rem;
+  }
+  .ftco-section-billing .sidebar-box {
+    padding: 24px 0 28px !important;      /* 原 40px 0 過大（style-custom.css） */
+  }
+  .ftco-section-billing .sidebar-box .h5 { font-size: 1rem; }   /* 小計/總計 */
+}
+
+
+
+/* ============================================================
+   行動端訂單詳情折疊面板（order_confirm.html，2026-08-13）
+   設計：預設關閉，「訂單詳情」文字 + 向下箭頭點擊展開。
+   - body 由 [aria-expanded="true"] 控制顯示（JS 僅切換 aria）
+   - 桌面（≥1200px）隱藏，改用右欄商品列表
+   ============================================================ */
+.bc-order-collapse {
+  margin: 0 0 0;                       /* col-12 已提供水平間距 */
+}
+
+.bc-order-collapse__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 0 12px 0;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.bc-order-collapse__header:hover,
+.bc-order-collapse__header:focus-visible {
+  outline: none;
+}
+
+.bc-order-collapse__title {
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.bc-order-collapse__arrow {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--bc-gold, #c49b63);
+  border-bottom: 2px solid var(--bc-gold, #c49b63);
+  transform: rotate(45deg);                 /* 向下 chevron */
+  margin-top: 0;                            /* flex 對齊水平中心 */
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bc-order-collapse__header[aria-expanded="true"] .bc-order-collapse__arrow {
+  transform: rotate(-135deg);               /* 向上 chevron */
+  margin-top: 0;
+}
+
+.bc-order-collapse__total {
+  margin-left: auto;
+  color: var(--bc-gold, #c49b63);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.bc-order-collapse__body {
+  display: none;
+  padding: 12px 2px 8px;
+}
+
+.bc-order-collapse__header[aria-expanded="true"] + .bc-order-collapse__body {
+  display: block;
+}
+
+/* 桌面端隱藏（≥1200px 改用右欄商品列表） */
+@media (min-width: 1200px) {
+  .bc-order-collapse {
+    display: none;
+  }
+
+/* 桌面右欄商品圖：與折疊面板一致，容器內 contain 居中（咖啡直向/豆方形等高統一） */
+.ftco-section-billing .col-xl-5.sidebar .bc-order-item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 }
 
