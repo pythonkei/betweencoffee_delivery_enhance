@@ -40,24 +40,28 @@
             </div>
         </div>
 
-        <!-- Coffee item list : Z 字對角主副卡（每 4 個一組 = 大 小 小 大） -->
-        <div class="coffee-menu-zgrid">
+        <!-- Coffee item list : A+C 混合不對稱網格（2026-08-13 方案 A，與 bean_menu 鏡像反轉 + 小卡向上錯落；每 3 個一組 = 大 小 小，組間翻轉） -->
+        <div class="coffee-mix-grid">
+        <div class="bean-mix-grid">
             {% for coffee in coffee_menu %}
-            {% if forloop.counter0|divisibleby:4 %}
-            <div class="coffee-z-row">
-            {% endif %}
-            {% if forloop.counter0|add:1|divisibleby:4 or forloop.counter0|divisibleby:4 %}
-            <div class="coffee-z-cell coffee-z-large">
+            {% if forloop.counter0|divisibleby:3 %}
+            {% if forloop.counter0|divisibleby:6 %}
+            <div class="bean-mix-group bean-mix-flip">
             {% else %}
-            <div class="coffee-z-cell coffee-z-small">
+            <div class="bean-mix-group">
+            {% endif %}
+            {% endif %}
+            {% if forloop.counter0|divisibleby:3 %}
+            <div class="bean-mix-main">
+            {% else %}
+            <div class="bean-mix-sub">
             {% endif %}
               <div class="menu-wrap">
-                <!-- coffee_menu.html - 保持不变，使用详情页图片 -->
+                <!-- coffee_menu.html - 使用详情页图片 -->
                 <div class="menu-img">
                   <a href="{% url 'coffee' coffee.id %}" id="svg_over" >
                     <span id="svg_over_on"><img src= {% static 'images/product_hover.svg' %} class="noise_animation"></span>
                     <canvas id="mouse_hit"></canvas>
-                    <!-- 使用详情页图片 -->
                     <img src="{{ coffee.get_detail_image }}" alt="{{ coffee.name }}" class="img">
                   </a>
                 </div>
@@ -72,14 +76,15 @@
                 </div>
               </div>
             </div>
-            {% if forloop.counter|divisibleby:4 %}
-            </div><!-- end coffee-z-row -->
+            {% if forloop.counter|divisibleby:3 %}
+            </div><!-- end bean-mix-group -->
             {% endif %}
             {% endfor %}
-            {% if coffee_menu|length|divisibleby:4 == False %}
-            </div><!-- 尾數未滿 4 個：補上未關閉的 row -->
+            {% if coffee_menu|length|divisibleby:3 == False %}
+            </div><!-- 尾數未滿 3 個：補上未關閉的 group -->
             {% endif %}
         </div>
+        </div><!-- end coffee-mix-grid -->
         <!-- end Coffee item list -->
     </div>
 </section>
