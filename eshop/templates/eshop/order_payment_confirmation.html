@@ -3,6 +3,14 @@
 {% load static %}
 
 {% block content %}
+<style>
+/* 訂單完成頁：隱藏全站懸浮按鈕（右側 Buy & Order + 浮動購物車）與右側虛線——結帳流程中不需顯示 */
+.bc-attract-nav,
+.bc-floating-cart,
+#borders {
+  display: none !important;
+}
+</style>
 {% with order_type=order.get_order_type_summary %}
 
 <!-- Header Banner-->

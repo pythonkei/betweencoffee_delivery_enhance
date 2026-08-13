@@ -4,6 +4,14 @@
 {% load tz %} 
 
 {% block content %}
+<style>
+/* 訂單確認頁：隱藏全站懸浮按鈕（右側 Buy & Order + 浮動購物車）與右側虛線——結帳流程中不需顯示 */
+.bc-attract-nav,
+.bc-floating-cart,
+#borders {
+  display: none !important;
+}
+</style>
 <!-- 背景文字：置於導覽列與內容之間 -->
 <div class="bc-section-with-bg-text bc-bg-text-top" data-bg-text="&#65371;Hug&#xa;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Caffeine!&#65373;"></div>
 
@@ -75,12 +83,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <button type="button" class="bc-order-collapse__header" id="bc-order-collapse-toggle" aria-expanded="false">
             <span class="bc-order-collapse__title">訂單詳情</span>
             <span class="bc-order-collapse__arrow" aria-hidden="true"></span>
-            <span class="bc-order-collapse__total">${{ total_price|floatformat:"-2" }}</span>
+            <span class="bc-order-collapse__total">總計:${{ total_price|floatformat:"-2" }}</span>
         </button>
         <div class="bc-order-collapse__body">
             {% for item in items %}
             <div class="block-21 mb-4 d-flex bc-order-item">
-                <div class="blog-img mr-4 bc-order-item-img">
+                <div class="blog-img mr-3 bc-order-item-img">
                     <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
                     <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
                 </div>
@@ -483,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="sidebar-box mt-6 hiddenSmall">
                         {% for item in items %}
                             <div class="block-21 mb-5 d-flex bc-order-item">
-                                <div class="blog-img mr-4 bc-order-item-img">
+                                <div class="blog-img mr-3 bc-order-item-img">
                                     <img src="{{ item.image }}" class="img-fluid" alt="{{ item.name }}">
                                     <span class="order-amount-label order-amount-label-pill">{{ item.quantity }}</span>
                                 </div>
@@ -564,8 +572,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="sidebar-box">
                         <div class="dividerline mb-4"></div>
                         <div class="total-price d-flex justify-content-between">
-                            <span class="h5">小計: </span>
-                            <span class="h5" id="bc-subtotal-amount">${{ total_price|floatformat:"-2" }}</span>
+                            <p class="h5">小計: </p>
+                            <p class="h5" id="bc-subtotal-amount">${{ total_price|floatformat:"-2" }}</p>
                         </div>
                         <div class="text-right px-1" id="bc-discount-row" style="{% if not user.is_authenticated or not best_reward %}display:none;{% endif %}">
                             <span class="bc-total-discount" id="bc-discount-text">
@@ -574,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 {% endif %}
                             </span>
                         </div>
-                        <div class="total-price mb-2 mt-4 d-flex justify-content-between">
+                        <div class="total-price mb-2 mt-2 d-flex justify-content-between">
                             <span class="h5 bc-total-gold">總計: </span>
                             <span class="h5 bc-total-gold" id="bc-total-amount">
                                 {% if user.is_authenticated and best_reward %}
@@ -1221,96 +1229,38 @@ function updateCountdown(orderId, remainingSeconds) {
 
 function showPendingOrderWarning(orders) {
     const warningHtml = `
-        <div class="pending-order-warning-card" style="
-            background: linear-gradient(135deg, rgba(196,155,99,0.12) 0%, rgba(255,255,255,0.03) 100%);
-            border: 1px solid rgba(196,155,99,0.35);
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin-bottom: 24px;
-            position: relative;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        ">
+        <div class="pending-order-warning-card">
             <!-- 關閉按鈕 -->
-            <button type="button" onclick="this.parentElement.remove()" style="
-                position: absolute; top: 12px; right: 16px;
-                background: none; border: none; color: rgba(255,255,255,0.4);
-                font-size: 1.4rem; cursor: pointer; padding: 0; line-height: 1;
-            ">&times;</button>
+            <button type="button" class="pending-order-warning-close" onclick="this.parentElement.remove()">&times;</button>
 
             <!-- 標題 -->
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-                <div style="
-                    width: 36px; height: 36px;
-                    background: rgba(196,155,99,0.2);
-                    border-radius: 50%;
-                    display: flex; align-items: center; justify-content: center;
-                    flex-shrink: 0;
-                ">
-                    <i class="fas fa-exclamation-triangle" style="color: #c49b63; font-size: 1rem;"></i>
+            <div class="pending-order-warning-header">
+                <div class="pending-order-warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div>
-                    <div style="color: #c49b63; font-weight: 600; font-size: 1rem;">
-                        發現未完成的訂單
-                    </div>
-                    <div style="color: rgba(255,255,255,0.8); font-size: 0.8rem;">
-                        您有 ${orders.length} 個訂單尚未完成支付, 5分鐘後自動刪除此訂單
-                    </div>
+                    <div class="pending-order-warning-title">發現未完成的訂單</div>
+                    <div class="pending-order-warning-subtitle">您有 ${orders.length} 個訂單尚未完成支付, 5分鐘後自動刪除此訂單</div>
                 </div>
             </div>
 
             <!-- 訂單列表 -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="pending-order-warning-list">
                 ${orders.map(order => `
-                    <div id="pending-order-${order.id}" style="
-                        display: flex; align-items: center; justify-content: space-between;
-                        background: rgba(255,255,255,0.04);
-                        border: 1px solid rgba(255,255,255,0.08);
-                        border-radius: 8px;
-                        padding: 10px 14px;
-                        transition: background 0.2s;
-                    " onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
-                        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-                            <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;" title="${order.item_name || '訂單 #' + order.id}">
+                    <div id="pending-order-${order.id}" class="pending-order-warning-item">
+                        <div class="pending-order-warning-item-info">
+                            <span class="pending-order-warning-item-name" title="${order.item_name || '訂單 #' + order.id}">
                                 ${order.item_name || '訂單 #' + order.id}
                             </span>
-                            <span style="color: rgba(255,255,255,0.8); font-size: 0.85rem;">
-                                $${parseFloat(order.total_price).toFixed(2)}
-                            </span>
-                            <span style="
-                                font-size: 0.85rem;
-                                color: #ffc107;
-                                background: rgba(255,193,7,0.12);
-                                padding: 2px 8px;
-                                border-radius: 10px;
-                                white-space: nowrap;
-                            ">待支付 <span id="countdown-${order.id}" style="font-size: 0.85rem; font-family: 'Courier New', monospace;">--:--</span></span>
+                            <span class="pending-order-warning-item-price">$${parseFloat(order.total_price).toFixed(2)}</span>
                         </div>
-                        <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                            <a href="/eshop/order/continue-payment/${order.id}/" style="
-                                display: inline-flex; align-items: center; gap: 6px;
-                                background: #c49b63; color: #ffffff;
-                                border: none; border-radius: 6px;
-                                padding: 6px 14px;
-                                font-size: 0.85rem; font-weight: 600;
-                                text-decoration: none;
-                                cursor: pointer;
-                                transition: all 0.2s;
-                                white-space: nowrap;
-                            " onmouseover="this.style.background='#d4ab73'" onmouseout="this.style.background='#c49b63'">
-                                <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i> 前往支付
+                        <span class="pending-order-warning-item-status">待支付 <span id="countdown-${order.id}" class="pending-order-warning-countdown">--:--</span></span>
+                        <div class="pending-order-warning-item-actions">
+                            <a href="/eshop/order/continue-payment/${order.id}/" class="pending-order-warning-btn-continue">
+                                <i class="fas fa-arrow-right"></i> 前往支付
                             </a>
-                            <button type="button" onclick="cancelPendingOrder(${order.id})" style="
-                                display: inline-flex; align-items: center; gap: 4px;
-                                background: transparent; color: rgba(255,255,255,0.5);
-                                border: 1px solid rgba(255,255,255,0.15);
-                                border-radius: 6px;
-                                padding: 6px 14px;
-                                font-size: 0.85rem; font-weight: 600;
-                                cursor: pointer;
-                                transition: all 0.2s;
-                                white-space: nowrap;
-                            " onmouseover="this.style.borderColor='rgba(220,53,69,0.5)';this.style.color='#dc3545'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='rgba(255,255,255,0.5)'">
-                                <i class="fas fa-times" style="font-size: 0.7rem;"></i> 取消訂單
+                            <button type="button" class="pending-order-warning-btn-cancel" onclick="cancelPendingOrder(${order.id})">
+                                <i class="fas fa-times"></i> 取消訂單
                             </button>
                         </div>
                     </div>
@@ -1319,15 +1269,16 @@ function showPendingOrderWarning(orders) {
             </div>
 
         </div>
-        <style>
-            @keyframes pendingPulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.4; }
-            }
-        </style>
     `;
 
-    // 插入到支付表單之前（正確的佈局位置）
+    // 行動端（<1200px）：插入到訂單詳情折疊面板上方；桌面：插入到支付表單之前
+    if (window.matchMedia('(max-width: 1199.98px)').matches) {
+        const collapseEl = document.querySelector('.bc-order-collapse');
+        if (collapseEl) {
+            collapseEl.insertAdjacentHTML('beforebegin', warningHtml);
+            return;
+        }
+    }
     const paymentForm = document.getElementById('payment-form');
     if (paymentForm) {
         paymentForm.insertAdjacentHTML('beforebegin', warningHtml);

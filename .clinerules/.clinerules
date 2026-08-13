@@ -174,7 +174,7 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 |------|:----:|:------:|
 | `static/js/websocket-core.js` | ~200 | ⭐⭐⭐⭐⭐ |
 | `static/js/staff-order-management/base-order-renderer-v2.js` | 1405 | ⭐⭐⭐⭐⭐ |
-| `static/css/bc-components.css` | ~3760 | ⭐⭐⭐⭐⭐ | 品牌元件庫（含 `.bc-order-collapse` 折疊面板） |
+| `static/css/bc-components.css` | ~3980 | ⭐⭐⭐⭐⭐ | 品牌元件庫（含 `.bc-order-collapse` 折疊面板、`.pending-order-warning-*`） |
 | `static/css/staff_order_management.css` | 1438 | ⭐⭐⭐⭐ |
 
 ## 常見開發任務速查

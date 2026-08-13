@@ -1816,6 +1816,7 @@ body {
 }
 .payment-radio-circle.active {
   border-color: #c49b63;
+  background: rgba(20, 20, 20, 0.45);   /* 深色內徑：強化金色圓點居中的視覺對比 */
 }
 .payment-radio-dot {
   width: 8px;
@@ -1834,7 +1835,7 @@ body {
 
 .payment-label-text {
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 400;
   display: inline-flex;
   align-items: center;
@@ -1850,6 +1851,13 @@ body {
   color: var(--bc-gold);
   vertical-align: middle;
   line-height: 1;
+}
+
+/* 桌面端：支付方式文字加大，text 為 inline-flex align-items:center 與圖示水平中心對齊（2026-08-13） */
+@media (min-width: 768px) {
+  .payment-label-text {
+    font-size: 1rem;
+  }
 }
 
 
@@ -3586,6 +3594,9 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     object-fit: contain;                  /* 容器內保持比例居中 */
     display: block;
   }
+  .bc-order-collapse__body .bc-order-item-text {
+    padding-left: 10px !important;        /* 覆蓋 .block-21 .text 的 18px */
+  }
   .bc-order-collapse__body .heading {
     font-size: 0.88rem !important;
     line-height: 1.2;
@@ -3620,14 +3631,18 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 
   /* ---- order_confirm：支付方式選項 ---- */
-  .payment-section-label { font-size: 0.95rem; }    /* 支付方式標題 */
+  .payment-section-label { font-size: 0.85rem; }    /* 支付方式標題 */
   .payment-label-simple {
     padding: 9px 12px !important;                   /* 原 11px 14px 過高 */
-    font-size: 0.88rem;
+    font-size: 0.8rem;
   }
-  .bc-payment-label-icon { font-size: 1rem; }       /* 原 1.1rem */
-  .payment-radio-circle { width: 14px; height: 14px; }
-  .payment-radio-dot { width: 6px; height: 6px; }
+  .bc-payment-label-icon { font-size: 0.9rem; }       /* 原 1.1rem */
+  .payment-radio-circle {
+    width: 12px;
+    height: 12px;
+    border-width: 1.5px;                  /* 細邊框讓內徑足夠，圓點居中可見間隙 */
+  }
+  .payment-radio-dot {width: 4px;height: 4px;}
 
   /* ---- order_confirm：取貨時間選項 ---- */
   .bc-pickup-label {
@@ -3650,8 +3665,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     width: 100%;                            /* 父容器全寬，按鈕才能頁面居中 */
   }
   .bc-payment-btn {
-    display: block;                           /* 頁面居中對齊 */
-    width: fit-content;
+    display: block;
+    width: 100% !important;               /* 容器寬度 */
     margin: 16px auto 0;
     padding: 12px 28px !important;        /* 原 pr-8/pl-8=6rem 過寬 */
     font-size: 0.95rem !important;
@@ -3668,6 +3683,29 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     padding: 24px 0 28px !important;      /* 原 40px 0 過大（style-custom.css） */
   }
   .ftco-section-billing .sidebar-box .h5 { font-size: 1rem; }   /* 小計/總計 */
+
+  /* ---- FPS/Cash 付款頁（blank.html）行動端調整（2026-08-13） ---- */
+  .card-body.p-5 { padding: 1.25rem !important; }              /* 44px → 20px */
+  .payment-logo { width: 72px !important; }                    /* FPS logo 128/110px → 72px */
+  .payment-icon-cash { font-size: 42px !important; }           /* 現金 icon 78px → 42px */
+  .ftco-subpage-section .card-body h3.text-primary { font-size: 1.5rem; }  /* 總金額 */
+  .ftco-subpage-section .card-body h5 { font-size: 1rem; }     /* 標題/商品名 */
+  .ftco-subpage-section .card-body img.border.rounded {
+    max-width: min(200px, 85%) !important;                     /* 二維碼 300px → 不溢出 */
+  }
+  .order-items .mr-3 > div {
+    width: 70px !important;                                    /* 商品圖 98px → 70px */
+    height: 70px !important;
+  }
+  .order-items .mr-3 img { max-height: 70px !important; }
+  .payment-details {
+    padding-left: 1rem !important;                             /* 付款說明 3rem → 1rem */
+    padding-right: 1rem !important;
+  }
+  .bc-payment-actions .bc-payment-action-btn {
+    padding: 10px 16px !important;
+    font-size: 0.9rem !important;
+  }
 }
 
 
@@ -3712,8 +3750,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   flex-shrink: 0;
   width: 7px;
   height: 7px;
-  border-right: 2px solid var(--bc-gold, #c49b63);
-  border-bottom: 2px solid var(--bc-gold, #c49b63);
+  border-right: 2px solid #ffffff;        /* 白色 chevron */
+  border-bottom: 2px solid #ffffff;
   transform: rotate(45deg);                 /* 向下 chevron */
   margin-top: 0;                            /* flex 對齊水平中心 */
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3756,5 +3794,188 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   display: block;
 }
 
+}
+
+
+/* ============================================================
+   pending-order-warning-card（order_confirm 未完成訂單警告，2026-08-13）
+   由 order_confirm.html 內聯 CSS 搬移至此，並加入行動端響應式。
+   樣式沿用原內聯設計（含既有 linear-gradient，待品牌重構時評估）。
+   ============================================================ */
+.pending-order-warning-card {
+  background: linear-gradient(135deg, rgba(196,155,99,0.12) 0%, rgba(255,255,255,0.03) 100%);
+  border: 1px solid rgba(196,155,99,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.pending-order-warning-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.pending-order-warning-close:hover { color: rgba(255,255,255,0.7); }
+.pending-order-warning-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pending-order-warning-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(196,155,99,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pending-order-warning-icon i { color: #c49b63; font-size: 1rem; }
+.pending-order-warning-title { color: #c49b63; font-weight: 600; font-size: 1rem; }
+.pending-order-warning-subtitle {color: rgba(255,255,255,0.8);font-size: 0.85rem;}
+.pending-order-warning-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pending-order-warning-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  transition: background 0.2s;
+}
+.pending-order-warning-item:hover { background: rgba(255,255,255,0.07); }
+.pending-order-warning-item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.pending-order-warning-item-name {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+.pending-order-warning-item-price { color: rgba(255,255,255,0.8); font-size: 0.85rem; }
+.pending-order-warning-item-status {
+  font-size: 0.85rem;
+  color: #ffc107;
+  background: rgba(255,193,7,0.12);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.pending-order-warning-countdown {
+  font-size: 0.85rem;
+  font-family: 'Courier New', monospace;
+}
+.pending-order-warning-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.pending-order-warning-btn-continue {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #c49b63;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.pending-order-warning-btn-continue:hover { background: #d4ab73; color: #ffffff; }
+.pending-order-warning-btn-continue i { font-size: 0.75rem; margin-top: -1px; }
+.pending-order-warning-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.pending-order-warning-btn-cancel:hover { border-color: rgba(220,53,69,0.5); color: #dc3545; }
+.pending-order-warning-btn-cancel i { font-size: 0.7rem; margin-top: -1px; }
+
+/* 行動端響應式：卡片內距縮小、訂單行允許換行、按鈕組換行靠右、內容整體縮小（2026-08-13 二輪） */
+@media (max-width: 767.98px) {
+  .pending-order-warning-card { padding: 14px; }
+  .pending-order-warning-close { font-size: 1.1rem; }
+  .pending-order-warning-header { gap: 8px; margin-bottom: 8px; }
+  .pending-order-warning-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .pending-order-warning-icon i { font-size: 0.8rem; }
+  .pending-order-warning-title { font-size: 0.85rem; }
+  .pending-order-warning-subtitle {font-size: 0.65rem;}
+  .pending-order-warning-list { gap: 6px; }
+  .pending-order-warning-item {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 7px 9px;
+  }
+  .pending-order-warning-item-info { gap: 8px; }
+  .pending-order-warning-item-name {
+    max-width: 120px;
+    font-size: 0.75rem;
+  }
+  .pending-order-warning-item-price { font-size: 0.72rem; }
+  .pending-order-warning-item-status { font-size: 0.72rem; }
+  .pending-order-warning-countdown {
+    font-size: 0.72rem;
+  }
+  .pending-order-warning-item-info { flex-basis: 100%; }   /* 資訊區佔第一行 */
+  .pending-order-warning-item-status {
+    width: fit-content;                   /* 徽章寬度依內容、靠左 */
+    align-self: center;
+  }
+  .pending-order-warning-item-actions {
+    flex: 1;                              /* 與徽章同一行、靠右 */
+    width: auto;
+    justify-content: flex-end;
+  }
+  .pending-order-warning-btn-continue {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    gap: 4px;
+  }
+  .pending-order-warning-btn-continue i { font-size: 0.65rem; margin-top: -1px; }
+  .pending-order-warning-btn-cancel {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    gap: 3px;
+  }
+  .pending-order-warning-btn-cancel i { font-size: 0.6rem; margin-top: -1px; }
 }
 
