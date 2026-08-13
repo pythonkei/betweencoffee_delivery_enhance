@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月13日（更新：付款頁 .payment-item-fps/cash 內聯 CSS 搬移；FPS/Cash 付款頁按鈕樣式統一（參考 coffee_menu 落單）；bean 詳情頁返回按鈕桌面端居中修復；首頁 .feed 蒙版動畫修復；首頁 Best Sell 咖啡卡片排序功能（hot_item_order）；Django admin 咖啡/咖啡豆卡片排序功能（sort_order + list_editable）；coffee_menu 產品區域改為 A+C 混合不對稱網格；首頁最後訂單咖啡豆選項預選；bc-welcome-panel 行動端文字排版；bc-search hover 動畫提速；訂單流程行動端 UI 全面優化；付款頁/員工頁響應式）
+> **最後更新**: 2026年8月13日（更新：bean 烘焙水平 active 金色；付款頁 .payment-item-fps/cash 內聯 CSS 搬移；FPS/Cash 付款頁按鈕樣式統一；bean 詳情頁返回按鈕桌面端居中修復；首頁 .feed 蒙版動畫修復；首頁 Best Sell 咖啡卡片排序功能（hot_item_order）；Django admin 咖啡/咖啡豆卡片排序功能（sort_order + list_editable）；coffee_menu 產品區域改為 A+C 混合不對稱網格；首頁最後訂單咖啡豆選項預選；bc-welcome-panel 行動端文字排版；bc-search hover 動畫提速；訂單流程行動端 UI 全面優化；付款頁/員工頁響應式）
 
 ## 開發者背景與方法論
 
