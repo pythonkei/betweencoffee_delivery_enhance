@@ -1792,6 +1792,16 @@ body {
   overflow: hidden;
 }
 
+/* ===== 付款頁支付說明卡片容器（2026-08-13：由 fps/cash 模板內聯搬移） ===== */
+.payment-item-fps,
+.payment-item-cash {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
 .payment-item-simple input[type="radio"] {
   display: none;
 }
