@@ -14,8 +14,16 @@
     }
 
     var isShow = false;
+    var hideTimer = null;
 
     function show() {
+        // 若上一個 hide 的計時器尚未觸發，先取消 → 快速 hover 進出不會被卡住
+        if (hideTimer) {
+            clearTimeout(hideTimer);
+            hideTimer = null;
+        }
+        // 移除 is-out，避免與 is-on 並存（CSS 中 is-out 後定義會勝出，背景圖會反向移出）
+        searchLink.classList.remove('is-out');
         searchLink.classList.add('is-on');
         isShow = true;
     }
@@ -24,13 +32,16 @@
         if (!isShow) {
             return;
         }
+        // 移除 is-on 讓 is-out 獨立生效（避免同時存在時 is-out 後定義勝出）
+        searchLink.classList.remove('is-on');
         searchLink.classList.add('is-out');
         // 等待 is-out 移出動畫完整播放後移除 class（回到初始隱藏狀態）
         // 以 setTimeout 為準（多圖 transition-delay 不同，transitionend 不可靠）
-        setTimeout(function () {
+        hideTimer = setTimeout(function () {
             searchLink.classList.remove('is-on', 'is-out');
             isShow = false;
-        }, 1500); // is-out 1000ms + 最大 delay 300ms
+            hideTimer = null;
+        }, 1000); // is-out 700ms + 最大 delay 300ms
     }
 
     // 桌面 hover

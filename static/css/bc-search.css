@@ -70,7 +70,8 @@
   transition-timing-function: cubic-bezier(0.895, 0.03, 0.685, 0.22);
 }
 /* 浮入/浮出 + 旋轉位移（對應 demido is-on/is-out）
-   is-on = 浮入原位；is-out = 向上移出（對應 demido transform 目標） */
+   is-on = 浮入原位；is-out = 向上移出（對應 demido transform 目標）
+   2026-08-13：動畫時長縮短（1000→700ms、delay 250→120ms），hover 反應更快 */
 .bc-search-bg-img-01 {
   top: -30px;
   left: 718px;
@@ -78,13 +79,13 @@
   transform: translate3d(0, 135%, 0) rotate(10deg);
 }
 .bc-search-link.is-on .bc-search-bg-img-01 {
-  transition-delay: 250ms;
-  transition-duration: 1000ms;
+  transition-delay: 120ms;
+  transition-duration: 700ms;
   transform: translate3d(0, 0, 0) rotate(0deg);
 }
 .bc-search-link.is-out .bc-search-bg-img-01 {
   transition-delay: 0ms;
-  transition-duration: 1000ms;
+  transition-duration: 700ms;
   transform: translate3d(0, -150%, 0) rotate(-10deg);
 }
 .bc-search-bg-img-02 {
@@ -95,12 +96,12 @@
 }
 .bc-search-link.is-on .bc-search-bg-img-02 {
   transition-delay: 0ms;
-  transition-duration: 1000ms;
+  transition-duration: 700ms;
   transform: translate3d(0, 0, 0) rotate(-18deg);
 }
 .bc-search-link.is-out .bc-search-bg-img-02 {
-  transition-delay: 150ms;
-  transition-duration: 1000ms;
+  transition-delay: 80ms;
+  transition-duration: 700ms;
   transform: translate3d(0, -120%, 0) rotate(28deg);
 }
 .bc-search-bg-img-03 {
@@ -111,12 +112,12 @@
 }
 .bc-search-link.is-on .bc-search-bg-img-03 {
   transition-delay: 0ms;
-  transition-duration: 1000ms;
+  transition-duration: 700ms;
   transform: translate3d(0, 0, 0) rotate(0deg);
 }
 .bc-search-link.is-out .bc-search-bg-img-03 {
-  transition-delay: 300ms;
-  transition-duration: 1000ms;
+  transition-delay: 150ms;
+  transition-duration: 700ms;
   transform: translate3d(0, -150%, 0) rotate(20deg);
 }
 

@@ -3094,34 +3094,40 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .bc-last-order {
     margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
   }
+  .bc-welcome-text {
+    gap: 12px;  /* 2026-08-13：18→12px，行動端讓文字區更寬 */
+  }
   .bc-welcome-avatar {
-    width: 51px;  /* 2026-08-11：46→51px（+10%，容器高度保持） */
-    height: 51px;
-    font-size: 1.65rem;  /* user icon 隨容器加大（51/46 × 1.5rem） */
+    width: 44px;  /* 2026-08-13：51→44px（縮小頭像，讓出文字空間） */
+    height: 44px;
+    font-size: 1.4rem;  /* user icon 隨容器縮小 */
+  }
+  .bc-welcome-info {
+    flex: 1;  /* 2026-08-13：讓文字區佔滿剩餘空間 */
   }
   .bc-welcome-greeting {
-    font-size: 15px;  /* 2026-08-10：13→15px 文字加大 */
+    font-size: 13px;  /* 2026-08-13：15→13px（空間變寬後仍可讀） */
   }
   .bc-welcome-points {
-    font-size: 14px;  /* 2026-08-10：12→14px 文字加大 */
+    font-size: 12px;  /* 2026-08-13：14→12px */
   }
   .bc-welcome-imgbox {
-    width: 119px;  /* 2026-08-10：140→119px（整體高度降 15%） */
-    min-height: 73px;  /* 2026-08-10：86→73px */
+    width: 92px;  /* 2026-08-13：119→92px（縮小圖片，讓出文字空間） */
+    min-height: 56px;
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
-    width: 119px;  /* 2026-08-10：140→119px */
-    height: 119px;
-    top: -65px;  /* 2026-08-10：-77→-65px（隨圖片縮小） */
+    width: 92px;
+    height: 92px;
+    top: -50px;  /* 2026-08-13：-65→-50px（隨圖片縮小） */
   }
   .bc-welcome-img-link {
-    top: -65px;  /* 2026-08-10：-77→-65px */
-    width: 119px;  /* 2026-08-10：140→119px */
-    height: 119px;
+    top: -50px;
+    width: 92px;
+    height: 92px;
   }
   .bc-last-order {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -3131,40 +3137,46 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bc-welcome-panel {
     width: 91%;  /* 2026-08-10：96→91%（寬度 -5%） */
-    gap: 7px;
+    gap: 6px;  /* 2026-08-13：7→6px */
     padding: 5px 8px;  /* 2026-08-10：6→5px（整體高度降 15%） */
   }
   .bc-last-order {
     margin-bottom: 0;  /* 防止文字溢出容器（行動不疊加文字於照片上） */
   }
+  .bc-welcome-text {
+    gap: 10px;  /* 2026-08-13：18→10px，手機端讓文字區更寬 */
+  }
   .bc-welcome-avatar {
-    width: 44px;  /* 2026-08-11：40→44px（+10%，容器高度保持） */
-    height: 44px;
-    font-size: 1.375rem;  /* user icon 隨容器加大（44/40 × 1.25rem） */
+    width: 38px;  /* 2026-08-13：44→38px（縮小頭像，讓出文字空間） */
+    height: 38px;
+    font-size: 1.15rem;  /* user icon 隨容器縮小 */
+  }
+  .bc-welcome-info {
+    flex: 1;
   }
   .bc-welcome-greeting {
-    font-size: 10px;  /* 2026-08-10：8→10px 文字加大 */
+    font-size: 11px;  /* 2026-08-13：10→11px（空間變寬後可讀性提升） */
   }
   .bc-welcome-points {
-    font-size: 10px;  /* 2026-08-10：8→10px 文字加大 */
+    font-size: 10px;  /* 2026-08-13：維持 10px */
   }
   .bc-welcome-imgbox {
-    width: 94px;  /* 2026-08-10：110→94px（整體高度降 15%） */
-    min-height: 60px;  /* 2026-08-10：70→60px */
+    width: 62px;  /* 2026-08-13：94→70→62px（再縮小，讓 points 單行） */
+    min-height: 46px;
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
-    width: 83px;  /* 2026-08-10：98→83px */
-    height: 83px;
-    top: -38px;  /* 2026-08-10：-45→-38px（隨圖片縮小） */
+    width: 58px;  /* 2026-08-13：83→64→58px */
+    height: 58px;
+    top: -29px;  /* 2026-08-13：-38→-32→-29px（隨圖片縮小） */
   }
   .bc-welcome-img-link {
-    top: -47px;  /* 2026-08-10：-55→-47px */
-    width: 94px;  /* 2026-08-10：110→94px */
-    height: 94px;
+    top: -35px;  /* 2026-08-13：-47→-38→-35px */
+    width: 62px;
+    height: 62px;
   }
   .bc-last-order {
-    font-size: 0.6rem;
+    font-size: 0.5rem;  /* 2026-08-13：0.6→0.5rem（配合縮小的 imgbox） */
   }
 }
 
