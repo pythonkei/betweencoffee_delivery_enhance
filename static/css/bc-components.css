@@ -3405,9 +3405,9 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .bean-mix-main + .bean-mix-sub {
     grid-row: 1;
   }
-  /* 同行橫向錯落：小卡1 內容下移 12px，與大卡頂部錯開（2026-08-14） */
+  /* 同行橫向錯落：小卡1 內容向上移 16px（高於大卡頂部，錯落加大；2026-08-14 方向修正：原下移 → 向上） */
   .bean-mix-main + .bean-mix-sub .menu-wrap {
-    margin-top: 12px;
+    transform: translateY(-16px);
   }
   .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
     grid-row: 2;
@@ -3450,10 +3450,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 }
 
-/* 同行橫向錯落：平板/桌面小卡1 內容下移 24px，與大卡頂部錯開（2026-08-14） */
+/* 同行橫向錯落：平板/桌面小卡1 內容向上移 28px（高於大卡頂部，錯落加大；2026-08-14 方向修正：原下移 → 向上） */
 @media screen and (min-width: 768px) {
   .bean-mix-main + .bean-mix-sub .menu-wrap {
-    margin-top: 24px;
+    transform: translateY(-28px);
   }
 }
 

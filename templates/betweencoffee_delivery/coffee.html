@@ -5,6 +5,10 @@
 {% block title %}Between Coffee - {{ coffee.name }}{% endblock %}
 
 {% block content %}
+<style>
+  /* 詳情頁：隱藏右側 Buy & Order 按鈕（2026-08-14）；保留懸浮購物車按鈕與右側虛線 */
+  .bc-attract-nav { display: none !important; }
+</style>
 <!-- Header Banner-->
 <section class="ftco-section-blank-small"></section>
 
