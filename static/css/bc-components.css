@@ -3497,10 +3497,16 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     font-size: 11px;
   }
 }
+@media screen and (min-width: 768px) and (max-width: 1199.98px) {
+  .bean-mix-main .menu-wrap .bc-menu-highlight,
+  .bean-mix-sub .menu-wrap .bc-menu-highlight {
+    font-size: 14px;
+  }
+}
 @media screen and (min-width: 1200px) {
   .bean-mix-main .menu-wrap .bc-menu-highlight,
   .bean-mix-sub .menu-wrap .bc-menu-highlight {
-    font-size: 13px;
+    font-size: 15px;
   }
 }
 
