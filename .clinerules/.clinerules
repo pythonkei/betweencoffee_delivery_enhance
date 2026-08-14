@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月14日（更新：.cart-popup 響應式三層級 56/65/88px；coffee_menu/bean_menu 平板保留不對稱網格；詳情頁一般文字統一 #ccc + 建立 --bc-text-ccc 變數；行動端大卡/小卡並排瀑布 + 多輪平衡調整（等大→大卡小卡→1.5fr、按鈕統一 96px、錯落加大）；highlight 亮點標語（Migration 0057）；詳情頁/菜單頁隱藏右側 Buy & Order 按鈕（保留浮動購物車與虛線）；首頁 .mid-banner 響應式 + lg_message 行距加大；浮動購物車移除滑入/滑出動畫 + 伺服器端初始渲染 + 徽章文字閃爍修復）
+> **最後更新**: 2026年8月15日（更新：coffee 詳情頁杯量 oz 標籤/文字加大（桌面 0.85rem≈13.6px + padding 6px12px、行動 11px + padding 5px10px）；全模板 HTML 結構/語法檢查與修正（修正 8 項結構錯誤、補建 3 個缺失模板、刪除 15 個孤兒模板、移除重複 noise-filiter/debug 欄位/無用 form/nav hidden 死碼）；order_confirm 表單交叉巢狀修正（form 屬性關聯 + 佈局回歸修復））
 
 ## 開發者背景與方法論
 
@@ -221,9 +221,12 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 2. 檢查子渲染器是否有硬編碼選項（需逐一搜尋 `cup_level_cn`）
 3. 檢查渲染器使用的欄位名（API 回傳 `strength_level`，渲染器需檢查 `item.strength_level_cn || item.strength_level`）
 
-## 近期任務（2026-08-14）
+## 近期任務（2026-08-15）
 
 ```
+├── [x] coffee 詳情頁 oz 標籤/文字加大 — ✅ 2026-08-14（桌面 0.72→0.85rem（13.6px）+ padding 6px12px、行動 8→11px + padding 5px10px；文字維持不變僅標籤再加大；bc-components.css?v=20260814y）
+├── [x] 全模板 HTML 結構/語法檢查 + 修正 + 冗餘清除 — ✅ 2026-08-14（59→44 模板；修正 8 項結構錯誤（缺 </span>/重複 rel/多餘 </b>/SVG clipPath/缺 </div>）；補建 socialuser reactivate/activity_history/points_summary（原 500）；git rm 15 個孤兒模板；移除重複 noise-filiter、debug 欄位去重、菜單卡片無用 form、nav hidden 死碼 -53 行；get_template 47/47 + manage.py check 0 issues）
+├── [x] order_confirm 表單交叉巢狀修正 + 佈局回歸修正 — ✅ 2026-08-14（form 還原 col-xl-7 內 + sidebar #payment-button 改 form="payment-form" 屬性關聯；CDP 驗證 col 58/42、btn.form 關聯、圖示順序正確）
 ├── [x] .cart-popup 響應式修復 — ✅ 2026-08-14（手機/平板/桌面三層級 56/65/88px；商品圖手機隱藏、名稱 ellipsis、價格數量完整、576~599 斷層消除；style-utilities.css?v=20260814b）
 ├── [x] coffee_menu/bean_menu 平板保留不對稱網格 — ✅ 2026-08-14（2fr 1fr 瀑布、大卡跨 2 行、flip 鏡像、圖片 !important 縮小 280/200；bc-components.css?v=20260814a）
 ├── [x] 詳情頁一般文字統一 #ccc + 建立 --bc-text-ccc 變數 — ✅ 2026-08-14（名稱/描述/標籤/內容/圖示/烘焙選項/表單標籤全用 var(--bc-text-ccc)；品牌金價格/active 與圖片保留；bc-components.css?v=20260814c）

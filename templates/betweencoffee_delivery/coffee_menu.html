@@ -74,10 +74,9 @@
                   <p class="bc-menu-highlight">{{ coffee.highlight }}</p>
                   <p class="price"><span>$ {{ coffee.price|floatformat:"-2"|default:"0" }}</span></p>
                   <p class="coffee-menu-desc">{{ coffee.description }}</p>
-                  <form action="{% url 'coffee' coffee.id %}" method="post" class="pt-2">
-                    {% csrf_token %}
+                  <div class="pt-2">
                     <a href="{% url 'coffee' coffee.id %}" class="btn btn-primary btn-outline-primary">落單</a>
-                  </form>
+                  </div>
                 </div>
               </div>
             </div>

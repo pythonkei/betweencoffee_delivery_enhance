@@ -27,7 +27,7 @@
     <div hidden class="container">
         <div class="col-lg-12 col-md-7 col-sm-12 text-center ftco-animate mb-4">
             <div class="container">
-                <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'coffee_menu' %}">返回</a></p>
+                <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'coffee_menu' %}">返回</a></span></p>
             </div>
         </div>
     </div>
@@ -486,10 +486,12 @@ function debugLog(message) {
   height: 72px !important;
   min-height: 72px !important;
 }
+/* 2026-08-14：杯量 oz 文字 0.85rem 維持；標籤再次加大 padding 4px8px→6px12px
+   行動端由 bc-components.css ≤767.98 以 (1,2,0)!important 覆蓋為 11px / 5px10px */
 #cup-level-group .bc-option-oz {
-  font-size: 0.72rem !important;
+  font-size: 0.85rem !important;
   margin: 0 !important;
-  padding: 3px 6px !important;
+  padding: 6px 12px !important;
 }
 .form-group.d-flex {
   align-items: center;

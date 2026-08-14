@@ -1589,17 +1589,17 @@ body {
   background: #fff;
 }
 
-/* 杯量按鈕 - 右上角 oz 標籤 */
+/* 杯量按鈕 - 右上角 oz 標籤（2026-08-14：文字 0.85rem 維持；標籤再次加大 padding 4px8px→6px12px） */
 .bc-option-oz {
   position: absolute;
   top: 0;
   right: 0;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: #fff;
   line-height: 1;
   transition: all var(--bc-transition);
   background: var(--bc-gold);
-  padding: 3px 6px;
+  padding: 6px 12px;
   margin: 0;
   border-radius: 0 4px 0 5px;
   letter-spacing: 0.5px;
@@ -2499,9 +2499,13 @@ body {
     font-size: 10px;
   }
   /* .r-btn 需 .product-details 前綴勝過 responsive .btn；oz 需 (1,2,0)!important 勝過
-     coffee.html inline <style> 的 #cup-level-group .bc-option-oz (1,1,0)!important */
+     coffee.html inline <style> 的 #cup-level-group .bc-option-oz (1,1,0)!important
+     （2026-08-14：oz 文字 11px 維持；標籤再次加大 padding 3px6px→5px10px） */
   .product-details .r-btn { font-size: 10px; }
-  .product-details #cup-level-group .bc-option-oz { font-size: 8px !important; }
+  .product-details #cup-level-group .bc-option-oz {
+    font-size: 11px !important;
+    padding: 5px 10px !important;
+  }
 
   /* 按鈕內部圖示縮小（2026-08-11：杯量 icon 13px→11px、+/- 9px→8px、
      option label 11px→10px 統一） */

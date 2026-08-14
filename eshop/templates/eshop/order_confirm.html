@@ -177,13 +177,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     {% csrf_token %}
 
                     <!-- 隱藏欄位用於調試 -->
-                    <!-- 调试信息 -->
                     <input type="hidden" name="debug_session_key" value="{{ request.session.session_key }}">
                     <input type="hidden" name="debug_user" value="{{ user.id }}">
                     <input type="hidden" name="debug_timestamp" value="{% now 'U' %}">
                     <input type="hidden" name="debug_info" value="form_submitted">
-                    <input type="hidden" name="debug_session_key" value="{{ request.session.session_key }}">
-                    <input type="hidden" name="debug_user" value="{{ user.id }}">
 
                     <!-- 输入info -->
                     <div class="row">
@@ -483,6 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                     </div>
+                </form>
                 </div>
             <!-- info from -->
 
@@ -595,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="block-21 justify-content-end">
                             <div class="form-group pb-5">
                             <!-- 支付按钮 -->
-                            <button type="submit" class="btn btn-primary btn-primary-outline pr-8 pl-8 py-3 mt-4 bc-payment-btn" id="payment-button">確認並支付</button>
+                            <button type="submit" form="payment-form" class="btn btn-primary btn-primary-outline pr-8 pl-8 py-3 mt-4 bc-payment-btn" id="payment-button">確認並支付</button>
                                 <div class="text-center mt-3">
                                     <span class=""><a href="{% url 'cart:cart_detail' %}" class="btn">返回購物車</a></span>
                                 </div>
@@ -606,7 +604,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <!-- end card item -->
         </div>
-                </form>
     </div>
 </section>
 

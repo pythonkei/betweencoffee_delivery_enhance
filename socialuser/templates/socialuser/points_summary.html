@@ -1,0 +1,86 @@
+<!-- socialuser/templates/socialuser/points_summary.html -->
+{% extends 'layouts/blank.html' %}
+{% load static %}
+{% block title %}Between Coffee - 積分摘要{% endblock %}
+
+{% block content %}
+<section class="ftco-section-blank"></section>
+
+<section class="ftco-subpage-section">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <!-- 會員導航菜單（水平置中） -->
+            <div class="col-12 col-lg-8 mb-4">
+                {% include 'socialuser/includes/member_nav.html' %}
+            </div>
+
+            <!-- 積分摘要內容 -->
+            <div class="col-lg-8 mb-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-star mr-1"></i>
+                            積分摘要
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- 積分概覽 -->
+                        <div class="row mb-4">
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="text-center p-3 rounded bg-light">
+                                    <div class="h2 mb-0 font-weight-bold">{{ points_summary.current_points }}</div>
+                                    <div class="text-muted small">當前積分</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="text-center p-3 rounded bg-light">
+                                    <div class="h2 mb-0 font-weight-bold">{{ points_summary.total_earned }}</div>
+                                    <div class="text-muted small">累計獲得</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="text-center p-3 rounded bg-light">
+                                    <div class="h2 mb-0 font-weight-bold">{{ points_summary.total_spent }}</div>
+                                    <div class="text-muted small">累計使用</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="text-center p-3 rounded bg-light">
+                                    <div class="h2 mb-0 font-weight-bold">{{ points_summary.total_orders }}</div>
+                                    <div class="text-muted small">累計訂單</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 積分有效期資訊 -->
+                        {% if expiry_info %}
+                        <div class="alert alert-{{ expiry_info.status }} mb-4">
+                            <i class="fas fa-clock mr-1"></i>
+                            {{ expiry_info.message }}
+                            {% if expiry_info.expiry_date %}
+                            <small class="d-block mt-1">到期日：{{ expiry_info.expiry_date }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- 積分獲取規則 -->
+                        <h5 class="mb-3">積分獲取規則</h5>
+                        <div class="row">
+                            {% for rule in point_rules %}
+                            <div class="col-md-4 mb-3">
+                                <div class="text-center p-3 rounded bg-light h-100">
+                                    <i class="fas {{ rule.icon }} fa-2x text-{{ rule.color }} mb-2"></i>
+                                    <div class="font-weight-bold">{{ rule.type }}</div>
+                                    <div class="small text-muted">{{ rule.description }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
