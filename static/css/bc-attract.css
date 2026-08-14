@@ -40,7 +40,7 @@
   right: 65px;
   width: 2px;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(128, 128, 128, 0.6);   /* 2026-08-14：加深灰色（原白 0.5） */
   -webkit-mask-image: url('/static/images/dots_40.svg');
   mask-image: url('/static/images/dots_40.svg');
   -webkit-mask-size: 40px 40px;

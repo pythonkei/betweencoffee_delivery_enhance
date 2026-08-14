@@ -538,6 +538,38 @@
   line-height: 0.8;
 }
 
+/* ===== .mid-banner 響應式（2026-08-14）
+   原本全固定值（min-height 620px / span 48px / lg_message 6em）在手機過大且無響應式，
+   375px 時寬度 423px 超出視窗 → 三級響應式縮小字體與高度。 */
+@media screen and (max-width: 991.98px) {
+  .mid-banner {
+    min-height: 460px;
+    max-width: 100%;
+  }
+  .mid-banner span {
+    font-size: 40px;
+  }
+  .playfair_deco .lg_message {
+    font-size: 4.5em;
+    letter-spacing: -4px;
+  }
+}
+
+@media screen and (max-width: 575.98px) {
+  .mid-banner {
+    min-height: 300px;
+    padding: 16px;
+  }
+  .mid-banner span {
+    font-size: 28px;
+    letter-spacing: -1px;
+  }
+  .playfair_deco .lg_message {
+    font-size: 2.6em;
+    letter-spacing: -2px;
+  }
+}
+
 
 
 
