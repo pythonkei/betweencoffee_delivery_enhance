@@ -3372,43 +3372,66 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 }
 
-/* 響應式 ≤768px：行動端 大卡片 + 小卡片 佈局（2026-08-14）
-   使用者要求：行動端改為大卡片與小卡片處理（取消等大）。
-   每組 3 卡（DOM=大 小 小）：大卡全寬橫幅（grid-column 1/3）+ 兩小卡半寬並排，
-   第二小卡下移 1.5rem 錯落（保留上下錯落設計語言）；描述保持隱藏。 */
+/* 響應式 ≤768px：行動端 大卡/小卡 並排瀑布（2026-08-14）
+   使用者要求：大卡片與小卡片相同並排處理、大卡不需全寬、像桌面端處理方法。
+   採用與平板/桌面相同的不對稱瀑布：大卡 2fr 跨 2 行（內容垂直置中）+ 兩小卡 1fr 上下排，
+   組間 flip 鏡像；尺寸縮小（大卡圖 200/小卡圖 130、小卡文字縮小）、第二小卡微錯落、描述隱藏。 */
 @media screen and (max-width: 767.98px) {
   .bean-mix-grid {
     padding: 1rem 0;
     gap: 2.5rem;
   }
   .bean-mix-group {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 1rem;
     align-items: start;
   }
   .bean-mix-main,
   .bean-mix-flip .bean-mix-main {
-    grid-column: 1 / 3;
-    grid-row: 1;
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+  .bean-mix-main .menu-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .bean-mix-sub,
+  .bean-mix-flip .bean-mix-sub {
+    grid-column: 2;
+    min-width: 0;
   }
   .bean-mix-main + .bean-mix-sub {
-    grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
   }
   .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
-    grid-column: 2;
     grid-row: 2;
     /* !important：覆蓋 .coffee-mix-grid 的 transform:none（specificity 較高且後定義） */
-    transform: translateY(1.5rem) !important;
+    transform: translateY(1rem) !important;
   }
-  /* 大卡圖片較大、小卡圖片較小（覆蓋平板 280/200 與桌面 340/280 的 !important） */
+  .bean-mix-flip { grid-template-columns: 1fr 2fr; }
+  .bean-mix-flip .bean-mix-main { grid-column: 2; }
+  .bean-mix-flip .bean-mix-sub { grid-column: 1; }
+  /* 大卡/小卡 圖片尺寸（覆蓋平板 280/200 與桌面 340/280 的 !important） */
   .bean-mix-main .menu-wrap .menu-img img {
-    width: min(280px, 100%) !important;
+    width: min(200px, 100%) !important;
     max-height: 36vh;
   }
   .bean-mix-sub .menu-wrap .menu-img img {
-    width: min(160px, 100%) !important;
+    width: min(130px, 100%) !important;
     max-height: 36vh;
+  }
+  /* 小卡內容縮小（名稱/價格/按鈕） */
+  .bean-mix-sub .menu-wrap .text h5 {
+    font-size: 12px;
+  }
+  .bean-mix-sub .menu-wrap .text .price {
+    font-size: 12px;
+  }
+  .bean-mix-sub .menu-wrap .text .r-btn,
+  .bean-mix-sub .menu-wrap .text .btn {
+    font-size: 11px;
+    padding: 4px 10px;
   }
   /* 行動端隱藏產品描述文字 */
   .bean-mix-group .coffee-menu-desc {
