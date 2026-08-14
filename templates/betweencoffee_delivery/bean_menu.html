@@ -6,6 +6,11 @@
 <style>
   /* 菜單頁：隱藏右側 Buy & Order 按鈕（2026-08-14）；保留懸浮購物車按鈕與右側虛線 */
   .bc-attract-nav { display: none !important; }
+  /* 2026-08-15：桌面端咖啡豆產品照片加大（大卡 340→400、小卡 280→320；僅 bean_menu 頁面級，coffee_menu 共用 .bean-mix 不受影響） */
+  @media screen and (min-width: 1080px) {
+    .bean-mix-main .menu-wrap .menu-img img { width: 400px !important; }
+    .bean-mix-sub .menu-wrap .menu-img img { width: 320px !important; }
+  }
 </style>
 <!-- Header Banner-->
 <section class="subpage-banner-h500 py-lg-4">
