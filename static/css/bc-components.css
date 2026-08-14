@@ -3405,6 +3405,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .bean-mix-main + .bean-mix-sub {
     grid-row: 1;
   }
+  /* 同行橫向錯落：小卡1 內容下移 12px，與大卡頂部錯開（2026-08-14） */
+  .bean-mix-main + .bean-mix-sub .menu-wrap {
+    margin-top: 12px;
+  }
   .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
     grid-row: 2;
     /* !important：覆蓋 .coffee-mix-grid 的 transform:none（specificity 較高且後定義）；2026-08-14 錯落 2rem→3rem */
@@ -3443,6 +3447,13 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   /* 行動端隱藏產品描述文字 */
   .bean-mix-group .coffee-menu-desc {
     display: none;
+  }
+}
+
+/* 同行橫向錯落：平板/桌面小卡1 內容下移 24px，與大卡頂部錯開（2026-08-14） */
+@media screen and (min-width: 768px) {
+  .bean-mix-main + .bean-mix-sub .menu-wrap {
+    margin-top: 24px;
   }
 }
 
