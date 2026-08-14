@@ -462,6 +462,7 @@ body {
   --bc-text: rgba(255, 255, 255, 0.9);
   --bc-text-muted: rgba(255, 255, 255, 0.6);
   --bc-text-dim: rgba(255, 255, 255, 0.3);
+  --bc-text-ccc: #ccc;  /* 2026-08-14：詳情頁一般文字統一色（供後續引用） */
   --bc-radius: 12px;
   --bc-radius-sm: 8px;
   --bc-radius-xs: 4px;
@@ -1655,24 +1656,47 @@ body {
   outline: none;
 }
 
-/* ===== 商品詳情頁文字顏色 #adadad ===== */
+/* ===== 商品詳情頁一般文字統一 #ccc（2026-08-14）
+   使用者要求 bean/coffee 詳情頁一般文字（名稱/描述/標籤/內容/圖示/烘焙選項/表單標籤）統一 #ccc；
+   品牌金（價格、選項按鈕 active 狀態、烘焙水平 active、按鈕）與咖啡/咖啡豆圖片顏色保留。
+   #ccc 以變數 --bc-text-ccc 管理（:root），供後續引用。 */
 .product-details .block-23 p.pb-2 {
-  color: #adadad;
+  color: var(--bc-text-ccc);
   font-size: 1.1rem;
 }
 
-
 .product-details .block-23 ul li span.text {
-  color: #adadad;
+  color: var(--bc-text-ccc);
   font-size: 1rem;
 }
 
-
+.product-details .block-23 ul li span.text .pl-3 {
+  color: var(--bc-text-ccc);
+}
 
 .product-details .block-23 ul li .icon {
   font-size: 24px;
   width: 32px;
-  color: rgb(108, 108, 108);   /* 2026-08-11：詳情頁資訊圖示顏色（按鈕內圖示除外）78→108 */
+  color: var(--bc-text-ccc);
+}
+
+/* 商品名稱（內層 span 被 style-bootstrap .product-details span{color:#eee} 覆寫，需同級覆蓋） */
+.product-details .coffee-title,
+.product-details .bean-title,
+.product-details .coffee-title span,
+.product-details .bean-title span {
+  color: var(--bc-text-ccc);
+}
+
+/* 烘焙水平選項（非 active；active 保留品牌金 .bc-roast-active） */
+.product-details .roastrange-item span:not(.bc-roast-active) {
+  color: var(--bc-text-ccc);
+}
+
+/* 表單標籤（淨量/研磨/數量/杯量/奶量/濃度）與數量輸入框 */
+.product-details .form-group p,
+.product-details .input-number {
+  color: var(--bc-text-ccc);
 }
 
 
