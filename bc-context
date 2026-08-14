@@ -89,7 +89,7 @@ load_context() {
         echo "│   ├── coffee_menu/bean_menu 平板保留不對稱網格：≤1079.98 改 2fr 1fr 瀑布（大卡跨 2 行 + 小卡上下排）、flip 鏡像 1fr 2fr、圖片 !important 縮小 280/200；CDP 驗證 768~1280 無溢出、桌面無回歸（bc-components.css?v=20260814a）"
         echo "│   └── bean/coffee 詳情頁一般文字統一 #ccc：:root 新增 --bc-text-ccc 變數供後續引用；名稱/描述/標籤/內容/圖示/烘焙選項(非 active)/表單標籤全部 var(--bc-text-ccc)；品牌金（價格、active）與咖啡/咖啡豆圖片保留；CDP 掃描 bean 19/coffee 14 個 #ccc（bc-components.css?v=20260814c）"
         echo "│   └── coffee_menu/bean_menu 行動端「大卡/小卡並排瀑布」佈局：≤767.98 大卡 1.5fr 跨 2 行 + 兩小卡 1fr 上下排、組間 flip 鏡像、第二小卡 translateY(2rem)!important 錯落加大、圖 180/130、名稱/價格縮小 13/12px、大小卡按鈕固定同寬 96px + margin:0 auto 水平居中、隱藏描述；CDP 驗證 375px 大卡 187/小卡 125/btnCx=cardCx（bc-components.css?v=20260814i）"
-        echo "│   └── 咖啡/咖啡豆 highlight 亮點標語：CoffeeItem/BeanItem 加 highlight 欄位（Migration 0057）+ 8 咖啡/6 咖啡豆中文文案 + Admin + 菜單卡片名稱下方 .bc-menu-highlight（品牌金、覆蓋 .menu-wrap p）；修正：文案精簡 8-9 字 + CSS nowrap/ellipsis 單行 + 三級響應式字體 11/16/18px + font-weight 600（bc-components.css?v=20260814n）"
+        echo "│   └── 咖啡/咖啡豆 highlight 亮點標語：CoffeeItem/BeanItem 加 highlight 欄位（Migration 0057）+ 8 咖啡/6 咖啡豆中文文案 + Admin + 菜單卡片名稱下方 .bc-menu-highlight（品牌金、覆蓋 .menu-wrap p）；修正：文案精簡 8-9 字 + CSS nowrap/ellipsis 單行 + 三級響應式字體 11/16/18px + font-weight 500（bc-components.css?v=20260814o）"
         echo "│"
         echo "│   2026-08-13 ✅"
         echo "│   ├── bean 詳情頁烘焙水平 active 改金色：.bc-roast-active 提高 specificity（.roastrange-item span 前綴勝過 #666）+ active 圓點 ::before 金色"
