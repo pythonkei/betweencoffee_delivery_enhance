@@ -3430,10 +3430,12 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .bean-mix-grid .bean-mix-group .bean-mix-sub .menu-wrap .text .price {
     font-size: 12px;
   }
-  /* 大卡/小卡 按鈕固定相同寬度（2026-08-14：統一 96px、字體 12px） */
+  /* 大卡/小卡 按鈕固定相同寬度（2026-08-14：統一 96px、字體 12px）
+     margin: 0 auto：按鈕 display:block 不受 text-align:center 影響 → 需 margin auto 強制水平居中 */
   .bean-mix-main .menu-wrap .text .btn,
   .bean-mix-sub .menu-wrap .text .btn {
     width: 96px;
+    margin: 0 auto;
     font-size: 12px;
     padding: 6px 12px;
   }
