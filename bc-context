@@ -92,6 +92,7 @@ load_context() {
         echo "│   ├── 咖啡/咖啡豆 highlight 亮點標語：CoffeeItem/BeanItem 加 highlight 欄位（Migration 0057）+ 8 咖啡/6 咖啡豆中文文案 + Admin + 菜單卡片名稱下方 .bc-menu-highlight（品牌金、覆蓋 .menu-wrap p）；修正：文案精簡 8-9 字 + CSS nowrap/ellipsis 單行 + 三級響應式字體 11/16/18px + font-weight 500（bc-components.css?v=20260814o）"
         echo "│   └── bean/coffee 詳情頁隱藏右側 Buy & Order 按鈕：頁面級 style .bc-attract-nav{display:none!important}；保留懸浮購物車與右側虛線（使用者指定）；CDP 驗證詳情頁 none、coffee_menu 對照 flex 正常"
         echo "│   └── 首頁 .mid-banner 響應式：原全固定值（620px/48px/6em）無響應式、375px 寬 423px 溢出 → 三級響應式（手機 300px/28px/2.6em、平板 460px/40px/4.5em、桌面維持）+ max-width:100% + lg_message 行距 0.8→1.15；CDP 驗證 320px 寬 242 無溢出（style-custom.css?v=20260814b）"
+        echo "│   └── 菜單頁 bean_menu/coffee_menu 隱藏右側 Buy & Order 按鈕：頁面級 style .bc-attract-nav{display:none!important}（coffee_menu 自指冗餘）；保留懸浮購物車與虛線；CDP 驗證兩頁 none"
         echo "│"
         echo "│   2026-08-13 ✅"
         echo "│   ├── bean 詳情頁烘焙水平 active 改金色：.bc-roast-active 提高 specificity（.roastrange-item span 前綴勝過 #666）+ active 圓點 ::before 金色"
