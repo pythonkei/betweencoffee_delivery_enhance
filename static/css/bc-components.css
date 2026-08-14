@@ -3372,10 +3372,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
 }
 
-/* 響應式 ≤768px：行動端 2 欄等大不對稱網格 + 上下錯落（2026-08-14）
-   使用者要求：行動端保留不對稱網格 + 卡片上下錯落，但卡片等大（無大卡/小卡）、隱藏描述。
-   每組 3 卡（DOM=大 小 小）排 2 欄：main 左欄 row1、sub1 右欄 row1 下移 2rem 錯落、
-   sub2 左欄 row2（2+1 排列）；行動端忽略 flip 鏡像統一 main 左。 */
+/* 響應式 ≤768px：行動端 大卡片 + 小卡片 佈局（2026-08-14）
+   使用者要求：行動端改為大卡片與小卡片處理（取消等大）。
+   每組 3 卡（DOM=大 小 小）：大卡全寬橫幅（grid-column 1/3）+ 兩小卡半寬並排，
+   第二小卡下移 1.5rem 錯落（保留上下錯落設計語言）；描述保持隱藏。 */
 @media screen and (max-width: 767.98px) {
   .bean-mix-grid {
     padding: 1rem 0;
@@ -3383,32 +3383,31 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bean-mix-group {
     grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
+    gap: 1rem;
     align-items: start;
   }
   .bean-mix-main,
   .bean-mix-flip .bean-mix-main {
-    grid-column: 1;
+    grid-column: 1 / 3;
     grid-row: 1;
   }
   .bean-mix-main + .bean-mix-sub {
-    grid-column: 2;
-    grid-row: 1;
-    transform: translateY(2rem);
-  }
-  .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
     grid-column: 1;
     grid-row: 2;
-    transform: none;
   }
-  .bean-mix-sub,
-  .bean-mix-flip .bean-mix-sub {
+  .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
     grid-column: 2;
+    grid-row: 2;
+    /* !important：覆蓋 .coffee-mix-grid 的 transform:none（specificity 較高且後定義） */
+    transform: translateY(1.5rem) !important;
   }
-  /* 等大卡片圖片（覆蓋平板 280/200 與桌面 340/280 的 !important） */
-  .bean-mix-main .menu-wrap .menu-img img,
+  /* 大卡圖片較大、小卡圖片較小（覆蓋平板 280/200 與桌面 340/280 的 !important） */
+  .bean-mix-main .menu-wrap .menu-img img {
+    width: min(280px, 100%) !important;
+    max-height: 36vh;
+  }
   .bean-mix-sub .menu-wrap .menu-img img {
-    width: min(220px, 100%) !important;
+    width: min(160px, 100%) !important;
     max-height: 36vh;
   }
   /* 行動端隱藏產品描述文字 */
