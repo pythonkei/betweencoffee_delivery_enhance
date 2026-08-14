@@ -282,7 +282,13 @@ class SlideoutCart {
       el.textContent = count || '0';
     });
     // 同步浮動購物車按鈕顯示狀態
-    this._updateFloatingCartVisibility(count);
+    // 2026-08-14：頁面載入期（constructor + rAF 兩次初始同步）靜默顯示（無動畫）；
+    // 延遲切換標記，確保所有初始同步皆靜默、之後操作（加入購物車等）才有滑入動畫
+    const animated = !this._initialBadgeSync;
+    this._updateFloatingCartVisibility(count, animated);
+    if (this._initialBadgeSync) {
+      setTimeout(() => { this._initialBadgeSync = false; }, 500);
+    }
   }
 
   /**
@@ -292,6 +298,9 @@ class SlideoutCart {
     this.floatingCart = document.getElementById('bc-floating-cart');
     this.navCartToggle = document.getElementById('bc-cart-toggle');
     if (!this.floatingCart || !this.navCartToggle) return;
+
+    // 2026-08-14：首次 badge 同步（頁面載入）靜默顯示浮動購物車（無滑入動畫），之後操作才動畫
+    this._initialBadgeSync = true;
 
     // 員工訂單管理頁面不需要顯示浮動購物車按鈕
     if (window.location.pathname.includes('/admin/eshop/ordermodel/staff-management/')) {
@@ -325,7 +334,7 @@ class SlideoutCart {
   /**
    * 更新浮動購物車顯示狀態（根據購物車數量，有商品時常駐顯示）
    */
-  _updateFloatingCartVisibility(count) {
+  _updateFloatingCartVisibility(count, animated = true) {
     if (!this.floatingCart) return;
     // 購物車打開時不處理浮動按鈕顯示
     if (this._cartOpenHiddenFloating) return;
@@ -334,11 +343,11 @@ class SlideoutCart {
       if (itemCount <= 0) {
         // 購物車為空時隱藏浮動按鈕
         this.floatingCart.style.display = 'none';
-        this.floatingCart.classList.remove('show', 'hide');
+        this.floatingCart.classList.remove('show', 'hide', 'no-anim');
         return;
       } else {
         // 購物車有商品時，常駐顯示浮動按鈕
-        this._showFloatingCart();
+        this._showFloatingCart(animated);
       }
     }
   }
@@ -346,11 +355,14 @@ class SlideoutCart {
   /**
    * 顯示浮動購物車（從底部滑入）
    */
-  _showFloatingCart() {
+  _showFloatingCart(animated = true) {
     if (!this.floatingCart) return;
     // 如果購物車為空，不顯示
     const badge = this.floatingCart.querySelector('.bc-floating-cart-badge');
     if (badge && parseInt(badge.textContent) <= 0) return;
+
+    // 2026-08-14：頁面載入靜默顯示（no-anim 禁用滑入動畫）；操作後（animated=true）恢復動畫
+    this.floatingCart.classList.toggle('no-anim', !animated);
 
     if (this.floatingCart.classList.contains('show')) return;
 
