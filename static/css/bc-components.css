@@ -3303,7 +3303,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bean-mix-main + .bean-mix-sub { grid-row: 1; }
 .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
   grid-row: 2;
-  transform: translateY(4rem);
+  transform: translateY(5rem);
 }
 
 /* C：組 2 翻轉（大卡右側、小卡左側） */
@@ -3359,7 +3359,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
     grid-row: 2;
-    transform: none;
+    /* 2026-08-14：平板加錯落 2rem（原 none）；!important 覆蓋 .coffee-mix-grid ≤1079.98 transform:none */
+    transform: translateY(2rem) !important;
   }
   .bean-mix-flip .bean-mix-main { grid-column: 2; }
   .bean-mix-flip .bean-mix-sub { grid-column: 1; }
@@ -3406,8 +3407,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
     grid-row: 2;
-    /* !important：覆蓋 .coffee-mix-grid 的 transform:none（specificity 較高且後定義）；2026-08-14 錯落加大 1rem→2rem */
-    transform: translateY(2rem) !important;
+    /* !important：覆蓋 .coffee-mix-grid 的 transform:none（specificity 較高且後定義）；2026-08-14 錯落 2rem→3rem */
+    transform: translateY(3rem) !important;
   }
   .bean-mix-flip { grid-template-columns: 1fr 1.5fr; }
   .bean-mix-flip .bean-mix-main { grid-column: 2; }
@@ -3516,7 +3517,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    第二張小卡錯落方向改為向上（translateY(-6rem)），bean_menu 維持向下 4rem
    響應式與 bean-mix 一致：≤1079.98px / ≤767.98px 時取消位移 */
 .coffee-mix-grid .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
-  transform: translateY(-6rem);
+  transform: translateY(-7rem);
 }
 @media screen and (max-width: 1079.98px) {
   .coffee-mix-grid .bean-mix-main + .bean-mix-sub + .bean-mix-sub {
