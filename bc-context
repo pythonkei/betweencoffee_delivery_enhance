@@ -96,6 +96,7 @@ load_context() {
         echo "│   └── 浮動購物車初始載入靜默顯示：購物車有商品時每次跳轉都滑入彈出（bcFloatingIn）幹擾 → JS 傳 animated 參數（初始加 .no-anim 禁動畫）+ _initialBadgeSync 延遲 500ms（constructor+rAF 兩次同步皆靜默）；CSS no-anim.show{animation:none}；CDP 驗證三頁 animation:none（bc-slideout-cart.js?v=20260814b）"
         echo "│   └── 浮動購物車完全移除動畫 + 伺服器端初始渲染：加入購物車滑入動畫也是幹擾 → CSS .show/.hide 改 animation:none；base.html 浮動購物車 {% if not cart_count %}display:none{% endif %} + badge {{cart_count}}（有商品載入即顯示無閃出）；CDP 驗證無商品 none/有商品 block+animation:none（bc-components.css?v=20260814v）"
         echo "│   └── 數量徽章文字閃爍修復：徽章 webfont（Noto Sans TC）字體載入延遲 FOUT 造成文字閃爍 → 徽章改 font-family:Arial（數字立即渲染）+ _updateBadge 值相同不重設 textContent（避免重繪）；CDP 驗證 font=Arial/animation:none（bc-components.css?v=20260814w）"
+        echo "│   └── 全域右側虛線加深灰：#borders .bc-borders__right 背景 rgba(128,128,128,0.6)（原白 0.5）（bc-attract.css?v=20260814a）"
         echo "│"
         echo "│   2026-08-13 ✅"
         echo "│   ├── bean 詳情頁烘焙水平 active 改金色：.bc-roast-active 提高 specificity（.roastrange-item span 前綴勝過 #666）+ active 圓點 ::before 金色"

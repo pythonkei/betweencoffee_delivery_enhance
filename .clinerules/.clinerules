@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月13日（更新：bean 烘焙水平 active 金色；付款頁 .payment-item-fps/cash 內聯 CSS 搬移；FPS/Cash 付款頁按鈕樣式統一；bean 詳情頁返回按鈕桌面端居中修復；首頁 .feed 蒙版動畫修復；首頁 Best Sell 咖啡卡片排序功能（hot_item_order）；Django admin 咖啡/咖啡豆卡片排序功能（sort_order + list_editable）；coffee_menu 產品區域改為 A+C 混合不對稱網格；首頁最後訂單咖啡豆選項預選；bc-welcome-panel 行動端文字排版；bc-search hover 動畫提速；訂單流程行動端 UI 全面優化；付款頁/員工頁響應式）
+> **最後更新**: 2026年8月14日（更新：.cart-popup 響應式三層級 56/65/88px；coffee_menu/bean_menu 平板保留不對稱網格；詳情頁一般文字統一 #ccc + 建立 --bc-text-ccc 變數；行動端大卡/小卡並排瀑布 + 多輪平衡調整（等大→大卡小卡→1.5fr、按鈕統一 96px、錯落加大）；highlight 亮點標語（Migration 0057）；詳情頁/菜單頁隱藏右側 Buy & Order 按鈕（保留浮動購物車與虛線）；首頁 .mid-banner 響應式 + lg_message 行距加大；浮動購物車移除滑入/滑出動畫 + 伺服器端初始渲染 + 徽章文字閃爍修復）
 
 ## 開發者背景與方法論
 
@@ -220,6 +220,19 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 1. 檢查 `eshop/serializers.py` 是否 mapping `strength_level_cn`
 2. 檢查子渲染器是否有硬編碼選項（需逐一搜尋 `cup_level_cn`）
 3. 檢查渲染器使用的欄位名（API 回傳 `strength_level`，渲染器需檢查 `item.strength_level_cn || item.strength_level`）
+
+## 近期任務（2026-08-14）
+
+```
+├── [x] .cart-popup 響應式修復 — ✅ 2026-08-14（手機/平板/桌面三層級 56/65/88px；商品圖手機隱藏、名稱 ellipsis、價格數量完整、576~599 斷層消除；style-utilities.css?v=20260814b）
+├── [x] coffee_menu/bean_menu 平板保留不對稱網格 — ✅ 2026-08-14（2fr 1fr 瀑布、大卡跨 2 行、flip 鏡像、圖片 !important 縮小 280/200；bc-components.css?v=20260814a）
+├── [x] 詳情頁一般文字統一 #ccc + 建立 --bc-text-ccc 變數 — ✅ 2026-08-14（名稱/描述/標籤/內容/圖示/烘焙選項/表單標籤全用 var(--bc-text-ccc)；品牌金價格/active 與圖片保留；bc-components.css?v=20260814c）
+├── [x] 行動端大卡/小卡並排瀑布 + 多輪平衡調整 — ✅ 2026-08-14（等大→大卡全寬→1.5fr 並排；大卡圖 130px/小卡圖 110px；間距 0.25rem；名稱/價格 13/12px；按鈕固定同寬 96px + margin auto 居中；三端錯落加大（行動 3rem/平板 2rem/桌面 bean 5rem+coffee -7rem）+ 同行橫向小卡1 內容向上移 16/28px；隱藏描述；bc-components.css?v=20260814s/t）
+├── [x] 咖啡/咖啡豆 highlight 亮點標語 — ✅ 2026-08-14（CoffeeItem/BeanItem 加 highlight 欄位 Migration 0057；8+6 中文文案；Admin；菜單卡片名稱下方 .bc-menu-highlight 品牌金 11/16/18px + font-weight 500 單行；bc-components.css?v=20260814o）
+├── [x] 詳情頁 + 菜單頁隱藏右側 Buy & Order 按鈕 — ✅ 2026-08-14（頁面級 style .bc-attract-nav{display:none!important}；保留懸浮購物車與右側虛線）
+├── [x] 首頁 .mid-banner 響應式 + 行距加大 — ✅ 2026-08-14（手機 300px/28px/2.6em、平板 460px/40px/4.5em、桌面維持；lg_message line-height 0.8→1.15；style-custom.css?v=20260814b）
+├── [x] 浮動購物車視覺幹擾修正 — ✅ 2026-08-14（移除滑入/滑出動畫；伺服器端初始渲染 {% if not cart_count %} 避免閃出；徽章字體改 Arial 避免 FOUT 閃爍；_updateBadge 值相同不重設；bc-components.css?v=20260814w、bc-slideout-cart.js?v=20260814c）
+```
 
 ## Phase 3 規劃
 
