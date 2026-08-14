@@ -3383,7 +3383,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bean-mix-group {
     grid-template-columns: 1.5fr 1fr;
-    gap: 1rem;
+    gap: 0.5rem;   /* 2026-08-14：大小卡間距 1rem→0.5rem（更緊湊） */
     align-items: start;
   }
   .bean-mix-main,
@@ -3414,7 +3414,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .bean-mix-flip .bean-mix-sub { grid-column: 1; }
   /* 大卡/小卡 圖片尺寸（覆蓋平板 280/200 與桌面 340/280 的 !important） */
   .bean-mix-main .menu-wrap .menu-img img {
-    width: min(180px, 100%) !important;
+    width: min(150px, 100%) !important;   /* 2026-08-14：大卡圖 180→150px（照片縮小） */
     max-height: 36vh;
   }
   .bean-mix-sub .menu-wrap .menu-img img {
