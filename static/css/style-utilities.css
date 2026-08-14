@@ -1949,21 +1949,95 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
    1) 全寬範圍 575.98 → 767.98（原僅 ≤575.98，576~599.98 視窗時 min-width:600px 突出視窗 12px）
    2) 手機內層響應式（≤575.98）：縮小 padding/gap/圖示/字體；.popup-product-info 改可收縮
       （flex:1 + min-width:0 → 名稱 ellipsis 生效），價格/數量 flex-shrink:0 保證不被裁切 */
-@media screen and (max-width: 767.98px) {
+@media screen and (max-width: 991.98px) {
   .cart-popup {
     min-width: 0;
-    width: 92vw;
+    max-width: 92vw;
+  }
+
+  /* 平板級內層縮小（576~991.98）：原桌面尺寸塞進 92vw 太大不平衡（2026-08-14 追加） */
+  .cart-popup .popup-left {
+    gap: 12px;
+    padding: 12px 20px;
+  }
+
+  .cart-popup .popup-right {
+    padding: 12px 16px;
+  }
+
+  .cart-popup .popup-product-info {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    gap: 8px;
+  }
+
+  .cart-popup .popup-product-img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cart-popup .popup-product-details {
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .cart-popup .popup-product-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+  }
+
+  .cart-popup .popup-product-price {
+    font-size: 14px;
+  }
+
+  .cart-popup .popup-product-qty {
+    font-size: 14px;
+  }
+
+  .cart-popup .popup-cart-icon-wrap {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cart-popup .popup-cart-icon-wrap .icon {
+    font-size: 26px;
+  }
+
+  .cart-popup .popup-cart-badge {
+    font-size: 12px;
+    min-width: 20px;
+    height: 20px;
+  }
+
+  .cart-popup .popup-divider {
+    height: 34px;
+  }
+
+  .cart-popup .popup-total-price span {
+    font-size: 18px;
+  }
+
+  .cart-popup .popup-checkout-btn {
+    font-size: 14px;
+    padding: 8px 16px;
   }
 }
 
 @media screen and (max-width: 575.98px) {
+  .cart-popup {
+    width: 92vw;
+  }
+
   .cart-popup .popup-left {
     gap: 8px;
-    padding: 12px 14px;
+    padding: 10px 12px;
   }
 
   .cart-popup .popup-right {
-    padding: 12px 10px;
+    padding: 10px 8px;
   }
 
   .cart-popup .popup-product-info {
@@ -1987,43 +2061,43 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   .cart-popup .popup-product-name {
     flex: 1;
     min-width: 0;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .cart-popup .popup-product-price {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .cart-popup .popup-product-qty {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .cart-popup .popup-cart-icon-wrap {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
   }
 
   .cart-popup .popup-cart-icon-wrap .icon {
-    font-size: 24px;
+    font-size: 23px;
   }
 
   .cart-popup .popup-cart-badge {
-    font-size: 12px;
-    min-width: 20px;
-    height: 20px;
+    font-size: 11px;
+    min-width: 18px;
+    height: 18px;
   }
 
   .cart-popup .popup-divider {
-    height: 30px;
+    height: 28px;
   }
 
   .cart-popup .popup-total-price span {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .cart-popup .popup-checkout-btn {
-    font-size: 13px;
-    padding: 8px 10px;
+    font-size: 12px;
+    padding: 7px 10px;
   }
 }
 
