@@ -3477,12 +3477,13 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    咖啡/咖啡豆 highlight 中文亮點，顯示於名稱下方、價格上方。
    需覆蓋 style-bootstrap .menu-wrap p（font-size 16px、color #ccc、-webkit-box line-clamp 截斷）：
    .menu-wrap .bc-menu-highlight (0,2,0) > .menu-wrap p (0,1,1)。
-   2026-08-14 追加：單行顯示（nowrap+ellipsis）+ 三級響應式字體（行動端 11 / 平板 12 / 桌面 13px） */
+   2026-08-14 追加：單行顯示（nowrap+ellipsis）+ 三級響應式字體（行動端 11 / 平板 16 / 桌面 18px）+ font-weight 600 */
 .bc-menu-highlight,
 .menu-wrap .bc-menu-highlight {
   margin: 0.1rem auto 0;
   padding: 2px 0.5rem 0;
   font-size: 12px;
+  font-weight: 600;
   line-height: 1.6;
   color: var(--bc-gold);
   display: block;
@@ -3500,13 +3501,13 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 @media screen and (min-width: 768px) and (max-width: 1199.98px) {
   .bean-mix-main .menu-wrap .bc-menu-highlight,
   .bean-mix-sub .menu-wrap .bc-menu-highlight {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 @media screen and (min-width: 1200px) {
   .bean-mix-main .menu-wrap .bc-menu-highlight,
   .bean-mix-sub .menu-wrap .bc-menu-highlight {
-    font-size: 15px;
+    font-size: 18px;
   }
 }
 
