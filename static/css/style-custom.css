@@ -529,13 +529,13 @@
   flex-wrap: wrap;  /* 2026-08-08 修復：flex 下長文字不換行會撐開 .mid-banner 造成手機橫向溢出 */
   font-size: 6em;
   letter-spacing: -6px;
-  line-height: 0.8; /* 修正：负值无效，现为合理值 */
+  line-height: 1.15; /* 2026-08-14：行距加大（原 0.8） */
   color: white;
 }
 
 .playfair_deco p.lg_message {
   margin: 30px 0;
-  line-height: 0.8;
+  line-height: 1.15; /* 2026-08-14：行距加大（原 0.8） */
 }
 
 /* ===== .mid-banner 響應式（2026-08-14）
