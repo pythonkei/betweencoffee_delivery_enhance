@@ -3382,7 +3382,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     gap: 2.5rem;
   }
   .bean-mix-group {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
     gap: 1rem;
     align-items: start;
   }
@@ -3409,25 +3409,28 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     /* !important：覆蓋 .coffee-mix-grid 的 transform:none（specificity 較高且後定義） */
     transform: translateY(1rem) !important;
   }
-  .bean-mix-flip { grid-template-columns: 1fr 2fr; }
+  .bean-mix-flip { grid-template-columns: 1fr 1.5fr; }
   .bean-mix-flip .bean-mix-main { grid-column: 2; }
   .bean-mix-flip .bean-mix-sub { grid-column: 1; }
   /* 大卡/小卡 圖片尺寸（覆蓋平板 280/200 與桌面 340/280 的 !important） */
   .bean-mix-main .menu-wrap .menu-img img {
-    width: min(200px, 100%) !important;
+    width: min(180px, 100%) !important;
     max-height: 36vh;
   }
   .bean-mix-sub .menu-wrap .menu-img img {
     width: min(130px, 100%) !important;
     max-height: 36vh;
   }
-  /* 小卡內容縮小（名稱/價格/按鈕） */
-  .bean-mix-sub .menu-wrap .text h5 {
+  /* 名稱/價格統一縮小（大卡+小卡；高 specificity 覆蓋「bean-mix 卡片文字加大」區塊） */
+  .bean-mix-grid .bean-mix-group .bean-mix-main .menu-wrap .text h5,
+  .bean-mix-grid .bean-mix-group .bean-mix-sub .menu-wrap .text h5 {
+    font-size: 13px;
+  }
+  .bean-mix-grid .bean-mix-group .bean-mix-main .menu-wrap .text .price,
+  .bean-mix-grid .bean-mix-group .bean-mix-sub .menu-wrap .text .price {
     font-size: 12px;
   }
-  .bean-mix-sub .menu-wrap .text .price {
-    font-size: 12px;
-  }
+  /* 小卡按鈕縮小 */
   .bean-mix-sub .menu-wrap .text .r-btn,
   .bean-mix-sub .menu-wrap .text .btn {
     font-size: 11px;
