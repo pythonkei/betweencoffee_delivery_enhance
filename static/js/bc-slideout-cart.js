@@ -278,8 +278,12 @@ class SlideoutCart {
   }
 
   _updateBadge(count) {
+    const val = count || '0';
     document.querySelectorAll(this.options.badgeSelector).forEach(el => {
-      el.textContent = count || '0';
+      // 2026-08-14：值相同不重設 textContent（避免重繪造成文字閃爍）
+      if (el.textContent !== val) {
+        el.textContent = val;
+      }
     });
     // 同步浮動購物車按鈕顯示狀態
     // 2026-08-14：頁面載入期（constructor + rAF 兩次初始同步）靜默顯示（無動畫）；

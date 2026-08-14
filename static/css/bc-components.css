@@ -1467,6 +1467,7 @@ body {
   border-radius: 11px;
   background: var(--bc-gold);  /* 金色背景 */
   color: #fff;   /* 白色文字 */
+  font-family: Arial, Helvetica, sans-serif;  /* 2026-08-14：數字用系統字體，避免 webfont 載入延遲造成文字閃爍（FOUT） */
   font-size: 0.79rem;  /* 縮小 10%（原 0.88rem → ×0.9） */
   font-weight: 700;
   display: flex;
