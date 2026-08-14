@@ -80,6 +80,7 @@
                 </div>
                 <div class="text text-center">
                   <h5 class="mt-3 text-uppercase">{{ bean.name }}</h5>
+                  <p class="bc-menu-highlight">{{ bean.highlight }}</p>
                   <p class="price"><span>$ {{ bean.price_200g|floatformat:"0"|default:"0" }}</span></p>
                   <p class="coffee-menu-desc">{{ bean.description }}</p>
                   <form action="{% url 'bean' bean.id %}" method="post" class="pt-2">

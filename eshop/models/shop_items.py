@@ -20,6 +20,8 @@ class CoffeeItem(models.Model):
     name = models.CharField(max_length=100)
     introduction = models.TextField(max_length=200, blank=True)
     description = models.TextField(max_length=400, blank=True)
+    # 亮點標語（2026-08-14）：菜單卡片名稱下方顯示的 12-15 字中文亮點
+    highlight = models.CharField(max_length=100, blank=True, verbose_name="亮點標語")
     image = models.ImageField(upload_to="coffee_images/")
     image_index = models.ImageField(
         upload_to="coffee_images/index/", blank=True, null=True, verbose_name="首页图片"
@@ -106,6 +108,8 @@ class BeanItem(models.Model):
     name = models.CharField(max_length=100)
     introduction = models.TextField(max_length=200, blank=True)
     description = models.TextField(max_length=400, blank=True)
+    # 亮點標語（2026-08-14）：菜單卡片名稱下方顯示的 12-15 字中文亮點
+    highlight = models.CharField(max_length=100, blank=True, verbose_name="亮點標語")
     image = models.ImageField(upload_to="bean_images/")
     image_index = models.ImageField(
         upload_to="bean_images/index/", blank=True, null=True, verbose_name="首页图片"

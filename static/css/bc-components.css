@@ -3473,6 +3473,30 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bean-mix-group .bean-mix-main .menu-wrap .coffee-menu-desc,
 .bean-mix-group .bean-mix-sub .menu-wrap .coffee-menu-desc { font-size: var(--bc-fs-base); }
 
+/* ===== 菜單卡片亮點標語 .bc-menu-highlight（2026-08-14）
+   咖啡/咖啡豆 highlight 中文亮點（12-15 字），顯示於名稱下方、價格上方。
+   需覆蓋 style-bootstrap .menu-wrap p（font-size 16px、color #ccc、-webkit-box line-clamp 截斷）：
+   .menu-wrap .bc-menu-highlight (0,2,0) > .menu-wrap p (0,1,1)；全端顯示（行動端描述隱藏不受影響） */
+.bc-menu-highlight,
+.menu-wrap .bc-menu-highlight {
+  margin: 0.1rem auto 0;
+  padding: 2px 0.5rem 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--bc-gold);
+  display: block;
+  -webkit-line-clamp: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+@media screen and (max-width: 767.98px) {
+  .bean-mix-main .menu-wrap .bc-menu-highlight,
+  .bean-mix-sub .menu-wrap .bc-menu-highlight {
+    font-size: 11px;
+  }
+}
+
 /* ===== coffee_menu 小卡向上錯落（2026-08-13）
    coffee_menu 與 bean_menu 共用 .bean-mix-*，此 wrapper 僅調整 coffee_menu：
    第二張小卡錯落方向改為向上（translateY(-6rem)），bean_menu 維持向下 4rem
