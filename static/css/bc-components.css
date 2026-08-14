@@ -3474,9 +3474,10 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bean-mix-group .bean-mix-sub .menu-wrap .coffee-menu-desc { font-size: var(--bc-fs-base); }
 
 /* ===== 菜單卡片亮點標語 .bc-menu-highlight（2026-08-14）
-   咖啡/咖啡豆 highlight 中文亮點（12-15 字），顯示於名稱下方、價格上方。
+   咖啡/咖啡豆 highlight 中文亮點，顯示於名稱下方、價格上方。
    需覆蓋 style-bootstrap .menu-wrap p（font-size 16px、color #ccc、-webkit-box line-clamp 截斷）：
-   .menu-wrap .bc-menu-highlight (0,2,0) > .menu-wrap p (0,1,1)；全端顯示（行動端描述隱藏不受影響） */
+   .menu-wrap .bc-menu-highlight (0,2,0) > .menu-wrap p (0,1,1)。
+   2026-08-14 追加：單行顯示（nowrap+ellipsis）+ 三級響應式字體（行動端 11 / 平板 12 / 桌面 13px） */
 .bc-menu-highlight,
 .menu-wrap .bc-menu-highlight {
   margin: 0.1rem auto 0;
@@ -3486,14 +3487,20 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   color: var(--bc-gold);
   display: block;
   -webkit-line-clamp: none;
-  overflow: visible;
-  text-overflow: clip;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 @media screen and (max-width: 767.98px) {
   .bean-mix-main .menu-wrap .bc-menu-highlight,
   .bean-mix-sub .menu-wrap .bc-menu-highlight {
     font-size: 11px;
+  }
+}
+@media screen and (min-width: 1200px) {
+  .bean-mix-main .menu-wrap .bc-menu-highlight,
+  .bean-mix-sub .menu-wrap .bc-menu-highlight {
+    font-size: 13px;
   }
 }
 
