@@ -94,6 +94,7 @@ load_context() {
         echo "│   └── 首頁 .mid-banner 響應式：原全固定值（620px/48px/6em）無響應式、375px 寬 423px 溢出 → 三級響應式（手機 300px/28px/2.6em、平板 460px/40px/4.5em、桌面維持）+ max-width:100% + lg_message 行距 0.8→1.15；CDP 驗證 320px 寬 242 無溢出（style-custom.css?v=20260814b）"
         echo "│   └── 菜單頁 bean_menu/coffee_menu 隱藏右側 Buy & Order 按鈕：頁面級 style .bc-attract-nav{display:none!important}（coffee_menu 自指冗餘）；保留懸浮購物車與虛線；CDP 驗證兩頁 none"
         echo "│   └── 浮動購物車初始載入靜默顯示：購物車有商品時每次跳轉都滑入彈出（bcFloatingIn）幹擾 → JS 傳 animated 參數（初始加 .no-anim 禁動畫）+ _initialBadgeSync 延遲 500ms（constructor+rAF 兩次同步皆靜默）；CSS no-anim.show{animation:none}；CDP 驗證三頁 animation:none（bc-slideout-cart.js?v=20260814b）"
+        echo "│   └── 浮動購物車完全移除動畫 + 伺服器端初始渲染：加入購物車滑入動畫也是幹擾 → CSS .show/.hide 改 animation:none；base.html 浮動購物車 {% if not cart_count %}display:none{% endif %} + badge {{cart_count}}（有商品載入即顯示無閃出）；CDP 驗證無商品 none/有商品 block+animation:none（bc-components.css?v=20260814v）"
         echo "│"
         echo "│   2026-08-13 ✅"
         echo "│   ├── bean 詳情頁烘焙水平 active 改金色：.bc-roast-active 提高 specificity（.roastrange-item span 前綴勝過 #666）+ active 圓點 ::before 金色"

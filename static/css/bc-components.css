@@ -1393,17 +1393,12 @@ body {
 
 .bc-floating-cart.show {
   pointer-events: auto;
-  animation: bcFloatingIn 0.4s ease-out forwards;
-}
-
-/* 2026-08-14：頁面載入靜默顯示（無滑入動畫，避免每次跳轉彈出幹擾） */
-.bc-floating-cart.no-anim.show {
-  animation: none;
+  animation: none;   /* 2026-08-14：移除滑入動畫（含加入購物車），避免視覺幹擾 */
 }
 
 .bc-floating-cart.hide {
   pointer-events: none;
-  animation: bcFloatingOut 0.3s ease-in forwards;
+  animation: none;   /* 2026-08-14：移除滑出動畫 */
 }
 
 @keyframes bcFloatingIn {
