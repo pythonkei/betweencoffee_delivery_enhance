@@ -1777,14 +1777,6 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   transform: translateX(-50%) translateY(0);
 }
 
-/* 2026-08-08 響應式修復：手機上 min-width:600px 超出視窗（fixed 元素雖不造成捲動，但顯示時超寬），改全寬 */
-@media screen and (max-width: 575.98px) {
-  .cart-popup {
-    min-width: 0;
-    width: 92vw;
-  }
-}
-
 .cart-popup.hide {
   opacity: 0;
   visibility: hidden;
@@ -1854,6 +1846,14 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
+}
+
+.cart-popup .popup-product-price {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .cart-popup .popup-product-qty {
@@ -1942,6 +1942,89 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 .cart-popup .popup-checkout-btn:hover {
   color: #b8894d;
+}
+
+/* 2026-08-08 響應式修復：手機上 min-width:600px 超出視窗（fixed 元素雖不造成捲動，但顯示時超寬），改全寬 */
+/* 2026-08-14 響應式擴充：
+   1) 全寬範圍 575.98 → 767.98（原僅 ≤575.98，576~599.98 視窗時 min-width:600px 突出視窗 12px）
+   2) 手機內層響應式（≤575.98）：縮小 padding/gap/圖示/字體；.popup-product-info 改可收縮
+      （flex:1 + min-width:0 → 名稱 ellipsis 生效），價格/數量 flex-shrink:0 保證不被裁切 */
+@media screen and (max-width: 767.98px) {
+  .cart-popup {
+    min-width: 0;
+    width: 92vw;
+  }
+}
+
+@media screen and (max-width: 575.98px) {
+  .cart-popup .popup-left {
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .cart-popup .popup-right {
+    padding: 12px 10px;
+  }
+
+  .cart-popup .popup-product-info {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    gap: 8px;
+  }
+
+  /* showPopup JS 會設 inline style display:inline，需 !important 才能覆蓋（手機窄螢幕隱藏裝飾性商品圖，把空間留給名稱 ellipsis） */
+  .cart-popup .popup-product-img {
+    display: none !important;
+  }
+
+  .cart-popup .popup-product-details {
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .cart-popup .popup-product-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  .cart-popup .popup-product-price {
+    font-size: 13px;
+  }
+
+  .cart-popup .popup-product-qty {
+    font-size: 13px;
+  }
+
+  .cart-popup .popup-cart-icon-wrap {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cart-popup .popup-cart-icon-wrap .icon {
+    font-size: 24px;
+  }
+
+  .cart-popup .popup-cart-badge {
+    font-size: 12px;
+    min-width: 20px;
+    height: 20px;
+  }
+
+  .cart-popup .popup-divider {
+    height: 30px;
+  }
+
+  .cart-popup .popup-total-price span {
+    font-size: 16px;
+  }
+
+  .cart-popup .popup-checkout-btn {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
 }
 
 @keyframes pulse {
