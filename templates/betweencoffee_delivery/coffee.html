@@ -203,8 +203,10 @@
             var key = group.getAttribute('data-group');
             var val = params.get('option_' + key);
             if (!val) return;
+            /* 先清除同組全部 active（含靜態 default），再只選中匹配按鈕，避免多個同時已選 */
             group.querySelectorAll('.bc-option-btn').forEach(function(btn) {
-                if (btn.getAttribute('data-value') === val) btn.classList.add('active');
+                var active = btn.getAttribute('data-value') === val;
+                btn.classList.toggle('active', active);
             });
             var hid = document.getElementById('option_' + key);
             if (hid) hid.value = val;
