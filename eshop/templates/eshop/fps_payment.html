@@ -1,6 +1,7 @@
 <!-- templates/eshop/fps_payment.html -->
 {% extends 'layouts/blank.html' %}
 {% load static %}
+{% load option_tags %}
 
 {% block content %}
 <style>
@@ -71,6 +72,7 @@
                                             {% if item.cup_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">water_full</span> 杯量: {{ item.cup_level_cn }}</span>{% endif %}
                                             {% if item.strength_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: {{ item.strength_level_cn }}</span>{% endif %}
                                             {% if item.milk_level_cn %}<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {{ item.milk_level_cn }}</span>{% endif %}
+                                            {% for opt_key, opt_val in item.extra_options_cn.items %}<span class="option-item"><span class="icon material-symbols-outlined">{{ opt_key|option_icon }}</span> {{ opt_key|option_label }}: {{ opt_val }}</span>{% endfor %}
                                             {% if item.grinding_level_cn %}<span class="option-item">研磨: {{ item.grinding_level_cn }}</span>{% endif %}
                                             {% if item.weight %}<span class="option-item">重量: {{ item.weight }}</span>{% endif %}
                                         </div>

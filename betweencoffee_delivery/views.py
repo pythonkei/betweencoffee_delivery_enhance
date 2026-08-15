@@ -111,6 +111,10 @@ def _get_last_order_link(user):
                         val = item.get(key)
                         if val:
                             opts.append(f"{key}={val}")
+                    # 自訂選項組（2026-08-15）：extra_options → option_<key>=<value>（詳情頁 preselect 支援）
+                    for key, val in (item.get("extra_options") or {}).items():
+                        if val:
+                            opts.append(f"option_{key}={val}")
                 qs = "?" + "&".join(opts) if opts else ""
                 base = "/coffee/" if ptype == "coffee" else "/bean/"
                 return f"{base}{pid}/{qs}"
@@ -190,9 +194,29 @@ class Coffee(View):
         coffee = get_object_or_404(CoffeeItem, id=product_id)
         cart = Cart(request)  # Initialize the cart
 
+        # 自訂選項組（2026-08-15）：依該咖啡啟用的選項組，提供給詳情頁渲染
+        from eshop.models.option_definitions import OPTION_GROUPS
+
+        # 以 (預設索引, group) 成對處理；排序用索引當 secondary key，避免在 sort 期間查 list
+        enabled = [
+            (i, g)
+            for i, g in enumerate(OPTION_GROUPS)
+            if getattr(coffee, f"option_{g['key']}", False)
+        ]
+
+        # 依 Admin 數字排序（option_order_<key>：數字越小越靠前，0=預設順序）
+        def _order_key(item):
+            i, g = item
+            n = getattr(coffee, f"option_order_{g['key']}", 0) or 0
+            return (n if n > 0 else 10 ** 9, i)
+
+        enabled.sort(key=_order_key)
+        enabled_groups = [g for _, g in enabled]
+
         context = {
             "coffee": coffee,
             "cart": cart,  # Add the cart to the context
+            "option_groups": enabled_groups,
         }
         return render(request, "betweencoffee_delivery/coffee.html", context)
 

@@ -30,6 +30,8 @@ class CartItem(models.Model):
     strength_level = models.CharField(max_length=10, blank=True, null=True)
     grinding_level = models.CharField(max_length=10, blank=True, null=True)
     weight = models.CharField(max_length=10, blank=True, null=True)
+    # 自訂選項（2026-08-15）：dict，如 {"caramel": "double", "milk": "oat"}
+    options_json = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -43,6 +45,7 @@ class CartItem(models.Model):
             "strength_level",
             "grinding_level",
             "weight",
+            "options_json",
         )
 
     def __str__(self):

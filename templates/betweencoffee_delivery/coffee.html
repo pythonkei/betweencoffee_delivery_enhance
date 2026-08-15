@@ -76,49 +76,22 @@
                 <form id="add-to-cart-form" class="pt-2">
                     {% csrf_token %}
                     <div class="row mt-4">
-                        <!-- Cup Level -->
-                            <div class="w-100 form-group d-flex">
-                                <p>杯量 :</p>
-                                <div class="bc-option-group" id="cup-level-group">
-                                    <button type="button" class="bc-option-btn" data-value="Small" data-oz="12oz" hidden>
-                                        <span class="bc-option-oz">12oz</span>
-                                        <i class="bc-option-icon icon-coffee"></i>
-                                        <span class="bc-option-label-text">少</span>
+                        <!-- 自訂選項組（2026-08-15）：依該咖啡啟用的選項渲染（杯量/濃度/奶量/奶類/…皆在此），每組單選（再點取消=原味）；預設值 group.default 載入時預先選中。杯量組含 oz/icon 特殊結構（choice 第 3 元素） -->
+                        {% for group in option_groups %}
+                            <div class="w-100 form-group d-flex bc-option-field">
+                                <p>{{ group.label }} :</p>
+                                <div class="bc-option-group" id="option-group-{{ group.key }}" data-group="{{ group.key }}">
+                                    {% for choice in group.choices %}
+                                    <button type="button" class="bc-option-btn{% if choice.0 == group.default %} active{% endif %}" data-value="{{ choice.0 }}"{% if choice.2 %} data-oz="{{ choice.2 }}"{% endif %}{% if group.key == 'cup_level' and choice.0 == 'Small' %} hidden{% endif %}>
+                                        {% if choice.2 %}<span class="bc-option-oz">{{ choice.2 }}</span>{% endif %}
+                                        {% if group.key == 'cup_level' %}<i class="bc-option-icon icon-coffee"></i>{% endif %}
+                                        {% if choice.2 %}<span class="bc-option-label-text">{{ choice.1 }}</span>{% else %}{{ choice.1 }}{% endif %}
                                     </button>
-                                    <button type="button" class="bc-option-btn active" data-value="Medium" data-oz="16oz">
-                                        <span class="bc-option-oz">16oz</span>
-                                        <i class="bc-option-icon icon-coffee"></i>
-                                        <span class="bc-option-label-text">正常</span>
-                                    </button>
-                                    <button type="button" class="bc-option-btn" data-value="Large" data-oz="20oz">
-                                        <span class="bc-option-oz">20oz</span>
-                                        <i class="bc-option-icon icon-coffee"></i>
-                                        <span class="bc-option-label-text">追加</span>
-                                    </button>
+                                    {% endfor %}
                                 </div>
-                                <input type="hidden" name="cup_level" id="cup_level" value="Medium">
+                                <input type="hidden" name="option_{{ group.key }}" id="option_{{ group.key }}" value="{% if group.default %}{{ group.default }}{% endif %}">
                             </div>
-
-                        <!-- Milk Level -->
-                            <div class="w-100 form-group d-flex">
-                                <p>奶量 :</p>
-                                <div class="bc-option-group" id="milk-level-group">
-                                    <button type="button" class="bc-option-btn" data-value="Light">少</button>
-                                    <button type="button" class="bc-option-btn active" data-value="Medium">正常</button>
-                                    <button type="button" class="bc-option-btn" data-value="Extra">追加</button>
-                                </div>
-                                <input type="hidden" name="milk_level" id="milk_level" value="Medium">
-                            </div>
-
-                        <!-- Strength Level -->
-                            <div class="w-100 form-group d-flex">
-                                <p>濃度 :</p>
-                                <div class="bc-option-group" id="strength-level-group">
-                                    <button type="button" class="bc-option-btn active" data-value="Normal">預設</button>
-                                    <button type="button" class="bc-option-btn" data-value="Extra">特濃</button>
-                                </div>
-                                <input type="hidden" name="strength_level" id="strength_level" value="Normal">
-                            </div>
+                        {% endfor %}
 
                         <!-- Quantity -->
                         <div class="w-100 form-group d-flex">
@@ -209,11 +182,7 @@
     /* 從 URL query 預選上次訂單選項（來自首頁最後訂單圖片連結） */
     (function preselectLastOrderOptions() {
         var params = new URLSearchParams(window.location.search);
-        var map = {
-            'cup_level': 'cup-level-group',
-            'milk_level': 'milk-level-group',
-            'strength_level': 'strength-level-group'
-        };
+        var map = {};
         Object.keys(map).forEach(function(key) {
             var val = params.get(key);
             if (!val) return;
@@ -229,33 +198,35 @@
                 if (hid) hid.value = val;
             }
         });
+        /* 自訂選項組預選（last order query: ?option_caramel=double） */
+        document.querySelectorAll('#add-to-cart-form .bc-option-group[data-group]').forEach(function(group) {
+            var key = group.getAttribute('data-group');
+            var val = params.get('option_' + key);
+            if (!val) return;
+            group.querySelectorAll('.bc-option-btn').forEach(function(btn) {
+                if (btn.getAttribute('data-value') === val) btn.classList.add('active');
+            });
+            var hid = document.getElementById('option_' + key);
+            if (hid) hid.value = val;
+        });
     })();
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Option Button Toggle - 杯量
-        document.querySelectorAll('#cup-level-group .bc-option-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('#cup-level-group .bc-option-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('cup_level').value = this.dataset.value;
-            });
-        });
-
-        // Option Button Toggle - 奶量
-        document.querySelectorAll('#milk-level-group .bc-option-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('#milk-level-group .bc-option-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('milk_level').value = this.dataset.value;
-            });
-        });
-
-        // Option Button Toggle - 濃度
-        document.querySelectorAll('#strength-level-group .bc-option-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('#strength-level-group .bc-option-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('strength_level').value = this.dataset.value;
+        // Option Button Toggle - 自訂選項組（含杯量/濃度/奶量/奶類…，單選，再點取消=原味）
+        document.querySelectorAll('#add-to-cart-form .bc-option-group[data-group]').forEach(group => {
+            group.querySelectorAll('.bc-option-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const key = group.getAttribute('data-group');
+                    const input = document.getElementById('option_' + key);
+                    if (this.classList.contains('active')) {
+                        this.classList.remove('active');
+                        input.value = '';
+                    } else {
+                        group.querySelectorAll('.bc-option-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        input.value = this.dataset.value;
+                    }
+                });
             });
         });
 
@@ -482,19 +453,35 @@ function debugLog(message) {
 </script>
 
 <style>
-#cup-level-group .bc-option-btn {
-  height: 72px !important;
-  min-height: 72px !important;
+#option-group-cup_level .bc-option-btn {
+  height: 78px !important;
+  min-height: 78px !important;
 }
-/* 2026-08-14：杯量 oz 文字 0.85rem 維持；標籤再次加大 padding 4px8px→6px12px
-   行動端由 bc-components.css ≤767.98 以 (1,2,0)!important 覆蓋為 11px / 5px10px */
-#cup-level-group .bc-option-oz {
-  font-size: 0.85rem !important;
+/* 2026-08-15：杯量 oz 標籤/文字整體縮小（0.85rem→0.72rem、padding 6px12px→3px7px）；按鈕整體增高 72→78px
+   行動端由 bc-components.css ≤767.98 以 (1,2,0)!important 覆蓋為 9px / 3px6px / 48px */
+#option-group-cup_level .bc-option-oz {
+  font-size: 0.72rem !important;
+  font-weight: 400 !important;
   margin: 0 !important;
-  padding: 6px 12px !important;
+  padding: 3px 7px !important;
 }
 .form-group.d-flex {
   align-items: center;
+}
+/* 2026-08-15：選項組拆分兩行（第一行選項文字、第二行相關按鈕）；行距已縮小（gap 8→4、p margin 0） */
+.w-100.form-group.d-flex.bc-option-field {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.w-100.form-group.d-flex.bc-option-field .bc-option-group {
+  width: 100%;
+}
+/* 2026-08-15：標籤靠左（style-bootstrap 對 .form-group p 設 align-self:flex-end，
+   column 布局下會被推到右邊 → 覆蓋回 flex-start）；移除 Bootstrap p 的 margin-bottom 縮小行距 */
+.w-100.form-group.d-flex.bc-option-field > p {
+  align-self: flex-start;
+  margin-bottom: 0;
 }
 </style>
 {% endblock %}

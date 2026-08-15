@@ -2,6 +2,7 @@
 <!-- Between Coffee 一頁式結帳 -->
 {% extends 'layouts/blank.html' %}
 {% load static %}
+{% load option_tags %}
 
 {% block title %}Between Coffee - 結帳{% endblock %}
 
@@ -42,8 +43,12 @@
               <div class="bc-checkout-item-name">{{ item.name }}</div>
               <div class="bc-checkout-item-detail">
                 {% if item.type == 'coffee' %}
-                  杯量: {% if item.cup_level == 'Small' %}細{% elif item.cup_level == 'Medium' %}中{% else %}大{% endif %}
-                  | 奶量: {% if item.milk_level == 'Light' %}少{% elif item.milk_level == 'Medium' %}正常{% else %}追加{% endif %}
+                  {% if item.extra_options %}
+                  {% for opt_key, opt_val in item.extra_options.items %}| {{ opt_key|option_label }}: {{ opt_val|option_value:opt_key }} {% endfor %}
+                  {% else %}
+                  {% if item.cup_level %}杯量: {% if item.cup_level == 'Small' %}細{% elif item.cup_level == 'Medium' %}中{% elif item.cup_level == 'Large' %}大{% endif %}{% endif %}
+                  {% if item.milk_level %}| 奶量: {% if item.milk_level == 'Light' %}少{% elif item.milk_level == 'Medium' %}正常{% elif item.milk_level == 'Extra' %}追加{% endif %}{% endif %}
+                  {% endif %}
                 {% elif item.type == 'bean' %}
                   重量: {{ item.weight|default:"200g" }}
                   | 研磨: {% if item.grinding_level == 'Non' %}免研磨{% elif item.grinding_level == 'Light' %}細{% elif item.grinding_level == 'Medium' %}中{% else %}粗{% endif %}

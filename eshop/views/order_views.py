@@ -193,6 +193,7 @@ class OrderConfirm(View):
                                 "strength_level": item_data.get("strength_level"),
                                 "grinding_level": item_data.get("grinding_level"),
                                 "weight": item_data.get("weight"),
+                                "extra_options": item_data.get("extra_options") or {},
                             }
                         )
                     except (CoffeeItem.DoesNotExist, BeanItem.DoesNotExist):
@@ -213,6 +214,7 @@ class OrderConfirm(View):
                                 "strength_level": item_data.get("strength_level"),
                                 "grinding_level": item_data.get("grinding_level"),
                                 "weight": item_data.get("weight"),
+                                "extra_options": item_data.get("extra_options") or {},
                             }
                         )
 
@@ -385,6 +387,7 @@ class OrderConfirm(View):
                                 "strength_level": item_data.get("strength_level"),
                                 "grinding_level": item_data.get("grinding_level"),
                                 "weight": item_data.get("weight"),
+                                "extra_options": item_data.get("extra_options") or {},
                                 "image": image_url,
                             }
                         )

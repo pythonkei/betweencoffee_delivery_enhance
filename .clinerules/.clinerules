@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月15日（更新：coffee 詳情頁杯量 oz 標籤/文字加大（桌面 0.85rem≈13.6px + padding 6px12px、行動 11px + padding 5px10px）；全模板 HTML 結構/語法檢查與修正（修正 8 項結構錯誤、補建 3 個缺失模板、刪除 15 個孤兒模板、移除重複 noise-filiter/debug 欄位/無用 form/nav hidden 死碼）；order_confirm 表單交叉巢狀修正（form 屬性關聯 + 佈局回歸修復））
+> **最後更新**: 2026年8月15日（更新：coffee 自訂選項組功能（16 組：杯量/濃度/奶量/奶類/焦糖/黃油/椰奶/香草/特調/烏龍/茉莉/抹茶/綠茶/焙茶/面層配料/配豆；Admin 勾選啟用 + 排序數字 + 合併 UI；詳情頁依排序渲染單選；資料流 extra_options → 各顯示端；order_confirm/checkout legacy fallback 重複顯示修復 + 依咖啡排序；Migratons 0058-0063；6 驗證腳本全 PASS））
 
 ## 開發者背景與方法論
 
@@ -224,6 +224,11 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ## 近期任務（2026-08-15）
 
 ```
+├── [x] coffee 自訂選項組功能（16 組）— ✅ 2026-08-15（option_definitions.py 定義 16 組含 label/icon/default/choices、杯量 3 元素 oz meta；CoffeeItem +16 option_* 啟用開關（杯/濃預設開）+ 16 option_order_* 排序數字；CartItem.options_json；Admin 合併 UI（勾選+排序數字一行 widget）；詳情頁統一選項迴圈 + 單選/清除/復購預選/杯量 oz；資料流 extra_options → 各顯示端；Migrations 0058-0063（手動除 pickup_time）；6 驗證腳本全 PASS）
+├── [x] 杯量/濃度合併至自訂選項組 — ✅ 2026-08-15（cup_level/strength_level 組 default=True 全咖啡顯示；legacy milk/cup/strength_level 欄位保留供舊訂單；顯示統一 少/正常/追加）
+├── [x] Admin 選項組排序（數字配置）— ✅ 2026-08-15（原 JSON 陣列 → 16 個 option_order_* 數字欄位，數字小在前 0=預設；view 依排序渲染）
+├── [x] Admin 自訂選項組 + 排序 UI 合併 — ✅ 2026-08-15（OptionGroupConfigWidget/Form 每組「勾選+排序數字」；option-group-config-grid；去白底、深灰邊框）
+├── [x] order_confirm/checkout 選項重複顯示 + 排序修復 — ✅ 2026-08-15（legacy fallback「中/預設/正常」硬編碼移除；有選項只顯示新選項；_add_chinese_options 有選項 pop legacy + 依咖啡排序；sort_option_keys_for_coffee 統一 add_to_cart/cart_count/訂單顯示；修正 jsonb 重排）
 ├── [x] coffee 詳情頁 oz 標籤/文字加大 — ✅ 2026-08-14（桌面 0.72→0.85rem（13.6px）+ padding 6px12px、行動 8→11px + padding 5px10px；文字維持不變僅標籤再加大；bc-components.css?v=20260814y）
 ├── [x] 全模板 HTML 結構/語法檢查 + 修正 + 冗餘清除 — ✅ 2026-08-14（59→44 模板；修正 8 項結構錯誤（缺 </span>/重複 rel/多餘 </b>/SVG clipPath/缺 </div>）；補建 socialuser reactivate/activity_history/points_summary（原 500）；git rm 15 個孤兒模板；移除重複 noise-filiter、debug 欄位去重、菜單卡片無用 form、nav hidden 死碼 -53 行；get_template 47/47 + manage.py check 0 issues）
 ├── [x] order_confirm 表單交叉巢狀修正 + 佈局回歸修正 — ✅ 2026-08-14（form 還原 col-xl-7 內 + sidebar #payment-button 改 form="payment-form" 屬性關聯；CDP 驗證 col 58/42、btn.form 關聯、圖示順序正確）

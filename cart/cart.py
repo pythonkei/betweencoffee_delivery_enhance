@@ -89,6 +89,7 @@ class Cart:
                 item.strength_level,
                 item.grinding_level,
                 item.weight,
+                item.options_json,
             )
 
             # 計算價格 - 使用修正的 _calculate_price 方法
@@ -105,6 +106,7 @@ class Cart:
                 "strength_level": item.strength_level,
                 "grinding_level": item.grinding_level,
                 "weight": item.weight or "200g",
+                "extra_options": item.options_json or {},
             }
 
     def _generate_item_key(
@@ -116,6 +118,7 @@ class Cart:
         strength_level=None,
         grinding_level=None,
         weight=None,
+        extra_options=None,
     ):
         """生成唯一的購物車項目鍵"""
         key_parts = [product_type, str(product_id)]
@@ -127,6 +130,12 @@ class Cart:
                 key_parts.append(f"milk_{milk_level}")
             if strength_level:
                 key_parts.append(f"strength_{strength_level}")
+            # 自訂選項（2026-08-15）：key 排序確保相同選項組合成同一項目
+            if extra_options:
+                for k in sorted(extra_options.keys()):
+                    v = extra_options.get(k)
+                    if v:
+                        key_parts.append(f"{k}_{v}")
         elif product_type == "bean":
             if grinding_level:
                 key_parts.append(f"grinding_{grinding_level}")
@@ -169,6 +178,7 @@ class Cart:
             options.get("strength_level"),
             options.get("grinding_level"),
             options.get("weight", "200g"),
+            options.get("extra_options"),
         )
 
         # 計算價格 - 使用修正的方法
@@ -190,6 +200,7 @@ class Cart:
                 "strength_level": options.get("strength_level"),
                 "grinding_level": options.get("grinding_level"),
                 "weight": options.get("weight", "200g"),
+                "extra_options": options.get("extra_options") or {},
             }
 
         self.save()
@@ -234,6 +245,7 @@ class Cart:
                 item.strength_level,
                 item.grinding_level,
                 item.weight,
+                item.options_json,
             )
             existing_keys[key] = item
 
@@ -252,6 +264,7 @@ class Cart:
             strength_level = item_data.get("strength_level")
             grinding_level = item_data.get("grinding_level")
             weight = item_data.get("weight", "200g")
+            extra_options = item_data.get("extra_options") or {}
 
             # 檢查是否已存在
             if key in existing_keys:
@@ -272,6 +285,7 @@ class Cart:
                     strength_level=strength_level,
                     grinding_level=grinding_level,
                     weight=weight,
+                    options_json=extra_options,
                 )
 
         # 刪除不再存在的項目
@@ -355,6 +369,7 @@ class Cart:
                     "strength_level": item_data.get("strength_level"),
                     "grinding_level": item_data.get("grinding_level"),
                     "weight": item_data.get("weight"),
+                    "extra_options": item_data.get("extra_options") or {},
                     "total_price": item_total_str,  # 總價（不帶$符號）
                 }
             except Exception as e:

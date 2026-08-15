@@ -396,6 +396,17 @@ class OrderModel(models.Model):
                     options.append(f'<span class="option-item"><span class="icon material-symbols-outlined">bolt</span> 濃度: {display_item["strength_level_cn"]}</span>')
                 if display_item.get("milk_level_cn"):
                     options.append(f'<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: {display_item["milk_level_cn"]}</span>')
+                # 自訂選項組（2026-08-15）
+                from eshop.models.option_definitions import OPTION_GROUPS
+
+                icon_map = {g["key"]: g["icon"] for g in OPTION_GROUPS}
+                label_map = {g["key"]: g["label"] for g in OPTION_GROUPS}
+                for opt_key, opt_val in (
+                    display_item.get("extra_options_cn") or {}
+                ).items():
+                    options.append(
+                        f'<span class="option-item"><span class="icon material-symbols-outlined">{icon_map.get(opt_key, "add_circle")}</span> {label_map.get(opt_key, opt_key)}: {opt_val}</span>'
+                    )
                 display_item["options_display"] = '<div class="bc-options-row">' + "".join(options) + "</div>" if options else ""
 
             elif item_type == "bean":
@@ -614,18 +625,55 @@ class OrderModel(models.Model):
             item_type = item.get("type", "unknown")
 
             if item_type == "coffee":
-                if "cup_level" in item:
-                    item["cup_level_cn"] = self.translate_option(
-                        "cup_level", item["cup_level"]
+                has_extra = item.get("extra_options")
+                if has_extra:
+                    # 自訂選項組（2026-08-15）：移除 legacy 欄位避免與新選項重複顯示
+                    # （舊訂單無 extra_options 才保留 legacy 顯示）
+                    for legacy in ("cup_level", "milk_level", "strength_level"):
+                        item.pop(legacy, None)
+
+                    # 依咖啡的選項組排序重排（DB jsonb 會重排 dict 順序 → 統一在此排序）
+                    from eshop.models.option_definitions import (
+                        OPTION_GROUPS,
+                        get_option_label,
+                        sort_option_keys_for_coffee,
                     )
-                if "milk_level" in item:
-                    item["milk_level_cn"] = self.translate_option(
-                        "milk_level", item["milk_level"]
+                    from .shop_items import CoffeeItem
+
+                    coffee = None
+                    try:
+                        coffee = CoffeeItem.objects.get(id=item.get("id"))
+                    except (CoffeeItem.DoesNotExist, TypeError, ValueError):
+                        coffee = None
+                    ordered_keys = sort_option_keys_for_coffee(
+                        coffee, list(has_extra.keys())
                     )
-                if "strength_level" in item:
-                    item["strength_level_cn"] = self.translate_option(
-                        "strength_level", item["strength_level"]
-                    )
+
+                    item["extra_options_cn"] = {
+                        k: self.translate_option(k, has_extra[k])
+                        for k in ordered_keys
+                    }
+                    # 顯示用：組名與圖示（供客戶端/員工端渲染器使用）
+                    item["extra_options_labels"] = {
+                        k: get_option_label(k) for k in ordered_keys
+                    }
+                    item["extra_options_icons"] = {
+                        g["key"]: g["icon"] for g in OPTION_GROUPS
+                    }
+                else:
+                    # legacy 舊訂單（無自訂選項組）
+                    if "cup_level" in item:
+                        item["cup_level_cn"] = self.translate_option(
+                            "cup_level", item["cup_level"]
+                        )
+                    if "milk_level" in item:
+                        item["milk_level_cn"] = self.translate_option(
+                            "milk_level", item["milk_level"]
+                        )
+                    if "strength_level" in item:
+                        item["strength_level_cn"] = self.translate_option(
+                            "strength_level", item["strength_level"]
+                        )
                 if "weight" in item:
                     logger.debug(
                         f"咖啡商品 {item.get('name', '未知')} 包含重量選項: {item['weight']}"
@@ -674,6 +722,14 @@ class OrderModel(models.Model):
                 "Extra": "特濃",
             },
         }
+        # 自訂選項組（2026-08-15）：從 option_definitions 合併映射
+        from eshop.models.option_definitions import OPTION_GROUPS
+
+        for group in OPTION_GROUPS:
+            # choices 可能含第 3 元素（如杯量 oz meta）→ 只取 (value, label)
+            mappings[group["key"]] = {
+                choice[0]: choice[1] for choice in group["choices"]
+            }
         return mappings.get(option_type, {}).get(value, value)
 
     @staticmethod

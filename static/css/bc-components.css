@@ -1532,7 +1532,7 @@ body {
   flex: 1;
   padding: 14px 10px;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--bc-gold);
   background: transparent;
@@ -1589,17 +1589,18 @@ body {
   background: #fff;
 }
 
-/* 杯量按鈕 - 右上角 oz 標籤（2026-08-14：文字 0.85rem 維持；標籤再次加大 padding 4px8px→6px12px） */
+/* 杯量按鈕 - 右上角 oz 標籤（2026-08-15：整體縮小 0.85rem→0.72rem、padding 6px12px→3px7px、font-weight 500→400） */
 .bc-option-oz {
   position: absolute;
   top: 0;
   right: 0;
-  font-size: 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 400;
   color: #fff;
   line-height: 1;
   transition: all var(--bc-transition);
   background: var(--bc-gold);
-  padding: 6px 12px;
+  padding: 3px 7px;
   margin: 0;
   border-radius: 0 4px 0 5px;
   letter-spacing: 0.5px;
@@ -1614,7 +1615,7 @@ body {
 
 /* 杯量按鈕 - 標籤文字 */
 .bc-option-label-text {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   line-height: 1;
 }
 
@@ -2466,7 +2467,7 @@ body {
 
   /* 選項按鈕（需 .product-details 前綴勝過 .product-details button 54px !important） */
   .product-details .bc-option-btn,
-  .product-details #cup-level-group .bc-option-btn {
+  .product-details #option-group-cup_level .bc-option-btn {
     height: 36px !important;
     min-height: 36px !important;
     padding: 3px 6px;
@@ -2490,21 +2491,23 @@ body {
     font-size: 10px;
   }
 
-  /* 全部按鈕文字縮小（2026-08-11：11px → 10px 再縮小） */
+  /* 選項按鈕文字加大（2026-08-15：10px→12px）；數量/輸入框維持 10px */
   .product-details .bc-option-btn,
-  .product-details #cup-level-group .bc-option-btn,
+  .product-details #option-group-cup_level .bc-option-btn {
+    font-size: 12px;
+  }
   .product-details .quantity-left-minus,
   .product-details .quantity-right-plus,
   .product-details .input-number {
     font-size: 10px;
   }
   /* .r-btn 需 .product-details 前綴勝過 responsive .btn；oz 需 (1,2,0)!important 勝過
-     coffee.html inline <style> 的 #cup-level-group .bc-option-oz (1,1,0)!important
-     （2026-08-14：oz 文字 11px 維持；標籤再次加大 padding 3px6px→5px10px） */
+     coffee.html inline <style> 的 #option-group-cup_level .bc-option-oz (1,1,0)!important
+     （2026-08-15：oz 文字 11px→9px、padding 3px6px 縮小） */
   .product-details .r-btn { font-size: 10px; }
-  .product-details #cup-level-group .bc-option-oz {
-    font-size: 11px !important;
-    padding: 5px 10px !important;
+  .product-details #option-group-cup_level .bc-option-oz {
+    font-size: 9px !important;
+    padding: 3px 6px !important;
   }
 
   /* 按鈕內部圖示縮小（2026-08-11：杯量 icon 13px→11px、+/- 9px→8px、
@@ -2512,7 +2515,7 @@ body {
   .product-details .bc-option-icon { font-size: 11px; }
   .product-details .quantity-left-minus i,
   .product-details .quantity-right-plus i { font-size: 8px; }
-  .product-details .bc-option-label-text { font-size: 10px; }
+  .product-details .bc-option-label-text { font-size: 12px; }
 
   /* 標籤文字與按鈕文字水平中心對齊（2026-08-11）
      label 被 style-bootstrap 設 align-self:flex-end（貼行底）→ 覆蓋為 center，
@@ -2527,16 +2530,16 @@ body {
   }
   /* 杯量按鈕含 icon+label（內容較高），固定 padding 讓內容偏上 → padding-top/bottom 0
       + inline-flex align-center 讓內容 cy = 按鈕中心（對齊 label）；
-      2026-08-11：杯量按鈕增加高度 36→44px（oz+icon+label 三層內容需要空間） */
-  .product-details #cup-level-group .bc-option-btn {
-    height: 44px !important;
-    min-height: 44px !important;
+      2026-08-15：杯量按鈕高度 44→48px（oz 縮小後整體增高） */
+  .product-details #option-group-cup_level .bc-option-btn {
+    height: 48px !important;
+    min-height: 48px !important;
     padding-top: 0;
     padding-bottom: 0;
   }
   /* 杯量按鈕內 label-text：移除 translateY（原 11px 過度把文字推下），
      自然居中 cy=596 = icon/label 水平線 */
-  .product-details #cup-level-group .bc-option-btn .bc-option-label-text {
+  .product-details #option-group-cup_level .bc-option-btn .bc-option-label-text {
     align-self: center;
   }
 

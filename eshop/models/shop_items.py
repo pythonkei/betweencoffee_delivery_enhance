@@ -66,6 +66,43 @@ class CoffeeItem(models.Model):
     sort_order = models.PositiveIntegerField(
         default=0, verbose_name="菜單排序", help_text="數字越小顯示越靠前"
     )
+    # ===== 自訂選項組開關（2026-08-15）：每種咖啡勾選要顯示的選項組，
+    #       選項值定義見 eshop/models/option_definitions.py =====
+    # 杯量 / 濃度：所有咖啡的基本選項 → default=True（Admin 可個別關閉，如 A 有 B 沒有）
+    option_cup_level = models.BooleanField(default=True, verbose_name="杯量")
+    option_strength_level = models.BooleanField(default=True, verbose_name="濃度")
+    # 奶量（少/正常/追加）：非所有咖啡皆有 → 每種咖啡指定是否顯示（2026-08-15）
+    option_milk_level = models.BooleanField(default=False, verbose_name="奶量（少/正常/追加）")
+    option_milk = models.BooleanField(default=False, verbose_name="奶類")
+    option_caramel = models.BooleanField(default=False, verbose_name="焦糖")
+    option_butter = models.BooleanField(default=False, verbose_name="黃油")
+    option_coconut = models.BooleanField(default=False, verbose_name="椰奶")
+    option_vanilla = models.BooleanField(default=False, verbose_name="香草")
+    option_special = models.BooleanField(default=False, verbose_name="特調")
+    option_oolong = models.BooleanField(default=False, verbose_name="烏龍茶")
+    option_jasmine = models.BooleanField(default=False, verbose_name="茉莉花茶")
+    option_matcha = models.BooleanField(default=False, verbose_name="抹茶")
+    option_green = models.BooleanField(default=False, verbose_name="綠茶")
+    option_hojicha = models.BooleanField(default=False, verbose_name="焙茶")
+    option_topping = models.BooleanField(default=False, verbose_name="面層配料")
+    option_bean_blend = models.BooleanField(default=False, verbose_name="配豆")
+    # 自訂選項組排序（2026-08-15）：每組一個數字欄位，數字越小越靠前，0=預設（依選項定義順序）
+    option_order_cup_level = models.PositiveIntegerField(default=0, blank=True, verbose_name="杯量順序", help_text="數字越小越靠前，0=預設")
+    option_order_strength_level = models.PositiveIntegerField(default=0, blank=True, verbose_name="濃度順序", help_text="數字越小越靠前，0=預設")
+    option_order_milk_level = models.PositiveIntegerField(default=0, blank=True, verbose_name="奶量順序", help_text="數字越小越靠前，0=預設")
+    option_order_milk = models.PositiveIntegerField(default=0, blank=True, verbose_name="奶類順序", help_text="數字越小越靠前，0=預設")
+    option_order_caramel = models.PositiveIntegerField(default=0, blank=True, verbose_name="焦糖順序", help_text="數字越小越靠前，0=預設")
+    option_order_butter = models.PositiveIntegerField(default=0, blank=True, verbose_name="黃油順序", help_text="數字越小越靠前，0=預設")
+    option_order_coconut = models.PositiveIntegerField(default=0, blank=True, verbose_name="椰奶順序", help_text="數字越小越靠前，0=預設")
+    option_order_vanilla = models.PositiveIntegerField(default=0, blank=True, verbose_name="香草順序", help_text="數字越小越靠前，0=預設")
+    option_order_special = models.PositiveIntegerField(default=0, blank=True, verbose_name="特調順序", help_text="數字越小越靠前，0=預設")
+    option_order_oolong = models.PositiveIntegerField(default=0, blank=True, verbose_name="烏龍順序", help_text="數字越小越靠前，0=預設")
+    option_order_jasmine = models.PositiveIntegerField(default=0, blank=True, verbose_name="茉莉順序", help_text="數字越小越靠前，0=預設")
+    option_order_matcha = models.PositiveIntegerField(default=0, blank=True, verbose_name="抹茶順序", help_text="數字越小越靠前，0=預設")
+    option_order_green = models.PositiveIntegerField(default=0, blank=True, verbose_name="綠茶順序", help_text="數字越小越靠前，0=預設")
+    option_order_hojicha = models.PositiveIntegerField(default=0, blank=True, verbose_name="焙茶順序", help_text="數字越小越靠前，0=預設")
+    option_order_topping = models.PositiveIntegerField(default=0, blank=True, verbose_name="配料順序", help_text="數字越小越靠前，0=預設")
+    option_order_bean_blend = models.PositiveIntegerField(default=0, blank=True, verbose_name="配豆順序", help_text="數字越小越靠前，0=預設")
 
     def __str__(self):
         return self.name

@@ -465,7 +465,8 @@ class BaseOrderRendererV2 {
             item.milk_level_cn ? `<span class="option-item"><span class="icon material-symbols-outlined">humidity_mid</span> 奶量: <span class="ov">${item.milk_level_cn}</span></span>` : '',
             item.grinding_level_cn ? `<span class="option-item">研磨: <span class="ov">${item.grinding_level_cn}</span></span>` : '',
             item.weight_cn ? `<span class="option-item">重量: <span class="ov">${item.weight_cn}</span></span>` : '',
-            item.weight ? `<span class="option-item">重量: <span class="ov">${item.weight}</span></span>` : ''
+            item.weight ? `<span class="option-item">重量: <span class="ov">${item.weight}</span></span>` : '',
+            ...Object.entries(item.extra_options_cn || {}).map(([k, v]) => `<span class="option-item"><span class="icon material-symbols-outlined">${(item.extra_options_icons || {})[k] || 'add_circle'}</span> ${(item.extra_options_labels || {})[k] || k}: <span class="ov">${v}</span></span>`)
         ].filter(Boolean);
 
         return `<div class="bc-options-row">${options.join('')}</div>`;

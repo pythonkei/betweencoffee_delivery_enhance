@@ -1,0 +1,42 @@
+/* Django Admin：自訂選項組「勾選啟用 + 排序數字」合併 UI（2026-08-15）
+   16 組選項每行顯示「☐ 名稱 [排序數字]」，以網格排列，方便管理員快速設定 */
+.option-group-config-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0;
+}
+.og-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 23%;
+    min-width: 190px;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    border: 1px solid #555;  /* 深灰色邊框 */
+    border-radius: 4px;
+    /* 去除白色背景：不設 background，跟隨 Admin 主題底色 */
+}
+.og-check {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-bottom: 0;
+}
+.og-check input[type="checkbox"] {
+    margin: 0;
+}
+.og-order-input {
+    width: 62px;
+    padding: 3px 6px;
+    font-size: 12px;
+}
+@media (max-width: 1300px) {
+    .og-row {
+        width: 31%;
+    }
+}

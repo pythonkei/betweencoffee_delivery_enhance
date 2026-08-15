@@ -59,10 +59,26 @@ def add_to_cart(request, product_id, product_type):
         if product_type == "coffee":
             product = get_object_or_404(CoffeeItem, id=product_id)
             options = {
-                "cup_level": request.POST.get("cup_level", "Medium"),
-                "milk_level": request.POST.get("milk_level", "Medium"),
-                "strength_level": request.POST.get("strength_level", "Normal"),
+                # 杯量/濃度/奶量已移入自訂選項組（option_cup_level/option_strength_level/option_milk_level）
             }
+            # 自訂選項組（2026-08-15）：依該咖啡的選項組排序收集（順序影響各顯示端）
+            from eshop.models.option_definitions import (
+                OPTION_GROUPS,
+                sort_option_keys_for_coffee,
+            )
+
+            group_keys = [
+                g["key"]
+                for g in OPTION_GROUPS
+                if getattr(product, f"option_{g['key']}", False)
+            ]
+            extra_options = {}
+            for key in sort_option_keys_for_coffee(product, group_keys):
+                val = (request.POST.get(f"option_{key}", "") or "").strip()
+                if val:
+                    extra_options[key] = val
+            if extra_options:
+                options["extra_options"] = extra_options
         elif product_type == "bean":
             product = get_object_or_404(BeanItem, id=product_id)
             options = {
@@ -326,6 +342,21 @@ def cart_count(request):
         cart = Cart(request)
         items = []
         for item in cart:
+            extra_opts = item.get("extra_options") or {}
+            # 自訂選項中文（2026-08-15）：供滑出購物車顯示，依咖啡排序
+            from eshop.models import CoffeeItem, OrderModel
+            from eshop.models.option_definitions import sort_option_keys_for_coffee
+
+            coffee = None
+            if item.get("type") == "coffee" and item.get("item_id"):
+                try:
+                    coffee = CoffeeItem.objects.get(
+                        id=int(str(item["item_id"]).split("_")[1])
+                    )
+                except (CoffeeItem.DoesNotExist, ValueError, IndexError):
+                    coffee = None
+            ordered_keys = sort_option_keys_for_coffee(coffee, list(extra_opts.keys()))
+
             items.append(
                 {
                     "item_id": item["item_id"],
@@ -340,6 +371,11 @@ def cart_count(request):
                     "strength_level": item.get("strength_level"),
                     "grinding_level": item.get("grinding_level"),
                     "weight": item.get("weight"),
+                    "extra_options": extra_opts,
+                    "extra_options_cn": {
+                        k: OrderModel.translate_option(k, extra_opts[k])
+                        for k in ordered_keys
+                    },
                 }
             )
         return JsonResponse(

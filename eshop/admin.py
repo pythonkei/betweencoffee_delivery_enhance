@@ -1,6 +1,7 @@
 # eshop/admin.py - 修正版
 import logging
 
+from django import forms
 from django.contrib import admin, messages
 from django.shortcuts import redirect, render
 from django.urls import path
@@ -8,6 +9,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from eshop.order_status_manager import OrderStatusManager
+from eshop.models.option_definitions import OPTION_GROUPS
 
 from .models import (
     Barista,
@@ -19,6 +21,81 @@ from .models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class OptionGroupConfigWidget(forms.Widget):
+    """自訂選項組 UI：每組一行「勾選啟用 + 排序數字」（2026-08-15）"""
+
+    class Media:
+        css = {"all": ("css/admin-option-order.css",)}
+
+    def render(self, name, value, attrs=None, renderer=None):
+        rows = []
+        for g in OPTION_GROUPS:
+            key = g["key"]
+            v = (value or {}).get(key) or {}
+            enabled = bool(v.get("enabled"))
+            order = int(v.get("order") or 0)
+            cid = f"{name}_{key}"
+            rows.append(
+                '<div class="og-row">'
+                f'<label class="og-check" for="{cid}">'
+                f'<input type="checkbox" id="{cid}" name="{name}_{key}"'
+                + (" checked" if enabled else "")
+                + f"> <span>{g['label']}</span></label>"
+                f'<input type="number" name="{name}_{key}_order" value="{order}" '
+                f'min="0" max="999" class="og-order-input" '
+                'title="排序：數字越小越靠前，0=預設" aria-label="排序">'
+                "</div>"
+            )
+        return '<div class="option-group-config-grid">' + "".join(rows) + "</div>"
+
+    def value_from_datadict(self, data, files, name):
+        result = {}
+        for g in OPTION_GROUPS:
+            key = g["key"]
+            enabled = bool(data.get(f"{name}_{key}"))
+            try:
+                order = int(data.get(f"{name}_{key}_order") or 0)
+            except (TypeError, ValueError):
+                order = 0
+            result[key] = {"enabled": enabled, "order": order}
+        return result
+
+
+class OptionGroupsConfigForm(forms.ModelForm):
+    """CoffeeItem 表單：把 16 組「啟用 checkbox + 排序數字」合併為單一欄位"""
+
+    option_groups_config = forms.Field(
+        widget=OptionGroupConfigWidget(),
+        required=False,
+        label="選項組",
+        help_text="勾選 = 詳情頁顯示該選項組；右側數字 = 排序（數字越小越靠前，0=預設順序）",
+    )
+
+    class Meta:
+        model = CoffeeItem
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["option_groups_config"].initial = {
+                g["key"]: {
+                    "enabled": bool(getattr(self.instance, f"option_{g['key']}", False)),
+                    "order": int(getattr(self.instance, f"option_order_{g['key']}", 0) or 0),
+                }
+                for g in OPTION_GROUPS
+            }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        for key, conf in (self.cleaned_data.get("option_groups_config") or {}).items():
+            setattr(instance, f"option_{key}", bool(conf.get("enabled")))
+            setattr(instance, f"option_order_{key}", int(conf.get("order") or 0))
+        if commit:
+            instance.save()
+        return instance
 
 
 # 員工訂單管理視圖
@@ -364,6 +441,7 @@ class OrderModelAdmin(admin.ModelAdmin):
 
 # CoffeeItem Admin
 class CoffeeItemAdmin(admin.ModelAdmin):
+    form = OptionGroupsConfigForm
     list_display = (
         "name",
         "highlight",
@@ -405,7 +483,13 @@ class CoffeeItemAdmin(admin.ModelAdmin):
                 "description": "详情页图片用于咖啡菜单和详情页，首页图片专门用于首页展示",
             },
         ),
-        ("选项设置", {"fields": ("cup_level", "milk_level")}),
+        (
+            "自訂選項組（勾選啟用 + 排序數字，0=預設順序）",
+            {
+                "fields": ("option_groups_config",),
+                "description": "勾選 = 詳情頁顯示該選項組；右側數字 = 顯示排序（數字越小越靠前，0=預設）。例：配豆勾選並填 1 → 顯示在最上方。每組單選，不選=原味；選項值見 option_definitions.py。",
+            },
+        ),
         ("状态管理", {"fields": ("is_published", "is_shop_hot_item", "list_date")}),
     )
 

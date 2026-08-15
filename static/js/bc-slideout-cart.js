@@ -425,6 +425,13 @@ class SlideoutCart {
         const label = map[item.milk_level] || item.milk_level;
         parts.push(`<i class="icon material-symbols-outlined">humidity_mid</i> 奶量: ${label}`);
       }
+      // 自訂選項組（2026-08-15）：API 已翻譯為中文（extra_options_cn）
+      if (item.extra_options_cn) {
+        const labelMap = { cup_level:'杯量', strength_level:'濃度', milk_level:'奶量', milk:'奶類', caramel:'焦糖', butter:'黃油', coconut:'椰奶', vanilla:'香草', special:'特調', oolong:'烏龍茶', jasmine:'茉莉花茶', matcha:'抹茶', green:'綠茶', hojicha:'焙茶', topping:'面層配料', bean_blend:'配豆' };
+        Object.entries(item.extra_options_cn).forEach(([k, v]) => {
+          parts.push(`${labelMap[k] || k}: ${v}`);
+        });
+      }
     } else if (item.type === 'bean') {
       if (item.grinding_level) {
         const map = { Non: '免研磨', Light: '細', Medium: '中', Deep: '粗' };
