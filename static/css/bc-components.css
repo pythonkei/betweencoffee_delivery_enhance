@@ -61,6 +61,12 @@ body {
 .ftco_navbar .navbar-brand {
   padding-top: 0.5625rem;    /* 0.3125rem + 0.25rem（下移補償） */
   padding-bottom: 0.0625rem; /* 0.3125rem - 0.25rem */
+  /* 2026-08-16：brand 移到瀏覽器（視窗）最左側 */
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
 }
 
 /* ===== 隱藏 home-slider 橫幅內按鈕（2026-08-09）
