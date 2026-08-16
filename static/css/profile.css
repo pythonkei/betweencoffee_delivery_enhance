@@ -352,6 +352,26 @@
     color: #fff;
 }
 
+.profile-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    color: #c49b63;
+    background: transparent;
+    border: 1px solid #c49b63;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.profile-logout-btn:hover {
+    background: #c49b63;
+    color: #fff;
+}
+
 /* --- AJAX Toast 提示 --- */
 .profile-toast {
     position: fixed;

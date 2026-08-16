@@ -1,5 +1,6 @@
 # socialuser/urls.py
 from django.urls import path
+from django.contrib.auth.views import LogoutView
 
 # 導入強化會員系統視圖
 from . import views_enhanced
@@ -26,6 +27,7 @@ app_name = "socialuser"
 
 urlpatterns = [
     path("", profile_view, name="profile"),
+    path("logout/", LogoutView.as_view(next_page="index"), name="logout"),
     path("debug/", social_login_debug, name="social-login-debug"),
     path("onboarding/", profile_edit_view, name="profile-onboarding"),
     path("emailchange/", profile_emailchange, name="profile-emailchange"),

@@ -239,6 +239,12 @@
                         
                         <!-- ===== 底部操作區 ===== -->
                         <div class="profile-actions mt-5">
+                            <form method="POST" action="{% url 'socialuser:logout' %}" style="display:inline;" onsubmit="return confirm('確定要登出嗎？');">
+                                {% csrf_token %}
+                                <button type="submit" class="profile-logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i> 登出
+                                </button>
+                            </form>
                             <a href="{% url 'socialuser:profile-delete' %}" class="profile-delete-btn">
                                 <i class="fas fa-trash-alt"></i> 刪除帳戶
                             </a>
