@@ -84,7 +84,6 @@ load_context() {
         echo "│"
         echo "│   2026-08-16 ✅"
         echo "│   ├── profile 頁新增登出按鈕：socialuser/urls.py LogoutView（next_page=index）+ profile.html 底部操作區登出 form（確認框、.profile-logout-btn 金系樣式與紅色刪除區分）；驗證 POST logout→302 /、登出後訪 profile 需登入"
-        echo "│   └── 首頁 BETWEEN SERIES 橫向滑動系列（參考 designing.jp/series）：普通區塊放 home-slider 後；大標題 Between/Series Playfair 6rem 兩行 + 6 系列卡片（咖啡豆/手沖/冷萃/季節限定/特調/烘焙）；bc-series.css（桌面箭頭/pager、行動 scroll-snap）；bc-series.js（--bc-series-x 位移、resize 重算）；CDP 桌面 translateX(-326px)/行動 scroll-snap 無溢出"
         echo "│   └── 首頁 bc-search lead SVG 文字圖 → CSS 小文本：移除 bc_search_txt_pc/sp.svg（git rm）；index.html .bc-search-lead 品牌故事文本 + BETWEEN 金色 span；bc-search.css 文字樣式（Noto Sans TC 0.8rem、響應式 ≤768 0.9rem）；css ?v=20260816a；CDP 無破圖/無溢出"
         echo "│"
         echo "│   2026-08-15 ✅"
