@@ -29,20 +29,31 @@ body {
   overflow-x: hidden;
 }
 
-/* ===== 導覽列 logo（navbar-brand）響應式縮小（2026-08-09）
-   桌面 40px（style-bootstrap）在手機過大，依斷點漸進縮小 */
+/* ===== 導覽列 logo（navbar-brand）響應式縮小（2026-08-16 修）
+   桌面 30px，平板/手機漸進縮小；用 min-width 限定桌面避免與斷點規則順序衝突 */
+@media screen and (min-width: 992px) {
+  .ftco_navbar .navbar-brand { font-size: 36px; }
+}
+@media screen and (max-width: 991.98px) {
+  .ftco_navbar .navbar-brand { font-size: 30px; }
+}
 @media screen and (max-width: 767.98px) {
-  .navbar-brand { font-size: 30px; }
+  .ftco_navbar .navbar-brand { font-size: 24px; }
 }
 @media screen and (max-width: 575.98px) {
-  .navbar-brand {font-size: 25px;}
+  .ftco_navbar .navbar-brand { font-size: 20px; }
 }
 
 /* ===== navbar logo 與菜單垂直居中強化（2026-08-09）
    確保所有斷點（含行動/平板）navbar-brand、toggler、菜單項嚴格垂直居中，
    且 nav-link 內 icon 與文字垂直對齊 */
+/* 2026-08-16：container 改全寬 → brand 貼瀏覽器最左，menu 靠右 */
 .ftco_navbar .container {
   align-items: center;
+  max-width: 100%;
+  width: 100%;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 .ftco_navbar .navbar-brand,
 .ftco_navbar .navbar-toggler,
@@ -56,25 +67,36 @@ body {
   justify-content: center;
   gap: 6px;
 }
-/* 2026-08-09：logo 略高修正 — Mogra glyph ascent 較大，line-height:1 下視覺偏上 ~4px
-   增加 padding-top / 減少 padding-bottom（總和維持 box 高），讓文字下移垂直居中 */
+/* 2026-08-16：brand 回 container 內 flex（靠左 + 垂直居中），縮小尺寸 */
 .ftco_navbar .navbar-brand {
-  padding-top: 0.5625rem;    /* 0.3125rem + 0.25rem（下移補償） */
-  padding-bottom: 0.0625rem; /* 0.3125rem - 0.25rem */
-  /* 2026-08-16：brand 移到瀏覽器（視窗）最左側，垂直居中於 navbar（各端統一） */
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: static;
   margin: 0;
+  padding: 0;
+  line-height: 1;
+  text-align: left;
 }
-/* 2026-08-16：brand 改 absolute 後脫離 flex 流，toggler 會往左疊在 brand 上 → 靠右 */
+/* 2026-08-16：桌面 brand 下移 + 右移（放在 margin:0 之後，避免被覆蓋） */
+@media screen and (min-width: 992px) {
+  .ftco_navbar .navbar-brand { margin-top: 12px; margin-left: 22px; }
+}
+/* 2026-08-16：toggler 靠右 */
 .ftco_navbar .navbar-toggler {
   margin-left: auto;
 }
-/* 2026-08-16：navbar 整體下移（離頂部遠一點），brand 垂直居中於 navbar，各端位置統一 */
+/* 2026-08-16：navbar 統一離頂（brand 與 menu 一起下移，各端響應式）；左右 padding 歸零避免 brand 離左太遠 */
 #ftco-navbar {
-  padding-top: 24px;
+  padding-top: 30px;
+  padding-left: 0;
+  padding-right: 0;
+}
+@media screen and (max-width: 991.98px) {
+  #ftco-navbar { padding-top: 24px; }
+}
+@media screen and (max-width: 767.98px) {
+  #ftco-navbar { padding-top: 18px; }
+}
+@media screen and (max-width: 575.98px) {
+  #ftco-navbar { padding-top: 14px; }
 }
 
 /* ===== 隱藏 home-slider 橫幅內按鈕（2026-08-09）
@@ -2597,10 +2619,6 @@ body {
   }
   .ftco_navbar .navbar-toggler {
     margin-left: auto !important;
-  }
-  /* 2026-08-16：brand 改 absolute 後，行動端 padding 改由 navbar padding-top 統一控制 */
-  #ftco-navbar {
-    padding-top: 12px;
   }
 }
 

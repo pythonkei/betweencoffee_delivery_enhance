@@ -84,6 +84,7 @@ load_context() {
         echo "│"
         echo "│   2026-08-16 ✅"
         echo "│   ├── profile 頁新增登出按鈕：socialuser/urls.py LogoutView（next_page=index）+ profile.html 底部操作區登出 form（確認框、.profile-logout-btn 金系樣式與紅色刪除區分）；驗證 POST logout→302 /、登出後訪 profile 需登入"
+        echo "│   └── navbar-brand「｛ Between ｝」移至最左 + 響應式縮小 + CSS 覆蓋修復：container 全寬貼左；navbar padding-top 離頂 30/24/18/14；字體 36/30/24/20（min-width:992 限定桌面避免順序衝突）；桌面 margin 12/22px 放 margin:0 後；toggler 靠右修疊加"
         echo "│   └── 首頁 bc-search lead SVG 文字圖 → CSS 小文本：移除 bc_search_txt_pc/sp.svg（git rm）；index.html .bc-search-lead 品牌故事文本 + BETWEEN 金色 span；bc-search.css 文字樣式（Noto Sans TC 0.8rem、響應式 ≤768 0.9rem）；css ?v=20260816a；CDP 無破圖/無溢出"
         echo "│"
         echo "│   2026-08-15 ✅"
