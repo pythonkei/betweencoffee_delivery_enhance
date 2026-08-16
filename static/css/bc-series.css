@@ -1,0 +1,121 @@
+/* ============================================================
+   Between Coffee：SERIES 滑桿（2026-08-16）
+   完全一致複製 https://designing.jp/series/ container_3HNAz：
+   - 左側大標題 + 滾動時 backdrop blur（data-blurred 切換）
+   - 底部照片滑桿水平滾動
+   - 無背景、照片無邊框（柔陰影）
+   ============================================================ */
+.bc-series-hero {
+  position: relative;
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+  background: transparent; /* 無背景 */
+}
+
+/* ===== 左側大標題 ===== */
+.bc-series-heading {
+  position: relative;
+  flex-shrink: 0;
+  padding: 12vh 40px 0;
+  font-family: 'Playfair', 'Noto Serif TC', serif;
+  font-size: 140px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+/* 模糊覆蓋層（滾動時 data-blurred=true 啟用 backdrop blur） */
+.bc-series-heading::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transform: translateZ(0);
+  opacity: 0;
+  transition: opacity 0.6s linear;
+  pointer-events: none;
+}
+.bc-series-heading[data-blurred="true"]::before { opacity: 1; }
+
+/* ===== 底部照片滑桿（水平滾動）===== */
+.bc-series-scrolling {
+  width: 100%;
+  margin-top: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: center;
+  padding: 40px 0 6vh;
+  padding-left: 15.46vw;
+  scrollbar-width: none;
+}
+.bc-series-scrolling::-webkit-scrollbar { display: none; }
+.bc-series-list {
+  display: flex;
+  align-items: center;
+  padding-right: 15.46vw;
+}
+
+/* ===== 照片 slide（無邊框、無背景、柔陰影）===== */
+.bc-series-slide {
+  flex: 0 0 auto;
+  width: 350px;
+  padding-right: 70px;
+}
+.bc-series-slide:last-child { width: 280px; padding-right: 0; }
+.bc-series-picture {
+  display: block;
+  aspect-ratio: 280 / 374;
+  height: 375px;
+  overflow: hidden;
+  box-shadow: 8px 15px 25px 0 rgba(0, 0, 0, 0.25);
+}
+.bc-series-picture > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: rotate(0.0001deg);
+  transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.bc-series-slide:hover .bc-series-picture > img {
+  transform: scale(1.03) rotate(0.0001deg);
+}
+
+/* ===== 響應式（≤767.98px 行動：標題上、滑桿底部 scroll-snap）===== */
+@media screen and (max-width: 767.98px) {
+  .bc-series-hero {
+    height: auto;
+    min-height: 70vh;
+    padding: 100px 0 60px;
+  }
+  .bc-series-heading {
+    margin-bottom: 14px;
+    padding: 0 25px;
+    font-size: 50px;
+    line-height: 1.2;
+  }
+  .bc-series-scrolling {
+    margin-top: 0;
+    padding: 0;
+    padding-left: 15.46vw;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .bc-series-slide {
+    width: 69.33vw;
+    padding-right: 20px;
+    scroll-snap-align: center;
+  }
+  .bc-series-slide:last-child { width: 280px; padding-right: 15.46vw; }
+  .bc-series-picture { height: 92.8vw; }
+}
