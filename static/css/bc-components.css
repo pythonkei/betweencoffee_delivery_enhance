@@ -61,17 +61,20 @@ body {
 .ftco_navbar .navbar-brand {
   padding-top: 0.5625rem;    /* 0.3125rem + 0.25rem（下移補償） */
   padding-bottom: 0.0625rem; /* 0.3125rem - 0.25rem */
-  /* 2026-08-16：brand 移到瀏覽器（視窗）最左側 */
+  /* 2026-08-16：brand 移到瀏覽器（視窗）最左側，垂直居中於 navbar（各端統一） */
   position: absolute;
   left: 20px;
   top: 50%;
   transform: translateY(-50%);
   margin: 0;
-  margin-top: 24px;  /* 下移：離頂部遠一點 */
 }
 /* 2026-08-16：brand 改 absolute 後脫離 flex 流，toggler 會往左疊在 brand 上 → 靠右 */
 .ftco_navbar .navbar-toggler {
   margin-left: auto;
+}
+/* 2026-08-16：navbar 整體下移（離頂部遠一點），brand 垂直居中於 navbar，各端位置統一 */
+#ftco-navbar {
+  padding-top: 24px;
 }
 
 /* ===== 隱藏 home-slider 橫幅內按鈕（2026-08-09）
@@ -2595,9 +2598,9 @@ body {
   .ftco_navbar .navbar-toggler {
     margin-left: auto !important;
   }
-  .ftco_navbar .navbar-brand {
-    padding-top: 4px;
-    padding-bottom: 5px;
+  /* 2026-08-16：brand 改 absolute 後，行動端 padding 改由 navbar padding-top 統一控制 */
+  #ftco-navbar {
+    padding-top: 12px;
   }
 }
 
