@@ -67,7 +67,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
   margin: 0;
-  margin-top: 12px;  /* 下移：離頂部遠一點 */
+  margin-top: 20px;  /* 下移：離頂部遠一點 */
 }
 
 /* ===== 隱藏 home-slider 橫幅內按鈕（2026-08-09）
