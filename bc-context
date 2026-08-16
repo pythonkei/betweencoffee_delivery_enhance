@@ -87,6 +87,7 @@ load_context() {
         echo "│   ├── Admin：自訂選項組 UI 合併（OptionGroupConfigWidget 每組「勾選+排序數字」option-group-config-grid；去白底、深灰邊框）；排序數字欄位（option_order_* 小在前 0=預設）"
         echo "│   ├── 顯示修復：order_confirm/checkout legacy fallback（中/預設/正常）移除；有選項只顯示新選項；_add_chinese_options pop legacy + 依咖啡排序（sort_option_keys_for_coffee 統一 add_to_cart/cart_count/訂單顯示；修正 jsonb 重排）"
         echo "│   └── 詳情頁復購預選單選修復：query preselect 原只 add(active) 不清同組 → 杯量 正常+追加 同時已選；改 toggle 後 CDP 實測每組恰 1 個 active"
+        echo "│   └── 員工端等待中卡片選項修復：queue-manager.js renderWaitingOrderItems 缺 extra_options_cn → 等待中咖啡自訂選項（杯量/濃度/配豆）不顯示；補迴圈 + 重量 weight_cn 優先（200克）；CDP 實測含杯量/配豆/濃度"
         echo "│   └── 驗證：verify_all_options（31 項）+ cup_strength/bean_blend/milk_level/option_display/group_order 6 腳本全 PASS + manage.py check 0 issues"
         echo "│   ├── coffee 詳情頁 oz 標籤/文字加大：桌面 0.85rem（13.6px）+ padding 6px12px、行動 11px + 5px10px；文字維持僅標籤再加大（bc-components.css?v=20260814y）"
         echo "│   ├── 全模板檢查清理：59→44 模板；修正 8 項結構錯誤（缺 span/重複 rel/多餘 b/SVG clipPath/缺 div）；補建 reactivate/activity_history/points_summary（原 500）；git rm 15 孤兒模板；移除重複 noise-filiter/debug 欄位/無用 form/nav hidden 死碼；get_template 47/47 + manage.py check 0 issues"
