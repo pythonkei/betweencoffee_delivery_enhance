@@ -1,119 +1,159 @@
 /* ============================================================
-   Between Coffee：BETWEEN SERIES（2026-08-16）
-   完全複製 https://designing.jp/series/ container_3HNAz 效果：
-   - 左側大標題（backdrop-filter blur 由 data-blurred 切換）
-   - 右側照片滑桿水平滾動（overflow-x）
-   - 無背景、照片無邊框（柔陰影）
+   Between Coffee：BETWEEN SERIES 橫向滑動系列（2026-08-16）
+   參考 https://designing.jp/series/（container_3HNAz 橫向滑動系列）
+   - 普通區塊（非 fixed 100vh），放 home-slider 之後
+   - 桌面：大字標題 + 箭頭/分頁橫向滑動（--bc-series-x）
+   - 行動：scroll-snap 原生橫向捲動
    ============================================================ */
 .bc-series-hero {
   position: relative;
-  height: 100vh;
-  min-height: 600px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   overflow: hidden;
-  background: transparent; /* 無背景 */
+  padding: 70px 0 60px;
+  background-color: #0e0e0e;
+  color: #fff;
 }
-
-/* ===== 左側大標題 ===== */
-.bc-series-heading {
-  position: relative;
-  flex-shrink: 0;
-  padding: 12vh 40px 0;
-  font-family: 'Playfair', 'Noto Serif TC', serif;
-  font-size: 140px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
-}
-.bc-series-heading-line { display: block; padding: 40px 0; }
-/* 模糊覆蓋層（滾動時 data-blurred=true 啟用 backdrop blur） */
-.bc-series-heading::before {
+.bc-series-hero::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  transform: translateZ(0);
-  opacity: 0;
-  transition: opacity 0.6s linear;
+  inset: 0;
+  z-index: 0;
+  background-image: url("/static/images/owl_title_bg_02.svg");
+  background-repeat: repeat;
+  background-size: 320px auto;
+  opacity: 0.05;
   pointer-events: none;
 }
-.bc-series-heading[data-blurred="true"]::before { opacity: 1; }
-
-/* ===== 底部照片滑桿（水平滾動）===== */
-.bc-series-scrolling {
-  width: 100%;
-  margin-top: auto;
-  overflow-x: auto;
-  overflow-y: hidden;
-  display: flex;
-  align-items: center;
-  padding: 40px 0 6vh;
-  padding-left: 15.46vw;
-  scrollbar-width: none;
+.bc-series-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
 }
-.bc-series-scrolling::-webkit-scrollbar { display: none; }
+
+/* ===== 大標題（桌面 6rem 兩行垂直）===== */
+.bc-series-heading {
+  margin: 0 0 44px;
+  font-family: 'Playfair', 'Noto Serif TC', serif;
+  font-size: 6rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.bc-series-heading-line { display: block; }
+
+/* ===== 滑動視窗（桌面 overflow hidden；行動 overflow-x auto）===== */
+.bc-series-stage {
+  position: relative;
+  overflow: hidden;
+}
 .bc-series-list {
   display: flex;
-  align-items: center;
-  padding-right: 15.46vw;
+  gap: 26px;
+  transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+  transform: translateX(var(--bc-series-x, 0));
 }
 
-/* ===== 照片 slide（無邊框、無背景、柔陰影）===== */
+/* ===== 系列卡片 ===== */
 .bc-series-slide {
   flex: 0 0 auto;
-  width: 350px;
-  padding-right: 70px;
-}
-.bc-series-slide:last-child { width: 280px; padding-right: 0; }
-.bc-series-picture {
+  width: 300px;
   display: block;
-  aspect-ratio: 280 / 374;
-  height: 375px;
-  overflow: hidden;
-  box-shadow: 8px 15px 25px 0 rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s;
 }
-.bc-series-picture > img {
+.bc-series-slide:hover {
+  transform: translateY(-4px);
+  border-color: rgba(196, 155, 99, 0.45);
+}
+.bc-series-slide-img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: 240px;
+  object-fit: contain;
   display: block;
-  transform: rotate(0.0001deg);
-  transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
 }
-.bc-series-slide:hover .bc-series-picture > img {
-  transform: scale(1.03) rotate(0.0001deg);
+.bc-series-slide-title {
+  margin: 14px 0 2px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}
+.bc-series-slide-en {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bc-gold);
 }
 
-/* ===== 響應式（≤767.98px 行動：標題上、滑桿底部 scroll-snap）===== */
+/* ===== 箭頭（桌面）===== */
+.bc-series-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(196, 155, 99, 0.5);
+  background: rgba(14, 14, 14, 0.7);
+  color: var(--bc-gold);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+.bc-series-arrow:hover { background: var(--bc-gold); color: #0e0e0e; }
+.bc-series-arrow-prev { left: 8px; }
+.bc-series-arrow-next { right: 8px; }
+
+/* ===== 分頁點（桌面）===== */
+.bc-series-pager {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.bc-series-pager li {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s;
+}
+.bc-series-pager li.active { background: var(--bc-gold); transform: scale(1.3); }
+
+/* ===== 響應式（≤767.98px 行動）===== */
 @media screen and (max-width: 767.98px) {
-  .bc-series-hero {
-    height: auto;
-    min-height: 70vh;
-    padding: 100px 0 60px;
-  }
-  .bc-series-heading {
-    margin-bottom: 14px;
-    padding: 0 25px;
-    font-size: 50px;
-    line-height: 1.2;
-  }
-  .bc-series-heading-line { padding: 5px 0; }
-  .bc-series-scrolling {
-    margin-top: 0;
-    padding: 0;
-    padding-left: 15.46vw;
+  .bc-series-hero { padding: 44px 0 40px; }
+  .bc-series-inner { padding: 0 20px; }
+  .bc-series-heading { font-size: 3rem; margin-bottom: 26px; }
+  .bc-series-stage {
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
+    scrollbar-width: none;
   }
-  .bc-series-slide { width: 69.33vw; padding-right: 20px; scroll-snap-align: center; }
-  .bc-series-slide:last-child { width: 280px; padding-right: 15.46vw; }
-  .bc-series-picture { height: 92.8vw; }
+  .bc-series-stage::-webkit-scrollbar { display: none; }
+  .bc-series-list {
+    gap: 14px;
+    padding: 4px 20px 8px;
+    transform: none;
+    transition: none;
+  }
+  .bc-series-slide {
+    width: 72vw;
+    scroll-snap-align: center;
+    padding: 14px;
+  }
+  .bc-series-slide-img { height: 160px; }
+  .bc-series-arrow, .bc-series-pager { display: none; }
 }
