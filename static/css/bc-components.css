@@ -3162,7 +3162,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 /* ===== 響應式：深金歡迎容器（平板/手機漸進縮放） ===== */
 @media (max-width: 768px) {
   .bc-welcome-section {
-    margin-top: -50px;  /* 平板容器較矮（約 100px），上移一半 */
+    margin-top: -34px;  /* 平板 panel 高約 68px，上移一半使中心貼齊 banner 底部 */
   }
   .bc-welcome-panel {
     width: 87%;  /* 2026-08-10：92→87%（寬度 -5%） */
@@ -3196,23 +3196,25 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
-    width: 92px;
-    height: 92px;
+    width: 76px;  /* 2026-08-16：92→76px（縮小避免與換行文字重疊） */
+    height: 76px;
     top: -50px;  /* 2026-08-13：-65→-50px（隨圖片縮小） */
   }
   .bc-welcome-img-link {
     top: -50px;
-    width: 92px;
-    height: 92px;
+    width: 76px;  /* 2026-08-16：92→76px（與圖片同步） */
+    height: 76px;
   }
   .bc-last-order {
     font-size: 0.75rem;
+    white-space: normal;  /* 2026-08-16：換行避免文字溢出 imgbox */
+    line-height: 1.25;
   }
 }
 
 @media (max-width: 480px) {
   .bc-welcome-section {
-    margin-top: -45px;  /* 手機容器最矮（約 90px），上移一半 */
+    margin-top: -28px;  /* 手機 panel 高約 56px，上移一半使中心貼齊 banner 底部 */
   }
   .bc-welcome-panel {
     width: 91%;  /* 2026-08-10：96→91%（寬度 -5%） */
@@ -3245,17 +3247,19 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
-    width: 58px;  /* 2026-08-13：83→64→58px */
-    height: 58px;
+    width: 55px;  /* 2026-08-16：58→55px（縮小避免與換行文字重疊） */
+    height: 55px;
     top: -29px;  /* 2026-08-13：-38→-32→-29px（隨圖片縮小） */
   }
   .bc-welcome-img-link {
-    top: -35px;  /* 2026-08-13：-47→-38→-35px */
-    width: 62px;
-    height: 62px;
+    top: -29px;  /* 2026-08-16：-35→-29px（與圖片對齊） */
+    width: 55px;  /* 2026-08-16：62→55px（與圖片同步） */
+    height: 55px;
   }
   .bc-last-order {
     font-size: 0.5rem;  /* 2026-08-13：0.6→0.5rem（配合縮小的 imgbox） */
+    white-space: normal;  /* 2026-08-16：換行避免文字溢出 imgbox */
+    line-height: 1.25;
   }
 }
 
