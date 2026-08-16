@@ -105,35 +105,6 @@
 		.on('changed.owl.carousel', loadActiveVideo);
 		// 初始化完成後立即執行一次（因 .on 綁定晚於 owlCarousel 同步初始化，改用直接呼叫）
 		loadActiveVideo();
-
-		// ===== 第 3 格 magasinn 動畫 + 圖片輪播（2026-08-16）=====
-		var triggerMagasinAnime = function() {
-			var $magasin = $('.home-slider .owl-item.active .bc-slider3-magasin');
-			$magasin.find('.set-anime').addClass('is-anime');
-		};
-		// 切換時：先移除全部（滑走後重播），再對第 3 格觸發。
-		// 用 translated 事件（active class 更新後觸發）+ setTimeout(0) 保險時序
-		$homeSlider.on('changed.owl.carousel translated.owl.carousel', function() {
-			$('.bc-slider3-magasin .set-anime').removeClass('is-anime');
-			setTimeout(triggerMagasinAnime, 0);
-		});
-		// 初始（首格非第 3 格，無作用；若直接跳到第 3 格也正常）
-		triggerMagasinAnime();
-
-		// 第 3 格圖片輪播（Between 咖啡去背圖，autoplay）
-		var $magasinSlider = $('.js-bc-magasin-slider');
-		if ($magasinSlider.length) {
-			$magasinSlider.owlCarousel({
-				loop: true,
-				autoplay: true,
-				autoplayTimeout: 3000,
-				autoplayHoverPause: true,
-				smartSpeed: 600,
-				items: 1,
-				nav: false,
-				dots: true
-			});
-		}
 		// owlCarousel() 已同步完成初始佈局 → 加 is-loaded class：
 		// bc-components.css 的 ::before/::after 遮罩淡出（transition 0.45s），
 		// .owl-stage-outer 由 opacity:0 → 1 淡入。

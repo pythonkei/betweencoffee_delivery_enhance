@@ -92,48 +92,12 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         </div>
         <div class="overlay"></div>
         <div class="container">
-            <div class="bc-slider3-magasin">
-                <p class="bc-magasin-logo lh-1">
-                    <span class="bc-magasin-logo-text block ls--02 of-hid txt-tf-up">
-                        <span class="i-block anime-elm anime-fade-up anime-delay1 set-anime">A</span>
-                    </span>
-                    <span class="bc-magasin-logo-text block ls--02 of-hid txt-tf-up">
-                        <span class="i-block anime-elm anime-fade-up anime-delay3 set-anime">
-                            <span class="hidden-sp">Craft</span>
-                            <span class="hidden-pc flex flex-ai-c">Cra<span class="bc-magasin-logo-line block"></span></span>
-                        </span>
-                    </span>
-                    <span class="bc-magasin-logo-text block ls--02 of-hid txt-tf-up hidden-pc">
-                        <span class="i-block anime-elm anime-fade-up anime-delay5 set-anime">ft</span>
-                    </span>
-                    <span class="bc-magasin-logo-text block ls--02 of-hid txt-tf-up">
-                        <span class="i-block anime-elm anime-fade-up anime-delay5 set-anime">Roastery</span>
-                    </span>
-                </p>
-                <p class="bc-magasin-catch lh-11 ls--01 txt-tf-up ws-nowrap">
-                    <span class="block of-hid">
-                        <span class="block anime-elm anime-fade-up anime-delay18 set-anime">Brewed</span>
-                    </span>
-                    <span class="block of-hid">
-                        <span class="block anime-elm anime-fade-up anime-delay19 set-anime">With</span>
-                    </span>
-                    <span class="block of-hid">
-                        <span class="block anime-elm anime-fade-up anime-delay20 set-anime">Soul</span>
-                    </span>
-                </p>
-                <div class="bc-magasin-slider-wrap">
-                    <div class="block of-hid">
-                        <div class="block anime-elm anime-fade-up anime-delay11 set-anime">
-                            <div class="bc-magasin-slider js-bc-magasin-slider owl-carousel">
-                                <div class="item"><img src="{% static 'images/coffee_01.png' %}" alt="Between Coffee" loading="lazy"></div>
-                                <div class="item"><img src="{% static 'images/coffee_02.png' %}" alt="Between Coffee" loading="lazy"></div>
-                                <div class="item"><img src="{% static 'images/coffee_03.png' %}" alt="Between Coffee" loading="lazy"></div>
-                                <div class="item"><img src="{% static 'images/coffee_04.png' %}" alt="Between Coffee" loading="lazy"></div>
-                                <div class="item"><img src="{% static 'images/coffee_05.png' %}" alt="Between Coffee" loading="lazy"></div>
-                                <div class="item"><img src="{% static 'images/coffee_08.png' %}" alt="Between Coffee" loading="lazy"></div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+                <div class="col-md-12 col-sm-12 text-center">
+                    <span class="subheading">~ Brew with Soul ~</span>
+                    <h1 class="mb-4">啡咖師的日常</h1>
+                    <p class="mb-4 mb-md-5">不只是余韻，更是生命!</p>
+                    <p><a href="#" class="btn btn-primary p-3 px-xl-4 py-xl-3">了解更多</a></p>
                 </div>
             </div>
             <span class="img-owl-bg">
@@ -346,8 +310,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 {% block extra_css %}
 <!-- 2026-08-11：首頁輪播 owl-carousel 樣式（僅首頁需，從 base 移出條件載入） -->
 <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
-<!-- 2026-08-16：首頁輪播第 3 格 magasinn 風格動畫區塊樣式 -->
-<link rel="stylesheet" href="{% static 'css/bc-magasin.css' %}?v=20260816a">
 <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
 <!-- 2026-08-13：首頁 .feed 水平移動 SVG 蒙版動畫樣式（landing.css；7dad800 條件載入時僅加到 landing_v3 漏了首頁，修正） -->
 <link rel="stylesheet" href="{% static 'css/landing.css' %}">
