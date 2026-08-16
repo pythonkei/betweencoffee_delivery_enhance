@@ -171,10 +171,22 @@
   color: #ffffff;
 }
 
-.bc-search-lead { width: 156px; }
-.bc-search-lead img,
-.bc-search-lead picture,
-.bc-search-lead picture img { width: 100%; height: auto; display: block; }
+.bc-search-lead {
+  width: 320px;
+  max-width: 100%;
+  margin-top: 6px;
+  font-family: 'Noto Sans TC', 'Noto Sans', sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.9;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: left;
+}
+.bc-search-lead-brand {
+  color: var(--bc-gold);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
 
 .bc-search-txt {
   width: 480px;
@@ -249,7 +261,7 @@
   .bc-search-ttl { width: 100%; }
   .bc-search-ttl-label { font-size: 1.8rem; }
   .bc-search-ttl-message { font-size: 2.6rem; }
-  .bc-search-lead { width: 539px; max-width: 100%; margin-top: 30px; }
+  .bc-search-lead { width: 100%; max-width: 100%; margin-top: 24px; font-size: 0.9rem; }
   .bc-search-txt { width: 360px; font-size: 1.25rem; }
   .bc-search-icon { width: 150px; height: 150px; }
   .bc-search-icon svg { width: 30px; }
@@ -262,6 +274,7 @@
   .bc-search-ttl-label { font-size: 1.5rem; }
   .bc-search-ttl-message { font-size: 2.2rem; }
   .bc-search-txt { width: 100%; font-size: 1.1rem; }
+  .bc-search-lead { width: 100%; font-size: 0.85rem; }
   .bc-search-icon { width: 120px; height: 120px; }
   .bc-search-bg-img-01 { left: auto; right: 20px; width: 180px; }
   .bc-search-bg-img-02 { left: -420px; width: 500px; }
