@@ -112,50 +112,21 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <!-- end owl-carousel -->
 
 
-<!-- ===== BETWEEN SERIES 橫向滑動系列（2026-08-16，參考 designing.jp/series）===== -->
+<!-- ===== BETWEEN SERIES（2026-08-16，完全複製 designing.jp/series container_3HNAz）===== -->
 <section class="bc-series-hero">
-    <div class="bc-series-inner">
-        <h2 class="bc-series-heading">
-            <span class="bc-series-heading-line">Between</span>
-            <span class="bc-series-heading-line">Series</span>
-        </h2>
-        <div class="bc-series-stage">
-            <button type="button" class="bc-series-arrow bc-series-arrow-prev" aria-label="上一組">&lsaquo;</button>
-            <button type="button" class="bc-series-arrow bc-series-arrow-next" aria-label="下一組">&rsaquo;</button>
-            <div class="bc-series-list">
-                <a class="bc-series-slide" href="{% url 'bean_menu' %}">
-                    <img class="bc-series-slide-img" src="{% static 'images/bean_01.png' %}" alt="咖啡豆" loading="lazy">
-                    <h3 class="bc-series-slide-title">咖啡豆</h3>
-                    <p class="bc-series-slide-en">Beans</p>
-                </a>
-                <a class="bc-series-slide" href="{% url 'coffee_menu' %}">
-                    <img class="bc-series-slide-img" src="{% static 'images/coffee_01.png' %}" alt="手沖" loading="lazy">
-                    <h3 class="bc-series-slide-title">手沖</h3>
-                    <p class="bc-series-slide-en">Pour Over</p>
-                </a>
-                <a class="bc-series-slide" href="{% url 'coffee_menu' %}">
-                    <img class="bc-series-slide-img" src="{% static 'images/coffee_02.png' %}" alt="冷萃" loading="lazy">
-                    <h3 class="bc-series-slide-title">冷萃</h3>
-                    <p class="bc-series-slide-en">Cold Brew</p>
-                </a>
-                <a class="bc-series-slide" href="{% url 'coffee_menu' %}">
-                    <img class="bc-series-slide-img" src="{% static 'images/coffee_03.png' %}" alt="季節限定" loading="lazy">
-                    <h3 class="bc-series-slide-title">季節限定</h3>
-                    <p class="bc-series-slide-en">Seasonal</p>
-                </a>
-                <a class="bc-series-slide" href="{% url 'coffee_menu' %}">
-                    <img class="bc-series-slide-img" src="{% static 'images/coffee_04.png' %}" alt="特調" loading="lazy">
-                    <h3 class="bc-series-slide-title">特調</h3>
-                    <p class="bc-series-slide-en">Signature</p>
-                </a>
-                <a class="bc-series-slide" href="{% url 'bean_menu' %}">
-                    <img class="bc-series-slide-img" src="{% static 'images/coffee_05.png' %}" alt="烘焙" loading="lazy">
-                    <h3 class="bc-series-slide-title">烘焙</h3>
-                    <p class="bc-series-slide-en">Roasting</p>
-                </a>
-            </div>
+    <h2 class="bc-series-heading">
+        <span class="bc-series-heading-line">BETWEEN</span>
+        <span class="bc-series-heading-line">SERIES</span>
+    </h2>
+    <div class="bc-series-scrolling">
+        <div class="bc-series-list">
+            <div class="bc-series-slide"><div class="bc-series-picture"><img src="{% static 'images/coffee_01.png' %}" alt="" loading="lazy"></div></div>
+            <div class="bc-series-slide"><div class="bc-series-picture"><img src="{% static 'images/coffee_02.png' %}" alt="" loading="lazy"></div></div>
+            <div class="bc-series-slide"><div class="bc-series-picture"><img src="{% static 'images/coffee_03.png' %}" alt="" loading="lazy"></div></div>
+            <div class="bc-series-slide"><div class="bc-series-picture"><img src="{% static 'images/coffee_04.png' %}" alt="" loading="lazy"></div></div>
+            <div class="bc-series-slide"><div class="bc-series-picture"><img src="{% static 'images/coffee_05.png' %}" alt="" loading="lazy"></div></div>
+            <div class="bc-series-slide"><div class="bc-series-picture"><img src="{% static 'images/coffee_08.png' %}" alt="" loading="lazy"></div></div>
         </div>
-        <ul class="bc-series-pager"></ul>
     </div>
 </section>
 <!-- end BETWEEN SERIES -->
