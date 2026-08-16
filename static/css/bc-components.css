@@ -69,6 +69,10 @@ body {
   margin: 0;
   margin-top: 24px;  /* 下移：離頂部遠一點 */
 }
+/* 2026-08-16：brand 改 absolute 後脫離 flex 流，toggler 會往左疊在 brand 上 → 靠右 */
+.ftco_navbar .navbar-toggler {
+  margin-left: auto;
+}
 
 /* ===== 隱藏 home-slider 橫幅內按鈕（2026-08-09）
    三個 slider 的「立即落單/我們的配方/了解更多」按鈕全部隱藏 */
