@@ -3005,7 +3005,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bc-welcome-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;  /* 2026-08-10：10→8px（整體高度降 15%） */
+  gap: 4px;  /* 2026-08-10：10→8px（整體高度降 15%） */
   min-width: 0;
 }
 
@@ -3050,7 +3050,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   color: #ffffff;
   font-size: 16px;  /* 2026-08-10：14→16px 文字加大（容器高度保持） */
   font-weight: 300;
-  /* line-height: 1.2; */  /* 讓文字高度貼近字體大小，垂直中心與頭像對齊 */
+  line-height: 1.6;  /* 讓文字高度貼近字體大小，垂直中心與頭像對齊 */
   display: inline-flex;
   align-items: center;
 }
@@ -3066,8 +3066,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 
 .bc-welcome-points {
   color: #bfbfbf;
-  font-size: 13px;  /* 2026-08-10：13→15px 文字加大（容器高度保持） */
-  line-height: 0.8;  /* 緊湊行距 */
+  font-size: 14px;  /* 2026-08-10：13→15px 文字加大（容器高度保持） */
+  line-height: 1.1;  /* 緊湊行距 */
 }
 
 /* 積分區塊內「訂單及帳戶詳情」連結（2026-08-10） */

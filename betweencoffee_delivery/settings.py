@@ -841,6 +841,13 @@ WHATSAPP_PHONE_NUMBER_ID = env("WHATSAPP_PHONE_NUMBER_ID", default="")
 WHATSAPP_BUSINESS_ACCOUNT_ID = env("WHATSAPP_BUSINESS_ACCOUNT_ID", default="")
 WHATSAPP_ENABLED = bool(WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID)
 
+# WhatsApp 範本訊息（template）配置 — 2026-08-17
+# 用於突破 24 小時會話窗口限制，主動推送「訂單就緒」通知。
+# 需先在 Meta 平台提交 template 並審核通過，再將名稱填入 WHATSAPP_TEMPLATE_NAME。
+# 未設定時，就緒通知會 fallback 到自由格式訊息（僅 24h 窗口內可發）。
+WHATSAPP_TEMPLATE_NAME = env("WHATSAPP_TEMPLATE_NAME", default="")
+WHATSAPP_TEMPLATE_LANGUAGE = env("WHATSAPP_TEMPLATE_LANGUAGE", default="zh_HK")
+
 # ==================== 异常处理 ====================
 
 
