@@ -3067,7 +3067,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .bc-welcome-points {
   color: #bfbfbf;
   font-size: 15px;  /* 2026-08-10：13→15px 文字加大（容器高度保持） */
-  line-height: 1.2;  /* 緊湊行距 */
+  line-height: 0.8;  /* 緊湊行距 */
 }
 
 /* 積分區塊內「訂單及帳戶詳情」連結（2026-08-10） */
@@ -3075,7 +3075,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   color: var(--bc-gold);
   text-decoration: underline;
   text-underline-offset: 2px;
-  margin-left: 16px;
+  margin-left: 10px;
   font-weight: 300;
   transition: color 0.25s ease;
 }
@@ -3120,12 +3120,12 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    內層圖片填滿整個連結區塊，避免被 <a> 包住後位移 */
 .bc-welcome-img-link {
   position: absolute;
-  top: -78px;   /* 2026-08-10：-92→-78px（隨圖片縮小） */
+  top: -70px;   /* 2026-08-10：-92→-78px（隨圖片縮小） */
   left: 50%;                 /* 2026-08-10：right:0→水平居中（與圖片一致） */
   transform: translateX(-50%);
   right: auto;
-  width: 136px;  /* 2026-08-10：160→136px（整體高度降 15%） */
-  height: 136px;
+  width: 120px;  /* 2026-08-10：160→136px（整體高度降 15%） */
+  height: 120px;
   z-index: 4;
   display: block;
   cursor: pointer;
@@ -3146,7 +3146,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   width: 100%;
   text-align: center;
   white-space: nowrap;
-  margin-bottom: 3px;  /* 2026-08-10：4→3px（配合圖片縮小上移） */
+  margin-bottom: 2px;  /* 2026-08-10：4→3px（配合圖片縮小上移） */
 }
 
 .bc-last-order i {
@@ -3191,7 +3191,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     font-size: 12px;  /* 2026-08-13：14→12px */
   }
   .bc-welcome-imgbox {
-    width: 92px;  /* 2026-08-13：119→92px（縮小圖片，讓出文字空間） */
+    width: 122px;  /* 2026-08-13：119→92px（縮小圖片，讓出文字空間） */
     min-height: 56px;
     margin-right: 0;  /* 移除負邊距，避免超出容器 */
   }
@@ -3202,13 +3202,13 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bc-welcome-img-link {
     top: -50px;
-    width: 76px;  /* 2026-08-16：92→76px（與圖片同步） */
-    height: 76px;
+    width: 84px;  /* 2026-08-16：92→76px（與圖片同步） */
+    height: 84px;
   }
   .bc-last-order {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     white-space: normal;  /* 2026-08-16：換行避免文字溢出 imgbox */
-    line-height: 1.25;
+    line-height: 1.5;
   }
 }
 
@@ -3217,7 +3217,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-top: -28px;  /* 手機 panel 高約 56px，上移一半使中心貼齊 banner 底部 */
   }
   .bc-welcome-panel {
-    width: 91%;  /* 2026-08-10：96→91%（寬度 -5%） */
+    width: 92%;  /* 2026-08-10：96→91%（寬度 -5%） */
     gap: 6px;  /* 2026-08-13：7→6px */
     padding: 5px 8px;  /* 2026-08-10：6→5px（整體高度降 15%） */
   }
@@ -3228,23 +3228,23 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     gap: 10px;  /* 2026-08-13：18→10px，手機端讓文字區更寬 */
   }
   .bc-welcome-avatar {
-    width: 38px;  /* 2026-08-13：44→38px（縮小頭像，讓出文字空間） */
-    height: 38px;
+    width: 32px;  /* 2026-08-13：44→38px（縮小頭像，讓出文字空間） */
+    height: 32PX;
     font-size: 1.15rem;  /* user icon 隨容器縮小 */
   }
   .bc-welcome-info {
     flex: 1;
   }
   .bc-welcome-greeting {
-    font-size: 11px;  /* 2026-08-13：10→11px（空間變寬後可讀性提升） */
+    font-size: 9px;  /* 2026-08-13：10→11px（空間變寬後可讀性提升） */
   }
   .bc-welcome-points {
-    font-size: 10px;  /* 2026-08-13：維持 10px */
+    font-size: 9px;  /* 2026-08-13：維持 10px */
   }
   .bc-welcome-imgbox {
-    width: 62px;  /* 2026-08-13：94→70→62px（再縮小，讓 points 單行） */
+    width: 80px;  /* 2026-08-13：94→70→62px（再縮小，讓 points 單行） */
     min-height: 46px;
-    margin-right: 0;  /* 移除負邊距，避免超出容器 */
+    margin-right: 0.5em;  /* 移除負邊距，避免超出容器 */
   }
   .bc-welcome-img {
     width: 55px;  /* 2026-08-16：58→55px（縮小避免與換行文字重疊） */
@@ -3253,8 +3253,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   }
   .bc-welcome-img-link {
     top: -29px;  /* 2026-08-16：-35→-29px（與圖片對齊） */
-    width: 55px;  /* 2026-08-16：62→55px（與圖片同步） */
-    height: 55px;
+    width: 62px;  /* 2026-08-16：62→55px（與圖片同步） */
+    height: 62px;
   }
   .bc-last-order {
     font-size: 0.5rem;  /* 2026-08-13：0.6→0.5rem（配合縮小的 imgbox） */
