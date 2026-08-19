@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20260818x" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}" />
+<!-- hakujuji csBlock__leader 逐字亮起（完整複製原站樣式） -->
+<link rel="stylesheet" href="{% static 'css/bc-leader.css' %}?v=20260819a" />
 {% endblock %}
 
 
@@ -139,6 +141,124 @@
     </ul>
 </section>
 
+<!-- hakujuji csBlock__leader（逐字亮起；桌面 partsPc + 行動 partsSp，100% 複製原站結構） -->
+<section class="bc-leader">
+    <div class="csBlock csBlock__leader partsPc">
+        <ul class="csBlock__leader--list">
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--1">
+                <div class="csBlock__leaderThum csBlock__leaderThum--1"><img src="{% static 'images/coffee_01.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">我們相信，一杯好咖啡的溫度，來</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--2">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">自對每個細節的堅持。從選豆、烘</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--3">
+                <div class="csBlock__leaderThum csBlock__leaderThum--2"><img src="{% static 'images/coffee_02.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">焙到手沖，每一道工序都用心。豆</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--4">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">子的香氣、水溫的掌握、沖煮的節</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--5">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">奏，皆是學問。我們想將這份專注</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--6">
+                <div class="csBlock__leaderThum csBlock__leaderThum--3"><img src="{% static 'images/coffee_03.png' %}" alt=""></div>
+                <div class="csBlock__leaderThum csBlock__leaderThum--4"><img src="{% static 'images/coffee_04.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">化作你手中的每一杯。讓匆忙的你</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--7">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">停下來，感受片刻的寧靜。為自己</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--8">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">沖一杯，好好享受。一杯咖啡的時</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--9">
+                <div class="csBlock__leaderThum csBlock__leaderThum--5"><img src="{% static 'images/coffee_05.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">間，是屬於自己的。Between Coffee</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--10">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">想成為你日常裡，最溫暖的陪伴。</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--11">
+                <div class="csBlock__leaderThum csBlock__leaderThum--6"><img src="{% static 'images/coffee_08.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">輕鬆感、自由感、放空感，都在這</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--12">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">一杯裡。希望每一次的相遇，都能</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--13">
+                <div class="csBlock__leaderThum csBlock__leaderThum--7"><img src="{% static 'images/bean_01.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">為你帶來，恰度好的一杯。</p></div>
+            </li>
+        </ul>
+    </div>
+    <div class="csBlock csBlock__leader partsSp">
+        <ul class="csBlock__leader--list">
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--1">
+                <div class="csBlock__leaderThum csBlock__leaderThum--1"><img src="{% static 'images/coffee_01.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">我們相信，一杯好咖啡的</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--2">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">溫度，來自對每個細節的</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--3">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">堅持。從選豆、烘焙到</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--4">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">手沖，每一道工序都用心。</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--5">
+                <div class="csBlock__leaderThum csBlock__leaderThum--2"><img src="{% static 'images/coffee_02.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">豆子的香氣、水溫的掌握、</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--6">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">沖煮的節奏，皆是學問。</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--7">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">我們想將這份專注，化作</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--8">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">你手中的每一杯。讓匆忙</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--9">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">的你，停下來，感受片刻</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--10">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">的寧靜。為自己沖一杯，</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--11">
+                <div class="csBlock__leaderThum csBlock__leaderThum--3"><img src="{% static 'images/coffee_03.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">好好享受。一杯咖啡的時</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--12">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">間，是屬於自己的。</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--13">
+                <div class="csBlock__leaderThum csBlock__leaderThum--4"><img src="{% static 'images/coffee_04.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">Between Coffee</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--14">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">想成為你日常裡，最溫暖的陪伴。</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--15">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">輕鬆感、自由感、放空感，</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--16">
+                <div class="csBlock__leaderThum csBlock__leaderThum--6"><img src="{% static 'images/coffee_08.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">都在這一杯裡。希望每一</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--17">
+                <div class="csBlock__leaderThum csBlock__leaderThum--7"><img src="{% static 'images/bean_01.png' %}" alt=""></div>
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">次，都能為你帶來</p></div>
+            </li>
+            <li class="csBlock__leaderTarget csBlock__leaderTarget--18">
+                <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">恰度好的一杯。</p></div>
+            </li>
+        </ul>
+    </div>
+</section>
+
 <section class="ftco-section-blank"></section>
 
 <!-- Bean detail -->
@@ -217,4 +337,6 @@
 {% block extra_scripts %}
 <!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
 <script src="{% static 'js/bc-series.js' %}?v=20260818w"></script>
+<!-- hakujuji csBlock__leader：逐字亮起動畫 -->
+<script src="{% static 'js/bc-leader.js' %}?v=20260819a"></script>
 {% endblock %}
