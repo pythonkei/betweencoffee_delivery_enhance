@@ -5,15 +5,146 @@
 {% load static %}
 {% block title %}Between Coffee - About{% endblock %}
 
+{% block extra_css %}
+<!-- About 頁面 SERIES 滑桿（完全複製 designing.jp/series container_3HNAz） -->
+<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20260818x" />
+<!-- productFv/US 區塊的 blob 遮罩樣式 -->
+<link rel="stylesheet" href="{% static 'css/blobs.css' %}" />
+{% endblock %}
+
 
 {% block content %}
+
+<!-- SERIES 滑桿（完全複製 designing.jp/series 的 container_3HNAz） -->
+<section class="bc-series-hero">
+    <h2 class="bc-series-heading">
+        SERIES
+        <span class="bc-series-heading-sub">一種興奮感, 超越一杯的沉默</span>
+    </h2>
+    <div class="bc-series-list-container">
+        <div class="bc-series-scrolling">
+            <div class="bc-series-list">
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_01.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_02.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_03.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_04.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_05.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_08.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <ul class="bc-series-pager">
+        <li><button type="button" data-direction="left" aria-label="Prev" class="bc-series-arrow icon-arrow-left"></button></li>
+        <li><button type="button" data-direction="right" aria-label="Next" class="bc-series-arrow icon-arrow-right"></button></li>
+    </ul>
+</section>
+
+<!-- SERIES 括號滑桿（第二組：每張照片一格 + 括號框固定居中） -->
+<section class="bc-series-hero bc-series-bracket">
+    <h2 class="bc-series-heading">
+        SERIES
+        <span class="bc-series-heading-sub">一種興奮感, 超越一杯的沉默</span>
+    </h2>
+    <div class="bc-series-list-container">
+        <div class="bc-series-scrolling">
+            <div class="bc-series-list">
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_01.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_02.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_03.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_04.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_05.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{% static 'images/coffee_08.png' %}" alt="" loading="lazy" decoding="async">
+                        </picture>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 括號框：居中固定，照片在其內部滑動（noise 效果同 index.html） -->
+    <div class="bc-bracket-frame noise-img">
+        <img src="{% static 'images/coffee_border_02.svg' %}" class="noise_animation" alt="">
+    </div>
+    <ul class="bc-series-pager">
+        <li><button type="button" data-direction="left" aria-label="Prev" class="bc-series-arrow icon-arrow-left"></button></li>
+        <li><button type="button" data-direction="right" aria-label="Next" class="bc-series-arrow icon-arrow-right"></button></li>
+    </ul>
+</section>
 
 <section class="ftco-section-blank"></section>
 
 <!-- Bean detail -->
 <section class="ftco-section overflow-hidden">
     <div class="container">
-        <div class="productFv style_01">
+        <div class="productFv style_01 loadEnd">
             <span class="title-bg-head">&#65371;US&#65373;</span>
             <div class="inner">
                 <div class="blobsBg"></div>
@@ -81,4 +212,9 @@
 
 <div class="flexable-vh-20"></div>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
+<script src="{% static 'js/bc-series.js' %}?v=20260818w"></script>
 {% endblock %}

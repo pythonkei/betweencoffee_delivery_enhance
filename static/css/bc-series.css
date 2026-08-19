@@ -1,0 +1,231 @@
+/* ============================================================
+   bc-series.css — About 頁面 SERIES 滑桿
+   完全複製 https://designing.jp/series/ 的 .container_3HNAz
+   （黑底白字適配、6 張咖啡去背圖、無陰影、無額外裝飾）
+   ============================================================ */
+
+/* ---------- 行動端（<768px）：標題在上 + 滑桿在下 ---------- */
+.bc-series-heading {
+    font-family: "Noto Sans TC", "Montserrat", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: #fff;
+    margin-bottom: 14px;
+    padding: 0 25px;
+    font-size: 50px;
+}
+.bc-series-heading-sub {
+    display: block;
+    font-size: 18px;
+    font-weight: 200;
+    letter-spacing: 0;
+    line-height: 1.5;
+    margin-top: 14px;
+}
+
+.bc-series-scrolling {
+    display: flex;
+    width: 100%;
+    padding-left: 15.4666666667vw;
+    overflow: visible;
+}
+
+.bc-series-list {
+    display: flex;
+    padding-right: 15.4666666667vw;
+}
+
+.bc-series-list-container {
+    --js-x: 0px;
+}
+
+.bc-series-slide {
+    width: 69.3333333333vw;
+    flex-shrink: 0;
+    scroll-snap-align: center;
+    transform: translate3d(var(--js-x), 0, 0);
+    transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+    touch-action: none;
+    -webkit-user-drag: none;
+    user-select: none;
+}
+.bc-series-scrolling.bc-series-dragging .bc-series-slide {
+    transition: transform 0.15s linear;
+}
+.bc-series-slide:not(:last-child) {
+    margin-right: 48px;
+}
+
+.bc-series-item {
+    display: block;
+}
+
+.bc-series-picture {
+    display: block;
+    aspect-ratio: 280 / 374;
+    overflow: hidden;
+}
+.bc-series-picture > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    vertical-align: top;
+}
+
+/* 箭頭 pager（行動端在滑桿下方） */
+.bc-series-pager {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.bc-series-pager > li {
+    padding: 0 30px;
+}
+.bc-series-arrow {
+    display: block;
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    line-height: 50px;
+    text-align: center;
+    cursor: pointer;
+    transition: opacity 0.25s;
+}
+.bc-series-arrow:hover {
+    opacity: 0.7;
+}
+
+/* ---------- 桌面端（≥768px）：100vh flex 橫向，JS 拖動（完全複製 designing.jp） ---------- */
+@media (min-width: 768px) {
+    .bc-series-hero {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: transparent;
+        position: relative;
+    }
+
+    .bc-series-heading {
+        padding: 10px 40px;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        z-index: 0; /* 標題在照片下方（照片拖動時覆蓋標題） */
+        font-size: 140px;
+        line-height: 1;
+        margin-bottom: 0;
+        -webkit-filter: blur(0);
+        filter: blur(0);
+        transition: -webkit-filter 0.6s linear, filter 0.6s linear;
+    }
+    /* 滾動/拖動時標題模糊：直接 filter blur 文字本身（無矩形蒙版邊界） */
+    .bc-series-heading[data-blurred="true"] {
+        -webkit-filter: blur(10px);
+        filter: blur(10px);
+    }
+
+    .bc-series-list-container {
+        flex: 1;
+        min-width: 0;
+        overflow: visible; /* 讓照片可滑動到標題下方（照片在頂部） */
+        --js-x: 0px;
+    }
+
+    /* 第一張照片在滑桿區域內完全居中對齊 */
+    .bc-series-scrolling {
+        padding-left: calc((100% - 280px) / 2);
+    }
+
+    .bc-series-slide {
+        cursor: grab;
+    }
+    .bc-series-slide:last-child {
+        width: 280px;
+    }
+    .bc-series-slide:not(:last-child) {
+        width: 420px;
+        padding-right: 140px;
+        margin-right: 0;
+    }
+
+    /* 箭頭 pager（桌面端固定在滑桿底部中央，同 designing.jp pager_2upI8） */
+    .bc-series-pager {
+        position: absolute;
+        bottom: 60px;
+        left: 0;
+        width: 100%;
+        margin: 0;
+    }
+}
+
+/* ============================================================
+   productFv「US」區塊 blob 遮罩修復
+   - blobs.css 的 .blobsItem>.inner 有 scale(0)、.blobsBg 桌面端
+     被 0 尺寸規則覆蓋（皆未在 loadEnd 還原）。
+   - blob 尺寸 102vw×69vw 過大超出容器，改為合理尺寸並讓圖片填滿
+     （對應 blobs.css 被註解的桌面 px 值）。
+   ============================================================ */
+.loadEnd .blobsItem > .inner {
+    transform: none;
+}
+@media (min-width: 768px) {
+    .loadEnd .blobsBg {
+        position: absolute;
+        width: 122.05128vw;
+        height: 135.89744vw;
+        bottom: -20.51282vw;
+        transform: none;
+    }
+    .productFv.style_01.loadEnd .blobsItem.size_06 > .inner {
+        width: 640px;
+        height: 433px;
+    }
+    .productFv.style_01.loadEnd .blobsItem.size_06 img {
+        width: 880px;
+        left: -70px;
+        top: -150px;
+    }
+    .productFv.style_01.loadEnd .blobsItem.size_07 > .inner {
+        width: 290px;
+        height: 242px;
+    }
+    .productFv.style_01.loadEnd .blobsItem.size_07 img {
+        width: 840px;
+        left: -300px;
+        top: -10px;
+    }
+}
+
+/* ============================================================
+   第二組：括號框滑桿（每張照片一格 + 括號框居中固定）
+   ============================================================ */
+.bc-series-bracket {
+    position: relative;
+}
+.bc-series-bracket .bc-bracket-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 600px;
+    max-width: 92vw;
+    pointer-events: none;
+}
+.bc-series-bracket .bc-bracket-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+

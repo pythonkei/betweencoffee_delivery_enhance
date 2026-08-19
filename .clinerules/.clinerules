@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月15日（更新：coffee 自訂選項組功能（16 組：杯量/濃度/奶量/奶類/焦糖/黃油/椰奶/香草/特調/烏龍/茉莉/抹茶/綠茶/焙茶/面層配料/配豆；Admin 勾選啟用 + 排序數字 + 合併 UI；詳情頁依排序渲染單選；資料流 extra_options → 各顯示端；order_confirm/checkout legacy fallback 重複顯示修復 + 依咖啡排序；Migratons 0058-0063；6 驗證腳本全 PASS））
+> **最後更新**: 2026年8月18日（更新：about.html 整合 SERIES 滑桿 + 括號滑桿——bc-series.css/js 新建；標題兩行文字+filter blur 模糊；--js-x 拖動（滑鼠+觸控 + setPointerCapture）；照片間距/第一張居中；第二組 bc-series-bracket 括號框（coffee_border_02.svg + noise-img noise_animation）+ 每張照片一格吸附；productFv blob 遮罩修復（blobs.css + loadEnd + scale(0)/0 尺寸 + 尺寸 640×433/290×242））
 
 ## 開發者背景與方法論
 
