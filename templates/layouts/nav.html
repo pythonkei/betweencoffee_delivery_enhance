@@ -36,7 +36,15 @@
         <div class="c-attract">
             <a href="{% url 'coffee_menu' %}" class="bc-attract-buy__link c-attract__layer">
                 <span class="icon material-icons c-icon">shopping_bag</span>
-                <span lang="en">Buy &amp; Order</span>
+                <span lang="en">Order</span>
+            </a>
+        </div>
+    </div>
+    <!-- 2026-08-18: 個人資料圓形按鈕（複製 bc-attract-buy 外觀，圓形 + 圖標，連結 profile） -->
+    <div class="bc-attract-profile">
+        <div class="c-attract">
+            <a href="{% url 'socialuser:profile' %}" class="bc-attract-profile__link c-attract__layer">
+                <span class="icon material-icons c-icon">person</span>
             </a>
         </div>
     </div>

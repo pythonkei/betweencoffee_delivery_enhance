@@ -32,7 +32,7 @@
   width: 100%;
   height: 100%;
 }
-/* 右側虛線：全高、點狀 mask、灰色，中心點對齊 Buy & Order 按鈕中心 */
+/* 右側虛線：全高、點狀 mask、灰色（按鈕中心點對齊此虛線中心） */
 #borders .bc-borders__right {
   position: absolute;
   top: 0;
@@ -81,11 +81,11 @@
 .bc-attract-buy {
   position: fixed;
   --attract: 24px;        /* 對齊 cheesetart grid*.5（24px hover 熱區） */
-  right: 17px;            /* 按鈕視覺中心對齊右側參考點（虛線） */
+  right: 26px;            /* 視覺按鈕(link)中心點對齊虛線中心（link 因 --attract 偏移 20px） */
   top: 50%;
   transform: translateY(-50%);
-  width: 50px;
-  height: 225px;
+  width: 40px;
+  height: 150px;
   /* z-index:99999 最頂（高於右側虛線 #borders z-index:9999）。
      重要：此元素必須是 body 直接子層（見 nav.html 註解），
      若巢狀在 #ftco-navbar（position:absolute;z-index:3 的 stacking context）內，
@@ -143,6 +143,55 @@
   font-weight: 300;
 }
 
+/* ===== 個人資料圓形按鈕（2026-08-18：複製 bc-attract-buy 外觀，圓形 + 圖標，連結 profile）
+   位置緊貼在 Buy & Order 按鈕下方（buy 底部 50%+112.5 + 半高 25 = 中心 50%+137.5，無間隙、中心點對齊）===== */
+.bc-attract-profile {
+  position: fixed;
+  --attract: 24px;        /* 與 bc-attract-buy 相同的 hover 熱區擴展 */
+  right: 17px;
+  top: calc(50% + 100px);
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  z-index: 99999;
+}
+.bc-attract-profile > div {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  transition: transform 0.3s 0.4s;
+}
+.bc-attract-profile .bc-attract-profile__link {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #999;
+  border-radius: 50%;
+  background-color: #101010;
+  color: #fff;
+  text-decoration: none;
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bc-attract-profile .bc-attract-profile__link:hover,
+.bc-attract-profile .bc-attract-profile__link:focus,
+.bc-attract-profile .bc-attract-profile__link:active {
+  color: #fff;
+  background-color: #000000;
+  border-color: #fff;
+  text-decoration: none;
+}
+.bc-attract-profile .bc-attract-profile__link .c-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
 /* ===== 漢堡選單（對應 cheesetart p-gh__button__menu） ===== */
 .bc-attract-menu {
   position: relative;
@@ -186,15 +235,15 @@
 
 /* ===== 響應式（≤767.98px 手機） ===== */
 @media screen and (max-width: 767.98px) {
-  /* 右虛線：灰色，中心點對齊手機版 Buy 按鈕中心（按鈕 right:16px + 半寬 20px = 36px） */
+  /* 右虛線（按鈕中心點對齊此虛線中心） */
   #borders .bc-borders__right {
     right: 36px;
   }
   .bc-attract-buy {
     --attract: 8px;
-    right: 16px;            /* 離右側邊緣留邊距 */
-    width: 40px;
-    height: 150px;
+    right: 13px;            /* 視覺按鈕中心點對齊虛線中心 */
+    width: 32px;
+    height: 110px;
   }
   .bc-attract-buy .bc-attract-buy__link {
     border-width: 1.5px;
@@ -207,6 +256,16 @@
   .bc-attract-buy .bc-attract-buy__link [lang='en'] {
     font-size: 0.8rem;
     letter-spacing: 0.15em;
+  }
+  .bc-attract-profile {
+    --attract: 8px;
+    right: 9px;
+    top: calc(50% + 75px);
+    width: 40px;
+    height: 40px;
+  }
+  .bc-attract-profile .bc-attract-profile__link .c-icon {
+    font-size: 1.2rem;
   }
   .bc-attract-menu {
     --attract: 8px;
@@ -223,17 +282,26 @@
 
 /* ===== 響應式（≤575.98px 小手機） ===== */
 @media screen and (max-width: 575.98px) {
-  /* 右虛線中心對齊小手機版 Buy 按鈕（按鈕 right:14px + 半寬 18px = 32px） */
+  /* 右虛線（按鈕中心點對齊此虛線中心） */
   #borders .bc-borders__right {
     right: 32px;
   }
   .bc-attract-buy {
-    right: 14px;            /* 離右側邊緣留邊距 */
-    width: 36px;
-    height: 130px;
+    right: 11px;            /* 視覺按鈕中心點對齊虛線中心 */
+    width: 28px;
+    height: 95px;
   }
   .bc-attract-buy .bc-attract-buy__link [lang='en'] {
     font-size: 0.75rem;
+  }
+  .bc-attract-profile {
+    right: 7px;
+    top: calc(50% + 65.5px);
+    width: 36px;
+    height: 36px;
+  }
+  .bc-attract-profile .bc-attract-profile__link .c-icon {
+    font-size: 1.1rem;
   }
   .bc-attract-menu {
     width: 30px;

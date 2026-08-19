@@ -3159,6 +3159,11 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   vertical-align: middle;
 }
 
+/* 未登入狀態：imgbox 區域改顯示登入按鈕（置中） */
+.bc-welcome-loginbox {
+  justify-content: center;
+}
+
 /* ===== 響應式：深金歡迎容器（平板/手機漸進縮放） ===== */
 @media (max-width: 768px) {
   .bc-welcome-section {

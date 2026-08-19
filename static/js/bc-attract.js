@@ -147,6 +147,22 @@
             });
         });
 
+        // 個人資料圓形按鈕（2026-08-18：與 Buy & Order 相同的吸引滑鼠動畫）
+        document.querySelectorAll('.bc-attract-profile').forEach(function (el) {
+            new AttractEffect({
+                container: el.querySelector('.c-attract'),
+                hitArea: el.querySelector('.c-attract'),
+                reference: el.querySelector('.bc-attract-profile__link'),
+                layer: '.c-attract__layer',
+                translate3d: ['48px', '48px', '0px'],   // 位移幅度（吸引感）
+                scale: 1,
+                attractRange: 60,
+                easeHover: 'power2.out',
+                easeRelease: 'elastic.out(1, 0.6)',
+                releaseDuration: 0.6
+            });
+        });
+
         // 漢堡選單（rotateRange 12 對應 cheesetart menu）
         document.querySelectorAll('.bc-attract-menu').forEach(function (el) {
             new AttractEffect({

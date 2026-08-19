@@ -141,7 +141,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                     <div class="bc-welcome-info">
                         <span class="bc-welcome-greeting">
                             Buddy! 是時間補充咖啡因!
-                            <a href="{% url 'account_login' %}" class="bc-welcome-login-link">登入</a>
                         </span>
                         <div class="bc-welcome-points">
                             為自己充充電!
@@ -150,7 +149,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                     {% endif %}
                 </div>
             </div>
-            <!-- 右側：wakemeup.png 照片（浮出容器右上角，與底部慣常口味文字垂直對齊） -->
+            <!-- 右側：登入後顯示照片（wakemeup/上次訂單），未登入顯示登入按鈕 -->
+            {% if is_authenticated %}
             <div class="bc-welcome-imgbox">
                 {% if last_order_image %}
                 <a href="{{ last_order_link }}" class="bc-welcome-img-link">
@@ -163,6 +163,13 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                     <i class="icon-history"></i><span>按照之前口味落單?</span>
                 </div>
             </div>
+            {% else %}
+            <div class="bc-welcome-imgbox bc-welcome-loginbox">
+                <a href="{% url 'account_login' %}" class="bc-btn bc-btn-primary">
+                    <i class="icon-user"></i> 登入
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>
