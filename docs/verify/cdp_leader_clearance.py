@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""CDP 驗證：leader 右側照片貼齊各自文字行尾端（無 ~500px 空曠）
+"""CDP 驗證：topConcept 右側照片貼齊各自文字行尾端（無 ~500px 空曠）
 
-原站 hakujuji 文字行很長、會延伸到右側照片；中文文案較短，
-right:0 會讓照片與文字間出現大片空白（「位移」）。
-驗證：coffee_02/04/05/bean_01 的照片左緣 ≈ 該行文字尾端（間距 0~25px）。
+原站 hakujuji 文字行很長、會延伸到右側照片；中文文案較短。
+驗證：coffee_02/04/05/bean_01 的照片左緣 ≈ 該行文字尾端（-20~25px，
+coffee_04 右緣對齊欄位右緣、左緣可略前於文字）。
 """
 import asyncio, json, urllib.request
 import websockets
@@ -11,8 +11,8 @@ import websockets
 BASE = "http://localhost:9222/json/new?about:blank"
 
 JS = (
-    "(function(){var box=document.querySelector('.bc-leader .partsPc');"
-    "if(getComputedStyle(box).display==='none')box=document.querySelector('.bc-leader .partsSp');"
+    "(function(){var box=document.querySelector('.bc-top-concept .partsPc');"
+    "if(getComputedStyle(box).display==='none')box=document.querySelector('.bc-top-concept .partsSp');"
     "var out=[];box.querySelectorAll('.csBlock__leaderTarget').forEach(function(li){"
     "var spans=li.querySelectorAll('.csBlock__leaderTarget--text--p span');"
     "var last=spans[spans.length-1];var tr=last.getBoundingClientRect();"
@@ -65,7 +65,7 @@ async def main():
         bad = []
         for r in right_rows:
             gap = r["thumL"] - r["textEnd"]
-            if not (0 <= gap <= 25):
+            if not (-20 <= gap <= 25):
                 bad.append("%s:%d" % (r["src"], gap))
         res = "PASS" if not bad else "FAIL " + str(bad)
         ok = ok and not bad
@@ -74,4 +74,5 @@ async def main():
 
 
 asyncio.run(main())
+
 

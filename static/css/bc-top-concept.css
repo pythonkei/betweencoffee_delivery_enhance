@@ -1,0 +1,336 @@
+/* ============================================================
+   bc-top-concept.css — hakujuji topConcept 整合（about.html）
+   100% 複製 https://www.hakujuji-g.co.jp/ 首頁 .boxBottomLine
+   article.topConcept（top.css / top-sp.css / base.css / base-sp.css）。
+   取代原 bc-leader 區塊：sticky 標題欄 + 74% leader 欄 + 了解按鈕。
+
+   2026-08-21：
+     - 全寬（.grid 40px）+ 原始 vw 尺寸（非 0.7 縮放）
+     - 照片貼齊各自文字行尾端（避免短中文文案造成 ~500px 空曠）
+     - 動畫為 top.js 的 scroll-scrub 逐字點亮（bc-top-concept.js）
+   深色主題必要適配（非額外 UI）：
+     - 文字 → #fff、boxBottomLine 底線 → var(--bc-border)
+     - 了解按鈕深灰底維持在黑底可辨識、hover 轉品牌金
+   ============================================================ */
+
+/* ---- 桌面 / 行動版本切換（複製 hakujuji default.css） ---- */
+.bc-top-concept .partsPc { display: block; }
+.bc-top-concept .partsSp { display: none; }
+
+/* ---- 清單 reset（瀏覽器預設 ul padding 40px 會使所有行偏移） ---- */
+.bc-top-concept .csBlock__leader--list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==============================================================
+   boxBottomLine / grid（複製 hakujuji base.css，底線適配深色）
+   ============================================================== */
+.bc-top-concept {
+  position: relative;
+  padding-top: 55px;
+  padding-bottom: 55px;
+}
+.bc-top-concept::after {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  top: auto;
+  bottom: 0;
+  background-color: var(--bc-border);
+  z-index: 2;
+}
+.bc-top-concept .grid {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+/* ==============================================================
+   topConcept 佈局（複製 hakujuji top.css）
+   ============================================================== */
+.bc-top-concept .topConcept {
+  overflow: clip;
+}
+.bc-top-concept .topConcept__tob {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+.bc-top-concept .topConcept__tobLeader {
+  position: sticky;
+  -ms-flex-item-align: start;
+      align-self: flex-start;
+  top: 105px;
+  width: 25.9882869693%;
+}
+.bc-top-concept .topConcept__tobLeader .articleTitle--strong .articleTitle--p {
+  font-size: min(2.196193265vw, 30px);
+  letter-spacing: 0.2em;
+}
+.bc-top-concept .topConcept__tobContents {
+  width: 74.0117130307%;
+}
+.bc-top-concept .topConcept__tobContents .csBlock__leader {
+  padding: 0.5856515373vw 0vw 2.0497803807vw 1.4641288433vw;
+}
+
+/* ==============================================================
+   articleTitle（複製 hakujuji base.css，文字適配深色）
+   ============================================================== */
+.bc-top-concept .articleTitle {
+  line-height: 1.3;
+  text-align: left;
+  margin-bottom: 35px;
+}
+.bc-top-concept .articleTitle--p {
+  letter-spacing: 0.3em;
+}
+.bc-top-concept .articleTitle--strong .articleTitle--p {
+  font-size: 31px;
+  color: #fff;
+}
+.bc-top-concept .fontW--b {
+  font-weight: 600;
+}
+
+/* ==============================================================
+   cateBtn 了解按鈕（複製 hakujuji base.css，深色適配）
+   ============================================================== */
+.bc-top-concept .cateNav__target {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 20px;
+  margin-bottom: 10px;
+}
+.bc-top-concept .cateNav__title {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+.bc-top-concept .cateBtn__link,
+.bc-top-concept a.cateBtn__link {
+  position: relative;
+  min-width: 152px;
+  background-color: #fff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--bc-border);
+  border-radius: 9999px;
+  padding: 0 35px;
+  cursor: pointer;
+  transition-duration: 0.15s;
+  transition-timing-function: cubic-bezier(0.41, 0.12, 0.26, 0.97);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  text-decoration: none;
+}
+.bc-top-concept .cateBtn .cateDot {
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  -webkit-transform: translate(0, -50%);
+          transform: translate(0, -50%);
+}
+.bc-top-concept .cateBtn .cateDot::after {
+  width: 55.5555555556%;
+  height: 55.5555555556%;
+}
+.bc-top-concept .cateBtn .cateNav__title {
+  line-height: 1.3;
+  text-align: center;
+  padding: 11px 0;
+}
+.bc-top-concept .cateDot {
+  position: relative;
+  width: 10px;
+  height: 10px;
+}
+.bc-top-concept .cateDot::after {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  border-radius: 50%;
+  transition-duration: 0.15s;
+  transition-timing-function: cubic-bezier(0.41, 0.12, 0.26, 0.97);
+}
+.bc-top-concept .allBtn {
+  -ms-flex-item-align: start;
+      align-self: flex-start;
+  margin-right: 0;
+}
+.bc-top-concept .allBtn .cateBtn__link,
+.bc-top-concept .allBtn a.cateBtn__link {
+  background-color: rgba(77, 77, 77, 1);
+}
+.bc-top-concept .allBtn .cateDot::after {
+  background-color: #fff;
+}
+.bc-top-concept .allBtn .cateNav__title {
+  font-size: 14px;
+  color: #fff;
+}
+/* hover（複製 base.css，深色適配：邊框/底改品牌金） */
+.bc-top-concept .cateBtn__link:hover,
+.bc-top-concept .cateBtn__link:active,
+.bc-top-concept a.cateBtn__link:hover,
+.bc-top-concept a.cateBtn__link:active {
+  border-color: var(--bc-gold);
+}
+.bc-top-concept .cateBtn__link:hover .cateDot::after,
+.bc-top-concept .cateBtn__link:active .cateDot::after,
+.bc-top-concept a.cateBtn__link:hover .cateDot::after,
+.bc-top-concept a.cateBtn__link:active .cateDot::after {
+  width: 100%;
+  height: 100%;
+}
+.bc-top-concept .allBtn .cateBtn__link:hover,
+.bc-top-concept .allBtn .cateBtn__link:active,
+.bc-top-concept .allBtn a.cateBtn__link:hover,
+.bc-top-concept .allBtn a.cateBtn__link:active {
+  background-color: var(--bc-gold);
+}
+
+
+/* ==============================================================
+   csBlock__leader（桌面，複製 hakujuji base.css 原始 vw 尺寸）
+   ============================================================== */
+.bc-top-concept .csBlock__leaderTarget {
+  position: relative;
+  padding-top: 0.7320644217vw;
+  padding-bottom: 0.7320644217vw;
+}
+.bc-top-concept .csBlock__leaderTarget--1,
+.bc-top-concept .csBlock__leaderTarget--2 { padding-left: 13.17715959vw; }
+.bc-top-concept .csBlock__leaderTarget--6 { padding-left: 6.4421669107vw; }
+.bc-top-concept .csBlock__leaderTarget--11,
+.bc-top-concept .csBlock__leaderTarget--12,
+.bc-top-concept .csBlock__leaderTarget--13 { padding-left: 10.6149341142vw; }
+
+.bc-top-concept .csBlock__leaderTarget--text--p {
+  margin: 0; /* reset（Bootstrap 預設 p margin-bottom 1rem 會撐開行距） */
+  font-size: 3.2942898975vw;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.023em;
+  color: #fff;
+}
+.bc-top-concept .csBlock__leaderTarget--text--p span { opacity: 0.3; }
+.bc-top-concept .csBlock__leaderTarget--2 .csBlock__leaderTarget--text--p { letter-spacing: 0.044em; }
+.bc-top-concept .csBlock__leaderTarget--3 .csBlock__leaderTarget--text--p { letter-spacing: 0.04em; }
+.bc-top-concept .csBlock__leaderTarget--4 .csBlock__leaderTarget--text--p { letter-spacing: 0.055em; }
+.bc-top-concept .csBlock__leaderTarget--5 .csBlock__leaderTarget--text--p { letter-spacing: 0.005em; }
+.bc-top-concept .csBlock__leaderTarget--7 .csBlock__leaderTarget--text--p { letter-spacing: 0.11em; }
+.bc-top-concept .csBlock__leaderTarget--8 .csBlock__leaderTarget--text--p { letter-spacing: 0.03em; }
+.bc-top-concept .csBlock__leaderTarget--9 .csBlock__leaderTarget--text--p { letter-spacing: 0; }
+.bc-top-concept .csBlock__leaderTarget--10 .csBlock__leaderTarget--text--p { letter-spacing: 0.092em; }
+.bc-top-concept .csBlock__leaderTarget--11 .csBlock__leaderTarget--text--p { letter-spacing: 0.138em; }
+.bc-top-concept .csBlock__leaderTarget--12 .csBlock__leaderTarget--text--p { letter-spacing: 0.08em; }
+.bc-top-concept .csBlock__leaderTarget--13 .csBlock__leaderTarget--text--p { letter-spacing: 0; }
+
+.bc-top-concept .csBlock__leaderThum { position: absolute; }
+.bc-top-concept .csBlock__leaderThum img { width: 100%; height: 100%; object-fit: contain; }
+.bc-top-concept .csBlock__leaderThum--1 { width: 11.3469985359vw; height: 7.76vw; top: 0.3660322108vw; left: 0; }
+.bc-top-concept .csBlock__leaderThum--2 { width: 5.1244509517vw; height: 3.51vw; top: 0.3660322108vw; left: 51.3vw; }
+.bc-top-concept .csBlock__leaderThum--3 { width: 5.1244509517vw; height: 3.51vw; top: 0.3660322108vw; left: 0; }
+.bc-top-concept .csBlock__leaderThum--4 { width: 11.4934114202vw; height: 7.83vw; top: 0.3660322108vw; left: 55.6vw; }
+.bc-top-concept .csBlock__leaderThum--5 { width: 5.1244509517vw; height: 3.44vw; top: 0.3660322108vw; left: 52.8vw; }
+.bc-top-concept .csBlock__leaderThum--6 { width: 9.3704245974vw; height: 12.52vw; top: 0.3660322108vw; left: 0; }
+.bc-top-concept .csBlock__leaderThum--7 { width: 3.953147877vw; height: 3.44vw; top: 0.3660322108vw; left: 50.1vw; }
+
+
+/* ==============================================================
+   csBlock__leader（行動 ≤767px，複製 hakujuji base-sp.css + top-sp.css）
+   ============================================================== */
+@media only screen and (max-width: 767px) {
+  .bc-top-concept .partsPc { display: none; }
+  .bc-top-concept .partsSp { display: block; }
+
+  .bc-top-concept .topConcept .articleTitle { margin-bottom: 25px; }
+  .bc-top-concept .topConcept__tob { display: block; }
+  .bc-top-concept .topConcept__tobLeader {
+    position: relative;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  .bc-top-concept .topConcept__tobLeader .articleTitle--strong .articleTitle--p {
+    font-size: min(4.8vw, 18px);
+    letter-spacing: 0.2em;
+  }
+  .bc-top-concept .topConcept__tobContents { width: 100%; }
+  .bc-top-concept .topConcept__tobContents .csBlock__leader {
+    padding: 2.1333333333vw 0vw 7.4666666667vw 0;
+  }
+
+  .bc-top-concept .csBlock__leaderTarget { padding-top: 1.3333333333vw; padding-bottom: 1.3333333333vw; }
+  .bc-top-concept .csBlock__leaderTarget--1,
+  .bc-top-concept .csBlock__leaderTarget--2,
+  .bc-top-concept .csBlock__leaderTarget--3 { padding-left: 31.2vw; }
+  .bc-top-concept .csBlock__leaderTarget--5,
+  .bc-top-concept .csBlock__leaderTarget--6 { padding-right: 21.3333333333vw; }
+  .bc-top-concept .csBlock__leaderTarget--6 { padding-left: 0; }
+  .bc-top-concept .csBlock__leaderTarget--11,
+  .bc-top-concept .csBlock__leaderTarget--12 { padding-left: 22.6666666667vw; }
+  .bc-top-concept .csBlock__leaderTarget--13 { padding-left: 0; }
+  .bc-top-concept .csBlock__leaderTarget--13,
+  .bc-top-concept .csBlock__leaderTarget--14,
+  .bc-top-concept .csBlock__leaderTarget--15 { padding-right: 32vw; }
+  .bc-top-concept .csBlock__leaderTarget--16,
+  .bc-top-concept .csBlock__leaderTarget--17,
+  .bc-top-concept .csBlock__leaderTarget--18 { padding-left: 17.3333333333vw; }
+  .bc-top-concept .csBlock__leaderTarget--17,
+  .bc-top-concept .csBlock__leaderTarget--18 { padding-right: 22.6666666667vw; }
+
+  .bc-top-concept .csBlock__leaderTarget--text--p { font-size: 5.0666666667vw; letter-spacing: 0.05em; }
+  .bc-top-concept .csBlock__leaderTarget--2 .csBlock__leaderTarget--text--p { letter-spacing: 0.01em; }
+  .bc-top-concept .csBlock__leaderTarget--3 .csBlock__leaderTarget--text--p { letter-spacing: 0.11em; }
+  .bc-top-concept .csBlock__leaderTarget--4 .csBlock__leaderTarget--text--p { letter-spacing: 0.095em; }
+  .bc-top-concept .csBlock__leaderTarget--5 .csBlock__leaderTarget--text--p { letter-spacing: -0.01em; }
+  .bc-top-concept .csBlock__leaderTarget--7 .csBlock__leaderTarget--text--p { letter-spacing: 0.05em; }
+  .bc-top-concept .csBlock__leaderTarget--8 .csBlock__leaderTarget--text--p { letter-spacing: 0.06em; }
+  .bc-top-concept .csBlock__leaderTarget--9 .csBlock__leaderTarget--text--p { letter-spacing: 0.085em; }
+  .bc-top-concept .csBlock__leaderTarget--11 .csBlock__leaderTarget--text--p { letter-spacing: 0.12em; }
+  .bc-top-concept .csBlock__leaderTarget--12 .csBlock__leaderTarget--text--p { letter-spacing: 0.08em; }
+  .bc-top-concept .csBlock__leaderTarget--13 .csBlock__leaderTarget--text--p { letter-spacing: 0.15em; }
+  .bc-top-concept .csBlock__leaderTarget--15 .csBlock__leaderTarget--text--p { letter-spacing: 0.1em; }
+  .bc-top-concept .csBlock__leaderTarget--17 .csBlock__leaderTarget--text--p { letter-spacing: 0.15em; }
+
+  .bc-top-concept .csBlock__leaderThum--1 { width: 28vw; height: 19.15vw; top: 1.8666666667vw; left: 0; }
+  .bc-top-concept .csBlock__leaderThum--2 { width: 17.3333333333vw; height: 11.89vw; top: 1.3333333333vw; left: 62.3vw; }
+  .bc-top-concept .csBlock__leaderThum--3 { width: 17.0666666667vw; height: 11.7vw; top: 2.1333333333vw; left: 0; }
+  .bc-top-concept .csBlock__leaderThum--4 { width: 27.7333333333vw; height: 18.9vw; top: 1.8666666667vw; left: 48.4vw; }
+  .bc-top-concept .csBlock__leaderThum--5 { display: none; }
+  .bc-top-concept .csBlock__leaderThum--6 { width: 13.8666666667vw; height: 20vw; top: 1.8666666667vw; left: 0; }
+  .bc-top-concept .csBlock__leaderThum--7 { width: 18.6666666667vw; height: 12.5333333333vw; top: 1.3333333333vw; left: 66vw; }
+
+  /* base-sp.css 按鈕 */
+  .bc-top-concept .cateBtn__link, .bc-top-concept a.cateBtn__link { min-width: 130px; padding: 0 35px; }
+  .bc-top-concept .cateBtn .cateDot { left: 14px; }
+  .bc-top-concept .cateDot { width: 8px; height: 8px; }
+  .bc-top-concept .cateBtn .cateNav__title { padding: 9px 0; }
+  .bc-top-concept .allBtn .cateBtn__link, .bc-top-concept .allBtn a.cateBtn__link { min-width: 90px; }
+  .bc-top-concept .allBtn .cateNav__title { font-size: 11px; }
+}
+

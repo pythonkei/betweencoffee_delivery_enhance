@@ -11,7 +11,7 @@
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}" />
 <!-- hakujuji csBlock__leader 逐字亮起（完整複製原站樣式） -->
-<link rel="stylesheet" href="{% static 'css/bc-leader.css' %}?v=20260820b" />
+<link rel="stylesheet" href="{% static 'css/bc-top-concept.css' %}?v=20260821a" />
 {% endblock %}
 
 
@@ -141,10 +141,27 @@
     </ul>
 </section>
 
-<!-- hakujuji csBlock__leader（逐字亮起；桌面 partsPc + 行動 partsSp，100% 複製原站結構） -->
-<section class="bc-leader">
-    <div class="container">
-        <div class="csBlock csBlock__leader partsPc">
+<!-- hakujuji topConcept（sticky 標題 + 74% leader + 捲動逐字點亮；取代原 bc-leader） -->
+<section class="boxBottomLine article topConcept bc-top-concept">
+    <section class="grid">
+        <div class="topConcept__tob">
+            <div class="topConcept__tobLeader">
+                <h2 class="articleTitle articleTitle--strong">
+                    <p class="fontW--b articleTitle--p">
+                        為什麼，Between Coffee<br>
+                        會如此堅持<br>
+                        一杯好咖啡。
+                    </p>
+                </h2>
+                <div class="cateNav__target cateBtn allBtn">
+                    <a class="cateBtn__link" href="{% url 'coffee_menu' %}" title="了解更多">
+                        <div class="cateDot"></div>
+                        <p class="cateNav__title">了解更多</p>
+                    </a>
+                </div>
+            </div>
+            <div class="topConcept__tobContents">
+                <div class="csBlock csBlock__leader partsPc">
             <ul class="csBlock__leader--list">
                 <li class="csBlock__leaderTarget csBlock__leaderTarget--1">
                 <div class="csBlock__leaderThum csBlock__leaderThum--1"><img src="{% static 'images/coffee_01.png' %}" alt=""></div>
@@ -257,8 +274,10 @@
                 <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">恰度好的一杯。</p></div>
             </li>
         </ul>
-    </div>
-    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </section>
 
 <section class="ftco-section-blank"></section>
@@ -340,5 +359,5 @@
 <!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
 <script src="{% static 'js/bc-series.js' %}?v=20260818w"></script>
 <!-- hakujuji csBlock__leader：逐字亮起動畫 -->
-<script src="{% static 'js/bc-leader.js' %}?v=20260819a"></script>
+<script src="{% static 'js/bc-top-concept.js' %}?v=20260821a"></script>
 {% endblock %}

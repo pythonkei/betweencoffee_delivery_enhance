@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""CDP 驗證：about.html 的 hakujuji csBlock__leader 整合
+"""CDP 驗證：about.html 的 hakujuji topConcept 整合
 - 桌面 1280x900：partsPc 顯示（13 行）、partsSp 隱藏
 - 行動 375x667：partsSp 顯示（18 行）、partsPc 隱藏
-- 逐字動畫：scroll 前 span opacity=0.3 → scroll 進視窗後 opacity=1
+- scroll-scrub 逐字點亮：初始 span opacity=0.3 → 捲到區塊底部全部 opacity=1
 - 輸出截圖
 """
 import asyncio, json, urllib.request
@@ -51,7 +51,7 @@ async def main():
 
         leader = await evaljs(
             "(function(){"
-            "var s=document.querySelector('.bc-leader');if(!s)return{missing:true};"
+            "var s=document.querySelector('.bc-top-concept');if(!s)return{missing:true};"
             "var pc=s.querySelector('.partsPc .csBlock__leaderTarget--text--p span');"
             "var sp=s.querySelector('.partsSp .csBlock__leaderTarget--text--p span');"
             "return{"
@@ -66,22 +66,23 @@ async def main():
         )
         print("DESKTOP before scroll:", json.dumps(leader, ensure_ascii=False))
 
-        # 滾動到 leader 上方（觸發 ScrollTrigger 逐字亮起）
+        # 捲到區塊底部（scrub end：全部點亮）
         await evaljs(
             "(function(){"
-            "var s=document.querySelector('.bc-leader');"
-            "window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY - window.innerHeight*0.6);"
+            "var s=document.querySelector('.bc-top-concept');"
+            "window.scrollTo(0, s.getBoundingClientRect().bottom + window.scrollY - window.innerHeight*0.4);"
             "return true;})()"
         )
-        await asyncio.sleep(2.5)
+        await asyncio.sleep(1.2)
         after = await evaljs(
             "(function(){"
-            "var s=document.querySelector('.bc-leader');"
-            "var pc=s.querySelector('.partsPc .csBlock__leaderTarget--text--p span');"
-            "return{spanOpacityAfter:(pc?getComputedStyle(pc).opacity:null)};})()"
+            "var s=document.querySelector('.bc-top-concept');"
+            "var spans=s.querySelectorAll('.partsPc .csBlock__leaderTarget--text--p span');"
+            "var one=0;spans.forEach(function(sp){if(parseFloat(getComputedStyle(sp).opacity)>=0.99)one++;});"
+            "return{litOne:one,total:spans.length};})()"
         )
         print("DESKTOP after scroll:", json.dumps(after, ensure_ascii=False))
-        await shot("/tmp/bc_leader_desktop.png")
+        await shot("/tmp/bc_topconcept_desktop.png")
 
         # ===== 行動 =====
         await send(msg("Emulation.setDeviceMetricsOverride",
@@ -90,7 +91,7 @@ async def main():
         await asyncio.sleep(4)
         mleader = await evaljs(
             "(function(){"
-            "var s=document.querySelector('.bc-leader');if(!s)return{missing:true};"
+            "var s=document.querySelector('.bc-top-concept');if(!s)return{missing:true};"
             "var sp=s.querySelector('.partsSp .csBlock__leaderTarget--text--p span');"
             "return{"
             "pcVisible:getComputedStyle(s.querySelector('.partsPc')).display!=='none',"
@@ -105,21 +106,23 @@ async def main():
         print("MOBILE before scroll:", json.dumps(mleader, ensure_ascii=False))
         await evaljs(
             "(function(){"
-            "var s=document.querySelector('.bc-leader');"
-            "window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY - window.innerHeight*0.6);"
+            "var s=document.querySelector('.bc-top-concept');"
+            "window.scrollTo(0, s.getBoundingClientRect().bottom + window.scrollY - window.innerHeight*0.4);"
             "return true;})()"
         )
-        await asyncio.sleep(2.5)
+        await asyncio.sleep(1.2)
         mafter = await evaljs(
             "(function(){"
-            "var s=document.querySelector('.bc-leader');"
-            "var sp=s.querySelector('.partsSp .csBlock__leaderTarget--text--p span');"
-            "return{spanOpacityAfter:(sp?getComputedStyle(sp).opacity:null)};})()"
+            "var s=document.querySelector('.bc-top-concept');"
+            "var spans=s.querySelectorAll('.partsSp .csBlock__leaderTarget--text--p span');"
+            "var one=0;spans.forEach(function(sp){if(parseFloat(getComputedStyle(sp).opacity)>=0.99)one++;});"
+            "return{litOne:one,total:spans.length};})()"
         )
         print("MOBILE after scroll:", json.dumps(mafter, ensure_ascii=False))
-        await shot("/tmp/bc_leader_mobile.png")
+        await shot("/tmp/bc_topconcept_mobile.png")
 
         await send(msg("Page.close"))
 
 
 asyncio.run(main())
+
