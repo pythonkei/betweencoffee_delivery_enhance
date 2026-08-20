@@ -11,7 +11,7 @@
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}" />
 <!-- hakujuji csBlock__leader 逐字亮起（完整複製原站樣式） -->
-<link rel="stylesheet" href="{% static 'css/bc-leader.css' %}?v=20260819a" />
+<link rel="stylesheet" href="{% static 'css/bc-leader.css' %}?v=20260820a" />
 {% endblock %}
 
 
@@ -143,9 +143,10 @@
 
 <!-- hakujuji csBlock__leader（逐字亮起；桌面 partsPc + 行動 partsSp，100% 複製原站結構） -->
 <section class="bc-leader">
-    <div class="csBlock csBlock__leader partsPc">
-        <ul class="csBlock__leader--list">
-            <li class="csBlock__leaderTarget csBlock__leaderTarget--1">
+    <div class="container">
+        <div class="csBlock csBlock__leader partsPc">
+            <ul class="csBlock__leader--list">
+                <li class="csBlock__leaderTarget csBlock__leaderTarget--1">
                 <div class="csBlock__leaderThum csBlock__leaderThum--1"><img src="{% static 'images/coffee_01.png' %}" alt=""></div>
                 <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">我們相信，一杯好咖啡的溫度，來</p></div>
             </li>
@@ -256,6 +257,7 @@
                 <div class="csBlock__leaderTarget--text"><p class="csBlock__leaderTarget--text--p">恰度好的一杯。</p></div>
             </li>
         </ul>
+    </div>
     </div>
 </section>
 

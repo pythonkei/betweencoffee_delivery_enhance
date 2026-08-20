@@ -49,10 +49,11 @@ async def run_viewport(width, height, mobile, cfg):
 
 
 async def main():
-    # 桌面：1280px，1vw=12.8px；section padding-left 1.4641288433vw≈18.7px
-    # li--1/2:+13.17715959vw | li--6:+6.4421669107vw | li--11~13:+10.6149341142vw
-    desk_expected = [187, 187, 19, 19, 19, 101, 19, 19, 19, 19, 155, 155, 155]
-    # 行動：375px，1vw=3.75px；section padding-left 5.3333333333vw≈20px
+    # 桌面 1280px：外層 .container（1140 max）+ 0.7 縮放（--luv=0.7vw=8.96px）
+    # container 左 content ≈85、csBlock padding-left 1.4641288433×8.96≈13px → li 起點 100
+    # li--1/2:+13.17715959×8.96≈118 | li--6:+6.4421669107×8.96≈58 | li--11~13:+10.6149341142×8.96≈95
+    desk_expected = [218, 218, 100, 100, 100, 157, 100, 100, 100, 100, 195, 195, 195]
+    # 行動：375px，1vw=3.75px；section padding-left 5.3333333333vw≈20px（無容器縮放）
     # li--1~3:+31.2vw | li--6:0 | li--11/12:+22.67vw | li--13:0 | li--16~18:+17.33vw
     mob_expected = [137, 137, 137, 20, 20, 20, 20, 20, 20, 20, 105, 105, 20, 20, 20, 85, 85, 85]
     await run_viewport(1280, 900, False, desk_expected)
