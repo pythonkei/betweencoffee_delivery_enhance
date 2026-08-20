@@ -230,13 +230,13 @@
 }
 .bc-top-concept .csBlock__leaderTarget--1,
 .bc-top-concept .csBlock__leaderTarget--2 { padding-left: 13.17715959vw; }
-.bc-top-concept .csBlock__leaderTarget--6 { padding-left: 6.4421669107vw; padding-bottom: 5.2vw; }
+.bc-top-concept .csBlock__leaderTarget--6 { padding-left: 6.4421669107vw; }
 .bc-top-concept .csBlock__leaderTarget--11,
 .bc-top-concept .csBlock__leaderTarget--12,
 .bc-top-concept .csBlock__leaderTarget--13 { padding-left: 10.6149341142vw; }
 
 .bc-top-concept .csBlock__leaderTarget--3 { padding-right: 5.72vw; }
-.bc-top-concept .csBlock__leaderTarget--6 { padding-right: 12.09vw; }
+.bc-top-concept .csBlock__leaderTarget--6 { padding-right: 5.7vw; }
 .bc-top-concept .csBlock__leaderTarget--9 { padding-right: 5.72vw; }
 .bc-top-concept .csBlock__leaderTarget--13 { padding-right: 4.65vw; }
 
@@ -272,17 +272,15 @@
 .bc-top-concept .csBlock__leaderThum--1 { width: 11.3469985359vw; height: 7.76vw; top: 0.3660322108vw; left: 0; }
 .bc-top-concept .csBlock__leaderThum--2 { width: 5.1244509517vw; height: 3.51vw; top: 0.3660322108vw; right: 0; }
 .bc-top-concept .csBlock__leaderThum--3 { width: 5.1244509517vw; height: 3.51vw; top: 0.3660322108vw; left: 0; }
-.bc-top-concept .csBlock__leaderThum--4 { width: 11.4934114202vw; height: 7.83vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--4 { width: 5.1vw; height: 3.5vw; top: 0.3660322108vw; right: 0; }
 .bc-top-concept .csBlock__leaderThum--5 { width: 5.1244509517vw; height: 3.44vw; top: 0.3660322108vw; right: 0; }
 .bc-top-concept .csBlock__leaderThum--6 { width: 9.3704245974vw; height: 12.52vw; top: 0.3660322108vw; left: 0; }
 .bc-top-concept .csBlock__leaderThum--7 { width: 3.953147877vw; height: 3.44vw; top: 0.3660322108vw; right: 0; }
 
-/* 2026-08-21：768–940px li--6（coffee_04 行）內容不足自然文字寬，
-   文字會溢出蓋到照片 → 此區間字級降至 2.5vw，讓文字停在照片前。
-   （置於基底 font-size 規則之後才不會被覆蓋） */
+/* 2026-08-21：coffee_04 縮小至行內後，li--6 已有充足餘裕，無需窄寬度降字級 */
 @media only screen and (min-width: 768px) and (max-width: 939.98px) {
   .bc-top-concept .csBlock__leaderTarget--text--p {
-    font-size: 2.5vw;
+    font-size: 2.6vw;
   }
 }
 
