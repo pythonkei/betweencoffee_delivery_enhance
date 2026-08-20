@@ -1,16 +1,32 @@
 #!/usr/bin/env python3
-"""CDP 驗證：leader 右側照片（coffee_02/04/05，right:0）不被固定 Order/profile 按鈕遮住
+"""CDP 驗證：leader 右側照片貼齊各自文字行尾端（無 ~500px 空曠）
 
-- 檢查多種桌面寬度（1280 / 1024 / 768）下，三張標記照片的右緣 < profile 按鈕左緣
-- 行動版（≤767）照片不涉及（partsPc 隱藏）
+原站 hakujuji 文字行很長、會延伸到右側照片；中文文案較短，
+right:0 會讓照片與文字間出現大片空白（「位移」）。
+驗證：coffee_02/04/05/bean_01 的照片左緣 ≈ 該行文字尾端（間距 0~25px）。
 """
 import asyncio, json, urllib.request
 import websockets
 
 BASE = "http://localhost:9222/json/new?about:blank"
 
+JS = (
+    "(function(){var box=document.querySelector('.bc-leader .partsPc');"
+    "if(getComputedStyle(box).display==='none')box=document.querySelector('.bc-leader .partsSp');"
+    "var out=[];box.querySelectorAll('.csBlock__leaderTarget').forEach(function(li){"
+    "var spans=li.querySelectorAll('.csBlock__leaderTarget--text--p span');"
+    "var last=spans[spans.length-1];var tr=last.getBoundingClientRect();"
+    "li.querySelectorAll('.csBlock__leaderThum img').forEach(function(img){"
+    "var ir=img.getBoundingClientRect();out.push({n:li.className.replace('csBlock__leaderTarget csBlock__leaderTarget--',''),"
+    "src:img.src.split('/').pop(),textEnd:Math.round(tr.right),"
+    "thumL:Math.round(ir.left),thumR:Math.round(ir.right)});});});"
+    "return out;})()"
+)
 
-async def check(width):
+RIGHT = ("coffee_02.png", "coffee_04.png", "coffee_05.png", "bean_01.png")
+
+
+async def check(width, mobile):
     req = urllib.request.Request(BASE, method="PUT")
     tab = json.loads(urllib.request.urlopen(req).read())
     async with websockets.connect(tab["webSocketDebuggerUrl"], max_size=None) as ws:
@@ -32,33 +48,30 @@ async def check(width):
         await send(msg("Page.enable"))
         await send(msg("Runtime.enable"))
         await send(msg("Emulation.setDeviceMetricsOverride",
-                       {"width": width, "height": 900, "deviceScaleFactor": 1, "mobile": False}))
+                       {"width": width, "height": 900, "deviceScaleFactor": 1, "mobile": mobile}))
         await send(msg("Page.navigate", {"url": "http://localhost:8081/about/"}))
         await asyncio.sleep(4)
-        js = ("(function(){var box=document.querySelector('.bc-leader .partsPc');"
-              "var ths=[];box.querySelectorAll('.csBlock__leaderThum img').forEach(function(th){"
-              "var r=th.getBoundingClientRect();ths.push({src:th.src.split('/').pop(),"
-              "l:Math.round(r.left),r:Math.round(r.right),t:Math.round(r.top),b:Math.round(r.bottom)});});"
-              "var flagged=ths.filter(function(t){return /coffee_(02|04|05)/.test(t.src)});"
-              "var prof=document.querySelector('.bc-attract-profile').getBoundingClientRect();"
-              "var order=document.querySelector('.bc-attract-buy').getBoundingClientRect();"
-              "return{flagged:flagged,profileLeft:Math.round(prof.left),orderLeft:Math.round(order.left)};})()")
-        r = await evaljs(js)
+        r = await evaljs(JS)
         await send(msg("Page.close"))
         return r
 
 
 async def main():
     ok = True
-    for w in [1280, 1024, 768]:
-        r = await check(w)
-        prof_l = r["profileLeft"]
-        gaps = {t["src"]: prof_l - t["r"] for t in r["flagged"]}
-        cleared = all(g >= 10 for g in gaps.values())
-        ok = ok and cleared
-        print("width=%d profileLeft=%d flaggedRightGaps=%s -> %s"
-              % (w, prof_l, gaps, "PASS" if cleared else "FAIL"))
+    for w, m, label in [(1280, False, "desktop"), (1024, False, "desktop"),
+                        (768, False, "desktop"), (375, True, "mobile")]:
+        rows = await check(w, m)
+        right_rows = [r for r in rows if r["src"] in RIGHT]
+        bad = []
+        for r in right_rows:
+            gap = r["thumL"] - r["textEnd"]
+            if not (0 <= gap <= 25):
+                bad.append("%s:%d" % (r["src"], gap))
+        res = "PASS" if not bad else "FAIL " + str(bad)
+        ok = ok and not bad
+        print("%dpx %s -> %s" % (w, label, res))
     print("  RESULT:", "PASS" if ok else "FAIL")
 
 
 asyncio.run(main())
+
