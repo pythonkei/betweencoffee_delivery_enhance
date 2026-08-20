@@ -87,7 +87,7 @@
    1200 以下 li--6 已無餘裕（1024 實測 403px < 自然 440px），維持 40px。 */
 @media only screen and (min-width: 1200px) {
   .bc-top-concept .topConcept__tobContents .csBlock__leader {
-    padding-right: 80px;
+    padding-right: 70px;
   }
 }
 
@@ -275,6 +275,15 @@
 .bc-top-concept .csBlock__leaderThum--5 { width: 5.1244509517vw; height: 3.44vw; top: 0.3660322108vw; right: 0; }
 .bc-top-concept .csBlock__leaderThum--6 { width: 9.3704245974vw; height: 12.52vw; top: 0.3660322108vw; left: 0; }
 .bc-top-concept .csBlock__leaderThum--7 { width: 3.953147877vw; height: 3.44vw; top: 0.3660322108vw; right: 0; }
+
+/* 2026-08-21：768–940px li--6（coffee_04 行）內容不足自然文字寬，
+   文字會溢出蓋到照片 → 此區間字級降至 2.5vw，讓文字停在照片前。
+   （置於基底 font-size 規則之後才不會被覆蓋） */
+@media only screen and (min-width: 768px) and (max-width: 939.98px) {
+  .bc-top-concept .csBlock__leaderTarget--text--p {
+    font-size: 2.5vw;
+  }
+}
 
 
 /* ==============================================================
