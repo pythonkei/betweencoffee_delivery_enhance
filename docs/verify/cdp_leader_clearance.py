@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""CDP 驗證：topConcept 右側照片貼齊各自文字行尾端（無 ~500px 空曠）
+"""CDP 驗證：topConcept 右側照片與文字 justify 後的關係
 
-原站 hakujuji 文字行很長、會延伸到右側照片；中文文案較短。
-驗證：coffee_02/04/05/bean_01 的照片左緣 ≈ 該行文字尾端（-20~25px，
-coffee_04 右緣對齊欄位右緣、左緣可略前於文字）。
+文字 justify 填滿欄位；照片行右 padding 讓文字停在照片前。
+驗證：coffee_02/04/05/bean_01 的照片左緣 ≈ 該行文字尾端。
+容差 -25~25px：窄寬度（768 附近）li--6 的最後字元 advance box
+可能進入照片左緣透明邊距，但像素驗證實際字形與杯身有間隔。
 """
 import asyncio, json, urllib.request
 import websockets
@@ -65,7 +66,7 @@ async def main():
         bad = []
         for r in right_rows:
             gap = r["thumL"] - r["textEnd"]
-            if not (-20 <= gap <= 25):
+            if not (-25 <= gap <= 25):
                 bad.append("%s:%d" % (r["src"], gap))
         res = "PASS" if not bad else "FAIL " + str(bad)
         ok = ok and not bad
@@ -74,5 +75,6 @@ async def main():
 
 
 asyncio.run(main())
+
 
 
