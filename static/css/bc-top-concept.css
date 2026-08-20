@@ -242,7 +242,8 @@
 
 .bc-top-concept .csBlock__leaderTarget--text--p {
   margin: 0; /* reset（Bootstrap 預設 p margin-bottom 1rem 會撐開行距） */
-  font-size: 2.8vw; /* 文字縮小（原 3.2943vw；30% 縮小後 justify 字距過寬，調至 2.8vw 平衡） */
+  font-size: 2.6vw; /* 文字縮小：給 li--6（coffee_04 行）充足餘裕，
+      即使捲軸寬度/fallback 字型差異也不讓文字溢到照片下方（原 2.8vw 僅 3px 餘裕） */
   line-height: 1;
   white-space: nowrap;
   letter-spacing: 0.023em;
