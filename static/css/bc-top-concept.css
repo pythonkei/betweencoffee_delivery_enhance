@@ -266,7 +266,7 @@
 .bc-top-concept .csBlock__leaderTarget--12 .csBlock__leaderTarget--text--p { letter-spacing: 0.08em; }
 .bc-top-concept .csBlock__leaderTarget--13 .csBlock__leaderTarget--text--p { letter-spacing: 0; }
 
-.bc-top-concept .csBlock__leaderThum { position: absolute; }
+.bc-top-concept .csBlock__leaderThum { position: absolute; z-index: 1; }
 .bc-top-concept .csBlock__leaderThum img { width: 100%; height: 100%; object-fit: contain; }
 .bc-top-concept .csBlock__leaderThum--1 { width: 11.3469985359vw; height: 7.76vw; top: 0.3660322108vw; left: 0; }
 .bc-top-concept .csBlock__leaderThum--2 { width: 5.1244509517vw; height: 3.51vw; top: 0.3660322108vw; right: 0; }
