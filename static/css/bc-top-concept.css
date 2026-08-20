@@ -82,6 +82,14 @@
 .bc-top-concept .topConcept__tobContents .csBlock__leader {
   padding: 0.5856515373vw 40px 2.0497803807vw 1.4641288433vw;
 }
+/* 2026-08-21：縮小文字區域（加大右 padding）→ justify 字距收斂。
+   li--6（coffee_04 行）內容空間在此極限值下仍容得下自然文字寬；
+   1200 以下 li--6 已無餘裕（1024 實測 403px < 自然 440px），維持 40px。 */
+@media only screen and (min-width: 1200px) {
+  .bc-top-concept .topConcept__tobContents .csBlock__leader {
+    padding-right: 80px;
+  }
+}
 
 /* ==============================================================
    articleTitle（複製 hakujuji base.css，文字適配深色）
