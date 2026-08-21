@@ -49,10 +49,10 @@ async def run_viewport(width, height, mobile, cfg):
 
 
 async def main():
-    # 桌面 1280px：li 起點 367；縮排 li--1/2 +6.6vw≈84、li--6 +3.6vw≈46、li--11~13 +6.6vw≈84
-    desk_expected = [451, 451, 367, 367, 367, 413, 367, 367, 367, 367, 451, 451, 451]
-    # 行動 375px：li 起點 40；縮排 li--1~3 +14vw≈53、li--11/12 +22.67vw≈85、li--16~18 +17.33vw≈65
-    mob_expected = [93, 93, 93, 40, 40, 40, 40, 40, 40, 40, 125, 125, 40, 40, 40, 105, 105, 105]
+    # 桌面 1280px：li 起點 367；縮排 li--1/2 +7.6vw≈97、li--6 +4.1vw≈52、li--11~13 +7.1vw≈91
+    desk_expected = [464, 464, 367, 367, 367, 419, 367, 367, 367, 367, 458, 458, 458]
+    # 行動 375px：li 起點 40；縮排 li--1~3 +15vw≈56、li--11/12 +21.5vw≈81、li--16~18 +17.5vw≈66
+    mob_expected = [96, 96, 96, 40, 40, 40, 40, 40, 40, 40, 121, 121, 40, 40, 40, 106, 106, 106]
     await run_viewport(1280, 900, False, desk_expected)
     await run_viewport(375, 812, True, mob_expected)
 
