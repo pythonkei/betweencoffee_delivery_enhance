@@ -224,35 +224,33 @@
   padding-top: 0.7320644217vw;
   padding-bottom: 0.7320644217vw;
 }
-/* 2026-08-21：照片與文字分離（不壓字）——照片垂直覆蓋的每一行都水平避讓，
-   文字縮小（2.5/2.75vw）使各照片行文字能完整容納 */
+/* 2026-08-21：照片與文字分離（不壓字）——照片行水平避讓；全部文字 justify 填滿右緣；
+   字級 3vw；照片縮小（thum--1 6vw、--2/3/5 3vw、--4 4vw、--6 6vw、--7 2.5vw）
+   使各照片行文字完整容納 */
 .bc-top-concept .csBlock__leaderTarget--1,
-.bc-top-concept .csBlock__leaderTarget--2,
-.bc-top-concept .csBlock__leaderTarget--3 { padding-left: 12.5vw; }  /* thum--1（11.35vw，覆蓋 li1-3） */
-.bc-top-concept .csBlock__leaderTarget--6,
-.bc-top-concept .csBlock__leaderTarget--7 { padding-left: 6.44vw; }  /* thum--3（5.12vw，覆蓋 li6-7） */
+.bc-top-concept .csBlock__leaderTarget--2 { padding-left: 6.6vw; }  /* thum--1（6vw） */
+.bc-top-concept .csBlock__leaderTarget--6 { padding-left: 3.6vw; }  /* thum--3（3vw） */
 .bc-top-concept .csBlock__leaderTarget--11,
 .bc-top-concept .csBlock__leaderTarget--12,
-.bc-top-concept .csBlock__leaderTarget--13 { padding-left: 10.61vw; }  /* thum--6（9.37vw，覆蓋 li11-13） */
-/* 右側照片避讓（照片寬 + 間距；覆蓋的每一行） */
-.bc-top-concept .csBlock__leaderTarget--3 { padding-right: 5.7vw; }   /* thum--2（5.12vw） */
-.bc-top-concept .csBlock__leaderTarget--6,
-.bc-top-concept .csBlock__leaderTarget--7,
-.bc-top-concept .csBlock__leaderTarget--8 { padding-right: 12.1vw; }  /* thum--4（11.49vw，覆蓋 li6-8） */
-.bc-top-concept .csBlock__leaderTarget--9 { padding-right: 5.7vw; }   /* thum--5（5.12vw） */
-.bc-top-concept .csBlock__leaderTarget--13 { padding-right: 4.6vw; }  /* thum--7（3.95vw） */
+.bc-top-concept .csBlock__leaderTarget--13 { padding-left: 6.6vw; }  /* thum--6（6vw） */
+/* 右側照片避讓（照片寬 + 間距） */
+.bc-top-concept .csBlock__leaderTarget--3 { padding-right: 3.6vw; }   /* thum--2（3vw） */
+.bc-top-concept .csBlock__leaderTarget--6 { padding-right: 4.6vw; }   /* thum--4（4vw） */
+.bc-top-concept .csBlock__leaderTarget--9 { padding-right: 3.6vw; }   /* thum--5（3vw） */
+.bc-top-concept .csBlock__leaderTarget--13 { padding-right: 3.1vw; }  /* thum--7（2.5vw） */
 
 .bc-top-concept .csBlock__leaderTarget--text--p {
   margin: 0; /* reset（Bootstrap 預設 p margin-bottom 1rem 會撐開行距） */
-  font-size: 2.5vw; /* 2026-08-21：縮小文字，使各照片行（含 li6 雙照片）文字避開照片（不壓字） */
+  font-size: 3vw; /* 2026-08-21：字級放大 + justify 填滿右緣（文字更大更滿） */
   line-height: 1;
   white-space: nowrap;
   letter-spacing: 0.023em;
   color: #fff; /* 深色主題適配 */
-  text-align: left; /* 原站無 justify（文字自然寬，照片壓字） */
-}
-@media (min-width: 1024px) {
-  .bc-top-concept .csBlock__leaderTarget--text--p { font-size: 2.75vw; }
+  /* 2026-08-21：全部文字 justify 填滿右緣（照片行填滿到照片前、非照片行填滿欄位右緣） */
+  text-align: justify;
+  text-align-last: justify;
+  -webkit-text-align-last: justify;
+  text-justify: inter-character;
 }
 .bc-top-concept .csBlock__leaderTarget--text--p span { opacity: 0.3; }
 .bc-top-concept .csBlock__leaderTarget--2 .csBlock__leaderTarget--text--p { letter-spacing: 0.044em; }
@@ -268,16 +266,15 @@
 .bc-top-concept .csBlock__leaderTarget--13 .csBlock__leaderTarget--text--p { letter-spacing: 0; }
 
 .bc-top-concept .csBlock__leaderThum { position: absolute; z-index: 1; }
-/* 2026-08-21：回歸 hakujuji 原站照片尺寸（width 固定、高度隨照片自然比例；
-   照片壓在文字上，被覆蓋行由原站縮排避讓） */
+/* 2026-08-21：照片縮小（不壓字 + justify 填滿：照片行文字需容納） */
 .bc-top-concept .csBlock__leaderThum img { width: 100%; height: auto; display: block; }
-.bc-top-concept .csBlock__leaderThum--1 { width: 11.3469985359vw; top: 0.3660322108vw; left: 0; }
-.bc-top-concept .csBlock__leaderThum--2 { width: 5.1244509517vw; top: 0.3660322108vw; right: 0; }
-.bc-top-concept .csBlock__leaderThum--3 { width: 5.1244509517vw; top: 0.3660322108vw; left: 0; }
-.bc-top-concept .csBlock__leaderThum--4 { width: 11.4934114202vw; top: 0.3660322108vw; right: 0; }
-.bc-top-concept .csBlock__leaderThum--5 { width: 5.1244509517vw; top: 0.3660322108vw; right: 0; }
-.bc-top-concept .csBlock__leaderThum--6 { width: 9.3704245974vw; top: 0.3660322108vw; left: 0; }
-.bc-top-concept .csBlock__leaderThum--7 { width: 3.953147877vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--1 { width: 6vw; top: 0.3660322108vw; left: 0; }
+.bc-top-concept .csBlock__leaderThum--2 { width: 3vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--3 { width: 3vw; top: 0.3660322108vw; left: 0; }
+.bc-top-concept .csBlock__leaderThum--4 { width: 4vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--5 { width: 3vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--6 { width: 6vw; top: 0.3660322108vw; left: 0; }
+.bc-top-concept .csBlock__leaderThum--7 { width: 2.5vw; top: 0.3660322108vw; right: 0; }
 
 /* 2026-08-21：回歸 hakujuji 原站樣式（照片尺寸、字級、縮排），移除窄寬度降字級與統右緣 */
 
@@ -335,7 +332,11 @@
   .bc-top-concept .csBlock__leaderTarget--text--p {
     font-size: 4vw; /* 2026-08-21：縮小文字，使 15 字長行避開照片（不壓字） */
     letter-spacing: 0.05em;
-    text-align: left; /* 原站無 justify */
+    /* 2026-08-21：全部文字 justify 填滿右緣（照片行填滿到照片前、非照片行填滿欄位右緣） */
+    text-align: justify;
+    text-align-last: justify;
+    -webkit-text-align-last: justify;
+    text-justify: inter-character;
   }
   .bc-top-concept .csBlock__leaderTarget--2 .csBlock__leaderTarget--text--p { letter-spacing: 0.01em; }
   .bc-top-concept .csBlock__leaderTarget--3 .csBlock__leaderTarget--text--p { letter-spacing: 0.11em; }
