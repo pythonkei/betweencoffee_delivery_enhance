@@ -23,20 +23,20 @@ JS = (
     "box.querySelectorAll('.csBlock__leaderThum').forEach(function(th){"
     "var m=th.className.match(/--(\\d+)/);"
     "var img=th.querySelector('img');"
-    "var r=img.getBoundingClientRect();"
+    "var r=th.getBoundingClientRect();"
     "out.push({n:parseInt(m[1]),left:Math.round(r.left),right:Math.round(r.right),top:Math.round(r.top),bottom:Math.round(r.bottom),"
-    "w:Math.round(r.width),h:Math.round(r.height),nw:img.naturalWidth,nh:img.naturalHeight});});"
+    "w:Math.round(r.width),h:Math.round(r.height),nw:(img?img.naturalWidth:0),nh:(img?img.naturalHeight:0)});});"
     "return {photos:out,rows:rows};})()"
 )
 
-# 桌面照片寬度（vw）：≥1024 寬桌面（thum--1/6 填滿 2 行 13.05/6.66vw）；768-1023 窄桌面（11.9/6.13vw）
-DESK_WIDE = {1: 13.05, 2: 3.5, 3: 3.5, 4: 4.6, 5: 3.5, 6: 6.66, 7: 2.9}
-DESK_NARROW = {1: 11.9, 2: 3.5, 3: 3.5, 4: 4.6, 5: 3.5, 6: 6.13, 7: 2.9}
-DESK_FIXED_H = {1: 8.85, 6: 8.85}            # ≥1024 固定高（2 行）
-DESK_NARROW_FIXED_H = {1: 7.8, 6: 7.8}        # 768-1023 固定高（2 行）
-# 行動版：thum--1/6/7 固定框；thum--2/3/4 寬 + 自然高
-SP_W = {2: 17.5, 3: 17.5, 4: 14.0}
-SP_FIXED = {1: (20.0, 13.72), 6: (10.3, 13.72), 7: (19.5, 13.5)}
+# 桌面照片寬度（vw，2026-08-21 整體縮小 25%）：thum--1 cover 2 行、thum--4/6 placeholder（2/3 行）
+DESK_WIDE = {1: 9.79, 2: 2.63, 3: 2.63, 4: 3.0, 5: 2.63, 6: 4.5, 7: 2.18}
+DESK_NARROW = {1: 8.93, 2: 2.63, 3: 2.63, 4: 3.0, 5: 2.63, 6: 4.5, 7: 2.18}
+DESK_FIXED_H = {1: 6.6, 4: 6.6, 6: 10.0}          # ≥1024 固定高（thum--4 2 行、thum--6 3 行）
+DESK_NARROW_FIXED_H = {1: 5.9, 4: 5.9, 6: 8.9}    # 768-1023
+# 行動版（縮小 25%）：thum--1/4/6/7 固定框；thum--2/3 寬 + 自然高
+SP_W = {2: 13.1, 3: 13.1}
+SP_FIXED = {1: (15.0, 11.6), 4: (10.0, 11.6), 6: (7.5, 17.6), 7: (14.6, 10.1)}
 
 
 def expected_size(n, vw, mobile):
