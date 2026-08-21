@@ -277,6 +277,10 @@
     .bc-series-pager {
         bottom: 30px;
     }
+    /* 括號框隨照片縮小（600px → 430px，配合平板照片 300px） */
+    .bc-series-bracket .bc-bracket-frame {
+        width: 430px;
+    }
 }
 
 
