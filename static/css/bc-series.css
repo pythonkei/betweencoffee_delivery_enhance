@@ -214,7 +214,7 @@
 }
 .bc-series-bracket .bc-bracket-frame {
     position: absolute;
-    top: 50%;
+    top: calc(50% - 33px); /* 對齊照片圖片中心（caption 高度 66px 的一半） */
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
