@@ -13,21 +13,27 @@ BASE = "http://localhost:9222/json/new?about:blank"
 JS = (
     "(function(){var box=document.querySelector('.bc-top-concept .partsPc');"
     "if(getComputedStyle(box).display==='none')box=document.querySelector('.bc-top-concept .partsSp');"
+    "var rows=[];"
+    "box.querySelectorAll('.csBlock__leaderTarget--text--p').forEach(function(p){"
+    "var sp=p.querySelectorAll('span');"
+    "var r0=sp[0].getBoundingClientRect();"
+    "var last=sp[sp.length-1].getBoundingClientRect();"
+    "rows.push({L:Math.round(r0.left),R:Math.round(last.right),T:Math.round(r0.top),B:Math.round(last.bottom)});});"
     "var out=[];"
     "box.querySelectorAll('.csBlock__leaderThum').forEach(function(th){"
     "var m=th.className.match(/--(\\d+)/);"
     "var img=th.querySelector('img');"
     "var r=img.getBoundingClientRect();"
-    "out.push({n:parseInt(m[1]),left:Math.round(r.left),right:Math.round(r.right),"
+    "out.push({n:parseInt(m[1]),left:Math.round(r.left),right:Math.round(r.right),top:Math.round(r.top),bottom:Math.round(r.bottom),"
     "w:Math.round(r.width),h:Math.round(r.height),nw:img.naturalWidth,nh:img.naturalHeight});});"
-    "return out;})()"
+    "return {photos:out,rows:rows};})()"
 )
 
 # 原站桌面照片寬度（vw）：thum--1~7
 DESK_W = {1: 11.3469985359, 2: 5.1244509517, 3: 5.1244509517, 4: 11.4934114202,
           5: 5.1244509517, 6: 9.3704245974, 7: 3.953147877}
-# 原站行動版：thum--1~4 寬度（vw）；thum--6/7 固定框（width×height vw）
-SP_W = {1: 28.0, 2: 17.3333333333, 3: 17.0666666667, 4: 27.7333333333}
+# 行動版（2026-08-21 不壓字：thum--1/4 縮小至 15/13vw）；thum--6/7 固定框
+SP_W = {1: 15.0, 2: 17.3333333333, 3: 17.0666666667, 4: 13.0}
 SP_FIXED = {6: (13.8666666667, 20.0), 7: (18.6666666667, 12.5333333333)}
 
 
@@ -77,8 +83,15 @@ async def main():
     ok = True
     for w, m, label in [(1280, False, "desktop"), (1024, False, "desktop"),
                         (768, False, "desktop"), (375, True, "mobile")]:
-        photos = await check(w, m)
+        r = await check(w, m)
+        photos, rows = r["photos"], r["rows"]
         bad = []
+        # 0) 照片與文字不重疊（不壓字）
+        for p in photos:
+            for row in rows:
+                if not (p["right"] <= row["L"] or p["left"] >= row["R"]
+                        or p["bottom"] <= row["T"] or p["top"] >= row["B"]):
+                    bad.append("thum%d 壓文字" % p["n"])
         for p in photos:
             exp_w, exp_h = expected_size(p["n"], w, m)
             if abs(p["w"] - exp_w) > 3:
