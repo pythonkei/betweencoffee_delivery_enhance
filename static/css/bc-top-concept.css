@@ -297,7 +297,9 @@
 .bc-top-concept .csBlock__leaderTarget--13 .csBlock__leaderTarget--text--p { letter-spacing: 0; }
 
 .bc-top-concept .csBlock__leaderThum { position: absolute; z-index: 1; }
-.bc-top-concept .csBlock__leaderThum img { width: 100%; height: 100%; object-fit: contain; }
+/* 2026-08-21：照片改為 hakujuji 原站照片（leader__img--1~7.jpg，橫式為主），
+   object-fit: cover 填滿 2 行高框（中央裁切，不變形） */
+.bc-top-concept .csBlock__leaderThum img { width: 100%; height: 100%; object-fit: cover; }
 /* 2026-08-21 方案 C：桌面照片全部 2 行文字高（4.4vw），寬度依 PNG 長寬比
    （咖啡杯 860×1100 → 0.7818 → 3.44vw；bean_01 正方 → 4.4vw）。
    右側照片貼統右緣（right 隨斷點 = 統右 padding），左側照片貼欄位左緣。 */
