@@ -8,6 +8,8 @@
      - 全寬（.grid 40px）+ 原始 vw 尺寸（非 0.7 縮放）
      - 照片貼齊各自文字行尾端（避免短中文文案造成 ~500px 空曠）
      - 動畫為 top.js 的 scroll-scrub 逐字點亮（bc-top-concept.js）
+     - 桌面/平板文字 2.6vw→2.2vw；各列右 padding 收斂 justify 字距至 ~3-7px
+     - 右側照片（coffee_02/04/05/bean_01）改為佔用 2 行文字尺寸
    深色主題必要適配（非額外 UI）：
      - 文字 → #fff、boxBottomLine 底線 → var(--bc-border)
      - 了解按鈕深灰底維持在黑底可辨識、hover 轉品牌金
@@ -82,14 +84,8 @@
 .bc-top-concept .topConcept__tobContents .csBlock__leader {
   padding: 0.5856515373vw 40px 2.0497803807vw 1.4641288433vw;
 }
-/* 2026-08-21：縮小文字區域（加大右 padding）→ justify 字距收斂。
-   li--6（coffee_04 行）內容空間在此極限值下仍容得下自然文字寬；
-   1200 以下 li--6 已無餘裕（1024 實測 403px < 自然 440px），維持 40px。 */
-@media only screen and (min-width: 1200px) {
-  .bc-top-concept .topConcept__tobContents .csBlock__leader {
-    padding-right: 70px;
-  }
-}
+/* 2026-08-21：桌面文字容器依各列內容長度收斂（各列右 padding），
+   讓 justify 字距維持 ~3-7px；不再需要 ≥1200 全域右 padding。 */
 
 /* ==============================================================
    articleTitle（複製 hakujuji base.css，文字適配深色）
@@ -235,16 +231,24 @@
 .bc-top-concept .csBlock__leaderTarget--12,
 .bc-top-concept .csBlock__leaderTarget--13 { padding-left: 10.6149341142vw; }
 
-.bc-top-concept .csBlock__leaderTarget--3 { padding-right: 5.72vw; }
-.bc-top-concept .csBlock__leaderTarget--6 { padding-right: 12vw; }
-.bc-top-concept .csBlock__leaderTarget--7 { padding-right: 12vw; }
-.bc-top-concept .csBlock__leaderTarget--9 { padding-right: 5.72vw; }
-.bc-top-concept .csBlock__leaderTarget--13 { padding-right: 4.65vw; }
+.bc-top-concept .csBlock__leaderTarget--1,
+.bc-top-concept .csBlock__leaderTarget--2 { padding-right: 10.5vw; }
+.bc-top-concept .csBlock__leaderTarget--3 { padding-right: 24.2vw; }
+.bc-top-concept .csBlock__leaderTarget--4 { padding-right: 24.2vw; }
+.bc-top-concept .csBlock__leaderTarget--5 { padding-right: 24.2vw; }
+.bc-top-concept .csBlock__leaderTarget--6 { padding-right: 17.2vw; }
+.bc-top-concept .csBlock__leaderTarget--7 { padding-right: 20.8vw; }
+.bc-top-concept .csBlock__leaderTarget--8 { padding-right: 24.2vw; }
+.bc-top-concept .csBlock__leaderTarget--9 { padding-right: 18.4vw; }
+.bc-top-concept .csBlock__leaderTarget--10 { padding-right: 24.2vw; }
+.bc-top-concept .csBlock__leaderTarget--11,
+.bc-top-concept .csBlock__leaderTarget--12 { padding-right: 9.2vw; }
+.bc-top-concept .csBlock__leaderTarget--13 { padding-right: 21.8vw; }
 
 .bc-top-concept .csBlock__leaderTarget--text--p {
   margin: 0; /* reset（Bootstrap 預設 p margin-bottom 1rem 會撐開行距） */
-  font-size: 2.6vw; /* 文字縮小：給 li--6（coffee_04 行）充足餘裕，
-      即使捲軸寬度/fallback 字型差異也不讓文字溢到照片下方（原 2.8vw 僅 3px 餘裕） */
+  font-size: 2.2vw; /* 2026-08-21：桌面/平板文字縮小（原 2.6vw），
+      配合各列右 padding 收斂 justify 字距 */
   line-height: 1;
   white-space: nowrap;
   letter-spacing: 0.023em;
@@ -271,19 +275,14 @@
 .bc-top-concept .csBlock__leaderThum { position: absolute; z-index: 1; }
 .bc-top-concept .csBlock__leaderThum img { width: 100%; height: 100%; object-fit: contain; }
 .bc-top-concept .csBlock__leaderThum--1 { width: 11.3469985359vw; height: 7.76vw; top: 0.3660322108vw; left: 0; }
-.bc-top-concept .csBlock__leaderThum--2 { width: 5.1244509517vw; height: 3.51vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--2 { width: 3.44vw; height: 4.4vw; top: 0.3660322108vw; right: 0; }
 .bc-top-concept .csBlock__leaderThum--3 { width: 5.1244509517vw; height: 3.51vw; top: 0.3660322108vw; left: 0; }
 .bc-top-concept .csBlock__leaderThum--4 { width: 11.4934114202vw; height: 7.83vw; top: 0.3660322108vw; right: 0; }
-.bc-top-concept .csBlock__leaderThum--5 { width: 5.1244509517vw; height: 3.44vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--5 { width: 3.44vw; height: 4.4vw; top: 0.3660322108vw; right: 0; }
 .bc-top-concept .csBlock__leaderThum--6 { width: 9.3704245974vw; height: 12.52vw; top: 0.3660322108vw; left: 0; }
-.bc-top-concept .csBlock__leaderThum--7 { width: 3.953147877vw; height: 3.44vw; top: 0.3660322108vw; right: 0; }
+.bc-top-concept .csBlock__leaderThum--7 { width: 4.4vw; height: 4.4vw; top: 0.3660322108vw; right: 0; }
 
-/* 2026-08-21：coffee_04 縮小至行內後，li--6 已有充足餘裕，無需窄寬度降字級 */
-@media only screen and (min-width: 768px) and (max-width: 939.98px) {
-  .bc-top-concept .csBlock__leaderTarget--text--p {
-    font-size: 2.6vw;
-  }
-}
+/* 2026-08-21：桌面/平板已改為各列右 padding 收斂字距，移除窄寬度降字級 */
 
 
 /* ==============================================================
@@ -322,17 +321,28 @@
   .bc-top-concept .csBlock__leaderTarget--16,
   .bc-top-concept .csBlock__leaderTarget--17,
   .bc-top-concept .csBlock__leaderTarget--18 { padding-left: 17.3333333333vw; }
-  /* 2026-08-21：照片行右 padding——justify 文字填滿至照片前，不與照片重疊
-     （照片貼齊行右緣 right:0，文字填滿至照片左緣前 ~7px） */
-  .bc-top-concept .csBlock__leaderTarget--5 { padding-right: 9.2vw; }
-  .bc-top-concept .csBlock__leaderTarget--13 { padding-right: 9.2vw; }
-  .bc-top-concept .csBlock__leaderTarget--17 { padding-right: 9.2vw; }
-  /* 2026-08-21：桌面照片行的 padding-right 在行動版無對應照片，
-     重置為 0 讓 justify 文字填滿到右緣（修正右側縮入） */
+  /* 2026-08-21：行動版各列右 padding——收斂 justify 字距（目標 ~5px/字間）。
+     依各列字數調整容器寬：長行（14-15 字）少縮、短行（7-8 字）多縮。 */
+  .bc-top-concept .csBlock__leaderTarget--4 { padding-right: 8.8vw; }
+  .bc-top-concept .csBlock__leaderTarget--5 { padding-right: 14.1vw; }
+  .bc-top-concept .csBlock__leaderTarget--6 { padding-right: 16.8vw; }
+  .bc-top-concept .csBlock__leaderTarget--7 { padding-right: 16.8vw; }
+  .bc-top-concept .csBlock__leaderTarget--8 { padding-right: 16.8vw; }
+  .bc-top-concept .csBlock__leaderTarget--9 { padding-right: 16.8vw; }
+  .bc-top-concept .csBlock__leaderTarget--10 { padding-right: 16.8vw; }
+  .bc-top-concept .csBlock__leaderTarget--12 { padding-right: 4.5vw; }
+  .bc-top-concept .csBlock__leaderTarget--13 { padding-right: 22.9vw; }
+  .bc-top-concept .csBlock__leaderTarget--15 { padding-right: 8.5vw; }
+  .bc-top-concept .csBlock__leaderTarget--17 { padding-right: 13.3vw; }
+  .bc-top-concept .csBlock__leaderTarget--18 { padding-right: 22.4vw; }
+  /* 無照片、字數與容器相近的列維持自然寬（右 padding 0） */
+  .bc-top-concept .csBlock__leaderTarget--1,
+  .bc-top-concept .csBlock__leaderTarget--2,
   .bc-top-concept .csBlock__leaderTarget--3,
-  .bc-top-concept .csBlock__leaderTarget--6,
-  .bc-top-concept .csBlock__leaderTarget--7,
-  .bc-top-concept .csBlock__leaderTarget--9 { padding-right: 0; }
+  .bc-top-concept .csBlock__leaderTarget--11,
+  .bc-top-concept .csBlock__leaderTarget--14,
+  .bc-top-concept .csBlock__leaderTarget--16 { padding-right: 0; }
+
 
   .bc-top-concept .csBlock__leaderTarget--text--p {
     font-size: 4.2vw;
@@ -357,13 +367,14 @@
   .bc-top-concept .csBlock__leaderTarget--17 .csBlock__leaderTarget--text--p { letter-spacing: 0.15em; }
 
   .bc-top-concept .csBlock__leaderThum--1 { width: 28vw; height: 19.15vw; top: 1.8666666667vw; left: 0; }
-  /* 2026-08-21：右側照片貼齊行右緣（right:0，與桌面一致），文字 justify 填滿至照片前 */
-  .bc-top-concept .csBlock__leaderThum--2 { width: 7.4vw; height: 5vw; top: 1.3333333333vw; right: 0; }
+  /* 2026-08-21：右側照片佔用 2 行文字尺寸（height = 2×font-size=8.4vw），
+     寬度依 PNG 長寬比（咖啡杯 0.782、豆袋 1.0），貼齊行右緣 right:0 */
+  .bc-top-concept .csBlock__leaderThum--2 { width: 6.57vw; height: 8.4vw; top: 1.3333333333vw; right: 0; }
   .bc-top-concept .csBlock__leaderThum--3 { width: 17.0666666667vw; height: 11.7vw; top: 2.1333333333vw; left: 0; }
-  .bc-top-concept .csBlock__leaderThum--4 { width: 7.4vw; height: 5vw; top: 1.3333333333vw; right: 0; }
+  .bc-top-concept .csBlock__leaderThum--4 { width: 6.57vw; height: 8.4vw; top: 1.3333333333vw; right: 0; }
   .bc-top-concept .csBlock__leaderThum--5 { display: none; }
   .bc-top-concept .csBlock__leaderThum--6 { width: 13.8666666667vw; height: 20vw; top: 1.8666666667vw; left: 0; }
-  .bc-top-concept .csBlock__leaderThum--7 { width: 7.4vw; height: 5vw; top: 1.3333333333vw; right: 0; }
+  .bc-top-concept .csBlock__leaderThum--7 { width: 8.4vw; height: 8.4vw; top: 1.3333333333vw; right: 0; }
 
   /* base-sp.css 按鈕 */
   .bc-top-concept .cateBtn__link, .bc-top-concept a.cateBtn__link { min-width: 130px; padding: 0 35px; }
