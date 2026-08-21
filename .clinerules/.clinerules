@@ -247,6 +247,26 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [x] 浮動購物車視覺幹擾修正 — ✅ 2026-08-14（移除滑入/滑出動畫；伺服器端初始渲染 {% if not cart_count %} 避免閃出；徽章字體改 Arial 避免 FOUT 閃爍；_updateBadge 值相同不重設；bc-components.css?v=20260814w、bc-slideout-cart.js?v=20260814c）
 ```
 
+## 近期任務（2026-08-21）topConcept + SERIES 優化
+
+```
+├── [x] topConcept 照片換為 hakujuji 原站照片 — ✅ 2026-08-21（下載 leader__img--1~7.jpg → static/images/hakujuji_leader_N.jpg；SERIES 維持 coffee PNG；object-fit cover）
+├── [x] topConcept 回歸 hakujuji 原站樣式 — ✅ 2026-08-21（照片原站尺寸、字級 3.29vw、無 justify）→ 後續多輪優化
+├── [x] topConcept 照片不壓字（照片與文字分離）+ 縮小文字 — ✅ 2026-08-21（照片垂直覆蓋行水平避讓；全域不重疊驗證）
+├── [x] topConcept 文字 justify 填滿右緣 + 字級 3vw + 照片縮小 — ✅ 2026-08-21
+├── [x] topConcept 照片垂直居中 + 縮小行動版 thum--1/6 — ✅ 2026-08-21
+├── [x] topConcept 所有照片稍微加大（桌面 +10~15%）— ✅ 2026-08-21
+├── [x] topConcept thum--1/6 固定框 cover 填滿 2 行（消除下方間隙）— ✅ 2026-08-21
+├── [x] topConcept 整體縮小 25% + thum--4/6 改 placeholder — ✅ 2026-08-21（col 55.5%、字級 2.25vw、照片 ×0.75；placeholder = 深色底+金框+咖啡 SVG）
+├── [x] topConcept 欄位左移 + 所有照片 placeholder 加寬 + 文字縮小 — ✅ 2026-08-21（col flex-start 靠左）
+├── [x] topConcept thum--4/6 加寬（8/10vw）+ 文字縮小 4px — ✅ 2026-08-21
+├── [x] 行動端 thum--2/3/7 佔 2 行 + 字距縮小 — ✅ 2026-08-21
+├── [x] 行動端文字加大（3.8vw 參考 hakujuji）+ 照片縮小 — ✅ 2026-08-21
+├── [x] SERIES 每種咖啡名稱 + Highlight 高亮（照片底部）— ✅ 2026-08-21（名稱/highlight 取自 eshop_coffeeitem；caption 名稱 20px/金 highlight 14px；兩組 12 張）
+├── [x] SERIES 平板響應式（基於桌面縮小）— ✅ 2026-08-21（標題 52px、照片 300px、括號框 430px、pager 30px）
+├── [x] SERIES 照片 src 修復 + 括號框對齊照片中心 — ✅ 2026-08-21（src 加回 images/ 前綴；括號框上移 caption 一半 33px）
+```
+
 ## Phase 3 規劃
 
 ```
