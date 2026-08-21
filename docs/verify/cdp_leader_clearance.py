@@ -29,29 +29,25 @@ JS = (
     "return {photos:out,rows:rows};})()"
 )
 
-# 桌面照片寬度（vw，2026-08-21 整體縮小 25%）：thum--1 cover 2 行、thum--4/6 placeholder（2/3 行）
-DESK_WIDE = {1: 9.79, 2: 2.63, 3: 2.63, 4: 3.0, 5: 2.63, 6: 4.5, 7: 2.18}
-DESK_NARROW = {1: 8.93, 2: 2.63, 3: 2.63, 4: 3.0, 5: 2.63, 6: 4.5, 7: 2.18}
-DESK_FIXED_H = {1: 6.6, 4: 6.6, 6: 10.0}          # ≥1024 固定高（thum--4 2 行、thum--6 3 行）
-DESK_NARROW_FIXED_H = {1: 5.9, 4: 5.9, 6: 8.9}    # 768-1023
-# 行動版（縮小 25%）：thum--1/4/6/7 固定框；thum--2/3 寬 + 自然高
-SP_W = {2: 13.1, 3: 13.1}
-SP_FIXED = {1: (15.0, 11.6), 4: (10.0, 11.6), 6: (7.5, 17.6), 7: (14.6, 10.1)}
+# 桌面（2026-08-21 全部照片 placeholder 加寬）：寬×高（vw）
+DESK_WIDE = {1: (12.0, 6.6), 2: (4.0, 2.3), 3: (4.0, 2.3), 4: (4.0, 6.3),
+             5: (4.0, 2.3), 6: (6.0, 9.6), 7: (3.5, 3.0)}
+DESK_NARROW = {1: (10.0, 6.0), 2: (3.4, 2.2), 3: (3.4, 2.2), 4: (3.4, 5.7),
+               5: (3.4, 2.2), 6: (5.0, 8.6), 7: (3.0, 2.2)}
+# 行動版（全部 placeholder 加寬）
+SP_FIXED = {1: (18.0, 11.6), 2: (15.0, 3.0), 3: (15.0, 3.0), 4: (12.0, 11.6),
+            6: (9.0, 17.6), 7: (16.0, 3.0)}
 
 
 def expected_size(n, vw, mobile):
+    desk = DESK_NARROW if vw < 1024 else DESK_WIDE
     if mobile:
         if n in SP_FIXED:
             w, h = SP_FIXED[n]
             return round(w * vw / 100), round(h * vw / 100)
-        w = round(SP_W[n] * vw / 100)
-        return w, None  # 高度自然
-    desk = DESK_NARROW if vw < 1024 else DESK_WIDE
-    w = round(desk[n] * vw / 100)
-    fh = DESK_NARROW_FIXED_H if vw < 1024 else DESK_FIXED_H
-    if n in fh:
-        return w, round(fh[n] * vw / 100)
-    return w, None
+        return None, None
+    w, h = desk[n]
+    return round(w * vw / 100), round(h * vw / 100)
 
 
 async def check(width, mobile):
