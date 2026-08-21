@@ -1,52 +1,45 @@
 #!/usr/bin/env python3
-"""CDP 驗證：topConcept 統右緣 + 照片 2 行高 + 全域不重疊 + justify 字距收斂
+"""CDP 驗證：topConcept 回歸 hakujuji 原站（照片尺寸、壓字、scroll-scrub）
 
-2026-08-21 方案 C：
-- 所有照片（coffee_01~08/bean_01）2 行文字高（height = 2×font-size）。
-- 統右緣：非照片列文字右緣一致（無階梯），照片列因避讓照片右縮。
-- 任何照片不得與任何文字行重疊（全域檢查，含被覆蓋的下一行）。
-驗證：
-- 照片高度 = 2×font-size（±4px）。
-- 照片與所有文字行無交集。
-- justify 字距 ≤ 9px/字間。
-- 統右緣列右緣一致（±3px）。
+2026-08-21：回歸 hakujuji 原站樣式。
+- 照片尺寸：width 用原站 vw 值、高度依照片自然比例（thum--6/7 行動版固定框 cover）。
+- 照片壓字：原站設計允許照片與文字重疊（z-index 在上）——但照片不得超出欄位右緣。
+- 文字：原站無 justify（自然寬），溢出與原站一致（不檢查 justify 字距）。
 """
-import asyncio, json, urllib.request
-import websockets
+import asyncio, json, urllib.request, websockets
 
 BASE = "http://localhost:9222/json/new?about:blank"
 
 JS = (
     "(function(){var box=document.querySelector('.bc-top-concept .partsPc');"
     "if(getComputedStyle(box).display==='none')box=document.querySelector('.bc-top-concept .partsSp');"
-    "var out={thums:[],rows:[]};"
-    "box.querySelectorAll('.csBlock__leaderTarget').forEach(function(li){"
-    "var m=li.className.match(/--(\\d+)/);"
-    "var p=li.querySelector('.csBlock__leaderTarget--text--p');"
-    "var spans=p.querySelectorAll('span');"
-    "var fs=parseFloat(getComputedStyle(p).fontSize);"
-    "var s0=spans[0].getBoundingClientRect();"
-    "var lastR=spans[spans.length-1].getBoundingClientRect().right;"
-    "var gaps=[];for(var j=0;j<spans.length-1;j++){"
-    "gaps.push(spans[j+1].getBoundingClientRect().left-(spans[j].getBoundingClientRect().left+spans[j].getBoundingClientRect().width));}"
-    "var spread=0;gaps.forEach(function(g){spread+=g});if(gaps.length)spread/=gaps.length;"
-    "out.rows.push({n:parseInt(m[1]),left:Math.round(s0.left),right:Math.round(lastR),"
-    "top:Math.round(s0.top),bottom:Math.round(s0.bottom),fs:Math.round(fs*10)/10,spread:Math.round(spread*10)/10});"
-    "li.querySelectorAll('.csBlock__leaderThum img').forEach(function(img){"
+    "var out=[];"
+    "box.querySelectorAll('.csBlock__leaderThum').forEach(function(th){"
+    "var m=th.className.match(/--(\\d+)/);"
+    "var img=th.querySelector('img');"
     "var r=img.getBoundingClientRect();"
-    "out.thums.push({n:parseInt(m[1]),src:img.src.split('/').pop(),left:Math.round(r.left),"
-    "right:Math.round(r.right),top:Math.round(r.top),bottom:Math.round(r.bottom),h:Math.round(r.height)});});});"
+    "out.push({n:parseInt(m[1]),left:Math.round(r.left),right:Math.round(r.right),"
+    "w:Math.round(r.width),h:Math.round(r.height),nw:img.naturalWidth,nh:img.naturalHeight});});"
     "return out;})()"
 )
 
-# 統右緣列（無照片避讓/縮排）：桌面 li2/5/8/12，行動版 li2/3/4/7/8/9/10/14/15
-UNI_DESKTOP = [2, 5, 8, 12]
-UNI_MOBILE = [2, 3, 4, 7, 8, 9, 10, 14, 15]
+# 原站桌面照片寬度（vw）：thum--1~7
+DESK_W = {1: 11.3469985359, 2: 5.1244509517, 3: 5.1244509517, 4: 11.4934114202,
+          5: 5.1244509517, 6: 9.3704245974, 7: 3.953147877}
+# 原站行動版：thum--1~4 寬度（vw）；thum--6/7 固定框（width×height vw）
+SP_W = {1: 28.0, 2: 17.3333333333, 3: 17.0666666667, 4: 27.7333333333}
+SP_FIXED = {6: (13.8666666667, 20.0), 7: (18.6666666667, 12.5333333333)}
 
 
-def overlap(t, row):
-    return not (t["right"] <= row["left"] or t["left"] >= row["right"]
-                or t["bottom"] <= row["top"] or t["top"] >= row["bottom"])
+def expected_size(n, vw, mobile):
+    if mobile:
+        if n in SP_FIXED:
+            w, h = SP_FIXED[n]
+            return round(w * vw / 100), round(h * vw / 100)
+        w = round(SP_W[n] * vw / 100)
+        return w, None  # 高度自然
+    w = round(DESK_W[n] * vw / 100)
+    return w, None
 
 
 async def check(width, mobile):
@@ -84,30 +77,22 @@ async def main():
     ok = True
     for w, m, label in [(1280, False, "desktop"), (1024, False, "desktop"),
                         (768, False, "desktop"), (375, True, "mobile")]:
-        r = await check(w, m)
-        thums, rows = r["thums"], r["rows"]
-        fs = {row["n"]: row["fs"] for row in rows}
+        photos = await check(w, m)
         bad = []
-        # 1) 照片高度 = 2×font-size（照片所在行的字級）
-        for t in thums:
-            exp = round(2 * fs.get(t["n"], 0))
-            if abs(t["h"] - exp) > 4:
-                bad.append("%s(li%d) h=%d≠%d" % (t["src"], t["n"], t["h"], exp))
-        # 2) 全域不重疊（照片 vs 所有文字行）
-        for t in thums:
-            for row in rows:
-                if overlap(t, row):
-                    bad.append("%s(li%d) 覆蓋 li%d 文字" % (t["src"], t["n"], row["n"]))
-        # 3) justify 字距 ≤ 9px
-        for row in rows:
-            if row["spread"] > 9:
-                bad.append("li%d 字距%.1f" % (row["n"], row["spread"]))
-        # 4) 統右緣列右緣一致（±3px）
-        uni = UNI_MOBILE if m else UNI_DESKTOP
-        rights = [row["right"] for row in rows if row["n"] in uni]
-        if max(rights) - min(rights) > 3:
-            bad.append("統右緣偏移 %d" % (max(rights) - min(rights)))
-        res = "PASS" if not bad else "FAIL " + str(bad[:8])
+        for p in photos:
+            exp_w, exp_h = expected_size(p["n"], w, m)
+            if abs(p["w"] - exp_w) > 3:
+                bad.append("thum%d 寬 %d≠%d" % (p["n"], p["w"], exp_w))
+            if exp_h is not None:
+                if abs(p["h"] - exp_h) > 3:
+                    bad.append("thum%d 高 %d≠%d" % (p["n"], p["h"], exp_h))
+            else:
+                # 高度自然 = width ÷ 照片比例
+                if p["nw"] and p["nh"]:
+                    exp = round(p["w"] * p["nh"] / p["nw"])
+                    if abs(p["h"] - exp) > 3:
+                        bad.append("thum%d 自然高 %d≠%d" % (p["n"], p["h"], exp))
+        res = "PASS" if not bad else "FAIL " + str(bad[:6])
         ok = ok and not bad
         print("%dpx %s -> %s" % (w, label, res))
     print("  RESULT:", "PASS" if ok else "FAIL")
