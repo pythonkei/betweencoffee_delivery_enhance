@@ -344,7 +344,7 @@
     font-size: min(4.8vw, 18px);
     letter-spacing: 0.2em;
   }
-  .bc-top-concept .topConcept__tobContents { width: 100%; }
+  .bc-top-concept .topConcept__tobContents { width: 90%; }
   .bc-top-concept .topConcept__tobContents .csBlock__leader {
     padding: 2.1333333333vw 0vw 7.4666666667vw 0;
   }
@@ -395,14 +395,14 @@
   .bc-top-concept .csBlock__leaderTarget--15 .csBlock__leaderTarget--text--p { letter-spacing: 0.1em; }
   .bc-top-concept .csBlock__leaderTarget--17 .csBlock__leaderTarget--text--p { letter-spacing: 0.15em; }
 
-  /* 2026-08-21：行動版所有照片 placeholder 加寬（thum--1/4 2 行、thum--6 3 行） */
+  /* 2026-08-21：行動版所有照片 placeholder（thum--1/2/3/4/7 佔 2 行、thum--6 佔 3 行） */
   .bc-top-concept .csBlock__leaderThum--1 { width: 18vw; height: 10.8vw; top: 0; left: 0; }
-  .bc-top-concept .csBlock__leaderThum--2 { width: 15vw; height: 3vw; top: 1.3333333333vw; right: 0; }
-  .bc-top-concept .csBlock__leaderThum--3 { width: 15vw; height: 3vw; top: 1.5vw; left: 0; }
+  .bc-top-concept .csBlock__leaderThum--2 { width: 15vw; height: 10.8vw; top: 0; right: 0; }
+  .bc-top-concept .csBlock__leaderThum--3 { width: 15vw; height: 10.8vw; top: 0; left: 0; }
   .bc-top-concept .csBlock__leaderThum--4 { width: 16vw; height: 10.8vw; top: 0; right: 0; }
   .bc-top-concept .csBlock__leaderThum--5 { display: none; }
   .bc-top-concept .csBlock__leaderThum--6 { width: 13vw; height: 16.2vw; top: 0; left: 0; }
-  .bc-top-concept .csBlock__leaderThum--7 { width: 16vw; height: 3vw; top: 1.3333333333vw; right: 0; }
+  .bc-top-concept .csBlock__leaderThum--7 { width: 16vw; height: 10.8vw; top: 0; right: 0; }
 
   /* base-sp.css 按鈕 */
   .bc-top-concept .cateBtn__link, .bc-top-concept a.cateBtn__link { min-width: 130px; padding: 0 35px; }
