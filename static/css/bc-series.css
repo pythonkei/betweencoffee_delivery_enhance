@@ -235,17 +235,19 @@
     padding: 16px 4px 0;
 }
 .bc-series-caption-name {
-    font-family: "Noto Sans TC", "Montserrat", sans-serif;
-    font-size: 20px;
-    font-weight: 600;
+    font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+    font-size: 26px;
+    font-weight: 400;
     color: #fff;
-    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    letter-spacing: normal;
     line-height: 1.3;
     margin: 0;
 }
 .bc-series-caption-highlight {
-    font-size: 14px;
-    font-weight: 300;
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 18px;
+    font-weight: 500;
     color: var(--bc-gold, #c49b63);
     letter-spacing: 0.06em;
     line-height: 1.4;
@@ -280,6 +282,29 @@
     /* 括號框隨照片縮小（600px → 430px，配合平板照片 300px） */
     .bc-series-bracket .bc-bracket-frame {
         width: 430px;
+    }
+    /* 名稱/Highlight 平板縮小（桌面 26/18 → 平板 22/15） */
+    .bc-series-caption-name {
+        font-size: 22px;
+    }
+    .bc-series-caption-highlight {
+        font-size: 15px;
+    }
+}
+
+/* ============================================================
+   行動端（≤767.98）：名稱/Highlight 縮小避免溢出
+   ============================================================ */
+@media (max-width: 767.98px) {
+    .bc-series-caption {
+        padding: 12px 2px 0;
+    }
+    .bc-series-caption-name {
+        font-size: 18px;
+    }
+    .bc-series-caption-highlight {
+        font-size: 12px;
+        margin-top: 2px;
     }
 }
 
