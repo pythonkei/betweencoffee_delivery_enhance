@@ -1125,11 +1125,15 @@ optgroup  {
 }
 
 /* 拆分所有嵌套规则 */
+/* 2026-08-24 模組化：背景圖由模板 inline style 提供（background-image），
+   此處僅保留定位/縮放/旋轉；原硬編碼 url('/static/images/sticker_v1.png') 已移除。 */
 .sticker .bg { 
   position: absolute;
   width: 100%;
   height: 100%;
-  background: url('/static/images/sticker_v1.png') center top / contain no-repeat;  /* 2026-08-11：加 / contain，背景圖隨容器縮放（否則手機縮小時維持 260px 固有尺寸被裁切） */
+  background-position: center top;
+  background-size: contain;
+  background-repeat: no-repeat;
   animation-name: spin;
   animation-duration: 2s; /* speed */
   animation-iteration-count: infinite;
@@ -1149,6 +1153,7 @@ optgroup  {
 .sticker .front img  { 
   width: clamp(37px, 10.24vw, 67px);    /* 2026-08-11：桌面/平板 max 84→67（-20%） */
   height: clamp(43px, 12.16vw, 78px);
+  object-fit: contain;    /* 2026-08-24：上傳自訂前圖不同比例時不變形 */
 }
 
 /* clears default br height */

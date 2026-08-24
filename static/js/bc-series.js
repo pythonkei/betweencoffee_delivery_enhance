@@ -120,4 +120,132 @@
         scrolling.style.cursor = "grab";
         syncBlur();
     }
+
+    // sukima hero-title-svg 手繪圓形畫線動畫觸發（2026-08-24）：
+    // 進入視口時加 .show（CSS .bc-series-hero.show .leaf-flow-reveal-stream
+    // 與原站 .hero.show 規則一致：2s ease-in-out forwards、延遲 1s）。
+    // 初始即在視口內的 hero（如首屏第一組）立即觸發，滾動進入的由 IO 觸發。
+    function initLeafFlowReveal() {
+        var heroes = document.querySelectorAll(".bc-series-hero");
+        if (!heroes.length) {
+            return;
+        }
+        function inViewport(el) {
+            var r = el.getBoundingClientRect();
+            return r.top < window.innerHeight && r.bottom > 0;
+        }
+        function showHero(el) {
+            el.classList.add("show");
+        }
+        if (!("IntersectionObserver" in window)) {
+            for (var i = 0; i < heroes.length; i++) {
+                showHero(heroes[i]);
+            }
+            return;
+        }
+        // 初始檢查：已在視口內的 hero 立即加 .show（不依賴 IO 首次回調）
+        for (var k = 0; k < heroes.length; k++) {
+            if (inViewport(heroes[k])) {
+                showHero(heroes[k]);
+            }
+        }
+        var io = new IntersectionObserver(
+            function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        showHero(entry.target);
+                        io.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.15 }
+        );
+        for (var j = 0; j < heroes.length; j++) {
+            io.observe(heroes[j]);
+        }
+    }
+
+    initLeafFlowReveal();
+
+    // sukima arrow-recruit-svg 手繪箭頭動畫觸發（2026-08-24）：
+    // way 區塊（.col-main.way）進入視口加 .show
+    // （CSS .col-main.way.show .comet-tail-reveal-stream 與原站一致）。
+    function initArrowReveal() {
+        var ways = document.querySelectorAll(".col-main.way");
+        if (!ways.length) {
+            return;
+        }
+        function showWay(el) {
+            el.classList.add("show");
+        }
+        if (!("IntersectionObserver" in window)) {
+            for (var i = 0; i < ways.length; i++) {
+                showWay(ways[i]);
+            }
+            return;
+        }
+        for (var k = 0; k < ways.length; k++) {
+            var r = ways[k].getBoundingClientRect();
+            if (r.top < window.innerHeight && r.bottom > 0) {
+                showWay(ways[k]);
+            }
+        }
+        var io = new IntersectionObserver(
+            function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        showWay(entry.target);
+                        io.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.15 }
+        );
+        for (var j = 0; j < ways.length; j++) {
+            io.observe(ways[j]);
+        }
+    }
+
+    initArrowReveal();
+
+    // sukima other-members-svg 手繪圓形動畫觸發（2026-08-24）：
+    // topConcept 區塊（.bc-top-concept）進入視口加 .show
+    // （CSS .bc-top-concept.show .organic-reveal-brush444）。
+    function initTopConceptReveal() {
+        var tops = document.querySelectorAll(".bc-top-concept");
+        if (!tops.length) {
+            return;
+        }
+        function showTop(el) {
+            el.classList.add("show");
+        }
+        if (!("IntersectionObserver" in window)) {
+            for (var i = 0; i < tops.length; i++) {
+                showTop(tops[i]);
+            }
+            return;
+        }
+        for (var k = 0; k < tops.length; k++) {
+            var r = tops[k].getBoundingClientRect();
+            if (r.top < window.innerHeight && r.bottom > 0) {
+                showTop(tops[k]);
+            }
+        }
+        var io = new IntersectionObserver(
+            function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        showTop(entry.target);
+                        io.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.15 }
+        );
+        for (var j = 0; j < tops.length; j++) {
+            io.observe(tops[j]);
+        }
+    }
+
+    initTopConceptReveal();
 })();

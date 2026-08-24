@@ -134,6 +134,17 @@ class CoffeeItem(models.Model):
         else:
             return "/static/images/default-coffee-detail.png"
 
+    # ===== Sticker 貼紙（2026-08-24 模組化）：詳情頁右上角貼紙 =====
+    # 留空 = 不顯示貼紙；選擇 = 顯示該貼紙設計（背景款式 + 前圖 + 文字）
+    sticker = models.ForeignKey(
+        "Sticker",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Sticker 貼紙",
+        help_text="選擇詳情頁顯示的貼紙；留空 = 不顯示。",
+    )
+
     class Meta:
         verbose_name_plural = "Coffee"
         ordering = []
@@ -226,6 +237,17 @@ class BeanItem(models.Model):
         elif weight == "500g":
             return self.price_500g
         return self.price_200g  # 默認返回200克價格
+
+    # ===== Sticker 貼紙（2026-08-24 模組化）：詳情頁右上角貼紙 =====
+    # 留空 = 不顯示貼紙；選擇 = 顯示該貼紙設計（背景款式 + 前圖 + 文字）
+    sticker = models.ForeignKey(
+        "Sticker",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Sticker 貼紙",
+        help_text="選擇詳情頁顯示的貼紙；留空 = 不顯示。",
+    )
 
     class Meta:
         verbose_name_plural = "Bean"

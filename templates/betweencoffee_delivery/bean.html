@@ -52,13 +52,15 @@
             <div class="col-lg-6 product-details pl-md-5 position-relative">
                 <div class="block-23 mb-3 position-relative">
                     <p class="h3 bean-title"><span>{{ bean.name }}</span></p>
+                    {% if bean.sticker %}
                     <div class="sticker-box">
                         <div class="sticker">
-                            <div class="front"><img src= {% static 'images/float_bean.png' %}></div>
-                            <div class="bg"></div>
-                            <p class="bc-sticker-text"><span class="bc-sticker-text-sub">Crafting<br>Perfection</span>打造完美<br>新鮮質量!</p>
+                            <div class="front"><img src="{{ bean.sticker.front_image_url }}"></div>
+                            <div class="bg" style="background-image: url('{{ bean.sticker.bg_image_url }}')"></div>
+                            <p class="bc-sticker-text"><span class="bc-sticker-text-sub">{{ bean.sticker.text_en|linebreaksbr }}</span>{{ bean.sticker.text_zh|linebreaksbr }}</p>
                         </div>
                     </div>
+                    {% endif %}
                     <p class="price">${{ bean.price_200g|floatformat:"0" }}</p>
                     <p class="pb-2 bc-description-clamp">{{ bean.description }}</p>
                 </div>

@@ -18,6 +18,7 @@ from .models import (
     CoffeePreparationTime,
     CoffeeQueue,
     OrderModel,
+    Sticker,
 )
 
 logger = logging.getLogger(__name__)
@@ -452,6 +453,7 @@ class CoffeeItemAdmin(admin.ModelAdmin):
         "hot_item_order",
         "image_preview",
         "index_image_preview",
+        "sticker",
     )
     list_filter = ("is_published", "is_shop_hot_item", "list_date")
     search_fields = ("name", "highlight", "introduction", "description")
@@ -491,6 +493,13 @@ class CoffeeItemAdmin(admin.ModelAdmin):
             },
         ),
         ("状态管理", {"fields": ("is_published", "is_shop_hot_item", "list_date")}),
+        (
+            "Sticker 貼紙（留空=不顯示）",
+            {
+                "fields": ("sticker",),
+                "description": "選擇詳情頁右上角顯示的貼紙；留空 = 不顯示。貼紙設計（背景/前圖/文字）在「Stickers」管理頁設定。",
+            },
+        ),
     )
 
     def image_preview(self, obj):
@@ -532,6 +541,7 @@ class BeanItemAdmin(admin.ModelAdmin):
         "is_shop_hot_item",
         "image_preview",
         "index_image_preview",
+        "sticker",
     )
     list_filter = ("is_published", "is_shop_hot_item", "roast_level", "list_date")
     search_fields = ("name", "highlight", "introduction", "description")
@@ -562,6 +572,13 @@ class BeanItemAdmin(admin.ModelAdmin):
         ),
         ("研磨选项", {"fields": ("grinding_level",)}),
         ("状态管理", {"fields": ("is_published", "is_shop_hot_item", "list_date")}),
+        (
+            "Sticker 貼紙（留空=不顯示）",
+            {
+                "fields": ("sticker",),
+                "description": "選擇詳情頁右上角顯示的貼紙；留空 = 不顯示。貼紙設計（背景/前圖/文字）在「Stickers」管理頁設定。",
+            },
+        ),
     )
 
     def image_preview(self, obj):
@@ -590,6 +607,55 @@ class BeanItemAdmin(admin.ModelAdmin):
     index_image_preview.short_description = "首页图片"
 
 
+# Sticker Admin（2026-08-24 模組化：貼紙設計管理）
+class StickerAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "bg_preview",
+        "front_preview",
+        "text_en",
+        "text_zh",
+        "is_active",
+        "sort_order",
+    )
+    list_editable = ("is_active", "sort_order")
+    list_filter = ("is_active",)
+    search_fields = ("name", "text_en", "text_zh")
+    fieldsets = (
+        (
+            "貼紙設計",
+            {
+                "fields": ("name", "bg_image", "front_image_preset", "front_image"),
+                "description": "背景款式為內建 4 款（260×260 旋轉底圖）；前圖可用內建款式或上傳自訂去背 PNG（上傳圖優先）。",
+            },
+        ),
+        (
+            "貼紙文字",
+            {
+                "fields": ("text_en", "text_zh"),
+                "description": "英文副標題顯示在上方小字、中文標語顯示在下方大字。用 \\n 換行。建議英文 ≤15 字、中文 ≤8 字，避免溢出貼紙圓框。",
+            },
+        ),
+        ("狀態", {"fields": ("is_active", "sort_order")}),
+    )
+
+    def bg_preview(self, obj):
+        return format_html(
+            '<img src="{}" style="width: 45px; height: 45px; object-fit: contain; border-radius: 50%; border: 1px solid #333; background:#fff;" />',
+            obj.bg_image_url,
+        )
+
+    bg_preview.short_description = "背景"
+
+    def front_preview(self, obj):
+        return format_html(
+            '<img src="{}" style="width: 26px; height: 28px; object-fit: contain; border: 1px solid #333; background:#fff;" />',
+            obj.front_image_url,
+        )
+
+    front_preview.short_description = "前圖"
+
+
 # 注册模型
 admin.site.register(CoffeeItem, CoffeeItemAdmin)
 admin.site.register(BeanItem, BeanItemAdmin)
@@ -597,3 +663,4 @@ admin.site.register(OrderModel, OrderModelAdmin)
 admin.site.register(CoffeeQueue)
 admin.site.register(Barista)
 admin.site.register(CoffeePreparationTime)
+admin.site.register(Sticker, StickerAdmin)

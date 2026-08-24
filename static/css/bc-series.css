@@ -306,6 +306,348 @@
         font-size: 12px;
         margin-top: 2px;
     }
+    /* sukima hero-title-svg：行動端縮小，與副標題文字同行不換行 */
+}
+
+/* ============================================================
+   sukima hero-title-svg 手繪圓形畫線揭示動畫整合（2026-08-24 修改）
+   完全複製 sukima.tokyo.jp 的 .leaf-flow-reveal-stream 動畫機制：
+   - SVG mask 內白色手繪線（dasharray=312/dashoffset=312，
+     = 手繪圓形 path 實際長度 311px）透過 dashoffset 312→0
+     （2s ease-in-out forwards、延遲 1s）逐步畫線揭示
+     #BFFF00 手繪圓環（opacity 0.75）。
+   - 形狀：葉形改為手繪圓形（不閉合螺旋橢圓 path），
+     圈住副標題「一種興奮感」文字（`.bc-leaf-circle-wrap` 錨點）。
+   - 觸發：進入視口時 bc-series.js 加 .show（IntersectionObserver），
+     CSS 規則結構與原站 .hero.show 一致。
+   ============================================================ */
+.bc-leaf-circle-wrap {
+    position: relative;
+    display: inline-block;
+}
+/* SVG 絕對定位覆蓋文字外圈（圓環畫在文字外側；2026-08-24 增高、再追加整體加大：inset 四邊 -14/-12 → -24px、寬高 +48px） */
+.bc-leaf-circle-wrap .hero-title-svg {
+    position: absolute;
+    inset: -24px -24px;
+    width: calc(100% + 48px);
+    height: calc(100% + 48px);
+    display: block;
+    margin: 0;
+    vertical-align: baseline;
+    pointer-events: none;
+}
+.bc-series-hero.show .leaf-flow-reveal-stream {
+    animation: leafFlowReveal 1.08s ease-in-out forwards 1s; /* 2026-08-24 速度再 +30%（1.4s→1.08s） */
+}
+@keyframes leafFlowReveal {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ============================================================
+   sukima title-hatarikata-svg 絲帶畫線揭示動畫整合（2026-08-24）
+   完全複製 sukima.tokyo.jp 的 .title-hatarikata-svg：
+   - mask 白線 tracer（flowing-ribbon-reveal-tracer，
+     dasharray 600/offset 600，path 實測 543px）透過
+     cometTailReveal 逐步揭示 #BFFF00 絲帶。
+   - 位置：移到標題文字下方（top:100% + margin-top，避免與文字
+     水平重疊）；width 98px→834px 154px→1920px 216px。
+   - 動畫：速度 +50%×2（4s→2.67s→1.78s）ease-in-out forwards。
+   - 觸發：進入視口 bc-series.js 加 .show（沿用既有機制）。
+   ============================================================ */
+.title-hatarikata-svg {
+    position: absolute;
+    top: 100%;
+    margin-top: 0; /* 2026-08-24 緊貼文字底部（2px→0） */
+    left: -23px;
+    width: 98px;
+    height: auto;
+    opacity: 0.75;
+    pointer-events: none;
+}
+.bc-series-hero.show .flowing-ribbon-reveal-tracer {
+    animation: cometTailReveal 0.91s ease-in-out forwards; /* 2026-08-24 速度再 +50%（1.37s→0.91s） */
+}
+@keyframes cometTailReveal {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ============================================================
+   sukima title-office-svg 手繪圓圈畫線揭示動畫整合（2026-08-24）
+   完全複製 sukima.tokyo.jp 的 .title-office-svg：
+   - mask 白線 tracer（fingerprint-reveal-flow，dasharray 700/
+     offset 700，path 實測 345.5px）透過 fingerprintReveal 2s
+     ease-in-out forwards 逐步揭示 #BFFF00 手繪圓圈（g opacity .75）。
+   - 動畫速度 +80%（2s→1.11s）。
+   - 位置（2026-08-24 使用者指示）：移到「那股香不只是味道」
+     span（.bc-smell-circle-wrap）右側、垂直居中（left:100%
+     top:50% translateY(-50%)）；width 55→834px 72→1920px 95。
+   - 觸發：way 區塊進視口 bc-series.js 加 .show（與箭頭共用）。
+   ============================================================ */
+.bc-smell-circle-wrap {
+    position: relative;
+    display: inline-block;
+}
+.title-office-svg {
+    position: absolute;
+    left: 100%;
+    bottom: 100%; /* 2026-08-24 再次上移：底部對齊文字行頂，完全在文字上方 */
+    margin-left: 10px;
+    margin-bottom: 0; /* 2026-08-24 向下移動一點：6px→0（底部對齊文字行頂） */
+    width: 55px;
+    height: auto;
+    pointer-events: none;
+    z-index: 50; /* 置頂，避免被 col-img 背景圖片覆蓋 */
+}
+.col-main.way.show .fingerprint-reveal-flow {
+    animation: fingerprintReveal 1.11s ease-in-out forwards; /* 2026-08-24 速度 +80%（2s→1.11s） */
+}
+@keyframes fingerprintReveal {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ============================================================
+   sukima footer-arrow-svg 手繪圓圈（山形）畫線揭示動畫整合（2026-08-24）
+   完全複製 sukima.tokyo.jp 的 .footer-arrow-svg：
+   - mask 白線 tracer（mountain-range-reveal-tracer，dasharray
+     1000/offset 1000，path 實測 491.1px）透過 revealFooterSvg
+     ease-in-out forwards 逐步揭示 #BFFF00 山形（g opacity .75）。
+   - 動畫速度 +80%（6s→3.33s）。
+   - 位置：absolute 於「世界太快」word（position:relative），
+     照抄 sukima（left78 right-31 top-40 bottom-24 width259 translateX(-259)）。
+   - 觸發：way 區塊進視口 bc-series.js 加 .show（共用）。
+   ============================================================ */
+.productFv .footer-arrow-svg {
+    position: absolute;
+    left: -200px; /* 2026-08-24 再次左移 */
+    top: 30px;
+    width: 259px !important; /* 覆蓋 blobs.css .productFv.style_01 h1 svg 的 vw 尺寸 */
+    height: auto !important;
+    pointer-events: none;
+    z-index: 50;
+}
+.col-main.way.show .mountain-range-reveal-tracer {
+    animation: revealFooterSvg 3.33s ease-in-out forwards; /* 2026-08-24 速度 +80%（6s→3.33s） */
+}
+@keyframes revealFooterSvg {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ============================================================
+   sukima who-arrow-svg 手繪箭頭畫線揭示動畫整合（2026-08-24）
+   完全複製 sukima.tokyo.jp 的 .who-arrow-svg：
+   - mask 白線 tracer（reveal-brush-arrow-wwa，dasharray 300/
+     offset 300，path 實測 242.6px）透過 organicRevealAnimation
+     ease-in-out forwards 逐步揭示 #bfff00 手繪箭頭（g opacity .75）。
+   - 動畫速度 +80%（1.5s→0.83s）。
+   - 位置：absolute 於「這就是起點」span（.bc-who-arrow-wrap），
+     照抄 sukima（bottom:3px left:45% translateY(100%) width:114），
+     834px→146、1920px→188。
+   - 觸發：way 區塊進視口 bc-series.js 加 .show（共用）。
+   ============================================================ */
+.bc-who-arrow-wrap {
+    position: relative;
+    display: inline-block;
+}
+.productFv .who-arrow-svg {
+    position: absolute;
+    bottom: 3px;
+    left: 45%;
+    width: 114px !important; /* 覆蓋 blobs.css .productFv h1 svg 尺寸 */
+    height: auto !important;
+    z-index: 2;
+    transform: translateY(100%);
+    pointer-events: none;
+    z-index: 50;
+}
+.col-main.way.show .reveal-brush-arrow-wwa {
+    animation: organicRevealAnimation 1.19s ease-in-out forwards; /* 2026-08-24 減慢 30%（0.83s→1.19s） */
+}
+@keyframes organicRevealAnimation {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ============================================================
+   sukima other-members-svg 手繪圓形畫線揭示動畫整合（2026-08-24）
+   完全複製 sukima.tokyo.jp 的 .other-members-svg：
+   - mask 白線 tracer（organic-reveal-brush444，dasharray 800/
+     offset 784，path 實測 814.9px）透過 organicRevealAnimation
+     1.5s ease-in-out forwards 逐步揭示 #BFFF00 手繪圓形（g opacity .75）。
+   - 位置：absolute 於「為什麼，Between Coffee…」h2（position:relative），
+     照抄 sukima（top:60% left:50% translate3d(-50%,-50%,0) rotate(10deg)
+     width:102px）。
+   - 觸發：topConcept 區塊進視口 bc-series.js 加 .show。
+   ============================================================ */
+.other-members-svg {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0) rotate(10deg);
+    opacity: 0.75;
+    z-index: 0;
+    width: 140px; /* 2026-08-24 加大：102→140 */
+    height: auto;
+    pointer-events: none;
+}
+.bc-top-concept.show .organic-reveal-brush444 {
+    animation: organicRevealAnimation 1.5s ease-in-out forwards;
+}
+@media (min-width: 834px) {
+    .other-members-svg {
+        width: 190px;
+    }
+}
+@media (min-width: 1920px) {
+    .other-members-svg {
+        width: 240px;
+    }
+}
+
+/* sukima .other-members「他にもいます！」文字動畫（2026-08-24 整合）
+   2026-08-24 移動：容器移到「一杯好咖啡。」文字後（inline-block），
+   移除 absolute top/right；僅 span scale 0→1（延遲 1s） */
+.bc-other-members {
+    display: inline-block;
+    position: relative;
+    transform: rotate(-10deg);
+    font-size: 16px; /* 2026-08-24 加大：10→16 */
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0.8px;
+    color: #fff;
+    pointer-events: none;
+    z-index: 50;
+    margin-left: 12px;
+}
+.bc-other-members span {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    transform: scale(0) rotate(10deg);
+    color: #fff;
+}
+.bc-top-concept.show .bc-other-members span {
+    transform: scale(1) rotate(0);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) 1s;
+}
+@media (min-width: 834px) {
+    .bc-other-members {
+        font-size: 20px; /* 12→20 */
+        top: 10px;
+    }
+}
+@media (min-width: 1920px) {
+    .bc-other-members {
+        font-size: 26px; /* 16→26 */
+        top: 18px;
+    }
+}
+/* blobs.css .productFv path{opacity:0;transform:translateY(1em)} 會隱藏
+   way 區塊 path（含 who-arrow 與 tracer）→ 覆蓋還原 */
+.productFv .who-arrow-svg path {
+    opacity: 1 !important;
+    transform: none !important;
+}
+@media (min-width: 834px) {
+    .productFv .who-arrow-svg {
+        width: 146px !important;
+    }
+}
+@media (min-width: 1920px) {
+    .productFv .who-arrow-svg {
+        width: 188px !important;
+    }
+}
+/* blobs.css .productFv path{opacity:0;transform:translateY(1em)} 會隱藏
+   way 區塊 path（含山形與 tracer）→ 覆蓋還原 */
+.productFv .footer-arrow-svg path {
+    opacity: 1 !important;
+    transform: none !important;
+}
+/* blobs.css .productFv path{opacity:0;transform:translateY(1em)} 會隱藏
+   way 區塊 path（含圓圈與 tracer）→ 覆蓋還原 */
+.productFv .title-office-svg path {
+    opacity: 1 !important;
+    transform: none !important;
+}
+@media (min-width: 834px) {
+    .title-office-svg {
+        width: 72px;
+    }
+}
+@media (min-width: 1920px) {
+    .title-office-svg {
+        width: 95px;
+    }
+}
+
+/* ============================================================
+   sukima arrow-recruit-svg 手繪箭頭畫線揭示動畫整合（2026-08-24）
+   完全複製 sukima.tokyo.jp 的 .arrow-recruit-svg：
+   - mask 白線 tracer（comet-tail-reveal-stream，dasharray 500/
+     offset 500，path 實測 296.8px）透過 cometTailReveal 4s
+     ease-in-out forwards 逐步揭示 #BFFF00 雙箭頭（g opacity .75）。
+   - 位置：absolute 於 way 區塊（col-main.way，position:relative）
+     底部左側（left:50px bottom:-39px translate(-100%) width:191px），
+     1920px→245px、2560px→286px。
+   - 觸發：進入視口 bc-series.js 加 .show。
+   ============================================================ */
+.arrow-recruit-svg {
+    position: absolute;
+    left: 50px;
+    bottom: -39px;
+    transform: translate(-100%);
+    width: 191px;
+    height: auto;
+    pointer-events: none;
+    z-index: 50; /* 2026-08-24 置頂，避免被 col-img 背景圖片覆蓋 */
+}
+.col-main.way.show .comet-tail-reveal-stream {
+    animation: cometTailReveal 1.71s ease-in-out forwards; /* 2026-08-24 速度再 +30%（2.22s→1.71s） */
+}
+/* 2026-08-24 修復：blobs.css 的 .productFv path{opacity:0;transform:translateY(1em)}
+   會隱藏/位移 way 區塊內所有 path（含箭頭與 mask 內 tracer）→ 用
+   higher specificity + !important 覆蓋還原（tracer 位移會使 mask 揭示偏移） */
+.productFv .arrow-recruit-svg path {
+    opacity: 1 !important;
+    transform: none !important;
+}
+@media (min-width: 1920px) {
+    .arrow-recruit-svg {
+        left: 50px;
+        bottom: -44px;
+        width: 245px;
+    }
+}
+@media (min-width: 2560px) {
+    .arrow-recruit-svg {
+        left: 63px;
+        bottom: -65px;
+        width: 286px;
+    }
+}
+@media (min-width: 834px) {
+    .title-hatarikata-svg {
+        left: -40px;
+        width: 154px;
+        margin-top: 0; /* 4px→0 */
+    }
+}
+@media (min-width: 1920px) {
+    .title-hatarikata-svg {
+        left: -44px;
+        width: 216px;
+        margin-top: 2px; /* 6px→2px */
+    }
 }
 
 

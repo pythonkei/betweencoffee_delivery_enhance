@@ -54,13 +54,15 @@
             <div class="col-lg-6 product-details pl-md-5  position-relative">
                 <div class="block-23 mb-3 position-relative">
                     <p class="h3 coffee-title">{{ coffee.name }}</p>
+                    {% if coffee.sticker %}
                     <div class="sticker-box">
                         <div class="sticker">
-                            <div class="front"><img src= {% static 'images/takeaway_cup.png' %}></div>
-                            <div class="bg"></div>
-                            <p class="bc-sticker-text"><span class="bc-sticker-text-sub">Follow <br>Your Rhythm</span>5分鐘內<br>準備就緒!!</p>
+                            <div class="front"><img src="{{ coffee.sticker.front_image_url }}"></div>
+                            <div class="bg" style="background-image: url('{{ coffee.sticker.bg_image_url }}')"></div>
+                            <p class="bc-sticker-text"><span class="bc-sticker-text-sub">{{ coffee.sticker.text_en|linebreaksbr }}</span>{{ coffee.sticker.text_zh|linebreaksbr }}</p>
                         </div>
                     </div>
+                    {% endif %}
                     <p class="price">${{ coffee.price|floatformat:"-2"|default:"0"  }}</p>
                     <p class="pb-2 bc-description-clamp">{{ coffee.description }}</p>
                 </div>
