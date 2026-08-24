@@ -1,0 +1,285 @@
+/* ============================================================
+   bc-who.css — About 頁面 sukima who section
+   完全複製 https://sukima.tokyo.jp/ 的 .section.who（#who）：
+   - 逐字揭示（wwa-anim-char opacity .5→1）
+   - spacer/visual 寬度展開 + img/video scale 0→1
+   - who-circle-svg 手繪圓圈畫線（wwa-circle-brush dashoffset 800→377）
+   - who-arrow-svg 手繪箭頭畫線（reveal-brush-arrow-wwa dashoffset 300→0）
+   - kicker 括號 (…) scale 0→1 + label 寬度展開（IO 觸發一次）
+   - 動畫驅動：bc-who.js scroll scrub（跟隨滾動進度，與原站
+     GSAP ScrollTrigger scrub 一致），逐字元素依原站時間軸
+     （間隔 0.5s）計算進度，JS 直接設定屬性
+   - 響應式斷點：base / ≥704 / ≥834 / ≥1920（與原站一致）
+   - 黑底白字適配（本地品牌背景）；SVG 高亮 #BFFF00 保留原樣
+   ============================================================ */
+
+/* ---------- 基底 ---------- */
+.bc-who-section {
+    position: relative;
+    /* 原站 section{padding:0 80px;max-width:1920px;margin:0 auto} +
+       #main-top-sections-wrapper gap:96px（section 之間距離）→ 折衷為上下 96px */
+    padding: 96px 80px;
+    max-width: 1920px;
+    margin: 0 auto;
+    /* 響應式目標寬度（bc-who.js scroll scrub 讀取） */
+    --who-spacer-w: 75px;
+    --who-visual01-w: 58px;
+    --who-visual03-w: 54px;
+}
+@media all and (max-width: 1080px) {
+    .bc-who-section {
+        padding: 96px 40px;
+    }
+}
+@media all and (max-width: 834px) {
+    .bc-who-section {
+        padding: 96px 20px;
+    }
+}
+.bc-who-section .who-content-sticky {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.bc-who-section .who-kicker {
+    margin-left: 87px;
+}
+.bc-who-section .who-content {
+    justify-content: flex-end;
+}
+.bc-who-section .who-content-text {
+    position: relative;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 180%;
+    letter-spacing: 1.92px;
+    max-width: 400px;
+    min-height: 386px;
+    color: #fff; /* 本地黑底適配：白字 */
+}
+
+
+/* ---------- section-title ---------- */
+.bc-who-section .section-title {
+    position: relative;
+    padding: 0 0 48px;
+}
+.bc-who-section .section-title__text {
+    position: relative;
+    display: inline-block;
+    font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+    font-size: 36px;
+    line-height: 100%;
+    font-weight: 500;
+    letter-spacing: 0.96px;
+    color: #fff;
+}
+.bc-who-section .section-title--left {
+    align-items: flex-start;
+}
+
+/* ---------- flx ---------- */
+.bc-who-section .flx {
+    display: flex;
+}
+.bc-who-section .flx-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---------- kicker 括號（sukima-parenthis-anim） ---------- */
+.bc-who-section .sukima-parenthis-anim {
+    display: flex;
+    gap: 4px;
+    transform: scale(0) translateZ(0);
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.bc-who-section .sukima-parenthis-anim .sukima-label {
+    overflow: hidden;
+    max-width: 0;
+    white-space: nowrap;
+    transition: max-width 0.8s ease 0.3s;
+}
+.bc-who-section .sukima-parenthesis,
+.bc-who-section .sukima-label {
+    color: #fff;
+}
+.bc-who-section.show .sukima-parenthis-anim {
+    transform: scale(1) translateZ(0);
+}
+.bc-who-section.show .sukima-parenthis-anim .sukima-label {
+    max-width: var(--label-width, 100px);
+    transition-delay: 0.3s;
+}
+
+/* ---------- 逐字動畫（JS scrub 驅動：opacity 依滾動進度 .5→1） ---------- */
+.bc-who-section .wwa-anim-char,
+.bc-who-section .wwa-anim-visual {
+    display: inline-block;
+}
+.bc-who-section .wwa-anim-char {
+    opacity: 0.5;
+}
+
+/* ---------- spacer（wwa-first-spacer，JS scrub 驅動寬度） ---------- */
+.bc-who-section .wwa-first-spacer {
+    width: 0;
+    overflow: hidden;
+}
+
+/* ---------- visual 容器（JS scrub 驅動寬度 + scale） ---------- */
+.bc-who-section .wwa-anim-visual {
+    opacity: 1;
+    width: 0;
+    position: relative;
+    height: 30px;
+}
+.bc-who-section .wwa-anim-visual img,
+.bc-who-section .wwa-anim-visual video {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: auto;
+    transform: scale(0);
+    transform-origin: bottom center;
+}
+.bc-who-section .wwa-anim-visual img {
+    top: 4px;
+    left: 2px;
+}
+.bc-who-section .wwa-visual-01 img {
+    left: -2px;
+}
+.bc-who-section .wwa-visual-03 video {
+    top: -2px;
+    left: 4px;
+}
+
+/* ---------- sukima-anim-wwa / video-anim-wwa 容器 ---------- */
+/* 原站 .sukima-anim-wwa 為 inline（僅 .relative 提供定位），
+   .video-anim-wwa 為 inline-block；修正後 who-circle-svg 的
+   top:73% 定位基準與原站一致 */
+.bc-who-section .sukima-anim-wwa {
+    position: relative;
+}
+.bc-who-section .video-anim-wwa {
+    position: relative;
+    display: inline-block;
+}
+
+/* ---------- who-circle-svg 手繪圓圈 ---------- */
+.bc-who-section .who-circle-svg {
+    position: absolute;
+    top: 73%;
+    left: 48%;
+    width: 102px;
+    height: auto;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+.bc-who-section .wwa-circle-brush {
+    /* JS scrub 驅動 stroke-dashoffset（inline SVG 初始 800） */
+}
+.bc-who-section .who-arrow-svg {
+    position: absolute;
+    bottom: 3px;
+    left: 45%;
+    width: 114px;
+    height: auto;
+    z-index: 2;
+    transform: translateY(100%);
+}
+.bc-who-section .reveal-brush-arrow-wwa {
+    /* JS scrub 驅動 stroke-dashoffset（inline SVG 初始 300） */
+}
+
+/* ---------- 響應式 ---------- */
+@media (min-width: 704px) {
+    .bc-who-section .who-content-text {
+        max-width: 440px;
+        min-height: 320px;
+    }
+}
+
+@media (min-width: 834px) {
+    .bc-who-section {
+        --who-spacer-w: 90px;
+        --who-visual01-w: 90px;
+        --who-visual03-w: 76px;
+    }
+    .bc-who-section .section-title {
+        padding: 0 0 64px;
+    }
+    .bc-who-section .section-title__text {
+        font-size: 56px;
+    }
+    .bc-who-section .who-kicker {
+        margin-left: 173px;
+    }
+    .bc-who-section .who-content-text {
+        font-size: 34px;
+        letter-spacing: 2.72px;
+        max-width: 640px;
+        min-height: 422px;
+    }
+    .bc-who-section .wwa-anim-visual {
+        height: 43px;
+    }
+    .bc-who-section .who-circle-svg {
+        width: 158px;
+    }
+    .bc-who-section .who-arrow-svg {
+        width: 146px;
+    }
+    .bc-who-section .wwa-visual-03 video {
+        top: -1px;
+        left: 6px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .bc-who-section {
+        --who-spacer-w: 140px;
+        --who-visual01-w: 144px;
+        --who-visual03-w: 126px;
+    }
+    .bc-who-section .section-title {
+        padding: 0 0 120px;
+    }
+    .bc-who-section .section-title__text {
+        font-size: 80px;
+    }
+    .bc-who-section .who-kicker {
+        margin-left: 262px;
+    }
+    .bc-who-section .who-content-text {
+        font-size: 50px;
+        letter-spacing: 4px;
+        max-width: 858px;
+    }
+    .bc-who-section .wwa-anim-visual {
+        height: 56px;
+    }
+    .bc-who-section .who-circle-svg {
+        width: 203px;
+    }
+    .bc-who-section .who-arrow-svg {
+        width: 188px;
+    }
+    .bc-who-section .wwa-anim-visual img {
+        left: 0;
+        top: -6px;
+    }
+    .bc-who-section .wwa-visual-02 img {
+        left: 10px;
+    }
+    .bc-who-section .wwa-visual-03 video {
+        top: -19px;
+        left: 6px;
+    }
+    .bc-who-section .wwa-visual-01 img {
+        left: -4px;
+    }
+}
