@@ -56,8 +56,8 @@ load_context() {
         return 1
     fi
     
-    # 運行加載
-    python load_betweencoffee_context.py --output "$CONTEXT_FILE"
+    # 運行加載（使用 /usr/bin/python3 避免 PATH 變動後 python 命令缺失）
+    /usr/bin/python3 load_betweencoffee_context.py --output "$CONTEXT_FILE"
     
     if [ $? -eq 0 ] && [ -f "$CONTEXT_FILE" ]; then
         FILE_SIZE=$(wc -c < "$CONTEXT_FILE")
