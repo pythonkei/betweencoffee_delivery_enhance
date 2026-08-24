@@ -1,7 +1,7 @@
 # Between Coffee 系統 .clinerules
 
 > 引用自: .clinerules/.clinerules
-> **最後更新**: 2026年8月23日（更新：① mauinterview rotate-mau 圓形旋轉文字標誌整合至 about.html——bc-rotate-mau.css 新建、文字沿圓周排列（Taste Right Taste Time ×2）、純 CSS 36s/50s 旋轉、z-index -1 背景層、scale=2πR/total_step 統一間隙；② bc-series 咖啡名稱改 Josefin Sans 26px uppercase + highlight 18px 500；③ bean 烘焙程度 5 顆咖啡豆 SVG（5 造型/5 色階/旋轉 55°）；④ kariomons .staff 整合至 bean 賞味期限下方（bc-staff 系列、懸停邊框根因=style-bootstrap .staff class 衝突、figure 瀏覽器默認 margin 修正）；⑤ MCP 配置：Cline 4.1.11 讀 ~/.cline/data/settings、uvx 重裝至 ~/.local/bin）
+> **最後更新**: 2026年8月24日（更新：浮動購物車按鈕修復——① `.bc-floating-cart.hide` 加 `display:none`（購物車打開時按鈕不疊頂部）；② `open()` 先 hide 再 lockScroll（點擊瞬間無位移）；③ 恢復加入購物車滑入動畫（`bcFloatingIn` + `no-anim` 初始靜默）；④ 頁面跳轉靜默（`_updateBadge` 加 `animatedOverride`，`_syncBadgeFromServer` 強制靜默）；⑤ 已有商品再次加入不重播（`_showFloatingCart` 先檢查 show）；版號 bc-components.css ?v=20260824a、bc-slideout-cart.js ?v=20260824c）
 
 ## 開發者背景與方法論
 

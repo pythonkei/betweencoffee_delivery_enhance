@@ -44,12 +44,11 @@ class SlideoutCart {
     this.isOpen = true;
     this.overlay?.classList.add('open');
     this.drawer.classList.add('open');
-    this._lockScroll();
-    this._loadItems();
-    // 打開購物車時隱藏浮動按鈕，避免覆蓋在面板上
-    // 設定標記防止 _updateFloatingCartVisibility 重新顯示
+    // 先隱藏浮動按鈕再鎖定滾動（避免 _lockScroll 對按鈕 right 補償造成點擊瞬間位移）
     this._cartOpenHiddenFloating = true;
     this._hideFloatingCart();
+    this._lockScroll();
+    this._loadItems();
   }
 
   close() {
@@ -277,7 +276,7 @@ class SlideoutCart {
     }
   }
 
-  _updateBadge(count) {
+  _updateBadge(count, animatedOverride) {
     const val = count || '0';
     document.querySelectorAll(this.options.badgeSelector).forEach(el => {
       // 2026-08-14：值相同不重設 textContent（避免重繪造成文字閃爍）
@@ -288,7 +287,9 @@ class SlideoutCart {
     // 同步浮動購物車按鈕顯示狀態
     // 2026-08-14：頁面載入期（constructor + rAF 兩次初始同步）靜默顯示（無動畫）；
     // 延遲切換標記，確保所有初始同步皆靜默、之後操作（加入購物車等）才有滑入動畫
-    const animated = !this._initialBadgeSync;
+    // 2026-08-24：_syncBadgeFromServer（頁面載入/bfcache 恢復）傳 false 強制靜默，
+    // 避免 async fetch 回應超過 500ms 時 _initialBadgeSync 已 false → 每次跳頁滑入動畫
+    const animated = animatedOverride !== undefined ? animatedOverride : !this._initialBadgeSync;
     this._updateFloatingCartVisibility(count, animated);
     if (this._initialBadgeSync) {
       setTimeout(() => { this._initialBadgeSync = false; }, 500);
@@ -328,7 +329,7 @@ class SlideoutCart {
       const response = await fetch(url);
       const data = await response.json();
       if (data.success) {
-        this._updateBadge(data.cart_total_items);
+        this._updateBadge(data.cart_total_items, false); // 2026-08-24：頁面載入/bfcache 恢復同步一律靜默（不觸發滑入動畫）
       }
     } catch (err) {
       // 靜默失敗，使用 HTML 初始值
@@ -365,10 +366,12 @@ class SlideoutCart {
     const badge = this.floatingCart.querySelector('.bc-floating-cart-badge');
     if (badge && parseInt(badge.textContent) <= 0) return;
 
+    // 2026-08-24：已顯示（show）時直接返回——不移除 no-anim、不重播滑入動畫。
+    // 否則加入商品時 animated=true 移除 no-anim → CSS 動畫從 none 變 bcFloatingIn → 每次重播
+    if (this.floatingCart.classList.contains('show')) return;
+
     // 2026-08-14：頁面載入靜默顯示（no-anim 禁用滑入動畫）；操作後（animated=true）恢復動畫
     this.floatingCart.classList.toggle('no-anim', !animated);
-
-    if (this.floatingCart.classList.contains('show')) return;
 
     // 確保元素可見（移除可能殘留的 display:none inline style）
     this.floatingCart.style.display = '';

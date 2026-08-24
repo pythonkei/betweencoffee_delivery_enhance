@@ -1433,12 +1433,16 @@ body {
 
 .bc-floating-cart.show {
   pointer-events: auto;
-  animation: none;   /* 2026-08-14：移除滑入動畫（含加入購物車），避免視覺幹擾 */
+  animation: bcFloatingIn 0.4s ease-out forwards; /* 2026-08-24：恢復加入購物車時從底部滑入右下角 */
+}
+.bc-floating-cart.no-anim.show {
+  animation: none; /* 初始載入靜默（JS 加 no-anim 禁動畫） */
 }
 
 .bc-floating-cart.hide {
   pointer-events: none;
   animation: none;   /* 2026-08-14：移除滑出動畫 */
+  display: none !important; /* 2026-08-23：animation 移除後 hide 需真正隱藏（購物車打開時浮動按鈕不疊在頂部） */
 }
 
 @keyframes bcFloatingIn {
