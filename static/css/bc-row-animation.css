@@ -1,0 +1,37 @@
+/* ============================================================
+   bc-row-animation.css — About 頁面 sukima row-animation video scrub
+   完全複製 https://sukima.tokyo.jp/ 的 .row-animation：
+   - 橫向條帶（flex 置中、overflow hidden、font-size:0）
+   - video height:100% width:auto + mix-blend-mode:hard-light
+   - 響應式高度：base 96px / ≥1024 160px / ≥1920 200px
+   - 黑底適配（本地品牌背景，原站為白底 var(--color-white)）
+   - 動畫：bc-row-animation.js 原生 scroll scrub
+     （video.currentTime 跟隨滾動，原站 videoScrubber 機制）
+   ============================================================ */
+.bc-row-animation {
+    background: var(--bc-bg, #0e0e0e); /* 黑底適配（原站 var(--color-white)） */
+    font-size: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    height: 96px;
+}
+.bc-row-animation .row-animation__video {
+    height: 100%;
+    width: auto;
+    mix-blend-mode: hard-light;
+}
+
+@media (min-width: 1024px) {
+    .bc-row-animation {
+        height: 160px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .bc-row-animation {
+        height: 200px;
+    }
+}

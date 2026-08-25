@@ -1,0 +1,115 @@
+/* ============================================================
+   bc-capabilities.css — About 頁面 sukima capabilities-gallery
+   完全複製 https://sukima.tokyo.jp/ 的 .capabilities-gallery：
+   - 左右團隊照片（cgi-left/right，scroll scrub 時從位移歸位）
+   - capabilities-anim-char 36 幀逐幀動畫（anim-frame visibility 切換）
+   - surprise-anim-svg 手繪閃電（reveal-brush dashoffset 305→0 畫線）
+   - 響應式：gap/max-width/padding、cgi 位移 10/18/24px、
+     anim-char 位置、surprise 41/61/81px
+   - 黑底適配（本地品牌背景）；SVG 高亮 #BFFF00 保留
+   - 動畫：bc-capabilities.js 原生 scroll scrub
+   ============================================================ */
+.bc-capabilities {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 96px 0; /* 區塊間距（對應原站 section 之間） */
+}
+.bc-capabilities .capabilities-gallery {
+    position: relative;
+    display: flex; /* 原站 class 含 flx（display:flex）；缺此導致兩圖垂直分離 */
+    font-size: 0;
+    width: 100%;
+    align-self: flex-end;
+    gap: 18px;
+    max-width: 606px;
+    padding: 30px 0;
+}
+.bc-capabilities .cgi {
+    flex: 1;
+}
+.bc-capabilities .cgi-left {
+    transform: translate3d(10px, 0, 0);
+}
+.bc-capabilities .cgi-right {
+    transform: translate3d(-9px, 0, 0);
+}
+.bc-capabilities .cgil-visual,
+.bc-capabilities .cgir-visual {
+    transform: translateZ(0);
+}
+.bc-capabilities .capabilities-anim-char {
+    font-size: 0;
+    position: absolute;
+    top: 22.8%;
+    left: 44.6%;
+    width: 26%;
+    z-index: 3;
+    aspect-ratio: 0.5678;
+}
+.bc-capabilities .capabilities-anim-char .anim-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+}
+.bc-capabilities .capabilities-anim-char .anim-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.bc-capabilities .capabilities-anim-char .anim-frame.frame-1 {
+    visibility: visible;
+}
+.bc-capabilities .surprise-anim-svg {
+    position: absolute;
+    z-index: 2;
+    top: 6px;
+    right: 6px;
+    width: 41px;
+    height: auto;
+    transform: translate(100%, -100%);
+}
+
+@media (min-width: 834px) {
+    .bc-capabilities .capabilities-gallery {
+        gap: 34px;
+        padding: 60px 0;
+    }
+    .bc-capabilities .cgi-left {
+        transform: translate3d(18px, 0, 0);
+    }
+    .bc-capabilities .cgi-right {
+        transform: translate3d(-17px, 0, 0);
+    }
+    .bc-capabilities .capabilities-anim-char {
+        top: 18.8%;
+        left: 46.5%;
+    }
+    .bc-capabilities .surprise-anim-svg {
+        width: 61px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .bc-capabilities .capabilities-gallery {
+        gap: 46px;
+        padding: 80px 0;
+        max-width: 880px;
+    }
+    .bc-capabilities .cgi-left {
+        transform: translate3d(23px, 0, 0);
+    }
+    .bc-capabilities .cgi-right {
+        transform: translate3d(-23px, 0, 0);
+    }
+    .bc-capabilities .capabilities-anim-char {
+        top: 22.8%;
+        left: 45%;
+    }
+    .bc-capabilities .surprise-anim-svg {
+        width: 81px;
+    }
+}

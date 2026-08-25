@@ -283,3 +283,44 @@
         left: -4px;
     }
 }
+
+/* ============================================================
+   sukima content-block-title 思考氣泡手繪畫線動畫（2026-08-25 整合）
+   完全複製 sukima.tokyo.jp 的 .culture-kangaeteiru-svg：
+   - absolute 於「Who we are」標題右側上方（top 8/22/41、right 0/0/-6）
+   - mask 白線 tracer（thought-bubble-reveal-tracer，dasharray 500/
+     offset 500）透過 animSvgStrokeTo 2s ease-in-out forwards 畫線揭示
+     #BFFF00 思考氣泡（g opacity .75）
+   - 觸發：who section 進視口加 .show（bc-who.js 既有機制）
+   ============================================================ */
+.bc-who-section .culture-kangaeteiru-svg {
+    position: absolute;
+    top: 8px;
+    right: -8px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
+    transform: translate3d(100%, -100%, 0);
+    width: 42px;
+    height: auto;
+}
+.bc-who-section.show .thought-bubble-reveal-tracer {
+    animation: animSvgStrokeTo 2s ease-in-out forwards;
+}
+@keyframes animSvgStrokeTo {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+@media (min-width: 834px) {
+    .bc-who-section .culture-kangaeteiru-svg {
+        top: 22px;
+        right: -8px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
+        width: 60px;
+    }
+}
+@media (min-width: 1920px) {
+    .bc-who-section .culture-kangaeteiru-svg {
+        top: 41px;
+        right: -14px; /* 2026-08-25 使用者要求稍微向右移動（原 -6） */
+        width: 80px;
+    }
+}
+
