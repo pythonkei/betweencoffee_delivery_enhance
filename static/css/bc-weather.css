@@ -23,19 +23,13 @@
 
 /* ---- 與 c-attract（右側虛線/Order 按鈕）中心點對齊（2026-08-26 需求）
    weather 水平中心對齊 #borders 右側虛線中心（= Order 按鈕視覺中心）。
-   各斷點位移量 = weather centerX − 虛線 centerX（實測推算）：
-     ≥992px       虛線 right:65px、weather 80px → 需左移 11px
-     768–991.98px 虛線 right:65px、weather 60px → 需左移 21px
-     576–767.98px 虛線 right:36px、weather 60px → 需右移 8px
-     ≤575.98px    虛線 right:32px、weather 60px → 需右移 12px
+   位移 = weather centerX − 虛線 centerX（weekday 加大後 768+ 容器 84px / 移動端 60px）：
+     ≥768px       84px 容器、虛線 right:65px → 需左移 9px
+     576–767.98px 60px 容器、虛線 right:36px → 需右移 8px
+     ≤575.98px    60px 容器、虛線 right:32px → 需右移 12px
    使用 transform（不影響 flex 佈局與 navbar 高度） */
 #ftco-navbar .weather {
-  transform: translateX(-11px);
-}
-@media screen and (max-width: 991.98px) {
-  #ftco-navbar .weather {
-    transform: translateX(-21px);
-  }
+  transform: translateX(-9px);
 }
 @media screen and (max-width: 767.98px) {
   #ftco-navbar .weather {
@@ -126,6 +120,31 @@
 }
 #ftco-navbar .weather .date .year:before {
   content: ". ";
+}
+/* ---- weekday 徽章（2026-08-27 整合：yokohama-timberwharf event/1125 的 .weekday 膠囊徽章）
+   原站樣式：display:block + margin auto 置中（日期下方、#0000001a 背景、9px）
+   需求變更：與日期**水平對齊**（inline-block + vertical-align:middle）
+   黑底適配：原站 #0000001a 黑底不可見 → rgba(255,255,255,.12)（同 -color_white 機制）---- */
+#ftco-navbar .weather .date .weekday {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 4px 8px;
+  border-radius: 100px;
+  background-color: rgba(255, 255, 255, 0.12);
+  font-size: 10px; /* 2026-08-27 加大：9→10 */
+  line-height: 1.4;
+}
+/* 移動端（≤767.98）：weekday 換行到日期下方（空間不足；原站 event_single .mb 亦為 block 置中）。
+   此規則須放在 weekday 樣式之後，否則被上方 inline-block 覆蓋（相同特異性、後者優先） */
+@media screen and (max-width: 767.98px) {
+  #ftco-navbar .weather .date .weekday {
+    display: block;
+    width: fit-content;
+    margin: 3px auto 0;
+    padding: 3px 7px;
+    font-size: 9px; /* 2026-08-27 加大：8→9 */
+  }
 }
 
 /* ---- 底部邊線（原站 border 分隔線；2026-08-26 需求：移除）---- */

@@ -10,12 +10,14 @@
 
 /* ===== #borders 全屏虛線邊框（對應 cheesetart #borders）
    右側垂直虛線（dots_40.svg mask），固定全屏、pointer-events:none
-   z-index:9999（位於 Buy 按鈕之下、一般內容之上）
    2px 細線 + 半透明 + pointer-events:none = 純裝飾引導線
    虛線從頁面頂部延伸至底部，對齊 Buy 按鈕中心
-   層級：.bc-attract-buy(99999, body 直接子層) > #borders(9999) > 內容 ===== */
+   層級：.bc-attract-buy(99999) > #ftco-navbar(3，含 weather 元件) > #borders(2) > 內容(1)
+   2026-08-27：z-index 9999→2 —— 原 9999 疊在 navbar 上方，右側虛線穿過 Timber Wharf
+   weather 元件（navbar z-index 3 stacking context 內）；降為 2 後 weather 顯示於
+   虛線之上（虛線位於底層），虛線仍高於一般內容（.bc-page-content z-index 1） */
 #borders {
-  z-index: 9999;
+  z-index: 2;
   width: 100%;
   height: 100%;
   position: fixed;

@@ -24,9 +24,9 @@
                 </li>
             </ul>
         </div>
-        {% if request.resolver_match.url_name == 'about' %}
-        <!-- 2026-08-26: 橫濱 Timber Wharf 天氣元件（完整複製 yokohama-timberwharf.com .weather -font_en；僅 about 頁右上角顯示）
-             2026-08-26 新增時鐘：動畫循環順序 時鐘 → 天氣 icon → 溫度 -->
+        <!-- 2026-08-26: 橫濱 Timber Wharf 天氣元件（完整複製 yokohama-timberwharf.com .weather -font_en；右上角顯示）
+             2026-08-26 新增時鐘：動畫循環順序 時鐘 → 天氣 icon → 溫度
+             2026-08-27 應用於全域（nav.html 無條件顯示，全站右上角） -->
         <div class="weather -font_en -color_white" data-bc-weather>
             <div class="view">
                 <div class="clock"><span class="value">--:--</span></div>
@@ -38,11 +38,14 @@
             </div>
             <span class="date">
                 <span class="month"></span>, <span class="day"></span><span class="year"></span>
+                <!-- 2026-08-27：weekday 徽章（yokohama-timberwharf event/1125 .weekday；香港真實星期） -->
+                <span class="weekday">--</span>
             </span>
             <span class="border"></span>
         </div>
         <script>
         /* 2026-08-26：立即同步填入時鐘 + 日期，避免載入時不同步（時間先、日期後）。
+           2026-08-27：加 weekday（香港真實星期）。
            在 DOM 解析到此處時同步執行（早於 bc-weather.js 外部腳本）；
            bc-weather.js 的 updateClock/fillDate 仍會持續更新（此為早期快照，兩者一致）。
            日期為瀏覽器本地時間，不依賴天氣 API。 */
@@ -60,9 +63,11 @@
             if (day) day.textContent = pad(d.getDate());
             var y = w.querySelector('.year');
             if (y) y.textContent = d.getFullYear();
+            var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            var wd = w.querySelector('.weekday');
+            if (wd) wd.textContent = WEEKDAYS[d.getDay()];
         })();
         </script>
-        {% endif %}
     </div>
 </nav>
 <!-- 2026-08-10: Buy & Order 流動按鈕（c-attract，參考 cheesetart.com）

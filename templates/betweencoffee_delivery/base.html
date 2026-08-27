@@ -34,7 +34,10 @@
     <link rel="stylesheet" href={% static "css/responsive-system.css" %}?v=20260809l />
 
     <!-- 2026-08-10: 流動選單（c-attract）動畫容器樣式（參考 cheesetart.com） -->
-    <link rel="stylesheet" href={% static "css/bc-attract.css" %}?v=20260818a />
+    <link rel="stylesheet" href={% static "css/bc-attract.css" %}?v=20260827a />
+
+    <!-- 2026-08-27: Timber Wharf 天氣/時鐘元件（全域載入；完整複製 yokohama-timberwharf.com .weather -font_en，scoped 至 #ftco-navbar） -->
+    <link rel="stylesheet" href={% static "css/bc-weather.css" %}?v=20260827f />
 
     <!-- 2026-08-10: GSAP 動畫引擎（全域載入，供 SALON SEARCH + 流動選單使用） -->
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -273,6 +276,9 @@
 
     <!-- 2026-08-10: 流動選單（c-attract）動畫（依賴 GSAP，head 已載入；defer 確保 GSAP 先就緒） -->
     <script defer src={% static "js/bc-attract.js" %}?v=20260818a></script>
+
+    <!-- 2026-08-27: Timber Wharf 天氣/時鐘元件（全域載入；OpenWeatherMap 香港葵涌 + 時鐘/日期/weekday + GSAP 3 元素循環動畫） -->
+    <script src={% static "js/bc-weather.js" %}?v=20260827a></script>
 
     <!-- 2026-08-10: 水平跑馬燈（bc-marquee，JS rAF 整數像素 + 循環 buffer 避免抖動/閃出） -->
     <script src={% static "js/bc-marquee.js" %}?v=20260810b></script>

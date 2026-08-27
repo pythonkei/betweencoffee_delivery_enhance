@@ -279,8 +279,20 @@ class About(View):
     def get(self, request, *args, **kwargs):
         cart = Cart(request)  # Initialize the cart
 
+        # 2026-08-27：SERIES 滑桿改資料庫驅動——取目前顯示的 6 種咖啡
+        # （資料庫 id 1-4、7、8；id 5、6 已刪除不存在）
+        series_coffees = list(
+            CoffeeItem.objects.filter(id__in=[1, 2, 3, 4, 7, 8]).order_by("id")
+        )
+        # 2026-08-27：咖啡豆 SERIES 括號滑桿——6 種咖啡豆（id 1,2,3,6,7,8）
+        series_beans = list(
+            BeanItem.objects.filter(id__in=[1, 2, 3, 6, 7, 8]).order_by("id")
+        )
+
         context = {
             "cart": cart,  # keep cart count fn
+            "series_coffees": series_coffees,
+            "series_beans": series_beans,
         }
         return render(request, "betweencoffee_delivery/about.html", context)
 

@@ -81,6 +81,9 @@
     var day = now.getDate().toString().padStart(2, '0');
     var year = now.getFullYear().toString();
     var MONTHS = { 1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec' };
+    /* 2026-08-27：weekday 香港真實星期（本地 getDay） */
+    var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var weekday = WEEKDAYS[now.getDay()];
 
     nodes.forEach(function (c) {
       var d = c.querySelector('.day');
@@ -89,6 +92,8 @@
       if (m) m.textContent = MONTHS[monthNum];
       var y = c.querySelector('.year');
       if (y) y.textContent = year;
+      var wd = c.querySelector('.weekday');
+      if (wd) wd.textContent = weekday;
     });
     nodes.forEach(function (c) {
       /* 注意：時鐘加入後 DOM 有兩個 .value（.clock .value / .temperature .value），
