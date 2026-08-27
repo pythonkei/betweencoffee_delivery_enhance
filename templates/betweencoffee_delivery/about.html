@@ -20,6 +20,8 @@
 <link rel="stylesheet" href="{% static 'css/bc-row-animation.css' %}?v=20260825a" />
 <!-- sukima capabilities-gallery（scroll scrub 逐幀動畫；黑底適配） -->
 <link rel="stylesheet" href="{% static 'css/bc-capabilities.css' %}?v=20260825b" />
+<!-- 2026-08-26: 橫濱 Timber Wharf 天氣元件 + 時鐘（about 頁右上角；完整複製原站 weather 系列樣式，scoped 至 #ftco-navbar） -->
+<link rel="stylesheet" href="{% static 'css/bc-weather.css' %}?v=20260826f" />
 {% endblock %}
 
 
@@ -586,4 +588,6 @@
 <script src="{% static 'js/bc-row-animation.js' %}?v=20260825c"></script>
 <!-- sukima capabilities-gallery scroll scrub（cgi 歸位 + 36 幀切換 + surprise 畫線） -->
 <script src="{% static 'js/bc-capabilities.js' %}?v=20260825k"></script>
+<!-- 2026-08-26: 橫濱 Timber Wharf 天氣元件 + 時鐘（OpenWeatherMap + GSAP 5 秒循環 時鐘→icon→溫度 滑動切換；依賴 base.html 全域 GSAP） -->
+<script src="{% static 'js/bc-weather.js' %}?v=20260826e"></script>
 {% endblock %}

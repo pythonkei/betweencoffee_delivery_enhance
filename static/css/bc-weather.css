@@ -1,0 +1,178 @@
+/* ============================================================
+   bc-weather.css — 橫濱 Timber Wharf 天氣元件（about 頁右上角）
+   2026-08-26 整合
+   ------------------------------------------------------------------
+   完整複製 yokohama-timberwharf.com/wp-content/themes/ytw/assets/css/style.css
+   的 weather 系列規則（原站 selector header .main .weather → scoped 為
+   #ftco-navbar .weather，避免與其他元素衝突）。
+   黑底適配沿用原站既有 -color_white 機制（filter 反白圖示），
+   不引入原站以外的任何樣式/UI。
+   ============================================================ */
+
+/* ---- 容器（原站 header .main .weather）---- */
+#ftco-navbar .weather {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  text-align: center;
+  transition: color .5s cubic-bezier(.23, 1, .32, 1);
+}
+
+/* ---- 與 c-attract（右側虛線/Order 按鈕）中心點對齊（2026-08-26 需求）
+   weather 水平中心對齊 #borders 右側虛線中心（= Order 按鈕視覺中心）。
+   各斷點位移量 = weather centerX − 虛線 centerX（實測推算）：
+     ≥992px       虛線 right:65px、weather 80px → 需左移 11px
+     768–991.98px 虛線 right:65px、weather 60px → 需左移 21px
+     576–767.98px 虛線 right:36px、weather 60px → 需右移 8px
+     ≤575.98px    虛線 right:32px、weather 60px → 需右移 12px
+   使用 transform（不影響 flex 佈局與 navbar 高度） */
+#ftco-navbar .weather {
+  transform: translateX(-11px);
+}
+@media screen and (max-width: 991.98px) {
+  #ftco-navbar .weather {
+    transform: translateX(-21px);
+  }
+}
+@media screen and (max-width: 767.98px) {
+  #ftco-navbar .weather {
+    transform: translateX(8px);
+  }
+}
+@media screen and (max-width: 575.98px) {
+  #ftco-navbar .weather {
+    transform: translateX(12px);
+  }
+}
+
+/* ---- view：icon 與溫度重疊裁切窗口（滑動切換動畫的關鍵）---- */
+#ftco-navbar .weather .view {
+  position: relative;
+  width: 80px;
+  height: 40px;
+  overflow: hidden;
+}
+#ftco-navbar .weather .view > * {
+  position: absolute;
+  width: max-content;
+  height: max-content;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  will-change: transform;
+}
+
+/* ---- 初始動畫狀態（2026-08-26 修復初始跳動）
+   CSS 生效即正確初始布局：時鐘顯示、icon/溫度藏右側，
+   不需等待 JS/API 回應（避免三元素疊中央 → 溫度先顯示再跳動到時鐘） */
+#ftco-navbar .weather .view .clock { transform: translateX(0); }
+#ftco-navbar .weather .view .icon { transform: translateX(80px); }
+#ftco-navbar .weather .view .temperature { transform: translateX(80px); }
+
+/* ---- icon ---- */
+#ftco-navbar .weather .view .icon {
+  width: 80px;
+  height: 40px;
+}
+#ftco-navbar .weather .view .icon img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---- 時鐘（2026-08-26 新增：動畫循環 時鐘 → icon → 溫度；與 temperature 同風格 -font_en 數字）---- */
+#ftco-navbar .weather .clock {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+#ftco-navbar .weather .clock .value {
+  display: block;
+  margin: calc(0px + var(--leading-trim-en-top, 0px)) 0 calc(0px + var(--leading-trim-en-bottom, 0px));
+  font-size: 28px;
+}
+
+/* ---- 溫度 ---- */
+#ftco-navbar .weather .temperature {
+  display: flex;
+  align-items: baseline;
+}
+#ftco-navbar .weather .temperature .value {
+  display: block;
+  margin: calc(0px + var(--leading-trim-en-top, 0px)) 0 calc(0px + var(--leading-trim-en-bottom, 0px));
+  font-size: 32px;
+}
+#ftco-navbar .weather .temperature .unit {
+  display: block;
+  margin: calc(0px + var(--leading-trim-en-top, 0px)) 0 calc(0px + var(--leading-trim-en-bottom, 0px));
+  font-size: 16px;
+}
+
+/* ---- 日期（2026-08-26 需求：隱藏年份後字體增大 10px→12px）---- */
+#ftco-navbar .weather .date {
+  display: block;
+  margin: calc(6px + var(--leading-trim-ja-top, 0px)) 0 calc(0px + var(--leading-trim-ja-bottom, 0px));
+  font-size: 12px;
+}
+/* 隱藏年份（2026-08-26 需求：顯示年份邏輯不變——JS 仍填充 year，僅 CSS 隱藏；
+   桌面與移動端統一） */
+#ftco-navbar .weather .date .year {
+  display: none;
+}
+#ftco-navbar .weather .date .year:before {
+  content: ". ";
+}
+
+/* ---- 底部邊線（原站 border 分隔線；2026-08-26 需求：移除）---- */
+#ftco-navbar .weather .border {
+  display: none;
+}
+
+/* ---- -font_en（原站字型宣告；SaansSemiBold 為原站自訂字型，本地 fallback Helvetica Neue）---- */
+#ftco-navbar .weather.-font_en {
+  font-weight: 600;
+  line-height: 1;
+  font-family: SaansSemiBold, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: -.02em;
+}
+
+/* ---- 黑底適配：原站 -color_white 機制（白字 + filter 反白圖示）---- */
+#ftco-navbar .weather.-color_white {
+  color: #fff;
+}
+#ftco-navbar .weather.-color_white .view .icon {
+  filter: brightness(0) invert(1);
+}
+#ftco-navbar .weather.-color_white .border {
+  background-color: rgba(255, 255, 255, .3);
+}
+
+/* ---- 移動端縮小（對應原站 .mb/.tb 規則）---- */
+@media screen and (max-width: 991.98px) {
+  #ftco-navbar .weather {
+    height: 100%;
+    border: none;
+  }
+  #ftco-navbar .weather .view {
+    width: 60px;
+    height: 30px;
+  }
+  #ftco-navbar .weather .view .icon {
+    width: 60px;
+    height: 30px;
+  }
+  #ftco-navbar .weather .temperature .value {
+    font-size: 24px;
+  }
+  #ftco-navbar .weather .clock .value {
+    font-size: 24px;
+  }
+  #ftco-navbar .weather .date {
+    margin: calc(8px + var(--leading-trim-ja-top, 0px)) 0 calc(0px + var(--leading-trim-ja-bottom, 0px));
+  }
+}

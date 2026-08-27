@@ -33,19 +33,19 @@ body {
   overflow-x: clip;
 }
 
-/* ===== 導覽列 logo（navbar-brand）響應式縮小（2026-08-16 修）
-   桌面 30px，平板/手機漸進縮小；用 min-width 限定桌面避免與斷點規則順序衝突 */
+/* ===== 導覽列 logo（navbar-brand）響應式縮小（2026-08-16 修；2026-08-26 增大）
+   桌面 40px，平板/手機漸進縮小；用 min-width 限定桌面避免與斷點規則順序衝突 */
 @media screen and (min-width: 992px) {
-  .ftco_navbar .navbar-brand { font-size: 36px; }
+  .ftco_navbar .navbar-brand { font-size: 40px; }
 }
 @media screen and (max-width: 991.98px) {
-  .ftco_navbar .navbar-brand { font-size: 30px; }
+  .ftco_navbar .navbar-brand { font-size: 34px; }
 }
 @media screen and (max-width: 767.98px) {
-  .ftco_navbar .navbar-brand { font-size: 24px; }
+  .ftco_navbar .navbar-brand { font-size: 28px; }
 }
 @media screen and (max-width: 575.98px) {
-  .ftco_navbar .navbar-brand { font-size: 20px; }
+  .ftco_navbar .navbar-brand { font-size: 24px; }
 }
 
 /* ===== navbar logo 與菜單垂直居中強化（2026-08-09）
