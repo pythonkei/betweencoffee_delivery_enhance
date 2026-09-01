@@ -37,6 +37,8 @@
 <!-- 2026-08-31: sake-shirakiku.jp products/vibran 的 product-mv section（載入原站日文字型 + scoped CSS） -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yakuhanjp@4.1.1/dist/css/yakuhanjp.css">
 <link rel="stylesheet" href="{% static 'css/bc-sake-mv.css' %}?v=20260831e" />
+<!-- 2026-09-01: fujiya-peko.co.jp/cakebrand #photo_area 鎖定頁面整合（700vh sticky + mask 揭示 + 逐字標語；白底 + #280901 文字適配） -->
+<link rel="stylesheet" href="{% static 'css/bc-fujiya-photo.css' %}?v=20260901c" />
 {% endblock %}
 
 
@@ -838,6 +840,82 @@
     </section>
 </section>
 
+<!-- 2026-09-01: fujiya-peko.co.jp/cakebrand #photo_area 鎖定頁面整合
+     （新 section .bc-fujiya-photo 包住原站 #photo_area，置於 .boxBottomLine 下方；
+       與原站 UI/動畫完全一致：700vh sticky 鎖定 + sv_shape mask 揭示 + 逐字標語） -->
+<section class="bc-fujiya-photo">
+    <div id="photo_area">
+        <div class="content">
+            <div class="title" id="photo_ttl">
+                <div id="photo_copy1" class="copy">
+                    <div class="mark">
+                        <img src="{% static 'images/fujiya-photo/mark.svg' %}" alt="">
+                    </div>
+                    <p class="txt txt_up_slide">
+                        <span class="t"><span>お</span></span><span class="t"><span>い</span></span><span class="t"><span>し</span></span><span class="t"><span>い</span></span><span class="t"><span>フ</span></span><span class="t"><span>ル</span></span><span class="t"><span>ー</span></span><span class="t"><span>ツ</span></span><span class="t"><span>を</span></span><span class="t"><span>、</span></span><br class="sp_view_i"><span class="t"><span>季</span></span><span class="t"><span>節</span></span><span class="t"><span>ご</span></span><span class="t"><span>と</span></span><span class="t"><span>の</span></span><span class="t"><span>お</span></span><span class="t"><span>い</span></span><span class="t"><span>し</span></span><span class="t"><span>い</span></span><span class="t"><span>産</span></span><span class="t"><span>地</span></span><span class="t"><span>か</span></span><span class="t"><span>ら</span></span><span class="t"><span>。</span></span>
+                    </p>
+                </div>
+                <div id="photo_copy2" class="copy">
+                    <div class="mark">
+                        <img src="{% static 'images/fujiya-photo/mark.svg' %}" alt="">
+                    </div>
+                    <p class="txt txt_up_slide">
+                        <span class="t"><span>い</span></span><span class="t"><span>つ</span></span><span class="t"><span>も</span></span><span class="t"><span>時</span></span><span class="t"><span>代</span></span><span class="t"><span>に</span></span><span class="t"><span>合</span></span><span class="t"><span>わ</span></span><span class="t"><span>せ</span></span><span class="t"><span>た</span></span><span class="t"><span>お</span></span><span class="t"><span>い</span></span><span class="t"><span>し</span></span><span class="t"><span>さ</span></span><span class="t"><span>を</span></span><span class="t"><span>、</span></span><br class="sp_view_i"><span class="t"><span>見</span></span><span class="t"><span>つ</span></span><span class="t"><span>め</span></span><span class="t"><span>続</span></span><span class="t"><span>け</span></span><span class="t"><span>ま</span></span><span class="t"><span>す</span></span><span class="t"><span>。</span></span>
+                    </p>
+                </div>
+                <div id="photo_copy3" class="copy">
+                    <div class="mark">
+                        <img src="{% static 'images/fujiya-photo/mark.svg' %}" alt="">
+                    </div>
+                    <p class="txt txt_up_slide">
+                        <span class="t"><span>ひ</span></span><span class="t"><span>と</span></span><span class="t"><span>つ</span></span><span class="t"><span>ひ</span></span><span class="t"><span>と</span></span><span class="t"><span>つ</span></span><span class="t"><span>の</span></span><span class="t"><span>原</span></span><span class="t"><span>材</span></span><span class="t"><span>料</span></span><span class="t"><span>に</span></span><span class="t"><span>、</span></span><br class="sp_view_i"><span class="t"><span>こ</span></span><span class="t"><span>だ</span></span><span class="t"><span>わ</span></span><span class="t"><span>り</span></span><span class="t"><span>の</span></span><span class="t"><span>ス</span></span><span class="t"><span>ト</span></span><span class="t"><span>ー</span></span><span class="t"><span>リ</span></span><span class="t"><span>ー</span></span><span class="t"><span>を</span></span><span class="t"><span>。</span></span>
+                    </p>
+                </div>
+            </div>
+            <div id="photo_slide">
+                <div class="photo_slide_item photo_slide_item1" id="photo_slide_item1">
+                    <div class="inner" id="photo_slide_item1_inner">
+                        <picture>
+                            <source media="(max-width:767px)" srcset="{% static 'images/fujiya-photo/photo1_sp.jpg' %}" sizes="100vw">
+                            <img src="{% static 'images/fujiya-photo/photo1.jpg' %}" alt="">
+                        </picture>
+                        <picture class="b">
+                            <source media="(max-width:767px)" srcset="{% static 'images/fujiya-photo/photo1_b_sp.jpg' %}" sizes="100vw">
+                            <img src="{% static 'images/fujiya-photo/photo1_b.jpg' %}" alt="">
+                        </picture>
+                    </div>
+                </div>
+                <div class="photo_slide_item photo_slide_item2" id="photo_slide_item2">
+                    <div class="inner" id="photo_slide_item2_inner">
+                        <picture>
+                            <source media="(max-width:767px)" srcset="{% static 'images/fujiya-photo/photo2_sp.jpg' %}" sizes="100vw">
+                            <img src="{% static 'images/fujiya-photo/photo2.jpg' %}" alt="">
+                        </picture>
+                        <picture class="b">
+                            <source media="(max-width:767px)" srcset="{% static 'images/fujiya-photo/photo2_b_sp.jpg' %}" sizes="100vw">
+                            <img src="{% static 'images/fujiya-photo/photo2_b.jpg' %}" alt="">
+                        </picture>
+                    </div>
+                </div>
+                <div class="photo_slide_item photo_slide_item3" id="photo_slide_item3">
+                    <div class="inner" id="photo_slide_item3_inner">
+                        <picture>
+                            <source media="(max-width:767px)" srcset="{% static 'images/fujiya-photo/photo3_sp.jpg' %}" sizes="100vw">
+                            <img src="{% static 'images/fujiya-photo/photo3.jpg' %}" alt="">
+                        </picture>
+                        <picture class="b">
+                            <source media="(max-width:767px)" srcset="{% static 'images/fujiya-photo/photo3_b_sp.jpg' %}" sizes="100vw">
+                            <img src="{% static 'images/fujiya-photo/photo3_b.jpg' %}" alt="">
+                        </picture>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <span class="photo_line1"></span>
+        <span class="photo_line2"></span>
+        <span class="photo_line3"></span>
+    </div>
+</section>
 <section class="ftco-section-blank"></section>
 
 <!-- Bean detail -->
@@ -1035,4 +1113,6 @@
 <script src="{% static 'js/bc-reviews.js' %}?v=20260828b"></script>
 <!-- 2026-08-31: sake-shirakiku.jp products/vibran product-mv staff-comment 輪播動畫 -->
 <script src="{% static 'js/bc-sake-mv.js' %}?v=20260831a"></script>
+<!-- 2026-09-01: fujiya-peko.co.jp/cakebrand #photo_area 鎖定頁面動畫（Waypoint copy 切換 + GSAP ScrollTrigger mask scrub） -->
+<script src="{% static 'js/bc-fujiya-photo.js' %}?v=20260901b"></script>
 {% endblock %}

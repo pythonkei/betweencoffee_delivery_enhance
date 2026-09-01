@@ -1,0 +1,325 @@
+/* ============================================================
+   bc-fujiya-photo.css — www.fujiya-peko.co.jp/cakebrand/
+   #photo_area 鎖定頁面 section 完整整合
+   2026-09-01 建立（與原站 UI / 動畫完全一致，scoped .bc-fujiya-photo）
+
+   原站機制（bin/page/top/css/screen.css + bin/cmn/css/cmn.css）：
+     - #photo_area 高 700vh（SP 600vh），.content position:sticky top:0
+       → 滾動時鎖定在視口，三張全寬照片依 photo_line1/2/3 刻度
+       逐一以 mask（sv_shape_pc.svg / sv_shape_sp.svg）揭示。
+     - .title 內三組 .copy（photo_copy1/2/3）標語逐字上滑切換；
+       .txt_up_slide .t > span 由 CSS transition 處理位移，
+       JS（bc-fujiya-photo.js）切換 inline transform 觸發動畫。
+     - picture.b（半解析度底圖）於 .photo_slide_item.open 時淡出。
+
+   斷點（與原站相同）：
+     ≥1921px   : 固定 px 大版（copy top 3.75px / mark 80px / txt 30px）
+     1360-1921 : 固定 px 小版（copy top 3px    / mark 64px / txt 24px）
+     768-1359  : vw 響應版（copy top .22059vw / mark 4.70588vw / txt 1.76471vw）
+     ≤767px    : SP 直立版（600vh、photo_line 30vh、title 52.26667vw、
+                 mask sv_shape_sp.svg、txt 4.26667vw）
+
+   深色主題必要適配（非額外 UI）：
+     - section 背景 #fff（原站頁面背景為白，照片為淺色蛋糕圖）
+     - 標語文字 color #280901（原站 body 色），因本頁 body 預設為白色文字
+     - 字型沿用原站 fallback 順序（日文字型 + Noto Sans TC）
+   ============================================================ */
+.bc-fujiya-photo {
+  background: #fff;
+  font-family: "Gothic Medium BBB", "Noto Sans JP", "Hiragino Sans",
+    ヒラギノ角ゴシック, "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    メイリオ, Meiryo, 游ゴシック, YuGothic, "ＭＳ Ｐゴシック",
+    "Noto Sans TC", sans-serif;
+}
+
+/* ============================================================
+   #photo_area 鎖定容器（PC）
+   ============================================================ */
+.bc-fujiya-photo #photo_area {
+  height: 700vh;
+  position: relative;
+}
+.bc-fujiya-photo #photo_area .photo_line1 {
+  position: absolute;
+  left: 0;
+  height: 1px;
+  top: 100vh;
+  width: 100%;
+}
+.bc-fujiya-photo #photo_area .photo_line2 {
+  position: absolute;
+  left: 0;
+  height: 1px;
+  top: 300vh;
+}
+.bc-fujiya-photo #photo_area .photo_line3 {
+  position: absolute;
+  left: 0;
+  height: 1px;
+  top: 500vh;
+}
+.bc-fujiya-photo #photo_area .content {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+}
+.bc-fujiya-photo #photo_area .title {
+  height: 12.13235vw;
+  position: relative;
+}
+.bc-fujiya-photo #photo_area .title .copy {
+  height: 12.13235vw;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: center;
+  margin-bottom: 0;
+  position: absolute;
+  top: 3.75px;
+  left: 50%;
+  transform: translateX(-39.92647vw);
+  width: 100%;
+  opacity: 0;
+  transition: all 0.133s;
+  transition-timing-function: linear;
+}
+.bc-fujiya-photo #photo_area .title .copy.active {
+  opacity: 1;
+}
+.bc-fujiya-photo #photo_area .title .mark {
+  display: block;
+  width: 80px;
+  margin: 0 30px 0 0;
+  overflow: hidden;
+  position: relative;
+  top: -2.5px;
+}
+.bc-fujiya-photo #photo_area .title .mark img {
+  transform: translateY(120%);
+  transition: all 0.133s;
+  transition-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
+}
+.bc-fujiya-photo #photo_area .title .mark.open img {
+  transform: translateY(0);
+}
+.bc-fujiya-photo #photo_area .title .txt {
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 160%;
+  /* 24px */
+  letter-spacing: 4.5px;
+  color: #280901;
+}
+.bc-fujiya-photo #photo_area #photo_slide {
+  position: relative;
+}
+.bc-fujiya-photo #photo_area #photo_slide .photo_slide_item {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+.bc-fujiya-photo #photo_area #photo_slide .photo_slide_item.open .inner picture.b {
+  opacity: 0;
+}
+.bc-fujiya-photo #photo_area #photo_slide .photo_slide_item .inner {
+  -webkit-mask-image: url("../images/fujiya-photo/sv_shape_pc.svg");
+  mask-image: url("../images/fujiya-photo/sv_shape_pc.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: top center;
+  mask-position: top center;
+  -webkit-mask-size: 100%;
+  mask-size: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  will-change: -webkit-mask-position;
+}
+.bc-fujiya-photo #photo_area #photo_slide .photo_slide_item picture {
+  width: 100%;
+  height: 100%;
+}
+.bc-fujiya-photo #photo_area #photo_slide .photo_slide_item picture.b {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  transition: all 0.5s;
+  transition-timing-function: linear;
+}
+.bc-fujiya-photo #photo_area #photo_slide .photo_slide_item:nth-of-type(1) picture img {
+  object-position: top center;
+}
+.bc-fujiya-photo #photo_area #photo_slide .photo_slide_item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- txt_up_slide 逐字位移（複製 cmn.css _pc.scss） ---- */
+.bc-fujiya-photo .txt_up_slide .t {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+.bc-fujiya-photo .txt_up_slide .t span,
+.bc-fujiya-photo .txt_up_slide .t path {
+  display: inline-block;
+  transform: translateY(102%);
+  transition: all 0.133s;
+  transition-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
+  will-change: translate;
+}
+.bc-fujiya-photo .txt_up_slide .t.open span,
+.bc-fujiya-photo .txt_up_slide .t.open path {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   桌面大版（≥1921px，與原站 px 值一致）
+   ============================================================ */
+@media print, screen and (min-width: 1921px) {
+  .bc-fujiya-photo #photo_area .title .copy {
+    top: 3.75px;
+  }
+  .bc-fujiya-photo #photo_area .title .mark {
+    width: 80px;
+    margin: 0 30px 0 0;
+    top: -2.5px;
+  }
+  .bc-fujiya-photo #photo_area .title .txt {
+    font-size: 30px;
+    letter-spacing: 4.5px;
+  }
+}
+
+/* ============================================================
+   桌面小版（1360–1921px）
+   ============================================================ */
+@media screen and (min-width: 1360px) and (max-width: 1921px) {
+  .bc-fujiya-photo #photo_area .title .copy {
+    top: 3px;
+  }
+  .bc-fujiya-photo #photo_area .title .mark {
+    width: 64px;
+    margin: 0 24px 0 0;
+    top: -2px;
+  }
+  .bc-fujiya-photo #photo_area .title .txt {
+    font-size: 24px;
+    letter-spacing: 3.6px;
+  }
+}
+
+/* ============================================================
+   平板版（768–1359px，vw 響應）
+   ============================================================ */
+@media print, screen and (min-width: 768px) and (max-width: 1359px) {
+  .bc-fujiya-photo #photo_area .title .copy {
+    top: 0.22059vw;
+  }
+  .bc-fujiya-photo #photo_area .title .mark {
+    width: 4.70588vw;
+    margin: 0 1.76471vw 0 0;
+    top: -0.14706vw;
+  }
+  .bc-fujiya-photo #photo_area .title .txt {
+    font-size: 1.76471vw;
+    letter-spacing: 0.26471vw;
+  }
+}
+
+/* ============================================================
+   SP 版（≤767px）
+   ============================================================ */
+@media screen and (max-width: 767px) {
+  .bc-fujiya-photo #photo_area {
+    height: 600vh;
+  }
+  .bc-fujiya-photo #photo_area .photo_line1 {
+    position: absolute;
+    left: 0;
+    height: 30vh;
+    top: 100vh;
+    display: block;
+    width: 100%;
+  }
+  .bc-fujiya-photo #photo_area .photo_line2 {
+    position: absolute;
+    left: 0;
+    height: 30vh;
+    top: 250vh;
+    display: block;
+    width: 100%;
+  }
+  .bc-fujiya-photo #photo_area .photo_line3 {
+    position: absolute;
+    left: 0;
+    height: 30vh;
+    top: 400vh;
+    display: block;
+    width: 100%;
+  }
+  .bc-fujiya-photo #photo_area .title {
+    height: 52.26667vw;
+  }
+  .bc-fujiya-photo #photo_area .title .copy {
+    height: 52.26667vw;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+    margin-bottom: 0;
+    box-sizing: border-box;
+    padding: 24vw 0 0 8.53333vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transform: none;
+    transition: all 0.133s;
+    transition-timing-function: linear;
+  }
+  .bc-fujiya-photo #photo_area .title .copy.active {
+    opacity: 1;
+  }
+  .bc-fujiya-photo #photo_area .title .mark {
+    display: block;
+    width: 10.66667vw;
+    margin: 0 4.26667vw 0 0;
+    position: relative;
+    top: 2.13333vw;
+    overflow: hidden;
+  }
+  .bc-fujiya-photo #photo_area .title .mark img {
+    transform: translateY(120%);
+    transition: all 0.133s;
+    transition-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
+  }
+  .bc-fujiya-photo #photo_area .title .mark.open img {
+    transform: translateY(0);
+  }
+  .bc-fujiya-photo #photo_area .title .txt {
+    width: 77.33333vw;
+    color: #280901;
+  }
+  .bc-fujiya-photo #photo_area .title .txt .t {
+    font-size: 4.26667vw;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%;
+    /* 28.8px */
+    letter-spacing: 0.15em;
+  }
+  .bc-fujiya-photo #photo_area #photo_slide .photo_slide_item .inner {
+    -webkit-mask-image: url("../images/fujiya-photo/sv_shape_sp.svg");
+    mask-image: url("../images/fujiya-photo/sv_shape_sp.svg");
+  }
+}
