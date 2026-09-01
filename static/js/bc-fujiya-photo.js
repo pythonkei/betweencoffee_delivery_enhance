@@ -54,16 +54,12 @@
       $root.find("#photo_ttl .copy").css({ opacity: 0 });
       $root.find("#photo_copy" + n).css({ opacity: 1 });
       // 2026-09-01：原 .mark（mark.svg）更改為 .bc-other-members 動畫 →
-      // 一份置於 title 層，與「第一組文字」綁定：copy1 顯示時顯示
-      // （首次播放 span scale + 手繪圓形畫線），copy2/3 顯示時隱藏
+      // 一份置於 title 層，photo_area 鎖定期間常駐顯示（copy1/2/3 皆顯示，
+      // 首次播放 span scale + 手繪圓形畫線），向上捲離（closePhoto）時隱藏
       var $otherMembers = $root.find("#photo_ttl > .bc-other-members");
-      if (n === 1) {
-        $otherMembers.removeClass("hide");
-        if (!$otherMembers.hasClass("show")) {
-          $otherMembers.addClass("show");
-        }
-      } else {
-        $otherMembers.addClass("hide");
+      $otherMembers.removeClass("hide");
+      if (!$otherMembers.hasClass("show")) {
+        $otherMembers.addClass("show");
       }
       // 逐字上滑：span 依序 22ms 間隔 y:0
       var spans = $root.find("#photo_copy" + n + " .t > span");
@@ -79,17 +75,9 @@
     function closePhoto(n) {
       if (copyTimers[n]) { clearTimeout(copyTimers[n]); copyTimers[n] = null; }
       $root.find(".photo_slide_item" + n).removeClass("open");
-      // 2026-09-01：bc-other-members 與第一組文字（copy1）綁定——
-      // closePhoto(2) 使 copy1 顯示 → 顯示；其餘（含向上捲離 copy1）隱藏
-      var $otherMembers = $root.find("#photo_ttl > .bc-other-members");
-      if (n === 2) {
-        $otherMembers.removeClass("hide");
-        if (!$otherMembers.hasClass("show")) {
-          $otherMembers.addClass("show");
-        }
-      } else {
-        $otherMembers.addClass("hide");
-      }
+      // 2026-09-01：bc-other-members 與文字動畫一起隱藏（向上捲動 closePhoto
+      // 觸發時），photo_area 內 copy1/2/3 切換時保持顯示
+      $root.find("#photo_ttl > .bc-other-members").addClass("hide");
       $root.find("#photo_copy" + n + " .t > span").each(function () {
         gsap.set(this, { y: "102%" });
       });

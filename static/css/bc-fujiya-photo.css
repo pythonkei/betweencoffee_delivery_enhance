@@ -343,7 +343,9 @@
   transform: translate3d(-39.92647vw, -50%, 0) rotate(-10deg);
   width: 190px;
   height: 121px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 50;
   margin-left: 0;
   font-size: 13px;
@@ -358,16 +360,15 @@
 .bc-fujiya-photo #photo_ttl > .bc-other-members.hide {
   opacity: 0;
 }
-/* 文字：z-index 2 疊在手繪圓形上層（topConcept 樣式） */
+/* 文字：z-index 2 疊在手繪圓形正中央（topConcept 樣式） */
 .bc-fujiya-photo #photo_ttl > .bc-other-members > span {
   position: relative;
   z-index: 2;
   display: flex;
-  justify-content: center;
   transform: scale(0) rotate(10deg);
   color: #fff;
   white-space: nowrap;
-  margin: 12px auto 0;
+  margin: 0;
   width: fit-content;
 }
 .bc-fujiya-photo #photo_ttl > .bc-other-members.show > span {
