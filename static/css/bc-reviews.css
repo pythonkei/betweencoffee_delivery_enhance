@@ -1,0 +1,128 @@
+/* ============================================================
+   bc-reviews.css — special.hakujuji-g.co.jp/waffle/ .reviews 水平跑馬燈
+   2026-08-28 整合
+   ------------------------------------------------------------------
+   完整複製原站 .reviews 結構與樣式（computed 實際生效值）：
+   - .reviews：block / relative / overflow:hidden / nowrap / font-size:0
+   - .reviewsInner：inline-block / nowrap（GSAP 控制 translateX 跑馬燈）
+   - .reviewsTarget：inline-block（每組評論單元）
+   - .reviewsBox：inline-block / 25px 高 / 1px 邊框（--line 透明底 / --bgColor 填充 /
+     --borderR 膠囊圓角 / --maru 圓形）
+   - .reviewsBox__text：15px（maru 14px）/ scaleX(1.15) / line-height 21px
+   - .reviewsMark__box / .reviewsMark / .reviewsMark__inner：十字圓點標記
+     （mask-image reviews--dot.svg，22×22 viewBox）
+   動畫：GSAP x:0 → -半寬、repeat:-1、線性 ~80px/s（原站 4311.8px/53.9s）。
+   黑底適配：原站深棕 rgb(102,36,11) → 白色系（Between Coffee 黑底）；
+   原站橙 rgb(254,130,54) 保留（黑底可見，品牌金色系）。
+   ============================================================ */
+
+/* 包裹容器（about 頁內定位，僅提供寬度與上下間距；不改變原站 reviews 樣式） */
+.bc-reviews {
+  width: 100%;
+  overflow: hidden;
+  padding: 48px 0;
+  font-size: 0;
+  line-height: 0;
+}
+
+/* ---- 原站 .reviews（scoped 至 .bc-reviews 避免全域衝突） ---- */
+.bc-reviews .reviews {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0;
+  line-height: 0;
+  padding: 2px 0 0;
+}
+.bc-reviews .reviewsInner {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 0;
+}
+.bc-reviews .reviewsTarget {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* ---- reviewsBox：膠囊/圓形/線框（原站 1px solid 深棕 → 黑底白色系） ---- */
+.bc-reviews .reviewsBox {
+  display: inline-block;
+  height: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-sizing: border-box;
+}
+.bc-reviews .reviewsBox--line {
+  background-color: transparent;
+}
+.bc-reviews .reviewsBox--bgColor {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+.bc-reviews .reviewsBox--borderR {
+  border-radius: 9999px;
+}
+.bc-reviews .reviewsBox--maru {
+  width: 25px;
+  border-radius: 50%;
+}
+
+/* ---- reviewsBox__text（原站 notoSerif-jp） ---- */
+.bc-reviews .reviewsBox__text {
+  display: block;
+  font-family: "Noto Serif JP", "Noto Serif TC", "Noto Sans TC", serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 21px;
+  padding: 0 15px;
+  transform: scaleX(1.15);
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.9);
+}
+/* 膠囊圓角（--borderR）：文字橫向 padding 加大（原站 0 25px） */
+.bc-reviews .reviewsBox--borderR .reviewsBox__text {
+  padding: 0 25px;
+}
+/* 填充底（--bgColor）：文字用原站橙色（黑底可見） */
+.bc-reviews .reviewsBox--bgColor .reviewsBox__text {
+  color: rgb(254, 130, 54);
+}
+/* 圓形（--maru）：14px / 置中 / 無 padding */
+.bc-reviews .reviewsBox--maru .reviewsBox__text {
+  font-size: 14px;
+  padding: 0;
+  text-align: center;
+}
+
+/* ---- reviewsMark 十字圓點標記（mask-image reviews--dot.svg） ----
+ * 2026-08-28 修正：reviewsMark__box 高度改為與 reviewsBox 一致（25px）並用
+ * inline-flex 垂直居中，dot 點與文字框垂直對齊（原 height:18px + vertical-align:top
+ * 使 dot 貼頂偏上）。 */
+.bc-reviews .reviewsMark__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 25px;
+  margin: 0 8px;
+  vertical-align: top;
+}
+.bc-reviews .reviewsMark {
+  display: block;
+  position: relative;
+  width: 22px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+}
+.bc-reviews .reviewsMark__inner {
+  display: block;
+  width: 18px;
+  height: 18px;
+  background-color: rgba(255, 255, 255, 0.9);
+  -webkit-mask-image: url("/static/images/reviews--dot.svg");
+  mask-image: url("/static/images/reviews--dot.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}

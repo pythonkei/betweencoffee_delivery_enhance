@@ -7,11 +7,21 @@
 
 {% block extra_css %}
 <!-- About 頁面 SERIES 滑桿（完全複製 designing.jp/series container_3HNAz） -->
-<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20260827c" />
+<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20260828q" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}" />
 <!-- hakujuji csBlock__leader 逐字亮起（完整複製原站樣式） -->
 <link rel="stylesheet" href="{% static 'css/bc-top-concept.css' %}?v=20260821ag" />
+<!-- 2026-08-28: ramenclub.jp #utsuwa SVG symbol（c-sec-product-real 標題 i-utsuwa 使用） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol class="i-utsuwa" id="utsuwa" viewBox="0 0 22 15">
+      <path d="M22 3.84206C22 9.7283 17.0751 14.5 11 14.5C4.92487 14.5 0 9.7283 0 3.84206V3.44743C0.814815 3.44742 7.20945 3.44742 11 3.44742C14.8543 3.44742 21.1852 3.44739 22 3.44746V3.84206Z"></path>
+      <path d="M0 0H22V2.36844H0V0Z"></path>
+    </symbol>
+  </defs>
+</svg>
+
 <!-- mauinterview rotate-mau 旋轉標誌（完全複製 mauinterview.musabi.ac.jp，純 CSS 動畫） -->
 <link rel="stylesheet" href="{% static 'css/bc-rotate-mau.css' %}?v=20260822p" />
 <!-- sukima who section（sukima.tokyo.jp .section.who 完整複製；黑底白字適配、#BFFF00 高亮保留） -->
@@ -20,6 +30,13 @@
 <link rel="stylesheet" href="{% static 'css/bc-row-animation.css' %}?v=20260825a" />
 <!-- sukima capabilities-gallery（scroll scrub 逐幀動畫；黑底適配） -->
 <link rel="stylesheet" href="{% static 'css/bc-capabilities.css' %}?v=20260825b" />
+<!-- 2026-08-28: ramenclub.jp c-sec-product-real「<span class="c-sec-title-num">3</span>つのリアル」整合（scoped .bc-product-real） -->
+<link rel="stylesheet" href="{% static 'css/bc-ramen-product.css' %}?v=20260828z" />
+<!-- 2026-08-28: special.hakujuji-g.co.jp/waffle/ .reviews 水平跑馬燈整合（黑底適配） -->
+<link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20260828c" />
+<!-- 2026-08-31: sake-shirakiku.jp products/vibran 的 product-mv section（載入原站日文字型 + scoped CSS） -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yakuhanjp@4.1.1/dist/css/yakuhanjp.css">
+<link rel="stylesheet" href="{% static 'css/bc-sake-mv.css' %}?v=20260831e" />
 {% endblock %}
 
 
@@ -27,6 +44,7 @@
 
 <!-- mauinterview rotate-mau 旋轉標誌（完全複製 mauinterview.musabi.ac.jp 首頁 .rotate-mau：SVG mask 標誌剪影 + 逆時針旋轉，純 CSS） -->
 <div class="rotate-mau"><div class="rotate-mau__inner"><div class="rotate-mau__inner__item"><div class="rotate-mau__inner__item__inner"></div></div></div></div>
+
 
 <!-- SERIES 滑桿（完全複製 designing.jp/series 的 container_3HNAz） -->
 
@@ -136,6 +154,284 @@
     </ul>
 </section>
 
+
+<!-- 2026-08-28：ramenclub.jp c-sec-product-real「<span class="c-sec-title-num">3</span>つのリアル」整合（scoped .bc-product-real；完整複製原站結構與動畫） -->
+<div class="bc-product-real">
+<section class='c-sec c-sec-product-real' data-bg='black'>
+
+                <div class='c-sec-real'>
+                    <h2 class='c-sec-title f-14'>
+                        <div class='c-sec-title-body'>
+                            <div class='i-utsuwa'>
+                                <svg viewBox='0 0 22 15'>
+                                    <use xlink:href='#utsuwa'></use>
+                                </svg>
+                            </div>
+                            <div class='t'><span class="c-sec-title-num">3</span>つのリアル</div>
+                        </div>
+                    </h2>
+                    <div class='c-real-img'>
+                        <div class='js-img c-zoom' data-image-d2x="{% static 'images/ramen/3-1@2x.jpg.webp' %}"
+                            data-image-d1x="{% static 'images/ramen/3-1@1x.jpg.webp' %}"
+                            data-image-mob="{% static 'images/ramen/3-1@mb.jpg.webp' %}"
+                            data-image-pre="{% static 'images/ramen/3-1@pe.jpg.webp' %}">
+                            <div class='js-img-pivot c-iv js-iv'>
+                                <div class='js-img-preload'></div>
+                                <div class='js-img-poster'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='c-real-txt js-hover'>
+                        <div class='r'>
+                            <a href='#' class='c-real-title js-hover-enter'>
+                                <div class='c-real-title-header f-20 js-iv'>
+                                    <h3>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='0'>ニンニクと豚の旨味が、</div>
+                                            </div>
+                                        </div>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='1'>2種類の味噌を引き立てる</div>
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <div data-rem='3'></div>
+                                <div class='c-real-title-footer'>
+                                    <div class='c-real-num'>
+                                        <div class='f-12'>REAL</div>
+                                        <div class='f-48'>01</div>
+                                    </div>
+                                    <div class='ui-btn-more'>
+                                        <div class='r'>
+                                            <div class='t t1'></div>
+                                            <div class='t t2'></div>
+                                        </div>
+                                    </div>
+                                    <div class='c-real-detail-img'>
+                                        <div class='js-img c-zoom'
+                                            data-image-d2x="{% static 'images/ramen/3-1-s@2x.jpg.webp' %}"
+                                            data-image-d1x="{% static 'images/ramen/3-1-s@1x.jpg.webp' %}"
+                                            data-image-pre="{% static 'images/ramen/3-1-s@pe.jpg.webp' %}">
+                                            <div class='js-img-pivot'>
+                                                <div class='js-img-preload'></div>
+                                                <div class='js-img-poster'></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='c-real-detail js-hover-leave js-iv'>
+                                    <div class='c-editor f-14'>
+                                        <div class='f-20'>
+                                            <h3 class='w-300'>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='0'>ニンニクと豚の旨味が、</div>
+                                                    </div>
+                                                </div>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='1'>2種類の味噌を引き立てる</div>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        <div class='c-real-detail-o'>
+                                            <div class='c-real-detail-i'>
+                                                <p>麺をコーティングしているスープが口の中でジュワっと広がる、独自開発のメルトスープ製法。<br>
+                                                    ニンニク・豚肉・野菜の素材の旨味と、赤と白の味噌を合わせたメルトスープを作り、麺に絡ませました。<br>
+                                                    味噌ラーメン好きの方にも満足のいく、 食べ応えのある味に仕上がっています。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='c-sec-real'>
+                    <div class='c-real-img'>
+                        <div class='js-img c-zoom' data-image-d2x="{% static 'images/ramen/3-2@2x.jpg.webp' %}"
+                            data-image-d1x="{% static 'images/ramen/3-2@1x.jpg.webp' %}"
+                            data-image-mob="{% static 'images/ramen/3-2@mb.jpg.webp' %}"
+                            data-image-pre="{% static 'images/ramen/3-2@pe.jpg.webp' %}">
+                            <div class='js-img-pivot'>
+                                <div class='js-img-preload'></div>
+                                <div class='js-img-poster'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='c-real-txt js-hover'>
+                        <div class='r'>
+                            <a href='#' class='c-real-title js-hover-enter'>
+                                <div class='c-real-title-header f-20 js-iv'>
+                                    <h3>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='0'>リアルな素材を</div>
+                                            </div>
+                                        </div>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='1'>真空フライでそのまま具材に</div>
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <div data-rem='3'></div>
+                                <div class='c-real-title-footer'>
+                                    <div class='c-real-num'>
+                                        <div class='f-12'>REAL</div>
+                                        <div class='f-48'>02</div>
+                                    </div>
+                                    <div class='ui-btn-more'>
+                                        <div class='r'>
+                                            <div class='t t1'></div>
+                                            <div class='t t2'></div>
+                                        </div>
+                                    </div>
+                                    <div class='c-real-detail-img'>
+                                        <div class='js-img c-zoom'
+                                            data-image-d2x="{% static 'images/ramen/3-2-s@2x.jpg.webp' %}"
+                                            data-image-d1x="{% static 'images/ramen/3-2-s@1x.jpg.webp' %}"
+                                            data-image-pre="{% static 'images/ramen/3-2-s@pe.jpg.webp' %}">
+                                            <div class='js-img-pivot'>
+                                                <div class='js-img-preload'></div>
+                                                <div class='js-img-poster'></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='c-real-detail js-hover-leave js-iv'>
+                                    <div class='c-editor f-14'>
+                                        <div class='f-20'>
+                                            <h3 class='w-300'>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='0'>リアルな素材を</div>
+                                                    </div>
+                                                </div>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='1'>真空フライでそのまま具材に</div>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        <div class='c-real-detail-o'>
+                                            <div class='c-real-detail-i'>
+                                                <p>札幌の精肉店と開発したチャーシュー、北海道由仁町のもやし、十勝の契約農家からのとうもろこし、札幌味噌ラーメンで定番の具材を「真空フライ」製法でスナック化。
+                                                    <br>
+                                                    エアードライ製法のネギと共に、見た目も鮮やかなこだわり具材の食感と味の変化をお楽しみください。
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='c-sec-real'>
+                    <div class='c-real-img'>
+                        <div class='js-img c-zoom' data-image-d2x="{% static 'images/ramen/3-3@2x.jpg.webp' %}"
+                            data-image-d1x="{% static 'images/ramen/3-3@1x.jpg.webp' %}"
+                            data-image-mob="{% static 'images/ramen/3-3@mb.jpg.webp' %}"
+                            data-image-pre="{% static 'images/ramen/3-3@pe.jpg.webp' %}">
+                            <div class='js-img-pivot'>
+                                <div class='js-img-preload'></div>
+                                <div class='js-img-poster'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='c-real-txt js-hover'>
+                        <div class='r'>
+                            <a href='#' class='c-real-title js-hover-enter'>
+                                <div class='c-real-title-header f-20 js-iv'>
+                                    <h3>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='0'>自家製の中太縮れ麺を、</div>
+                                            </div>
+                                        </div>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='1'>3度揚げでガリっと</div>
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <div data-rem='3'></div>
+                                <div class='c-real-title-footer'>
+                                    <div class='c-real-num'>
+                                        <div class='f-12'>REAL</div>
+                                        <div class='f-48'>03</div>
+                                    </div>
+                                    <div class='ui-btn-more'>
+                                        <div class='r'>
+                                            <div class='t t1'></div>
+                                            <div class='t t2'></div>
+                                        </div>
+                                    </div>
+                                    <div class='c-real-detail-img'>
+                                        <div class='js-img c-zoom'
+                                            data-image-d2x="{% static 'images/ramen/3-3-s@2x.jpg.webp' %}"
+                                            data-image-d1x="{% static 'images/ramen/3-3-s@1x.jpg.webp' %}"
+                                            data-image-pre="{% static 'images/ramen/3-3-s@pe.jpg.webp' %}">
+                                            <div class='js-img-pivot'>
+                                                <div class='js-img-preload'></div>
+                                                <div class='js-img-poster'></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='c-real-detail js-hover-leave js-iv'>
+                                    <div class='c-editor f-14'>
+                                        <div class='f-20'>
+                                            <h3 class='w-300'>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='0'>自家製の中太縮れ麺を、</div>
+                                                    </div>
+                                                </div>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='1'>3度揚げでガリっと</div>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        <div class='c-real-detail-o'>
+                                            <div class='c-real-detail-i'>
+                                                <p>麺は、数種類の小麦粉を使い、スナックとして食すのに最適な配合で作った自家製麺。製麺してすぐに独自の揚げ麺機で3度揚げすることで、ガリっとした食感に。
+                                                </p>
+                                                <p>札幌味噌ラーメンらしい中太縮れ麺に仕上げ、「メルトスープ」との相性も抜群です。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='c-sec-bg-fix h-680'>
+                    <div class='js-img' data-image-d2x="{% static 'images/ramen/grain@2x.jpg.webp' %}"
+                        data-image-d1x="{% static 'images/ramen/grain@1x.jpg.webp' %}"
+                        data-image-pre="{% static 'images/ramen/grain@pe.jpg.webp' %}">
+                        <div class='js-img-pivot'>
+                            <div class='js-img-preload'></div>
+                            <div class='js-img-poster'></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+</div>
+
 <section class="section who bc-who-section" id="who">
     <div class="who-content-sticky">
         <div class="section-title section-title--left">
@@ -169,6 +465,212 @@
     <video muted playsinline class="row-animation__video">
         <source src="{% static 'animations/row-animation.mp4' %}" type="video/mp4">
     </video>
+</section>
+<!-- 2026-08-28: special.hakujuji-g.co.jp/waffle/ .reviews 水平跑馬燈（原站結構/樣式/GSAP 動畫完整複製；黑底適配） -->
+<section class="bc-reviews-section">
+<div class="bc-reviews">
+    <div class="reviews">
+        <div class="reviewsInner">
+<div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">これ以上の</p></div>
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">フワフワ</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">を</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">知らない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">岡山</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">の</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">ソウルフード</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">なぜか</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">岡山</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">と</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">広島</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">と</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">兵庫</p></div>
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">でしか</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">食べれない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">地元県民</p></div>
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">御用達</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">素朴</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">なのに</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">癖になる</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">食べると</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">胸がときめく</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">全世代向け</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">おやつ</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">しっとり</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">で</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">うっとり</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">何度食べても</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">飽きない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">「きびだんご」</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">ではなく</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">「ワッフル」</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">嬉しい</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">お土産</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">贈り物で</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">で</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">100%</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喜ばれる</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">何度食べても</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">飽きない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">ご褒美</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">おやつ</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">これ以上の</p></div>
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">フワフワ</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">を</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">知らない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">岡山</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">の</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">ソウルフード</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">なぜか</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">岡山</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">と</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">広島</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">と</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">兵庫</p></div>
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">でしか</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">食べれない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">地元県民</p></div>
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">御用達</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">素朴</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">なのに</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">癖になる</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">食べると</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">胸がときめく</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">全世代向け</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">おやつ</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">しっとり</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">で</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">うっとり</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">何度食べても</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">飽きない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">「きびだんご」</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">ではなく</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">「ワッフル」</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">嬉しい</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">お土産</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">贈り物で</p></div>
+	<div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">で</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">100%</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喜ばれる</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">何度食べても</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">飽きない</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div><div class="reviewsTarget">
+	<div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">ご褒美</p></div>
+	<div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">おやつ</p></div>
+	<div class="reviewsMark__box">
+		<div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+	</div>
+</div>
+        </div>
+    </div>
+</div>
 </section>
 
 <!-- sukima capabilities-gallery（完整複製 sukima.tokyo.jp capabilities section 核心；黑底適配） -->
@@ -474,6 +976,46 @@
 
 <div class="flexable-vh-20"></div>
 
+<!-- 2026-08-31: sake-shirakiku.jp/products/vibran 的 product-mv section 整合
+     （新 section .bc-sake-mv 包住原站結構，置於 .boxBottomLine 下方；與原站 UI/動畫完全一致） -->
+<section class="bc-sake-mv">
+    <section id="shopify-section-template--16830511972551__main" class="shopify-section product-mv">
+        <div class="staff-comment p-1">
+            <div class="blowing staff-comment-1 pattern-1">
+                <div class="img">
+                    <p class="text">チーズやパスタにも合います</p>
+                </div>
+            </div>
+        </div>
+        <div class="staff-comment p-2">
+            <div class="blowing staff-comment-4 pattern-3">
+                <div class="img">
+                    <p class="text">フルーティーな定番の一本です</p>
+                </div>
+            </div>
+        </div>
+        <div class="staff-comment p-3 is-show">
+            <div class="blowing staff-comment-2 pattern-5">
+                <div class="img">
+                    <p class="text">ワイングラスで飲むと美味しい</p>
+                </div>
+            </div>
+        </div>
+        <div class="staff-comment p-4">
+            <div class="blowing staff-comment-3 pattern-4">
+                <div class="img">
+                    <p class="text">酸味がある洋食にも合うお酒</p>
+                </div>
+            </div>
+        </div>
+        <div class="img-effect product-img">
+            <div class="img-load loaded">
+                <img class="img-ofi" src="{% static 'images/sake-mv/vibran.jpg' %}" width="1366" height="1366" alt="vibrant" loading="lazy" decoding="async">
+            </div>
+        </div>
+    </section>
+</section>
+
 {% endblock %}
 
 {% block extra_scripts %}
@@ -487,4 +1029,10 @@
 <script src="{% static 'js/bc-row-animation.js' %}?v=20260825c"></script>
 <!-- sukima capabilities-gallery scroll scrub（cgi 歸位 + 36 幀切換 + surprise 畫線） -->
 <script src="{% static 'js/bc-capabilities.js' %}?v=20260825k"></script>
+<!-- 2026-08-28: ramenclub.jp c-sec-product-real 動畫（js-img/is-acrive/js-hover/c-cl） -->
+<script src="{% static 'js/bc-ramen-product.js' %}?v=20260828h"></script>
+<!-- 2026-08-28: hakujuji waffle .reviews 水平跑馬燈動畫（GSAP x:0→-半寬、repeat:-1、線性 ~80px/s） -->
+<script src="{% static 'js/bc-reviews.js' %}?v=20260828b"></script>
+<!-- 2026-08-31: sake-shirakiku.jp products/vibran product-mv staff-comment 輪播動畫 -->
+<script src="{% static 'js/bc-sake-mv.js' %}?v=20260831a"></script>
 {% endblock %}

@@ -9,7 +9,7 @@
      （video.currentTime 跟隨滾動，原站 videoScrubber 機制）
    ============================================================ */
 .bc-row-animation {
-    background: var(--bc-bg, #0e0e0e); /* 黑底適配（原站 var(--color-white)） */
+    background: #ffffff; /* 黑底適配（原站 var(--color-white)） */
     font-size: 0;
     display: flex;
     justify-content: center;

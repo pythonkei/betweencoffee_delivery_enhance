@@ -29,16 +29,21 @@
      ≤575.98px    60px 容器、虛線 right:32px → 需右移 12px
    使用 transform（不影響 flex 佈局與 navbar 高度） */
 #ftco-navbar .weather {
-  transform: translateX(-9px);
+  transform: translateX(-11px);
 }
-@media screen and (max-width: 767.98px) {
+@media (min-width: 768px) and (max-width: 991.98px) {
   #ftco-navbar .weather {
-    transform: translateX(8px);
+    transform: translateX(-20px);
+  }
+}
+@media (min-width: 576px) and (max-width: 767.98px) {
+  #ftco-navbar .weather {
+    transform: translateX(-3px);
   }
 }
 @media screen and (max-width: 575.98px) {
   #ftco-navbar .weather {
-    transform: translateX(12px);
+    transform: translateX(1px);
   }
 }
 
@@ -143,7 +148,7 @@
     width: fit-content;
     margin: 3px auto 0;
     padding: 3px 7px;
-    font-size: 9px; /* 2026-08-27 加大：8→9 */
+    font-size: 6px; /* 2026-08-28 縮小：7→6（配合 .date 整體縮小） */
   }
 }
 
@@ -177,21 +182,27 @@
     height: 100%;
     border: none;
   }
+  /* 2026-08-28：.view 與 .date 整體再縮小
+     view 44x22→38x19、clock/temp 16→14px、unit 10→9px、date 9→8px */
   #ftco-navbar .weather .view {
-    width: 60px;
-    height: 30px;
+    width: 38px;
+    height: 19px;
   }
   #ftco-navbar .weather .view .icon {
-    width: 60px;
-    height: 30px;
+    width: 38px;
+    height: 19px;
   }
   #ftco-navbar .weather .temperature .value {
-    font-size: 24px;
+    font-size: 14px;
   }
   #ftco-navbar .weather .clock .value {
-    font-size: 24px;
+    font-size: 14px;
+  }
+  #ftco-navbar .weather .temperature .unit {
+    font-size: 9px;
   }
   #ftco-navbar .weather .date {
     margin: calc(8px + var(--leading-trim-ja-top, 0px)) 0 calc(0px + var(--leading-trim-ja-bottom, 0px));
+    font-size: 8px;
   }
 }

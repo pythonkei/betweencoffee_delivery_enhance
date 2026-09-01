@@ -1,0 +1,286 @@
+/* ============================================================
+   bc-sake-mv.css — sake-shirakiku.jp/products/vibran
+   <section id="shopify-section-template--16830511972551__main"
+            class="shopify-section product-mv"> 完整整合
+   2026-08-31 建立（與原站 UI / 動畫完全一致，scoped .bc-sake-mv）
+
+   ── rem 基準轉換 ─────────────────────────────────────────
+   原站 html{font-size} 響應式縮放：
+     ≤767px            : 26.6666666667vw  （1rem = 26.67vw）
+     768–1099px        : 503.2942898975%  （1rem = 80.527px）
+     1100–1365px       : 7.3206442167vw   （1rem = 7.32vw）
+     ≥1366px           : 625%             （1rem = 100px）
+   Between Coffee 的 html font-size 為 clamp(14px,0.3vw+13.5px,16px)，
+   與原站不同 → 用 CSS 變數 --sake-rem 模擬原站縮放，並把所有 Xrem
+   轉換為 calc(X * var(--sake-rem))，使本 section 尺寸與原站一致。
+   ─────────────────────────────────────────────────────────
+   ============================================================ */
+.bc-sake-mv {
+  --sake-rem: 26.6666666667vw;
+  color: #111;
+  letter-spacing: 0.02em;
+  line-height: 1.8;
+  font-family: YakuHanJP, "dnp-shuei-gothic-gin-std", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", "Noto Sans TC", sans-serif;
+  font-feature-settings: "palt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@media (min-width: 768px) {
+  .bc-sake-mv { --sake-rem: 80.527px; }
+}
+@media (min-width: 1100px) {
+  .bc-sake-mv { --sake-rem: 7.3206442167vw; }
+}
+@media (min-width: 1366px) {
+  .bc-sake-mv { --sake-rem: 100px; }
+}
+
+/* ---- product-mv 主容器 ---- */
+.bc-sake-mv .product-mv {
+  width: 100%;
+  height: 100svw;
+  position: relative;
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .product-mv {
+    overflow: hidden;
+    height: calc(0.77 * var(--sake-rem) + 100svh);
+  }
+}
+
+/* ---- product-img 主照片 ---- */
+@media (min-width: 768px), print {
+  .bc-sake-mv .product-mv .product-img {
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .product-mv .product-img { height: 100%; }
+}
+.bc-sake-mv .product-mv .product-img .img-load { background-color: rgb(240, 244, 244); }
+@media (max-width: 767px) {
+  .bc-sake-mv .product-mv .product-img .img-load { height: 100%; }
+}
+.bc-sake-mv .product-mv .product-img img { mix-blend-mode: multiply; }
+
+/* ---- img-ofi / img-effect / img-load（進場 clip-path 動畫） ---- */
+.bc-sake-mv img.img-ofi {
+  object-fit: cover;
+  object-position: center center;
+  font-family: "object-fit: cover";
+  height: 100%;
+  width: 100%;
+}
+.bc-sake-mv .img-effect {
+  overflow: hidden;
+  background-color: transparent;
+}
+.bc-sake-mv .img-effect .img-load {
+  clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 99.9%);
+}
+.bc-sake-mv .img-effect .img-load.loaded {
+  animation: bc-sake-mv-loaded 1.3s cubic-bezier(0.19, 1, 0.22, 1) 1s both;
+}
+@keyframes bc-sake-mv-loaded {
+  0% {
+    clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 100% -1%, 100% 101%, 0 100%);
+  }
+}
+
+/* ---- staff-comment 氣泡定位 ---- */
+.bc-sake-mv .staff-comment {
+  position: sticky;
+  z-index: 5000;
+}
+@media (min-width: 768px), print {
+  .bc-sake-mv .staff-comment { display: inline-block; }
+}
+/* 氣泡（.blowing .img，bottom:100%）位於 staff 上方，向上最多 氣泡高 + 動畫
+   translate(-40px)。原站 product-mv 在頁面頂部，氣泡超出 mv 頂部會被視口天然
+   裁切；Between Coffee 中 mv 在頁面中段，未 sticky 時 staff 於 mv 頂部、氣泡
+   會超出 mv 遮住上方內容。此處以 margin-top 讓 staff 自然位置下移 2.5rem
+   （≥ 最大氣泡高 1.92rem + 動畫 -40px 餘量），使氣泡任何狀態都在 mv 內：
+   不超出、不需 overflow 裁切、不影響 position:sticky。 */
+@media (min-width: 768px) {
+  .bc-sake-mv .staff-comment {
+    margin-top: calc(2.5 * var(--sake-rem));
+  }
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .staff-comment { position: absolute; }
+}
+.bc-sake-mv .p-1 { top: calc(4.35 * var(--sake-rem)); left: 10%; }
+.bc-sake-mv .p-2 { top: calc(5 * var(--sake-rem)); left: 25%; }
+.bc-sake-mv .p-3 { top: calc(4.35 * var(--sake-rem)); left: 60%; }
+.bc-sake-mv .p-4 { top: calc(4.82 * var(--sake-rem)); left: 85%; }
+/* 覆蓋 Between Coffee 的 Bootstrap spacing utilities：.p-1~p-4 在原站
+   shirakiku 是 staff-comment 定位 class，但 Bootstrap 視為 padding
+   （.p-2 = padding:.5rem !important 等）。此處 scoped 且 !important 覆蓋，
+   否則 staff-comment 會被加上 4/8/16/24px padding，尺寸與原站不符。 */
+.bc-sake-mv .p-1,
+.bc-sake-mv .p-2,
+.bc-sake-mv .p-3,
+.bc-sake-mv .p-4 {
+  padding: 0 !important;
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .p-1 { top: calc(2.5 * var(--sake-rem)); left: calc(0.7 * var(--sake-rem)); }
+  .bc-sake-mv .p-2 { top: calc(5 * var(--sake-rem)); left: calc(0.9 * var(--sake-rem)); }
+  .bc-sake-mv .p-3 { top: calc(2 * var(--sake-rem)); left: calc(2.2 * var(--sake-rem)); }
+  .bc-sake-mv .p-4 { top: calc(3.8 * var(--sake-rem)); left: calc(2.3 * var(--sake-rem)); }
+}
+
+/* ---- blowing 氣泡本體 ---- */
+.bc-sake-mv .blowing {
+  font-weight: 600;
+  position: relative;
+}
+.bc-sake-mv .blowing::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: calc(-0.3 * var(--sake-rem));
+  left: calc(0.3 * var(--sake-rem));
+  background: center center / contain no-repeat;
+}
+.bc-sake-mv .blowing .img {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  font-feature-settings: "vpal";
+  letter-spacing: 0.02em;
+  filter: drop-shadow(rgba(17, 17, 17, 0.08) 0 0 32px);
+  will-change: filter;
+  position: absolute;
+  bottom: 100%;
+  left: -50%;
+  min-width: 100%;
+  min-height: 100%;
+  background: center center / contain no-repeat;
+}
+.bc-sake-mv .blowing .img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bc-sake-mv .blowing .text {
+  position: relative;
+  z-index: 20;
+  text-orientation: upright;
+  margin: 0;
+  color: #111;
+  font-size: min(calc(0.14 * var(--sake-rem)), 14px);
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing .text {
+    font-size: min(calc(0.12 * var(--sake-rem)), 12px);
+    line-height: 1.6;
+  }
+}
+
+/* ---- pattern-1（p-1） ---- */
+.bc-sake-mv .blowing.pattern-1 { width: calc(1.57 * var(--sake-rem)); height: calc(1.72 * var(--sake-rem)); }
+.bc-sake-mv .blowing.pattern-1 .text { padding: calc(0.3 * var(--sake-rem)) calc(0.1 * var(--sake-rem)) calc(0.3 * var(--sake-rem)) 0; }
+.bc-sake-mv .blowing.pattern-1 .img { background-image: url("../images/sake-mv/blowing-pattern01.svg"); }
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.pattern-1 { width: calc(1.02 * var(--sake-rem)); height: calc(1.12 * var(--sake-rem)); }
+  .bc-sake-mv .blowing.pattern-1 .text { padding: calc(0.2 * var(--sake-rem)) calc(0.1 * var(--sake-rem)) calc(0.2 * var(--sake-rem)) 0; }
+}
+
+/* ---- pattern-3（p-2 的 staff-comment-4） ---- */
+.bc-sake-mv .blowing.pattern-3 { width: calc(2.15 * var(--sake-rem)); height: calc(1.92 * var(--sake-rem)); }
+.bc-sake-mv .blowing.pattern-3 .text { padding: calc(0.3 * var(--sake-rem)) 0; }
+.bc-sake-mv .blowing.pattern-3 .img { background-image: url("../images/sake-mv/blowing-pattern03.svg"); }
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.pattern-3 { width: calc(1.4 * var(--sake-rem)); height: calc(1.25 * var(--sake-rem)); }
+  .bc-sake-mv .blowing.pattern-3 .text { padding: calc(0.2 * var(--sake-rem)) 0; }
+}
+
+/* ---- pattern-4（p-4 的 staff-comment-3） ---- */
+.bc-sake-mv .blowing.pattern-4 { width: calc(1.75 * var(--sake-rem)); height: calc(1.57 * var(--sake-rem)); }
+.bc-sake-mv .blowing.pattern-4 .text { padding: calc(0.3 * var(--sake-rem)) 0; }
+.bc-sake-mv .blowing.pattern-4 .img { background-image: url("../images/sake-mv/blowing-pattern02.svg"); }
+.bc-sake-mv .blowing.pattern-4::after { scale: -1; }
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.pattern-4 { width: calc(1.13 * var(--sake-rem)); height: calc(1.02 * var(--sake-rem)); }
+  .bc-sake-mv .blowing.pattern-4 .text { padding: calc(0.2 * var(--sake-rem)) 0; }
+}
+
+/* ---- pattern-5（p-3 的 staff-comment-2） ---- */
+.bc-sake-mv .blowing.pattern-5 { width: calc(2.15 * var(--sake-rem)); height: calc(1.92 * var(--sake-rem)); }
+.bc-sake-mv .blowing.pattern-5 .text { padding: calc(0.3 * var(--sake-rem)) 0; }
+.bc-sake-mv .blowing.pattern-5 .img { background-image: url("../images/sake-mv/blowing-pattern03.svg"); }
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.pattern-5 { width: calc(1.4 * var(--sake-rem)); height: calc(1.25 * var(--sake-rem)); }
+  .bc-sake-mv .blowing.pattern-5 .text { padding: calc(0.2 * var(--sake-rem)) 0; }
+}
+
+/* ---- staff 圖章（::after） ---- */
+.bc-sake-mv .blowing.staff-comment-1::after {
+  background-image: url("../images/sake-mv/staff01.png");
+  width: calc(0.8 * var(--sake-rem));
+  height: calc(0.95 * var(--sake-rem));
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.staff-comment-1::after { width: calc(0.52 * var(--sake-rem)); height: calc(0.62 * var(--sake-rem)); }
+}
+.bc-sake-mv .blowing.staff-comment-2::after {
+  background-image: url("../images/sake-mv/staff02.png");
+  width: calc(0.69 * var(--sake-rem));
+  height: calc(0.95 * var(--sake-rem));
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.staff-comment-2::after { width: calc(0.45 * var(--sake-rem)); height: calc(0.62 * var(--sake-rem)); }
+}
+.bc-sake-mv .blowing.staff-comment-3::after {
+  background-image: url("../images/sake-mv/staff03.png");
+  width: calc(0.73 * var(--sake-rem));
+  height: calc(0.95 * var(--sake-rem));
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.staff-comment-3::after { width: calc(0.48 * var(--sake-rem)); height: calc(0.62 * var(--sake-rem)); }
+}
+.bc-sake-mv .blowing.staff-comment-4::after {
+  background-image: url("../images/sake-mv/staff04.png");
+  width: calc(0.68 * var(--sake-rem));
+  height: calc(1.03 * var(--sake-rem));
+}
+@media (max-width: 767px) {
+  .bc-sake-mv .blowing.staff-comment-4::after { width: calc(0.44 * var(--sake-rem)); height: calc(0.67 * var(--sake-rem)); }
+}
+
+/* ---- staff-comment 動畫（is-show 輪播） ---- */
+.bc-sake-mv .staff-comment .img {
+  transition: scale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center bottom;
+  scale: 0;
+  rotate: -20deg;
+  translate: 0 -40px;
+}
+.bc-sake-mv .staff-comment .blowing::after {
+  transition: scale 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, rotate 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+  transform-origin: center bottom;
+  scale: 0;
+  rotate: -90deg;
+}
+.bc-sake-mv .staff-comment.is-show .img {
+  transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s, rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s, translate 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+  scale: 1;
+  rotate: 0deg;
+  translate: 0 0;
+}
+.bc-sake-mv .staff-comment.is-show .blowing::after {
+  transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  scale: 1;
+  rotate: 0deg;
+}
+

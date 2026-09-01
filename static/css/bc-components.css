@@ -4306,3 +4306,29 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   .pending-order-warning-btn-cancel i { font-size: 0.6rem; margin-top: -1px; }
 }
 
+
+/* ===== 2026-08-28：內容首屏預留 navbar 高度 =====
+   #ftco-navbar 為 position:absolute（不佔文檔流），bc-page-content 從頁面頂部開始
+   會被 navbar 覆蓋（weather 元件加入後 navbar 更高）。
+   全屏 home-slider（首頁 hero）除外——其設計即由 navbar 浮於頂部。
+   navbar 實際高度（實測）：>992=140 / 768-992=114 / 576-768=119 / <576=113。
+   用 margin-top（非 padding-top）：section 整體下移（含 absolute 子元素如 bracket 框），
+   內部元素相對位置不變。 */
+.bc-page-content > section:first-of-type:not(.home-slider) {
+  margin-top: 140px;
+}
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .bc-page-content > section:first-of-type:not(.home-slider) {
+    margin-top: 114px;
+  }
+}
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .bc-page-content > section:first-of-type:not(.home-slider) {
+    margin-top: 119px;
+  }
+}
+@media (max-width: 575.98px) {
+  .bc-page-content > section:first-of-type:not(.home-slider) {
+    margin-top: 113px;
+  }
+}

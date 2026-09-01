@@ -32,7 +32,7 @@
                 <div class="clock"><span class="value">--:--</span></div>
                 <div class="icon"></div>
                 <span class="temperature">
-                    <span class="value">23</span>
+                    <span class="value"></span>
                     <span class="unit">°C</span>
                 </span>
             </div>
@@ -46,9 +46,9 @@
         <script>
         /* 2026-08-26：立即同步填入時鐘 + 日期，避免載入時不同步（時間先、日期後）。
            2026-08-27：加 weekday（香港真實星期）。
-           在 DOM 解析到此處時同步執行（早於 bc-weather.js 外部腳本）；
-           bc-weather.js 的 updateClock/fillDate 仍會持續更新（此為早期快照，兩者一致）。
-           日期為瀏覽器本地時間，不依賴天氣 API。 */
+           2026-08-28：依 sessionStorage 恢復動畫狀態與溫度——在首 paint 前執行
+           （weather 元素後、body 尾 bc-weather.js 之前），避免轉跳後先顯示時鐘
+           再切換到天氣/溫度的閃現抖動；weather 全程可見（無 opacity 隱藏）。 */
         (function () {
             var w = document.querySelector('.weather');
             if (!w) return;
@@ -66,6 +66,22 @@
             var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             var wd = w.querySelector('.weekday');
             if (wd) wd.textContent = WEEKDAYS[d.getDay()];
+
+            /* 2026-08-28：恢復上次動畫狀態（sessionStorage bcWeatherIndex）。
+               直接設 transform，首 paint 即顯示上次狀態（無時鐘閃現）。 */
+            var ORDER = ['clock', 'icon', 'temperature'];
+            var idx = parseInt(sessionStorage.getItem('bcWeatherIndex') || '-1', 10);
+            if (!(idx >= 0 && idx < ORDER.length)) idx = 0;
+            ORDER.forEach(function (n, i) {
+                var el = w.querySelector('.' + n);
+                if (el) el.style.transform = 'translateX(' + (i === idx ? 0 : 80) + 'px)';
+            });
+            /* 2026-08-28：溫度值（sessionStorage 快取），首 paint 即正確溫度 */
+            try {
+                var data = JSON.parse(sessionStorage.getItem('bcWeatherData') || 'null');
+                var tv = w.querySelector('.temperature .value');
+                if (data && data.main && tv) tv.textContent = Math.round(data.main.temp);
+            } catch (e) {}
         })();
         </script>
     </div>

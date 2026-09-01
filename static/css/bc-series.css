@@ -298,15 +298,46 @@
    行動端（≤767.98）：名稱/Highlight 縮小避免溢出
    ============================================================ */
 @media (max-width: 767.98px) {
+    /* 2026-08-28：行動端 heading 內部文字相應縮小（50→30px、sub 18→12px） */
+    .bc-series-heading {
+        font-size: 30px;
+    }
+    .bc-series-heading-sub {
+        font-size: 9px; /* 2026-08-28 縮小：12→9 */
+        margin-top: 8px;
+    }
+    /* 2026-08-28：手繪圓圈動畫相應縮小（副標題縮小後外圈 inset 24→14px）
+       提高特異性：基礎規則 (.bc-leaf-circle-wrap .hero-title-svg) 在此 media 之後定義 */
+    .bc-series-hero .bc-leaf-circle-wrap .hero-title-svg {
+        inset: -14px -14px;
+        width: calc(100% + 28px);
+        height: calc(100% + 28px);
+    }
     .bc-series-caption {
         padding: 12px 2px 0;
     }
     .bc-series-caption-name {
-        font-size: 18px;
+        font-size: 14px; /* 2026-08-28 縮小：18→14（配合照片縮小至 32vw） */
     }
     .bc-series-caption-highlight {
-        font-size: 11px; /* 2026-08-27 稍微減小：12→11 */
+        font-size: 9px; /* 2026-08-28 縮小：11→9 */
         margin-top: 2px;
+    }
+    /* 2026-08-28：行動端照片再次縮小——
+       照片 40vw → 32vw、bracket 62vw → 52vw（相應縮小，維持比例） */
+    .bc-series-slide {
+        width: 32vw;
+    }
+    /* 2026-08-28：照片縮小後，scrolling padding-left 同步調整為 calc(50% - 16vw)——讓第一張照片中心對齊 hero/bracket 框中心 */
+    .bc-series-scrolling {
+        padding-left: calc(50% - 16vw);
+    }
+    .bc-series-bracket .bc-bracket-frame {
+        width: 52vw;
+        max-width: 52vw;
+        /* 2026-08-28：照片縮小後 bracket 中心偏高，向下移動 5vw 對齊照片滑動區中心
+           （375px 差 +9 / 320px 差 +13，取 5vw 使兩者落在 ±3px） */
+        top: calc(50% - 33px + 5vw);
     }
     /* sukima hero-title-svg：行動端縮小，與副標題文字同行不換行 */
 }

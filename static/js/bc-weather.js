@@ -108,19 +108,15 @@
     });
   }
 
-  /* 初始動畫定位（2026-08-26 修復：立即執行，不等 API 回應）
-     時鐘顯示（x:0）、icon/溫度右側待命（x:80）。
-     CSS 已有相同初始值（bc-weather.css），此為 JS 雙保險，避免載入閃爍。 */
-  function setInitialPositions(nodes) {
+  /* 立即定位（2026-08-28：不依賴 GSAP/defer 時序——script 在 body 尾、首 paint 前
+     執行，直接設 style.transform，首幀即依 sessionStorage 的上次狀態，
+     無需 opacity 隱藏，weather 保持可見不消失彈出） */
+  function applyPositions(nodes) {
     nodes.forEach(function (l) {
-      var clockEl = l.querySelector('.clock');
-      var iconEl = l.querySelector('.icon');
-      var tempEl = l.querySelector('.temperature');
-      if (window.gsap) {
-        if (clockEl) gsap.set(clockEl, { x: 0 });
-        if (iconEl) gsap.set(iconEl, { x: 80 });
-        if (tempEl) gsap.set(tempEl, { x: 80 });
-      }
+      ORDER.forEach(function (n, i) {
+        var el = l.querySelector('.' + n);
+        if (el) el.style.transform = 'translateX(' + (i === currentIndex ? 0 : 80) + 'px)';
+      });
     });
   }
 
@@ -146,6 +142,8 @@
         }
       });
       currentIndex = (currentIndex + 1) % ORDER.length;
+      /* 2026-08-28：記錄目前動畫狀態，轉跳頁面時恢復（不重播回時鐘） */
+      try { sessionStorage.setItem('bcWeatherIndex', String(currentIndex)); } catch (e) {}
     }
 
     function tick(now) {
@@ -156,6 +154,16 @@
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
+  }
+
+  /* 2026-08-28：轉跳防重播——恢復上次動畫狀態已保證轉跳不重置為時鐘，
+     循環延遲 5 秒啟動：足夠避免轉跳瞬間切換的干擾，
+     且 weather 不會停在單一狀態太久。 */
+  function maybeStartLoop() {
+    var now = Date.now();
+    var last = parseInt(sessionStorage.getItem('bcWeatherLastVisit') || '0', 10);
+    sessionStorage.setItem('bcWeatherLastVisit', String(now));
+    setTimeout(startLoop, 5000);
   }
 
   /* 時鐘：每秒刷新 HH:MM（24 小時制，原站 -font_en 數字風格） */
@@ -169,8 +177,10 @@
     });
   }
 
-  /* 入口（原站 IIFE 內主邏輯） */
-  function init() {
+  /* 主邏輯：script 在 body 尾、首 paint 前同步執行——立即定位與填充，
+     首幀即依 sessionStorage 的上次狀態顯示，weather 全程可見（無消失彈出）。
+     註：weather 元素位於 navbar（body 開頭），執行時已存在。 */
+  function main() {
     var nodes = document.querySelectorAll('.weather');
     if (!nodes || nodes.length === 0) return;
 
@@ -178,16 +188,22 @@
     updateClock();
     setInterval(updateClock, 1000);
 
-    /* 初始動畫定位：立即執行（不等 API 回應），頁面載入即正確顯示時鐘，無跳動 */
-    currentIndex = 0;
-    setInitialPositions(nodes);
+    /* 立即定位：恢復上次動畫狀態（sessionStorage），首 paint 即正確狀態 */
+    var savedIdx = parseInt(sessionStorage.getItem('bcWeatherIndex') || '-1', 10);
+    if (savedIdx >= 0 && savedIdx < ORDER.length) {
+      currentIndex = savedIdx;
+    }
+    applyPositions(nodes);
 
-    /* 已快取 → 直接填充 + 啟動循環（原站 tu&&ya 短路） */
-    if (hasCached && cachedData) {
-      fillIcon(cachedData, nodes);
-      fillDate(cachedData, nodes);
-      startLoop();
-      return;
+    /* 2026-08-28：sessionStorage 天氣快取——轉跳頁面時立即顯示正確溫度/icon，
+       避免溫度元素在 API 回應前顯示空/舊值（nav.html 預設已清空）造成抖動 */
+    var stored = null;
+    try { stored = JSON.parse(sessionStorage.getItem('bcWeatherData') || 'null'); } catch (e) { stored = null; }
+    var filled = false;
+    if (stored && stored.main && stored.weather) {
+      fillIcon(stored, nodes);
+      fillDate(stored, nodes);
+      filled = true;
     }
 
     /* OpenWeatherMap API（2026-08-26 需求：改為香港葵涌天氣；原站 Yokohama） */
@@ -199,7 +215,9 @@
           hasCached = true;
           fillIcon(cachedData, nodes);
           fillDate(cachedData, nodes);
-          startLoop();
+          /* 2026-08-28：寫入 sessionStorage 快取，下次轉跳即時顯示 */
+          try { sessionStorage.setItem('bcWeatherData', JSON.stringify(cachedData)); } catch (e) {}
+          if (!filled) { maybeStartLoop(); filled = true; }
         }
       } catch (e) {
         console.error('\u5929\u6C17UI\u306E\u66F4\u65B0\u4E2D\u306B\u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u307E\u3057\u305F:', e);
@@ -208,12 +226,11 @@
     xhr.open('GET', 'https://api.openweathermap.org/data/2.5/weather?q=Kwai Chung&units=metric&lang=ja&appid=6db833ee3b72a69a8ca7ba2676850f74', true);
     xhr.responseType = 'json';
     xhr.send();
+
+    /* 快取已填充 → 啟動循環（延遲 5 秒）；API 回應路徑由 filled flag 防重複 */
+    if (filled) maybeStartLoop();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  main();
 })();
 
