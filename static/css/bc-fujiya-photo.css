@@ -20,12 +20,12 @@
                  mask sv_shape_sp.svg、txt 4.26667vw）
 
    深色主題必要適配（非額外 UI）：
-     - section 背景 #fff（原站頁面背景為白，照片為淺色蛋糕圖）
-     - 標語文字 color #280901（原站 body 色），因本頁 body 預設為白色文字
+     - section 背景 #0e0e0e（Between Coffee 品牌黑 --bc-bg，取代原站白底）
+     - 標語文字 color #fff（白色，配合黑底；原站為深棕 #280901）
      - 字型沿用原站 fallback 順序（日文字型 + Noto Sans TC）
    ============================================================ */
 .bc-fujiya-photo {
-  background: #fff;
+  background: #0e0e0e;
   font-family: "Gothic Medium BBB", "Noto Sans JP", "Hiragino Sans",
     ヒラギノ角ゴシック, "Hiragino Kaku Gothic ProN", "Noto Sans JP",
     メイリオ, Meiryo, 游ゴシック, YuGothic, "ＭＳ Ｐゴシック",
@@ -109,7 +109,7 @@
   line-height: 160%;
   /* 24px */
   letter-spacing: 4.5px;
-  color: #280901;
+  color: #fff;
 }
 .bc-fujiya-photo #photo_area #photo_slide {
   position: relative;
@@ -308,7 +308,7 @@
   }
   .bc-fujiya-photo #photo_area .title .txt {
     width: 77.33333vw;
-    color: #280901;
+    color: #fff;
   }
   .bc-fujiya-photo #photo_area .title .txt .t {
     font-size: 4.26667vw;
