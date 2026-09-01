@@ -12,8 +12,11 @@
      3. jQuery Waypoint × 6：
         photo_line1/2/3 於 offset=.79*(windowH−copyH) 切換 showPhoto/closePhoto、
         於 offset="10%" 切換 .photo_slide_item 的 .open（picture.b 淡出）
-     4. showPhoto/closePhoto：標語 copy 淡入淡出 + mark 滑入 + 逐字上滑
-        （span 依序 22ms 間隔、CSS transition 0.133s cubic-bezier(.61,1,.88,1)）
+     4. showPhoto/closePhoto：標語 copy 淡入淡出 + 逐字上滑
+        （span 依序 22ms 間隔、CSS transition 0.133s cubic-bezier(.61,1,.88,1)）；
+        2026-09-01：原 .mark（mark.svg）更改為 .bc-other-members 動畫 →
+        showPhoto(n) 對 #photo_copy{n} 的 .bc-other-members 加 .show
+        （「【 他にもいます！】」span scale 0→1 + 手繪圓形畫線，CSS 觸發）
 
    依賴：jQuery（base.html body 尾）、Waypoints 4.0.0（base.html 已載入）、
    GSAP 3.12.5 + ScrollTrigger（base.html head defer）。
@@ -47,10 +50,12 @@
     /* ---- showPhoto：切換標語 copy（複製原站 Manager.showPhoto） ---- */
     function showPhoto(n) {
       if (copyTimers[n]) { clearTimeout(copyTimers[n]); copyTimers[n] = null; }
-      // 全部 copy 淡出、目標 copy 淡入、mark 滑入
+      // 全部 copy 淡出、目標 copy 淡入
       $root.find("#photo_ttl .copy").css({ opacity: 0 });
       $root.find("#photo_copy" + n).css({ opacity: 1 });
-      gsap.set($root.find("#photo_copy" + n + " .mark img")[0], { y: 0 });
+      // 2026-09-01：原 .mark（mark.svg）已更改為 .bc-other-members 動畫 →
+      // 觸發「【 他にもいます！】」span scale + 手繪圓形畫線（每次顯示播放）
+      $root.find("#photo_copy" + n + " .bc-other-members").addClass("show");
       // 逐字上滑：span 依序 22ms 間隔 y:0
       var spans = $root.find("#photo_copy" + n + " .t > span");
       spans.each(function (i) {
@@ -65,7 +70,6 @@
     function closePhoto(n) {
       if (copyTimers[n]) { clearTimeout(copyTimers[n]); copyTimers[n] = null; }
       $root.find(".photo_slide_item" + n).removeClass("open");
-      gsap.set($root.find("#photo_copy" + n + " .mark img")[0], { y: "120%" });
       $root.find("#photo_copy" + n + " .t > span").each(function () {
         gsap.set(this, { y: "102%" });
       });

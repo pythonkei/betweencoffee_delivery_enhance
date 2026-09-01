@@ -323,3 +323,53 @@
     mask-image: url("../images/fujiya-photo/sv_shape_sp.svg");
   }
 }
+
+/* ============================================================
+   photo_area 內 .bc-other-members（2026-09-01）
+   原 .mark（不二家 mark.svg）內容更改為 .bc-other-members 動畫：
+   「【 他にもいます！】」span scale 0→1（延遲 1s）+ 手繪圓形
+   other-members-svg 畫線揭示（organicRevealAnimation 1.5s）。
+   複製 bc-series.css 的 .other-members-svg / organic-reveal-brush444
+   動畫，覆蓋 topConcept 專用定位（absolute top/left/translate → static），
+   尺寸對應原 .mark 四斷點（80px / 64px / 4.70588vw / 10.66667vw）。
+   觸發：showPhoto(n) 對 #photo_copy{n} 的 .bc-other-members 加 .show。
+   ============================================================ */
+.bc-fujiya-photo .bc-other-members {
+  margin-left: 0;
+  top: auto;
+  z-index: 2;
+}
+.bc-fujiya-photo .other-members-svg {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: rotate(10deg);
+  opacity: 0.75;
+  z-index: 2;
+  width: 80px;
+  height: auto;
+  pointer-events: none;
+}
+/* 觸發後：span scale 0→1（延遲 1s）+ 手繪圓形畫線 1.5s */
+.bc-fujiya-photo .bc-other-members.show span {
+  transform: scale(1) rotate(0);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) 1s;
+}
+.bc-fujiya-photo .bc-other-members.show .organic-reveal-brush444 {
+  animation: organicRevealAnimation 1.5s ease-in-out forwards;
+}
+@media screen and (min-width: 1360px) and (max-width: 1921px) {
+  .bc-fujiya-photo .other-members-svg {
+    width: 64px;
+  }
+}
+@media print, screen and (min-width: 768px) and (max-width: 1359px) {
+  .bc-fujiya-photo .other-members-svg {
+    width: 4.70588vw;
+  }
+}
+@media screen and (max-width: 767px) {
+  .bc-fujiya-photo .other-members-svg {
+    width: 10.66667vw;
+  }
+}
