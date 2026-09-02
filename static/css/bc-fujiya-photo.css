@@ -386,6 +386,12 @@
   z-index: 0;
   pointer-events: none;
 }
+.bc-fujiya-photo #photo_ttl > .bc-other-members .organic-reveal-brush444 {
+  /* 初始全隱藏：SVG 屬性 dashoffset="784"（dasharray 800）會在 path 起點
+     露出 16px 白線 → mask 顯現綠色小點（動畫第一幀之前）；CSS 覆蓋為 800
+     完全隱藏，.show 觸發 animation（無 from → 由當前 800 畫到 0） */
+  stroke-dashoffset: 800;
+}
 .bc-fujiya-photo #photo_ttl > .bc-other-members.show .organic-reveal-brush444 {
   animation: organicRevealAnimation 1.5s ease-in-out forwards;
 }
