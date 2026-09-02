@@ -13,10 +13,11 @@
         photo_line1/2/3 於 offset=.79*(windowH−copyH) 切換 showPhoto/closePhoto、
         於 offset="10%" 切換 .photo_slide_item 的 .open（picture.b 淡出）
      4. showPhoto/closePhoto：標語 copy 淡入淡出 + 逐字上滑
-        （span 依序 22ms 間隔、CSS transition 0.133s cubic-bezier(.61,1,.88,1)）；
-        2026-09-01：原 .mark（mark.svg）更改為 .bc-other-members 動畫 →
-        showPhoto(n) 對 #photo_copy{n} 的 .bc-other-members 加 .show
-        （「【 他にもいます！】」span scale 0→1 + 手繪圓形畫線，CSS 觸發）
+        （span 依序 22ms 間隔、CSS transition 0.133s cubic-bezier(.61,1,.88,1)）
+     5. bc-other-members（原 .mark 更改，2026-09-01）：
+        置 title 層一份；顯示/隱藏綁定「photo_area 段落」——進入
+        photo_area（頂到視口底）顯示、捲出 photo_area（底離開視口）
+        隱藏；photo_area 內 copy1/2/3 切換時常駐顯示、動畫只播一次
 
    依賴：jQuery（base.html body 尾）、Waypoints 4.0.0（base.html 已載入）、
    GSAP 3.12.5 + ScrollTrigger（base.html head defer）。
@@ -53,14 +54,6 @@
       // 全部 copy 淡出、目標 copy 淡入
       $root.find("#photo_ttl .copy").css({ opacity: 0 });
       $root.find("#photo_copy" + n).css({ opacity: 1 });
-      // 2026-09-01：原 .mark（mark.svg）更改為 .bc-other-members 動畫 →
-      // 一份置於 title 層，photo_area 鎖定期間常駐顯示（copy1/2/3 皆顯示，
-      // 首次播放 span scale + 手繪圓形畫線），向上捲離（closePhoto）時隱藏
-      var $otherMembers = $root.find("#photo_ttl > .bc-other-members");
-      $otherMembers.removeClass("hide");
-      if (!$otherMembers.hasClass("show")) {
-        $otherMembers.addClass("show");
-      }
       // 逐字上滑：span 依序 22ms 間隔 y:0
       var spans = $root.find("#photo_copy" + n + " .t > span");
       spans.each(function (i) {
@@ -75,9 +68,6 @@
     function closePhoto(n) {
       if (copyTimers[n]) { clearTimeout(copyTimers[n]); copyTimers[n] = null; }
       $root.find(".photo_slide_item" + n).removeClass("open");
-      // 2026-09-01：bc-other-members 與文字動畫一起隱藏（向上捲動 closePhoto
-      // 觸發時），photo_area 內 copy1/2/3 切換時保持顯示
-      $root.find("#photo_ttl > .bc-other-members").addClass("hide");
       $root.find("#photo_copy" + n + " .t > span").each(function () {
         gsap.set(this, { y: "102%" });
       });
@@ -199,10 +189,49 @@
       });
     }
 
+    /* ---- bc-other-members：綁定 photo_area 段落進出（2026-09-01） ----
+       進入 photo_area（頂到視口底）→ 顯示（首次播放動畫）；
+       捲出 photo_area（底離開視口）或捲回頂部上方 → 隱藏；
+       photo_area 內 copy1/2/3 切換時常駐顯示（不隨 copy 方向消失） */
+    function initOtherMembersTriggers() {
+      var $om = $root.find("#photo_ttl > .bc-other-members");
+      var paEl = document.querySelector(".bc-fujiya-photo #photo_area");
+      if (!$om.length || !paEl) return;
+
+      function showOM() {
+        $om.removeClass("hide");
+        if (!$om.hasClass("show")) {
+          $om.addClass("show");
+        }
+      }
+      function hideOM() {
+        $om.addClass("hide");
+      }
+
+      // 進入/離開 photo_area 頂部
+      new Waypoint({
+        element: paEl,
+        handler: function (dir) {
+          if (dir === "down") showOM(); else hideOM();
+        },
+        offset: "100%"
+      });
+      // 捲出 photo_area 底部（photo_area bottom 離開視口）
+      var bottomOffset = window.innerHeight - paEl.offsetHeight;
+      new Waypoint({
+        element: paEl,
+        handler: function (dir) {
+          if (dir === "down") hideOM(); else showOM();
+        },
+        offset: bottomOffset
+      });
+    }
+
     function init() {
       photoResize();
       initScrollTriggers();
       initWaypoints();
+      initOtherMembersTriggers();
       $(window).on("resize", function () {
         photoResize();
         if (typeof ScrollTrigger !== "undefined") ScrollTrigger.refresh();
