@@ -15,9 +15,10 @@
      4. showPhoto/closePhoto：標語 copy 淡入淡出 + 逐字上滑
         （span 依序 22ms 間隔、CSS transition 0.133s cubic-bezier(.61,1,.88,1)）
      5. bc-other-members（原 .mark 更改，2026-09-01）：
-        置 title 層一份；顯示/隱藏綁定「photo_area 段落」——進入
-        photo_area（頂到視口底）顯示、捲出 photo_area（底離開視口）
-        隱藏；photo_area 內 copy1/2/3 切換時常駐顯示、動畫只播一次
+        置 title 層一份、文字 z-index 置圓形正中央；跟隨「第一組文字」——
+        copy1 顯示時顯示（showPhoto(1)，每次重新進入重播手繪動畫）；
+        向下捲 copy1→2→3 常駐（showPhoto/closePhoto 2/3 不影響）；
+        向上回捲到 copy1 消失（closePhoto(1)）時一起消失（.hide）
 
    依賴：jQuery（base.html body 尾）、Waypoints 4.0.0（base.html 已載入）、
    GSAP 3.12.5 + ScrollTrigger（base.html head defer）。
@@ -48,12 +49,39 @@
       return window.innerWidth <= 767;
     }
 
+    /* ---- 取得 bc-other-members（title 層一份） ---- */
+    function otherMembers() {
+      return $root.find("#photo_ttl > .bc-other-members");
+    }
+
+    /* ---- 觸發 bc-other-members 動畫（重新進入 copy1 時重播） ---- */
+    function playOtherMembers() {
+      var $om = otherMembers();
+      if (!$om.length) return;
+      $om.removeClass("hide");
+      if ($om.hasClass("show")) {
+        // 移除 .show → reflow → 重新加回 → CSS animation 重播
+        $om.removeClass("show");
+        void $om[0].offsetWidth;
+      }
+      $om.addClass("show");
+    }
+    /* ---- 隱藏 bc-other-members（copy1 文字消失時一起消失） ---- */
+    function hideOtherMembers() {
+      otherMembers().addClass("hide");
+    }
+
     /* ---- showPhoto：切換標語 copy（複製原站 Manager.showPhoto） ---- */
     function showPhoto(n) {
       if (copyTimers[n]) { clearTimeout(copyTimers[n]); copyTimers[n] = null; }
       // 全部 copy 淡出、目標 copy 淡入
       $root.find("#photo_ttl .copy").css({ opacity: 0 });
       $root.find("#photo_copy" + n).css({ opacity: 1 });
+      // 2026-09-01：bc-other-members 跟隨第一組文字——copy1 顯示時
+      // 顯示並重播手繪動畫（向下捲 copy1→2→3 常駐，copy2/3 不影響）
+      if (n === 1) {
+        playOtherMembers();
+      }
       // 逐字上滑：span 依序 22ms 間隔 y:0
       var spans = $root.find("#photo_copy" + n + " .t > span");
       spans.each(function (i) {
@@ -68,6 +96,11 @@
     function closePhoto(n) {
       if (copyTimers[n]) { clearTimeout(copyTimers[n]); copyTimers[n] = null; }
       $root.find(".photo_slide_item" + n).removeClass("open");
+      // 2026-09-01：向上回捲到第一組文字（copy1）消失時，
+      // bc-other-members 與它一起消失；copy2/3 消失不影響（常駐）
+      if (n === 1) {
+        hideOtherMembers();
+      }
       $root.find("#photo_copy" + n + " .t > span").each(function () {
         gsap.set(this, { y: "102%" });
       });
@@ -189,49 +222,10 @@
       });
     }
 
-    /* ---- bc-other-members：綁定 photo_area 段落進出（2026-09-01） ----
-       進入 photo_area（頂到視口底）→ 顯示（首次播放動畫）；
-       捲出 photo_area（底離開視口）或捲回頂部上方 → 隱藏；
-       photo_area 內 copy1/2/3 切換時常駐顯示（不隨 copy 方向消失） */
-    function initOtherMembersTriggers() {
-      var $om = $root.find("#photo_ttl > .bc-other-members");
-      var paEl = document.querySelector(".bc-fujiya-photo #photo_area");
-      if (!$om.length || !paEl) return;
-
-      function showOM() {
-        $om.removeClass("hide");
-        if (!$om.hasClass("show")) {
-          $om.addClass("show");
-        }
-      }
-      function hideOM() {
-        $om.addClass("hide");
-      }
-
-      // 進入/離開 photo_area 頂部
-      new Waypoint({
-        element: paEl,
-        handler: function (dir) {
-          if (dir === "down") showOM(); else hideOM();
-        },
-        offset: "100%"
-      });
-      // 捲出 photo_area 底部（photo_area bottom 離開視口）
-      var bottomOffset = window.innerHeight - paEl.offsetHeight;
-      new Waypoint({
-        element: paEl,
-        handler: function (dir) {
-          if (dir === "down") hideOM(); else showOM();
-        },
-        offset: bottomOffset
-      });
-    }
-
     function init() {
       photoResize();
       initScrollTriggers();
       initWaypoints();
-      initOtherMembersTriggers();
       $(window).on("resize", function () {
         photoResize();
         if (typeof ScrollTrigger !== "undefined") ScrollTrigger.refresh();
