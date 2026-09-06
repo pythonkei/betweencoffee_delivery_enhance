@@ -104,3 +104,61 @@
 .bc-flor-menu .flex-section ul{list-style-type:disc}
 .bc-flor-menu .group-section[data-v-26b607d9]{position:relative}
 .bc-flor-menu .section-container[data-v-26b607d9]{transition:background-color .5s ease}
+
+/* ===== 右側時間軸指示器（bc-flor-rail）=====
+   移植自 florporto 產品模組同款 fixed right 指示器（data-debug="timeline-indicator"）：
+   太陽☀ → 垂直主線 + morning/afternoon/evening 三段 tick → 月亮☾。
+   原站以 Tailwind 工具類實作（rem 縮放），本檔改以等效值直接撰寫；
+   顏色由原站黑(38 33 32) 改為白色系以配合深色頁面，行為與動畫不變。
+   JS 以 .active 切換目前 step；整支 hover 時會浮現非 active 標籤。 */
+.bc-flor-rail{
+  position:fixed;right:3rem;top:50%;transform:translateY(-50%);z-index:90;color:#fff;
+  opacity:1;visibility:visible;transition:opacity .25s ease,visibility .25s ease;
+}
+.bc-flor-rail.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.bc-flor-rail-inner{display:flex;flex-direction:column;align-items:flex-end;padding-right:.5rem}
+.bc-flor-rail svg{display:block;width:1rem;height:1rem;flex:none}
+.bc-flor-rail .step-indicators{
+  position:relative;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;
+  height:15rem;margin:1rem 0;
+}
+.bc-flor-rail .main-vertical-line{position:absolute;top:0;bottom:0;right:.4375rem;width:1px;background:rgba(255,255,255,.8)}
+.bc-flor-rail .step-indicator{
+  position:relative;right:.5rem;display:flex;align-items:center;
+  margin:0;padding:.5rem 0;border:0;background:transparent;color:inherit;
+  cursor:pointer;-webkit-appearance:none;appearance:none;
+}
+.bc-flor-rail .step-indicator:focus-visible{outline:1px solid rgba(255,255,255,.75);outline-offset:4px;border-radius:4px}
+.bc-flor-rail .step-text{
+  margin-right:.5rem;font-size:.75rem;line-height:1.625;letter-spacing:.02em;white-space:nowrap;
+  color:#fff;opacity:0;transform:translateX(.5rem);pointer-events:none;
+  transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1);
+}
+.bc-flor-rail .step-horizontal-line{
+  display:block;height:1px;width:.5rem;background:#fff;flex:none;
+  transition:width .3s cubic-bezier(.4,0,.2,1),opacity .3s cubic-bezier(.4,0,.2,1);
+}
+/* 目前 step：文字完整顯示、橫線加長（原站 !opacity-100 + w-4/md:w-8） */
+.bc-flor-rail .step-indicator.active .step-text{opacity:1;transform:translateX(0)}
+.bc-flor-rail .step-indicator.active .step-horizontal-line{width:1rem}
+.bc-flor-rail .step-indicator.active{pointer-events:auto}
+/* hover 整支（原站 group-hover/menu:*）：浮現非 active 標籤、橫線收短並淡化 */
+.bc-flor-rail:hover .step-text{opacity:.6;transform:translateX(0)}
+.bc-flor-rail:hover .step-indicator.active .step-text{opacity:1}
+.bc-flor-rail:hover .step-horizontal-line{width:.75rem;opacity:.6}
+@media (min-width:768px){
+  /* 本站右緣有固定 bc-attract-buy/profile（含 24px hover 熱區），讓 rail 貼齊其左側避免遮擋 */
+  .bc-flor-rail{right:92px}
+}
+@media (min-width:960px){
+  .bc-flor-rail{right:74px}
+  .bc-flor-rail-inner{padding-right:1rem}
+  .bc-flor-rail svg{width:1.5rem;height:1.5rem}
+  .bc-flor-rail .step-indicators{margin:2rem 0}
+  .bc-flor-rail .main-vertical-line{right:.6875rem}
+  .bc-flor-rail .step-indicator{right:.75rem;padding:1rem 0}
+  .bc-flor-rail .step-text{margin-right:1rem;font-size:.9375rem}
+  .bc-flor-rail .step-horizontal-line{width:1rem}
+  .bc-flor-rail .step-indicator.active .step-horizontal-line{width:2rem}
+  .bc-flor-rail:hover .step-horizontal-line{width:1.25rem}
+}

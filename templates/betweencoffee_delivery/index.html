@@ -585,6 +585,26 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                 </div>
             </div>
         </div>
+        <!-- florporto 右側時間軸指示器：morning / afternoon / evening
+             隨捲動切換 active step，可點擊跳轉至對應群組（原站 data-debug="timeline-indicator"） -->
+        <div class="bc-flor-rail" data-debug="timeline-indicator">
+            <div class="bc-flor-rail-inner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <div class="step-indicators">
+                    <span class="main-vertical-line" aria-hidden="true"></span>
+                    <div class="step-indicator active" data-step-index="0" role="button" tabindex="0" aria-label="morning">
+                        <span class="step-text">morning</span><span class="step-horizontal-line" aria-hidden="true"></span>
+                    </div>
+                    <div class="step-indicator" data-step-index="1" role="button" tabindex="0" aria-label="afternoon">
+                        <span class="step-text">afternoon</span><span class="step-horizontal-line" aria-hidden="true"></span>
+                    </div>
+                    <div class="step-indicator" data-step-index="2" role="button" tabindex="0" aria-label="evening">
+                        <span class="step-text">evening</span><span class="step-horizontal-line" aria-hidden="true"></span>
+                    </div>
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -722,7 +742,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20260906a">
 <link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20260904o">
 <!-- 2026-09-06：florporto 產品模組移植（最強人氣上方；wrapper 封裝 .bc-flor-menu、文字轉白） -->
-<link rel="stylesheet" href="{% static 'css/bc-flor-menu.css' %}?v=20260906a">
+<link rel="stylesheet" href="{% static 'css/bc-flor-menu.css' %}?v=20260906c">
 <style>
 /* 2026-09-04：首頁 feed 為頂部首屏（home-slider 已 hidden）→ 比照 home-slider：
    feed 照片/形狀由視口頂部開始、穿入 navbar 後方透出，navbar（z-index:100、
@@ -751,5 +771,5 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <!-- 2026-09-06：reviews 跑馬燈動畫（支援 data-bc-reviews-reverse 反向；GSAP base defer） -->
 <script src="{% static 'js/bc-reviews.js' %}?v=20260906a"></script>
 <!-- 2026-09-06：florporto 產品模組捲動 crossfade（圖片層隨捲動進度切換） -->
-<script src="{% static 'js/bc-flor-menu.js' %}?v=20260906a"></script>
+<script src="{% static 'js/bc-flor-menu.js' %}?v=20260906b"></script>
 {% endblock %}
