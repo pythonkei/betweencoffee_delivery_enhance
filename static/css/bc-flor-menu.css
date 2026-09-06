@@ -1,0 +1,106 @@
+/* Between Coffee — florporto 產品模組移植（bc-flor-menu）
+   抽取來源：https://florporto.com/_nuxt/entry.CJmBBoJ8.css 必要規則 + 其 scoped css
+   全部規則封裝於 .bc-flor-menu 內避免與全站/Bootstrap 衝突；
+   依需求文字轉白：非按鈕內文由 wrapper color 白化（按鈕保留原站黑字樣式）。 */
+.bc-flor-menu{
+  /* 原站 :root 變數（限定 wrapper；注意抽取時最後一項原無分號已補） */
+  --theme-color_primary:241 116 85;--theme-color_secondary:88 82 77;--theme-color_secondary-2:163 149 139;--theme-color_secondary-3:189 179 171;--theme-color_secondary-4:230 222 217;--theme-color_black:38 33 32;--theme-color_white:255 255 255;--theme-font_headlines_font_family:"Open Sans",sans-serif;--theme-font_paragraph_font_family:"Open Sans",sans-serif;--theme-font_headlines_line_height:1.1;--theme-font_paragraph_line_height:1.4;
+  color: rgb(var(--theme-color_white) / var(--tw-text-opacity, 1));
+}
+.bc-flor-menu .absolute{position:absolute}
+.bc-flor-menu .relative{position:relative}
+.bc-flor-menu .inset-0{top:0;right:0;bottom:0;left:0}
+.bc-flor-menu .col-span-9{grid-column:span 9/span 9}
+.bc-flor-menu .col-span-full{grid-column:1/-1}
+.bc-flor-menu .col-start-1{grid-column-start:1}
+.bc-flor-menu .mx-auto{margin-left:auto;margin-right:auto}
+.bc-flor-menu .mt-36{margin-top:9rem}
+.bc-flor-menu .mt-6{margin-top:1.5rem}
+.bc-flor-menu .flex{display:flex}
+.bc-flor-menu .grid{display:grid}
+.bc-flor-menu .aspect-\[4\/5\]{aspect-ratio:4/5}
+.bc-flor-menu .h-full{height:100%}
+.bc-flor-menu .w-full{width:100%}
+.bc-flor-menu .max-w-\[1200px\]{max-width:1200px}
+.bc-flor-menu .grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}
+.bc-flor-menu .flex-col{flex-direction:column}
+.bc-flor-menu .flex-wrap{flex-wrap:wrap}
+.bc-flor-menu .items-center{align-items:center}
+.bc-flor-menu .justify-center{justify-content:center}
+.bc-flor-menu .gap-10{gap:2.5rem}
+.bc-flor-menu .gap-4{gap:1rem}
+.bc-flor-menu .space-y-36>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-bottom:calc(9rem*var(--tw-space-y-reverse));margin-top:calc(9rem*(1 - var(--tw-space-y-reverse)))}
+.bc-flor-menu .overflow-hidden{overflow:hidden}
+.bc-flor-menu .rounded-lg{border-radius:.5rem}
+.bc-flor-menu .object-cover{object-fit:cover}
+.bc-flor-menu .pb-36{padding-bottom:9rem}
+.bc-flor-menu .pl-4{padding-left:1rem}
+.bc-flor-menu .pt-36{padding-top:9rem}
+.bc-flor-menu .text-3xl{font-size:2.438rem}
+.bc-flor-menu .text-lg{font-size:1.25rem}
+.bc-flor-menu .opacity-0{opacity:0}
+.bc-flor-menu .transition-opacity{transition-duration:.15s;transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1)}
+.bc-flor-menu .duration-1000{transition-duration:1s}
+@media (min-width:960px){
+.bc-flor-menu .md\:col-span-3{grid-column:span 3/span 3}
+.bc-flor-menu .md\:col-span-5{grid-column:span 5/span 5}
+.bc-flor-menu .md\:col-start-3{grid-column-start:3}
+.bc-flor-menu .md\:col-start-6{grid-column-start:6}
+.bc-flor-menu .md\:col-start-8{grid-column-start:8}
+.bc-flor-menu .md\:mt-0{margin-top:0}
+.bc-flor-menu .md\:mt-72{margin-top:18rem}
+.bc-flor-menu .md\:grid-flow-col{grid-auto-flow:column}
+.bc-flor-menu .md\:gap-8{gap:2rem}
+.bc-flor-menu .md\:space-y-72>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-bottom:calc(18rem*var(--tw-space-y-reverse));margin-top:calc(18rem*(1 - var(--tw-space-y-reverse)))}
+.bc-flor-menu .md\:pb-72{padding-bottom:18rem}
+.bc-flor-menu .md\:pl-0{padding-left:0}
+.bc-flor-menu .md\:pt-72{padding-top:18rem}
+}
+@media (min-width:1280px){
+.bc-flor-menu .lg\:max-w-\[1456px\]{max-width:1456px}
+}
+.bc-flor-menu .default-grid{display:grid;gap:1rem;grid-template-columns:repeat(12,minmax(0,1fr))}
+@media (min-width:1280px){
+.bc-flor-menu .default-grid{-moz-column-gap:3rem;column-gap:3rem}
+}
+.bc-flor-menu .default-grid.half-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+.bc-flor-menu .header-bs{margin-bottom:1.5rem}
+.bc-flor-menu .body-bs,.subheader-bs{margin-bottom:1.75rem}
+.bc-flor-menu .btn{align-items:center;display:inline-flex;font-weight:500;justify-content:center;position:relative;transition-duration:.3s;transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1)}
+.bc-flor-menu .btn.btn-primary{color:rgb(var(--theme-color_black))}
+.bc-flor-menu .btn.btn-primary,.btn.btn-primary.no-client-hydrated,.btn.btn-secondary{border-bottom-width:1px;border-color:currentColor}
+.bc-flor-menu .btn.btn-secondary{color:rgb(var(--theme-color_white))}
+.bc-flor-menu .btn.btn-secondary.no-client-hydrated{border-bottom-width:1px;border-color:currentColor}
+.bc-flor-menu .btn.btn-cozinha,.btn.btn-thelargo{font-size:20px}
+.bc-flor-menu .btn.btn-flor{font-size:16px}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-thelargo{font-weight:var(--theme-font_bold_weight)}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-thelargo.btn-primary{border-style:none}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-thelargo.btn-primary:after{background-image:url(../ui/painting-line.png);background-repeat:no-repeat;background-size:cover;bottom:-14px;clip-path:inset(0 100% 0 0);content:"";height:.5rem;left:0;opacity:0;position:absolute;transition:clip-path .5s ease-in-out,opacity .3s ease-in-out;width:5rem}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-thelargo.btn-primary:hover:after{clip-path:inset(0 0 0 0);opacity:1}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-thelargo.btn-secondary{border-style:none;opacity:1;transition-duration:.3s;transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1)}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-thelargo.btn-secondary:hover{opacity:.7}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-cozinha.btn-primary{border-style:none;color:rgb(var(--theme-color_black));position:relative}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-cozinha.btn-primary:after{background-color:rgb(var(--theme-color_black));bottom:-12px;content:"";height:.125rem;position:absolute;right:0;transition:width .6s cubic-bezier(.65,0,.35,1);width:0}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-cozinha.btn-primary:hover:after{width:100%}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-cozinha.btn-secondary{border-style:none;color:rgb(var(--theme-color_white));position:relative}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-cozinha.btn-secondary:after{background-color:rgb(var(--theme-color_white));bottom:-12px;content:"";height:.125rem;position:absolute;right:0;width:0}
+.bc-flor-menu .flex-section.btn:not(.no-client-hydrated).btn-cozinha.btn-secondary input:after,.flex-section.btn:not(.no-client-hydrated).btn-cozinha.btn-secondary select:after,.flex-section.btn:not(.no-client-hydrated).btn-cozinha.btn-secondary textarea:after{background-color:rgb(var(--theme-color_black)/.05);border-color:rgb(var(--theme-color_black)/.15);border-width:1px}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-cozinha.btn-secondary:after{transition:width .6s cubic-bezier(.65,0,.35,1)}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-cozinha.btn-secondary:hover:after{width:100%}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-primary{align-items:center;border-style:none;color:rgb(var(--theme-color_black));display:inline-flex;letter-spacing:2px;position:relative;text-transform:lowercase;white-space:nowrap}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-primary:after{bottom:-5px;content:"";height:1px;left:0;position:absolute;transform-origin:center;--tw-scale-x:0;background-color:rgb(var(--theme-color_black));transition:transform .3s cubic-bezier(.4,0,.2,1);width:100%}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-primary:after,.btn:not(.no-client-hydrated).btn-flor.btn-primary:hover:after{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-primary:hover:after{--tw-scale-x:1}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-secondary{align-items:center;border-style:none;color:rgb(var(--theme-color_white));display:inline-flex;letter-spacing:2px;position:relative;text-transform:lowercase;white-space:nowrap}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-secondary:after{bottom:-5px;content:"";height:1px;left:0;position:absolute;transform-origin:center;width:100%;--tw-scale-x:0;background-color:rgb(var(--theme-color_white));transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}
+.bc-flor-menu .flex-section.btn:not(.no-client-hydrated).btn-flor.btn-secondary input:after,.flex-section.btn:not(.no-client-hydrated).btn-flor.btn-secondary select:after,.flex-section.btn:not(.no-client-hydrated).btn-flor.btn-secondary textarea:after{background-color:rgb(var(--theme-color_black)/.05);border-color:rgb(var(--theme-color_black)/.15);border-width:1px}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-secondary:after{transition:transform .3s cubic-bezier(.4,0,.2,1);width:100%}
+.bc-flor-menu .btn:not(.no-client-hydrated).btn-flor.btn-secondary:hover:after{--tw-scale-x:1;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}
+.bc-flor-menu .flex-section.bg-inherit input,.flex-section.bg-inherit select,.flex-section.bg-inherit textarea,.flex-section.bg-white input,.flex-section.bg-white select,.flex-section.bg-white textarea{background-color:rgb(var(--theme-color_black)/.05);border-color:rgb(var(--theme-color_black)/.15);border-width:1px}
+.bc-flor-menu input .flex-section select,input .flex-section textarea,input.flex-section input,select .flex-section select,select .flex-section textarea,select.flex-section input,textarea .flex-section select,textarea .flex-section textarea,textarea.flex-section input{background-color:rgb(var(--theme-color_black)/.05);border-color:rgb(var(--theme-color_black)/.15);border-width:1px}
+.bc-flor-menu .flex-section.fm-active{border-bottom-width:2px;border-color:rgb(var(--theme-color_primary));border-style:dashed;border-top-width:2px}
+.bc-flor-menu .flex-section ol:last-child,.flex-section ul:last-child{margin-bottom:0}
+.bc-flor-menu .flex-section ol{list-style-type:decimal}
+.bc-flor-menu .flex-section ul{list-style-type:disc}
+.bc-flor-menu .group-section[data-v-26b607d9]{position:relative}
+.bc-flor-menu .section-container[data-v-26b607d9]{transition:background-color .5s ease}
