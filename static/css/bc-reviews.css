@@ -13,7 +13,7 @@
      （mask-image reviews--dot.svg，22×22 viewBox）
    動畫：GSAP x:0 → -半寬、repeat:-1、線性 ~80px/s（原站 4311.8px/53.9s）。
    黑底適配：原站深棕 rgb(102,36,11) → 白色系（Between Coffee 黑底）；
-   原站橙 rgb(254,130,54) 保留（黑底可見，品牌金色系）。
+   原站橙 rgb(254,130,54) → 2026-09-04 重點字改品牌主題金 var(--bc-gold, #c49b63)；白字（--line/maru/dot）不變。
    ============================================================ */
 
 /* 包裹容器（about 頁內定位，僅提供寬度與上下間距；不改變原站 reviews 樣式） */
@@ -82,9 +82,9 @@
 .bc-reviews .reviewsBox--borderR .reviewsBox__text {
   padding: 0 25px;
 }
-/* 填充底（--bgColor）：文字用原站橙色（黑底可見） */
+/* 填充底（--bgColor）：文字用品牌主題金 var(--bc-gold, #c49b63)（2026-09-04 由原站橙改，白字不變） */
 .bc-reviews .reviewsBox--bgColor .reviewsBox__text {
-  color: rgb(254, 130, 54);
+  color: var(--bc-gold, #c49b63);
 }
 /* 圓形（--maru）：14px / 置中 / 無 padding */
 .bc-reviews .reviewsBox--maru .reviewsBox__text {
@@ -125,4 +125,82 @@
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
   mask-size: contain;
+}
+
+/* ============================================================
+   2026-09-06：行動端整個模組縮小尺寸（平板中縮 / 手機全縮）
+   - ≤768px：膠囊 25→22px、主字 15→13px、模組上下 padding 48→34px
+   - ≤480px：膠囊 22→18px、主字 13→11px、模組上下 padding 34→24px
+   （含 reviewsBox/maru/dot/reviewsMark 同步縮放，維持原比例）
+   ============================================================ */
+@media (max-width: 768px) {
+  .bc-reviews {
+    padding: 34px 0;
+  }
+  .bc-reviews .reviewsBox {
+    height: 22px;
+  }
+  .bc-reviews .reviewsBox__text {
+    font-size: 13px;
+    line-height: 18px;
+    padding: 0 12px;
+  }
+  .bc-reviews .reviewsBox--borderR .reviewsBox__text {
+    padding: 0 20px;
+  }
+  .bc-reviews .reviewsBox--maru {
+    width: 22px;
+  }
+  .bc-reviews .reviewsBox--maru .reviewsBox__text {
+    font-size: 12px;
+  }
+  .bc-reviews .reviewsMark__box {
+    width: 24px;
+    height: 22px;
+    margin: 0 6px;
+  }
+  .bc-reviews .reviewsMark {
+    width: 19px;
+    height: 16px;
+  }
+  .bc-reviews .reviewsMark__inner {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bc-reviews {
+    padding: 24px 0;
+  }
+  .bc-reviews .reviewsBox {
+    height: 18px;
+  }
+  .bc-reviews .reviewsBox__text {
+    font-size: 11px;
+    line-height: 15px;
+    padding: 0 9px;
+  }
+  .bc-reviews .reviewsBox--borderR .reviewsBox__text {
+    padding: 0 15px;
+  }
+  .bc-reviews .reviewsBox--maru {
+    width: 18px;
+  }
+  .bc-reviews .reviewsBox--maru .reviewsBox__text {
+    font-size: 10px;
+  }
+  .bc-reviews .reviewsMark__box {
+    width: 20px;
+    height: 18px;
+    margin: 0 5px;
+  }
+  .bc-reviews .reviewsMark {
+    width: 15px;
+    height: 13px;
+  }
+  .bc-reviews .reviewsMark__inner {
+    width: 13px;
+    height: 13px;
+  }
 }

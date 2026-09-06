@@ -8,6 +8,8 @@
    - ease: 'none'（線性，原站均速）
    - duration = 半寬 / 80（原站 4311.8px ÷ 53.9s ≈ 80px/s 線性速度）
    - immediateRender: true + startAt: { x: 0 }
+   2026-09-06：支援水平反向——若 section.bc-reviews-section 帶 data-bc-reviews-reverse
+   （首頁 feed 下方複製版），改為從 x:-半寬 向右捲回 x:0（鏡像方向），其餘參數相同。
    依賴：GSAP（base.html 全域載入 3.12.5，defer → DOMContentLoaded 前就緒）。
    註：GSAP 為 defer，本檔（body 尾同步）執行時可能未載入 →
    需在 DOMContentLoaded 後才檢查 gsap 並啟動動畫。
@@ -20,14 +22,28 @@
     if (!inner || !window.gsap) return;
     var half = inner.scrollWidth / 2;
     if (!half) return;
-    gsap.to('.reviewsInner', {
-      repeat: -1,
-      x: -half,
-      duration: half / 80,
-      ease: 'none',
-      immediateRender: true,
-      startAt: { x: 0 }
-    });
+    var section = inner.closest('.bc-reviews-section');
+    var reverse = !!(section && section.hasAttribute('data-bc-reviews-reverse'));
+    if (reverse) {
+      // 水平反向：以 -half 為起點向右捲動至 0（內容週期 = half → 無縫循環）
+      gsap.to('.reviewsInner', {
+        repeat: -1,
+        x: 0,
+        duration: half / 80,
+        ease: 'none',
+        immediateRender: true,
+        startAt: { x: -half }
+      });
+    } else {
+      gsap.to('.reviewsInner', {
+        repeat: -1,
+        x: -half,
+        duration: half / 80,
+        ease: 'none',
+        immediateRender: true,
+        startAt: { x: 0 }
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

@@ -4332,3 +4332,11 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
     margin-top: 113px;
   }
 }
+
+/* ===== 2026-09-04：navbar 保持站內最上層 =====
+   .ftco-navbar-light 原 z-index:3（style-bootstrap.css）。導航為固定浮層，
+   提高至 100 確保高於頁面所有內容層（含 landing feed z2）；
+   仍遠低於 overlay：cart drawer z9998 / modal z10000 等。 */
+.ftco-navbar-light {
+  z-index: 100;
+}

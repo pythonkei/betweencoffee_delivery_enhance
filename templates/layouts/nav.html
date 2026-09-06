@@ -104,7 +104,13 @@
     <div class="bc-attract-profile">
         <div class="c-attract">
             <a href="{% url 'socialuser:profile' %}" class="bc-attract-profile__link c-attract__layer">
+                <!-- 2026-09-06：登入後狀態替換內部圖示為 Facebook/Google 用戶頭像（user_avatar，邏輯同 bc-welcome-avatar）；
+                     未登入/無頭像維持 person 圖示 -->
+                {% if user_avatar %}
+                <img src="{{ user_avatar }}" class="bc-attract-profile__avatar" alt="avatar">
+                {% else %}
                 <span class="icon material-icons c-icon">person</span>
+                {% endif %}
             </a>
         </div>
     </div>

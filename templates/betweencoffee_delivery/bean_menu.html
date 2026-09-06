@@ -2,6 +2,11 @@
 {% load static %}
 {% block title %}Between Coffee - Bean Menu{% endblock %}
 
+{% block extra_css %}
+<!-- 2026-09-04: .bc-product-real 模組樣式（咖啡豆 4 REAL 堆疊） -->
+<link rel="stylesheet" href="{% static 'css/bc-bean-product.css' %}?v=20260904d" />
+{% endblock %}
+
 {% block content %}
 <style>
   /* 菜單頁：隱藏右側 Buy & Order 按鈕（2026-08-14）；保留懸浮購物車按鈕與右側虛線 */
@@ -113,4 +118,322 @@
 <section class="ftco-section-blank-small"></section>
 
 
+
+
+<!-- 2026-09-04: 自 about.html 複製 .bc-product-real 模組（咖啡豆 4 REAL：選定/保管/焙煎/嚐味），置於 footer 上方 -->
+<div class="bc-product-real">
+<section class='c-sec c-sec-product-real' data-bg='black'>
+
+                <div class='c-sec-real'>
+                    <h2 class='c-sec-title f-14'>
+                        <div hidden class='c-sec-title-body'>
+                            <div class='i-utsuwa'>
+                                <svg viewBox='0 0 22 15'>
+                                    <use xlink:href='#utsuwa'></use>
+                                </svg>
+                            </div>
+                            <div class='t'><span class="c-sec-title-num">3</span>Mindful</div>
+                        </div>
+                    </h2>
+                    <div class='c-real-img'>
+                        <div class='js-img c-zoom' data-image-d2x="{% static 'images/gerson-cifuentes-0-SWia-_xjA-unsplash.jpg' %}"
+                            data-image-d1x="{% static 'images/gerson-cifuentes-0-SWia-_xjA-unsplash.jpg' %}"
+                            data-image-mob="{% static 'images/gerson-cifuentes-0-SWia-_xjA-unsplash.jpg' %}"
+                            data-image-pre="{% static 'images/gerson-cifuentes-0-SWia-_xjA-unsplash.jpg' %}">
+                            <div class='js-img-pivot c-iv js-iv'>
+                                <div class='js-img-preload'></div>
+                                <div class='js-img-poster'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='c-real-txt js-hover'>
+                        <div class='r'>
+                            <a href='#' class='c-real-title js-hover-enter'>
+                                <div class='c-real-title-header f-20 js-iv'>
+                                    <h3>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='0'>選定</div>
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <div data-rem='3'></div>
+                                <div class='c-real-title-footer'>
+                                    <div class='c-real-num'>
+                                        <div class='f-12'>REAL</div>
+                                        <div class='f-48'>01</div>
+                                    </div>
+                                    <div class='ui-btn-more'>
+                                        <div class='r'>
+                                            <div class='t t1'></div>
+                                            <div class='t t2'></div>
+                                        </div>
+                                    </div>
+                                    <div class='c-real-detail-img'>
+                                        <div class='js-img c-zoom'
+                                            data-image-d2x="{% static 'images/bean/3-1-s@2x.jpg.webp' %}"
+                                            data-image-d1x="{% static 'images/bean/3-1-s@1x.jpg.webp' %}"
+                                            data-image-pre="{% static 'images/bean/3-1-s@pe.jpg.webp' %}">
+                                            <div class='js-img-pivot'>
+                                                <div class='js-img-preload'></div>
+                                                <div class='js-img-poster'></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='c-real-detail js-hover-leave js-iv'>
+                                    <div class='c-editor f-14'>
+                                        <div class='f-20'>
+                                            <h3 class='w-300'>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='0'>選定</div>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        <div class='c-real-detail-o'>
+                                            <div class='c-real-detail-i'>
+                                                <p>我們選擇烘焙單一產地、符合道德規範的精品咖啡豆，以確保種植咖啡的農民獲得公平的報酬，並最大限度地減少咖啡對環境的影響。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='c-sec-real'>
+                    <div class='c-real-img'>
+                        <div class='js-img c-zoom' data-image-d2x="{% static 'images/wyatt-harrom-CUvEDrfE7Ek-unsplash.jpg' %}"
+                            data-image-d1x="{% static 'images/wyatt-harrom-CUvEDrfE7Ek-unsplash.jpg' %}"
+                            data-image-mob="{% static 'images/wyatt-harrom-CUvEDrfE7Ek-unsplash.jpg' %}"
+                            data-image-pre="{% static 'images/wyatt-harrom-CUvEDrfE7Ek-unsplash.jpg' %}">
+                            <div class='js-img-pivot'>
+                                <div class='js-img-preload'></div>
+                                <div class='js-img-poster'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='c-real-txt js-hover'>
+                        <div class='r'>
+                            <a href='#' class='c-real-title js-hover-enter'>
+                                <div class='c-real-title-header f-20 js-iv'>
+                                    <h3>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='0'>保管</div>
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <div data-rem='3'></div>
+                                <div class='c-real-title-footer'>
+                                    <div class='c-real-num'>
+                                        <div class='f-12'>REAL</div>
+                                        <div class='f-48'>02</div>
+                                    </div>
+                                    <div class='ui-btn-more'>
+                                        <div class='r'>
+                                            <div class='t t1'></div>
+                                            <div class='t t2'></div>
+                                        </div>
+                                    </div>
+                                    <div class='c-real-detail-img'>
+                                        <div class='js-img c-zoom'
+                                            data-image-d2x="{% static 'images/bean/3-2-s@2x.jpg.webp' %}"
+                                            data-image-d1x="{% static 'images/bean/3-2-s@1x.jpg.webp' %}"
+                                            data-image-pre="{% static 'images/bean/3-2-s@pe.jpg.webp' %}">
+                                            <div class='js-img-pivot'>
+                                                <div class='js-img-preload'></div>
+                                                <div class='js-img-poster'></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='c-real-detail js-hover-leave js-iv'>
+                                    <div class='c-editor f-14'>
+                                        <div class='f-20'>
+                                            <h3 class='w-300'>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='0'>保管</div>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        <div class='c-real-detail-o'>
+                                            <div class='c-real-detail-i'>
+                                                <p>十分嚴格地把控著貯存場所的溫度。我們非常重視細節，在咖啡豆進入烘焙機前時刻保持其處於最佳的狀態。我們十分重視烘焙前的工序。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='c-sec-real'>
+                    <div class='c-real-img'>
+                        <div class='js-img c-zoom' data-image-d2x="{% static 'images/clarocafe-coffee-6487101_1920.jpg' %}"
+                            data-image-d1x="{% static 'images/clarocafe-coffee-6487101_1920.jpg' %}"
+                            data-image-mob="{% static 'images/clarocafe-coffee-6487101_1920.jpg' %}"
+                            data-image-pre="{% static 'images/clarocafe-coffee-6487101_1920.jpg' %}">
+                            <div class='js-img-pivot'>
+                                <div class='js-img-preload'></div>
+                                <div class='js-img-poster'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='c-real-txt js-hover'>
+                        <div class='r'>
+                            <a href='#' class='c-real-title js-hover-enter'>
+                                <div class='c-real-title-header f-20 js-iv'>
+                                    <h3>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='0'>焙煎</div>
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <div data-rem='3'></div>
+                                <div class='c-real-title-footer'>
+                                    <div class='c-real-num'>
+                                        <div class='f-12'>REAL</div>
+                                        <div class='f-48'>03</div>
+                                    </div>
+                                    <div class='ui-btn-more'>
+                                        <div class='r'>
+                                            <div class='t t1'></div>
+                                            <div class='t t2'></div>
+                                        </div>
+                                    </div>
+                                    <div class='c-real-detail-img'>
+                                        <div class='js-img c-zoom'
+                                            data-image-d2x="{% static 'images/bean/3-3-s@2x.jpg.webp' %}"
+                                            data-image-d1x="{% static 'images/bean/3-3-s@1x.jpg.webp' %}"
+                                            data-image-pre="{% static 'images/bean/3-3-s@pe.jpg.webp' %}">
+                                            <div class='js-img-pivot'>
+                                                <div class='js-img-preload'></div>
+                                                <div class='js-img-poster'></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='c-real-detail js-hover-leave js-iv'>
+                                    <div class='c-editor f-14'>
+                                        <div class='f-20'>
+                                            <h3 class='w-300'>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='0'>焙煎</div>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        <div class='c-real-detail-o'>
+                                            <div class='c-real-detail-i'>
+                                                <p>烘焙是處理咖啡豆時的重中之重。因此我們採用獨特的烘焙技術，最大程度地將氧氣灌入，從而最大限度地去除澀味、煙味、雜味等非水果風味。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+<div class='c-sec-real'>
+                    <div class='c-real-img'>
+                        <div class='js-img c-zoom' data-image-d2x="{% static 'images/ronhvass-coffee-1731910_1920.jpg' %}"
+                            data-image-d1x="{% static 'images/ronhvass-coffee-1731910_1920.jpg' %}"
+                            data-image-mob="{% static 'images/ronhvass-coffee-1731910_1920.jpg' %}"
+                            data-image-pre="{% static 'images/ronhvass-coffee-1731910_1920.jpg' %}">
+                            <div class='js-img-pivot'>
+                                <div class='js-img-preload'></div>
+                                <div class='js-img-poster'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='c-real-txt js-hover'>
+                        <div class='r'>
+                            <a href='#' class='c-real-title js-hover-enter'>
+                                <div class='c-real-title-header f-20 js-iv'>
+                                    <h3>
+                                        <div class='c-cl ja'>
+                                            <div class='o'>
+                                                <div class='t' data-d1='0'>嚐味</div>
+                                            </div>
+                                        </div>
+                                    </h3>
+                                </div>
+                                <div data-rem='3'></div>
+                                <div class='c-real-title-footer'>
+                                    <div class='c-real-num'>
+                                        <div class='f-12'>REAL</div>
+                                        <div class='f-48'>04</div>
+                                    </div>
+                                    <div class='ui-btn-more'>
+                                        <div class='r'>
+                                            <div class='t t1'></div>
+                                            <div class='t t2'></div>
+                                        </div>
+                                    </div>
+                                    <div class='c-real-detail-img'>
+                                        <div class='js-img c-zoom'
+                                            data-image-d2x="{% static 'images/bean/3-3-s@2x.jpg.webp' %}"
+                                            data-image-d1x="{% static 'images/bean/3-3-s@1x.jpg.webp' %}"
+                                            data-image-pre="{% static 'images/bean/3-3-s@pe.jpg.webp' %}">
+                                            <div class='js-img-pivot'>
+                                                <div class='js-img-preload'></div>
+                                                <div class='js-img-poster'></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class='c-real-detail js-hover-leave js-iv'>
+                                    <div class='c-editor f-14'>
+                                        <div class='f-20'>
+                                            <h3 class='w-300'>
+                                                <div class='c-cl ja'>
+                                                    <div class='o'>
+                                                        <div class='t' data-d1='0'>嚐味</div>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        <div class='c-real-detail-o'>
+                                            <div class='c-real-detail-i'>
+                                                <p>咖啡豆中不含過度的苦味等令人不快的味道。風味就像水一樣清澈通透，即使涼了後它的美味也不會改變，而是更有層次感。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='c-sec-bg-fix h-680'>
+                    <div class='js-img' data-image-d2x="{% static 'images/bean/grain@2x.jpg.webp' %}"
+                        data-image-d1x="{% static 'images/bean/grain@1x.jpg.webp' %}"
+                        data-image-pre="{% static 'images/bean/grain@pe.jpg.webp' %}">
+                        <div class='js-img-pivot'>
+                            <div class='js-img-preload'></div>
+                            <div class='js-img-poster'></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+</div>
+
 {% endblock content %}
+
+{% block extra_scripts %}
+<!-- 2026-09-04: .bc-product-real 模組動畫（js-img/is-acrive/js-hover/c-cl） -->
+<script src="{% static 'js/bc-bean-product.js' %}?v=20260904c"></script>
+{% endblock %}

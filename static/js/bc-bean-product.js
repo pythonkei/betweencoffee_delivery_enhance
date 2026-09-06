@@ -1,11 +1,11 @@
 /* ============================================================
-   bc-ramen-product.js — ramenclub.jp c-sec-product-real「3つのリアル」整合
+   bc-bean-product.js — ramenclub.jp c-sec-product-real「リアル」整合（已擴充 4 圖堆疊 REAL 01-04）
    2026-08-28 整合
    ------------------------------------------------------------------
    完整複製 ramenclub.jp/dev-script.js 的相關機制（vanilla 重現）：
    1. js-img：讀 data-image-d1x/d2x/mob/pre → 建立 <img> 填入 .js-img-poster，
       載入後加 is-image-loaded（CSS 處理淡入 + c-zoom 30s 慢縮放）
-   2. is-acrive-1/2/3：scroll 進度切換 3 張圖堆疊（progress > .6666→3、> .3333→2、else→1）
+   2. is-acrive-1/2/3/4：scroll 進度切換 4 張圖堆疊（progress > .75→4、> .5→3、> .25→2、else→1）
    3. js-hover：pointerenter/leave → is-pointer-enter（CSS 展開白色詳情面板）
    4. c-cl 文字：section 加 is-loaded + 進視口 c-real-txt data-shown="1" → 文字 reveal
    5. c-iv（js-iv）：進視口 data-visible="1"（translateY 50px→0）
@@ -21,6 +21,8 @@
 
   /* ---- 1. js-img：data-image → <img> ---- */
   wrap.querySelectorAll('.js-img').forEach(function (el) {
+    /* 2026-09-04：背景圖片層 .c-sec-bg-fix（grain）已 CSS 隱藏 → 略過，不下載其圖 */
+    if (el.closest('.c-sec-bg-fix')) return;
     var d1 = el.getAttribute('data-image-d1x');
     var d2 = el.getAttribute('data-image-d2x');
     var mob = el.getAttribute('data-image-mob');
@@ -80,9 +82,10 @@
     }
 
     /* is-acrive：progress > .6666→3、> .3333→2、else→1 */
-    section.classList.toggle('is-acrive-3', p > 0.6666);
-    section.classList.toggle('is-acrive-2', p > 0.3333 && p <= 0.6666);
-    section.classList.toggle('is-acrive-1', p <= 0.3333);
+    section.classList.toggle('is-acrive-4', p > 0.75);
+    section.classList.toggle('is-acrive-3', p > 0.5 && p <= 0.75);
+    section.classList.toggle('is-acrive-2', p > 0.25 && p <= 0.5);
+    section.classList.toggle('is-acrive-1', p <= 0.25);
 
     /* 進視口：c-cl 文字 reveal + c-iv 上移 */
     if (sy + vh > sectionTop && sy < end) {

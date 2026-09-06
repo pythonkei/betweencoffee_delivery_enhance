@@ -1,0 +1,388 @@
+/* ============================================================
+   bc-yama-header.css — yama-beer.com .header-bot(_pc) + .tax-nav 整合
+   2026-09-04
+   -----------------------------------------------------------------
+   複刻 yama-beer.com common.css 的 header-bot / tax-nav 樣式與動畫：
+   - header-bot：fixed bottom-right 帳號列（此頁僅 Cart）；首次 scroll 加
+     is-view 淡入、footer 進入視口加 is-hide 隱藏（離開移除）
+   - tax-nav：固定黃色圓形公告球；JS 延遲 0.7s 加 init 淡入、hover 灰層
+     scaleY(0→1) 掃過、footer 進入視口移除 init（離開加回）
+   scoped 於 .bc-yama；僅 index.html 條件載入（不影響其他頁面）。
+   z-index 200：高於 navbar(100)、低於 cart drawer / toast overlay。
+   斷點：僅 ≥769px 顯示；≤768px 整個 .bc-yama 隱藏
+   （行動端沿用原 navbar / 浮動購物車，避免重疊）。
+   中文適配：主文字 min(1.111vw,16px)（原站 min(1.25vw,18px) 以日文
+   6 字設計；本頁 9 字中文需略縮以容納於 174px 圓內）。
+   ============================================================ */
+
+/* 2026-09-06 主題顏色變數：tax-nav 圓球背景與 hover 掃層色
+   （2026-09-06 更新：背景 #774f18 深咖啡；hover #1a1919 近黑） */
+:root {
+  --bc-yama-circle: #774f18;         /* 圓球背景（深咖啡） */
+  --bc-yama-circle-hover: #1a1919;   /* hover 狀態（掃過層） */
+}
+
+/* 2026-09-06：tax-nav .init 後圓形外陰影（桌面與 ≤768 通用；init 延遲淡入後出現） */
+.bc-yama .tax-nav.init a {
+  box-shadow:
+    0 10px 34px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 30px rgba(119, 79, 24, 0.35);
+}
+
+.bc-yama { display: none; }
+@media (min-width: 769px) {
+  .bc-yama { display: block; }
+}
+
+/* ---- header-bot：底部帳號列（僅 Cart） ---- */
+@media (min-width: 769px) {
+  /* ---- header-bot：位於 tax-nav 黃圓底部、水平對齊圓心
+         2026-09-04：right = 圓心距視口右（tax right + 半徑）搭配 translateX(50%)
+         讓整列文字中心 = 圓心 x；bottom = 圓底(距視口底 tax bottom) − 行高 − gap，
+         即文字列貼於圓球底部下方居中 */
+  .bc-yama .header-bot {
+    position: fixed;
+    bottom: calc(min(6.25vw, 90px) - 1.2em - min(1.111vw, 16px));  /* 圓底下方 gap（2026-09-04：8px → 14px 級） */
+    right: calc(min(3.889vw, 56px) + min(12.083vw, 174px) / 2);
+    transform: translateX(50%);
+    color: #c2c2bf;
+    font-family: "Noto Sans TC", "Noto Sans JP", "Work Sans", sans-serif;
+    font-size: min(1.172vw, 16px);  /* 購物車 [ n ]（2026-09-04 縮小：原 min(1.458vw,21px) 過大） */
+    font-weight: 400;
+    line-height: 120%;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+    z-index: 200;
+  }
+  .bc-yama .header-bot.is-view {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .bc-yama .header-bot.is-hide {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  .bc-yama .header-bot .account {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .bc-yama .header-bot .account li a {
+    align-items: center;
+    display: flex;
+    position: relative;
+    text-decoration: none;
+  }
+  /* 捲字動畫（原站 text-shadow 雙層）：僅套在「購物車 [」與「]」文字片段；
+     數字（.bc-yama-cart-num）以真實文字顯示並由 .bc-cart-count 同步機制更新 */
+  .bc-yama .header-bot .account li a .bc-yama-cart-text {
+    --base-offset-y: 1.5em;
+    color: rgba(0, 0, 0, 0);
+    display: inline-block;
+    overflow: hidden;
+    text-shadow:
+      0 calc(var(--hover-offset-y, 0em) * -1) 0 #c2c2bf,
+      0 calc(var(--base-offset-y, 1.5em) - var(--hover-offset-y, 0em)) 0 #c2c2bf;
+    transition: text-shadow .3s ease-in-out;
+    line-height: 120%;
+  }
+  .bc-yama .header-bot .account li a:hover .bc-yama-cart-text,
+  .bc-yama .header-bot .account li a:focus .bc-yama-cart-text {
+    --hover-offset-y: 1.5em;
+  }
+  .bc-yama .header-bot .account li a .bc-yama-cart-num {
+    color: #c2c2bf;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 120%;
+    display: inline-block;
+  }
+}
+
+/* ---- tax-nav：黃色圓形公告球 ---- */
+@media (min-width: 769px) {
+  .bc-yama .tax-nav {
+    position: fixed;
+    bottom: min(6.25vw, 90px);
+    right: min(3.889vw, 56px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .6s ease;
+    z-index: 200;
+  }
+  .bc-yama .tax-nav.init {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .bc-yama .tax-nav a {
+    align-items: center;
+    background: var(--bc-yama-circle);   /* 主題色圓球背景（深咖啡 #774f18） */
+    border-radius: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;   /* 2026-09-04：還原原站 overflow:hidden — 灰層(:after)靠 a 圓形裁切成圓（原站 radius:0） */
+    position: relative;
+    width: min(12.083vw, 174px);
+    height: min(12.083vw, 174px);
+    z-index: 1;
+    text-decoration: none;
+  }
+  .bc-yama .tax-nav a:before {
+    background: url("../images/yama/icn_tax_frame.png") no-repeat 50%/contain;
+    content: "";
+    display: block;
+    height: min(11.181vw, 161px);
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(11.181vw, 161px);
+    pointer-events: none;
+  }
+  .bc-yama .tax-nav a:after {
+    background: var(--bc-yama-circle-hover);   /* hover #1a1919 */
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform: scaleY(0);
+    transform-origin: top center;
+    transition: transform .4s ease;
+    width: 100%;
+    z-index: -1;
+  }
+  .bc-yama .tax-nav a:hover:after,
+  .bc-yama .tax-nav a:focus:after {
+    transform: scaleY(1);
+    transform-origin: bottom center;
+  }
+  /* deco_05 主題色裝飾：span + CSS mask（deco_05.svg 形狀）＋品牌金背景，
+     置於 a 外層 sibling 不受 overflow:hidden 影響；水平與圓心居中、底緣停於
+     「登入補充咖啡因!」文字上方、上半部向上超出圓球外圍 */
+  .bc-yama .tax-nav .bc-yama-deco {
+    aspect-ratio: 600 / 650;             /* deco_05.svg viewBox 比例 */
+    background-color: #ffffff;           /* 2026-09-06 改為白色 */
+    bottom: 61%;
+    display: block;
+    height: auto;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    width: min(8.203vw, 105px);          /* 加大尺寸（原 84px） */
+    z-index: 3;
+    pointer-events: none;
+    -webkit-mask: url("../images/deco_05.svg") no-repeat center / contain;
+    mask: url("../images/deco_05.svg") no-repeat center / contain;
+  }
+  .bc-yama .tax-nav a p {
+    color: #fff;   /* 主文／登入前 tagline 白 */
+    font-size: min(.972vw, 14px);   /* 2026-09-04：「為自己充充電!」加大（原 min(.556vw,8px)） */
+    font-weight: 300;   /* 2026-09-06：登入前第二行「為自己充充電!」減重（原 600） */
+    font-feature-settings: normal;
+    line-height: 1;
+    margin: 0;
+    text-align: center;
+  }
+  .bc-yama .tax-nav a p > span:first-child {
+    color: #fff;   /* 主行（登入補充咖啡因!/按照之前口味落單?） */
+    display: block;
+    font-size: min(1.111vw, 16px);   /* 中文適配：原站 min(1.25vw,18px) */
+    font-weight: 600;
+    line-height: 1;
+    margin-block: min(.833vw, 12px) min(.486vw, 7px);
+    white-space: nowrap;
+  }
+  /* 2026-09-04：「登入」二字新增底線 */
+  .bc-yama .tax-nav a p > span:first-child em {
+    font-style: normal;
+    text-decoration-line: underline;
+    text-decoration-color: #fff;
+    text-decoration-thickness: .08em;
+    text-underline-offset: .14em;
+  }
+}
+
+/* ---- 桌面讓位：既有浮動購物車移到左側，避免與 header-bot/tax-nav 重疊
+       （本檔僅首頁載入 → 只影響首頁，其他頁維持原右下位置） ---- */
+@media (min-width: 769px) {
+  .bc-floating-cart {
+    left: 40px;
+    right: auto;
+  }
+}
+
+/* ---- 平板/行動（≤768px）：黃圓模組亦顯示（參考 yama-beer.com——行動/平板 tax-nav
+       為較大圓形懸浮右下：min(30.769vw,236px)）；
+       header-bot（購物車 [n]）維持僅桌面顯示（同原站 .header-bot._pc）；
+       既有浮動購物車改置左下避讓（本檔僅首頁載入） ---- */
+@media (max-width: 768px) {
+  .bc-yama { display: block; }
+
+  .bc-yama .tax-nav {
+    position: fixed;
+    bottom: 20px;
+    right: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .6s ease;
+    z-index: 200;
+  }
+  .bc-yama .tax-nav.init {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .bc-yama .tax-nav a {
+    align-items: center;
+    background: var(--bc-yama-circle);
+    border-radius: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    width: min(30.769vw, 236px);
+    height: min(30.769vw, 236px);
+    z-index: 1;
+    text-decoration: none;
+  }
+  .bc-yama .tax-nav a:before {
+    background: url("../images/yama/icn_tax_frame.png") no-repeat 50%/contain;
+    content: "";
+    display: block;
+    height: 92%;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 92%;
+    pointer-events: none;
+  }
+  .bc-yama .tax-nav a:after {
+    background: var(--bc-yama-circle-hover);   /* hover #1a1919 */
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform: scaleY(0);
+    transform-origin: top center;
+    transition: transform .4s ease;
+    width: 100%;
+    z-index: -1;
+  }
+  .bc-yama .tax-nav a:hover:after,
+  .bc-yama .tax-nav a:focus:after {
+    transform: scaleY(1);
+    transform-origin: bottom center;
+  }
+  .bc-yama .tax-nav a p {
+    color: #fff;
+    font-size: min(2.564vw, 13px);
+    font-weight: 300;   /* 2026-09-06：登入前第二行減重 */
+    line-height: 1;
+    margin: 0;
+    text-align: center;
+  }
+  .bc-yama .tax-nav a p > span:first-child {
+    color: #fff;
+    display: block;
+    font-size: min(3.077vw, 16px);
+    font-weight: 600;
+    line-height: 1;
+    margin-block: min(1.282vw, 10px) min(.769vw, 6px);
+    white-space: nowrap;
+  }
+  .bc-yama .tax-nav a p > span:first-child em {
+    font-style: normal;
+    text-decoration-line: underline;
+    text-decoration-color: #fff;
+    text-decoration-thickness: .08em;
+    text-underline-offset: .14em;
+  }
+  /* deco_05 主題金裝飾：寬 67.7% = 隨圓直徑縮放（120px 圓 → 81px；236px 圓 → 160px） */
+  .bc-yama .tax-nav .bc-yama-deco {
+    aspect-ratio: 600 / 650;
+    background-color: #ffffff;   /* 2026-09-06 改為白色 */
+    bottom: 61%;
+    display: block;
+    height: auto;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    width: 67.7%;
+    z-index: 3;
+    pointer-events: none;
+    -webkit-mask: url("../images/deco_05.svg") no-repeat center / contain;
+    mask: url("../images/deco_05.svg") no-repeat center / contain;
+  }
+  /* 購物車 [ n ] 僅桌面（同原站 _pc）；行動端購物車入口 = navbar icon / 浮動購物車 */
+  .bc-yama .header-bot {
+    display: none;
+  }
+  /* 既有浮動購物車移左下避讓右下黃圓（僅本頁） */
+  .bc-floating-cart {
+    right: auto;
+    left: 20px;
+    bottom: 20px;
+  }
+}
+
+/* ============================================================
+   2026-09-06 登入後狀態：tax-nav 內 bc-yama-deco-photo
+   （上次訂單照片，bc-welcome-imgbox 邏輯）
+   ------------------------------------------------------------
+   置於檔尾全域（後位覆寫上方 desktop / ≤768 copy 的 deco 規則）：
+   - bc-yama-deco-photo：僅停用金圖 mask/背景（mask:none、background:none），
+     其餘沿用 .bc-yama-deco 位置與尺寸——bottom61%、寬度同金圖、水平置中圓心、
+     突出圓外；照片以 contain 完整顯示（無圓形遮罩、無方框裁切）
+   註：個人頭像（FB/Google）由全站 nav .bc-attract-profile 顯示
+   （nav.html + bc-attract.css + user_avatar context processor），tax-nav 不含頭像。
+   ============================================================ */
+.bc-yama .tax-nav .bc-yama-deco-photo {
+  -webkit-mask: none;
+  mask: none;
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+/* 照片完整顯示（無圓形遮罩/方框）：contain 於與 bc-yama-deco 相同的位置與尺寸框
+   （bottom61% + 寬度同金圖 + 水平置中於圓心、突出圓外） */
+.bc-yama .tax-nav .bc-yama-deco-photo img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+/* ============================================================
+   2026-09-06 第二行文字（tagline）：
+   - 登入前「為自己充充電!」：白色、font-weight 300（已減重，繼承 p）
+   - 登入後「當前積分可減免 -5」：與 .bc-welcome-points 相同 CSS
+     （文字 #bfbfbf、-5 金 var(--bc-gold) 700），字級沿用 p（桌面 12.4 / 行動 10）
+   ============================================================ */
+.bc-yama .tax-nav a p .bc-yama-tagline {
+  display: block;
+  font-weight: 300;
+  white-space: nowrap;
+}
+.bc-yama .tax-nav a p .bc-yama-tagline--points {
+  color: #bfbfbf;   /* 同 .bc-welcome-points color */
+}
+.bc-yama .tax-nav a p .bc-yama-tagline--points .bc-yama-discount {
+  color: var(--bc-gold, #c49b63);   /* 同 .bc-welcome-discount：金色粗體 */
+  font-weight: 700;
+}
+

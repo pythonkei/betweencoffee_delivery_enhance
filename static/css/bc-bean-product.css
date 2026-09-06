@@ -1,5 +1,5 @@
 /* ============================================================
-   bc-ramen-product.css — ramenclub.jp c-sec-product-real「3つのリアル」整合
+   bc-bean-product.css — ramenclub.jp c-sec-product-real「リアル」整合（已擴充 4 圖堆疊 REAL 01-04）
    2026-08-28 整合（v2：修正 @media 上下文遺失）
    完整複製 ramenclub.jp prod-style.css/coc-style.css 相關規則，scoped 至 .bc-product-real。
    ============================================================ */
@@ -254,7 +254,7 @@
 .bc-product-real [data-bg="buta"] .i-utsuwa use{
 	fill: #F9C205 !important;
 }
-.bc-product-real // 未使用？？  22260414 いちげん
+/* 4 圖堆疊規則（prod-style いちげん） */
 .is-acrive-2 .c-sec-real:nth-child(1) .c-real-img .js-img,.bc-product-real .is-acrive-3 .c-sec-real:nth-child(2) .c-real-img .js-img,.bc-product-real .is-acrive-4 .c-sec-real:nth-child(3) .c-real-img .js-img{
 	translate: 0% -6%;
 	scale: 0.98;
@@ -592,3 +592,17 @@
   }
 }
 
+/* 2026-09-04：中文描述文字可見性修正
+   原 .c-real-detail-i 使用漸層文字 clip（background-clip:text + text-fill-color:transparent，
+   gradient 左側 30% 透明）——對日文短行尚可，但長篇中文幾乎全透明不可見。
+   改為一般黑字顯示（保留 .c-real-detail 整體 opacity 淡入展開動畫）。 */
+.bc-product-real .c-real-detail-i {
+  background: none;
+  background-image: none;
+  -webkit-text-fill-color: var(--c-black);
+  color: var(--c-black);
+}
+
+
+/* 2026-09-04：隱藏 .bc-product-real 模組背景圖片（.c-sec-bg-fix grain 層）——桌面不再顯示 grain 底圖，黑底純淨 */
+.bc-product-real .c-sec-bg-fix{display:none!important}

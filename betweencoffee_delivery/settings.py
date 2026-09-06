@@ -227,6 +227,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "cart.context_processors.cart_count",
+                "betweencoffee_delivery.context_processors.user_avatar",
                 "eshop.view_utils.error_context_processor",
             ],
             "string_if_invalid": "",

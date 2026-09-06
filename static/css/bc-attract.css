@@ -193,6 +193,14 @@
   font-size: 1.4rem;
   line-height: 1;
 }
+/* 2026-09-06：登入後個人圓鈕內部替換為 FB/Google 用戶頭像（圓形 cover，無 padding 覆蓋於 50px 圓鈕） */
+.bc-attract-profile .bc-attract-profile__link .bc-attract-profile__avatar {
+  border-radius: 50%;
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
 
 /* ===== 漢堡選單（對應 cheesetart p-gh__button__menu） ===== */
 .bc-attract-menu {

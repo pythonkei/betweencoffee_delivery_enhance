@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="61" height="43" viewBox="0 0 61 43" fill="none">
+  <!-- 2026-09-04：自製咖啡杯線圖（替代原站 icn_tax.png「故鄉納稅」圖示，尺寸同 61×43） -->
+  <g stroke="#1C1C1C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 杯身 -->
+    <path d="M13 16 h25 a5 5 0 0 1 5 5 v4 a10 10 0 0 1 -10 10 H18 a10 10 0 0 1 -10 -10 v-4 a5 5 0 0 1 5 -5 z"/>
+    <!-- 杯把手 -->
+    <path d="M43 19 h4 a6.5 6.5 0 0 1 0 13 h-4"/>
+    <!-- 蒸氣 -->
+    <path d="M21 4 c-2.5 3 2.5 4.5 0 7.5"/>
+    <path d="M31 4 c-2.5 3 2.5 4.5 0 7.5"/>
+    <!-- 杯墊 -->
+    <path d="M11 40 h28"/>
+  </g>
+</svg>
