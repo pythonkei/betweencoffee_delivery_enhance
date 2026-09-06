@@ -7,7 +7,7 @@
       - 顯示第幾層由「圖欄在視口中的捲動進度」決定：
         p=0（進入前）→ 第 0 層；p=1（完全通過）→ 最後一層；中間依 p 線性切層
       - 首層初始即顯示（HTML 未帶 opacity-0），JS 僅接管切換
-   B. 右側時間軸指示器（.bc-flor-rail）：
+   B. 左側時間軸指示器（.bc-flor-rail，鏡像自原站右欄）：
       - 僅在模組進入/離開視口附近時顯示（原站為 scroll 觸發 mount/unmount）
       - active step = 最後一個「頂部已通過視口中線」的群組（.group-section）
       - 點擊 / Enter / Space → 平滑捲動至對應群組
@@ -39,7 +39,7 @@
     }
   }
 
-  /* ========== B. 右側時間軸指示器 ========== */
+  /* ========== B. 左側時間軸指示器 ========== */
   var rail = root.querySelector('.bc-flor-rail');
   var groupEls = root.querySelectorAll('.group-section');
   var stepEls = rail ? rail.querySelectorAll('.step-indicator') : [];
