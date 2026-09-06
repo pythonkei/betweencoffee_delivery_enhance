@@ -89,8 +89,9 @@ generate_final_report.py
 precise_status_check.py
 analyze_js_dependencies.py
 
-# Report files
-*.md
+# Report files（2026-09-06：原全域 `*.md` 誤排除 agent 記憶庫/規則/文件；
+# 改為僅排除根層散置報告與報告目錄；betweencoffee_memory_bank / .clinerules / docs 的 md 需入庫）
+/*.md
 docs/reports/
 
 # Temporary directories

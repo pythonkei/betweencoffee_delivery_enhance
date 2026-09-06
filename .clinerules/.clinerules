@@ -681,7 +681,7 @@ Phase 4：效能優化與架構精簡 — ✅ 2026-07-27
 
 ## UI 開發設計注意事項
 
-進行所有 UI 開發設計和修改時，請遵循以下原則（詳見 `.clinerules/uiux-principles.md`）：
+進行所有 UI 開發設計和修改時，請遵循以下原則（自動注入精簡核心：`.clinerules/uiux-core.md`；完整詳版：`docs/uiux-full-reference.md`）：
 
 ### 核心原則
 - **不花巧** — 功能優先，裝飾其次
@@ -707,4 +707,4 @@ Phase 4：效能優化與架構精簡 — ✅ 2026-07-27
 
 ## 完整參考
 詳細系統分析請參閱根目錄 `.clinerules/.clinerules`
-UI 設計原則請參閱 `.clinerules/uiux-principles.md`
+UI 設計原則請參閱 `.clinerules/uiux-core.md`（自動注入核心）與 `docs/uiux-full-reference.md`（完整參考）
