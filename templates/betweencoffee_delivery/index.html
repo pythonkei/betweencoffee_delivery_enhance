@@ -795,10 +795,11 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
     var A = wr.top + (window.pageYOffset || document.documentElement.scrollTop || 0) + wr.height / 2; // weather 中心（文件座標）
     var hB = buy.getBoundingClientRect().height;
     var hP = prof.getBoundingClientRect().height;
+    // 2026-09-07：原以 weather 中心為準仍偏高 → 整體再下移 78px
+    var DOWN = 78;
     // 兩者 CSS 皆 transform: translateY(-50%) → inline top 即為中心座標；
-    // buy 中心對齊 weather 中心，但 weather 高度僅約 80px、buy 高 150px，
-    // 中心太靠近 viewport 頂會裁切 → 下緣保護：中心至少 (hB/2)+6px
-    var buyTop = Math.max(A, Math.ceil(hB / 2) + 6);
+    // 中心下限 (hB/2)+6 防止 buy 上半超出 viewport 頂
+    var buyTop = Math.max(A, Math.ceil(hB / 2) + 6) + DOWN;
     buy.style.top = Math.round(buyTop) + 'px';
     prof.style.top = Math.round(buyTop + (hB + hP) / 2) + 'px';
     nav.classList.add('bc-home-attract-ready');
