@@ -159,3 +159,20 @@
   .bc-flor-rail .step-indicator.active .step-horizontal-line{width:2rem}
   .bc-flor-rail:hover .step-horizontal-line{width:1.25rem}
 }
+
+/* ===== 2026-09-07：手機/平板（<960）產品內容避開左側 bc-flor-rail 並整體縮小 =====
+   原站畫面：行內容只佔左側 9/12 欄，右側約 25% 留白放右側 rail；
+   本模組 rail 在左 → 改讓內容自第 4 欄開始，左側留給 rail（鏡像等價）。
+   垂直節奏 mobile 原本 9rem 級距（pt-36/space-y-36…）太大 → <960 縮小。 */
+@media screen and (max-width: 959.98px) {
+  .bc-flor-menu .col-span-9.col-start-1 { grid-column: 4 / 13; }
+  .bc-flor-menu .pt-36 { padding-top: 2.75rem; }
+  .bc-flor-menu .mt-36 { margin-top: 3rem; }
+  .bc-flor-menu .pb-36 { padding-bottom: 2.75rem; }
+  .bc-flor-menu .space-y-36 > :not([hidden]) ~ :not([hidden]) { margin-top: 3rem; }
+  .bc-flor-menu .mt-6 { margin-top: 1rem; }
+  .bc-flor-menu .text-3xl { font-size: 1.55rem; line-height: 1.2; }
+  .bc-flor-menu .text-lg { font-size: 1rem; }
+  .bc-flor-menu .prose p { font-size: .95rem; }
+  .bc-flor-menu .btn.asymmetric-btn-v1 { padding: .55rem 1.5rem; font-size: .85rem; }
+}
