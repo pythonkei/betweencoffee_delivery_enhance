@@ -150,7 +150,7 @@
 .bc-attract-profile {
   position: fixed;
   --attract: 24px;        /* 與 bc-attract-buy 相同的 hover 熱區擴展 */
-  right: 17px;
+  right: 21px;            /* 中心=右21+25=46 = bc-attract-buy 中心（右26+20=46），上下居中對齊 buy 軸線 */
   top: calc(50% + 100px);
   transform: translateY(-50%);
   width: 50px;
@@ -328,7 +328,8 @@
    使用者反饋模組偏大（平板 768–991 仍沿用桌面 150px 高度，手機也需再縮）。
    置於檔末統一覆蓋：僅調外觀尺寸；各斷點的水平中心維持先前設定的中心
    （buy 中心：≥992=right26+w40→46 / 768–991=right29+w34→46 / ≤767=right15+w28→29 / ≤575=right13+w24→25；
-    profile：≥992=right17+w50→42 / 768–991=right21+w40→41 / ≤767=right12+w34→29 / ≤575=right10+w30→25）。
+    profile：≥992=right21+w50→46 / 768–991=right26+w40→46 / ≤767=right12+w34→29 / ≤575=right10+w30→25，
+    皆與同斷點 buy 中心一致）。
    垂直連續：profile top = buy bottom（cluster 無縫）。 */
 @media screen and (min-width: 768px) and (max-width: 991.98px) {
   .bc-attract-buy {
@@ -348,7 +349,7 @@
   }
   .bc-attract-profile {
     --attract: 12px;
-    right: 21px;
+    right: 26px;
     top: calc(50% + 78px);
     width: 40px;
     height: 40px;
