@@ -23,7 +23,7 @@
   --color-neutral: #eeeeee;
   --color-black: #000000;
   --color-white: #ffffff;
-  --color-base: #ffffff;
+  /* --color-base: #ffffff; */
   --color-text: #000000;
   --color-text-sub: #757575;
   --color-border: #000000;
@@ -80,6 +80,12 @@
   transition: transform 0.3s 0.2s, opacity 0.3s 0.2s;
 }
 
+.bc-gunte-hero.-load .hero_catch .hero_catch_txt {
+  opacity: 1;
+  transform: scale(1);
+  transition: transform 0.3s 0.2s, opacity 0.3s 0.2s;
+}
+
 .bc-gunte-hero.-load .hero_slide {
   opacity: 1;
   transform: translateY(0);
@@ -110,6 +116,21 @@
   opacity: 0;
   transform: scale(2);
   will-change: transform, opacity;
+}
+
+/* 2026-09-07：catch 改為文字標語（主題金） */
+.bc-gunte-hero .hero_catch .hero_catch_txt {
+  opacity: 0;
+  transform: scale(2);
+  will-change: transform, opacity;
+  display: inline-block;
+  font-family: "Alfa Slab One", "Noto Sans JP", "Noto Sans TC", sans-serif;
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 60px);
+  line-height: 1.08;
+  letter-spacing: 0.05em;
+  text-align: center;
+  color: #c49b63;
 }
 
 .bc-gunte-hero .hero_wrap {
@@ -204,6 +225,7 @@
   line-height: 1;
   letter-spacing: 0.06em;
   writing-mode: vertical-lr;
+  color: var(--color-white); /* 2026-09-07：en 文字改白 */
   transition: opacity 0.5s;
 }
 
@@ -317,18 +339,23 @@
   height: 8px;
   border: 1px solid var(--color-black);
   border-radius: 4px;
-  background: var(--color-primary);
+  background: #c49b63; /* 2026-09-07：正常狀態 → 主題金 */
   transition: var(--ease-out);
 }
 
 .bc-gunte-hero .hero_nav > li > button.-current::before {
   width: 32px;
-  background: var(--color-black);
+  background: #ffffff; /* 2026-09-07：已選取/active → 白 */
   transition: var(--ease-in);
 }
 
 .bc-gunte-hero .hero_nav > li > button:hover::before {
   width: 32px;
+}
+
+.bc-gunte-hero .hero_nav > li > button:active::before {
+  width: 32px;
+  background: #ffffff;
 }
 
 /* ---- 工具類（原 base.css，scoped）---- */
