@@ -777,32 +777,41 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <script src="{% static 'js/bc-reviews.js' %}?v=20260906a"></script>
 <!-- 2026-09-06：florporto 產品模組捲動 crossfade（圖片層隨捲動進度切換） -->
 <script src="{% static 'js/bc-flor-menu.js' %}?v=20260906c"></script>
-<!-- 2026-09-06：首頁將 bc-attract-buy/profile 移至隱藏後 weather 的位置
-     （buy 垂直中心 = 原 weather 中心、profile 接在 buy 下方；沿用既有 translateY(-50%) 機制） -->
+<!-- 2026-09-07：首頁將 bc-attract-buy/profile 對齊 navbar-brand 頂部邊緣
+     （buy 頂邊 = navbar-brand 頂邊、profile 接在 buy 下方；沿用既有 translateY(-50%) 機制） -->
 <script>
 (function () {
   'use strict';
   function place() {
-    var w = document.querySelector('#ftco-navbar .weather');
     var nav = document.querySelector('.bc-attract-nav');
     var buy = document.querySelector('.bc-attract-buy');
     var prof = document.querySelector('.bc-attract-profile');
-    if (!nav) return;
-    // 找不到 weather/buy/profile 時仍還原顯示（維持原預設位置），避免整組消失
-    if (!w || !buy || !prof) { nav.classList.add('bc-home-attract-ready'); return; }
-    var wr = w.getBoundingClientRect();
-    if (!wr.width && !wr.height) { nav.classList.add('bc-home-attract-ready'); return; }
-    var A = wr.top + (window.pageYOffset || document.documentElement.scrollTop || 0) + wr.height / 2; // weather 中心（文件座標）
+    var ready = function () { if (nav) nav.classList.add('bc-home-attract-ready'); };
+    if (!nav || !buy || !prof) return;
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
     var hB = buy.getBoundingClientRect().height;
     var hP = prof.getBoundingClientRect().height;
-    // 2026-09-07：原以 weather 中心為準仍偏高 → 整體再下移 78px
-    var DOWN = 78;
-    // 兩者 CSS 皆 transform: translateY(-50%) → inline top 即為中心座標；
-    // 中心下限 (hB/2)+6 防止 buy 上半超出 viewport 頂
-    var buyTop = Math.max(A, Math.ceil(hB / 2) + 6) + DOWN;
+    var anchor = null; // 要對齊的「頂邊」文件座標
+    var brand = document.querySelector('#ftco-navbar .navbar-brand');
+    if (brand) {
+      var br = brand.getBoundingClientRect();
+      if (br.height) anchor = br.top + scrollTop;
+    }
+    if (anchor === null) {
+      // fallback：改取 weather 盒頂邊（weather 已隱藏但仍在 navbar 排版中）
+      var w = document.querySelector('#ftco-navbar .weather');
+      if (w) {
+        var wr = w.getBoundingClientRect();
+        if (wr.height) anchor = wr.top + scrollTop;
+      }
+    }
+    if (anchor === null) { ready(); return; }
+    // CSS 皆 transform: translateY(-50%) → inline top 即中心座標。
+    // buy 頂邊 = anchor：top(中心) = anchor + hB/2；另保 (hB/2)+6 下限防裁切
+    var buyTop = Math.max(anchor + hB / 2, Math.ceil(hB / 2) + 6);
     buy.style.top = Math.round(buyTop) + 'px';
     prof.style.top = Math.round(buyTop + (hB + hP) / 2) + 'px';
-    nav.classList.add('bc-home-attract-ready');
+    ready();
   }
   var rAF = 0;
   function onResize() {

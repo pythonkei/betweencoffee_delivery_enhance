@@ -323,3 +323,81 @@
   .bc-attract-menu .bc-attract-menu__body [data-position='middle'] { top: 5px; }
   .bc-attract-menu .bc-attract-menu__body [data-position='bottom'] { top: 10px; }
 }
+
+/* ===== 2026-09-07：手機/平板 bc-attract-buy / bc-attract-profile 整體縮小 =====
+   使用者反饋模組偏大（平板 768–991 仍沿用桌面 150px 高度，手機也需再縮）。
+   置於檔末統一覆蓋：僅調外觀尺寸；各斷點的水平中心維持先前設定的中心
+   （buy 中心：≥992=right26+w40→46 / 768–991=right29+w34→46 / ≤767=right15+w28→29 / ≤575=right13+w24→25；
+    profile：≥992=right17+w50→42 / 768–991=right21+w40→41 / ≤767=right12+w34→29 / ≤575=right10+w30→25）。
+   垂直連續：profile top = buy bottom（cluster 無縫）。 */
+@media screen and (min-width: 768px) and (max-width: 991.98px) {
+  .bc-attract-buy {
+    --attract: 12px;
+    right: 29px;
+    width: 34px;
+    height: 116px;
+  }
+  .bc-attract-buy .bc-attract-buy__link {
+    border-radius: 18px;
+    row-gap: 6px;
+  }
+  .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 0.95rem; }
+  .bc-attract-buy .bc-attract-buy__link [lang='en'] {
+    font-size: 0.78rem;
+    letter-spacing: 0.17em;
+  }
+  .bc-attract-profile {
+    --attract: 12px;
+    right: 21px;
+    top: calc(50% + 78px);
+    width: 40px;
+    height: 40px;
+  }
+  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.05rem; }
+}
+@media screen and (max-width: 767.98px) {
+  .bc-attract-buy {
+    right: 15px;
+    width: 28px;
+    height: 92px;
+  }
+  .bc-attract-buy .bc-attract-buy__link {
+    border-radius: 16px;
+    row-gap: 5px;
+  }
+  .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 0.9rem; }
+  .bc-attract-buy .bc-attract-buy__link [lang='en'] {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+  }
+  .bc-attract-profile {
+    right: 12px;
+    top: calc(50% + 63px);
+    width: 34px;
+    height: 34px;
+  }
+  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.05rem; }
+}
+@media screen and (max-width: 575.98px) {
+  .bc-attract-buy {
+    right: 13px;
+    width: 24px;
+    height: 78px;
+  }
+  .bc-attract-buy .bc-attract-buy__link {
+    border-radius: 14px;
+    row-gap: 4px;
+  }
+  .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 0.8rem; }
+  .bc-attract-buy .bc-attract-buy__link [lang='en'] {
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+  }
+  .bc-attract-profile {
+    right: 10px;
+    top: calc(50% + 54px);
+    width: 30px;
+    height: 30px;
+  }
+  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 0.95rem; }
+}
