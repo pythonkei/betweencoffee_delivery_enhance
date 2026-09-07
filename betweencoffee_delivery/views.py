@@ -50,12 +50,15 @@ def _build_landing_context(request):
         is_shop_hot_item=True, is_published=True
     ).order_by("hot_item_order", "id")[:4]
     all_coffees = CoffeeItem.objects.filter(is_published=True)[:9]
+    # 2026-09-07：GUNTE hero 手套圓 → coffee menu 照片（排序同 coffee_menu 頁）
+    hero_coffees = CoffeeItem.objects.filter(is_published=True).order_by("sort_order", "id")[:7]
     beans = BeanItem.objects.filter(is_published=True)[:3]
 
     context = {
         "shop_hot_coffees": hot_coffees,
         "hot_coffees": hot_coffees,
         "all_coffees": all_coffees,
+        "hero_coffees": hero_coffees,
         "beans": beans,
         "is_authenticated": request.user.is_authenticated,
         "user_avatar": "",

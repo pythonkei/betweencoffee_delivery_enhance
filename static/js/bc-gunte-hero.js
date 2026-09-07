@@ -74,12 +74,6 @@
       });
     }
 
-    Array.prototype.forEach.call(handItems, function (item, index) {
-      item.addEventListener('click', function () {
-        splideHero.go(index);
-      });
-    });
-
     Array.prototype.forEach.call(navButtons, function (button, index) {
       button.addEventListener('click', function () {
         splideHero.go(index);
