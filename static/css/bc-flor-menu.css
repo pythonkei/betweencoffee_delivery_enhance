@@ -160,19 +160,21 @@
   .bc-flor-rail:hover .step-horizontal-line{width:1.25rem}
 }
 
-/* ===== 2026-09-07：手機/平板（<960）產品內容避開左側 bc-flor-rail 並整體縮小 =====
-   原站畫面：行內容只佔左側 9/12 欄，右側約 25% 留白放右側 rail；
-   本模組 rail 在左 → 改讓內容自第 4 欄開始，左側留給 rail（鏡像等價）。
-   垂直節奏 mobile 原本 9rem 級距（pt-36/space-y-36…）太大 → <960 縮小。 */
+/* ===== 2026-09-07 rev.2：手機/平板（<960）再縮小＋右側留白 =====
+   rev1 讓內容 4→13 欄（僅左側留給 rail、緊貼右緣、圖片仍高）。
+   rev2：改 span 4→11（7 欄）——左側 3 欄給 bc-flor-rail、
+   右側 2 欄自然留白；圖片 aspect 4/5 改近方形大幅降低每張高度；
+   垂直節奏/字級/按鈕再縮一輪。桌面 ≥960 維持 florporto 原比例。 */
 @media screen and (max-width: 959.98px) {
-  .bc-flor-menu .col-span-9.col-start-1 { grid-column: 4 / 13; }
-  .bc-flor-menu .pt-36 { padding-top: 2.75rem; }
-  .bc-flor-menu .mt-36 { margin-top: 3rem; }
-  .bc-flor-menu .pb-36 { padding-bottom: 2.75rem; }
-  .bc-flor-menu .space-y-36 > :not([hidden]) ~ :not([hidden]) { margin-top: 3rem; }
-  .bc-flor-menu .mt-6 { margin-top: 1rem; }
-  .bc-flor-menu .text-3xl { font-size: 1.55rem; line-height: 1.2; }
-  .bc-flor-menu .text-lg { font-size: 1rem; }
-  .bc-flor-menu .prose p { font-size: .95rem; }
-  .bc-flor-menu .btn.asymmetric-btn-v1 { padding: .55rem 1.5rem; font-size: .85rem; }
+  .bc-flor-menu .col-span-9.col-start-1 { grid-column: 4 / 11; }
+  .bc-flor-menu .aspect-\[4\/5\] { aspect-ratio: 1 / 1.05; }
+  .bc-flor-menu .pt-36 { padding-top: 2rem; }
+  .bc-flor-menu .mt-36 { margin-top: 2.25rem; }
+  .bc-flor-menu .pb-36 { padding-bottom: 2rem; }
+  .bc-flor-menu .space-y-36 > :not([hidden]) ~ :not([hidden]) { margin-top: 2.25rem; }
+  .bc-flor-menu .mt-6 { margin-top: .875rem; }
+  .bc-flor-menu .text-3xl { font-size: 1.3rem; line-height: 1.25; }
+  .bc-flor-menu .text-lg { font-size: .95rem; }
+  .bc-flor-menu .prose p { font-size: .9rem; }
+  .bc-flor-menu .btn.asymmetric-btn-v1 { padding: .5rem 1.25rem; font-size: .8rem; }
 }
