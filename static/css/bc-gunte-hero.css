@@ -82,8 +82,7 @@
 
 .bc-gunte-hero.-load .hero_catch .hero_catch_txt {
   opacity: 1;
-  transform: scale(1);
-  transition: transform 0.3s 0.2s, opacity 0.3s 0.2s;
+  transition: opacity 0.3s 0.2s;
 }
 
 .bc-gunte-hero.-load .hero_slide {
@@ -118,11 +117,11 @@
   will-change: transform, opacity;
 }
 
-/* 2026-09-07：catch 文字標語（字型同 about .bc-series-heading：Noto Sans TC 700；主題金 + 白描邊） */
+/* 2026-09-07：catch 文字標語（字型同 about .bc-series-heading；主題金 + 近黑描邊；
+   正常尺寸淡入，無 scale 動畫） */
 .bc-gunte-hero .hero_catch .hero_catch_txt {
   opacity: 0;
-  transform: scale(2);
-  will-change: transform, opacity;
+  will-change: opacity;
   display: inline-block;
   font-family: "Noto Sans TC", "Montserrat", sans-serif;
   font-weight: 700;
@@ -131,7 +130,7 @@
   letter-spacing: -0.02em;
   text-align: center;
   color: #c49b63;
-  -webkit-text-stroke: 2px #ffffff;
+  -webkit-text-stroke: 2px #111111;
   paint-order: stroke fill;
 }
 
@@ -303,18 +302,23 @@
   pointer-events: auto;
 }
 
-.bc-gunte-hero .hero_hand_item > img {
+.bc-gunte-hero .hero_hand_item a {
+  display: block;
+}
+
+/* 2026-09-07：img 已被 <a> 包住 → 用後代選擇器（否則參考網站尺寸/scale 失效、圖過大） */
+.bc-gunte-hero .hero_hand_item img {
   width: 420px;
   scale: 0.5;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
 }
 
-.bc-gunte-hero:has(.is-initialized) .hero_hand_item > img {
+.bc-gunte-hero:has(.is-initialized) .hero_hand_item img {
   transition: scale 1.2s;
 }
 
-.bc-gunte-hero .hero_hand_item.-current > img {
+.bc-gunte-hero .hero_hand_item.-current img {
   scale: 1;
 }
 
@@ -416,7 +420,7 @@
     top: 88%;
   }
 
-  .bc-gunte-hero .hero_hand_item > img {
+  .bc-gunte-hero .hero_hand_item img {
     width: 340px;
   }
 
@@ -473,7 +477,7 @@
     top: 87%;
   }
 
-  .bc-gunte-hero .hero_hand_item > img {
+  .bc-gunte-hero .hero_hand_item img {
     width: 200px;
   }
 
