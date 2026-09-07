@@ -14,6 +14,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <link rel="preload" as="image" href="{% static 'images/section_bg_01.svg' %}">
 <link rel="preload" as="image" href="{% static 'images/_cup_360.gif' %}">
 <link rel="preload" as="image" href="{% static 'images/coffee_04.png' %}">
+<!-- 2026-09-07：GUNTE Lab. hero 字型（Alfa Slab One / Noto Sans JP / Inter） -->
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -62,6 +64,159 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 </div>
 
 <!-- branding Deco -->
+
+
+<!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp） -->
+<section class="hero bc-gunte-hero">
+            <div class="hero_wrap">
+                <h2 class="hero_catch">
+                    <img src="{% static 'images/gunte_hero/hero-catch.svg' %}" alt="" width="1055" height="226">
+                    <span class="vis-hide">WE CAN MAKE ORIGINAL GLOVE</span>
+                </h2>
+                <div class="hero_slide">
+                    <div class="splide">
+                        <div class="splide__track">
+                            <ul class="splide__list">
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/gunte_hero/hero-slide05-photo@2x.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/gunte_hero/hero-slide05-photo-sp@2x.jpg' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">ＧＯ｜建築</h3>
+                                        <p class="hero_slide_item_en">GO｜ARCHITECTURE</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-05-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="320" href="#bc-gunte-05-path">手袋だってひとつの道具。細かいところまでこだわりたい。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/gunte_hero/hero-slide06-photo@2x.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/gunte_hero/hero-slide06-photo-sp@2x.jpg' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">富山 GRN サンダーバーズ｜スポーツ</h3>
+                                        <p class="hero_slide_item_en">TOYAMA GRN THUNDERBIRDS｜SPORTS</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-06-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="350" href="#bc-gunte-06-path">野球が繋ぐ支援の輪。優しさのお返しに手袋を。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/gunte_hero/hero-slide07-photo@2x.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/gunte_hero/hero-slide07-photo-sp@2x.jpg' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">カターレ富山｜スポーツ</h3>
+                                        <p class="hero_slide_item_en">KATALLER TOYAMA｜SPORTS</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-07-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="220" href="#bc-gunte-07-path">プレイヤーもスタッフもサポーターも！みんなのユニフォームグローブ。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/gunte_hero/hero-slide01-photo@2x.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/gunte_hero/hero-slide01-photo-sp@2x.jpg' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">BOOK DAY とやま｜イベント</h3>
+                                        <p class="hero_slide_item_en">BOOK DAY TOYAMA｜EVENT </p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-01-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="290" href="#bc-gunte-01-path">新しいノベルティの定番に。もらってうれしいオリジナル軍手。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/gunte_hero/hero-slide02-photo@2x.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/gunte_hero/hero-slide02-photo-sp@2x.jpg' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">歯のマンガ｜漫画家</h3>
+                                        <p class="hero_slide_item_en">HA NO MANGA｜COMICS</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="320" href="#bc-gunte-02-path">うれしいタッチパネル対応。普段使いだってできちゃう軍手。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/gunte_hero/hero-slide03-photo@2x.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/gunte_hero/hero-slide03-photo-sp@2x.jpg' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">神明おのがわ農園｜農業</h3>
+                                        <p class="hero_slide_item_en">SHINMEI ONOGAWA NOUEN｜AGRICULTURE</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-03-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="370" href="#bc-gunte-03-path">みんなでおそろい！思い出に残る、楽しい体験に。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/gunte_hero/hero-slide04-photo@2x.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/gunte_hero/hero-slide04-photo-sp@2x.jpg' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">宮崎知恵（STOMACHACHE.）｜イラストレーター</h3>
+                                        <p class="hero_slide_item_en">TOMOE MIYAZAKI (STOMACHACHE.)｜ILLUSTRATOR</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-04-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="330" href="#bc-gunte-04-path">愛くるしさがたまらない。フルオーダーで作る小さな手袋。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero_hand">
+                    <div id="hero_hand_list" class="hero_hand_list">
+
+                        <div class="hero_hand_item" style="--angle:-90"><img src="{% static 'images/gunte_hero/hero-slide05-hand@2x.png' %}" alt="" width="470" height="360"></div>
+                        <div class="hero_hand_item" style="--angle:-65"><img src="{% static 'images/gunte_hero/hero-slide06-hand@2x.png' %}" alt="" width="470" height="360"></div>
+                        <div class="hero_hand_item" style="--angle:-40"><img src="{% static 'images/gunte_hero/hero-slide07-hand@2x.png' %}" alt="" width="470" height="360"></div>
+                        <div class="hero_hand_item" style="--angle:-15"><img src="{% static 'images/gunte_hero/hero-slide01-hand@2x.png' %}" alt="" width="470" height="360"></div>
+                        <div class="hero_hand_item" style="--angle:10"><img src="{% static 'images/gunte_hero/hero-slide02-hand@2x.png' %}" alt="" width="470" height="360"></div>
+                        <div class="hero_hand_item" style="--angle:35"><img src="{% static 'images/gunte_hero/hero-slide03-hand@2x.png' %}" alt="" width="470" height="360"></div>
+                        <div class="hero_hand_item" style="--angle:60"><img src="{% static 'images/gunte_hero/hero-slide04-hand@2x.png' %}" alt="" width="470" height="360"></div>
+                    </div>
+                </div>
+            </div>
+            <ol id="hero_nav" class="hero_nav">
+                <li><button type="button">1</button></li>
+                <li><button type="button">2</button></li>
+                <li><button type="button">3</button></li>
+                <li><button type="button">4</button></li>
+                <li><button type="button">5</button></li>
+                <li><button type="button">6</button></li>
+                <li><button type="button">7</button></li>
+            </ol>
+        </section>
+
 <section class="feed overflow-hidden">
     <div class="feed__layer">
         <div class="feed__layer-parts feed__layer-parts--01"></div>
@@ -743,6 +898,9 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20260904o">
 <!-- 2026-09-06：florporto 產品模組移植（最強人氣上方；wrapper 封裝 .bc-flor-menu、文字轉白） -->
 <link rel="stylesheet" href="{% static 'css/bc-flor-menu.css' %}?v=20260907b">
+<!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class） -->
+<link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20260907a">
 <style>
 /* 2026-09-04：首頁 feed 為頂部首屏（home-slider 已 hidden）→ 比照 home-slider：
    feed 照片/形狀由視口頂部開始、穿入 navbar 後方透出，navbar（z-index:100、
@@ -777,6 +935,9 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <script src="{% static 'js/bc-reviews.js' %}?v=20260906a"></script>
 <!-- 2026-09-06：florporto 產品模組捲動 crossfade（圖片層隨捲動進度切換） -->
 <script src="{% static 'js/bc-flor-menu.js' %}?v=20260906c"></script>
+<!-- 2026-09-07：GUNTE Lab. hero 動畫（Splide 引擎 + hero 初始化） -->
+<script src="{% static 'library/splide-4.1.3/dist/js/splide.min.js' %}"></script>
+<script src="{% static 'js/bc-gunte-hero.js' %}?v=20260907a"></script>
 <!-- 2026-09-07：首頁將 bc-attract-buy/profile 對齊 navbar-brand 頂部邊緣
      （buy 頂邊 = navbar-brand 頂邊、profile 接在 buy 下方；沿用既有 translateY(-50%) 機制） -->
 <script>

@@ -1,0 +1,470 @@
+/* ============================================================
+   bc-gunte-hero.css — GUNTE Lab. <section class="hero"> 移植（首頁第一屏）
+   來源：https://gunte-lab.kachiboshi.co.jp/
+        index.html 的 <section class="hero"> + css/home.css + css/base.css 工具類
+   移植原則：
+   - 全部規則封裝於 .bc-gunte-hero 內（選擇器逐條前綴），不影響本站其他樣式
+   - Splide 輪播基本樣式另外整包載入 static/library/splide-4.1.3/（唯一使用處）
+   - 進入動畫原以 body.-load 觸發 → 改由 wrapper 自帶 .-load（JS 於 window load 加上），
+     避免污染全站 <body>
+   - hero 本身為白底模組（原站頁面白底），色變數/字型限定於 wrapper
+   ============================================================ */
+
+.bc-gunte-hero,
+.bc-gunte-hero *,
+.bc-gunte-hero *::before,
+.bc-gunte-hero *::after {
+  box-sizing: border-box;
+}
+
+.bc-gunte-hero {
+  /* 原站 :root 變數（限定 wrapper） */
+  --color-primary: #fff462;
+  --color-neutral: #eeeeee;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-base: #ffffff;
+  --color-text: #000000;
+  --color-text-sub: #757575;
+  --color-border: #000000;
+  --color-border-light: #e0e0e0;
+  --color-border-form: #bdbdbd;
+  --lh-ttl: 1.44;
+  --ff-en: "Alfa Slab One", serif;
+  --ff-inter: "Inter", sans-serif;
+  --ease-in: 0.3s;
+  --ease-out: 0.35s;
+
+  /* 原站 body 基礎字型（限定 wrapper）；白底隔離於本站黑底 */
+  color: var(--color-text);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.8;
+  font-family: "Noto Sans JP", "Noto Sans TC", sans-serif;
+  letter-spacing: 0.06em;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--color-base);
+
+  /* 首屏定位：本站 navbar 高度預留（與全站 first-of-type 規則一致） */
+  margin-top: 140px;
+  position: relative;
+  padding-bottom: 90px;
+  overflow: hidden;
+  overflow-x: clip;
+  user-select: none;
+}
+
+.bc-gunte-hero ul,
+.bc-gunte-hero ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bc-gunte-hero a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.bc-gunte-hero img,
+.bc-gunte-hero svg {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+/* ---- 首屏進場（等效原站 body.-load）---- */
+.bc-gunte-hero.-load .hero_catch > img {
+  opacity: 1;
+  transform: scale(1);
+  transition: transform 0.3s 0.2s, opacity 0.3s 0.2s;
+}
+
+.bc-gunte-hero.-load .hero_slide {
+  opacity: 1;
+  transform: translateY(0);
+  transition: transform 0.8s 1.5s, opacity 0.5s 1.5s;
+}
+
+.bc-gunte-hero.-load .hero_hand {
+  opacity: 1;
+  transform: rotate(0deg);
+  transition: transform 0.8s 2s, opacity 0.8s 2s;
+}
+
+/* ---- 版面 ---- */
+.bc-gunte-hero .hero_catch {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 5%;
+}
+
+.bc-gunte-hero .hero_catch > img {
+  opacity: 0;
+  transform: scale(2);
+  will-change: transform, opacity;
+}
+
+.bc-gunte-hero .hero_wrap {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+  height: 810px;
+}
+
+.bc-gunte-hero .hero_slide {
+  display: flex;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  text-align: center;
+  transform: translateY(10%);
+  will-change: transform, opacity;
+}
+
+/* ---- Splide（hero 內）---- */
+.bc-gunte-hero .hero_slide .splide {
+  width: 62vw;
+  max-width: 892px;
+  margin: auto;
+}
+
+.bc-gunte-hero .hero_slide .splide__track {
+  overflow: visible;
+}
+
+.bc-gunte-hero .hero_slide .splide__list {
+  will-change: transform;
+}
+
+.bc-gunte-hero .hero_slide .splide__slide {
+  padding: 12px;
+}
+
+/* ---- Slide item ---- */
+.bc-gunte-hero .hero_slide_item {
+  display: inline-block;
+  position: relative;
+}
+
+.bc-gunte-hero .hero_slide_item_img {
+  overflow: hidden;
+}
+
+.bc-gunte-hero .hero_slide_item_img > img {
+  transform: scale(1);
+  transition: transform var(--ease-out);
+}
+
+.bc-gunte-hero .hero_slide_item:hover .hero_slide_item_img > img {
+  transform: scale(1.05);
+  transition: transform var(--ease-in);
+}
+
+/* ---- Slide 裝飾字（直排 cap / en / 曲線標題）---- */
+.bc-gunte-hero .hero_slide_item_cap {
+  opacity: 0;
+  position: absolute;
+  top: 20px;
+  right: 16px;
+  z-index: 5;
+  color: var(--color-white);
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  writing-mode: vertical-lr;
+  transition: opacity 0.5s;
+}
+
+.bc-gunte-hero .hero_slide_item_cap.-black {
+  color: var(--color-black);
+}
+
+.bc-gunte-hero .state-active .hero_slide_item_cap {
+  opacity: 1;
+}
+
+.bc-gunte-hero .hero_slide_item_en {
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  z-index: 5;
+  margin: 0 10px;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  writing-mode: vertical-lr;
+  transition: opacity 0.5s;
+}
+
+.bc-gunte-hero .state-prev .hero_slide_item_en {
+  left: 100%;
+}
+
+.bc-gunte-hero .state-next .hero_slide_item_en {
+  right: 100%;
+}
+
+.bc-gunte-hero .state-active .hero_slide_item_en {
+  opacity: 0;
+}
+
+.bc-gunte-hero .hero_slide_item_ttl {
+  opacity: 0;
+  position: absolute;
+  top: -11px;
+  left: -11px;
+  z-index: 10;
+  height: auto;
+  transition: opacity 0.5s;
+}
+
+.bc-gunte-hero .state-active .hero_slide_item_ttl {
+  opacity: 1;
+}
+
+.bc-gunte-hero .hero_slide_item_ttl text {
+  font-weight: 900;
+  font-size: 24px;
+  paint-order: stroke;
+  stroke-width: 1.5;
+  stroke: var(--color-black);
+  fill: var(--color-primary);
+}
+
+/* ---- 手套圓 ---- */
+.bc-gunte-hero .hero_hand {
+  opacity: 0;
+  position: absolute;
+  top: 91%;
+  left: 50%;
+  pointer-events: none;
+  transform: rotate(-35deg);
+  will-change: transform, opacity;
+  --circle-radius: 100vw;
+}
+
+.bc-gunte-hero:has(.is-initialized) .hero_hand_list {
+  transition: transform 1.2s;
+}
+
+.bc-gunte-hero .hero_hand_list {
+  width: calc(var(--circle-radius) * 2);
+  margin-left: calc(var(--circle-radius) * -1);
+  aspect-ratio: 1;
+}
+
+.bc-gunte-hero .hero_hand_item {
+  position: absolute;
+  pointer-events: auto;
+  translate: calc(cos(var(--angle) * 1deg) * var(--circle-radius) - 50%)
+    calc(sin(var(--angle) * 1deg) * var(--circle-radius) * 1 - 50%);
+  rotate: calc((var(--angle) - 270) * 1deg);
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+}
+
+.bc-gunte-hero .hero_hand_item.-current {
+  pointer-events: none;
+}
+
+.bc-gunte-hero .hero_hand_item > img {
+  width: 420px;
+  scale: 0.5;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+.bc-gunte-hero:has(.is-initialized) .hero_hand_item > img {
+  transition: scale 1.2s;
+}
+
+.bc-gunte-hero .hero_hand_item.-current > img {
+  scale: 1;
+}
+
+/* ---- 頁籤點 ---- */
+.bc-gunte-hero .hero_nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 110px;
+  font-size: 0;
+}
+
+.bc-gunte-hero .hero_nav > li > button {
+  padding: 5px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  font: inherit;
+}
+
+.bc-gunte-hero .hero_nav > li > button::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 8px;
+  border: 1px solid var(--color-black);
+  border-radius: 4px;
+  background: var(--color-primary);
+  transition: var(--ease-out);
+}
+
+.bc-gunte-hero .hero_nav > li > button.-current::before {
+  width: 32px;
+  background: var(--color-black);
+  transition: var(--ease-in);
+}
+
+.bc-gunte-hero .hero_nav > li > button:hover::before {
+  width: 32px;
+}
+
+/* ---- 工具類（原 base.css，scoped）---- */
+.bc-gunte-hero .vis-hide {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 0 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 4px !important;
+  height: 4px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: none !important;
+}
+
+.bc-gunte-hero .vis-sp,
+.bc-gunte-hero .vis-tb {
+  display: none;
+}
+
+/* ---- 響應式：navbar 高度預留（與 bc-components 首 section 一致）---- */
+@media screen and (max-width: 991.98px) {
+  .bc-gunte-hero { margin-top: 114px; }
+}
+@media screen and (max-width: 767.98px) {
+  .bc-gunte-hero { margin-top: 119px; }
+}
+@media screen and (max-width: 575.98px) {
+  .bc-gunte-hero { margin-top: 113px; }
+}
+
+/* ---- 響應式（≤991.98，原 home.css）---- */
+@media screen and (max-width: 991.98px) {
+  .bc-gunte-hero .hero_wrap {
+    height: auto;
+    padding: 120px 0;
+  }
+
+  .bc-gunte-hero .hero_slide .splide {
+    width: 68vw;
+  }
+
+  .bc-gunte-hero .hero_slide_item {
+    margin: 0 10%;
+  }
+
+  .bc-gunte-hero .hero_slide_item_en {
+    display: none;
+  }
+
+  .bc-gunte-hero .hero_hand {
+    top: 88%;
+  }
+
+  .bc-gunte-hero .hero_hand_item > img {
+    width: 340px;
+  }
+
+  .bc-gunte-hero .hero_nav {
+    margin-top: 60px;
+  }
+}
+
+/* ---- 響應式（≤767.98，原 home.css + base.css 工具）---- */
+@media screen and (max-width: 767.98px) {
+  .bc-gunte-hero {
+    margin-top: 119px;
+    padding-top: 50px;
+    padding-bottom: 60px;
+    font-size: 14px;
+  }
+
+  .bc-gunte-hero .vis-sp {
+    display: block;
+  }
+
+  .bc-gunte-hero .hide-sp {
+    display: none;
+  }
+
+  .bc-gunte-hero .hero_wrap {
+    padding: 50px 0;
+  }
+
+  .bc-gunte-hero .hero_slide .splide {
+    width: calc(68vw + 44px);
+    max-width: 320px;
+  }
+
+  .bc-gunte-hero .hero_slide_item {
+    margin: 0 10px;
+  }
+
+  .bc-gunte-hero .hero_slide_item_cap {
+    top: 15px;
+    right: 12px;
+    font-size: 10px;
+  }
+
+  .bc-gunte-hero .hero_slide_item_ttl {
+    max-width: calc(100% + 11px);
+  }
+
+  .bc-gunte-hero .hero_slide_item_ttl text {
+    stroke-width: 2;
+  }
+
+  .bc-gunte-hero .hero_hand_list {
+    top: 87%;
+  }
+
+  .bc-gunte-hero .hero_hand_item > img {
+    width: 200px;
+  }
+
+  .bc-gunte-hero .hero_nav {
+    margin-top: 20px;
+  }
+
+  .bc-gunte-hero .hero_nav > li > button {
+    padding: 10px 4px;
+  }
+
+  .bc-gunte-hero .hero_nav > li > button::before {
+    width: 13px;
+    height: 5px;
+  }
+
+  .bc-gunte-hero .hero_nav > li > button.-current::before {
+    width: 24px;
+  }
+
+  .bc-gunte-hero .hero_nav > li > button:hover::before {
+    width: 24px;
+  }
+}
