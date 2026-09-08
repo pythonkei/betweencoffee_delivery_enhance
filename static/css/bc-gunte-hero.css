@@ -46,8 +46,8 @@
   -webkit-font-smoothing: antialiased;
   background-color: var(--color-base);
 
-  /* 首屏定位：本站 navbar 高度預留（與全站 first-of-type 規則一致） */
-  margin-top: 140px;
+  /* 2026-09-07：hero 與頁頂對齊、穿入 navbar 後方（margin 0，下方再以 !important 壓制全域規則） */
+  margin-top: 0;
   position: relative;
   padding-bottom: 90px;
   overflow: hidden;
@@ -388,13 +388,13 @@
 
 /* ---- 響應式：navbar 高度預留（與 bc-components 首 section 一致）---- */
 @media screen and (max-width: 991.98px) {
-  .bc-gunte-hero { margin-top: 114px; }
+  .bc-gunte-hero { margin-top: 0; }
 }
 @media screen and (max-width: 767.98px) {
-  .bc-gunte-hero { margin-top: 119px; }
+  .bc-gunte-hero { margin-top: 0; }
 }
 @media screen and (max-width: 575.98px) {
-  .bc-gunte-hero { margin-top: 113px; }
+  .bc-gunte-hero { margin-top: 0; }
 }
 
 /* ---- 響應式（≤991.98，原 home.css）---- */
@@ -432,7 +432,7 @@
 /* ---- 響應式（≤767.98，原 home.css + base.css 工具）---- */
 @media screen and (max-width: 767.98px) {
   .bc-gunte-hero {
-    margin-top: 119px;
+    margin-top: 0;
     padding-top: 50px;
     padding-bottom: 60px;
     font-size: 14px;
@@ -501,4 +501,9 @@
   .bc-gunte-hero .hero_nav > li > button:hover::before {
     width: 24px;
   }
+}
+
+/* 2026-09-07：hero 置頂穿入 navbar 後方（壓制 bc-components 的 first-of-type margin-top 預留） */
+.bc-page-content > section.bc-gunte-hero.hero {
+  margin-top: 0 !important;
 }
