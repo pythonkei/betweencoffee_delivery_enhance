@@ -327,6 +327,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative; /* 2026-09-07：提高 z，避免被上方手套圓咖啡圖遮住/擋點擊 */
+  z-index: 20;
   margin-top: 110px;
   font-size: 0;
 }
