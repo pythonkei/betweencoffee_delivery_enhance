@@ -269,12 +269,12 @@
 .bc-gunte-hero .hero_hand {
   opacity: 0;
   position: absolute;
-  top: 91%;
+  top: 62%; /* 2026-09-07：由 91% 上移，整圈弧收在 nav 上方 */
   left: 50%;
   pointer-events: none;
   transform: rotate(-35deg);
   will-change: transform, opacity;
-  --circle-radius: 100vw;
+  --circle-radius: 22vw; /* 2026-09-07：原 100vw 過大 → 22vw，旋轉時不再掃到 nav */
 }
 
 .bc-gunte-hero:has(.is-initialized) .hero_hand_list {
@@ -308,7 +308,7 @@
 
 /* 2026-09-07：img 已被 <a> 包住 → 用後代選擇器（否則參考網站尺寸/scale 失效、圖過大） */
 .bc-gunte-hero .hero_hand_item img {
-  width: 420px;
+  width: 280px; /* 2026-09-07：420→280，配合小弧收在 nav 上方 */
   scale: 0.5;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
@@ -329,7 +329,7 @@
   align-items: center;
   position: relative; /* 2026-09-07：提高 z，避免被上方手套圓咖啡圖遮住/擋點擊 */
   z-index: 20;
-  margin-top: 110px;
+  margin-top: 120px; /* 2026-09-07：弧已上移收窄，nav 回到較正常間距 */
   font-size: 0;
 }
 
@@ -419,15 +419,15 @@
   }
 
   .bc-gunte-hero .hero_hand {
-    top: 88%;
+    top: 64%;
   }
 
   .bc-gunte-hero .hero_hand_item img {
-    width: 340px;
+    width: 260px;
   }
 
   .bc-gunte-hero .hero_nav {
-    margin-top: 60px;
+    margin-top: 90px;
   }
 }
 
@@ -480,11 +480,11 @@
   }
 
   .bc-gunte-hero .hero_hand_item img {
-    width: 200px;
+    width: 140px;
   }
 
   .bc-gunte-hero .hero_nav {
-    margin-top: 20px;
+    margin-top: 40px;
   }
 
   .bc-gunte-hero .hero_nav > li > button {
