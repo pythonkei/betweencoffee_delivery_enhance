@@ -52,6 +52,9 @@ def _build_landing_context(request):
     all_coffees = CoffeeItem.objects.filter(is_published=True)[:9]
     # 2026-09-07：GUNTE hero 手套圓 → coffee menu 照片（排序同 coffee_menu 頁）
     hero_coffees = CoffeeItem.objects.filter(is_published=True).order_by("sort_order", "id")[:7]
+    # 2026-09-07：bc-search 背景浮動圖改用 BeanItem（id7 / id6）
+    search_bean_01 = BeanItem.objects.filter(pk=7).first()
+    search_bean_02 = BeanItem.objects.filter(pk=6).first()
     beans = BeanItem.objects.filter(is_published=True)[:3]
 
     context = {
@@ -59,6 +62,8 @@ def _build_landing_context(request):
         "hot_coffees": hot_coffees,
         "all_coffees": all_coffees,
         "hero_coffees": hero_coffees,
+        "search_bean_01": search_bean_01,
+        "search_bean_02": search_bean_02,
         "beans": beans,
         "is_authenticated": request.user.is_authenticated,
         "user_avatar": "",

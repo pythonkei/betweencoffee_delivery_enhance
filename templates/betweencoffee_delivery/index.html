@@ -722,8 +722,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <aside class="bc-search" data-section="inversion">
     <a href="{% url 'coffee_menu' %}" class="bc-search-link">
         <div class="bc-search-bg">
-            <figure class="bc-search-bg-img bc-search-bg-img-01"><img src="{% static 'images/search_img01.png' %}" width="562" height="810" alt=""></figure>
-            <figure class="bc-search-bg-img bc-search-bg-img-02"><img src="{% static 'images/search_img02.png' %}" width="712" height="1000" alt=""></figure>
+            <figure class="bc-search-bg-img bc-search-bg-img-01"><img src="{% if search_bean_01 %}{{ search_bean_01.get_index_image }}{% else %}{% static 'images/search_img01.png' %}{% endif %}" alt="{{ search_bean_01.name|default:'' }}"></figure>
+            <figure class="bc-search-bg-img bc-search-bg-img-02"><img src="{% if search_bean_02 %}{{ search_bean_02.get_index_image }}{% else %}{% static 'images/search_img02.png' %}{% endif %}" alt="{{ search_bean_02.name|default:'' }}"></figure>
             <figure class="bc-search-bg-img bc-search-bg-img-03"><img src="{% static 'images/search_img03.png' %}" width="262" height="276" alt=""></figure>
         </div>
         <div class="bc-search-inner bc-search-inner-top">
