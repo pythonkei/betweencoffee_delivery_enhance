@@ -73,10 +73,9 @@
 
     // --- B. rail show/hide + active step ---
     if (!rail || !groupEls.length) return;
-    var first = groupEls[0].getBoundingClientRect();
-    var last = groupEls[groupEls.length - 1].getBoundingClientRect();
-    // 顯示區間（等效原站 mount/unmount）：第一群組已進入視口上半，直到最後群組完全捲離視口上方
-    var show = first.top < vh * 0.4 && last.bottom > 0;
+    var moduleRect = root.getBoundingClientRect();
+    // 模組進入視口附近就顯示（含平滑捲動/任意捲動容器都較穩定）
+    var show = moduleRect.top < vh * 0.9 && moduleRect.bottom > vh * 0.1;
     rail.classList.toggle('is-hidden', !show);
     if (!show) return;
 
@@ -122,7 +121,14 @@
     update();
     bindRail();
     window.addEventListener('scroll', onScroll, { passive: true });
+    // 2026-09-07：capture 監聽可一併接住任何捲動容器（非 window 捲動的頁面）
+    document.addEventListener('scroll', onScroll, { passive: true, capture: true });
     window.addEventListener('resize', onScroll);
+    window.addEventListener('orientationchange', onScroll);
+    // 模組進出視口時立即重算（避免僅靠 scroll 事件遺漏）
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(onScroll, { rootMargin: '20% 0px 20% 0px' }).observe(root);
+    }
     // 圖載入後高度可能變化，重新量測
     var imgs = root.querySelectorAll('img');
     Array.prototype.forEach.call(imgs, function (img) {
