@@ -73,9 +73,10 @@
 
     // --- B. rail show/hide + active step ---
     if (!rail || !groupEls.length) return;
-    var moduleRect = root.getBoundingClientRect();
-    // 模組進入視口附近就顯示（含平滑捲動/任意捲動容器都較穩定）
-    var show = moduleRect.top < vh * 0.9 && moduleRect.bottom > vh * 0.1;
+    var first = groupEls[0].getBoundingClientRect();
+    var last = groupEls[groupEls.length - 1].getBoundingClientRect();
+    // 顯示時機（同原站/首頁版）：第一群組進入視口上緣 40% 才出現，直到最後群組完全捲離
+    var show = first.top < vh * 0.4 && last.bottom > 0;
     rail.classList.toggle('is-hidden', !show);
     if (!show) return;
 
