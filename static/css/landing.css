@@ -320,8 +320,19 @@
    - .feed__video：絕對定位鋪滿區塊，溢出由 .feed overflow-hidden 裁切。
    - video：object-fit: cover（等效原本 background-size: cover）。
    - 蒙版 id 換為 feedMaskVideo（同文件不得重複 id），幾何與第一組相同。
-   - ::before 深色帶（130px）維持不變 → 影片頂部同樣被深色帶遮住，
-     與第一組 .feed 視覺一致（該區域原本也不顯示照片）。
+
+   高度對齊（2026-09-11 追加）：
+   原 .feed 的 ::before 130px 深色帶會佔高度，使區塊＝130＋蒙版層，
+   而 .feed__video 是 inset:0（撐滿區塊）→ 影片區比 .feed__layer 高出 130px，
+   影片上緣 130px 恆被深色帶蓋住、看不到。本組改成三者高度完全相等：
+        .feed--video 區塊高度 ＝ .feed__layer 高度 ＝ .feed__video 高度
+   作法：深色帶高度歸零 ＋ 移除 .feed__layer-parts 的 -6px 上移補償
+        （該補償原本是為了躲進 130px 深色帶、遮住蒙版頂邊的 GPU 接縫）。
+   安全理由：本組 background-image:none、底色為 rgba(18,18,18,1)，且上方緊接
+        第一組 .feed 的深色蒙版層 → 即使蒙版頂邊（貼齊區塊上緣）有合成抖動，
+        露出的也只會是近同色深底，不會出現第一組照片那種漏光線。
+   因此高度只需調整 .feed__layer-parts 的 height（各斷點 576 / 406 / 246px），
+        .feed__video 會自動跟著等於同高（height:100%）。
    註：video 有 muted + playsinline；載入/播放時機由 bc-feed-video.js
        以 IntersectionObserver 控制（preload="none" → 進入視口才下載）。
    ============================================================ */
@@ -329,6 +340,11 @@
   position: relative;
   z-index: 0;
   background-image: none;
+}
+
+/* 高度歸零：影片組不需要頂部深色帶（見上方「高度對齊」說明） */
+.feed--video::before {
+  height: 0;
 }
 
 .feed--video .feed__video {
@@ -351,8 +367,10 @@
   object-position: center center;
 }
 
-/* 蒙版層改用本組專屬 clipPath（id: feedMaskVideo）；其餘繼承 .feed__layer-parts */
+/* 蒙版層：改用本組專屬 clipPath（id: feedMaskVideo）、並移除 -6px 上移補償
+   → 蒙版層頂邊＝區塊上緣＝影片上緣，三者同高（其餘繼承 .feed__layer-parts） */
 .feed--video .feed__layer-parts {
+  margin-top: 0;
   -webkit-clip-path: url(#feedMaskVideo);
           clip-path: url(#feedMaskVideo);
 }
