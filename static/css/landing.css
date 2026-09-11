@@ -303,3 +303,56 @@
 .cls-1 {
     fill: transparent;
 }
+
+
+/* ============================================================
+   複製版 .feed：底層「背景圖片」→ 影片容器（2026-09-11）
+   ------------------------------------------------------------
+   第一組 .feed 以 background-image: index_feed_image.png 當底層照片，
+   上層 .feed__layer-parts 用反相 clip-path（#mask）挖洞 → 只有形狀輪廓內
+   露出底層照片（見上方「兩層設計」註解）。
+   本組 .feed--video 保留同一套蒙版幾何與 feedScroll 跑馬燈動畫，
+   僅把底層照片換成 <video>（roasting.webm）：
+   - .feed--video { z-index: 0 }：建立 stacking context，讓 z-index:-1 的
+     影片層落在「.feed 自身背景之上、in-flow 的 ::before 深色帶與
+     .feed__layer-parts 蒙版層之下」= 等同原本的背景圖層。
+   - background-image: none：不再下載靜態照片（改用 video 的 poster）。
+   - .feed__video：絕對定位鋪滿區塊，溢出由 .feed overflow-hidden 裁切。
+   - video：object-fit: cover（等效原本 background-size: cover）。
+   - 蒙版 id 換為 feedMaskVideo（同文件不得重複 id），幾何與第一組相同。
+   - ::before 深色帶（130px）維持不變 → 影片頂部同樣被深色帶遮住，
+     與第一組 .feed 視覺一致（該區域原本也不顯示照片）。
+   註：video 有 muted + playsinline；載入/播放時機由 bc-feed-video.js
+       以 IntersectionObserver 控制（preload="none" → 進入視口才下載）。
+   ============================================================ */
+.feed--video {
+  position: relative;
+  z-index: 0;
+  background-image: none;
+}
+
+.feed--video .feed__video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  background-color: rgba(17, 16, 19, 1);
+  pointer-events: none;
+}
+
+.feed--video .feed__video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+/* 蒙版層改用本組專屬 clipPath（id: feedMaskVideo）；其餘繼承 .feed__layer-parts */
+.feed--video .feed__layer-parts {
+  -webkit-clip-path: url(#feedMaskVideo);
+          clip-path: url(#feedMaskVideo);
+}
