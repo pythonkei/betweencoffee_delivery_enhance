@@ -121,12 +121,12 @@
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .img {
   width: calc(3.3 * var(--bc-cb-fs));
   height: calc(8.99 * var(--bc-cb-fs)); /* N=7：(7×1.02 + 1.85) × fs */
-  background-image: url("../images/sake-mv/blowing-pattern01a.svg");
+  background-image: url("../images/sake-mv/blowing-pattern01a.svg?v=20260911c");
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
   width: calc(3.3 * var(--bc-cb-fs));
   height: calc(7.97 * var(--bc-cb-fs)); /* N=6：(6×1.02 + 1.85) × fs */
-  background-image: url("../images/sake-mv/blowing-pattern02a.svg");
+  background-image: url("../images/sake-mv/blowing-pattern02a.svg?v=20260911c");
 }
 /* 直立文字：內距 上 0.55fs / 左右 0.55fs / 下 1.3fs（下緣留給尾巴）
    → 文字外框 = 3.3fs × (1.02N + 1.85)fs，與氣泡框完全相同
