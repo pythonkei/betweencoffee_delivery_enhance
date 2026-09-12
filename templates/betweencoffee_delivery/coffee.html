@@ -41,9 +41,31 @@
         <div class="row justify-content-center mt-5">
             <!-- coffee.html - 保持不变，使用详情页图片 -->
             <div class="col-lg-6 mb-5">
-                <div class="img-box">
+                <div class="img-box bc-coffee-photo">
                     <!-- 使用详情页图片 -->
                     <img src="{{ coffee.get_detail_image }}" class="img-4" alt="{{ coffee.name }}">
+                    {% if coffee.id == 10 %}
+                    <!-- 2026-09-11：複製 about 頁 .bc-sake-mv 的 staff-comment p-1 / p-3
+                         （頭部圖章 + 直立氣泡文字 + 彈出動畫）到 coffee_09.png 照片上。
+                         文案改為咖啡相關中文；僅 coffee id 10（Butter King）輸出，
+                         其他咖啡詳情頁完全不受影響。 -->
+                    <div class="bc-coffee-comment" aria-hidden="true">
+                        <div class="staff-comment p-1">
+                            <div class="blowing staff-comment-1 pattern-1">
+                                <div class="img">
+                                    <p class="text">配牛油香最對味</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="staff-comment p-3">
+                            <div class="blowing staff-comment-2 pattern-5">
+                                <div class="img">
+                                    <p class="text">冰飲也很清爽</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                     <span class="img-deco-bg">
                         <div hidden class="gif-box"><img src= {% static 'images/cup_360.gif' %} class=""></div>
                     </span>
@@ -488,4 +510,17 @@ function debugLog(message) {
   margin-bottom: 0;
 }
 </style>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<!-- 2026-09-11：咖啡詳情頁照片上的 staff-comment 氣泡（頭部圖章 + 直立文字 + 彈出動畫）
+     註：layouts/blank.html 用 extra_css 塞了 .blank-container{padding-top:24vh}，
+     故必須保留 {{ block.super }}，否則整頁版面上移 -->
+<link rel="stylesheet" href="{% static 'css/bc-coffee-comment.css' %}?v=20260911a">
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- 2026-09-11：氣泡 is-show 輪播（每 3 秒隨機輪替；僅 /coffee/10/ 有此區塊） -->
+<script src="{% static 'js/bc-coffee-comment.js' %}?v=20260911a"></script>
 {% endblock %}

@@ -1,0 +1,173 @@
+/* ============================================================
+   bc-coffee-comment.css — 咖啡詳情頁照片上的 staff-comment 氣泡
+   （頭部圖章 + 直立文字氣泡 + 彈出動畫）
+   2026-09-11 建立
+   ── 來源 ────────────────────────────────────────────────
+   1:1 複製 about 頁 .bc-sake-mv（sake-shirakiku.jp products/vibran）
+   的 staff-comment p-1 / p-3 效果，改套用到咖啡詳情頁的產品照片上：
+     p-1 → .blowing.staff-comment-1.pattern-1（頭部 staff01.png）
+     p-3 → .blowing.staff-comment-2.pattern-5（頭部 staff02.png）
+   動畫（scale / rotate / translate 彈出）與價值完全照抄，
+   僅 scoped 至 .bc-coffee-photo 且改用本頁尺寸基準（見下）。
+
+   ── 尺寸基準 ────────────────────────────────────────────
+   原站 --sake-rem = 100px（主照片 1440×1440）；
+   咖啡詳情頁照片桌機僅約 343×439（縮小 15% 後），
+   故改用 --bc-cb-rem = 46 / 64 / 72px（手機 / 平板 / 桌機），
+   讓氣泡（1.57~2.15rem）與文字（0.14rem，最低 9px 保證可讀）
+   維持與原站相同的比例關係、且不壓滿照片。
+
+   ── 覆蓋層定位 ──────────────────────────────────────────
+   .bc-coffee-comment 以 aspect-ratio 貼齊照片本體：
+   咖啡詳情頁 .img-box 為 flex 容器、照片水平置中，
+   且容器高度恆等於照片高度（測 390 / 1024 / 1440 三斷點皆成立）
+   → 覆蓋層 height:100% + aspect-ratio: 860/1100（coffee_09.png 尺寸）
+   ＝ 與照片完全同框，因此氣泡的百分比定位可直接對應照片。
+   ============================================================ */
+.bc-coffee-photo {
+  position: relative;
+}
+
+.bc-coffee-photo .bc-coffee-comment {
+  --bc-cb-rem: 46px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+  aspect-ratio: 860 / 1100; /* coffee_09.png = 860×1100（貼齊照片框） */
+  pointer-events: none;
+  z-index: 3;
+}
+@media (min-width: 768px) {
+  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 64px; }
+}
+@media (min-width: 1080px) {
+  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 72px; }
+}
+
+/* ---- 氣泡項目（頭部圖章為錨點，氣泡浮在其上方） ---- */
+.bc-coffee-photo .bc-coffee-comment .staff-comment {
+  position: absolute;
+  display: inline-block;
+  font-weight: 600;
+  font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
+}
+.bc-coffee-photo .bc-coffee-comment .p-1 { top: 62%; left: 22%; }
+.bc-coffee-photo .bc-coffee-comment .p-3 { top: 56%; left: 64%; }
+/* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
+   定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
+.bc-coffee-photo .bc-coffee-comment .p-1,
+.bc-coffee-photo .bc-coffee-comment .p-3 {
+  padding: 0 !important;
+}
+@media (max-width: 767.98px) {
+  /* 手機照片僅 145×186，氣泡（最寬 99px）需再往內收：
+     p-3 的 top 若維持 48% 氣泡頂端會超出照片上緣（實測 9px）→ 下移至 53% */
+  .bc-coffee-photo .bc-coffee-comment .p-1 { top: 55%; left: 28%; }
+  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 53%; left: 62%; }
+}
+
+/* ---- 氣泡本體 ---- */
+.bc-coffee-photo .bc-coffee-comment .blowing {
+  position: relative;
+  font-weight: 600;
+}
+/* 頭部圖章（人物照片） */
+.bc-coffee-photo .bc-coffee-comment .blowing::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: calc(-0.3 * var(--bc-cb-rem));
+  left: calc(0.3 * var(--bc-cb-rem));
+  background: center center / contain no-repeat;
+}
+/* pattern-1（p-1） */
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 {
+  width: calc(1.57 * var(--bc-cb-rem));
+  height: calc(1.72 * var(--bc-cb-rem));
+}
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .text {
+  padding: calc(0.3 * var(--bc-cb-rem)) calc(0.1 * var(--bc-cb-rem)) calc(0.3 * var(--bc-cb-rem)) 0;
+}
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .img {
+  background-image: url("../images/sake-mv/blowing-pattern01.svg");
+}
+/* pattern-5（p-3） */
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 {
+  width: calc(2.15 * var(--bc-cb-rem));
+  height: calc(1.92 * var(--bc-cb-rem));
+}
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .text {
+  padding: calc(0.3 * var(--bc-cb-rem)) 0;
+}
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
+  background-image: url("../images/sake-mv/blowing-pattern03.svg");
+}
+/* 頭部圖章尺寸（staff-comment-1 → staff01.png、staff-comment-2 → staff02.png） */
+.bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-1::after {
+  background-image: url("../images/sake-mv/staff01.png");
+  width: calc(0.8 * var(--bc-cb-rem));
+  height: calc(0.95 * var(--bc-cb-rem));
+}
+.bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-2::after {
+  background-image: url("../images/sake-mv/staff02.png");
+  width: calc(0.69 * var(--bc-cb-rem));
+  height: calc(0.95 * var(--bc-cb-rem));
+}
+
+/* ---- 氣泡（白底手繪 SVG）＋ 直立文字 ---- */
+.bc-coffee-photo .bc-coffee-comment .blowing .img {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  font-feature-settings: "vpal";
+  letter-spacing: 0.02em;
+  filter: drop-shadow(rgba(17, 17, 17, 0.08) 0 0 32px);
+  will-change: filter;
+  position: absolute;
+  bottom: 100%;
+  left: -50%;
+  min-width: 100%;
+  min-height: 100%;
+  background: center center / contain no-repeat;
+}
+.bc-coffee-photo .bc-coffee-comment .blowing .text {
+  position: relative;
+  z-index: 20;
+  margin: 0;
+  color: #111;
+  /* 原站 0.14rem（=14px）；此處加 9px 下限，手機縮小後仍清晰可讀 */
+  font-size: max(calc(0.14 * var(--bc-cb-rem)), 9px);
+  line-height: 1.8;
+  font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
+  text-orientation: upright;
+}
+
+/* ---- 動畫（is-show 輪替；與原站數值完全一致） ---- */
+.bc-coffee-photo .bc-coffee-comment .staff-comment .img {
+  transition: scale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center bottom;
+  scale: 0;
+  rotate: -20deg;
+  translate: 0 -40px;
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment .blowing::after {
+  transition: scale 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, rotate 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+  transform-origin: center bottom;
+  scale: 0;
+  rotate: -90deg;
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment.is-show .img {
+  transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s, rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s, translate 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+  scale: 1;
+  rotate: 0deg;
+  translate: 0 0;
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment.is-show .blowing::after {
+  transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  scale: 1;
+  rotate: 0deg;
+}

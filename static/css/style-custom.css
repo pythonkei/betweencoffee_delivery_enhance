@@ -857,6 +857,26 @@ optgroup  {
   .img-box .img-4 { max-height: 516px; }
 }
 
+/* 2026-09-11：咖啡詳情頁（/coffee/<id>/）照片再縮小 15%
+   四顆尺寸旋鈕全部 ×0.85（各斷點實際受限的旋鈕都涵蓋）→ 每個斷點都精準 -15%：
+     ≤767.98px：max-width 70%→59.5%、max-height 56vw→47.6vw
+     768–1079.98px：max-height 600→510px（此斷點實際為寬度受限 → max-width 85% 生效）
+     ≥1080px：max-height 516→438.6px
+   僅 scoped 至 .bc-coffee-photo（bean 詳情頁 .img-box 維持原尺寸）。
+   實測（390/1024/1440）：171×218 → 145×186、426×545 → 362×463、403×516 → 343×439。 */
+.img-box.bc-coffee-photo .img-4 {
+  max-width: 85%;
+}
+@media all and (max-width: 767.98px) {
+  .img-box.bc-coffee-photo .img-4 { max-width: 59.5%; max-height: 47.6vw; }
+}
+@media screen and (min-width: 768px) and (max-width: 1079.98px) {
+  .img-box.bc-coffee-photo .img-4 { max-height: 510px; }
+}
+@media screen and (min-width: 1080px) {
+  .img-box.bc-coffee-photo .img-4 { max-height: 438.6px; }
+}
+
 /* Add to Cart Popup box */
 
 #section-single-product  { 
