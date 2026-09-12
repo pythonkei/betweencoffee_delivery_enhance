@@ -24,13 +24,16 @@
     var shuffled = els.slice().sort(function () {
       return Math.random() - Math.random();
     });
-    var t = 0;
 
     // 初始狀態：先讓第一個顯示（避免 3 秒空窗）
     els.forEach(function (el) {
       el.classList.remove("is-show");
     });
     shuffled[0].classList.add("is-show");
+
+    // 計數器從 1 起算：初始已顯示 shuffled[0]，
+    // 若從 0 起算第一次輪替（3 秒後）會再顯示同一個 → 變成停 6 秒才換
+    var t = 1;
 
     setInterval(function () {
       els.forEach(function (el) {
