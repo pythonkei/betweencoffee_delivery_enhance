@@ -1,0 +1,8 @@
+<svg width="100" height="272" viewBox="0 0 100 272" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- 咖啡詳情頁專用氣泡（長方形版）— 對應 7 字文案「配牛油香最對味」
+     viewBox 比例 3.3 : 8.99（氣泡寬 3.3×字級 / 高 8.99×字級）
+     本體 100 × 249、圓角 14；左下小尾巴（指向下方頭部圖章）
+     註：about 頁共用的 blowing-pattern01.svg 未更動 -->
+<rect x="0" y="0" width="100" height="249" rx="14" fill="#ffffff"/>
+<path d="M22 228 L54 228 L26 271 Z" fill="#ffffff"/>
+</svg>

@@ -1,35 +1,37 @@
 /* ============================================================
    bc-coffee-comment.css — 咖啡詳情頁照片上的 staff-comment 氣泡
-   （頭部圖章 + 直立文字氣泡 + 彈出動畫）
-   2026-09-11 建立
+   2026-09-11 建立（v1）／2026-09-11 修訂（v2：文字放大 + 長方形氣泡）
    ── 來源 ────────────────────────────────────────────────
-   1:1 複製 about 頁 .bc-sake-mv（sake-shirakiku.jp products/vibran）
-   的 staff-comment p-1 / p-3 效果，改套用到咖啡詳情頁的產品照片上：
+   複製 about 頁 .bc-sake-mv（sake-shirakiku.jp products/vibran）的
+   staff-comment p-1 / p-3 效果（頭部圖章 + 氣泡 + 彈出動畫）到咖啡詳情頁：
      p-1 → .blowing.staff-comment-1.pattern-1（頭部 staff01.png）
      p-3 → .blowing.staff-comment-2.pattern-5（頭部 staff02.png）
-   動畫（scale / rotate / translate 彈出）與價值完全照抄，
-   僅 scoped 至 .bc-coffee-photo 且改用本頁尺寸基準（見下）。
+   is-show 動畫（scale / rotate / translate 彈出）數值與原站完全一致。
 
-   ── 尺寸基準 ────────────────────────────────────────────
-   原站 --sake-rem = 100px（主照片 1440×1440）；
-   咖啡詳情頁照片桌機僅約 343×439（縮小 15% 後），
-   故改用 --bc-cb-rem = 46 / 64 / 72px（手機 / 平板 / 桌機），
-   讓氣泡（1.57~2.15rem）與文字（0.14rem，最低 9px 保證可讀）
-   維持與原站相同的比例關係、且不壓滿照片。
+   ── v2 變更（2026-09-11）─────────────────────────────────
+   1. 文字放大：原本沿用原站 0.14rem（桌機 10.08px）太小 →
+      改為 --bc-cb-fs = 13 / 15 / 17px（手機 / 平板 / 桌機）。
+   2. 氣泡改「長方形 + 左下小尾巴」，長度依字數決定；新增咖啡頁專用 SVG：
+        blowing-pattern01a.svg → 7 字「配牛油香最對味」
+        blowing-pattern02a.svg → 6 字「冰飲也很清爽」
+      （about 頁共用的 blowing-pattern01/02/03.svg 完全未動）
+      viewBox 比例 = 2.9 : (1.02N + 1.85) → 8.99（N=7）／7.97（N=6）。
+   3. 氣泡改為固定尺寸（width/height 由 fs 計算，不再靠 pattern 框撐開），
+      pattern 框縮小為「氣泡底 + 頭部圖章」的定位錨點；
+      頭部圖章改為水平置中於氣泡下方。
 
    ── 覆蓋層定位 ──────────────────────────────────────────
-   .bc-coffee-comment 以 aspect-ratio 貼齊照片本體：
-   咖啡詳情頁 .img-box 為 flex 容器、照片水平置中，
-   且容器高度恆等於照片高度（測 390 / 1024 / 1440 三斷點皆成立）
-   → 覆蓋層 height:100% + aspect-ratio: 860/1100（coffee_09.png 尺寸）
-   ＝ 與照片完全同框，因此氣泡的百分比定位可直接對應照片。
+   .bc-coffee-comment 以 height:100% + aspect-ratio:860/1100 貼齊照片本體
+   （咖啡頁 .img-box 高度恆等於照片高、照片水平置中）→ 氣泡的百分比定位
+   直接對應照片。
    ============================================================ */
 .bc-coffee-photo {
   position: relative;
 }
 
 .bc-coffee-photo .bc-coffee-comment {
-  --bc-cb-rem: 46px;
+  --bc-cb-rem: 46px; /* 頭部圖章 / 位移基準（原站 100px 配 1440px 照片） */
+  --bc-cb-fs: 13px; /* 氣泡文字級距（v2 放大） */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -40,21 +42,23 @@
   z-index: 3;
 }
 @media (min-width: 768px) {
-  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 64px; }
+  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 64px; --bc-cb-fs: 15px; }
 }
 @media (min-width: 1080px) {
-  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 72px; }
+  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 72px; --bc-cb-fs: 17px; }
 }
 
-/* ---- 氣泡項目（頭部圖章為錨點，氣泡浮在其上方） ---- */
+/* ---- 氣泡項目定位 ---- */
 .bc-coffee-photo .bc-coffee-comment .staff-comment {
   position: absolute;
   display: inline-block;
   font-weight: 600;
   font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
 }
-.bc-coffee-photo .bc-coffee-comment .p-1 { top: 62%; left: 22%; }
-.bc-coffee-photo .bc-coffee-comment .p-3 { top: 56%; left: 64%; }
+/* v2：氣泡改窄長後重新定位（原本 62%/22%、56%/64% 是寬版手繪氣泡的位置），
+   確保「氣泡 + 頭部圖章 + 錨點框」整個模組都落在照片框內 */
+.bc-coffee-photo .bc-coffee-comment .p-1 { top: 64%; left: 14%; }
+.bc-coffee-photo .bc-coffee-comment .p-3 { top: 35%; left: 66%; }
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
 .bc-coffee-photo .bc-coffee-comment .p-1,
@@ -62,49 +66,28 @@
   padding: 0 !important;
 }
 @media (max-width: 767.98px) {
-  /* 手機照片僅 145×186，氣泡（最寬 99px）需再往內收：
-     p-3 的 top 若維持 48% 氣泡頂端會超出照片上緣（實測 9px）→ 下移至 53% */
-  .bc-coffee-photo .bc-coffee-comment .p-1 { top: 55%; left: 28%; }
-  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 53%; left: 62%; }
+  /* 手機照片僅 145×186，模組（氣泡最高 117px + 圖章 30px）須再往內收 */
+  .bc-coffee-photo .bc-coffee-comment .p-1 { top: 72%; left: 20%; }
+  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 66%; left: 55%; }
 }
 
-/* ---- 氣泡本體 ---- */
+/* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
 .bc-coffee-photo .bc-coffee-comment .blowing {
   position: relative;
   font-weight: 600;
+  width: calc(1.2 * var(--bc-cb-rem));
+  height: calc(0.3 * var(--bc-cb-rem));
 }
-/* 頭部圖章（人物照片） */
+/* 頭部圖章（水平置中於氣泡下方；動畫只改 scale/rotate，translate 固定 -50%） */
 .bc-coffee-photo .bc-coffee-comment .blowing::after {
   content: "";
   display: block;
   position: absolute;
   top: calc(-0.3 * var(--bc-cb-rem));
-  left: calc(0.3 * var(--bc-cb-rem));
+  left: 50%;
+  translate: -50% 0;
   background: center center / contain no-repeat;
 }
-/* pattern-1（p-1） */
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 {
-  width: calc(1.57 * var(--bc-cb-rem));
-  height: calc(1.72 * var(--bc-cb-rem));
-}
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .text {
-  padding: calc(0.3 * var(--bc-cb-rem)) calc(0.1 * var(--bc-cb-rem)) calc(0.3 * var(--bc-cb-rem)) 0;
-}
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .img {
-  background-image: url("../images/sake-mv/blowing-pattern01.svg");
-}
-/* pattern-5（p-3） */
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 {
-  width: calc(2.15 * var(--bc-cb-rem));
-  height: calc(1.92 * var(--bc-cb-rem));
-}
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .text {
-  padding: calc(0.3 * var(--bc-cb-rem)) 0;
-}
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
-  background-image: url("../images/sake-mv/blowing-pattern03.svg");
-}
-/* 頭部圖章尺寸（staff-comment-1 → staff01.png、staff-comment-2 → staff02.png） */
 .bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-1::after {
   background-image: url("../images/sake-mv/staff01.png");
   width: calc(0.8 * var(--bc-cb-rem));
@@ -116,7 +99,7 @@
   height: calc(0.95 * var(--bc-cb-rem));
 }
 
-/* ---- 氣泡（白底手繪 SVG）＋ 直立文字 ---- */
+/* ---- 氣泡本體（長方形；尺寸依字數：p-1 7 字、p-3 6 字） ---- */
 .bc-coffee-photo .bc-coffee-comment .blowing .img {
   display: flex;
   flex-wrap: wrap;
@@ -129,21 +112,37 @@
   will-change: filter;
   position: absolute;
   bottom: 100%;
-  left: -50%;
-  min-width: 100%;
-  min-height: 100%;
+  /* 置中於錨點框：left = 50% − 半個氣泡寬（氣泡寬 = 2.9fs → 半寬 1.45fs） */
+  left: calc(50% - 1.45 * var(--bc-cb-fs));
+  min-width: 0;
+  min-height: 0;
   background: center center / contain no-repeat;
 }
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .img {
+  width: calc(3.3 * var(--bc-cb-fs));
+  height: calc(8.99 * var(--bc-cb-fs)); /* N=7：(7×1.02 + 1.85) × fs */
+  background-image: url("../images/sake-mv/blowing-pattern01a.svg");
+}
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
+  width: calc(3.3 * var(--bc-cb-fs));
+  height: calc(7.97 * var(--bc-cb-fs)); /* N=6：(6×1.02 + 1.85) × fs */
+  background-image: url("../images/sake-mv/blowing-pattern02a.svg");
+}
+/* 直立文字：內距 上 0.55fs / 左右 0.55fs / 下 1.3fs（下緣留給尾巴）
+   → 文字外框 = 3.3fs × (1.02N + 1.85)fs，與氣泡框完全相同
+   white-space: nowrap 保證「單一垂直字行」不因捨入而折成兩欄；
+   氣泡淨寬 2.2fs > 字行寬 1.8fs（line-height）仍有 0.4fs 餘裕 */
 .bc-coffee-photo .bc-coffee-comment .blowing .text {
   position: relative;
   z-index: 20;
   margin: 0;
   color: #111;
-  /* 原站 0.14rem（=14px）；此處加 9px 下限，手機縮小後仍清晰可讀 */
-  font-size: max(calc(0.14 * var(--bc-cb-rem)), 9px);
+  font-size: var(--bc-cb-fs);
   line-height: 1.8;
   font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
   text-orientation: upright;
+  white-space: nowrap;
+  padding: calc(0.55 * var(--bc-cb-fs)) calc(0.55 * var(--bc-cb-fs)) calc(1.3 * var(--bc-cb-fs)) calc(0.55 * var(--bc-cb-fs));
 }
 
 /* ---- 動畫（is-show 輪替；與原站數值完全一致） ---- */
