@@ -857,24 +857,25 @@ optgroup  {
   .img-box .img-4 { max-height: 516px; }
 }
 
-/* 2026-09-11：咖啡詳情頁（/coffee/<id>/）照片縮小
-   第一階段 -15%（旋鈕 ×0.85）、第二階段再 -5%（再 ×0.95）→ 累計 ×0.8075（-19.25%）：
-     base          ：max-width 100% → 80.75%
-     ≤767.98px     ：max-width 70%→56.525%、max-height 56vw→45.22vw
-     768–1079.98px ：max-height 600→484.5px（此斷點實際為寬度受限 → max-width 生效）
-     ≥1080px       ：max-height 516→416.67px
+/* 2026-09-11：咖啡詳情頁（/coffee/<id>/）照片尺寸
+   歷程：原 100% → -15%（×0.85）→ 再 -5%（×0.95）→ 放大 +10%（×1.10）
+   累計 ×0.88825（相對原圖 -11.175%）：
+     base          ：max-width 100% → 88.825%
+     ≤767.98px     ：max-width 70%→62.1775%、max-height 56vw→49.742vw
+     768–1079.98px ：max-height 600→532.95px（此斷點實際為寬度受限 → max-width 生效）
+     ≥1080px       ：max-height 516→458.337px
    僅 scoped 至 .bc-coffee-photo（bean 詳情頁 .img-box 維持原尺寸）。 */
 .img-box.bc-coffee-photo .img-4 {
-  max-width: 80.75%;
+  max-width: 88.825%;
 }
 @media all and (max-width: 767.98px) {
-  .img-box.bc-coffee-photo .img-4 { max-width: 56.525%; max-height: 45.22vw; }
+  .img-box.bc-coffee-photo .img-4 { max-width: 62.1775%; max-height: 49.742vw; }
 }
 @media screen and (min-width: 768px) and (max-width: 1079.98px) {
-  .img-box.bc-coffee-photo .img-4 { max-height: 484.5px; }
+  .img-box.bc-coffee-photo .img-4 { max-height: 532.95px; }
 }
 @media screen and (min-width: 1080px) {
-  .img-box.bc-coffee-photo .img-4 { max-height: 416.67px; }
+  .img-box.bc-coffee-photo .img-4 { max-height: 458.337px; }
 }
 
 /* Add to Cart Popup box */
