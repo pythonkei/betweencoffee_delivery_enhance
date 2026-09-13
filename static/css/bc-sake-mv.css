@@ -115,9 +115,13 @@
 @media (max-width: 767px) {
   .bc-sake-mv .staff-comment { position: absolute; }
 }
-.bc-sake-mv .p-1 { top: calc(4.35 * var(--sake-rem)); left: 10%; }
+.bc-sake-mv .p-1 { top: calc(4.35 * var(--sake-rem)); left: calc(10% - 0.2355 * var(--sake-rem)); }
 .bc-sake-mv .p-2 { top: calc(5 * var(--sake-rem)); left: 25%; }
-.bc-sake-mv .p-3 { top: calc(4.35 * var(--sake-rem)); left: 60%; }
+.bc-sake-mv .p-3 { top: calc(4.062 * var(--sake-rem)); left: calc(60% + 0.3225 * var(--sake-rem)); }
+/* 2026-09-11：位置微調（15% ＝ 氣泡自身尺寸，以 --sake-rem 表達 → 各斷點等比）
+   p-1：往左 15% ＝ 氣泡寬 157px(1.57rem) × 0.15 = 23.55px → left 10% − 0.2355rem
+   p-3：向上右 15% ＝ 寬 215px(2.15rem)×0.15 = 32.25px → left 60% + 0.3225rem；
+        高 192px(1.92rem)×0.15 = 28.8px → top 4.35rem − 0.288 = 4.062rem */
 .bc-sake-mv .p-4 { top: calc(4.82 * var(--sake-rem)); left: 85%; }
 /* 覆蓋 Between Coffee 的 Bootstrap spacing utilities：.p-1~p-4 在原站
    shirakiku 是 staff-comment 定位 class，但 Bootstrap 視為 padding
@@ -130,9 +134,13 @@
   padding: 0 !important;
 }
 @media (max-width: 767px) {
-  .bc-sake-mv .p-1 { top: calc(2.5 * var(--sake-rem)); left: calc(0.7 * var(--sake-rem)); }
+  .bc-sake-mv .p-1 { top: calc(2.5 * var(--sake-rem)); left: calc(0.547 * var(--sake-rem)); }
   .bc-sake-mv .p-2 { top: calc(5 * var(--sake-rem)); left: calc(0.9 * var(--sake-rem)); }
-  .bc-sake-mv .p-3 { top: calc(2 * var(--sake-rem)); left: calc(2.2 * var(--sake-rem)); }
+  .bc-sake-mv .p-3 { top: calc(1.8125 * var(--sake-rem)); left: calc(2.4106 * var(--sake-rem)); }
+  /* 2026-09-11：手機斷點同步（手機氣泡 106×116 / 146×130px）
+     p-1 往左 15% = 106×0.15 = 15.9px(0.153rem) → left 0.7rem − 0.153 = 0.547rem
+     p-3 向上右 15%：右 146×0.15 = 21.9px(0.2106rem) → left 2.2rem + 0.2106 = 2.4106rem
+                    上 130×0.15 = 19.5px(0.1875rem) → top 2rem − 0.1875 = 1.8125rem */
   .bc-sake-mv .p-4 { top: calc(3.8 * var(--sake-rem)); left: calc(2.3 * var(--sake-rem)); }
 }
 
