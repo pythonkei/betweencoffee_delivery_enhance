@@ -1,6 +1,6 @@
 # 系統狀態
 
-> **最後更新**: 2026年9月6日（記憶庫瘦身：歷史日誌已封存，本檔僅現況）
+> **最後更新**: 2026年9月13日（咖啡詳情頁氣泡移到咖啡杯外；記憶庫瘦身：歷史日誌已封存，本檔僅現況）
 > **注意**: 完整變更日誌 → `docs/archive/04_SYSTEM_STATE_history_202607-202609.md`；逐筆細目 → `git log`。
 
 
@@ -19,7 +19,7 @@
 | 測試 | ⚠️ 不足 | 覆蓋率低 |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
 | 文檔 | ✅ 已重構 | 資訊收攏至 `.clinerules/` 目錄 |
-| 2026-09 前端整合 | ✅ 進行中 | yama 圓球 header（首頁）/ bean（咖啡豆）REAL 模組 / reviews 行動縮放；完成後更新本列 |
+| 2026-09 前端整合 | ✅ 進行中 | yama 圓球 header（首頁）/ bean（咖啡豆）REAL 模組 / reviews 行動縮放 / **咖啡詳情頁 staff-comment 氣泡（/coffee/10/，已移到咖啡杯外）**；完成後更新本列 |
 | 記憶庫 | ✅ 已瘦身 | 2026-09-06：04 拆至 <1K、`.clinerules` 拆 core（自動注入）/完整參考（docs/uiux-full-reference.md） |
 
 ## 資料庫現狀
@@ -34,6 +34,8 @@
 
 ## 近期變更（最近 10 筆標題；細節見封存檔與 git log）
 
+- 2026-09-13 咖啡詳情頁 staff-comment 氣泡移到咖啡杯外（對齊去背 PNG alpha bbox x 9.30%~89.53%，單一 calc 算式通吃 10 斷點、零重疊零溢出）
+- 2026-09-11 咖啡詳情頁 staff-comment 氣泡建立（/coffee/10/）：長方形氣泡 + 咖啡專用 SVG + 直立文字 + 3 秒輪播彈出動畫
 - 2026-09-01 ramen→bean REAL + reviews 整合（about 頁）＋ 平板照片放大置中 ＋ sake-shirakiku product-mv 整合
 - 2026-08-27 Timber Wharf 全域應用 + weekday 徽章 + SERIES 資料庫驅動（咖啡/咖啡豆）
 - 2026-08-26~27 yokohama-timberwharf weather 天氣/時鐘元件整合（about 頁右上角）
