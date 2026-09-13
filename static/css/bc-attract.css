@@ -34,7 +34,13 @@
   width: 100%;
   height: 100%;
 }
-/* 右側虛線：全高、點狀 mask、灰色（按鈕中心點對齊此虛線中心） */
+/* 右側虛線：全高、點狀 mask、灰色（按鈕中心點對齊此虛線中心）
+   2026-09-11：補上 768–991 斷點。bc-attract 按鈕的「可見中心」=
+   元素 right + 寬/2 + --attract（.c-attract 的 margin:-attract 會讓內部
+   link 再往左偏 --attract），實測各斷點可見中心為
+     ≥992 = 66、768–991 = 58、≤767 = 37、≤575 = 33
+   線寬 2px → 線中心 = right + 1 → right 依序為 65 / 57 / 36 / 32
+   （原本缺 768–991，導致該斷點虛線比按鈕中心右偏 8px） */
 #borders .bc-borders__right {
   position: absolute;
   top: 0;
@@ -49,6 +55,9 @@
   mask-size: 40px 40px;
   -webkit-mask-repeat: repeat;
   mask-repeat: repeat;
+}
+@media screen and (min-width: 768px) and (max-width: 991.98px) {
+  #borders .bc-borders__right { right: 57px; }   /* 中心 58 = 同斷點按鈕可見中心 */
 }
 /* 左側虛線（已隱藏 2026-08-10） */
 #borders .bc-borders__left {
@@ -150,7 +159,10 @@
 .bc-attract-profile {
   position: fixed;
   --attract: 24px;        /* 與 bc-attract-buy 相同的 hover 熱區擴展 */
-  right: 21px;            /* 中心=右21+25=46 = bc-attract-buy 中心（右26+20=46），上下居中對齊 buy 軸線 */
+  /* 2026-09-11：21px → 17px。可見圓鈕中心 = right + 寬/2 + --attract
+     = 17 + 25 + 24 = 66，與右側虛線中心（66）及 Buy 按鈕軸線一致
+     （原 21px 實測中心 70，比虛線偏左 4px） */
+  right: 17px;
   top: calc(50% + 100px);
   transform: translateY(-50%);
   width: 50px;
@@ -200,6 +212,10 @@
   height: 100%;
   object-fit: cover;
   width: 100%;
+}
+/* 2026-09-11：顯示社群頭像時取消圓形邊框（未登入的 person 圖示仍保留外框） */
+.bc-attract-profile .bc-attract-profile__link:has(.bc-attract-profile__avatar) {
+  border: none;
 }
 
 /* ===== 漢堡選單（對應 cheesetart p-gh__button__menu） ===== */

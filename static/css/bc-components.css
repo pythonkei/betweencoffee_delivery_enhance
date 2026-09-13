@@ -3208,6 +3208,12 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   display: block;
 }
 
+/* 2026-09-11：登入顯示社群帳號頭像後，取消圓形白色邊框
+   （未登入的 .icon-user 圖示狀態仍保留原本 1px rgba(255,255,255,.3) 外框） */
+.bc-welcome-avatar:has(.bc-welcome-avatar-img) {
+  border: none;
+}
+
 /* 登入前狀態：登入連結（下底線樣式） */
 .bc-welcome-login-link {
   color: #ffffff;
