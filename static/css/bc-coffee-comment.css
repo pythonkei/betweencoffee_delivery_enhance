@@ -1,6 +1,7 @@
 /* ============================================================
    bc-coffee-comment.css — 咖啡詳情頁照片上的 staff-comment 氣泡
    2026-09-11 建立（v1）／2026-09-11 修訂（v2：文字放大 + 長方形氣泡）
+   2026-09-13 修訂（v3：氣泡移出咖啡杯＝改放在照片去背透明留白區）
    ── 來源 ────────────────────────────────────────────────
    複製 about 頁 .bc-sake-mv（sake-shirakiku.jp products/vibran）的
    staff-comment p-1 / p-3 效果（頭部圖章 + 氣泡 + 彈出動畫）到咖啡詳情頁：
@@ -19,6 +20,12 @@
    3. 氣泡改為固定尺寸（width/height 由 fs 計算，不再靠 pattern 框撐開），
       pattern 框縮小為「氣泡底 + 頭部圖章」的定位錨點；
       頭部圖章改為水平置中於氣泡下方。
+   ── v3 變更（2026-09-13）─────────────────────────────────
+   氣泡原本壓在咖啡杯照片上（p-1 left 10.65% / p-3 left 71.31% 皆落在
+   照片的不透明區內），視覺上與咖啡杯太貼近 → 改為對齊照片去背透明留白：
+     p-1 氣泡右緣 = 照片不透明區左緣 − 0.5fs
+     p-3 氣泡左緣 = 照片不透明區右緣 + 0.5fs
+   算式推導與各斷點實測見下方「---- 氣泡項目定位 ----」註解。
 
    ── 覆蓋層定位 ──────────────────────────────────────────
    .bc-coffee-comment 以 height:100% + aspect-ratio:860/1100 貼齊照片本體
@@ -55,14 +62,31 @@
   font-weight: 600;
   font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
 }
-/* v2：氣泡改窄長後重新定位（原本 62%/22%、56%/64% 是寬版手繪氣泡的位置），
-   確保「氣泡 + 頭部圖章 + 錨點框」整個模組都落在照片框內
-   2026-09-11 追加：氣泡 SVG 放大 10% 且底邊上移 0.3rem（見 .blowing .img 註解）
-   → 模組上方所需空間變大，p-3 由 35% 下移至 41%、手機 p-1/p-3 下移 */
-.bc-coffee-photo .bc-coffee-comment .p-1 { top: 64%; left: 10.65%; } /* 2026-09-11：12.5% → 10.65%（氣泡再往左，淨位移 −9.9px＝氣泡寬 15%） */
-/* 2026-09-11：left 68% → 71.31%、top 41% → 39.58%
-   （向上右側移動 15%：右 +8.9px、上 −19.6px；錨點已補償氣泡放大造成的位移） */
-.bc-coffee-photo .bc-coffee-comment .p-3 { top: 39.58%; left: 71.31%; }
+/* v3（2026-09-13）：氣泡由「壓在咖啡杯照片上」改為「移到杯外」——
+   放在 .img-box 內、照片去背透明留白區，不再與咖啡杯重疊。
+   coffee_09.png 去背 alpha bbox（占照片框寬）= x 9.30% ~ 89.53%
+   （alpha>5 與 alpha>200 量到的 bbox 相同 → 硬邊去背，左右各約 9.3% / 10.5% 全透明）
+   氣泡水平置中於錨點框（寬 1.2rem）：
+     氣泡左緣 = left + 0.6rem − 半個氣泡寬（pattern-1 2.145fs、pattern-5 1.9195fs）
+   對齊目標：p-1 氣泡「右緣」= 9.30% − 0.5fs（杯左外側留白 0.5fs ≈ 6.5~8.5px）
+             p-3 氣泡「左緣」= 89.53% + 0.5fs（杯右外側同留白）
+   因 fs / rem 皆隨斷點變化，此 left 為單一算式即可通吃全部斷點
+   → 下方 media query 只需覆寫 top（見檔尾）。
+   各斷點實測（氣泡外緣 vs .img-box 邊緣）：
+     375 / 480 / 576 / 768 / ≥1200px：模組完整落在 .img-box 內
+     992–1199px（照片被 max-height 限高、左右留白僅 24~34px）：p-1 向左最多凸出
+       .img-box 約 13~14px（實測 992px→13px、1080px→14px），落在欄與欄之間的黑底；
+       右側商品欄內容起點 ≥544px，仍有 60px 以上距離
+       → 不重疊、也不會被 body overflow-x:clip 裁掉 */
+.bc-coffee-photo .bc-coffee-comment .p-1 {
+  top: 64%;
+  left: calc(9.3% - 0.5 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem) - 2.145 * var(--bc-cb-fs));
+}
+/* 2026-09-13：top 39.58%（0.39fs 差距保留），left 依上述算式改為照片右側杯外 */
+.bc-coffee-photo .bc-coffee-comment .p-3 {
+  top: 39.58%;
+  left: calc(89.53% + 0.5 * var(--bc-cb-fs) + 1.9195 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
+}
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
 .bc-coffee-photo .bc-coffee-comment .p-1,
@@ -70,12 +94,12 @@
   padding: 0 !important;
 }
 @media (max-width: 767.98px) {
-  /* 手機照片僅 145×186，模組（氣泡最高 117.7px + 圖章 30px）須再往內收
-     2026-09-11：氣泡放大 10% 且上移 0.3rem → p-1 72%→78%、p-3 66%→70%
-     2026-09-11 追加：氣泡再放大 10% + p-3 向上右 15%、p-1 向左 15%
-                → p-1 16%→12.65%（−7.6px）、p-3 56.5%→62.47% / 70%→67.42%（+6.8px / −15px） */
-  .bc-coffee-photo .bc-coffee-comment .p-1 { top: 78%; left: 12.65%; }
-  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 67.42%; left: 62.47%; }
+  /* 2026-09-13：left 已由上方 calc（依 fs / rem 自動縮放）統一定位，
+     手機只覆寫垂直位置；水平算式與桌機相同 → 氣泡同樣落在杯外留白區。
+     手機照片 146×187（fs 13 / rem 46），氣泡寬 55.8px，
+     .img-box 左右留白 76~119px > 氣泡寬 → 完整落在盒內 */
+  .bc-coffee-photo .bc-coffee-comment .p-1 { top: 78%; }
+  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 67.42%; }
 }
 
 /* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
