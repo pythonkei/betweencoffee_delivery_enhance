@@ -59,10 +59,10 @@
    確保「氣泡 + 頭部圖章 + 錨點框」整個模組都落在照片框內
    2026-09-11 追加：氣泡 SVG 放大 10% 且底邊上移 0.3rem（見 .blowing .img 註解）
    → 模組上方所需空間變大，p-3 由 35% 下移至 41%、手機 p-1/p-3 下移 */
-.bc-coffee-photo .bc-coffee-comment .p-1 { top: 64%; left: 12.5%; } /* 2026-09-11：14% → 12.5%（氣泡往左，實測 −8px） */
-/* 2026-09-11：66% → 68%；氣泡同時縮窄 2.4px（左緣內縮）→ 錨點需補償，
-   使「可見左緣」與 p-1 對稱地往右移約 +8px */
-.bc-coffee-photo .bc-coffee-comment .p-3 { top: 41%; left: 68%; }
+.bc-coffee-photo .bc-coffee-comment .p-1 { top: 64%; left: 10.65%; } /* 2026-09-11：12.5% → 10.65%（氣泡再往左，淨位移 −9.9px＝氣泡寬 15%） */
+/* 2026-09-11：left 68% → 71.31%、top 41% → 39.58%
+   （向上右側移動 15%：右 +8.9px、上 −19.6px；錨點已補償氣泡放大造成的位移） */
+.bc-coffee-photo .bc-coffee-comment .p-3 { top: 39.58%; left: 71.31%; }
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
 .bc-coffee-photo .bc-coffee-comment .p-1,
@@ -72,10 +72,10 @@
 @media (max-width: 767.98px) {
   /* 手機照片僅 145×186，模組（氣泡最高 117.7px + 圖章 30px）須再往內收
      2026-09-11：氣泡放大 10% 且上移 0.3rem → p-1 72%→78%、p-3 66%→70%
-     2026-09-11 追加：氣泡尺度重算（p-1 框 3.90fs、p-3 框 3.49fs）
-                → p-1 20%→16%（−6px）、p-3 55%→56.5%（+5px，與桌機對稱） */
-  .bc-coffee-photo .bc-coffee-comment .p-1 { top: 78%; left: 16%; }
-  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 70%; left: 56.5%; }
+     2026-09-11 追加：氣泡再放大 10% + p-3 向上右 15%、p-1 向左 15%
+                → p-1 16%→12.65%（−7.6px）、p-3 56.5%→62.47% / 70%→67.42%（+6.8px / −15px） */
+  .bc-coffee-photo .bc-coffee-comment .p-1 { top: 78%; left: 12.65%; }
+  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 67.42%; left: 62.47%; }
 }
 
 /* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
@@ -123,35 +123,34 @@
        無法完整顯示；上移後氣泡底邊＝圖章頂緣，氣泡與尾巴完整可見。 */
   bottom: calc(100% + 0.3 * var(--bc-cb-rem));
   /* 置中於錨點框：left = 50% − 半個氣泡寬（各 pattern 依自身框寬覆寫）
-     pattern-1：框寬 3.90fs → 半寬 1.95fs
-     pattern-5：框寬 3.49fs → 半寬 1.745fs */
-  left: calc(50% - 1.95 * var(--bc-cb-fs));
+     pattern-1：框寬 4.290fs → 半寬 2.145fs
+     pattern-5：框寬 3.839fs → 半寬 1.9195fs */
+  left: calc(50% - 2.145 * var(--bc-cb-fs));
   min-width: 0;
   min-height: 0;
   background: center center / contain no-repeat;
 }
-/* 2026-09-11：氣泡再放大 10%（對「實際可見的繪圖」精準 ×1.1；文字級距不變）
-   + 依手繪 SVG 匯出的 viewBox 比例設定框高，使圖形正好填滿框（不裁切、不留空邊）
-   框寬＝目標繪圖寬 ÷ 填入比（繪圖精確寬 / viewBox 寬）：
-     pattern-1：繪圖 3.404fs ×1.1 = 3.744fs ÷ 0.960 = 3.90fs → 高 3.90 / 0.4303 = 9.063fs
-     pattern-5：繪圖 3.044fs ×1.1 = 3.348fs ÷ 0.959 = 3.49fs → 高 3.49 / 0.4544 = 7.680fs
+/* 2026-09-11：氣泡再放大 10%（以「實際可見的繪圖寬」精準 ×1.1；文字級距不變）
+   框寬＝目標繪圖寬 ÷ 填入比（精確繪圖寬 / viewBox 寬）：
+     pattern-1：繪圖 3.7455fs ×1.1 = 4.1201fs ÷ 0.960386 = 4.290fs → 高 4.290 / 0.4303 = 9.970fs
+     pattern-5：繪圖 3.3459fs ×1.1 = 3.6805fs ÷ 0.958696 = 3.839fs → 高 3.839 / 0.4544 = 8.449fs
    ※ viewBox 為使用者以 SVGMaker 匯出的緊貼繪圖版（邊距 1.5，路徑未改動） */
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .img {
-  left: calc(50% - 1.95 * var(--bc-cb-fs)); /* 3.90 / 2 */
-  width: calc(3.9 * var(--bc-cb-fs));
-  height: calc(9.063 * var(--bc-cb-fs)); /* 3.90 / 0.4303（01a viewBox 比例） */
+  left: calc(50% - 2.145 * var(--bc-cb-fs)); /* 4.290 / 2 */
+  width: calc(4.29 * var(--bc-cb-fs));
+  height: calc(9.97 * var(--bc-cb-fs)); /* 4.290 / 0.4303（01a viewBox 比例） */
   background-image: url("../images/sake-mv/blowing-pattern01a.svg?v=20260911j");
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
-  left: calc(50% - 1.745 * var(--bc-cb-fs)); /* 3.49 / 2 */
-  width: calc(3.49 * var(--bc-cb-fs));
-  height: calc(7.68 * var(--bc-cb-fs)); /* 3.49 / 0.4544（02a viewBox 比例） */
+  left: calc(50% - 1.9195 * var(--bc-cb-fs)); /* 3.839 / 2 */
+  width: calc(3.839 * var(--bc-cb-fs));
+  height: calc(8.449 * var(--bc-cb-fs)); /* 3.839 / 0.4544（02a viewBox 比例） */
   background-image: url("../images/sake-mv/blowing-pattern02a.svg?v=20260911j");
 }
 /* 直立文字：內距依 pattern 設定，使「文字外框＋內距」剛好等於氣泡框高
    → 文字精準落在手繪圖形內（下方留較多空間給尾巴）
-     pattern-1：7 字 = 7.14fs，框 9.063fs → 上 0.788fs + 下 1.135fs
-     pattern-5：6 字 = 6.12fs，框 7.680fs → 上 0.618fs + 下 0.942fs
+     pattern-1：7 字 = 7.14fs，框 9.970fs → 上 1.160fs + 下 1.670fs
+     pattern-5：6 字 = 6.12fs，框 8.449fs → 上 0.922fs + 下 1.407fs
    （氣泡放大 10% 時內距同步放大，維持文字在氣泡內的相對位置；字級不變） */
 .bc-coffee-photo .bc-coffee-comment .blowing .text {
   position: relative;
@@ -165,10 +164,10 @@
   white-space: nowrap;
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .text {
-  padding: calc(0.788 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.135 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc(1.16 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.67 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .text {
-  padding: calc(0.618 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(0.942 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc(0.922 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.407 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
 }
 
 /* ---- 動畫（is-show 輪替；與原站數值完全一致） ---- */
