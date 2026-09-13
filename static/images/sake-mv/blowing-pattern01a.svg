@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="77.46" height="175.78" viewBox="-1.572 -1.500 77.460 175.782">
-<!-- 2026-09-11：viewBox 由 -1.2597099999999912 -1.5 75.63628133607008 175.78200000855492 調整為緊貼繪圖 + 1.5 邊距（路徑資料未動）
-     原因：原 viewBox 比繪圖窄 → 左右被裁掉，氣泡無法完整顯示 -->
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="75.64" height="175.78" viewBox="-1.2597099999999912 -1.5 75.63628133607008 175.78200000855492">
 <desc>Created with SVGMaker Editor 3.4.1</desc>
 <defs>
 </defs>
