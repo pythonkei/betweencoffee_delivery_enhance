@@ -206,12 +206,22 @@
 }
 
 /* ---- pattern-4（p-4 的 staff-comment-3） ---- */
-.bc-sake-mv .blowing.pattern-4 { width: calc(1.75 * var(--sake-rem)); height: calc(1.57 * var(--sake-rem)); }
+/* 2026-09-11：底圖改為豎式 blowing-pattern02a.svg（比例 0.4544）
+   → 框高加大，使「酸味がある洋食にも合うお酒」12 字排成單一直行並完整落在圖形內：
+     桌機：字高 12×14×1.02 = 171.4 + 上下內距 2×0.3rem(30px) = 231.4 → 框高 2.35rem(235px)
+           框 175×235 → .img 175×235，圖形 contain 依高度撐滿 = 106.7×235，文字單行約 25px 寬 ✓
+     手機：字高 12×12×1.02 = 146.9 + 2×0.2rem(20.8px) = 188.5 → 框高 1.9rem(197.6px)
+   ※ 未加大前框高僅 157px，12 字會折成 2 欄（寬 76px）而凸出 71px 寬的圖形。 */
+.bc-sake-mv .blowing.pattern-4 { width: calc(1.75 * var(--sake-rem)); height: calc(2.35 * var(--sake-rem)); }
 .bc-sake-mv .blowing.pattern-4 .text { padding: calc(0.3 * var(--sake-rem)) 0; }
-.bc-sake-mv .blowing.pattern-4 .img { background-image: url("../images/sake-mv/blowing-pattern02.svg"); }
+/* 2026-09-11：p-4 底圖由 blowing-pattern02.svg（175×157 橫式，使用者已改名為
+   _blowing-pattern02.svg）改用 blowing-pattern02a.svg（72.67×159.94 豎式，
+   與咖啡詳情頁 p-3 同一手繪氣泡）。.img 為 min-width/min-height:100% 且
+   background 為 contain → 豎長 SVG 會依 .img 高度等比撐滿，文字落在圖形內。 */
+.bc-sake-mv .blowing.pattern-4 .img { background-image: url("../images/sake-mv/blowing-pattern02a.svg"); }
 .bc-sake-mv .blowing.pattern-4::after { scale: -1; }
 @media (max-width: 767px) {
-  .bc-sake-mv .blowing.pattern-4 { width: calc(1.13 * var(--sake-rem)); height: calc(1.02 * var(--sake-rem)); }
+  .bc-sake-mv .blowing.pattern-4 { width: calc(1.13 * var(--sake-rem)); height: calc(1.9 * var(--sake-rem)); }
   .bc-sake-mv .blowing.pattern-4 .text { padding: calc(0.2 * var(--sake-rem)) 0; }
 }
 
