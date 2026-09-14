@@ -27,6 +27,14 @@
      p-3 氣泡左緣 = 照片不透明區右緣 + 0.5fs
    算式推導與各斷點實測見下方「---- 氣泡項目定位 ----」註解。
 
+   ── v4 變更（2026-09-14）─────────────────────────────────
+   1. 氣泡位置微調（5% ＝ 氣泡自身尺寸，用 --bc-cb-fs 表達 → 各斷點等比）：
+        p-1：往左 5% ＝ 氣泡寬 4.29fs × 0.05 = 0.2145fs
+        p-3：向上右 5% ＝ 寬 3.839fs × 0.05 = 0.19195fs（右）
+                          高 8.449fs × 0.05 = 0.42245fs（上）
+   2. 資源搬遷：static/images/sake-mv/* → static/images/*
+      （資料夾已刪除，本檔 4 個參照同步改為 ../images/…）
+
    ── 覆蓋層定位 ──────────────────────────────────────────
    .bc-coffee-comment 以 height:100% + aspect-ratio:860/1100 貼齊照片本體
    （咖啡頁 .img-box 高度恆等於照片高、照片水平置中）→ 氣泡的百分比定位
@@ -72,20 +80,25 @@
              p-3 氣泡「左緣」= 89.53% + 0.5fs（杯右外側同留白）
    因 fs / rem 皆隨斷點變化，此 left 為單一算式即可通吃全部斷點
    → 下方 media query 只需覆寫 top（見檔尾）。
-   各斷點實測（氣泡外緣 vs .img-box 邊緣）：
+   各斷點實測（氣泡外緣 vs .img-box 邊緣；數值為 2026-09-14 v4 微調後）：
      375 / 480 / 576 / 768 / ≥1200px：模組完整落在 .img-box 內
      992–1199px（照片被 max-height 限高、左右留白僅 24~34px）：p-1 向左最多凸出
-       .img-box 約 13~14px（實測 992px→13px、1080px→14px），落在欄與欄之間的黑底；
-       右側商品欄內容起點 ≥544px，仍有 60px 以上距離
+       .img-box 約 16~18px（實測 992px→16px、1080px→18px），落在欄與欄之間的黑底；
+       右側商品欄內容起點 ≥544px，仍有 57px 以上距離
        → 不重疊、也不會被 body overflow-x:clip 裁掉 */
 .bc-coffee-photo .bc-coffee-comment .p-1 {
   top: 64%;
-  left: calc(9.3% - 0.5 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem) - 2.145 * var(--bc-cb-fs));
+  /* 2026-09-14：往左 5%（氣泡寬 4.29fs × 0.05 = 0.2145fs）
+     → 0.5(gap) + 2.145(半寬) + 0.2145 = 2.8595fs */
+  left: calc(9.3% - 0.6 * var(--bc-cb-rem) - 2.8595 * var(--bc-cb-fs));
 }
-/* 2026-09-13：top 39.58%（0.39fs 差距保留），left 依上述算式改為照片右側杯外 */
+/* 2026-09-13：top 39.58%（0.39fs 差距保留），left 依上述算式改為照片右側杯外
+   2026-09-14：向上右 5%（寬 3.839fs × 0.05 = 0.19195fs → 右；
+                          高 8.449fs × 0.05 = 0.42245fs → 上）
+     left：0.5(gap) + 1.9195(半寬) + 0.19195 = 2.61145fs */
 .bc-coffee-photo .bc-coffee-comment .p-3 {
-  top: 39.58%;
-  left: calc(89.53% + 0.5 * var(--bc-cb-fs) + 1.9195 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
+  top: calc(39.58% - 0.42245 * var(--bc-cb-fs));
+  left: calc(89.53% + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
 }
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
@@ -97,9 +110,10 @@
   /* 2026-09-13：left 已由上方 calc（依 fs / rem 自動縮放）統一定位，
      手機只覆寫垂直位置；水平算式與桌機相同 → 氣泡同樣落在杯外留白區。
      手機照片 146×187（fs 13 / rem 46），氣泡寬 55.8px，
-     .img-box 左右留白 76~119px > 氣泡寬 → 完整落在盒內 */
+     .img-box 左右留白 76~119px > 氣泡寬 → 完整落在盒內
+     2026-09-14：p-3 的上移 5%（0.42245fs）為等比量，手機同步套用 */
   .bc-coffee-photo .bc-coffee-comment .p-1 { top: 78%; }
-  .bc-coffee-photo .bc-coffee-comment .p-3 { top: 67.42%; }
+  .bc-coffee-photo .bc-coffee-comment .p-3 { top: calc(67.42% - 0.42245 * var(--bc-cb-fs)); }
 }
 
 /* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
@@ -120,12 +134,12 @@
   background: center center / contain no-repeat;
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-1::after {
-  background-image: url("../images/sake-mv/staff01.png");
+  background-image: url("../images/staff01.png");
   width: calc(0.8 * var(--bc-cb-rem));
   height: calc(0.95 * var(--bc-cb-rem));
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-2::after {
-  background-image: url("../images/sake-mv/staff02.png");
+  background-image: url("../images/staff02.png");
   width: calc(0.69 * var(--bc-cb-rem));
   height: calc(0.95 * var(--bc-cb-rem));
 }
@@ -163,19 +177,36 @@
   left: calc(50% - 2.145 * var(--bc-cb-fs)); /* 4.290 / 2 */
   width: calc(4.29 * var(--bc-cb-fs));
   height: calc(9.97 * var(--bc-cb-fs)); /* 4.290 / 0.4303（01a viewBox 比例） */
-  background-image: url("../images/sake-mv/blowing-pattern01a.svg?v=20260911j");
+  background-image: url("../images/blowing-pattern01a.svg?v=20260911j");
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
   left: calc(50% - 1.9195 * var(--bc-cb-fs)); /* 3.839 / 2 */
   width: calc(3.839 * var(--bc-cb-fs));
   height: calc(8.449 * var(--bc-cb-fs)); /* 3.839 / 0.4544（02a viewBox 比例） */
-  background-image: url("../images/sake-mv/blowing-pattern02a.svg?v=20260911j");
+  background-image: url("../images/blowing-pattern02a.svg?v=20260911j");
 }
 /* 直立文字：內距依 pattern 設定，使「文字外框＋內距」剛好等於氣泡框高
-   → 文字精準落在手繪圖形內（下方留較多空間給尾巴）
-     pattern-1：7 字 = 7.14fs，框 9.970fs → 上 1.160fs + 下 1.670fs
-     pattern-5：6 字 = 6.12fs，框 8.449fs → 上 0.922fs + 下 1.407fs
-   （氣泡放大 10% 時內距同步放大，維持文字在氣泡內的相對位置；字級不變） */
+   → 文字精準落在手繪圖形內
+     pattern-1：7 字 = 7.14fs，框 9.970fs → 上 1.16fs + 下 1.67fs（和 2.83fs）
+     pattern-5：6 字 = 6.12fs，框 8.449fs → 上 0.922fs + 下 1.407fs（和 2.329fs）
+   ※ 內距合計 = 框高 − 文字高，故只重新分配上下內距不會改變文字是否放得下。
+   2026-09-14：文字改為在氣泡內「垂直置中」
+     量測方法：把 .img 底圖暫時隱藏、改純綠底 rgb(0,180,0) 後 6x 截圖
+       → 暗像素 100% 是字形（避開氣泡尾巴細窄區與白色描邊的誤判）；
+       比較基準用「同一張截圖內的氣泡 ink 中心」（無截圖四捨五入誤差）。
+     修正前實測（原始內距）：pattern-1 字形中心高出氣泡中心 3.49px、
+       pattern-5 高出 2.32px ← 使用者回報的「氣泡未與文字中心對齊」。
+     修正：以 fs 表達位移量（各斷點等比、只重新分配上下內距，合計不變）：
+       pattern-1：下移 3.49px = 0.2053fs → 上 1.16+0.2053 = 1.3653fs、下 1.67−0.2053 = 1.4647fs
+       pattern-5：下移 2.32px = 0.1365fs → 上 0.922+0.1365 = 1.0585fs、下 1.407−0.1365 = 1.2705fs
+     再實測（以氣泡 ink 中心為基準）微調至最終值：
+       pattern-1：上 1.33fs / 下 1.5fs（p-1 原偏 +0.6px → 上移 0.6px）
+       pattern-5：上 1.1526fs / 下 1.1764fs（p-3 原偏 −1.6px → 下移 1.6px）
+     最終實測（375 / 768 / 1280 / 1920，字形中心 − 氣泡 ink 中心）：
+       pattern-1：−0.75 / −0.42 / −0.08 / −0.08 px
+       pattern-5：+0.50 / +0.08 / +0.67 / +0.67 px（皆 ≤ 0.92px）
+     ※ 曾用「氣泡白像素範圍內找暗像素」量測，因尾巴細窄區的暗邊被誤判為文字
+       → 一度誤判為「p-3 文字偏低」而過度上移；已改用綠底法重測後修正。 */
 .bc-coffee-photo .bc-coffee-comment .blowing .text {
   position: relative;
   z-index: 20;
@@ -188,10 +219,10 @@
   white-space: nowrap;
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .text {
-  padding: calc(1.16 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.67 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc(1.33 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.5 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .text {
-  padding: calc(0.922 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.407 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc(1.1526 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.1764 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
 }
 
 /* ---- 動畫（is-show 輪替；與原站數值完全一致） ---- */
