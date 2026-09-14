@@ -35,32 +35,37 @@
    2. 資源搬遷：static/images/sake-mv/* → static/images/*
       （資料夾已刪除，本檔 4 個參照同步改為 ../images/…）
 
-   ── 覆蓋層定位 ──────────────────────────────────────────
-   .bc-coffee-comment 以 height:100% + aspect-ratio:860/1100 貼齊照片本體
+   ── 覆蓋層定位（2026-09-14：改為每款咖啡可設定）────────────────
+   .bc-coffee-comment 以 height:100% + aspect-ratio 貼齊照片本體
    （咖啡頁 .img-box 高度恆等於照片高、照片水平置中）→ 氣泡的百分比定位
-   直接對應照片。
+   直接對應照片。三個值由模板以行內樣式傳入（CoffeeItem 欄位，
+   留空時由模型存檔自動量測；見 eshop/models/shop_items.py）：
+     --bc-cb-photo-ratio  照片寬高比（860×1100 → 0.782；Black Blend 1200×840 → 1.429）
+     --bc-cb-safe-l/-r    照片不透明內容的左/右緣（占照片寬 %）→ 氣泡只排在此範圍外
+     --bc-cb-scale        氣泡尺寸倍率（直式 1；橫式 ≈ 1/寬高比，避免氣泡相對照片過大）
+   未傳值時用下方 CSS 預設（= Butter King 860×1100 的幾何）。
    ============================================================ */
 .bc-coffee-photo {
   position: relative;
 }
 
 .bc-coffee-photo .bc-coffee-comment {
-  --bc-cb-rem: 46px; /* 頭部圖章 / 位移基準（原站 100px 配 1440px 照片） */
-  --bc-cb-fs: 13px; /* 氣泡文字級距（v2 放大） */
+  --bc-cb-rem: calc(46px * var(--bc-cb-scale, 1)); /* 頭部圖章 / 位移基準（原站 100px 配 1440px 照片） */
+  --bc-cb-fs: calc(13px * var(--bc-cb-scale, 1)); /* 氣泡文字級距（v2 放大） */
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   height: 100%;
-  aspect-ratio: 860 / 1100; /* coffee_09.png = 860×1100（貼齊照片框） */
+  aspect-ratio: var(--bc-cb-photo-ratio, 0.782); /* 預設 coffee_09.png = 860×1100（貼齊照片框） */
   pointer-events: none;
   z-index: 3;
 }
 @media (min-width: 768px) {
-  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 64px; --bc-cb-fs: 15px; }
+  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: calc(64px * var(--bc-cb-scale, 1)); --bc-cb-fs: calc(15px * var(--bc-cb-scale, 1)); }
 }
 @media (min-width: 1080px) {
-  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: 72px; --bc-cb-fs: 17px; }
+  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: calc(72px * var(--bc-cb-scale, 1)); --bc-cb-fs: calc(17px * var(--bc-cb-scale, 1)); }
 }
 
 /* ---- 氣泡項目定位 ---- */
@@ -90,7 +95,7 @@
   top: 64%;
   /* 2026-09-14：往左 5%（氣泡寬 4.29fs × 0.05 = 0.2145fs）
      → 0.5(gap) + 2.145(半寬) + 0.2145 = 2.8595fs */
-  left: calc(9.3% - 0.6 * var(--bc-cb-rem) - 2.8595 * var(--bc-cb-fs));
+  left: calc(var(--bc-cb-safe-l, 9.3%) - 0.6 * var(--bc-cb-rem) - 2.8595 * var(--bc-cb-fs));
 }
 /* 2026-09-13：top 39.58%（0.39fs 差距保留），left 依上述算式改為照片右側杯外
    2026-09-14：向上右 5%（寬 3.839fs × 0.05 = 0.19195fs → 右；
@@ -98,7 +103,7 @@
      left：0.5(gap) + 1.9195(半寬) + 0.19195 = 2.61145fs */
 .bc-coffee-photo .bc-coffee-comment .p-3 {
   top: calc(39.58% - 0.42245 * var(--bc-cb-fs));
-  left: calc(89.53% + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
+  left: calc(var(--bc-cb-safe-r, 89.53%) + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
 }
 /* 2026-09-14 新增：p-2（第三顆，右下）— 對齊照片右側留白（同 p-3 的算法）
    氣泡寬 4.89fs（pattern-2）→ 半寬 2.445fs；氣泡左緣 = 89.53% + 0.5fs
@@ -107,7 +112,7 @@
      實測氣泡完全落在照片框內（手機斷點另覆寫為 84%） */
 .bc-coffee-photo .bc-coffee-comment .p-2 {
   top: 80%;
-  left: calc(89.53% + 2.945 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
+  left: calc(var(--bc-cb-safe-r, 89.53%) + 2.945 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
 }
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */

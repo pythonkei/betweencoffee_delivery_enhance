@@ -42,6 +42,32 @@ class CoffeeItem(models.Model):
         verbose_name="氣泡文字 3（右上）",
         help_text="詳情頁照片右上氣泡（pattern-5）；建議 5~6 字，留空=不顯示",
     )
+    # 氣泡定位用的照片幾何（2026-09-14）：預設由 image 自動量測（存檔時若為空才填），
+    # 也可在 Admin 手動覆寫。三顆氣泡都排在「照片不透明內容」之外，故需要這三個基準值。
+    bubble_safe_left = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡左基準（內容左緣 %）",
+        help_text="去背照片實際內容的左緣（占照片寬 %）；留空=存檔時自動量測",
+    )
+    bubble_safe_right = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡右基準（內容右緣 %）",
+        help_text="去背照片實際內容的右緣（占照片寬 %）；留空=存檔時自動量測",
+    )
+    bubble_photo_ratio = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="照片寬高比（寬÷高）",
+        help_text="例 860×1100 → 0.782；氣泡覆蓋層用此比例對齊照片；留空=存檔時自動量測",
+    )
+    bubble_scale = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡尺寸倍率",
+        help_text="1=直式照片標準；橫式照片自動設為 1/寬高比（如 1200×840 → 0.7）避免氣泡相對照片過大；留空=存檔時自動計算",
+    )
     image = models.ImageField(upload_to="coffee_images/")
     image_index = models.ImageField(
         upload_to="coffee_images/index/", blank=True, null=True, verbose_name="首页图片"
@@ -164,6 +190,59 @@ class CoffeeItem(models.Model):
         verbose_name="Sticker 貼紙",
         help_text="選擇詳情頁顯示的貼紙；留空 = 不顯示。",
     )
+
+    # ===== 氣泡定位幾何（2026-09-14）=====
+    def measure_bubble_geometry(self):
+        """由詳情照片量測氣泡定位所需幾何 → (內容左緣 %, 內容右緣 %, 寬高比, 尺寸倍率)。
+
+        - 左/右緣：去背 PNG 不透明區的左右邊界（占照片寬 %）→ 氣泡只排在這個範圍外
+        - 寬高比：寬 ÷ 高（氣泡覆蓋層用此比例對齊照片本體）
+        - 倍率：min(1, 1/寬高比)；直式照片 1.0，橫式照片自動縮小
+          （照片顯示高度 ≈ 顯示寬 ÷ 寬高比，橫式照片較矮，氣泡需同比縮小）
+        讀不到圖（無圖／非本機儲存）→ 回傳 (None, None, None, None)，由人工設定。
+        """
+        try:
+            from PIL import Image
+
+            if not (self.image and getattr(self.image, "name", "")):
+                return None, None, None, None
+            with Image.open(self.image.path) as im:
+                width, height = im.size
+                if not (width and height):
+                    return None, None, None, None
+                ratio = round(width / height, 3)
+                left = right = None
+                if im.mode in ("RGBA", "LA") or "transparency" in im.info:
+                    box = im.convert("RGBA").getchannel("A").getbbox()
+                    if box:
+                        left = round(box[0] / width * 100, 2)
+                        right = round(box[2] / width * 100, 2)
+                scale = round(1 / ratio, 2) if ratio > 1 else 1.0
+                return left, right, ratio, scale
+        except Exception:
+            return None, None, None, None
+
+    def save(self, *args, **kwargs):
+        """氣泡定位欄位留空時，自動由詳情照片量測填入（已手動填過的值不會被覆蓋）。
+
+        換圖後若覺得氣泡位置不準 → 把這幾個欄位清空再存一次即可重新量測。
+        """
+        if self.image and (
+            self.bubble_safe_left is None
+            or self.bubble_safe_right is None
+            or self.bubble_photo_ratio is None
+            or self.bubble_scale is None
+        ):
+            left, right, ratio, scale = self.measure_bubble_geometry()
+            if self.bubble_safe_left is None and left is not None:
+                self.bubble_safe_left = left
+            if self.bubble_safe_right is None and right is not None:
+                self.bubble_safe_right = right
+            if self.bubble_photo_ratio is None and ratio is not None:
+                self.bubble_photo_ratio = ratio
+            if self.bubble_scale is None and scale is not None:
+                self.bubble_scale = scale
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "Coffee"
