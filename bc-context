@@ -87,6 +87,7 @@ load_context() {
         echo "│   ├── 版號：bc-sake-mv.css ?v=20260914a（about.html）、bc-coffee-comment.css ?v=20260914b（coffee.html）；⑬⑮ 條目提到的 static/images/sake-mv/ 為搬遷前歷史紀錄"
         echo "│   ├── 咖啡詳情頁氣泡微調（5% = 氣泡自身尺寸，用 --bc-cb-fs 表達 → 各斷點等比）：p-1 往左 5%（4.29fs×0.05 = 0.2145fs → left fs 係數 0.5+2.145+0.2145 = 2.8595fs）；p-3 向上右 5%（3.839fs×0.05 = 0.19195fs → 2.61145fs；8.449fs×0.05 = 0.42245fs → top calc(39.58% - 0.42245fs)、手機 calc(67.42% - 0.42245fs)）"
         echo "│   ├── 氣泡文字垂直置中（回報 blowing-pattern02a.svg 未與文字中心對齊）：SVG 本身水平已精確置中（ink bbox 左右留白皆 1.593 單位、dx 0.00px）；真因是文字在氣泡內的垂直位置，視覺基準取氣泡面積質心（手繪小尾巴會讓 ink bbox 中心偏低約 3.5px）→ 只重新分配 .text 上下內距（合計不變）：pattern-1 上 1.1803fs / 下 1.6497fs、pattern-5 上 0.9318fs / 下 1.3972fs（與原始 1.16/1.67、0.922/1.407 僅差 0.01~0.02fs ≒ 0.2~0.35px，原設計已接近最佳）"
+        echo "│   ├── hero 第 6、7 張 slide 圖片更換：index.html .bc-gunte-hero ul.splide__list 第 6 個 li → images/06_720.jpg、第 7 個 li → images/07_1080.jpg（.hide-sp 540x540 與 .vis-sp 255x340 同步換；原 images/gunte_hero/hero-slide03/04-photo(-sp)@2x.jpg 停用；實測桌機 540x540、手機 255x255 比例保留、載入正常）"
         echo "│   └── 驗證：11 個新路徑全部 200 且 img.decode() 尺寸正確（01a 76x176 / 02a 73x160 / 01 158x173 / 03 215x192 / staff01~04 / vibran 2600x2600）、舊路徑 404、coffee 與 about 頁皆無 404；8 斷點實測距咖啡杯 9~12px、無水平溢出、992-1080px p-1 凸出 img-box 16~18px 但距右側商品欄 >= 57px；氣泡文字置中量測法＝把 .img 底圖暫時隱藏改純綠底 rgb(0,180,0) 後 6x 截圖（暗像素 100% 是字形，避開尾巴細窄區與白色描邊的誤判），最終實測 375/768/1280/1920「字形中心 - 氣泡 ink 中心」：pattern-1 -0.75/-0.42/-0.08/-0.08px、pattern-5 +0.50/+0.08/+0.67/+0.67px（皆 <= 0.92px）"
         echo "│"
         echo "│   2026-09-13 ✅"

@@ -288,9 +288,10 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [ ] 全部咖啡詳情頁套用氣泡（待做）：各商品照片比例與去背邊界不同（如 Black Blend 1200×840 橫圖），需逐張量 alpha bbox，並把 9.30%/89.53% 由硬編碼改為可依圖設定的 CSS 變數
 ```
 
-## 近期任務（2026-09-14）sake-mv 資源集中 + 咖啡頁氣泡微調
+## 近期任務（2026-09-14）sake-mv 資源集中 + 咖啡頁氣泡微調 + hero 圖片替換
 
 ```
+├── [x] hero（GUNTE .bc-gunte-hero）第 6、7 張 slide 圖片更換 — ✅ 2026-09-14（index.html `ul.splide__list` 第 6 個 li → `images/06_720.jpg`、第 7 個 li → `images/07_1080.jpg`；每個 li 的 .hide-sp（540×540）與 .vis-sp（255×340）同步換；原 `images/gunte_hero/hero-slide03-photo(-sp)@2x.jpg`、`hero-slide04-photo(-sp)@2x.jpg` 停用；CDP 實測桌機 540×540、手機 255×255（1:1 比例保留、無拉伸）、complete 載入正常，其餘 5 張未動）
 ├── [x] sake-mv 資源集中（資料夾扁平化）— ✅ 2026-09-14（static/images/sake-mv/ 11 檔 git mv 到 static/images/ 並刪除資料夾；bc-sake-mv.css 8 處 + bc-coffee-comment.css 4 處路徑 ../images/sake-mv/x → ../images/x；about.html vibran.jpg 路徑更新；版號 bc-sake-mv.css ?v=20260914a；驗證 11 檔新路徑 200 + decode 尺寸正確、舊路徑 404、兩頁無 404）
 ├── [x] 咖啡詳情頁氣泡位置微調（5% ＝ 氣泡自身尺寸）— ✅ 2026-09-14（p-1 往左 5%：寬 4.29fs×0.05 = 0.2145fs → left fs 係數 0.5+2.145+0.2145 = 2.8595fs；p-3 向上右 5%：寬 3.839fs×0.05 = 0.19195fs → 2.61145fs、高 8.449fs×0.05 = 0.42245fs → top calc(39.58% − 0.42245fs)＋手機 calc(67.42% − 0.42245fs)；8 斷點實測距咖啡杯 9~12px、無水平溢出、距右側商品欄 ≥57px；版號 bc-coffee-comment.css ?v=20260914b）
 ├── [x] 氣泡文字在氣泡內「垂直置中」（blowing-pattern02a.svg 回報）— ✅ 2026-09-14（診斷：SVG 本身水平已精確置中（ink bbox 左右留白皆 1.593 單位、dx 0.00px），真因是文字在氣泡內的垂直位置；**視覺基準＝面積質心**（手繪氣泡的小尾巴會讓 ink bbox 中心偏低約 3.5px）；修法＝只重新分配 .text 上下內距（合計不變）：pattern-1 上 1.1803fs / 下 1.6497fs、pattern-5 上 0.9318fs / 下 1.3972fs（與原始 1.16/1.67、0.922/1.407 僅差 0.01~0.02fs ≒ 0.2~0.35px → 原設計已接近最佳）；量測法＝元素截圖 DPR 4 白像素算質心 + DOM document.createRange() 取文字 advance 中心；最終 375/768/1280/1920 實測 ≤ 0.44px。踩雷：尾巴暗邊被誤判為字形、截圖 DPR 誤以 6 換算 → 中途一度壓低 4~6px）
