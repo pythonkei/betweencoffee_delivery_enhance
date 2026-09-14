@@ -494,6 +494,13 @@ class CoffeeItemAdmin(admin.ModelAdmin):
         ),
         ("状态管理", {"fields": ("is_published", "is_shop_hot_item", "list_date")}),
         (
+            "詳情頁氣泡文字（留空=不顯示）",
+            {
+                "fields": ("staff_comment_1", "staff_comment_2", "staff_comment_3"),
+                "description": "詳情頁照片上輪播的店員氣泡文字（每 3 秒輪替一顆）。留空 = 該顆不顯示；三顆全空則整組不出現。建議字數：1 → 5~7 字、2 → 5~7 字、3 → 5~6 字（氣泡圖形為固定尺寸，字數過多會超出圖形）。※ 氣泡位置以「860×1100 直式去背照片（左右留白 9.3% / 89.5%）」設計，目前 6 款 860×1100 咖啡皆適用；Black Blend（1200×840 橫式）與 Flat White（840×1200）比例不同，位置會偏，需另行調整（或先留空）。",
+            },
+        ),
+        (
             "Sticker 貼紙（留空=不顯示）",
             {
                 "fields": ("sticker",),

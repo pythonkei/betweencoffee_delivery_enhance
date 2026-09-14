@@ -100,6 +100,15 @@
   top: calc(39.58% - 0.42245 * var(--bc-cb-fs));
   left: calc(89.53% + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
 }
+/* 2026-09-14 新增：p-2（第三顆，右下）— 對齊照片右側留白（同 p-3 的算法）
+   氣泡寬 4.89fs（pattern-2）→ 半寬 2.445fs；氣泡左緣 = 89.53% + 0.5fs
+     left = 89.53% + 0.5 + 2.445 = 89.53% + 2.945fs − 0.6rem
+   top：氣泡高 9.78fs，往上延伸（氣泡底 ≈ 錨點上方 0.75rem）→ 取 80%，
+     實測氣泡完全落在照片框內（手機斷點另覆寫為 84%） */
+.bc-coffee-photo .bc-coffee-comment .p-2 {
+  top: 80%;
+  left: calc(89.53% + 2.945 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
+}
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
 .bc-coffee-photo .bc-coffee-comment .p-1,
@@ -111,9 +120,11 @@
      手機只覆寫垂直位置；水平算式與桌機相同 → 氣泡同樣落在杯外留白區。
      手機照片 146×187（fs 13 / rem 46），氣泡寬 55.8px，
      .img-box 左右留白 76~119px > 氣泡寬 → 完整落在盒內
-     2026-09-14：p-3 的上移 5%（0.42245fs）為等比量，手機同步套用 */
+     2026-09-14：p-3 的上移 5%（0.42245fs）為等比量，手機同步套用；
+     p-2（氣泡高 9.78fs＝127px，佔手機照片 68%）取 84% 讓氣泡與圖章都在框內 */
   .bc-coffee-photo .bc-coffee-comment .p-1 { top: 78%; }
   .bc-coffee-photo .bc-coffee-comment .p-3 { top: calc(67.42% - 0.42245 * var(--bc-cb-fs)); }
+  .bc-coffee-photo .bc-coffee-comment .p-2 { top: 84%; }
 }
 
 /* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
@@ -141,6 +152,12 @@
 .bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-2::after {
   background-image: url("../images/staff02.png");
   width: calc(0.69 * var(--bc-cb-rem));
+  height: calc(0.95 * var(--bc-cb-rem));
+}
+/* 2026-09-14 新增：p-2 的頭部圖章（staff03.png，比例 403×523 → 0.95rem 高、寬 0.73rem） */
+.bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-3::after {
+  background-image: url("../images/staff03.png");
+  width: calc(0.73 * var(--bc-cb-rem));
   height: calc(0.95 * var(--bc-cb-rem));
 }
 
@@ -189,8 +206,31 @@
   height: calc(8.449 * var(--bc-cb-fs)); /* 3.839 / 0.4544（原始 02a viewBox 比例） */
   background-image: url("../images/blowing-pattern02a.svg?v=20260911j");
 }
+/* ---- pattern-2（p-2 的 staff-comment-3）---- 2026-09-14 新增
+   底圖 blowing-pattern03a.svg（viewBox 0 0 96 192 → 比例 0.5）；實繪邊界
+   x −0.25~96、y 0~192（繪圖緊貼 artboard，僅左側超出 0.25 單位 ≈ 渲染後 <0.3px，
+   肉眼不可見）→ 填入比 ≈ 1.0
+   框尺寸：比照 pattern-1 的「繪圖高 ÷ 文字高 = 1.370（7 字）」→ 框高 = 1.370 × 7.14
+   = 9.78fs、框寬 = 9.78 × 0.5 = 4.89fs（可容納 7 字；5~6 字由模板的 --bc-cb-n 自動置中） */
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-2 .img {
+  left: calc(50% - 2.445 * var(--bc-cb-fs)); /* 4.89 / 2 */
+  width: calc(4.89 * var(--bc-cb-fs));
+  height: calc(9.78 * var(--bc-cb-fs)); /* 4.89 / 0.5（03a viewBox 比例） */
+  background-image: url("../images/blowing-pattern03a.svg?v=20260914a");
+}
 /* 直立文字：內距依 pattern 設定，使「文字外框＋內距」剛好等於氣泡框高
    → 文字精準落在手繪圖形內
+   2026-09-14：內距改為「依字數自動分配」，讓任何字數都在氣泡內置中
+     模板在每個 .staff-comment 上以行內樣式傳入字數 → --bc-cb-n（例：--bc-cb-n: 7）
+     文字每字行進 = 1.02em（1em + letter-spacing 0.02em）→ 文字高 = 1.02N fs
+     上內距 = (框高 − 1.02N) / 2 − offset
+     下內距 = (框高 − 1.02N) / 2 + offset
+     offset ＝ 該 pattern 的視覺重心修正（手繪氣泡有小尾巴，含尾巴的 ink bbox 中心
+       偏低約 3.5px，故文字要比幾何中心再高一點；由質心對齊實測反推：
+       pattern-1 −0.2347fs、pattern-5 −0.2327fs）
+     N 省略時用 var(--bc-cb-n, 預設字數) 的預設值（pattern-1/2：7、pattern-5：6）
+     N 過大時內距會算成 0（負值無效 → 視為 0），文字僅會略微超出圖形。
+   ── 以下為 2026-09-11～09-14 的定值調校紀錄（現已由上式自動產生）──
      pattern-1：7 字 = 7.14fs，框 9.970fs → 上下內距合計 2.83fs
      pattern-5：6 字 = 6.12fs，框 8.449fs → 上下內距合計 2.329fs
    ※ 內距合計 = 框高 − 文字高，故只重新分配上下內距不會改變文字是否放得下。
@@ -225,10 +265,25 @@
   white-space: nowrap;
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .text {
-  padding: calc(1.1803 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.6497 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc((9.97 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) - 0.2347 * var(--bc-cb-fs))
+           calc(0.605 * var(--bc-cb-fs))
+           calc((9.97 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) + 0.2347 * var(--bc-cb-fs))
+           calc(0.605 * var(--bc-cb-fs));
+}
+/* 2026-09-14 新增：pattern-2（p-2）— 框高 9.78fs（7 字滿版）
+   offset 由實測反推：原用 −0.2327fs 時文字比質心低 0.96~1.75px（375/768/1280）
+   → 再上移 0.0901fs（取三斷點平均）＝ −0.3228fs，修正後殘差 ≤0.22px */
+.bc-coffee-photo .bc-coffee-comment .blowing.pattern-2 .text {
+  padding: calc((9.78 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) - 0.3228 * var(--bc-cb-fs))
+           calc(0.605 * var(--bc-cb-fs))
+           calc((9.78 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) + 0.3228 * var(--bc-cb-fs))
+           calc(0.605 * var(--bc-cb-fs));
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .text {
-  padding: calc(0.9318 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.3972 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc((8.449 - 1.02 * var(--bc-cb-n, 6)) / 2 * var(--bc-cb-fs) - 0.2327 * var(--bc-cb-fs))
+           calc(0.605 * var(--bc-cb-fs))
+           calc((8.449 - 1.02 * var(--bc-cb-n, 6)) / 2 * var(--bc-cb-fs) + 0.2327 * var(--bc-cb-fs))
+           calc(0.605 * var(--bc-cb-fs));
 }
 
 /* ---- 動畫（is-show 輪替；與原站數值完全一致） ---- */

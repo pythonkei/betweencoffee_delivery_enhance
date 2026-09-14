@@ -18,7 +18,14 @@
     if (!root) return;
 
     var els = Array.from(root.getElementsByClassName("staff-comment"));
-    if (els.length < 2) return;
+    if (!els.length) return;
+
+    // 2026-09-14：文字改由 CoffeeItem 欄位驅動 → 三顆氣泡可能只填 1~2 顆。
+    // 只有 1 顆時不輪播（否則原本的 els.length < 2 直接 return 會讓它永遠不顯示）。
+    if (els.length < 2) {
+      els[0].classList.add("is-show");
+      return;
+    }
 
     // 與原站相同：隨機打亂順序後輪流切換 is-show
     var shuffled = els.slice().sort(function () {

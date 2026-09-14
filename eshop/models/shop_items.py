@@ -22,6 +22,26 @@ class CoffeeItem(models.Model):
     description = models.TextField(max_length=400, blank=True)
     # 亮點標語（2026-08-14）：菜單卡片名稱下方顯示的 12-15 字中文亮點
     highlight = models.CharField(max_length=100, blank=True, verbose_name="亮點標語")
+    # 詳情頁照片氣泡文字（2026-09-14）：staff-comment 三顆氣泡（p-1 / p-2 / p-3）
+    # 留空 = 該顆不顯示；建議字數依氣泡圖形而定（見 help_text）
+    staff_comment_1 = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name="氣泡文字 1（左側）",
+        help_text="詳情頁照片左側氣泡（pattern-1）；建議 5~7 字，留空=不顯示",
+    )
+    staff_comment_2 = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name="氣泡文字 2（右下）",
+        help_text="詳情頁照片右下氣泡（pattern-2）；建議 5~7 字，留空=不顯示",
+    )
+    staff_comment_3 = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name="氣泡文字 3（右上）",
+        help_text="詳情頁照片右上氣泡（pattern-5）；建議 5~6 字，留空=不顯示",
+    )
     image = models.ImageField(upload_to="coffee_images/")
     image_index = models.ImageField(
         upload_to="coffee_images/index/", blank=True, null=True, verbose_name="首页图片"
