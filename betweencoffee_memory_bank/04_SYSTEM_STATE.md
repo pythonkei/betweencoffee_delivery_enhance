@@ -34,7 +34,7 @@
 
 ## 近期變更（最近 10 筆標題；細節見封存檔與 git log）
 
-- 2026-09-14 sake-mv 資源集中（`static/images/sake-mv/*` → `static/images/*`，資料夾刪除、CSS/模板路徑同步）＋ 咖啡詳情頁氣泡微調（p-1 左 5%、p-3 上右 5%，5%＝氣泡自身尺寸）＋ 氣泡內文字垂直置中修正（對齊氣泡面積質心；pattern-1 上 1.1803fs/下 1.6497fs、pattern-5 上 0.9318fs/下 1.3972fs；4 斷點實測 ≤0.44px）＋ hero（GUNTE）第 6/7 張 slide 圖片更換（06_720.jpg / 07_1080.jpg）
+- 2026-09-14 sake-mv 資源集中（`static/images/sake-mv/*` → `static/images/*`，資料夾刪除、CSS/模板路徑同步）＋ 咖啡詳情頁氣泡微調（p-1 左 5%、p-3 上右 5%，5%＝氣泡自身尺寸）＋ 氣泡內文字垂直置中修正（對齊氣泡面積質心；pattern-1 上 1.1803fs/下 1.6497fs、pattern-5 上 0.9318fs/下 1.3972fs；4 斷點實測 ≤0.44px）＋ hero（GUNTE）第 6/7 張 slide 圖片更換（06_720.jpg / 07_1080.jpg）＋ **咖啡詳情頁氣泡文字 DB 化**（CoffeeItem `staff_comment_1/2/3` ＋ migration 0066/0067 ＋ Admin 欄位組；三顆氣泡對所有 coffee 生效、留空不顯示；新增 pattern-2（03a.svg）/p-2 位置；內距改依字數 `--bc-cb-n` 自動置中；4 斷點實測 ≤0.43px）
 - 2026-09-13 咖啡詳情頁 staff-comment 氣泡移到咖啡杯外（對齊去背 PNG alpha bbox x 9.30%~89.53%，單一 calc 算式通吃 10 斷點、零重疊零溢出）
 - 2026-09-11 咖啡詳情頁 staff-comment 氣泡建立（/coffee/10/）：長方形氣泡 + 咖啡專用 SVG + 直立文字 + 3 秒輪播彈出動畫
 - 2026-09-01 ramen→bean REAL + reviews 整合（about 頁）＋ 平板照片放大置中 ＋ sake-shirakiku product-mv 整合
