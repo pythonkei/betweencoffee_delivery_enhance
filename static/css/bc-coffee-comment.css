@@ -182,31 +182,37 @@
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
   left: calc(50% - 1.9195 * var(--bc-cb-fs)); /* 3.839 / 2 */
   width: calc(3.839 * var(--bc-cb-fs));
-  height: calc(8.449 * var(--bc-cb-fs)); /* 3.839 / 0.4544（02a viewBox 比例） */
+  /* 2026-09-14：02a 由使用者重新匯出（viewBox 3.61/-1.54/72.67/159.94 →
+     0/0/73.67/159.94，比例 0.4544 → 0.4606）→ contain 改由寬度決定縮放、
+     上下各留 0.98px（氣泡實際高度 141.66px，置中於 143.63px 框內）；
+     實繪邊界與質心位置幾乎不變，垂直對齊實測仍 ≤ 0.44px（見下方 .text 註解） */
+  height: calc(8.449 * var(--bc-cb-fs)); /* 3.839 / 0.4544（原始 02a viewBox 比例） */
   background-image: url("../images/blowing-pattern02a.svg?v=20260911j");
 }
 /* 直立文字：內距依 pattern 設定，使「文字外框＋內距」剛好等於氣泡框高
    → 文字精準落在手繪圖形內
-     pattern-1：7 字 = 7.14fs，框 9.970fs → 上 1.16fs + 下 1.67fs（和 2.83fs）
-     pattern-5：6 字 = 6.12fs，框 8.449fs → 上 0.922fs + 下 1.407fs（和 2.329fs）
+     pattern-1：7 字 = 7.14fs，框 9.970fs → 上下內距合計 2.83fs
+     pattern-5：6 字 = 6.12fs，框 8.449fs → 上下內距合計 2.329fs
    ※ 內距合計 = 框高 − 文字高，故只重新分配上下內距不會改變文字是否放得下。
-   2026-09-14：文字改為在氣泡內「垂直置中」
-     量測方法：把 .img 底圖暫時隱藏、改純綠底 rgb(0,180,0) 後 6x 截圖
-       → 暗像素 100% 是字形（避開氣泡尾巴細窄區與白色描邊的誤判）；
-       比較基準用「同一張截圖內的氣泡 ink 中心」（無截圖四捨五入誤差）。
-     修正前實測（原始內距）：pattern-1 字形中心高出氣泡中心 3.49px、
-       pattern-5 高出 2.32px ← 使用者回報的「氣泡未與文字中心對齊」。
-     修正：以 fs 表達位移量（各斷點等比、只重新分配上下內距，合計不變）：
-       pattern-1：下移 3.49px = 0.2053fs → 上 1.16+0.2053 = 1.3653fs、下 1.67−0.2053 = 1.4647fs
-       pattern-5：下移 2.32px = 0.1365fs → 上 0.922+0.1365 = 1.0585fs、下 1.407−0.1365 = 1.2705fs
-     再實測（以氣泡 ink 中心為基準）微調至最終值：
-       pattern-1：上 1.33fs / 下 1.5fs（p-1 原偏 +0.6px → 上移 0.6px）
-       pattern-5：上 1.1526fs / 下 1.1764fs（p-3 原偏 −1.6px → 下移 1.6px）
-     最終實測（375 / 768 / 1280 / 1920，字形中心 − 氣泡 ink 中心）：
-       pattern-1：−0.75 / −0.42 / −0.08 / −0.08 px
-       pattern-5：+0.50 / +0.08 / +0.67 / +0.67 px（皆 ≤ 0.92px）
-     ※ 曾用「氣泡白像素範圍內找暗像素」量測，因尾巴細窄區的暗邊被誤判為文字
-       → 一度誤判為「p-3 文字偏低」而過度上移；已改用綠底法重測後修正。 */
+   2026-09-14：文字在氣泡內「垂直置中」＝對齊氣泡的「面積質心（視覺重心）」
+     量測法：① 元素截圖（DPR 4）以白像素計算氣泡質心／主體中心／ink 中心
+             ② 文字位置取 DOM 精確值：document.createRange() 的文字 advance 框中心
+                （避開字形 ink 邊界與截圖換算的誤差）
+     基準選擇：手繪氣泡有小尾巴 → 含尾巴的 ink bbox 中心會偏低約 3.5px，
+       故以「面積質心」（尾巴僅約 5% 面積、對質心影響 < 1px）為視覺中心。
+     歷程（三次修正）：
+       • 原始內距（1.16/1.67、0.922/1.407）其實已近似質心置中（差 0.2~0.6px）
+       • 一度改以「含尾巴的 ink bbox 中心」為基準 → 文字被壓低 4~6px
+         （使用者回報「修改後文字位置稍微偏低」）
+       • 最終定案＝質心基準：pattern-1 上 1.1803fs / 下 1.6497fs
+                            pattern-5 上 0.9318fs / 下 1.3972fs
+         （與原始值僅差 0.01~0.02fs ≈ 0.2~0.35px，即原設計已接近最佳）
+     最終實測（文字 advance 中心 − 氣泡質心，css px）：
+       pattern-1：375 +0.44 / 768 −0.20 / 1280 −0.36 / 1920 −0.36
+       pattern-5：375 −0.16 / 768 +0.15 / 1280 +0.04 / 1920 +0.05（皆 ≤ 0.44px）
+     ※ 踩雷紀錄：① 用「氣泡白像素範圍內找暗像素」量字形 → 尾巴的暗邊被誤判為
+       文字，一度誤判方向；② 截圖 DPR 誤設（實際 4、誤以 6 換算）→ 位移量少算
+       0.67 倍。兩者皆已修正並改用上述量測法。 */
 .bc-coffee-photo .bc-coffee-comment .blowing .text {
   position: relative;
   z-index: 20;
@@ -219,10 +225,10 @@
   white-space: nowrap;
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .text {
-  padding: calc(1.33 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.5 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc(1.1803 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.6497 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
 }
 .bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .text {
-  padding: calc(1.1526 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.1764 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
+  padding: calc(0.9318 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs)) calc(1.3972 * var(--bc-cb-fs)) calc(0.605 * var(--bc-cb-fs));
 }
 
 /* ---- 動畫（is-show 輪替；與原站數值完全一致） ---- */
