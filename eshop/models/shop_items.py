@@ -68,6 +68,46 @@ class CoffeeItem(models.Model):
         verbose_name="氣泡尺寸倍率",
         help_text="1=直式照片標準；橫式照片自動設為 1/寬高比（如 1200×840 → 0.7）避免氣泡相對照片過大；留空=存檔時自動計算",
     )
+    # 氣泡落點微調（2026-09-15）：三顆氣泡在照片上的落點可**逐款咖啡**用偏移量微調，
+    # 留空＝維持自動算出的預設位置（照片去背不透明內容的外緣，一定在咖啡杯外圍）。
+    # 單位＝照片寬／高的百分比：dx 正值往右、dy 正值往下；負值分別往左／往上。
+    # 例：Black Blend 的氣泡 1 想更高 → bubble_dy_1 = -6（往上 6% 照片高）。
+    bubble_dx_1 = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡 1 水平偏移（% 照片寬）",
+        help_text="正值=往右、負值=往左；留空=預設位置（照片左側杯外）",
+    )
+    bubble_dy_1 = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡 1 垂直偏移（% 照片高）",
+        help_text="正值=往下、負值=往上；預設 64%（手機 78%）→ 想更高就填負值",
+    )
+    bubble_dx_2 = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡 2 水平偏移（% 照片寬）",
+        help_text="正值=往右、負值=往左；留空=預設位置（照片右下杯外）",
+    )
+    bubble_dy_2 = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡 2 垂直偏移（% 照片高）",
+        help_text="正值=往下、負值=往上；預設 80%（手機 84%）",
+    )
+    bubble_dx_3 = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡 3 水平偏移（% 照片寬）",
+        help_text="正值=往右、負值=往左；留空=預設位置（照片右上杯外）",
+    )
+    bubble_dy_3 = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="氣泡 3 垂直偏移（% 照片高）",
+        help_text="正值=往下、負值=往上；預設 39.58%（手機 67.42%）",
+    )
     image = models.ImageField(upload_to="coffee_images/")
     image_index = models.ImageField(
         upload_to="coffee_images/index/", blank=True, null=True, verbose_name="首页图片"

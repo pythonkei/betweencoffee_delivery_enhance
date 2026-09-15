@@ -86,27 +86,29 @@
   font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
 }
 /* ---- 三顆氣泡的落點變數（2026-09-15）---------------------------------
-   三顆氣泡在照片上的「出現位置」全部抽成變數（原本寫死在下方 .p-1/.p-2/.p-3），
-   預設值 = 原本的值 → 不覆寫時外觀與修改前完全相同。
+   三顆氣泡在照片上的「出現位置」抽成變數，並可用偏移量「逐款咖啡」微調。
+   預設值 = 原本寫死的值 → 不覆寫、偏移留空時外觀與修改前完全相同。
      --bc-cb-p1-top / --bc-cb-p1-left   左側那顆（pattern-1）
      --bc-cb-p2-top / --bc-cb-p2-left   右下那顆（pattern-2）
      --bc-cb-p3-top / --bc-cb-p3-left   右上那顆（pattern-5）
-     --bc-cb-p1-top-sm / -p2- / -p3-    手機（≤767.98px）的垂直落點
-   top  = 照片高度百分比；left = 「照片不透明內容邊緣 ＋ 氣泡自身尺寸」的算式
+     --bc-cb-p  n-top-sm（1/2/3）       手機（≤767.98px）的垂直落點
+     --bc-cb-p  n-dx / -dy（1/2/3）     逐款咖啡的偏移量（% 照片寬／高；由模板以行內樣式
+                                         傳入 CoffeeItem.bubble_dx_N / bubble_dy_N，留空＝0）
+   top  = 照片高度百分比；left = 「照片不透明內容邊緣 ＋ 氣泡自身尺寸 ＋ dx」的算式
           （safe-l / safe-r、--bc-cb-fs、--bc-cb-rem 皆自動縮放 → 單一算式通吃全部斷點）
    三個落點都在咖啡杯圖片外圍（照片去背透明留白），彈出動畫也在同一處發生。
-   要調整位置：改這裡的值，或在單顆 .staff-comment 上覆寫同名變數即可。
+   要調整：①（逐款）Admin → 咖啡 → 氣泡落點微調；②（全域）改這裡的值或覆寫同名變數。
    -------------------------------------------------------------------- */
 .bc-coffee-photo .bc-coffee-comment {
-  --bc-cb-p1-top: 64%;
-  --bc-cb-p1-left: calc(var(--bc-cb-safe-l, 9.3%) - 0.6 * var(--bc-cb-rem) - 2.8595 * var(--bc-cb-fs));
-  --bc-cb-p2-top: 80%;
-  --bc-cb-p2-left: calc(var(--bc-cb-safe-r, 89.53%) + 2.945 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
-  --bc-cb-p3-top: calc(39.58% - 0.42245 * var(--bc-cb-fs));
-  --bc-cb-p3-left: calc(var(--bc-cb-safe-r, 89.53%) + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem));
-  --bc-cb-p1-top-sm: 78%;
-  --bc-cb-p2-top-sm: 84%;
-  --bc-cb-p3-top-sm: calc(67.42% - 0.42245 * var(--bc-cb-fs));
+  --bc-cb-p1-top: calc(64% + var(--bc-cb-p1-dy, 0%));
+  --bc-cb-p1-left: calc(var(--bc-cb-safe-l, 9.3%) - 0.6 * var(--bc-cb-rem) - 2.8595 * var(--bc-cb-fs) + var(--bc-cb-p1-dx, 0%));
+  --bc-cb-p2-top: calc(80% + var(--bc-cb-p2-dy, 0%));
+  --bc-cb-p2-left: calc(var(--bc-cb-safe-r, 89.53%) + 2.945 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem) + var(--bc-cb-p2-dx, 0%));
+  --bc-cb-p3-top: calc(39.58% - 0.42245 * var(--bc-cb-fs) + var(--bc-cb-p3-dy, 0%));
+  --bc-cb-p3-left: calc(var(--bc-cb-safe-r, 89.53%) + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem) + var(--bc-cb-p3-dx, 0%));
+  --bc-cb-p1-top-sm: calc(78% + var(--bc-cb-p1-dy, 0%));
+  --bc-cb-p2-top-sm: calc(84% + var(--bc-cb-p2-dy, 0%));
+  --bc-cb-p3-top-sm: calc(67.42% - 0.42245 * var(--bc-cb-fs) + var(--bc-cb-p3-dy, 0%));
 }
 /* v3（2026-09-13）：氣泡由「壓在咖啡杯照片上」改為「移到杯外」——
    放在 .img-box 內、照片去背透明留白區，不再與咖啡杯重疊。

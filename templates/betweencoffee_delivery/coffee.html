@@ -53,7 +53,10 @@
                          建議字數見 model help_text（氣泡圖形固定，字數過多會超出圖形）。 -->
                     {% if coffee.staff_comment_1 or coffee.staff_comment_2 or coffee.staff_comment_3 %}
                     <div class="bc-coffee-comment" aria-hidden="true"
-                         style="--bc-cb-safe-l: {{ coffee.bubble_safe_left|default_if_none:9.3 }}%; --bc-cb-safe-r: {{ coffee.bubble_safe_right|default_if_none:89.53 }}%; --bc-cb-photo-ratio: {{ coffee.bubble_photo_ratio|default_if_none:0.782 }}; --bc-cb-scale: {{ coffee.bubble_scale|default_if_none:1 }}">
+                         style="--bc-cb-safe-l: {{ coffee.bubble_safe_left|default_if_none:9.3 }}%; --bc-cb-safe-r: {{ coffee.bubble_safe_right|default_if_none:89.53 }}%; --bc-cb-photo-ratio: {{ coffee.bubble_photo_ratio|default_if_none:0.782 }}; --bc-cb-scale: {{ coffee.bubble_scale|default_if_none:1 }};
+                                --bc-cb-p1-dx: {{ coffee.bubble_dx_1|default_if_none:0 }}%; --bc-cb-p1-dy: {{ coffee.bubble_dy_1|default_if_none:0 }}%;
+                                --bc-cb-p2-dx: {{ coffee.bubble_dx_2|default_if_none:0 }}%; --bc-cb-p2-dy: {{ coffee.bubble_dy_2|default_if_none:0 }}%;
+                                --bc-cb-p3-dx: {{ coffee.bubble_dx_3|default_if_none:0 }}%; --bc-cb-p3-dy: {{ coffee.bubble_dy_3|default_if_none:0 }}%">
                         {% if coffee.staff_comment_1 %}
                         <div class="staff-comment p-1" style="--bc-cb-n: {{ coffee.staff_comment_1|length }}">
                             <div class="blowing staff-comment-1 pattern-1">
@@ -534,7 +537,7 @@ function debugLog(message) {
 <!-- 2026-09-11：咖啡詳情頁照片上的 staff-comment 氣泡（頭部圖章 + 直立文字 + 彈出動畫）
      註：layouts/blank.html 用 extra_css 塞了 .blank-container{padding-top:24vh}，
      故必須保留 {{ block.super }}，否則整頁版面上移 -->
-<link rel="stylesheet" href="{% static 'css/bc-coffee-comment.css' %}?v=20260915b">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-comment.css' %}?v=20260915c">
 {% endblock %}
 
 {% block extra_scripts %}
