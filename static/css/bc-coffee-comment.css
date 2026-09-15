@@ -35,6 +35,15 @@
    2. 資源搬遷：static/images/sake-mv/* → static/images/*
       （資料夾已刪除，本檔 4 個參照同步改為 ../images/…）
 
+   ── v5 變更（2026-09-15）─────────────────────────────────
+   氣泡入場動畫改為「可選樣式 + 全變數」（原本 3 顆寫死同一組原站數值）：
+   每顆氣泡以 data-anim 選 pop / slide / rise（模板由 CoffeeItem 的
+   bubble_anim_1/2/3 帶入，留空 = pop），動畫只改「進場路徑」，
+   終點與靜止位置不變，起點一律在咖啡杯圖片外圍。
+   所有數值（位移／縮放／旋轉／時長／緩動／前後延遲）都是 --cb-in-* 變數，
+   可在 .bc-coffee-comment 或單顆 .staff-comment 上覆寫微調。
+   定義與推導見檔尾「---- 動畫（is-show 輪替）----」段。
+
    ── 覆蓋層定位（2026-09-14：改為每款咖啡可設定）────────────────
    .bc-coffee-comment 以 height:100% + aspect-ratio 貼齊照片本體
    （咖啡頁 .img-box 高度恆等於照片高、照片水平置中）→ 氣泡的百分比定位
@@ -291,28 +300,95 @@
            calc(0.605 * var(--bc-cb-fs));
 }
 
-/* ---- 動畫（is-show 輪替；與原站數值完全一致） ---- */
+/* ---- 動畫（is-show 輪替）------------------------------------------------
+   2026-09-15（v5）：入場動畫改為「可選樣式 + 全變數」。三顆氣泡各自以
+   data-anim 選樣式（模板由 CoffeeItem.bubble_anim_1/2/3 帶入，留空 = pop）。
+   三種樣式**只改變氣泡進入畫面的路徑**，終點（is-show）完全相同＝原本的
+   靜止位置，且起點一律在咖啡杯圖片外圍（照片去背透明留白／杯外）：
+     pop   原地彈出：上方 −40px、旋轉 −20°、scale 0 → 1（原站數值，預設）
+     slide 杯外滑入：沿氣泡所在側水平位移（p-1 由左、p-2/p-3 由右）→ 0
+     rise  下方浮升：由下方 0.6rem 浮升＋淡入＋scale 0.92 → 1
+   變數（在 .bc-coffee-comment 或單顆 .staff-comment 上覆寫即可微調）：
+     --cb-in-x / --cb-in-y  入場起點位移（x 正值＝往杯外右側；p-1 以 --bc-cb-side:-1 反向）
+     --cb-in-s / --cb-in-r  入場起點 scale / rotate
+     --cb-in-o              入場前透明度（pop 1＝不淡入；slide/rise 0 → 未輪到時完全不可見）
+     --cb-in-dur            縮放／旋轉 時長；--cb-in-tdur 位移時長
+     --cb-in-delay/-ease    延遲／緩動
+     --cb-in-stamp-r        頭部圖章起始旋轉（−90°＝轉入）
+   pop 的數值＝修改前的原值 → 未設定 bubble_anim_* 的咖啡頁與舊版一致。
+   ------------------------------------------------------------ */
+.bc-coffee-photo .bc-coffee-comment .staff-comment {
+  --bc-cb-side: 1; /* 1 = 氣泡在照片右側（往右＝杯外）／-1 = 左側（p-1） */
+  --cb-in-x: 0px;
+  --cb-in-y: -40px;
+  --cb-in-s: 0;
+  --cb-in-r: -20deg;
+  --cb-in-o: 1; /* pop 不淡入（scale 0 已不可見）＝與原站／舊版逐像素相同 */
+  --cb-in-dur: 0.4s;
+  --cb-in-tdur: 1s;
+  --cb-in-delay: 0.2s;
+  --cb-in-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --cb-in-stamp-r: -90deg;
+}
+/* p-1 在照片左側 → 杯外＝左邊（slide 反向） */
+.bc-coffee-photo .bc-coffee-comment .staff-comment.p-1 {
+  --bc-cb-side: -1;
+}
+/* slide：沿所在側水平滑入（0.5rem ≈ 桌機 36px／手機 23px）
+   1280px 實測：p-1 起點凸出 .img-box 左 7.2px（終點在框內、距杯 12.2px）、
+   手機與 768 斷點仍在 .img-box 留白內 → 三顆起點一律在咖啡杯外（距杯 19.8~50.4px） */
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-anim="slide"] {
+  --cb-in-x: calc(var(--bc-cb-side) * 0.5 * var(--bc-cb-rem));
+  --cb-in-y: 0px;
+  --cb-in-s: 0.94;
+  --cb-in-r: 0deg;
+  --cb-in-o: 0; /* 起點全透明 → 未輪到時完全不可見（只靠位移不足以免露餡） */
+  --cb-in-tdur: 0.85s;
+  --cb-in-delay: 0.15s;
+  --cb-in-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* rise：由下方浮升（0.45rem ≈ 桌機 32px／手機 21px）＋淡入 */
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-anim="rise"] {
+  --cb-in-x: 0px;
+  --cb-in-y: calc(0.45 * var(--bc-cb-rem));
+  --cb-in-s: 0.92;
+  --cb-in-r: 0deg;
+  --cb-in-o: 0;
+  --cb-in-tdur: 0.85s;
+  --cb-in-delay: 0.15s;
+  --cb-in-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .bc-coffee-photo .bc-coffee-comment .staff-comment .img {
-  transition: scale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: scale 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center bottom;
-  scale: 0;
-  rotate: -20deg;
-  translate: 0 -40px;
+  scale: var(--cb-in-s);
+  rotate: var(--cb-in-r);
+  translate: var(--cb-in-x) var(--cb-in-y);
+  opacity: var(--cb-in-o);
 }
 .bc-coffee-photo .bc-coffee-comment .staff-comment .blowing::after {
-  transition: scale 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, rotate 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+  transition: scale 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, rotate 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s, opacity 0.3s linear;
   transform-origin: center bottom;
-  scale: 0;
-  rotate: -90deg;
+  scale: var(--cb-in-s);
+  rotate: var(--cb-in-stamp-r);
+  translate: calc(-50% + var(--cb-in-x)) var(--cb-in-y);
+  opacity: var(--cb-in-o);
 }
 .bc-coffee-photo .bc-coffee-comment .staff-comment.is-show .img {
-  transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s, rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s, translate 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+  transition: scale var(--cb-in-dur) var(--cb-in-ease) var(--cb-in-delay),
+              rotate var(--cb-in-dur) var(--cb-in-ease) var(--cb-in-delay),
+              translate var(--cb-in-tdur) var(--cb-in-ease) var(--cb-in-delay),
+              opacity var(--cb-in-dur) linear var(--cb-in-delay);
   scale: 1;
   rotate: 0deg;
   translate: 0 0;
+  opacity: 1;
 }
 .bc-coffee-photo .bc-coffee-comment .staff-comment.is-show .blowing::after {
-  transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s linear;
   scale: 1;
   rotate: 0deg;
+  translate: -50% 0;
+  opacity: 1;
 }

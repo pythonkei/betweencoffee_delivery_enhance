@@ -42,6 +42,40 @@ class CoffeeItem(models.Model):
         verbose_name="氣泡文字 3（右上）",
         help_text="詳情頁照片右上氣泡（pattern-5）；建議 5~6 字，留空=不顯示",
     )
+    # 氣泡入場動畫樣式（2026-09-15）：三顆氣泡可**各自**指定入場樣式，
+    # 只改變「氣泡進入畫面的路徑」，終點與靜止位置完全不變，
+    # 且一律從咖啡杯圖片外圍（照片去背透明留白／杯外）進入。
+    # 實際數值（位移 / 縮放 / 旋轉 / 時長 / 緩動）皆為 CSS 變數 --cb-in-*，
+    # 定義於 static/css/bc-coffee-comment.css，可單款覆寫微調。
+    BUBBLE_ANIM_CHOICES = [
+        ("pop", "彈出（旋轉縮放；預設）"),
+        ("slide", "杯外滑入（沿所在側水平滑入）"),
+        ("rise", "下方浮升（垂直浮升＋淡入）"),
+    ]
+    bubble_anim_1 = models.CharField(
+        max_length=12,
+        choices=BUBBLE_ANIM_CHOICES,
+        blank=True,
+        default="",
+        verbose_name="氣泡動畫 1（左側）",
+        help_text="留空＝彈出（pop）；三種樣式只差在進場路徑，靜止位置相同",
+    )
+    bubble_anim_2 = models.CharField(
+        max_length=12,
+        choices=BUBBLE_ANIM_CHOICES,
+        blank=True,
+        default="",
+        verbose_name="氣泡動畫 2（右下）",
+        help_text="留空＝彈出（pop）；三種樣式只差在進場路徑，靜止位置相同",
+    )
+    bubble_anim_3 = models.CharField(
+        max_length=12,
+        choices=BUBBLE_ANIM_CHOICES,
+        blank=True,
+        default="",
+        verbose_name="氣泡動畫 3（右上）",
+        help_text="留空＝彈出（pop）；三種樣式只差在進場路徑，靜止位置相同",
+    )
     # 氣泡定位用的照片幾何（2026-09-14）：預設由 image 自動量測（存檔時若為空才填），
     # 也可在 Admin 手動覆寫。三顆氣泡都排在「照片不透明內容」之外，故需要這三個基準值。
     bubble_safe_left = models.FloatField(

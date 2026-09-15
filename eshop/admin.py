@@ -501,6 +501,13 @@ class CoffeeItemAdmin(admin.ModelAdmin):
             },
         ),
         (
+            "氣泡入場動畫（留空=彈出）",
+            {
+                "fields": ("bubble_anim_1", "bubble_anim_2", "bubble_anim_3"),
+                "description": "三顆氣泡可各自選入場樣式：pop 彈出（原地旋轉縮放，預設）／slide 杯外滑入（沿氣泡所在側，由照片外緣水平滑入）／rise 下方浮升（垂直浮升＋淡入）。三者只改變「進場路徑」，氣泡靜止位置、尺寸、輪播時序完全相同，且一律從咖啡杯圖片外圍（去背透明留白）進入。位移／縮放／時長／緩動等數值＝CSS 變數 --cb-in-*（static/css/bc-coffee-comment.css），要微調改該檔即可，不需要改資料。",
+            },
+        ),
+        (
             "氣泡定位（留空=存檔時自動量測照片）",
             {
                 "fields": (
