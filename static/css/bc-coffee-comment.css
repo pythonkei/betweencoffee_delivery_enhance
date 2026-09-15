@@ -367,3 +367,29 @@
   rotate: 0deg;
   translate: -50% 0;
 }
+/* ---- 退場：原地縮小消失（2026-09-15 修正）-------------------------------
+   原本退場只過渡 scale（0.3s），但 rotate / translate 沒有過渡 → 會**瞬間跳回
+   入場起點**（translate 0 −40px、rotate −20deg）再縮小，看起來像「往上跳一下
+   才消失」。改為：
+     JS 收起時加上 .is-hiding（並移除 .is-show）→ 本段把 rotate / translate
+     固定在 0（＝維持在原本位置），只把 scale 收到 0，氣泡就地縮小消失；
+     約 0.3s 後 JS 再移除 .is-hiding，元素回到入場前的起始狀態（scale 0 不可見，
+     下一輪仍由正規起點彈出）。
+     收縮原點由入場用的 center bottom 改為 center center → 以自身中心收縮，
+     中心點完全不動（真正「在原地消失」）。
+   ※ 本段必須排在 .is-show 之後（同權重時後者勝出）。
+   ------------------------------------------------------------------- */
+.bc-coffee-photo .bc-coffee-comment .staff-comment.is-hiding .img {
+  transition: scale 0.3s cubic-bezier(0.4, 0, 1, 1);
+  transform-origin: center center;
+  scale: 0;
+  rotate: 0deg;
+  translate: 0 0;
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment.is-hiding .blowing::after {
+  transition: scale 0.3s cubic-bezier(0.4, 0, 1, 1);
+  transform-origin: center center;
+  scale: 0;
+  rotate: 0deg;
+  translate: -50% 0;
+}
