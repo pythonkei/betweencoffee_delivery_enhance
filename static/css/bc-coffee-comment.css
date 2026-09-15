@@ -110,15 +110,15 @@
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos$="r"] {
   left: calc(var(--bc-cb-safe-r, 89.53%) - 0.6 * var(--bc-cb-rem) + var(--cb-k));
 }
-/* 上 / 中 / 下三列 */
+/* 上 / 中 / 下三列（2026-09-15：整體向上調整 — 上 -2%、中 -7%、下 -10%）*/
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="t"] {
-  top: calc(39.58% - 0.42245 * var(--bc-cb-fs));
+  top: calc(37.58% - 0.42245 * var(--bc-cb-fs));
 }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="m"] {
-  top: 64%;
+  top: 57%;
 }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="b"] {
-  top: 80%;
+  top: 70%;
 }
 /* v3（2026-09-13）幾何基準與各斷點實測（保留紀錄）：
    氣泡水平置中於錨點框（寬 1.2rem）→ 氣泡左緣 = left + 0.6rem − 半個氣泡寬；
@@ -144,12 +144,13 @@
      .img-box 左右留白 76~119px > 氣泡寬 → 完整落在盒內
      2026-09-14：上列的上移 5%（0.42245fs）為等比量，手機同步套用；
      下列（原 p-2，氣泡高 9.78fs＝127px、佔手機照片 68%）取 84% 讓氣泡與圖章都在框內
-     2026-09-15：改為 6 落點後，手機只覆寫三列的 top（上 67.42% / 中 78% / 下 84%） */
+     2026-09-15：改為 6 落點後，手機只覆寫三列的 top（上 65.42% / 中 71% / 下 74%；
+       整體與桌機同步向上調整：上 -2%、中 -7%、下 -10%）*/
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="t"] {
-    top: calc(67.42% - 0.42245 * var(--bc-cb-fs));
+    top: calc(65.42% - 0.42245 * var(--bc-cb-fs));
   }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="m"] { top: 78%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="b"] { top: 84%; }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="m"] { top: 71%; }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="b"] { top: 74%; }
 }
 
 /* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
