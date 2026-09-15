@@ -134,13 +134,13 @@
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 38%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 54%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 67.5%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 42%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 61%; }
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 36%; }
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 64%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { top: 74.5%; }
 
 /* 6 個落點各自「再往杯外推」的距離 --cb-out（2026-09-15；% 為照片寬，左側往左、右側往右）
    未列的落點（bl / mr）＝ 0；要再靠外或收回只改這裡的 6 個值。 */
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { --cb-out: 3%; }
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { --cb-out: 5%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { --cb-out: 2%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { --cb-out: 2%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { --cb-out: 2%; }
@@ -173,8 +173,8 @@
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 64.5%; }
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 69%; }
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 72%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 68.5%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 74%; }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 64%; }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 76%; }
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { top: 78%; }
 }
 
