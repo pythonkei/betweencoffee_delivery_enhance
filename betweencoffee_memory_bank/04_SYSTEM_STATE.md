@@ -8,7 +8,7 @@
 
 | 維度 | 狀態 | 備註 |
 |------|:----:|------|
-| 資料庫（Supabase） | ✅ 正常 | 2026-09-15：專案曾消失導致部署失敗，使用者於後台還原後恢復（pooler 需約 3 分鐘註冊 tenant）；還原點（07-27）與本地（08-16）的**資料落差已回補完成**——訂單 2661 / 佇列 1036 與本地一致；順帶以 **Django 模型為權威**對齊 5 個 varchar 欄位（email 80 / order_number 20 / payment_method 10 / phone 12 / pickup_code 4；本地庫才是偏離模型的一方） |
+| 資料庫（Supabase） | ✅ 正常 | 2026-09-15：專案曾消失導致部署失敗，使用者於後台還原後恢復（pooler 需約 3 分鐘註冊 tenant）；還原點（07-27）與本地（08-16）的**資料落差已回補完成**——訂單 2661 / 佇列 1036 與本地一致；順帶以 **Django 模型為權威**對齊 5 個 varchar 欄位（email 80 / order_number 20 / payment_method 10 / phone 12 / pickup_code 4；本地庫才是偏離模型的一方）；同日再以 **username 為橋樑**完成**資料統一**（舊訂單歸屬 36 筆、補建 test_customer、咖啡名稱 8/9/10 覆蓋為本地版）→ 帳號 40/40、訂單歸屬與名稱 0 差異 |
 | 核心功能 | ✅ 完整 | 下單→支付→製作→取餐 |
 | WebSocket | ✅ 穩定 | 三層架構，InMemoryChannelLayer |
 | 支付 | ✅ 4種 | PayPal/Alipay/FPS/現金 |
