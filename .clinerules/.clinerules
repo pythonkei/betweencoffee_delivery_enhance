@@ -314,7 +314,7 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 │   ├── CSS（`data-pos` 屬性選擇器）：垂直＝照片高 %（上 `calc(39.58% - 0.42245fs)` / 中 64% / 下 80%；手機 67.42% / 78% / 84%）；水平＝`[data-pos$="l"] left = safe-l − 0.6rem − K`、`[data-pos$="r"] left = safe-r − 0.6rem + K`，K 依該顆圖形寬度（`--cb-k`：pattern-1 2.8595fs、pattern-2 2.945fs、pattern-5 2.61145fs，＝0.5fs 杯外留白＋半寬[＋左 5% 微調]）→ 6 個落點都在咖啡杯外圍、所有斷點自動縮放。
 │   ├── 動畫：`--cb-in-x/y/s/r/dur/tdur/delay/ease/stamp-r`（0 / −40px、0 / −20deg、0.4s / 1s、0.2s / 彈性、−90deg）三顆共用、效果與原站逐值相同。
 │   ├── 驗證（本地 1280px CDP）：預設（ml/br/tr）相對落點與尺寸與改動前**逐項相同**（left −52.2 / 337.8 / 333.0px、bottom 59.29% / 77.03% / 33.30%、尺寸 72.9×169.5 / 83.1×166.3 / 65.3×143.6）；動畫 start 皆 `scale 0 / rotate −20deg / translate 0 −40px`、圖章 `-50% -40px / -90deg`；把氣泡 1 改 `bl` → 確實移到左下（bottom 75.29%、left −52.2px、仍在杯外）、另兩顆不受影響；`manage.py check` 0 issues、`makemigrations --check` 無變更；版號 bc-coffee-comment.css ?v=20260915d。
-│   ├── Admin 精簡（同日）：移除「氣泡定位（留空=存檔時自動量測照片）」欄位組（bubble_safe_left/right、bubble_photo_ratio、bubble_scale）——這 4 個值仍保留在模型、由存檔時自動量測（Pillow 讀去背 PNG alpha bbox），只是不再顯示於 Admin（避免誤改）；Admin 氣泡相關只剩「詳情頁氣泡文字（留空=不顯示）」與「氣泡位置（6 選 1；動畫不變）」兩組；`manage.py check` 0 issues。
+│   ├── Admin 精簡（同日）：移除「氣泡定位（留空=存檔時自動量測照片）」欄位組（bubble_safe_left/right、bubble_photo_ratio、bubble_scale）——這 4 個值仍保留在模型、由存檔時自動量測（Pillow 讀去背 PNG alpha bbox），只是不再顯示於 Admin（避免誤改）；Admin 氣泡相關只剩「詳情頁氣泡文字（留空=不顯示）」與「氣泡位置（6 選 1；動畫不變）」兩組；`manage.py check` 0 issues。另把 CoffeeItem.save() 改成「偵測到 image 與資料庫現值不同就自動重新量測」（原本只能靠 Admin 清空欄位重存），所以換照片不必手動處理：實測 item10 換成 Black Blend 橫式圖 → 幾何自動變 15.08/80.25/1.429/0.7，還原圖 → 回到 9.19/89.65/0.782/1.0。
 │   └── ※ 教訓（需求三次收斂）：①首版誤做成「pop/slide/rise 三種動畫樣式」✗（要的是位置可變、動畫不變）②次版做「dx/dy 偏移量逐款微調」✗（要的是簡單選項）③定案＝**6 個落點選 1**（右上／右下／左上／左下／左中間／右中間）。中途的模型欄位與 migration 皆已還原重做（現行 0070 ＝bubble_pos_1/2/3）。
 ```
 

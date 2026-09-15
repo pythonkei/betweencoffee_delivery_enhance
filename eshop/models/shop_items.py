@@ -259,23 +259,41 @@ class CoffeeItem(models.Model):
     def save(self, *args, **kwargs):
         """氣泡定位欄位留空時，自動由詳情照片量測填入（已手動填過的值不會被覆蓋）。
 
-        換圖後若覺得氣泡位置不準 → 把這幾個欄位清空再存一次即可重新量測。
+        2026-09-15：這四個欄位已從 Admin 隱藏 → 換圖時自動重新量測：
+          存檔時若偵測到 image 與資料庫中的現值不同，先清空四個欄位再量測，
+          因此換照片不必再手動清空。需要人工指定時可用 shell 寫入欄位值
+          （非空值不會被自動覆蓋，除非同時換圖）。
         """
-        if self.image and (
-            self.bubble_safe_left is None
-            or self.bubble_safe_right is None
-            or self.bubble_photo_ratio is None
-            or self.bubble_scale is None
-        ):
-            left, right, ratio, scale = self.measure_bubble_geometry()
-            if self.bubble_safe_left is None and left is not None:
-                self.bubble_safe_left = left
-            if self.bubble_safe_right is None and right is not None:
-                self.bubble_safe_right = right
-            if self.bubble_photo_ratio is None and ratio is not None:
-                self.bubble_photo_ratio = ratio
-            if self.bubble_scale is None and scale is not None:
-                self.bubble_scale = scale
+        if self.image:
+            # 換圖偵測：與資料庫現值不同 → 清空幾何以重新量測
+            old_image = None
+            if self.pk:
+                old_image = (
+                    type(self)
+                    .objects.filter(pk=self.pk)
+                    .values_list("image", flat=True)
+                    .first()
+                )
+            if old_image and old_image != (self.image.name or ""):
+                self.bubble_safe_left = None
+                self.bubble_safe_right = None
+                self.bubble_photo_ratio = None
+                self.bubble_scale = None
+            if (
+                self.bubble_safe_left is None
+                or self.bubble_safe_right is None
+                or self.bubble_photo_ratio is None
+                or self.bubble_scale is None
+            ):
+                left, right, ratio, scale = self.measure_bubble_geometry()
+                if self.bubble_safe_left is None and left is not None:
+                    self.bubble_safe_left = left
+                if self.bubble_safe_right is None and right is not None:
+                    self.bubble_safe_right = right
+                if self.bubble_photo_ratio is None and ratio is not None:
+                    self.bubble_photo_ratio = ratio
+                if self.bubble_scale is None and scale is not None:
+                    self.bubble_scale = scale
         super().save(*args, **kwargs)
 
     class Meta:
