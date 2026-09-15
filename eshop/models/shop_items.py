@@ -68,45 +68,39 @@ class CoffeeItem(models.Model):
         verbose_name="氣泡尺寸倍率",
         help_text="1=直式照片標準；橫式照片自動設為 1/寬高比（如 1200×840 → 0.7）避免氣泡相對照片過大；留空=存檔時自動計算",
     )
-    # 氣泡落點微調（2026-09-15）：三顆氣泡在照片上的落點可**逐款咖啡**用偏移量微調，
-    # 留空＝維持自動算出的預設位置（照片去背不透明內容的外緣，一定在咖啡杯外圍）。
-    # 單位＝照片寬／高的百分比：dx 正值往右、dy 正值往下；負值分別往左／往上。
-    # 例：Black Blend 的氣泡 1 想更高 → bubble_dy_1 = -6（往上 6% 照片高）。
-    bubble_dx_1 = models.FloatField(
-        null=True,
-        blank=True,
-        verbose_name="氣泡 1 水平偏移（% 照片寬）",
-        help_text="正值=往右、負值=往左；留空=預設位置（照片左側杯外）",
+    # 氣泡位置（2026-09-15）：三顆氣泡可各自選 6 個位置之一（照片四周的 6 個落點）。
+    # 6 個落點全部自動貼在照片去背「不透明內容」的外緣＝咖啡杯外圍，
+    # 水平算式會依該顆氣泡的圖形寬度與照片幾何自動縮放（所有斷點通用），
+    # 換照片後（bubble_safe_left/right 重新量測）位置仍然正確。
+    # 彈出動畫效果與原站完全相同，不受位置選擇影響。
+    BUBBLE_POS_CHOICES = [
+        ("tl", "左上"),
+        ("ml", "左中間"),
+        ("bl", "左下"),
+        ("tr", "右上"),
+        ("mr", "右中間"),
+        ("br", "右下"),
+    ]
+    bubble_pos_1 = models.CharField(
+        max_length=2,
+        choices=BUBBLE_POS_CHOICES,
+        default="ml",
+        verbose_name="氣泡 1 位置",
+        help_text="預設＝左中間（原設計位置）",
     )
-    bubble_dy_1 = models.FloatField(
-        null=True,
-        blank=True,
-        verbose_name="氣泡 1 垂直偏移（% 照片高）",
-        help_text="正值=往下、負值=往上；預設 64%（手機 78%）→ 想更高就填負值",
+    bubble_pos_2 = models.CharField(
+        max_length=2,
+        choices=BUBBLE_POS_CHOICES,
+        default="br",
+        verbose_name="氣泡 2 位置",
+        help_text="預設＝右下（原設計位置）",
     )
-    bubble_dx_2 = models.FloatField(
-        null=True,
-        blank=True,
-        verbose_name="氣泡 2 水平偏移（% 照片寬）",
-        help_text="正值=往右、負值=往左；留空=預設位置（照片右下杯外）",
-    )
-    bubble_dy_2 = models.FloatField(
-        null=True,
-        blank=True,
-        verbose_name="氣泡 2 垂直偏移（% 照片高）",
-        help_text="正值=往下、負值=往上；預設 80%（手機 84%）",
-    )
-    bubble_dx_3 = models.FloatField(
-        null=True,
-        blank=True,
-        verbose_name="氣泡 3 水平偏移（% 照片寬）",
-        help_text="正值=往右、負值=往左；留空=預設位置（照片右上杯外）",
-    )
-    bubble_dy_3 = models.FloatField(
-        null=True,
-        blank=True,
-        verbose_name="氣泡 3 垂直偏移（% 照片高）",
-        help_text="正值=往下、負值=往上；預設 39.58%（手機 67.42%）",
+    bubble_pos_3 = models.CharField(
+        max_length=2,
+        choices=BUBBLE_POS_CHOICES,
+        default="tr",
+        verbose_name="氣泡 3 位置",
+        help_text="預設＝右上（原設計位置）",
     )
     image = models.ImageField(upload_to="coffee_images/")
     image_index = models.ImageField(

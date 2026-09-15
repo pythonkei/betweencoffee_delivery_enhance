@@ -85,73 +85,52 @@
   font-weight: 600;
   font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
 }
-/* ---- 三顆氣泡的落點變數（2026-09-15）---------------------------------
-   三顆氣泡在照片上的「出現位置」抽成變數，並可用偏移量「逐款咖啡」微調。
-   預設值 = 原本寫死的值 → 不覆寫、偏移留空時外觀與修改前完全相同。
-     --bc-cb-p1-top / --bc-cb-p1-left   左側那顆（pattern-1）
-     --bc-cb-p2-top / --bc-cb-p2-left   右下那顆（pattern-2）
-     --bc-cb-p3-top / --bc-cb-p3-left   右上那顆（pattern-5）
-     --bc-cb-p  n-top-sm（1/2/3）       手機（≤767.98px）的垂直落點
-     --bc-cb-p  n-dx / -dy（1/2/3）     逐款咖啡的偏移量（% 照片寬／高；由模板以行內樣式
-                                         傳入 CoffeeItem.bubble_dx_N / bubble_dy_N，留空＝0）
-   top  = 照片高度百分比；left = 「照片不透明內容邊緣 ＋ 氣泡自身尺寸 ＋ dx」的算式
-          （safe-l / safe-r、--bc-cb-fs、--bc-cb-rem 皆自動縮放 → 單一算式通吃全部斷點）
-   三個落點都在咖啡杯圖片外圍（照片去背透明留白），彈出動畫也在同一處發生。
-   要調整：①（逐款）Admin → 咖啡 → 氣泡落點微調；②（全域）改這裡的值或覆寫同名變數。
+/* ---- 氣泡位置：6 個落點（2026-09-15）-----------------------------------
+   每顆氣泡在 Admin 選一個落點（模板輸出 data-pos）：
+     tl 左上 / ml 左中間 / bl 左下 / tr 右上 / mr 右中間 / br 右下
+   垂直＝照片高的百分比（上 39.58% / 中 64% / 下 80%；手機 67.42% / 78% / 84%）
+   水平＝照片去背「不透明內容」外緣 ± K，K 依該顆氣泡的圖形寬度（--cb-k）：
+     pattern-1（框寬 4.29fs）  K = 2.8595fs  ＝ 0.5 + 2.145(半寬) + 0.2145(左 5%)
+     pattern-2（框寬 4.89fs）  K = 2.945fs   ＝ 0.5 + 2.445(半寬)
+     pattern-5（框寬 3.839fs） K = 2.61145fs ＝ 0.5 + 1.9195(半寬) + 0.19195(左 5%)
+     → 左側：left = safe-l − 0.6rem − K（0.6rem＝錨點框寬 1.2rem 的一半）
+     → 右側：left = safe-r − 0.6rem + K
+   6 個落點都在咖啡杯圖片外圍，且 fs / rem / safe-l / safe-r 皆自動縮放
+   → 單一算式通吃所有斷點；換照片重測幾何後位置仍正確。
+   預設：氣泡 1 左中間、氣泡 2 右下、氣泡 3 右上（＝原本設計位置，外觀不變）。
    -------------------------------------------------------------------- */
-.bc-coffee-photo .bc-coffee-comment {
-  --bc-cb-p1-top: calc(64% + var(--bc-cb-p1-dy, 0%));
-  --bc-cb-p1-left: calc(var(--bc-cb-safe-l, 9.3%) - 0.6 * var(--bc-cb-rem) - 2.8595 * var(--bc-cb-fs) + var(--bc-cb-p1-dx, 0%));
-  --bc-cb-p2-top: calc(80% + var(--bc-cb-p2-dy, 0%));
-  --bc-cb-p2-left: calc(var(--bc-cb-safe-r, 89.53%) + 2.945 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem) + var(--bc-cb-p2-dx, 0%));
-  --bc-cb-p3-top: calc(39.58% - 0.42245 * var(--bc-cb-fs) + var(--bc-cb-p3-dy, 0%));
-  --bc-cb-p3-left: calc(var(--bc-cb-safe-r, 89.53%) + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem) + var(--bc-cb-p3-dx, 0%));
-  --bc-cb-p1-top-sm: calc(78% + var(--bc-cb-p1-dy, 0%));
-  --bc-cb-p2-top-sm: calc(84% + var(--bc-cb-p2-dy, 0%));
-  --bc-cb-p3-top-sm: calc(67.42% - 0.42245 * var(--bc-cb-fs) + var(--bc-cb-p3-dy, 0%));
+.bc-coffee-photo .bc-coffee-comment .staff-comment.p-1 { --cb-k: calc(2.8595 * var(--bc-cb-fs)); }
+.bc-coffee-photo .bc-coffee-comment .staff-comment.p-2 { --cb-k: calc(2.945 * var(--bc-cb-fs)); }
+.bc-coffee-photo .bc-coffee-comment .staff-comment.p-3 { --cb-k: calc(2.61145 * var(--bc-cb-fs)); }
+
+/* 左半邊（tl / ml / bl）與右半邊（tr / mr / br）：貼在杯外留白 */
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos$="l"] {
+  left: calc(var(--bc-cb-safe-l, 9.3%) - 0.6 * var(--bc-cb-rem) - var(--cb-k));
 }
-/* v3（2026-09-13）：氣泡由「壓在咖啡杯照片上」改為「移到杯外」——
-   放在 .img-box 內、照片去背透明留白區，不再與咖啡杯重疊。
-   coffee_09.png 去背 alpha bbox（占照片框寬）= x 9.30% ~ 89.53%
-   （alpha>5 與 alpha>200 量到的 bbox 相同 → 硬邊去背，左右各約 9.3% / 10.5% 全透明）
-   氣泡水平置中於錨點框（寬 1.2rem）：
-     氣泡左緣 = left + 0.6rem − 半個氣泡寬（pattern-1 2.145fs、pattern-5 1.9195fs）
-   對齊目標：p-1 氣泡「右緣」= 9.30% − 0.5fs（杯左外側留白 0.5fs ≈ 6.5~8.5px）
-             p-3 氣泡「左緣」= 89.53% + 0.5fs（杯右外側同留白）
-   因 fs / rem 皆隨斷點變化，此 left 為單一算式即可通吃全部斷點
-   → 下方 media query 只需覆寫 top（見檔尾）。
-   各斷點實測（氣泡外緣 vs .img-box 邊緣；數值為 2026-09-14 v4 微調後）：
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos$="r"] {
+  left: calc(var(--bc-cb-safe-r, 89.53%) - 0.6 * var(--bc-cb-rem) + var(--cb-k));
+}
+/* 上 / 中 / 下三列 */
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="t"] {
+  top: calc(39.58% - 0.42245 * var(--bc-cb-fs));
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="m"] {
+  top: 64%;
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="b"] {
+  top: 80%;
+}
+/* v3（2026-09-13）幾何基準與各斷點實測（保留紀錄）：
+   氣泡水平置中於錨點框（寬 1.2rem）→ 氣泡左緣 = left + 0.6rem − 半個氣泡寬；
+   對齊目標為杯外留白 0.5fs（≈6.5~8.5px）。因 fs / rem 隨斷點變化，
+   單一 calc 算式即可通吃全部斷點（media query 只需覆寫 top）。
+   各斷點實測（氣泡外緣 vs .img-box 邊緣；2026-09-14 v4 微調後）：
      375 / 480 / 576 / 768 / ≥1200px：模組完整落在 .img-box 內
-     992–1199px（照片被 max-height 限高、左右留白僅 24~34px）：p-1 向左最多凸出
+     992–1199px（照片被 max-height 限高、左右留白僅 24~34px）：左側氣泡最多凸出
        .img-box 約 16~18px（實測 992px→16px、1080px→18px），落在欄與欄之間的黑底；
        右側商品欄內容起點 ≥544px，仍有 57px 以上距離
-       → 不重疊、也不會被 body overflow-x:clip 裁掉 */
-.bc-coffee-photo .bc-coffee-comment .p-1 {
-  top: var(--bc-cb-p1-top, 64%);
-  /* 2026-09-14：往左 5%（氣泡寬 4.29fs × 0.05 = 0.2145fs）
-     → 0.5(gap) + 2.145(半寬) + 0.2145 = 2.8595fs */
-  left: var(--bc-cb-p1-left,
-        calc(var(--bc-cb-safe-l, 9.3%) - 0.6 * var(--bc-cb-rem) - 2.8595 * var(--bc-cb-fs)));
-}
-/* 2026-09-13：top 39.58%（0.39fs 差距保留），left 依上述算式改為照片右側杯外
-   2026-09-14：向上右 5%（寬 3.839fs × 0.05 = 0.19195fs → 右；
-                          高 8.449fs × 0.05 = 0.42245fs → 上）
-     left：0.5(gap) + 1.9195(半寬) + 0.19195 = 2.61145fs */
-.bc-coffee-photo .bc-coffee-comment .p-3 {
-  top: var(--bc-cb-p3-top, calc(39.58% - 0.42245 * var(--bc-cb-fs)));
-  left: var(--bc-cb-p3-left,
-        calc(var(--bc-cb-safe-r, 89.53%) + 2.61145 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem)));
-}
-/* 2026-09-14 新增：p-2（第三顆，右下）— 對齊照片右側留白（同 p-3 的算法）
-   氣泡寬 4.89fs（pattern-2）→ 半寬 2.445fs；氣泡左緣 = 89.53% + 0.5fs
-     left = 89.53% + 0.5 + 2.445 = 89.53% + 2.945fs − 0.6rem
-   top：氣泡高 9.78fs，往上延伸（氣泡底 ≈ 錨點上方 0.75rem）→ 取 80%，
-     實測氣泡完全落在照片框內（手機斷點另覆寫為 84%） */
-.bc-coffee-photo .bc-coffee-comment .p-2 {
-  top: var(--bc-cb-p2-top, 80%);
-  left: var(--bc-cb-p2-left,
-        calc(var(--bc-cb-safe-r, 89.53%) + 2.945 * var(--bc-cb-fs) - 0.6 * var(--bc-cb-rem)));
-}
+       → 不重疊、也不會被 body overflow-x:clip 裁掉
+   2026-09-15：原本寫死的 .p-1 / .p-2 / .p-3 落點，改為上方 6 個 data-pos 選擇。 */
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
 .bc-coffee-photo .bc-coffee-comment .p-1,
@@ -163,11 +142,14 @@
      手機只覆寫垂直位置；水平算式與桌機相同 → 氣泡同樣落在杯外留白區。
      手機照片 146×187（fs 13 / rem 46），氣泡寬 55.8px，
      .img-box 左右留白 76~119px > 氣泡寬 → 完整落在盒內
-     2026-09-14：p-3 的上移 5%（0.42245fs）為等比量，手機同步套用；
-     p-2（氣泡高 9.78fs＝127px，佔手機照片 68%）取 84% 讓氣泡與圖章都在框內 */
-  .bc-coffee-photo .bc-coffee-comment .p-1 { top: var(--bc-cb-p1-top-sm, 78%); }
-  .bc-coffee-photo .bc-coffee-comment .p-3 { top: var(--bc-cb-p3-top-sm, calc(67.42% - 0.42245 * var(--bc-cb-fs))); }
-  .bc-coffee-photo .bc-coffee-comment .p-2 { top: var(--bc-cb-p2-top-sm, 84%); }
+     2026-09-14：上列的上移 5%（0.42245fs）為等比量，手機同步套用；
+     下列（原 p-2，氣泡高 9.78fs＝127px、佔手機照片 68%）取 84% 讓氣泡與圖章都在框內
+     2026-09-15：改為 6 落點後，手機只覆寫三列的 top（上 67.42% / 中 78% / 下 84%） */
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="t"] {
+    top: calc(67.42% - 0.42245 * var(--bc-cb-fs));
+  }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="m"] { top: 78%; }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos^="b"] { top: 84%; }
 }
 
 /* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
