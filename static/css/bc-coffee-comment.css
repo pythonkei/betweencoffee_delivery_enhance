@@ -89,19 +89,37 @@
    每顆氣泡在 Admin 選一個落點（模板輸出 data-pos）：
      tl 左上 / ml 左中間 / bl 左下 / tr 右上 / mr 右中間 / br 右下
    垂直＝照片高的百分比（上 39.58% / 中 64% / 下 80%；手機 67.42% / 78% / 84%）
-   水平＝照片去背「不透明內容」外緣 ± K，K 依該顆氣泡的圖形寬度（--cb-k）：
-     pattern-1（框寬 4.29fs）  K = 2.8595fs  ＝ 0.5 + 2.145(半寬) + 0.2145(左 5%)
-     pattern-2（框寬 4.89fs）  K = 2.945fs   ＝ 0.5 + 2.445(半寬)
-     pattern-5（框寬 3.839fs） K = 2.61145fs ＝ 0.5 + 1.9195(半寬) + 0.19195(左 5%)
+   水平＝照片去背「不透明內容」外緣 ± K，K = 留白（--cb-gap）＋ 該顆半寬（--cb-half）
+        ＋ 左移 5% 微調（--cb-nudge）：
+     pattern-1（框寬 4.29fs）  半寬 2.145fs、nudge 0.2145fs
+     pattern-2（框寬 4.89fs）  半寬 2.445fs、nudge 0
+     pattern-5（框寬 3.839fs） 半寬 1.9195fs、nudge 0.19195fs
      → 左側：left = safe-l − 0.6rem − K（0.6rem＝錨點框寬 1.2rem 的一半）
      → 右側：left = safe-r − 0.6rem + K
+   2026-09-15：留白 --cb-gap 由 0.5fs 加大為 1.5fs（使用者回報「離咖啡杯太近」，
+     左右各再拉開約 1fs＝桌機 17px / 手機 13px）；要再拉開或靠近只改這一個值。
    6 個落點都在咖啡杯圖片外圍，且 fs / rem / safe-l / safe-r 皆自動縮放
    → 單一算式通吃所有斷點；換照片重測幾何後位置仍正確。
-   預設：氣泡 1 左中間、氣泡 2 右下、氣泡 3 右上（＝原本設計位置，外觀不變）。
+   預設：氣泡 1 左中間、氣泡 2 右下、氣泡 3 右上。
    -------------------------------------------------------------------- */
-.bc-coffee-photo .bc-coffee-comment .staff-comment.p-1 { --cb-k: calc(2.8595 * var(--bc-cb-fs)); }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.p-2 { --cb-k: calc(2.945 * var(--bc-cb-fs)); }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.p-3 { --cb-k: calc(2.61145 * var(--bc-cb-fs)); }
+.bc-coffee-photo .bc-coffee-comment .staff-comment {
+  --cb-gap: calc(1.5 * var(--bc-cb-fs)); /* 氣泡邊緣與杯內容的留白（原 0.5fs） */
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment.p-1 {
+  --cb-half: calc(2.145 * var(--bc-cb-fs));
+  --cb-nudge: calc(0.2145 * var(--bc-cb-fs));
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment.p-2 {
+  --cb-half: calc(2.445 * var(--bc-cb-fs));
+  --cb-nudge: 0px;
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment.p-3 {
+  --cb-half: calc(1.9195 * var(--bc-cb-fs));
+  --cb-nudge: calc(0.19195 * var(--bc-cb-fs));
+}
+.bc-coffee-photo .bc-coffee-comment .staff-comment {
+  --cb-k: calc(var(--cb-gap) + var(--cb-half) + var(--cb-nudge));
+}
 
 /* 左半邊（tl / ml / bl）與右半邊（tr / mr / br）：貼在杯外留白 */
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos$="l"] {
