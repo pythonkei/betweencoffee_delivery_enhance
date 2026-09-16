@@ -35,10 +35,10 @@
   --ease-in: 0.3s;
   --ease-out: 0.35s;
 
-  /* 2026-09-15：hero slide 等比縮放旋鈕（0.9 = 縮小 10%；1 = 原始尺寸）
+  /* 2026-09-15：hero slide 等比縮放旋鈕（0.8 = 縮小 20%；1 = 原始尺寸）
      驅動：.hero_slide .splide 寬度、img.hide-sp、圈圈字 SVG、hero_wrap 高度、平板手套圓。
      手機（≤767.98）不受影響：該斷點顯示的 img.vis-sp（255×340）不套用本旋鈕。 */
-  --bc-gunte-scale: 0.9;
+  --bc-gunte-scale: 0.8;
 
   /* 原站 body 基礎字型（限定 wrapper）；白底隔離於本站黑底 */
   color: var(--color-text);
