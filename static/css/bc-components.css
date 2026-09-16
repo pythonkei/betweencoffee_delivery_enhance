@@ -457,31 +457,29 @@ body {
    2026-09-15（同日追加4）：桌面端（基礎規則，≥992px）再 −10%
      4.48em → 4.032em、14.56vh → 13.104vh（累計 = 原值 8em/26vh 的 0.504 倍）*/
 .ftco-section-blank-small {
-  padding: 4.032em 0;
-  min-height: 13.104vh;
+  padding: 2em 0;
+  min-height: 10vh;
 }
 
 @media (max-width: 991px) {
   .ftco-section-blank-small {
     /* 平板端再 −10%：2.016em → 1.8144em、9.072vh → 8.1648vh */
-    padding: 1.8144em 1em;
-    min-height: 8.1648vh;
+    min-height: 2vh;
   }
 }
 
 @media (max-width: 768px) {
   .ftco-section-blank-small {
     /* 行動端再 −20%：1.12em → 0.896em、5.376vh → 4.3008vh */
-    padding: 0.896em 0;
-    min-height: 4.3008vh;
+    min-height: 2vh;
   }
 }
 
 @media (max-width: 480px) {
   .ftco-section-blank-small {
     /* 小手機再 −20%：0.672em → 0.5376em、3.584vh → 2.8672vh */
-    padding: 0.5376em 0;
-    min-height: 2.8672vh;
+    /* padding: 0.5376em 0; */
+    min-height: 1vh;
   }
 }
 
@@ -4340,21 +4338,21 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    用 margin-top（非 padding-top）：section 整體下移（含 absolute 子元素如 bracket 框），
    內部元素相對位置不變。 */
 .bc-page-content > section:first-of-type:not(.home-slider) {
-  margin-top: 140px;
+  margin-top: 100px;
 }
 @media (min-width: 768px) and (max-width: 991.98px) {
   .bc-page-content > section:first-of-type:not(.home-slider) {
-    margin-top: 114px;
+    margin-top: 72px;
   }
 }
 @media (min-width: 576px) and (max-width: 767.98px) {
   .bc-page-content > section:first-of-type:not(.home-slider) {
-    margin-top: 119px;
+    margin-top: 60px;
   }
 }
 @media (max-width: 575.98px) {
   .bc-page-content > section:first-of-type:not(.home-slider) {
-    margin-top: 113px;
+    margin-top: 60px;
   }
 }
 
