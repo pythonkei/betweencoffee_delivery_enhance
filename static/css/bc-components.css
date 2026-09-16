@@ -447,30 +447,32 @@ body {
    修復：修正左右內縮 + 依螢幕尺寸逐級減少間距
    2026-09-15：使用者要求「空白縮小 30%」→ 垂直 padding 與 min-height 全面 ×0.7
      （基礎原本在 style-bootstrap.css 的 8em / 26vh；本檔載入在後，故在此覆蓋為 5.6em / 18.2vh）
-     實測 1280×720：224px → 156.8px（−30%）；左右 padding 維持 1em（那是修 bug 的值，不算留白） */
+     實測 1280×720：224px → 156.8px（−30%）；左右 padding 維持 1em（那是修 bug 的值，不算留白）
+   2026-09-15（同日追加）：「再縮小 20%」→ 再 ×0.8（累計 = 原值 ×0.56）
+     基礎 5.6em → 4.48em、18.2vh → 14.56vh；實測 156.8px → 125.44px */
 .ftco-section-blank-small {
-  padding: 5.6em 0;
-  min-height: 18.2vh;
+  padding: 4.48em 0;
+  min-height: 14.56vh;
 }
 
 @media (max-width: 991px) {
   .ftco-section-blank-small {
-    padding: 2.8em 1em;
-    min-height: 12.6vh;
+    padding: 2.24em 1em;
+    min-height: 10.08vh;
   }
 }
 
 @media (max-width: 768px) {
   .ftco-section-blank-small {
-    padding: 1.75em 0;
-    min-height: 8.4vh;
+    padding: 1.4em 0;
+    min-height: 6.72vh;
   }
 }
 
 @media (max-width: 480px) {
   .ftco-section-blank-small {
-    padding: 1.05em 0;
-    min-height: 5.6vh;
+    padding: 0.84em 0;
+    min-height: 4.48vh;
   }
 }
 
