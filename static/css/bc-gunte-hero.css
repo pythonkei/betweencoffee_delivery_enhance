@@ -40,6 +40,13 @@
      手機（≤767.98）不受影響：該斷點顯示的 img.vis-sp（255×340）不套用本旋鈕。 */
   --bc-gunte-scale: 0.8;
 
+  /* 2026-09-15：桌面端 hero 內容與導覽列的距離。
+     slide 縮小後，內容在 .hero_wrap（高度隨 scale 縮小）內垂直置中 → 整體被推高、
+     投影片頂端跑到導覽列底下（實測導覽列底 139.8px vs 投影片頂 92.5px）。
+     以 padding-top 把內容推回（置中會吃掉一半，故 135px 只下移約 67px）；
+     平板／手機不受影響（≤991.98 與 ≤767.98 各自有 padding 覆寫）。設 0 即還原純置中。 */
+  --bc-gunte-top-gap: 135px;
+
   /* 原站 body 基礎字型（限定 wrapper）；白底隔離於本站黑底 */
   color: var(--color-text);
   font-style: normal;
@@ -145,8 +152,10 @@
   align-items: center;
   position: relative;
   z-index: 10;
-  /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 810px→648px），避免 slide 變小後下方多出空白 */
+  /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 810px→648px），避免 slide 變小後下方多出空白
+     ＋ 桌面端以 --bc-gunte-top-gap 把內容往下推、與導覽列拉開 */
   height: calc(810px * var(--bc-gunte-scale));
+  padding-top: var(--bc-gunte-top-gap);
 }
 
 .bc-gunte-hero .hero_slide {
