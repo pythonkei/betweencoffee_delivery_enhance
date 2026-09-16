@@ -463,7 +463,9 @@
   }
 
   .bc-gunte-hero .hero_nav {
-    margin-top: 60px;
+    /* 2026-09-15：60 → 135px，避免手套圓咖啡照片壓到圓點（實測最低照片底 760.5px
+       vs 原本 nav 頂端 703.5px → 重疊；135px 留約 18px 淨空） */
+    margin-top: 135px;
   }
 }
 
@@ -520,7 +522,9 @@
   }
 
   .bc-gunte-hero .hero_nav {
-    margin-top: 20px;
+    /* 2026-09-15：20 → 115px，避免手套圓咖啡照片壓到圓點（實測最低照片底 532.7px
+       vs 原本 nav 頂端 456.2px → 重疊；115px 留約 18px 淨空） */
+    margin-top: 115px;
   }
 
   .bc-gunte-hero .hero_nav > li > button {
