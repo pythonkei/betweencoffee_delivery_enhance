@@ -131,10 +131,10 @@
 /* 6 個落點各自的垂直位置（2026-09-15；左右刻意錯開讓排列有落差、不呆板）
    ※ 上列（tl/tr）接近照片頂端（氣泡高約 31~37% 照片高）：tl 取最高可用值、tr 往下製造落差；
      若把較高的氣泡（p-1）放到上列，頂端會略微凸出照片。 */
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 38%; }
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 34%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 55%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 70.5%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 32%; }
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 30%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 64%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { top: 76.5%; }
 
@@ -173,10 +173,10 @@
      下列（原 p-2，氣泡高 9.78fs＝127px、佔手機照片 68%）取 84% 讓氣泡與圖章都在框內
      2026-09-15：改為 6 落點後，手機只覆寫垂直位置（水平算式與桌機相同）；
        6 個落點同樣左右錯開（比例與桌機一致，見上方 data-pos 段）*/
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 64.5%; }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 60.5%; }
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 70%; }
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 75%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 60%; }
+  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 58%; }
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 76%; }
   .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { top: 80%; }
 }
