@@ -40,6 +40,12 @@
      手機（≤767.98）不受影響：該斷點顯示的 img.vis-sp（255×340）不套用本旋鈕。 */
   --bc-gunte-scale: 0.8;
 
+  /* 2026-09-15：桌面端 hero_nav（下方圓點導覽）與手套圓咖啡照片的距離。
+     手套圓是 absolute top:91%（相對 .hero_wrap），圓弧上的咖啡照片會往下壓；
+     實測最低可見照片底部 853.9px vs nav 頂端 758px → 重疊 95.9px。
+     改為 240px → nav 頂端 888px（淨空約 34px）。平板／手機各自有 60px / 20px 覆寫，不受影響。 */
+  --bc-gunte-nav-gap: 270px;
+
   /* 2026-09-15：桌面端 hero 內容與導覽列的距離。
      slide 縮小後，內容在 .hero_wrap（高度隨 scale 縮小）內垂直置中 → 整體被推高、
      投影片頂端跑到導覽列底下（實測導覽列底 139.8px vs 投影片頂 92.5px）。
@@ -356,7 +362,8 @@
   align-items: center;
   position: relative; /* 2026-09-07：提高 z，避免被上方手套圓咖啡圖遮住/擋點擊 */
   z-index: 20;
-  margin-top: 110px;
+  /* 2026-09-15：改由 --bc-gunte-nav-gap 驅動（原 110px → 240px），與手套圓咖啡照片拉開 */
+  margin-top: var(--bc-gunte-nav-gap);
   font-size: 0;
 }
 
