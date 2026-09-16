@@ -450,7 +450,10 @@ body {
      實測 1280×720：224px → 156.8px（−30%）；左右 padding 維持 1em（那是修 bug 的值，不算留白）
    2026-09-15（同日追加）：「再縮小 20%」→ 再 ×0.8（累計 = 原值 ×0.56）
      基礎 5.6em → 4.48em、18.2vh → 14.56vh；實測 156.8px → 125.44px
-   2026-09-15（同日追加2）：分斷點微調 —— 平板端（≤991px）再 −10%、行動端（≤768 / ≤480）再 −20% */
+   2026-09-15（同日追加2）：分斷點微調 —— 平板端（≤991px）再 −10%、行動端（≤768 / ≤480）再 −20%
+   2026-09-15（同日追加3）：同樣三項再一輪 —— 平板端再 −10%、行動端再 −20%
+     （累計：平板 2.016em→1.8144em / 9.072vh→8.1648vh；行動 1.12em→0.896em / 5.376vh→4.3008vh；
+       小手機 0.672em→0.5376em / 3.584vh→2.8672vh）*/
 .ftco-section-blank-small {
   padding: 4.48em 0;
   min-height: 14.56vh;
@@ -458,25 +461,25 @@ body {
 
 @media (max-width: 991px) {
   .ftco-section-blank-small {
-    /* 平板端再 −10%：2.24em → 2.016em、10.08vh → 9.072vh */
-    padding: 2.016em 1em;
-    min-height: 9.072vh;
+    /* 平板端再 −10%：2.016em → 1.8144em、9.072vh → 8.1648vh */
+    padding: 1.8144em 1em;
+    min-height: 8.1648vh;
   }
 }
 
 @media (max-width: 768px) {
   .ftco-section-blank-small {
-    /* 行動端再 −20%：1.4em → 1.12em、6.72vh → 5.376vh */
-    padding: 1.12em 0;
-    min-height: 5.376vh;
+    /* 行動端再 −20%：1.12em → 0.896em、5.376vh → 4.3008vh */
+    padding: 0.896em 0;
+    min-height: 4.3008vh;
   }
 }
 
 @media (max-width: 480px) {
   .ftco-section-blank-small {
-    /* 小手機再 −20%：0.84em → 0.672em、4.48vh → 3.584vh */
-    padding: 0.672em 0;
-    min-height: 3.584vh;
+    /* 小手機再 −20%：0.672em → 0.5376em、3.584vh → 2.8672vh */
+    padding: 0.5376em 0;
+    min-height: 2.8672vh;
   }
 }
 
