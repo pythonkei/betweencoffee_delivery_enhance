@@ -872,7 +872,10 @@ optgroup  {
   .img-box.bc-coffee-photo .img-4 { max-width: 62.1775%; max-height: 49.742vw; }
 }
 @media screen and (min-width: 768px) and (max-width: 1079.98px) {
-  .img-box.bc-coffee-photo .img-4 { max-height: 532.95px; }
+  /* 2026-09-15：平板端咖啡照片再縮小 20%（×0.8）
+     原 max-height 532.95px（此斷點實際由 max-width 88.825% 限制寬度）
+     → max-width 88.825% ×0.8 = 71.06%、max-height 532.95 ×0.8 = 426.36px */
+  .img-box.bc-coffee-photo .img-4 { max-width: 71.06%; max-height: 426.36px; }
 }
 @media screen and (min-width: 1080px) {
   .img-box.bc-coffee-photo .img-4 { max-height: 458.337px; }
