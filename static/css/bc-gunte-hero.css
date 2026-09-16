@@ -53,6 +53,15 @@
      平板／手機不受影響（≤991.98 與 ≤767.98 各自有 padding 覆寫）。設 0 即還原純置中。 */
   --bc-gunte-top-gap: 135px;
 
+  /* 2026-09-16：投影片項目（＝圖片）寬度，**單一來源**。
+     cap／en／ttl 的尺寸與位移全部由它換算，讓這些文字跟著圖片一起等比縮放
+     （先前是固定 px：圖片縮到 297~344px 時文字仍 14px，占圖寬從 3.24% 漲到 4.1~4.7%）。
+     桌機值＝min(540px×scale, splide 內容寬)；平板／手機由各自 media query 覆寫。 */
+  --bc-item-w: min(calc(540px * var(--bc-gunte-scale)), calc(min(62vw, 892px) * var(--bc-gunte-scale) - 24px));
+  /* --bc-item-k ＝「原設計 432px 圖片」的 1/432（乘 14 得 14px、乘 20 得 20px…），
+     故任何尺寸下比例都與桌機參考值一致。 */
+  --bc-item-k: calc(var(--bc-item-w) / 432);
+
   /* 原站 body 基礎字型（限定 wrapper）；白底隔離於本站黑底 */
   color: var(--color-text);
   font-style: normal;
@@ -211,9 +220,11 @@
 }
 
 /* 2026-09-15：桌機／平板顯示的 slide 圖片隨 --bc-gunte-scale 縮放
-   （手機 ≤767.98 顯示的是 img.vis-sp、且 hide-sp 為 display:none → 不受影響） */
+   （手機 ≤767.98 顯示的是 img.vis-sp、且 hide-sp 為 display:none → 不受影響）
+   2026-09-16：改用單一來源 --bc-item-w（值與原本 540px×scale 相同），
+   讓 cap／en／ttl 能由同一變數等比換算。 */
 .bc-gunte-hero .hero_slide_item_img > img.hide-sp {
-  width: calc(540px * var(--bc-gunte-scale));
+  width: var(--bc-item-w);
   height: auto;
 }
 
@@ -226,11 +237,13 @@
 .bc-gunte-hero .hero_slide_item_cap {
   opacity: 0;
   position: absolute;
-  top: 20px;
-  right: 16px;
+  /* 2026-09-16：尺寸與位移改依 --bc-item-k 等比（原設計 432px 圖：top 20px／right 16px／14px）
+     → 平板／短視窗圖片縮小時文字跟著縮，比例與桌機一致 */
+  top: calc(var(--bc-item-k) * 20);
+  right: calc(var(--bc-item-k) * 16);
   z-index: 5;
   color: var(--color-white);
-  font-size: 14px;
+  font-size: calc(var(--bc-item-k) * 14);
   line-height: 1;
   letter-spacing: 0.06em;
   writing-mode: vertical-lr;
@@ -250,8 +263,8 @@
   position: absolute;
   top: 0;
   z-index: 5;
-  margin: 0 10px;
-  font-size: 12px;
+  margin: 0 calc(var(--bc-item-k) * 10); /* 2026-09-16：原固定 10px → 依 --bc-item-k 等比 */
+  font-size: calc(var(--bc-item-k) * 12); /* 2026-09-16：原固定 12px → 依 --bc-item-k 等比 */
   line-height: 1;
   letter-spacing: 0.06em;
   writing-mode: vertical-lr;
@@ -275,11 +288,12 @@
   opacity: 0;
   position: absolute;
   /* 2026-09-15：隨 --bc-gunte-scale 縮放（尺寸與 -11px 偏移一起等比；
-     手機由下方 ≤767.98 的 max-width: calc(100% + 11px) 自動壓回） */
-  top: calc(-11px * var(--bc-gunte-scale));
-  left: calc(-11px * var(--bc-gunte-scale));
+     手機由下方 ≤767.98 的 max-width: calc(100% + 11px) 自動壓回）
+     2026-09-16：改由單一來源 --bc-item-w／--bc-item-k 換算，與圖片完全同寬 */
+  top: calc(var(--bc-item-k) * -11);
+  left: calc(var(--bc-item-k) * -11);
   z-index: 10;
-  width: calc(540px * var(--bc-gunte-scale));
+  width: var(--bc-item-w);
   height: auto;
   transition: opacity 0.5s;
 }
@@ -435,6 +449,13 @@
 
 /* ---- 響應式（≤991.98，原 home.css）---- */
 @media screen and (max-width: 991.98px) {
+  .bc-gunte-hero {
+    /* 2026-09-16：平板圖片寬＝(splide 68vw×scale − 24px slide padding) × 0.8
+       （item 左右各 10% margin）→ cap／en／ttl 由 --bc-item-k 一起等比縮小。
+       實測：744→304.6px、820→337.7px、834→343.8px（與改動前圖片寬完全相同）。 */
+    --bc-item-w: calc((68vw * var(--bc-gunte-scale) - 24px) * 0.8);
+  }
+
   .bc-gunte-hero .hero_wrap {
     height: auto;
     padding: 120px 0;
@@ -449,9 +470,9 @@
     margin: 0 10%;
   }
 
-  .bc-gunte-hero .hero_slide_item_en {
-    display: none;
-  }
+  /* 2026-09-16：原在此隱藏 .hero_slide_item_en（平板看不到、與桌面不一致）
+     → 改為與桌面相同顯示；font-size／margin 已由 --bc-item-k 等比，
+     文字落在 item 左右各 10% margin 的間隙內，不會壓到鄰張圖片。 */
 
   .bc-gunte-hero .hero_hand {
     top: 88%;
@@ -478,6 +499,13 @@
     padding-top: 50px;
     padding-bottom: 60px;
     font-size: 14px;
+    /* 2026-09-16：手機實際顯示的 img.vis-sp 固定 255px → 投影片寬固定 255 */
+    --bc-item-w: 255px;
+  }
+
+  /* 2026-09-16：平板改為顯示 en，但手機維持隱藏（item margin 僅 10px，放不下） */
+  .bc-gunte-hero .hero_slide_item_en {
+    display: none;
   }
 
   .bc-gunte-hero .vis-sp {
@@ -508,6 +536,10 @@
   }
 
   .bc-gunte-hero .hero_slide_item_ttl {
+    /* 2026-09-16：手機維持原本的 scale 尺寸（圖片固定 255px、圈圈字由 max-width 壓回 266px） */
+    top: calc(-11px * var(--bc-gunte-scale));
+    left: calc(-11px * var(--bc-gunte-scale));
+    width: calc(540px * var(--bc-gunte-scale));
     max-width: calc(100% + 11px);
   }
 
