@@ -228,6 +228,14 @@
   height: auto;
 }
 
+/* 2026-09-16：手機端顯示的直式 sp 圖（3:4、510×680，與原站 hero-slideNN-photo-sp@2x.jpg 同規格）
+   —— 寬度同樣由 --bc-item-w 驅動，比例由圖檔本身決定（height: auto 即得 255×340），
+   不需要 object-fit 裁切。桌機／平板此圖為 display:none，不受影響。 */
+.bc-gunte-hero .hero_slide_item_img > img.vis-sp {
+  width: var(--bc-item-w);
+  height: auto;
+}
+
 .bc-gunte-hero .hero_slide_item:hover .hero_slide_item_img > img {
   transform: scale(1.05);
   transition: transform var(--ease-in);
