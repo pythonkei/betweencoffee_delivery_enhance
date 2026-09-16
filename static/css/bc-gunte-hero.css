@@ -145,7 +145,7 @@
   align-items: center;
   position: relative;
   z-index: 10;
-  /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.9 → 810px→729px），避免 slide 變小後下方多出空白 */
+  /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 810px→648px），避免 slide 變小後下方多出空白 */
   height: calc(810px * var(--bc-gunte-scale));
 }
 
@@ -162,7 +162,7 @@
 
 /* ---- Splide（hero 內）---- */
 .bc-gunte-hero .hero_slide .splide {
-  /* 2026-09-15：寬度改由 --bc-gunte-scale 驅動（0.9 → 62vw→55.8vw、892px→802.8px） */
+  /* 2026-09-15：寬度改由 --bc-gunte-scale 驅動（0.8 → 62vw→49.6vw、892px→713.6px） */
   width: calc(62vw * var(--bc-gunte-scale));
   max-width: calc(892px * var(--bc-gunte-scale));
   margin: auto;
@@ -325,7 +325,7 @@
 
 /* 2026-09-07：img 已被 <a> 包住 → 用後代選擇器（否則參考網站尺寸/scale 失效、圖過大） */
 .bc-gunte-hero .hero_hand_item img {
-  /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.9 → 420px→378px；手機 200px 不變） */
+  /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 420px→336px；手機 200px 不變） */
   width: calc(420px * var(--bc-gunte-scale));
   scale: 0.5;
   -webkit-user-drag: none;
@@ -425,7 +425,7 @@
   }
 
   .bc-gunte-hero .hero_slide .splide {
-    /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.9 → 68vw→61.2vw） */
+    /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 68vw→54.4vw） */
     width: calc(68vw * var(--bc-gunte-scale));
   }
 
@@ -442,7 +442,7 @@
   }
 
   .bc-gunte-hero .hero_hand_item img {
-    /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.9 → 340px→306px） */
+    /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 340px→272px） */
     width: calc(340px * var(--bc-gunte-scale));
   }
 
