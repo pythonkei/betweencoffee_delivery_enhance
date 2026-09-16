@@ -444,25 +444,33 @@ body {
    原始 CSS 存在 bug：
    1. ≤991px 時 padding: 5em 7em 7em 7em → 左右 7em(112px) 內縮造成大留白
    2. min-height: 26vh 在所有螢幕都相同，行動螢幕上過度佔高
-   修復：修正左右內縮 + 依螢幕尺寸逐級減少間距 */
+   修復：修正左右內縮 + 依螢幕尺寸逐級減少間距
+   2026-09-15：使用者要求「空白縮小 30%」→ 垂直 padding 與 min-height 全面 ×0.7
+     （基礎原本在 style-bootstrap.css 的 8em / 26vh；本檔載入在後，故在此覆蓋為 5.6em / 18.2vh）
+     實測 1280×720：224px → 156.8px（−30%）；左右 padding 維持 1em（那是修 bug 的值，不算留白） */
+.ftco-section-blank-small {
+  padding: 5.6em 0;
+  min-height: 18.2vh;
+}
+
 @media (max-width: 991px) {
   .ftco-section-blank-small {
-    padding: 4em 1em;
-    min-height: 18vh;
+    padding: 2.8em 1em;
+    min-height: 12.6vh;
   }
 }
 
 @media (max-width: 768px) {
   .ftco-section-blank-small {
-    padding: 2.5em 0;
-    min-height: 12vh;
+    padding: 1.75em 0;
+    min-height: 8.4vh;
   }
 }
 
 @media (max-width: 480px) {
   .ftco-section-blank-small {
-    padding: 1.5em 0;
-    min-height: 8vh;
+    padding: 1.05em 0;
+    min-height: 5.6vh;
   }
 }
 
