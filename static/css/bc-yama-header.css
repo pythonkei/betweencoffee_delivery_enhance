@@ -386,3 +386,48 @@
   font-weight: 700;
 }
 
+/* ============================================================
+   2026-09-16 平板層（744~1199.98px）：統一黃圓尺寸與字級
+   ------------------------------------------------------------
+   問題（headless 實測）：768/769 交界出現尺寸斷崖 ——
+     ≤768 用 min(30.769vw, 236px)：iPad Mini 6 直向 744 → 圓徑 229px（過大）
+     ≥769 用 min(12.083vw, 174px)：iPad Air 直向 820 → 圓徑 99px、字僅 9.1px
+                                    Pro 11 直向 834 → 101px / 9.3px
+        → 平板（Air / Pro）幾乎看不到，只有 Mini 看得到（使用者回報）。
+   修法：744~1199.98px 統一 150px 圓（min(20vw,150px)）＋ 字級 13 / 11px
+        （9 字中文 × 13px ≈ 96px，150px 圓內緣約 127px → 不裁切）；
+        frame 圖 139px（= 圓徑 ×0.925）、deco 67.7%（隨圓徑縮放）。
+        ≥1200 桌機（174px）與 ≤743 手機（min(30.769vw,236px)）維持原值。
+   單一旋鈕：本區塊的 150px 與 13px（想更小改這兩個）。
+   ============================================================ */
+@media screen and (min-width: 744px) and (max-width: 1199.98px) {
+  .bc-yama .tax-nav {
+    bottom: 24px;
+    right: 20px;
+  }
+  .bc-yama .tax-nav a {
+    width: min(20vw, 150px);
+    height: min(20vw, 150px);
+  }
+  /* 圓框裝飾圖：隨圓徑等比（150 × 0.925 = 139） */
+  .bc-yama .tax-nav a:before {
+    width: min(18.5vw, 139px);
+    height: min(18.5vw, 139px);
+  }
+  .bc-yama .tax-nav a p {
+    font-size: min(1.4vw, 11px);
+  }
+  .bc-yama .tax-nav a p > span:first-child {
+    font-size: min(1.75vw, 13px);
+    margin-block: min(.833vw, 10px) min(.486vw, 6px);
+  }
+  .bc-yama .tax-nav .bc-yama-deco {
+    width: 67.7%;   /* 隨圓徑縮放（登入後照片 .bc-yama-deco-photo 亦沿用） */
+  }
+  /* header-bot（購物車 [ n ]，僅 ≥769 顯示）位置跟著新圓心／圓底重算 */
+  .bc-yama .header-bot {
+    bottom: calc(24px - 1.2em - 11px);
+    right: calc(20px + min(20vw, 150px) / 2);
+  }
+}
+
