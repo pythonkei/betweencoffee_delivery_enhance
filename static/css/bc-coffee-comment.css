@@ -139,10 +139,13 @@
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { top: 76.5%; }
 
 /* 6 個落點各自「再往杯外推」的距離 --cb-out（2026-09-15；% 為照片寬，左側往左、右側往右）
-   未列的落點（bl / mr）＝ 0；要再靠外或收回只改這裡的 6 個值。 */
+   ※ 這組值決定各落點的水平位置：互相差距太小（< 2%）會看起來「排在同一條垂直線上」，
+     故右側刻意做成 1% / 5% / 2%（tr / mr / br）＝水平錯開 3.6 / 17.9 / 7.2px。
+   左側（tl / ml / bl）＝ 4% / 2% / 0%。要再靠外或收回只改這裡的值。 */
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { --cb-out: 4%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { --cb-out: 2%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { --cb-out: 1%; }
+.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { --cb-out: 5%; }
 .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { --cb-out: 2%; }
 /* v3（2026-09-13）幾何基準與各斷點實測（保留紀錄）：
    氣泡水平置中於錨點框（寬 1.2rem）→ 氣泡左緣 = left + 0.6rem − 半個氣泡寬；
