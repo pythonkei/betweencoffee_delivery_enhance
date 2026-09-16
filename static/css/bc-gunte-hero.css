@@ -135,7 +135,10 @@
   z-index: 0;
   width: 100%;
   height: 100%;
-  padding: 0 5%;
+  /* 2026-09-16：上緣內距與 .hero_wrap 相同 → catch 文字才能與投影片照片垂直居中。
+     原本只有 `0 5%`，文字中心 324px 而照片中心 388px（差 64px）。
+     桌機／短視窗 = --bc-gunte-top-gap；平板與手機於下方覆寫為 0（見各自 media query 的說明）。 */
+  padding: var(--bc-gunte-top-gap) 5% 0;
 }
 
 .bc-gunte-hero .hero_catch > img {
@@ -152,7 +155,8 @@
   display: inline-block;
   font-family: "Noto Sans TC", "Montserrat", sans-serif;
   font-weight: 900;
-  font-size: clamp(30px, 4.6vw, 68px);
+  /* 2026-09-16：縮小約 26%（原 clamp(30px, 4.6vw, 68px)：1440 為 66.24px、1920 為 68px） */
+  font-size: clamp(24px, 3.4vw, 50px);
   line-height: 1.2;
   letter-spacing: -0.02em;
   text-align: center;
@@ -247,8 +251,12 @@
   position: absolute;
   /* 2026-09-16：尺寸與位移改依 --bc-item-k 等比（原設計 432px 圖：top 20px／right 16px／14px）
      → 平板／短視窗圖片縮小時文字跟著縮，比例與桌機一致 */
+  /* 2026-09-16：全域 h3 reset（style-bootstrap.css 等）會給本直排標題外加 margin
+     （實測 0px 14px 8px 14px）→ 讓 right:16px 實際變成距圖片右緣 30px（偏左）。
+     這裡明確歸零，並把 right 收為 14px（比原站 16px 再往右一點）。 */
+  margin: 0;
   top: calc(var(--bc-item-k) * 20);
-  right: calc(var(--bc-item-k) * 16);
+  right: calc(var(--bc-item-k) * 14);
   z-index: 5;
   color: var(--color-white);
   font-size: calc(var(--bc-item-k) * 14);
@@ -271,7 +279,7 @@
   position: absolute;
   top: 0;
   z-index: 5;
-  margin: 0 calc(var(--bc-item-k) * 10); /* 2026-09-16：原固定 10px → 依 --bc-item-k 等比 */
+  margin: 0 calc(var(--bc-item-k) * 6); /* 2026-09-16：10px → 6px（整體往右一點；margin 由上到下皆明確） */
   font-size: calc(var(--bc-item-k) * 12); /* 2026-09-16：原固定 12px → 依 --bc-item-k 等比 */
   line-height: 1;
   letter-spacing: 0.06em;
@@ -469,6 +477,13 @@
     padding: 120px 0;
   }
 
+  /* 2026-09-16：平板 .hero_wrap 是 height:auto（catch 的 height:100% 解析為 wrap 的 padding box）
+     且內含 nav 使內容高於內容框 → 上緣內距須為 0 才會與照片垂直居中（實測 pt:120 → 文字低 63.5px；
+     pt:0 → 差 3.5px，與桌機同級）。 */
+  .bc-gunte-hero .hero_catch {
+    padding-top: 0;
+  }
+
   .bc-gunte-hero .hero_slide .splide {
     /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 68vw→54.4vw） */
     width: calc(68vw * var(--bc-gunte-scale));
@@ -526,6 +541,11 @@
 
   .bc-gunte-hero .hero_wrap {
     padding: 50px 0;
+  }
+
+  /* 2026-09-16：手機原本（padding-top: 0）文字就已與照片居中，故維持 0（勿繼承桌機的 --bc-gunte-top-gap） */
+  .bc-gunte-hero .hero_catch {
+    padding-top: 0;
   }
 
   .bc-gunte-hero .hero_slide .splide {
