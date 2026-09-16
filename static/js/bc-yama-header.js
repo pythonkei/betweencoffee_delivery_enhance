@@ -67,6 +67,27 @@
         });
       }
     }
+
+    /* 5. 2026-09-16：iOS／行動瀏覽器底部工具列遮擋修正
+       問題：position:fixed 的模組以「layout viewport」定位，而行動 Safari 的
+             分頁列／工具列／首頁指示列會蓋在 layout viewport 底部 →
+             bottom:20~24px 的元素實機只露出上緣（iPad 實測遮住約 120px、iPhone 約 58px）。
+       解法：以 visualViewport 量測「layout viewport 與實際可視區」的差（＝被遮住的高度），
+             寫入 CSS 變數 --bc-vis-gap，CSS 端 tax-nav / header-bot 的 bottom 加上它。
+             桌機（無遮擋）差值為 0 → 位置完全不變。 */
+    if (window.visualViewport) {
+      var syncVisGap = function () {
+        var vv = window.visualViewport;
+        var gap = window.innerHeight - vv.height - vv.offsetTop;
+        if (!isFinite(gap) || gap < 0) gap = 0;
+        if (gap > 200) gap = 200;   /* 螢幕鍵盤等極端情況的上限保護 */
+        document.documentElement.style.setProperty('--bc-vis-gap', Math.round(gap) + 'px');
+      };
+      syncVisGap();
+      window.visualViewport.addEventListener('resize', syncVisGap);
+      window.visualViewport.addEventListener('scroll', syncVisGap);
+      window.addEventListener('orientationchange', syncVisGap);
+    }
   }
 
   if (document.readyState === 'loading') {

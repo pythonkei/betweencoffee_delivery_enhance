@@ -43,7 +43,7 @@
          即文字列貼於圓球底部下方居中 */
   .bc-yama .header-bot {
     position: fixed;
-    bottom: calc(min(6.25vw, 90px) - 1.2em - min(1.111vw, 16px));  /* 圓底下方 gap（2026-09-04：8px → 14px 級） */
+    bottom: calc(min(6.25vw, 90px) + var(--bc-vis-gap, 0px) - 1.2em - min(1.111vw, 16px));  /* 圓底下方 gap（2026-09-04：8px → 14px 級；2026-09-16 加 --bc-vis-gap） */
     right: calc(min(3.889vw, 56px) + min(12.083vw, 174px) / 2);
     transform: translateX(50%);
     color: #c2c2bf;
@@ -109,7 +109,10 @@
 @media (min-width: 769px) {
   .bc-yama .tax-nav {
     position: fixed;
-    bottom: min(6.25vw, 90px);
+    /* 2026-09-16：+ --bc-vis-gap（JS 以 visualViewport 量測的瀏覽器底部工具列高度）
+       + env(safe-area-inset-bottom)。iOS/行動 Safari 的 layout viewport 延伸至底部工具列後方，
+       原本的 bottom 值會被分頁列／工具列蓋住 → 實機只露出圓球上緣一小部分。 */
+    bottom: calc(min(6.25vw, 90px) + var(--bc-vis-gap, 0px) + env(safe-area-inset-bottom, 0px));
     right: min(3.889vw, 56px);
     opacity: 0;
     pointer-events: none;
@@ -230,7 +233,8 @@
 
   .bc-yama .tax-nav {
     position: fixed;
-    bottom: 20px;
+    /* 2026-09-16：同桌面層，加上 --bc-vis-gap + 安全區（實機才不會被底部工具列蓋住） */
+    bottom: calc(20px + var(--bc-vis-gap, 0px) + env(safe-area-inset-bottom, 0px));
     right: 10px;
     opacity: 0;
     pointer-events: none;
@@ -402,7 +406,7 @@
    ============================================================ */
 @media screen and (min-width: 744px) and (max-width: 1199.98px) {
   .bc-yama .tax-nav {
-    bottom: 24px;
+    bottom: calc(24px + var(--bc-vis-gap, 0px) + env(safe-area-inset-bottom, 0px));
     right: 20px;
   }
   .bc-yama .tax-nav a {
@@ -426,7 +430,7 @@
   }
   /* header-bot（購物車 [ n ]，僅 ≥769 顯示）位置跟著新圓心／圓底重算 */
   .bc-yama .header-bot {
-    bottom: calc(24px - 1.2em - 11px);
+    bottom: calc(24px + var(--bc-vis-gap, 0px) - 1.2em - 11px);
     right: calc(20px + min(20vw, 150px) / 2);
   }
 }
