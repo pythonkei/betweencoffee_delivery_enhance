@@ -469,8 +469,10 @@
   }
 }
 
-/* ---- 響應式（≤767.98，原 home.css + base.css 工具）---- */
-@media screen and (max-width: 767.98px) {
+/* ---- 響應式（≤743.98，原 home.css + base.css 工具）----
+   2026-09-16：邊界由 ≤767.98 改為 ≤743.98 → iPad Mini 6 直向（744px）改走平板版
+   （原本 744 落在手機層，只顯示 vis-sp 255px 圖片，在 744 寬螢幕上偏小）。 */
+@media screen and (max-width: 743.98px) {
   .bc-gunte-hero {
     margin-top: 0;
     padding-top: 50px;
@@ -549,3 +551,19 @@
 .bc-page-content > section.bc-gunte-hero.hero {
   margin-top: 0 !important;
 }
+
+/* ---- 響應式（短視窗：≥992 寬且 ≤900 高）2026-09-16 ----
+   問題：專案標準斷點是「純寬度」，iPad 橫向的 CSS 寬度是 1024~1366px → 全部落在桌機層，
+   但桌機版 hero 總高 961px（wrap 648 + nav 205 + padding 90）是給 ≥900px 高的視窗用的
+   → 放進 744~834px 高的橫向 iPad 會溢出 129~217px（實測 1024×768：hero 961 vs 視窗 768）。
+   解法：改用「視窗高度」判斷（真正的限制條件），短視窗把三個旋鈕一起降一級（hero ≈ 693px）。
+   涵蓋：iPad Mini 6 / Air / Pro 11 / Pro 12.9 橫向、以及 1280×720、1366×768 小筆電。
+   桌機（高度 >900px）完全不動。 */
+@media (min-width: 992px) and (max-height: 900px) {
+  .bc-gunte-hero {
+    --bc-gunte-scale: 0.55;
+    --bc-gunte-top-gap: 90px;
+    --bc-gunte-nav-gap: 140px;
+  }
+}
+
