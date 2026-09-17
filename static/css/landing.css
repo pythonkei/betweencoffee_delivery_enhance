@@ -198,14 +198,6 @@
 
 
 
-.feed__triangle {
-  position: absolute;
-  right: -140px;
-  bottom: 0;
-  transform: rotate(-229deg);
-  width: 577px;
-  mix-blend-mode: difference;
-}
 
 /* 懸浮時鐘樣式 - 最終修正版 */
 .feed__clock {
@@ -272,9 +264,6 @@
     width: 1704px;
     height: 406px; /* 400 + 6px 補償 margin-top -6px */
   }
-  .feed__triangle {
-    width: 440px;
-  }
 }
 
 @media screen and (max-width: 576px) {
@@ -284,9 +273,6 @@
   .feed__layer-parts {
     width: 1022px;
     height: 246px; /* 240 + 6px 補償 margin-top -6px */
-  }
-  .feed__triangle {
-    width: 340px;
   }
 }
 

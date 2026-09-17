@@ -8,12 +8,14 @@
 
    作法：
    - 影片標記 muted / playsinline / loop / preload="none"
-     （首屏不下載 2.2MB；poster 使用原照片，未播放時外觀與第一組相同）
+     （首屏不下載 2.2MB；2026-09-16 移除 poster——原本未播放時會先顯示靜態照片
+       index_feed_image.png、之後才播影片，使用者回報「初始顯示異常」；
+       現改為顯示容器底色 rgba(17,16,19,1)，與蒙版同色、切換不可見）
    - 本檔以 IntersectionObserver 控制：
        進入視口（上下各 200px 提前量）→ preload="auto" + play()
        離開視口 → pause()（省 CPU / 電力，已下載的資料保留）
-   - play() 被瀏覽器拒絕（省電模式等）時忽略 → 維持 poster，不報錯
-   - 不支援 IntersectionObserver 或腳本未載入 → 只顯示 poster，
+   - play() 被瀏覽器拒絕（省電模式等）時忽略 → 維持容器底色，不報錯
+   - 不支援 IntersectionObserver 或腳本未載入 → 只顯示容器底色，
      版面與第一組 .feed 完全相同，不會破版
    ============================================================ */
 (function () {

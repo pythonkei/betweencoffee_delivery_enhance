@@ -715,9 +715,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         </clipPath>
         </svg>
     </div>
-    <div hidden class="feed__triangle">
-        <img src="https://wondercrecue.com/wp-content/themes/wondercrecue2025/assets/images/index_feed_triangle.svg" alt="Wonder Crecue（ワンダークリック）">
-    </div>
 </section>
 
 <section class="ftco-section-blank-small"></section>
@@ -730,7 +727,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <section class="feed feed--video overflow-hidden">
     <div class="feed__video">
         <video class="video" muted playsinline loop preload="none" aria-hidden="true"
-               data-feed-video poster="{% static 'images/index_feed_image.png' %}">
+               data-feed-video>
             <source src="{% static 'roasting.webm' %}" type="video/webm">
             <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
         </video>
@@ -748,9 +745,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
             <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
         </clipPath>
         </svg>
-    </div>
-    <div hidden class="feed__triangle">
-        <img src="https://wondercrecue.com/wp-content/themes/wondercrecue2025/assets/images/index_feed_triangle.svg" alt="Wonder Crecue（ワンダークリック）">
     </div>
 </section>
 
@@ -841,7 +835,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <script src="{% static 'library/splide-4.1.3/dist/js/splide.min.js' %}"></script>
 <script src="{% static 'js/bc-gunte-hero.js' %}?v=20260907b"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
-<script src="{% static 'js/bc-feed-video.js' %}?v=20260911a"></script>
+<script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
 <!-- 2026-09-07：首頁將 bc-attract-buy/profile 對齊 navbar-brand 頂部邊緣
      （buy 頂邊 = navbar-brand 頂邊、profile 接在 buy 下方；沿用既有 translateY(-50%) 機制） -->
 <script>
