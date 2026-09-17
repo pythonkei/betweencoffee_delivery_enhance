@@ -84,6 +84,9 @@
         document.documentElement.style.setProperty('--bc-vis-gap', Math.round(gap) + 'px');
       };
       syncVisGap();
+      /* 2026-09-16：工具列狀態可能在 load 後才穩定（iOS Safari），再補測 1 次 */
+      window.addEventListener('load', syncVisGap);
+      setTimeout(syncVisGap, 800);
       window.visualViewport.addEventListener('resize', syncVisGap);
       window.visualViewport.addEventListener('scroll', syncVisGap);
       window.addEventListener('orientationchange', syncVisGap);
