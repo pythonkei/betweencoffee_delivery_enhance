@@ -206,7 +206,7 @@
     font-size: min(1.111vw, 16px);   /* 中文適配：原站 min(1.25vw,18px) */
     font-weight: 600;
     line-height: 1;
-    margin-block: min(.833vw, 12px) min(.486vw, 7px);
+    margin-block: min(.833vw, 12px) min(.764vw, 11px);   /* 2026-09-16：行距加大（bottom 7→11px，與 tagline 間距 +57%） */
     white-space: nowrap;
   }
   /* 2026-09-04：「登入」二字新增底線 */
@@ -310,7 +310,7 @@
     font-size: min(3.077vw, 16px);
     font-weight: 600;
     line-height: 1;
-    margin-block: min(1.282vw, 10px) min(.769vw, 6px);
+    margin-block: min(1.282vw, 10px) min(1.154vw, 9px);   /* 2026-09-16：行距加大（bottom 6→9px） */
     white-space: nowrap;
   }
   .bc-yama .tax-nav a p > span:first-child em {
@@ -433,7 +433,7 @@
   }
   .bc-yama .tax-nav a p > span:first-child {
     font-size: min(1.75vw, 13px);
-    margin-block: min(.833vw, 10px) min(.486vw, 6px);
+    margin-block: min(.833vw, 10px) min(.729vw, 9px);   /* 2026-09-16：行距加大（bottom 6→9px） */
   }
   .bc-yama .tax-nav .bc-yama-deco {
     width: 67.7%;   /* 隨圓徑縮放（登入後照片 .bc-yama-deco-photo 亦沿用） */
@@ -484,7 +484,24 @@
   }
   .bc-yama .tax-nav a p > span:first-child {
     font-size: min(2.462vw, 12.8px);
-    margin-block: min(1.026vw, 8px) min(.615vw, 4.8px);
+    margin-block: min(1.026vw, 8px) min(.9225vw, 7.2px);   /* 2026-09-16：行距加大（bottom 4.8→7.2px） */
   }
+}
+
+/* ============================================================
+   2026-09-16：tax-nav 兩行文字整體下移微調
+   ------------------------------------------------------------
+   使用者要求「按照之前口味落單?」與「當前積分可減免 -5」兩段文字向下微調位置
+   （兩行間距加大見各層 margin-block 的 bottom 值：桌機 7→11、≤768 6→9、
+    平板 6→9、手機 4.8→7.2px）。
+   作法：p 給 position: relative + top: 0.25em
+        （em 隨各層 p 的字級縮放：桌機 ≈3.5px、≤768 ≈3.25px、平板 ≈2.75px、手機 ≈2.6px）。
+   註：.tax-nav a 是 flex column + justify-content:center，直接加 margin/padding
+       只會位移「一半」（置中會吸收另一半），故用 position/top 做純位移。
+   適用於登入前（登入補充咖啡因! / 為自己充充電!）與登入後兩種狀態（同一組元素）。
+   ============================================================ */
+.bc-yama .tax-nav a p {
+  position: relative;
+  top: 0.25em;
 }
 
