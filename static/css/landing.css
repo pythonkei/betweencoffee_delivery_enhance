@@ -342,9 +342,24 @@
   background-image: none;
 }
 
-/* 高度歸零：影片組不需要頂部深色帶（見上方「高度對齊」說明） */
+/* 高度歸零：影片組不需要頂部深色帶（見上方「高度對齊」說明）
+   2026-09-16：改為「上下各 1.2% 的實色帶」——影片組移除了 −6px 上緣補償且下緣無餘裕，
+   實測上下各有約 6px 亮帶漏出影片（1.2% 在 576px 時＝6.9px）。
+   字母上緣在 5.88/570 = 1.03% → 1.2% 不會裁到字母；絕對定位不影響區塊高度。 */
+.feed--video::before,
+.feed--video::after {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.2%;
+  z-index: 2;   /* 高於 .feed__layer（蒙版層）、影片層 z-index:-1 */
+  pointer-events: none;
+}
 .feed--video::before {
-  height: 0;
+  top: 0;
+}
+.feed--video::after {
+  bottom: 0;
 }
 
 .feed--video .feed__video {
