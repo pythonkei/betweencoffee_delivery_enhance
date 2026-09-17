@@ -4,71 +4,13 @@
    - .c-attract 容器：負 margin 擴展 hover 範圍 + 3D 透視
    - .c-attract__layer：preserve-3d 內層（GSAP tilt 動畫目標）
    - 應用：navbar Buy & Order 按鈕 + 漢堡選單三條線
-   - #borders：全屏 fixed 左右垂直虛線（dots mask），左線對齊 Buy 按鈕
    動畫：static/js/bc-attract.js（UnifiedEffect 精簡版）
    ============================================================ */
 
-/* ===== #borders 全屏虛線邊框（對應 cheesetart #borders）
-   右側垂直虛線（dots_40.svg mask），固定全屏、pointer-events:none
-   2px 細線 + 半透明 + pointer-events:none = 純裝飾引導線
-   虛線從頁面頂部延伸至底部，對齊 Buy 按鈕中心
-   層級：.bc-attract-buy(99999) > #ftco-navbar(3，含 weather 元件) > #borders(2) > 內容(1)
-   2026-08-27：z-index 9999→2 —— 原 9999 疊在 navbar 上方，右側虛線穿過 Timber Wharf
-   weather 元件（navbar z-index 3 stacking context 內）；降為 2 後 weather 顯示於
-   虛線之上（虛線位於底層），虛線仍高於一般內容（.bc-page-content z-index 1） */
-#borders {
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-}
-/* 內容 wrapper：恢復自然層級（虛線為裝飾引導線，位於內容之上但細線不遮擋） */
+/* 內容 wrapper（原為 #borders 虛線的層級安排；2026-09-16 #borders 已移除，保留 position: relative） */
 .bc-page-content {
   position: relative;
 }
-#borders .bc-borders__inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-/* 右側虛線：全高、點狀 mask、灰色（按鈕中心點對齊此虛線中心）
-   2026-09-11：補上 768–991 斷點。bc-attract 按鈕的「可見中心」=
-   元素 right + 寬/2 + --attract（.c-attract 的 margin:-attract 會讓內部
-   link 再往左偏 --attract），實測各斷點可見中心為
-     ≥992 = 66、768–991 = 58、≤767 = 37、≤575 = 33
-   線寬 2px → 線中心 = right + 1 → right 依序為 65 / 57 / 36 / 32
-   （原本缺 768–991，導致該斷點虛線比按鈕中心右偏 8px） */
-#borders .bc-borders__right {
-  /* 2026-09-16：依使用者要求「所有模板隱藏右側垂直虛線」→ 與左側同樣處理（display: none）。
-     管理頁 templates/admin/staff_order_management.html 早已用 inline CSS 隱藏整個 #borders；
-     此處為全站（base.html 皆含 #borders）統一生效。
-     要恢復虛線只需移除下面這行 display: none（下列 right 斷點值仍保留）。 */
-  display: none;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 65px;
-  width: 2px;
-  height: 100%;
-  background-color: rgba(128, 128, 128, 0.6);   /* 2026-08-14：加深灰色（原白 0.5） */
-  -webkit-mask-image: url('/static/images/dots_40.svg');
-  mask-image: url('/static/images/dots_40.svg');
-  -webkit-mask-size: 40px 40px;
-  mask-size: 40px 40px;
-  -webkit-mask-repeat: repeat;
-  mask-repeat: repeat;
-}
-@media screen and (min-width: 768px) and (max-width: 991.98px) {
-  #borders .bc-borders__right { right: 57px; }   /* 中心 58 = 同斷點按鈕可見中心 */
-}
-/* 左側虛線（已隱藏 2026-08-10） */
-#borders .bc-borders__left {
-  display: none;
-}
-
 /* ===== c-attract 通用容器（對應 cheesetart .c-attract） ===== */
 .c-attract {
   margin: calc(var(--attract, 0px) * -1);
@@ -102,10 +44,10 @@
   transform: translateY(-50%);
   width: 40px;
   height: 150px;
-  /* z-index:99999 最頂（高於右側虛線 #borders z-index:9999）。
+  /* z-index:99999 最頂（2026-09-16 前為高於右側虛線 #borders）。
      重要：此元素必須是 body 直接子層（見 nav.html 註解），
      若巢狀在 #ftco-navbar（position:absolute;z-index:3 的 stacking context）內，
-     99999 會被鎖在層級 3，低於 #borders(9999) 而被虛線蓋住。 */
+     99999 會被鎖在層級 3，原會低於當時的右側虛線（#borders 9999，已於 2026-09-16 移除）。 */
   z-index: 99999;
 }
 .bc-attract-buy > div {
@@ -266,10 +208,6 @@
 
 /* ===== 響應式（≤767.98px 手機） ===== */
 @media screen and (max-width: 767.98px) {
-  /* 右虛線（按鈕中心點對齊此虛線中心） */
-  #borders .bc-borders__right {
-    right: 36px;
-  }
   .bc-attract-buy {
     --attract: 8px;
     right: 13px;            /* 視覺按鈕中心點對齊虛線中心 */
@@ -313,10 +251,6 @@
 
 /* ===== 響應式（≤575.98px 小手機） ===== */
 @media screen and (max-width: 575.98px) {
-  /* 右虛線（按鈕中心點對齊此虛線中心） */
-  #borders .bc-borders__right {
-    right: 32px;
-  }
   .bc-attract-buy {
     right: 11px;            /* 視覺按鈕中心點對齊虛線中心 */
     width: 28px;

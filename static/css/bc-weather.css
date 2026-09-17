@@ -22,7 +22,7 @@
 }
 
 /* ---- 與 c-attract（右側虛線/Order 按鈕）中心點對齊（2026-08-26 需求）
-   weather 水平中心對齊 #borders 右側虛線中心（= Order 按鈕視覺中心）。
+   weather 水平中心對齊 Order 按鈕視覺中心（2026-09-16 前同位置為 #borders 右側虛線）。
    位移 = weather centerX − 虛線 centerX（weekday 加大後 768+ 容器 84px / 移動端 60px）：
      ≥768px       84px 容器、虛線 right:65px → 需左移 9px
      576–767.98px 60px 容器、虛線 right:36px → 需右移 8px
