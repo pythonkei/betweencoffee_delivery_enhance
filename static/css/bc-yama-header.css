@@ -409,8 +409,10 @@
    ============================================================ */
 @media screen and (min-width: 744px) and (max-width: 1199.98px) {
   .bc-yama .tax-nav {
-    bottom: 24px;   /* fallback（舊瀏覽器不支援 calc 內的 env()） */
-    bottom: calc(24px + var(--bc-vis-gap, 0px) + env(safe-area-inset-bottom, 0px));
+    /* 2026-09-16：平板圓球 bottom 需 ≥44px，否則下方 .header-bot（購物車 [ n ]）
+       會算出負值被切掉（1133px 寬時：24 − 1.2em(16px) − 11px = −3px，Air 820 僅 +1.5px）。 */
+    bottom: 44px;   /* fallback（舊瀏覽器不支援 calc 內的 env()） */
+    bottom: calc(44px + var(--bc-vis-gap, 0px) + env(safe-area-inset-bottom, 0px));
     right: 20px;
   }
   .bc-yama .tax-nav a {
@@ -434,9 +436,35 @@
   }
   /* header-bot（購物車 [ n ]，僅 ≥769 顯示）位置跟著新圓心／圓底重算 */
   .bc-yama .header-bot {
-    bottom: calc(24px - 1.2em - 11px);   /* fallback */
-    bottom: calc(24px + var(--bc-vis-gap, 0px) - 1.2em - 11px);
+    bottom: calc(44px - 1.2em - 11px);   /* fallback */
+    bottom: calc(44px + var(--bc-vis-gap, 0px) - 1.2em - 11px);
     right: calc(20px + min(20vw, 150px) / 2);
+  }
+}
+
+/* ============================================================
+   2026-09-16 手機層（≤743.98px）：整體再縮小 20%
+   ------------------------------------------------------------
+   使用者要求「手機端整個 .bc-yama 再縮小 20%」。以 ≤768 原值 ×0.8：
+     圓徑      min(30.769vw, 236px) → min(24.615vw, 189px)
+     主文字    min(3.077vw, 16px)   → min(2.462vw, 12.8px)
+     tagline   min(2.564vw, 13px)   → min(2.051vw, 10.4px)
+     主文字上下間距 min(1.282vw,10px) / min(.769vw,6px) → ×0.8
+   frame 圖（92%）與 deco（67.7%）為百分比 → 隨圓徑自動縮放。
+   位置（bottom 20px / right 10px）與 --bc-vis-gap 補償沿用 ≤768 區塊。
+   平板（744~1199.98）與桌機（≥1200）不受影響。
+   ============================================================ */
+@media screen and (max-width: 743.98px) {
+  .bc-yama .tax-nav a {
+    width: min(24.615vw, 189px);
+    height: min(24.615vw, 189px);
+  }
+  .bc-yama .tax-nav a p {
+    font-size: min(2.051vw, 10.4px);
+  }
+  .bc-yama .tax-nav a p > span:first-child {
+    font-size: min(2.462vw, 12.8px);
+    margin-block: min(1.026vw, 8px) min(.615vw, 4.8px);
   }
 }
 
