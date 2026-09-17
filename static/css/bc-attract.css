@@ -42,6 +42,11 @@
    線寬 2px → 線中心 = right + 1 → right 依序為 65 / 57 / 36 / 32
    （原本缺 768–991，導致該斷點虛線比按鈕中心右偏 8px） */
 #borders .bc-borders__right {
+  /* 2026-09-16：依使用者要求「所有模板隱藏右側垂直虛線」→ 與左側同樣處理（display: none）。
+     管理頁 templates/admin/staff_order_management.html 早已用 inline CSS 隱藏整個 #borders；
+     此處為全站（base.html 皆含 #borders）統一生效。
+     要恢復虛線只需移除下面這行 display: none（下列 right 斷點值仍保留）。 */
+  display: none;
   position: absolute;
   top: 0;
   bottom: 0;
