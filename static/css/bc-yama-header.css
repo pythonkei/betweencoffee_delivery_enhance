@@ -35,8 +35,11 @@
   .bc-yama { display: block; }
 }
 
-/* ---- header-bot：底部帳號列（僅 Cart） ---- */
-@media (min-width: 769px) {
+/* ---- header-bot：底部帳號列（僅 Cart） ----
+   2026-09-16：本段原包在 @media (min-width: 769px) 內，導致 ≤768（iPad Mini 直向 744/768、
+   手機）完全沒有 position:fixed 等基礎樣式，一旦顯示就變成靜態 block 掉到文件流外
+   （實測落在視窗下方 1194~1508px）→ 改為全寬度生效；
+   各斷點的尺寸／位置由下方「平板層」「手機層」覆寫。 */
   /* ---- header-bot：位於 tax-nav 黃圓底部、水平對齊圓心
          2026-09-04：right = 圓心距視口右（tax right + 半徑）搭配 translateX(50%)
          讓整列文字中心 = 圓心 x；bottom = 圓底(距視口底 tax bottom) − 行高 − gap，
@@ -104,7 +107,6 @@
     line-height: 120%;
     display: inline-block;
   }
-}
 
 /* ---- tax-nav：黃色圓形公告球 ---- */
 @media (min-width: 769px) {
@@ -334,9 +336,11 @@
     -webkit-mask: url("../images/deco_05.svg") no-repeat center / contain;
     mask: url("../images/deco_05.svg") no-repeat center / contain;
   }
-  /* 購物車 [ n ] 僅桌面（同原站 _pc）；行動端購物車入口 = navbar icon / 浮動購物車 */
+  /* 2026-09-16：原本此處 display:none（同原站 ._pc「僅桌面」）→ 改為顯示，
+     讓 iPad Mini 直向（744/768）與手機也能看到購物車 [ n ]
+     （使用者回報：Air/Pro 有、Mini 與手機沒有）。尺寸／位置由下方手機層覆寫。 */
   .bc-yama .header-bot {
-    display: none;
+    display: block;
   }
   /* 既有浮動購物車移左下避讓右下黃圓（僅本頁） */
   .bc-floating-cart {
@@ -434,8 +438,11 @@
   .bc-yama .tax-nav .bc-yama-deco {
     width: 67.7%;   /* 隨圓徑縮放（登入後照片 .bc-yama-deco-photo 亦沿用） */
   }
-  /* header-bot（購物車 [ n ]，僅 ≥769 顯示）位置跟著新圓心／圓底重算 */
+  /* header-bot（購物車 [ n ]）：位置跟著新圓心／圓底重算
+     2026-09-16：+ display:block（原本 ≤768 被隱藏，導致 iPad Mini 直向 744/768 看不到） */
   .bc-yama .header-bot {
+    display: block;
+    font-size: 13px;   /* 桌面 min(1.172vw,16px) 在平板寬度只剩 9~10px 過小 → 平板固定 13px */
     bottom: calc(44px - 1.2em - 11px);   /* fallback */
     bottom: calc(44px + var(--bc-vis-gap, 0px) - 1.2em - 11px);
     right: calc(20px + min(20vw, 150px) / 2);
@@ -455,6 +462,19 @@
    平板（744~1199.98）與桌機（≥1200）不受影響。
    ============================================================ */
 @media screen and (max-width: 743.98px) {
+  /* 圓球底部上移，讓出下方 .header-bot（購物車 [ n ]）的空間 */
+  .bc-yama .tax-nav {
+    bottom: 44px;   /* fallback */
+    bottom: calc(44px + var(--bc-vis-gap, 0px) + env(safe-area-inset-bottom, 0px));
+  }
+  /* 2026-09-16：手機端原本 ≤768 將 header-bot 設 display:none → 改為顯示（與平板一致） */
+  .bc-yama .header-bot {
+    display: block;
+    font-size: 10px;
+    bottom: calc(44px - 1.2em - 8px);   /* fallback */
+    bottom: calc(44px + var(--bc-vis-gap, 0px) - 1.2em - 8px);
+    right: calc(10px + min(24.615vw, 189px) / 2);
+  }
   .bc-yama .tax-nav a {
     width: min(24.615vw, 189px);
     height: min(24.615vw, 189px);
