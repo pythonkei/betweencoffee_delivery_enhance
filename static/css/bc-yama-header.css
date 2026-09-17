@@ -305,7 +305,7 @@
     text-align: center;
   }
   .bc-yama .tax-nav a p > span:first-child {
-    color: #fff;
+    color: #ba833a;   /* 2026-09-16：原 #fff → 改與桌機層一致（#ba833a 金） */
     display: block;
     font-size: min(3.077vw, 16px);
     font-weight: 600;
@@ -429,11 +429,12 @@
     height: min(18.5vw, 139px);
   }
   .bc-yama .tax-nav a p {
-    font-size: min(1.4vw, 11px);
+    font-size: min(1.28vw, 10px);   /* 2026-09-16：稍微縮小（11→10px） */
   }
   .bc-yama .tax-nav a p > span:first-child {
-    font-size: min(1.75vw, 13px);
-    margin-block: min(.833vw, 10px) min(.729vw, 9px);   /* 2026-09-16：行距加大（bottom 6→9px） */
+    font-size: min(1.6vw, 12px);    /* 2026-09-16：稍微縮小（13→12px） */
+    /* 2026-09-16：行距改固定 11px（原 vw 版在 744~1194 只有 5.4~8.7px，實測太近） */
+    margin-block: min(.833vw, 10px) 11px;
   }
   .bc-yama .tax-nav .bc-yama-deco {
     width: 67.7%;   /* 隨圓徑縮放（登入後照片 .bc-yama-deco-photo 亦沿用） */
@@ -480,11 +481,12 @@
     height: min(24.615vw, 189px);
   }
   .bc-yama .tax-nav a p {
-    font-size: min(2.051vw, 10.4px);
+    font-size: min(1.887vw, 9.6px);   /* 2026-09-16：稍微縮小（10.4→9.6px） */
   }
   .bc-yama .tax-nav a p > span:first-child {
-    font-size: min(2.462vw, 12.8px);
-    margin-block: min(1.026vw, 8px) min(.9225vw, 7.2px);   /* 2026-09-16：行距加大（bottom 4.8→7.2px） */
+    font-size: min(2.265vw, 11.8px);  /* 2026-09-16：稍微縮小（12.8→11.8px） */
+    /* 2026-09-16：行距改固定 8px（原 vw 版在 320~430 只有 2~4px，實測太近） */
+    margin-block: min(1.026vw, 8px) 8px;
   }
 }
 
