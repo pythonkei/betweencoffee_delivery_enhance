@@ -18,7 +18,7 @@
 /* 2026-09-06 主題顏色變數：tax-nav 圓球背景與 hover 掃層色
    （2026-09-06 更新：背景 #774f18 深咖啡；hover #1a1919 近黑） */
 :root {
-  --bc-yama-circle: #774f18;         /* 圓球背景（深咖啡） */
+  --bc-yama-circle: #131211;         /* 圓球背景（2026-09-16 依使用者要求由深咖啡 #774f18 改為近黑 #131211） */
   --bc-yama-circle-hover: #1a1919;   /* hover 狀態（掃過層） */
 }
 
@@ -201,7 +201,7 @@
     text-align: center;
   }
   .bc-yama .tax-nav a p > span:first-child {
-    color: #fff;   /* 主行（登入補充咖啡因!/按照之前口味落單?） */
+    color: #ba833a;   /* 主行（登入補充咖啡因!/按照之前口味落單?） */
     display: block;
     font-size: min(1.111vw, 16px);   /* 中文適配：原站 min(1.25vw,18px) */
     font-weight: 600;
@@ -252,7 +252,7 @@
   }
   .bc-yama .tax-nav a {
     align-items: center;
-    background: var(--bc-yama-circle);
+    background: #131211;
     border-radius: 100%;
     box-sizing: border-box;
     display: flex;
