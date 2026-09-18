@@ -82,6 +82,37 @@
                 self.animate();
             }
         });
+
+        /* 2026-09-18：視窗尺寸變更（DevTools 切換裝置／旋轉螢幕／手機網址列伸縮）時，
+           把殘留的磁吸位移歸零回「原始位置」。
+           原因：位移只在「滑鼠移動」時依 proximity 重算，若游標停在熱區內、之後沒有新的
+           mousemove（在 DevTools 切換裝置後很常見），按鈕就會一直停在偏移處，
+           看起來像「模組位移、無法回到原位」。歸零後下一次 mousemove 會自然重新吸附。 */
+        var onViewportChange = function () { self.reset(); };
+        window.addEventListener('resize', onViewportChange);
+        window.addEventListener('orientationchange', onViewportChange);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', onViewportChange);
+        }
+        // 游標離開視窗（例如切到 DevTools 面板）時一併歸位
+        document.addEventListener('mouseleave', onViewportChange);
+    };
+
+    /* 2026-09-18：歸零回原位（不經 animate()，避免受 isHovering 狀態影響）。
+       以 GSAP 補間回彈，不做直接跳到 0 的突現。 */
+    AttractEffect.prototype.reset = function () {
+        this.isHovering = false;
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.layers.forEach(function (layer) {
+            gsap.to(layer, {
+                x: 0,
+                y: 0,
+                duration: 0.3,
+                ease: 'power2.out',
+                overwrite: 'auto'
+            });
+        });
     };
 
     AttractEffect.prototype.updateMouse = function (e) {

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bc-attract-buy 內部圖示 — 10 個選項</title>
+<!-- 2026-09-18：Buy & Order 按鈕（bc-attract-buy）內部圖示挑選用預覽頁。
+     直接載入正式 bc-attract.css（相對路徑）→ 按鈕外觀、尺寸、圓角、垂直文字與線上完全一致，
+     並會隨斷點變化（桌機 150px 高 / 平板 116 / ≤767 92 / ≤575 78）→ 用 DevTools 切裝置即可檢視。
+     開啟方式：
+       Django dev server → http://127.0.0.1:8081/static/preview/bc-attract-buy-icons.html
+       或直接以瀏覽器開啟本檔（file://，相對路徑同樣可解析） -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="../css/bc-attract.css">
+<style>
+  /* 僅預覽頁版面；按鈕本體樣式一律來自 ../css/bc-attract.css（不重刻） */
+  body { margin: 0; padding: 32px; background: #0e0e0e; color: rgba(255, 255, 255, .9); font-family: 'Noto Sans TC', sans-serif; }
+  h1 { font-size: 1.2rem; font-weight: 500; margin: 0 0 8px; }
+  .note { font-size: .85rem; font-weight: 300; line-height: 1.8; color: rgba(255, 255, 255, .5); margin: 0 0 28px; }
+  .note code { color: #c49b63; font-family: monospace; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 20px; }
+  .card { background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 20px 8px 14px; text-align: center; }
+  /* 預覽用覆寫：只取消 fixed 定位與垂直置中，讓 10 個按鈕能並排；
+     寬高、圓角、底色、icon/文字尺寸與間距全部沿用正式 CSS（含各斷點 media query） */
+  .card .bc-attract-buy { position: relative; top: auto; right: auto; transform: none; margin: 0 auto 12px; }
+  /* 預覽用：補上與線上相同的 box-sizing（線上由全域 reset 提供；本頁未載入該檔）。
+     少了它，.c-attract 的 width:100% + padding 24px 會以 content-box 計算 → link 變 88x198（線上為 48x150）→ 比例失真。 */
+  .card .bc-attract-buy .c-attract { box-sizing: border-box; }
+  .no { font-size: 1.05rem; font-weight: 700; color: #c49b63; line-height: 1; }
+  /* 放大檢視：同一圖示放大 40px，方便比較形狀（實際大小看下方按鈕） */
+  .bigicon { display: block; font-size: 40px; line-height: 1; margin: 0 0 14px; color: #fff; }
+  .nm { font-size: .68rem; color: rgba(255, 255, 255, .55); font-family: monospace; word-break: break-all; margin-top: 5px; }
+  .dsc { font-size: .7rem; font-weight: 300; color: rgba(255, 255, 255, .4); margin-top: 2px; }
+</style>
+</head>
+<body>
+<h1>bc-attract-buy 內部圖示 — 10 個選項</h1>
+<p class="note">
+  本頁直接載入正式的 <code>bc-attract.css</code>：按鈕尺寸、圓角、底色、垂直 <code>Order</code> 文字（font-weight 500）與線上完全一致，
+  且會隨斷點變化（桌機高 150px／平板 116／≤767 92／≤575 78）→ 用 DevTools 切換裝置即可檢視該尺寸的實際效果。<br>
+  選定後把 <code>templates/layouts/nav.html</code> 內 <code>&lt;span class="icon material-icons c-icon"&gt;</code> 的內容換成該名稱即可（僅改一個字）。
+</p>
+<div class="grid" id="grid"></div>
+<script>
+  var OPTIONS = [
+    ['shopping_bag', '購物袋', '目前使用'],
+    ['local_cafe', '外帶咖啡杯', ''],
+    ['coffee', '咖啡杯（有杯盤）', ''],
+    ['emoji_food_beverage', '熱咖啡（杯＋蒸氣）', ''],
+    ['free_breakfast', '咖啡＋可頌', '咖啡店常見組合'],
+    ['local_dining', '刀叉餐具', '強調餐點'],
+    ['restaurant_menu', '菜單（單頁）', ''],
+    ['menu_book', '菜單本', ''],
+    ['takeout_dining', '外帶餐盒', ''],
+    ['shopping_cart', '購物車', '']
+  ];
+  document.getElementById('grid').innerHTML = OPTIONS.map(function (o, i) {
+    return '<div class="card">'
+      + '<span class="icon material-icons bigicon">' + o[0] + '</span>'
+      + '<div class="bc-attract-buy"><div class="c-attract">'
+      + '<a class="bc-attract-buy__link c-attract__layer" href="#" onclick="return false">'
+      + '<span class="icon material-icons c-icon">' + o[0] + '</span>'
+      + '<span lang="en">Order</span>'
+      + '</a></div></div>'
+      + '<div class="no">' + (i + 1) + '</div>'
+      + '<div class="nm">' + o[0] + '</div>'
+      + '<div class="dsc">' + o[1] + (o[2] ? '：' + o[2] : '') + '</div>'
+      + '</div>';
+  }).join('');
+</script>
+</body>
+</html>

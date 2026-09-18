@@ -98,7 +98,7 @@
   white-space: nowrap;
   font-size: 0.9rem;
   letter-spacing: 0.2em;
-  font-weight: 300;
+  font-weight: 500;               /* 2026-09-18：300 → 500（使用者指定「Order 文字 font-weight:500」） */
 }
 
 /* ===== 個人資料圓形按鈕（2026-08-18：複製 bc-attract-buy 外觀，圓形 + 圖標，連結 profile）

@@ -822,9 +822,15 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
     var prof = document.querySelector('.bc-attract-profile');
     var ready = function () { if (nav) nav.classList.add('bc-home-attract-ready'); };
     if (!nav || !buy || !prof) return;
-    var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
     var hB = buy.getBoundingClientRect().height;
     var hP = prof.getBoundingClientRect().height;
+    /* 2026-09-18：.bc-attract-buy / .bc-attract-profile 是 position: fixed，inline top 屬「視窗座標」，
+       而此處對齊基準是「navbar-brand 在頁面上的位置」＝**文件座標** br.top + scrollTop。
+       此值與捲動無關（navbar 為文件流內 absolute，br.top 會隨捲動等量遞減 → 相加為定值），
+       因此按鈕等同「固定在與頁面頂端 navbar 對齊的高度」。
+       註：不可改用純 br.top（視窗座標）——捲動狀態下會量到負值或視窗外的值，
+       經下方防裁切 Math.max 下限後按鈕會被吸到視窗頂（已實測，故不採用）。 */
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
     var anchor = null; // 要對齊的「頂邊」文件座標
     var brand = document.querySelector('#ftco-navbar .navbar-brand');
     if (brand) {
@@ -839,7 +845,14 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         if (wr.height) anchor = wr.top + scrollTop;
       }
     }
-    if (anchor === null) { ready(); return; }
+    if (anchor === null) {
+      /* 2026-09-18：量不到基準時清掉 inline top，交回 CSS（top:50%），
+         避免殘留上一個裝置算出的舊值造成永久位移。 */
+      buy.style.top = '';
+      prof.style.top = '';
+      ready();
+      return;
+    }
     // CSS 皆 transform: translateY(-50%) → inline top 即中心座標。
     // buy 頂邊 = anchor：top(中心) = anchor + hB/2；另保 (hB/2)+6 下限防裁切
     var buyTop = Math.max(anchor + hB / 2, Math.ceil(hB / 2) + 6);
@@ -848,9 +861,15 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
     ready();
   }
   var rAF = 0;
+  var settleTimer = 0;
   function onResize() {
-    if (rAF) return;
-    rAF = requestAnimationFrame(function () { rAF = 0; place(); });
+    if (!rAF) {
+      rAF = requestAnimationFrame(function () { rAF = 0; place(); });
+    }
+    /* 2026-09-18：切換裝置當下 navbar 版面（字級/圖片）可能仍在重排，
+       rAF 那次會量到中間值（實測殘留 2~5px 偏差）→ 安定後再對齊一次。 */
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(place, 350);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', place);
@@ -859,6 +878,14 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
   }
   window.addEventListener('load', place);
   window.addEventListener('resize', onResize);
+  /* 2026-09-18：旋轉螢幕／手機網址列伸縮／網頁字型載入完成後各再對齊一次 */
+  window.addEventListener('orientationchange', onResize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onResize);
+  }
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(place).catch(function () {});
+  }
 })();
 </script>
 {% endblock %}
