@@ -246,12 +246,14 @@
 /* ===== 響應式（≤768px 手機）===== */
 @media screen and (max-width: 768px) {
   .bc-search-link {
-    height: 1160px;
+    /* 2026-09-16：原 1160px → 縮減 1/3（×2/3 = 773px，依使用者「整個模組比例太長」） */
+    height: 773px;
     padding: 60px;
   }
-  .bc-search-bg-img-01 { top: 420px; left: 283px; width: 225px; }
-  .bc-search-bg-img-02 { top: -30px; left: -560px; width: 672px; }
-  .bc-search-bg-img-03 { top: 151px; right: -99px; width: 263px; }
+  /* 2026-09-16：背景浮動圖垂直位置同步 ×2/3（維持與原版面相同的相對比例） */
+  .bc-search-bg-img-01 { top: 280px; left: 283px; width: 225px; }
+  .bc-search-bg-img-02 { top: -20px; left: -560px; width: 672px; }
+  .bc-search-bg-img-03 { top: 101px; right: -99px; width: 263px; }
   /* 手機版 is-out：對應 demido SP 移出位移（較大幅度向上移出） */
   .bc-search-link.is-out .bc-search-bg-img-01 { transform: translate3d(0, -140%, 0) rotate(-10deg); }
   .bc-search-link.is-out .bc-search-bg-img-02 { transform: translate3d(0, -95%, 0) rotate(20deg); }
@@ -269,7 +271,8 @@
 
 /* ===== 響應式（≤575.98px）===== */
 @media screen and (max-width: 575.98px) {
-  .bc-search-link { padding: 40px; height: 900px; }
+  /* 2026-09-16：原 900px → 縮減 1/3（×2/3 = 600px） */
+  .bc-search-link { padding: 40px; height: 600px; }
   .bc-search-ttl { width: 100%; }
   .bc-search-ttl-label { font-size: 1.5rem; }
   .bc-search-ttl-message { font-size: 2.2rem; }
