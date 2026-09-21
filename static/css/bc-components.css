@@ -1677,6 +1677,8 @@ body {
 .bc-option-btn:hover {
   background: var(--bc-gold);
   color: #fff;
+  /* 2026-09-21（使用者指示）：hover（滑入）狀態也 font-weight 400，與已選取一致 */
+  font-weight: 400;
 }
 
 .bc-option-btn:hover .bc-option-icon,
