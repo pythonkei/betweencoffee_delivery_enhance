@@ -9,8 +9,10 @@
 
 {% block content %}
 <style>
-  /* 菜單頁：隱藏右側 Buy & Order 按鈕（2026-08-14）；保留懸浮購物車按鈕與右側虛線 */
-  .bc-attract-nav { display: none !important; }
+  /* 2026-09-21（使用者指示「全端 bc-attract-buy and profile 和 index 一樣」）：
+     原本 2026-08-14 在此以 .bc-attract-nav{display:none} 隱藏右側 Buy & Order →
+     現改為全站與 index 相同：不再隱藏，由 static/js/bc-attract-place.js 定位
+     （購物袋 → Order 長條 → 個人圓鈕，整組對齊 navbar-brand 頂邊）。 */
   /* 2026-08-15：桌面端咖啡豆產品照片加大（大卡 340→400、小卡 280→320；僅 bean_menu 頁面級，coffee_menu 共用 .bean-mix 不受影響） */
   @media screen and (min-width: 1080px) {
     .bean-mix-main .menu-wrap .menu-img img { width: 400px !important; }

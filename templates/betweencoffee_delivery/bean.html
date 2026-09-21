@@ -5,10 +5,10 @@
 {% block title %}Between Coffee - {{ bean.name }}{% endblock %}
 
 {% block content %}
-<style>
-  /* 詳情頁：隱藏右側 Buy & Order 按鈕（2026-08-14）；保留懸浮購物車按鈕與右側虛線 */
-  .bc-attract-nav { display: none !important; }
-</style>
+<!-- 2026-09-21（使用者指示「全端 bc-attract-buy and profile 和 index 一樣」）：
+     原本 2026-08-14 在此以 .bc-attract-nav{display:none} 隱藏右側 Buy & Order →
+     現改為全站與 index 相同：不再隱藏，由 static/js/bc-attract-place.js 定位
+     （購物袋 → Order 長條 → 個人圓鈕，整組對齊 navbar-brand 頂邊）。 -->
 <!-- Header Banner-->
 <section class="ftco-section-blank-small"></section>
 

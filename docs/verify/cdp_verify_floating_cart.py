@@ -66,6 +66,11 @@ JS = r"""
     ? wBottomDoc : out.navbar_brand_top;
   out.attract_pending = document.documentElement.classList.contains('bc-attract-pending');
   out.attract_ready = !!document.querySelector('.bc-attract-nav.bc-attract-ready');
+  /* 2026-09-21（使用者指示「在全端隱藏右上角的選單」）：navbar 漢堡選單必須全站隱藏 */
+  var menuEl = document.querySelector('#ftco-navbar .bc-attract-menu');
+  out.toggler_display = togglerEl ? getComputedStyle(togglerEl).display : 'no-toggler';
+  out.menu_rect_w = menuEl ? +menuEl.getBoundingClientRect().width.toFixed(1) : null;
+  out.menu_hidden = !menuEl || out.menu_rect_w === 0;
 
   /* 1c. 初始（未強制顯示）狀態：2026-09-21 使用者指示「空車也顯示圖示、只隱藏數字圓圈」 */
   if (fc) {
@@ -140,8 +145,13 @@ JS = r"""
     out.overlaps_bar = (out.cart_wrapper.y < (out.bar.y + out.bar.h) - 0.5)
                     && ((out.cart_wrapper.y + out.cart_wrapper.h) > out.bar.y + 0.5);
     out.placement = ((out.cart_wrapper.y + out.cart_wrapper.h) <= out.bar.y + 1) ? 'above-bar' : 'below-cluster';
-    /* 2026-09-21：與 Buy 按鈕的間距（使用者指示「增加間距」；CSS 定義 12px） */
+    /* 2026-09-21：與 Buy 按鈕的間距（使用者指示「增加間距」；CSS 定義 20px） */
     out.gap_px = +(out.bar.y - (out.cart_wrapper.y + out.cart_wrapper.h)).toFixed(1);
+    /* 2026-09-21（使用者指示「全端 bc-attract-buy and profile 和 index 一樣」）：
+       所有頁面的 Buy／個人圓鈕都要可見，且圓鈕在長條下方（＝index 的堆疊順序） */
+    out.buy_visible = !!(buy && buy.getBoundingClientRect().width > 0);
+    out.profile_visible = !!(profile && profile.getBoundingClientRect().width > 0);
+    out.profile_below_bar = !!(out.bar && out.profile && out.profile.y >= out.bar.y + out.bar.h - 1);
   }
 
   /* 3. 點擊命中 */
@@ -311,6 +321,16 @@ async def main():
                                  f"（navbar-brand {anchor}／weather 讓位）")
                 if v.get("overlaps_weather") and (v.get("weather") or {}).get("visibility") == "visible":
                     fails.append(f"{tag}: 浮動鈕與 weather 天氣元件重疊")
+                if not v.get("menu_hidden"):
+                    fails.append(f"{tag}: 右上角漢堡選單未隱藏"
+                                 f"（toggler display={v.get('toggler_display')}／menu 寬 {v.get('menu_rect_w')}）")
+                if v.get("bar"):
+                    if not v.get("buy_visible"):
+                        fails.append(f"{tag}: bc-attract-buy 不可見（應與 index 相同）")
+                    if not v.get("profile_visible"):
+                        fails.append(f"{tag}: bc-attract-profile 不可見（應與 index 相同）")
+                    if v.get("placement") == "above-bar" and not v.get("profile_below_bar"):
+                        fails.append(f"{tag}: 個人圓鈕不在 Order 長條下方（堆疊順序與 index 不符）")
                 if v.get("attract_pending"):
                     fails.append(f"{tag}: .bc-attract-pending 未移除（整組可能仍隱藏）")
                 if v.get("overlaps_brand"):

@@ -33,6 +33,16 @@ html.bc-attract-pending .bc-attract-nav {
   visibility: hidden;
 }
 
+/* 2026-09-21（使用者指示「在全端隱藏右上角的選單」）：
+   全站隱藏 navbar 右上角的漢堡選單（.navbar-toggler 及其內的 .bc-attract-menu 三線圖示）。
+   原因：右側空間已由「浮動購物車 → Order 長條 → 個人圓鈕」整組佔用
+   （行動端實測購物袋與漢堡重疊，購物袋在上層會擋住點擊）；
+   #navbarNav 內只有一個 d-lg-none 的行動端購物車連結（與浮動購物車功能重複），
+   故隱藏不影響任何功能（桌機 ≥992px Bootstrap 本來就 display:none）。 */
+#ftco-navbar .navbar-toggler {
+  display: none !important;
+}
+
 .bc-attract-nav {
   display: flex;
   align-items: center;
