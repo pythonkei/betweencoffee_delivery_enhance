@@ -313,10 +313,114 @@ class SlideoutCart {
       return;
     }
 
+    // 2026-09-21：浮動購物車定位（量測 .bc-attract-buy 後寫入 CSS 變數）
+    this._bindFloatingCartPlacement();
+
     // 初始載入購物車數量，有商品時常駐顯示
     requestAnimationFrame(() => {
       this._syncBadgeFromServer();
     });
+  }
+
+  /**
+   * 2026-09-21：浮動購物車定位 —— 貼在 .bc-attract-buy 正上方、中心線對齊、圖示尺寸同按鈕寬
+   * 座標以 CSS 變數寫入（--bc-fc-top / --bc-fc-right / --bc-fc-size），外觀仍由 CSS 控制。
+   * 為何需用 JS 量測：首頁的 Buy 按鈕位置由 index.html 的 place() 以 inline top 對齊
+   * navbar-brand（文件座標），其他頁面才是 CSS top:50% —— 只有在 DOM 上量測才能兩者一致。
+   * Buy 按鈕不存在（咖啡／豆 詳情與選單頁、付款頁等 .bc-attract-nav 被隱藏者）→
+   * 移除 inline 變數、交回 CSS 各斷點提供的「同軸線退化值」（不再回到右下角）。
+   */
+  _placeFloatingCart() {
+    const el = this.floatingCart;
+    if (!el) return;
+
+    // 圖示尺寸：與 bc-components.css 各斷點一致（桌機 52 / 平板 48 / 手機 44）
+    const size = window.matchMedia('(min-width: 992px)').matches ? 52
+      : window.matchMedia('(min-width: 768px)').matches ? 48 : 44;
+    el.style.setProperty('--bc-fc-size', size + 'px');
+
+    const buy = document.querySelector('.bc-attract-buy');
+    const buyVisible = !!(buy && getComputedStyle(buy).display !== 'none' && buy.getBoundingClientRect().width > 0);
+
+    if (!buyVisible) {
+      // Buy 按鈕不存在（咖啡／豆 詳情與選單頁、付款頁等 .bc-attract-nav 被隱藏者）
+      // → 移除 inline 變數、交回 CSS 各斷點的同軸線退化值
+      el.style.removeProperty('--bc-fc-top');
+      el.style.removeProperty('--bc-fc-right');
+      return;
+    }
+
+    // 對齊基準＝「可見長條」.bc-attract-buy__link（使用者實際看到的按鈕；
+    // 外層 .bc-attract-buy 盒因 .c-attract 負 margin 而與可見長條差 24px）
+    const bar = document.querySelector('.bc-attract-buy__link') || buy;
+    const barRect = bar.getBoundingClientRect();
+    const profile = document.querySelector('.bc-attract-profile');
+    const profileRect = profile ? profile.getBoundingClientRect() : null;
+
+    // 首選：長條正上方；上方空間不足（例如首頁把整組按鈕對齊 navbar-brand 頂邊，
+    // 上方就是視窗上緣）→ 改放整組下方，維持同一軸線往下延伸（Buy → 個人圓鈕 → 購物車）
+    const MIN_TOP = 8;
+    let desiredTop = Math.round(barRect.top - size);
+    if (desiredTop < MIN_TOP) {
+      desiredTop = Math.round((profileRect && profileRect.height) ? profileRect.bottom : barRect.bottom);
+    }
+    const desiredCx = barRect.left + barRect.width / 2;
+
+    // 初值：right 以 clientWidth 為基準——position:fixed 的 right 基準是 ICB（不含右側捲軸寬），
+    // 用 window.innerWidth 會多算一個捲軸寬（實測 15px 偏差）
+    el.style.setProperty('--bc-fc-top', desiredTop + 'px');
+    el.style.setProperty('--bc-fc-right', Math.round(document.documentElement.clientWidth - desiredCx - size / 2) + 'px');
+
+    // 自我修正：可見時量測實際位置再校正一次（吸收捲軸寬、transform 等平台差異）。
+    // 進場動畫（bcFloatingIn 用 transform 位移）期間不量測，避免把動畫位移算進去。
+    const animating = el.classList.contains('show') && !el.classList.contains('no-anim');
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && !animating) {
+      const cs = getComputedStyle(el);
+      const dx = desiredCx - (r.left + r.width / 2);   // >0 表偏左 → 需往右（right 變小）
+      const dy = desiredTop - r.top;                    // >0 表偏高 → 需往下（top 變大）
+      if (Math.abs(dx) >= 0.5) {
+        const cur = parseFloat(cs.getPropertyValue('--bc-fc-right')) || 0;
+        el.style.setProperty('--bc-fc-right', Math.round(cur - dx) + 'px');
+      }
+      if (Math.abs(dy) >= 0.5) {
+        const cur = parseFloat(cs.getPropertyValue('--bc-fc-top')) || 0;
+        el.style.setProperty('--bc-fc-top', Math.round(cur + dy) + 'px');
+      }
+    }
+  }
+
+  /**
+   * 2026-09-21：註冊浮動購物車定位重算時機
+   * （首頁 place() 會在 rAF 與 350ms 安定後各寫一次 inline top → 補兩次量測確保最後才量）
+   */
+  _bindFloatingCartPlacement() {
+    const run = () => this._placeFloatingCart();
+    run();
+    requestAnimationFrame(run);
+    window.addEventListener('load', run);
+    window.addEventListener('pageshow', run);
+    window.addEventListener('resize', run);
+    window.addEventListener('orientationchange', run);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', run);
+    }
+    setTimeout(run, 400);
+    setTimeout(run, 1200);
+
+    // 2026-09-21：主動預載圖示字型。
+    // 原因：購物車為空時浮動鈕是 display:none，瀏覽器不會為它載入 Material Icons，
+    // 之後加入商品才顯示時會先渲染成文字（例如 "shopping_bag"，實測寬 346px）→ 文字閃現。
+    // 這裡在頁面載入時就要求該字型（依目前使用的圖示字型家族）。
+    if (document.fonts && document.fonts.load) {
+      const icon = this.floatingCart.querySelector('.material-icons, .material-symbols-outlined');
+      if (icon) {
+        const fs = getComputedStyle(icon).fontSize || '52px';
+        const family = icon.classList.contains('material-symbols-outlined')
+          ? 'Material Symbols Outlined' : 'Material Icons';
+        document.fonts.load(fs + ' "' + family + '"').catch(() => {});
+      }
+    }
   }
 
   /**
@@ -404,6 +508,9 @@ class SlideoutCart {
     if (!this.floatingCart) return;
     // 使用 requestAnimationFrame 確保 _unlockScroll 已完成
     requestAnimationFrame(() => {
+      // 2026-09-21：關閉抽屜後 body padding-right 已還原（.bc-attract-buy 的水平位置會回復），
+      // 故重新量測定位，避免浮動鈕停留在補償後的偏移位置
+      this._placeFloatingCart();
       const badge = this.floatingCart.querySelector('.bc-floating-cart-badge');
       if (badge && parseInt(badge.textContent) > 0) {
         this._showFloatingCart();
@@ -483,10 +590,22 @@ class SlideoutCart {
         el.style.right = scrollbarWidth + 'px';
       }
     });
-    // 補償浮動購物車按鈕的 right 值，防止 body padding-right 導致位移
+    // 補償浮動購物車的右緣（2026-09-21：位置改由 CSS 變數 --bc-fc-right 決定
+    // ——「貼在 .bc-attract-buy 正上方」——故以變數現值 + 捲軸寬補償，不再寫死 40px）
     if (this.floatingCart) {
-      this.floatingCart.style.right = (40 + scrollbarWidth) + 'px';
+      this.floatingCart.style.right = (this._floatingCartBaseRight() + scrollbarWidth) + 'px';
     }
+  }
+
+  /**
+   * 2026-09-21：浮動購物車目前的基準 right（px）
+   * 讀 CSS 變數 --bc-fc-right：JS 量測值（inline）優先，其次為各斷點退化值，都沒有則 40
+   */
+  _floatingCartBaseRight() {
+    if (!this.floatingCart) return 40;
+    const raw = getComputedStyle(this.floatingCart).getPropertyValue('--bc-fc-right');
+    const v = parseFloat(raw);
+    return isFinite(v) ? v : 40;
   }
 
   /**

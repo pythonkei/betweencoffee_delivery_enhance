@@ -219,14 +219,19 @@
   }
 }
 
-/* ---- 桌面讓位：既有浮動購物車移到左側，避免與 header-bot/tax-nav 重疊
-       （本檔僅首頁載入 → 只影響首頁，其他頁維持原右下位置） ---- */
-@media (min-width: 769px) {
-  .bc-floating-cart {
-    left: 40px;
-    right: auto;
-  }
+/* ---- 2026-09-21：首頁 yama「購物車 [ n ]」列改為隱藏 ----
+   使用者指定：改由全站浮動購物車（bc-floating-cart）取代，避免首頁同時出現兩個購物車入口。
+   作法：僅 CSS 隱藏（markup 與 bc-yama-header.js 皆保留，可逆）。
+   註：tax-nav（黃圓）位置不受影響——其 bottom 用的 --bc-vis-gap 來自 visualViewport，與本列無關。 */
+.bc-yama .header-bot {
+  display: none !important;
 }
+
+/* ---- 2026-09-21：移除原有「桌面讓位」規則 ----
+   舊規則把浮動購物車移到左側（left:40px / right:auto）避開 header-bot 與 tax-nav；
+   新設計改為固定在 .bc-attract-buy 正上方、同一軸線、圖示尺寸同按鈕寬
+   （外觀見 bc-components.css，座標由 bc-slideout-cart.js 量測寫入），故不再需要讓位；
+   下方 ≤768 層的 left:20px 讓位同步移除。 ---- */
 
 /* ---- 平板/行動（≤768px）：黃圓模組亦顯示（參考 yama-beer.com——行動/平板 tax-nav
        為較大圓形懸浮右下：min(30.769vw,236px)）；
@@ -342,12 +347,8 @@
   .bc-yama .header-bot {
     display: block;
   }
-  /* 既有浮動購物車移左下避讓右下黃圓（僅本頁） */
-  .bc-floating-cart {
-    right: auto;
-    left: 20px;
-    bottom: 20px;
-  }
+  /* 2026-09-21：既有浮動購物車「移左下避讓右下黃圓」讓位規則已移除——新版固定貼在
+     .bc-attract-buy 正上方（bc-components.css + bc-slideout-cart.js），不需讓位。 */
 }
 
 /* ============================================================
