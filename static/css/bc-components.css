@@ -1564,11 +1564,15 @@ body {
 }
 
 /* 斷點：圖示尺寸 ＋「Buy 按鈕不存在時」的同軸線退化位置
-   （軸線＝.bc-attract-buy 可見長條中心距右緣：≥992→66px、768-991→58px、
-     ≤767→37px、≤575→33px；退化 top = 該斷點按鈕盒上緣 − 佔位 44px − 間距 20px）
+   （軸線＝.bc-attract-buy 可見長條中心距右緣：
+      ≥992→66px（buy 40 寬，right 26）、768–991→46px（buy 40 寬，right 26）、
+      ≤767→29px（buy 34 寬，right 12）、≤575→25px（buy 30 寬，right 10）；
+     退化 top = 該斷點按鈕盒上緣 − 佔位 44px − 間距 20px）
    2026-09-21：使用者三度指示縮小 → 字級 52/48/44 → 48/44/40 → 44/40/36 → **37/34/31**（再 −15%）；
      「實際佔位」＝ max(44px 透明點擊區下限, 字級)，各斷點因此都仍是 44px
        （只有字形變小、好點按範圍不變）。
+   2026-09-21 追加：手機/平板 buy 加大（40×136／34×112／30×96）→ 退化 right/top 同步換算，
+       使「無 Buy 按鈕頁面」的浮動鈕仍與加大後按鈕同一軸心與同一間距。
    註：這裡只覆寫「變數」，實際 top/right/font-size 屬性仍由上方 var() 讀取，
        因此 JS 量測後的 inline 變數優先權更高、不會被 media query 蓋掉。 */
 @media (min-width: 992px) {
@@ -1580,8 +1584,8 @@ body {
 @media (min-width: 768px) and (max-width: 991.98px) {
   .bc-floating-cart {
     --bc-fc-size: 34px;
-    --bc-fc-right: 36px;              /* 58 − 44/2 */
-    --bc-fc-top: calc(50% - 122px);   /* 按鈕盒上緣(50% − 58px) − 佔位 44px − 間距 20px */
+    --bc-fc-right: 38px;              /* 可見長條軸心 60（實測）− 44/2 */
+    --bc-fc-top: calc(50% - 132px);   /* 按鈕盒上緣(50% − 136/2) − 佔位 44px − 間距 20px */
   }
 }
 
@@ -1589,15 +1593,15 @@ body {
 @media (max-width: 767.98px) {
   .bc-floating-cart {
     --bc-fc-size: 31px;
-    --bc-fc-right: 15px;              /* 37 − 44/2（佔位仍是 44px 點擊區） */
-    --bc-fc-top: calc(50% - 110px);   /* 按鈕盒上緣(50% − 46px) − 佔位 44px − 間距 20px */
+    --bc-fc-right: 17px;              /* 可見長條軸心 39（實測）− 44/2；佔位仍是 44px 點擊區 */
+    --bc-fc-top: calc(50% - 120px);   /* 按鈕盒上緣(50% − 112/2) − 佔位 44px − 間距 20px */
   }
 }
 
 @media (max-width: 575.98px) {
   .bc-floating-cart {
-    --bc-fc-right: 11px;              /* 33 − 44/2 */
-    --bc-fc-top: calc(50% - 103px);   /* 按鈕盒上緣(50% − 39px) − 佔位 44px − 間距 20px */
+    --bc-fc-right: 13px;              /* 可見長條軸心 35（實測）− 44/2 */
+    --bc-fc-top: calc(50% - 112px);   /* 按鈕盒上緣(50% − 96/2) − 佔位 44px − 間距 20px */
   }
 }
 

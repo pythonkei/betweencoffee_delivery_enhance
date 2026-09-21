@@ -303,13 +303,68 @@ html.bc-attract-pending .bc-attract-nav {
    （buy 中心：≥992=right26+w40→46 / 768–991=right29+w34→46 / ≤767=right15+w28→29 / ≤575=right13+w24→25；
     profile：≥992=right21+w50→46 / 768–991=right26+w40→46 / ≤767=right12+w34→29 / ≤575=right10+w30→25，
     皆與同斷點 buy 中心一致）。
-   垂直連續：profile top = buy bottom（cluster 無縫）。 */
+   垂直連續：profile top = buy bottom（cluster 無縫）。
+
+   2026-09-21（使用者指示「手機端平板端 bc-attract-buy 與個人圓鈕放大一點，桌面不動」）：
+   平板與手機（≤991.98）整體放大約 +20~25%，**桌面（≥992）完全不動**；水平軸心一律不變
+   （寬度變大 → right 同步換算：中心 − 寬/2），垂直仍由 bc-attract-place.js 依實測高度堆疊。
+   新尺寸：平板 40×136 / 48×48、≤767 34×112 / 42×42、≤575 30×96 / 36×36。 */
 @media screen and (min-width: 768px) and (max-width: 991.98px) {
   .bc-attract-buy {
-    --attract: 12px;
-    right: 29px;
+    --attract: 14px;
+    right: 26px;            /* 中心 46px 不變（46 − 40/2） */
+    width: 40px;
+    height: 136px;
+  }
+  .bc-attract-buy .bc-attract-buy__link {
+    border-radius: 22px;
+    row-gap: 8px;
+  }
+  .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 1.1rem; }
+  .bc-attract-buy .bc-attract-buy__link [lang='en'] {
+    font-size: 0.88rem;
+    letter-spacing: 0.19em;
+  }
+  .bc-attract-profile {
+    --attract: 14px;
+    right: 22px;            /* 中心 46px 不變（46 − 48/2） */
+    top: calc(50% + 92px);  /* fallback：(136 + 48)/2；JS 定位會覆寫 */
+    width: 48px;
+    height: 48px;
+  }
+  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.25rem; }
+}
+@media screen and (max-width: 767.98px) {
+  .bc-attract-buy {
+    --attract: 10px;
+    right: 12px;            /* 中心 29px 不變（29 − 34/2） */
     width: 34px;
-    height: 116px;
+    height: 112px;
+  }
+  .bc-attract-buy .bc-attract-buy__link {
+    border-radius: 20px;
+    row-gap: 7px;
+  }
+  .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 1.05rem; }
+  .bc-attract-buy .bc-attract-buy__link [lang='en'] {
+    font-size: 0.85rem;
+    letter-spacing: 0.16em;
+  }
+  .bc-attract-profile {
+    --attract: 10px;
+    right: 8px;             /* 中心 29px 不變（29 − 42/2） */
+    top: calc(50% + 77px);  /* fallback：(112 + 42)/2；JS 定位會覆寫 */
+    width: 42px;
+    height: 42px;
+  }
+  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.2rem; }
+}
+@media screen and (max-width: 575.98px) {
+  .bc-attract-buy {
+    --attract: 10px;
+    right: 10px;            /* 中心 25px 不變（25 − 30/2） */
+    width: 30px;
+    height: 96px;
   }
   .bc-attract-buy .bc-attract-buy__link {
     border-radius: 18px;
@@ -318,60 +373,14 @@ html.bc-attract-pending .bc-attract-nav {
   .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 0.95rem; }
   .bc-attract-buy .bc-attract-buy__link [lang='en'] {
     font-size: 0.78rem;
-    letter-spacing: 0.17em;
-  }
-  .bc-attract-profile {
-    --attract: 12px;
-    right: 26px;
-    top: calc(50% + 78px);
-    width: 40px;
-    height: 40px;
-  }
-  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.05rem; }
-}
-@media screen and (max-width: 767.98px) {
-  .bc-attract-buy {
-    right: 15px;
-    width: 28px;
-    height: 92px;
-  }
-  .bc-attract-buy .bc-attract-buy__link {
-    border-radius: 16px;
-    row-gap: 5px;
-  }
-  .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 0.9rem; }
-  .bc-attract-buy .bc-attract-buy__link [lang='en'] {
-    font-size: 0.72rem;
     letter-spacing: 0.14em;
   }
   .bc-attract-profile {
-    right: 12px;
-    top: calc(50% + 63px);
-    width: 34px;
-    height: 34px;
+    --attract: 10px;
+    right: 7px;             /* 中心 25px 不變（25 − 36/2） */
+    top: calc(50% + 66px);  /* fallback：(96 + 36)/2；JS 定位會覆寫 */
+    width: 36px;
+    height: 36px;
   }
-  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.05rem; }
-}
-@media screen and (max-width: 575.98px) {
-  .bc-attract-buy {
-    right: 13px;
-    width: 24px;
-    height: 78px;
-  }
-  .bc-attract-buy .bc-attract-buy__link {
-    border-radius: 14px;
-    row-gap: 4px;
-  }
-  .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 0.8rem; }
-  .bc-attract-buy .bc-attract-buy__link [lang='en'] {
-    font-size: 0.66rem;
-    letter-spacing: 0.12em;
-  }
-  .bc-attract-profile {
-    right: 10px;
-    top: calc(50% + 54px);
-    width: 30px;
-    height: 30px;
-  }
-  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 0.95rem; }
+  .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.1rem; }
 }

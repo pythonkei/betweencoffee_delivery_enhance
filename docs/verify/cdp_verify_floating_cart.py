@@ -137,6 +137,9 @@ JS = r"""
   var profile = document.querySelector('.bc-attract-profile');
   var buyVisible = !!(buy && getComputedStyle(buy).display !== 'none' && buy.getBoundingClientRect().width > 0);
   out.buy_display = buy ? getComputedStyle(buy).display : 'no-buy';
+  /* 2026-09-21：尺寸斷言用「外盒」（.bc-attract-buy 本體）；
+     .bc-attract-buy__link 因 .c-attract 的 --attract padding 會比外盒寬，不適合比對尺寸 */
+  out.buy_box = buy ? rect(buy) : null;
   out.bar = (bar && buyVisible) ? rect(bar) : null;
   out.profile = (profile && buyVisible) ? rect(profile) : null;
   if (out.bar && out.cart_wrapper) {
@@ -230,6 +233,11 @@ async def main():
                 await asyncio.sleep(0.4)
 
         expected_size = {1440: 37, 1024: 37, 768: 34, 390: 31, 320: 31}   # 2026-09-21 三度縮小：37/34/31（再 −15%）
+        # 2026-09-21（使用者指示「手機端平板端 bc-attract-buy 與個人圓鈕放大一點，桌面不動」）：
+        #   buy 外盒 40×150（桌機，不變）／40×136（平板）／34×112（≤767）／30×96（≤575）
+        #   個人圓鈕 50（桌機，不變）／48／42／36
+        expected_buy = {1440: (40, 150), 1024: (40, 150), 768: (40, 136), 390: (30, 96), 320: (30, 96)}
+        expected_profile = {1440: 50, 1024: 50, 768: 48, 390: 36, 320: 36}
         fails = []
         pos_map = {}   # {(w): {page: cart_y}} → 跨頁位置一致性（2026-09-21 使用者指示）
 
@@ -325,6 +333,15 @@ async def main():
                     fails.append(f"{tag}: 右上角漢堡選單未隱藏"
                                  f"（toggler display={v.get('toggler_display')}／menu 寬 {v.get('menu_rect_w')}）")
                 if v.get("bar"):
+                    eb = expected_buy[w]
+                    barv = v.get("buy_box") or v.get("bar") or {}
+                    if abs((barv.get("w") or 0) - eb[0]) > 1 or abs((barv.get("h") or 0) - eb[1]) > 1:
+                        fails.append(f"{tag}: Buy 外盒 {barv.get('w')}×{barv.get('h')} != {eb[0]}×{eb[1]}"
+                                     f"（手機/平板加大、桌面不動）")
+                    pv = v.get("profile") or {}
+                    if abs((pv.get("w") or 0) - expected_profile[w]) > 1:
+                        fails.append(f"{tag}: 個人圓鈕 {pv.get('w')}×{pv.get('h')}"
+                                     f" != {expected_profile[w]}×{expected_profile[w]}")
                     if not v.get("buy_visible"):
                         fails.append(f"{tag}: bc-attract-buy 不可見（應與 index 相同）")
                     if not v.get("profile_visible"):
