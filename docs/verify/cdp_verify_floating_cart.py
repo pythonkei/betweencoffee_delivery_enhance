@@ -100,9 +100,9 @@ PREP_JS = (
     "var fc=document.getElementById('bc-floating-cart');"
     "if(fc){fc.style.display='';}"
     "if(document.fonts&&document.fonts.load){"
-    "try{await document.fonts.load('52px \"Material Icons\"');"
-    "await document.fonts.load('48px \"Material Icons\"');"
-    "await document.fonts.load('44px \"Material Icons\"');}catch(e){}}"
+    "try{await document.fonts.load('48px \"Material Icons\"');"
+    "await document.fonts.load('44px \"Material Icons\"');"
+    "await document.fonts.load('40px \"Material Icons\"');}catch(e){}}"
     "return true;})()"
 )
 
@@ -153,7 +153,7 @@ async def main():
                     return False
                 await asyncio.sleep(0.4)
 
-        expected_size = {1440: 52, 1024: 52, 768: 48, 390: 44, 320: 44}
+        expected_size = {1440: 48, 1024: 48, 768: 44, 390: 40, 320: 40}   # 2026-09-21 圖示縮小：48/44/40
         fails = []
 
         for w, h, mobile in VIEWPORTS:

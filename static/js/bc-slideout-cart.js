@@ -334,10 +334,15 @@ class SlideoutCart {
     const el = this.floatingCart;
     if (!el) return;
 
-    // 圖示尺寸：與 bc-components.css 各斷點一致（桌機 52 / 平板 48 / 手機 44）
-    const size = window.matchMedia('(min-width: 992px)').matches ? 52
-      : window.matchMedia('(min-width: 768px)').matches ? 48 : 44;
+    // 圖示字級：與 bc-components.css 各斷點一致（桌機 48 / 平板 44 / 手機 40；2026-09-21 縮小）
+    const size = window.matchMedia('(min-width: 992px)').matches ? 48
+      : window.matchMedia('(min-width: 768px)').matches ? 44 : 40;
     el.style.setProperty('--bc-fc-size', size + 'px');
+    // 實際佔位＝max(44px 透明點擊區下限, 字級)：定位要用「盒子」而不是字形大小
+    // （手機是 40px 字形裝在 44px 盒子裡——只縮字形、點擊區不變）
+    const fcBtn = el.querySelector('.bc-floating-cart-btn');
+    const minBox = fcBtn ? parseFloat(getComputedStyle(fcBtn).minHeight) : NaN;
+    const box = Math.max(size, isFinite(minBox) ? minBox : 0);
 
     const buy = document.querySelector('.bc-attract-buy');
     const buyVisible = !!(buy && getComputedStyle(buy).display !== 'none' && buy.getBoundingClientRect().width > 0);
@@ -360,7 +365,7 @@ class SlideoutCart {
     // 首選：長條正上方；上方空間不足（例如首頁把整組按鈕對齊 navbar-brand 頂邊，
     // 上方就是視窗上緣）→ 改放整組下方，維持同一軸線往下延伸（Buy → 個人圓鈕 → 購物車）
     const MIN_TOP = 8;
-    let desiredTop = Math.round(barRect.top - size);
+    let desiredTop = Math.round(barRect.top - box);
     if (desiredTop < MIN_TOP) {
       desiredTop = Math.round((profileRect && profileRect.height) ? profileRect.bottom : barRect.bottom);
     }
@@ -369,7 +374,7 @@ class SlideoutCart {
     // 初值：right 以 clientWidth 為基準——position:fixed 的 right 基準是 ICB（不含右側捲軸寬），
     // 用 window.innerWidth 會多算一個捲軸寬（實測 15px 偏差）
     el.style.setProperty('--bc-fc-top', desiredTop + 'px');
-    el.style.setProperty('--bc-fc-right', Math.round(document.documentElement.clientWidth - desiredCx - size / 2) + 'px');
+    el.style.setProperty('--bc-fc-right', Math.round(document.documentElement.clientWidth - desiredCx - box / 2) + 'px');
 
     // 自我修正：可見時量測實際位置再校正一次（吸收捲軸寬、transform 等平台差異）。
     // 進場動畫（bcFloatingIn 用 transform 位移）期間不量測，避免把動畫位移算進去。

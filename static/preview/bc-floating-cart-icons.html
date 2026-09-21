@@ -43,7 +43,8 @@
 <p class="note">
   本頁載入正式 <code>bc-components.css</code>：圖示<b>無圓形底、無邊框、無陰影</b>，hover 轉品牌金 <code>#c49b63</code>，
   右上角為金色數字 badge — 與線上完全一致。<br>
-  每個候選列出三種斷點尺寸（桌機 <code>52px</code>／平板 <code>48px</code>／手機 <code>44px</code>；字形內建留白，實際墨跡約再小 4px）。<br>
+  每個候選列出三種斷點尺寸（桌機 <code>48px</code>／平板 <code>44px</code>／手機 <code>40px</code>；字形內建留白，實際墨跡約再小 4px；
+  手機另有 44px 透明點擊區，只縮字形不縮可點範圍）。<br>
   目前使用：<code>1 shopping_bag</code>。選定後只需改
   <code>templates/betweencoffee_delivery/base.html</code> 內該行的圖示名稱（一個字）。
 </p>
@@ -58,8 +59,8 @@
        改為 Material Icons 的 backpack（已實測可正常渲染）。 */
     ['backpack',        '背包',              'Material Icons',   '',        'material-icons']
   ];
-  var SIZES = [52, 48, 44];
-  var LABELS = { 52: '52px 桌機', 48: '48px 平板', 44: '44px 手機' };
+  var SIZES = [48, 44, 40];
+  var LABELS = { 48: '48px 桌機', 44: '44px 平板', 40: '40px 手機' };
   document.getElementById('grid').innerHTML = OPTIONS.map(function (o, i) {
     var cells = SIZES.map(function (s) {
       return '<div class="size">'
