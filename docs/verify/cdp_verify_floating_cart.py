@@ -114,9 +114,9 @@ PREP_JS = (
     "var fc=document.getElementById('bc-floating-cart');"
     "if(fc){fc.style.display='';}"
     "if(document.fonts&&document.fonts.load){"
-    "try{await document.fonts.load('44px \"Material Icons\"');"
-    "await document.fonts.load('40px \"Material Icons\"');"
-    "await document.fonts.load('36px \"Material Icons\"');}catch(e){}}"
+    "try{await document.fonts.load('37px \"Material Icons\"');"
+    "await document.fonts.load('34px \"Material Icons\"');"
+    "await document.fonts.load('31px \"Material Icons\"');}catch(e){}}"
     "return true;})()"
 )
 
@@ -167,7 +167,7 @@ async def main():
                     return False
                 await asyncio.sleep(0.4)
 
-        expected_size = {1440: 44, 1024: 44, 768: 40, 390: 36, 320: 36}   # 2026-09-21 兩度縮小：44/40/36
+        expected_size = {1440: 37, 1024: 37, 768: 34, 390: 31, 320: 31}   # 2026-09-21 三度縮小：37/34/31（再 −15%）
         fails = []
 
         for w, h, mobile in VIEWPORTS:
@@ -216,8 +216,8 @@ async def main():
                         fails.append(f"{tag}: 圖示被推出畫面外 y={(v.get('cart_wrapper') or {}).get('y')}")
                     if v.get("overlaps_bar"):
                         fails.append(f"{tag}: 圖示與 Buy 長條重疊")
-                    if v.get("placement") == "above-bar" and abs(v.get("gap_px", -99) - 12) > 1:
-                        fails.append(f"{tag}: 與 Buy 間距 {v.get('gap_px')}px != 12px")
+                    if v.get("placement") == "above-bar" and abs(v.get("gap_px", -99) - 20) > 1:
+                        fails.append(f"{tag}: 與 Buy 間距 {v.get('gap_px')}px != 20px")
                 ist = v.get("initial_state") or {}
                 if ist and not ist.get("cart_visible"):
                     fails.append(f"{tag}: 初始狀態未顯示浮動鈕圖示（display={ist.get('cart_display')}）")

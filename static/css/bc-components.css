@@ -1450,10 +1450,11 @@ body {
       同時也是無 JS 時的保險值——維持同一條右側軸線，不再回到右下角。 */
 .bc-floating-cart {
   position: fixed;
-  /* 2026-09-21：--bc-fc-gap＝浮動鈕與 Buy 按鈕之間的間距（JS 定位與首頁 place() 都讀這個值） */
-  --bc-fc-gap: 12px;
-  /* 退化值＝「Buy 按鈕不存在時」的同軸線位置（軸線距右緣 66px、佔位 44px、間距 12px） */
-  top: var(--bc-fc-top, calc(50% - 131px));
+  /* 2026-09-21：--bc-fc-gap＝浮動鈕與 Buy 按鈕之間的間距（JS 定位與首頁 place() 都讀這個值）
+     使用者兩度指示「增加間距」：0 → 12px → **20px** */
+  --bc-fc-gap: 20px;
+  /* 退化值＝「Buy 按鈕不存在時」的同軸線位置（軸線距右緣 66px、佔位 44px、間距 20px） */
+  top: var(--bc-fc-top, calc(50% - 139px));
   bottom: auto;
   right: var(--bc-fc-right, 44px);
   left: auto;
@@ -1521,7 +1522,7 @@ body {
   transition: color 0.25s ease, transform 0.25s ease;
   position: relative;
   color: #fff;
-  font-size: var(--bc-fc-size, 44px);  /* 圖示＝按鈕字級（2026-09-21 使用者兩度縮小：52→48→44px） */
+  font-size: var(--bc-fc-size, 37px);  /* 圖示＝按鈕字級（2026-09-21 使用者三度縮小：52 → 48 → 44 → 37px＝再 −15%） */
   padding: 0;
   line-height: 1;
 }
@@ -1564,38 +1565,39 @@ body {
 
 /* 斷點：圖示尺寸 ＋「Buy 按鈕不存在時」的同軸線退化位置
    （軸線＝.bc-attract-buy 可見長條中心距右緣：≥992→66px、768-991→58px、
-     ≤767→37px、≤575→33px；退化 top = 該斷點按鈕盒上緣 − 佔位 44px − 間距 12px）
-   2026-09-21：使用者兩度指示縮小 → 字級 52/48/44 → 48/44/40 → **44/40/36**；
-     「實際佔位」＝ max(44px 透明點擊區下限, 字級)，手機因此仍是 44px（只有字形變小、好點按不變）。
+     ≤767→37px、≤575→33px；退化 top = 該斷點按鈕盒上緣 − 佔位 44px − 間距 20px）
+   2026-09-21：使用者三度指示縮小 → 字級 52/48/44 → 48/44/40 → 44/40/36 → **37/34/31**（再 −15%）；
+     「實際佔位」＝ max(44px 透明點擊區下限, 字級)，各斷點因此都仍是 44px
+       （只有字形變小、好點按範圍不變）。
    註：這裡只覆寫「變數」，實際 top/right/font-size 屬性仍由上方 var() 讀取，
        因此 JS 量測後的 inline 變數優先權更高、不會被 media query 蓋掉。 */
 @media (min-width: 992px) {
   .bc-floating-cart {
-    --bc-fc-size: 44px;
+    --bc-fc-size: 37px;
   }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
   .bc-floating-cart {
-    --bc-fc-size: 40px;
+    --bc-fc-size: 34px;
     --bc-fc-right: 36px;              /* 58 − 44/2 */
-    --bc-fc-top: calc(50% - 114px);   /* 按鈕盒上緣(50% − 58px) − 佔位 44px − 間距 12px */
+    --bc-fc-top: calc(50% - 122px);   /* 按鈕盒上緣(50% − 58px) − 佔位 44px − 間距 20px */
   }
 }
 
 /* 手機版（原 49px 圓形版已由「同軸線圖示」取代） */
 @media (max-width: 767.98px) {
   .bc-floating-cart {
-    --bc-fc-size: 36px;
+    --bc-fc-size: 31px;
     --bc-fc-right: 15px;              /* 37 − 44/2（佔位仍是 44px 點擊區） */
-    --bc-fc-top: calc(50% - 102px);   /* 按鈕盒上緣(50% − 46px) − 佔位 44px − 間距 12px */
+    --bc-fc-top: calc(50% - 110px);   /* 按鈕盒上緣(50% − 46px) − 佔位 44px − 間距 20px */
   }
 }
 
 @media (max-width: 575.98px) {
   .bc-floating-cart {
     --bc-fc-right: 11px;              /* 33 − 44/2 */
-    --bc-fc-top: calc(50% - 95px);    /* 按鈕盒上緣(50% − 39px) − 佔位 44px − 間距 12px */
+    --bc-fc-top: calc(50% - 103px);   /* 按鈕盒上緣(50% − 39px) − 佔位 44px − 間距 20px */
   }
 }
 

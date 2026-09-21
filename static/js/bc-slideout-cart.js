@@ -341,12 +341,13 @@ class SlideoutCart {
     const el = this.floatingCart;
     if (!el) return;
 
-    // 圖示字級：與 bc-components.css 各斷點一致（桌機 44 / 平板 40 / 手機 36；2026-09-21 兩度縮小）
-    const size = window.matchMedia('(min-width: 992px)').matches ? 44
-      : window.matchMedia('(min-width: 768px)').matches ? 40 : 36;
+    // 圖示字級：與 bc-components.css 各斷點一致（桌機 37 / 平板 34 / 手機 31；
+    // 2026-09-21 使用者三度縮小：52 → 48 → 44 → 37／34／31＝再 −15%）
+    const size = window.matchMedia('(min-width: 992px)').matches ? 37
+      : window.matchMedia('(min-width: 768px)').matches ? 34 : 31;
     el.style.setProperty('--bc-fc-size', size + 'px');
     // 實際佔位＝max(44px 透明點擊區下限, 字級)：定位要用「盒子」而不是字形大小
-    // （手機是 40px 字形裝在 44px 盒子裡——只縮字形、點擊區不變）
+    // （手機是 31px 字形裝在 44px 盒子裡——只縮字形、點擊區不變）
     const fcBtn = el.querySelector('.bc-floating-cart-btn');
     const minBox = fcBtn ? parseFloat(getComputedStyle(fcBtn).minHeight) : NaN;
     const box = Math.max(size, isFinite(minBox) ? minBox : 0);
