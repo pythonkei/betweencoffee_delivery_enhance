@@ -1650,34 +1650,9 @@ body {
   background: #fff;
 }
 
-/* ===== 唯讀選項值（2026-09-21）=====
-   自訂選項組中「客人不能選」的組（例：咖啡豆的產地／烘焙度）：
-   以文字 + 圖示呈現該商品的固定值，不使用按鈕外觀（避免誤認為可點選）。
-   註：選擇器刻意用三個 class（0,3,0）——站上 `.product-details span { color:#eee }`（0,1,1）
-       會蓋掉單一 class（0,1,0），故提高特異性以確保品牌金生效。 */
-.bc-option-group.bc-option-readonly {
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.bc-option-group.bc-option-readonly .bc-option-readonly-value {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--bc-gold);
-  line-height: 1.3;
-  letter-spacing: 0.02em;
-}
-
-.bc-option-group.bc-option-readonly .bc-option-readonly-value .icon {
-  /* 站上有 .icon { position: absolute } 的規則，會讓圖示飛到行尾 → 於高特異性選擇器內改回 static */
-  position: static;
-  font-size: 1.15rem;
-  line-height: 1;
-  color: var(--bc-gold);
-}
+/* 註（2026-09-21）：咖啡豆「產地」最終定案沿用詳情頁既有排版（block-23 清單行），
+   **不新增任何選項 UI**，故原本的唯讀晶片樣式（.bc-option-readonly*）已移除；
+   前台選項按鈕一律使用上方既有的 .bc-option-btn。
 
 /* 杯量按鈕 - 右上角 oz 標籤（2026-08-15：整體縮小 0.85rem→0.72rem、padding 6px12px→3px7px、font-weight 500→400） */
 .bc-option-oz {

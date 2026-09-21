@@ -353,21 +353,14 @@ class BeanItem(models.Model):
         max_length=10, choices=GRINDING_LEVEL_CHOICES, default="Non"
     )
 
-    # ===== 咖啡豆自訂選項組（2026-09-18）：與咖啡同一套機制 =====
+    # ===== 咖啡豆自訂選項組（2026-09-21）：與咖啡同一套機制 =====
     # 定義見 eshop/models/option_definitions.py 的 BEAN_OPTION_GROUPS
-    # 勾選 = 詳情頁顯示該組；option_order_* = 顯示排序（數字越小越靠前，0=預設順序）
-    # 「值／預設值」來源＝同名欄位：origin（唯讀顯示）／grinding_level（客人可選）／roast_level（唯讀顯示）
-    option_origin = models.BooleanField(default=True, verbose_name="選項組：產地")
+    # 研磨（客人可選）：勾選 = 詳情頁顯示「研磨」按鈕組；option_order_* = 顯示排序（小在前，0=預設）
+    # 產地（唯讀、客人不能選）：勾選 = 詳情頁是否顯示原有的「產地」那一行（沿用既有排版，無新 UI）
+    option_origin = models.BooleanField(default=True, verbose_name="顯示產地")
     option_grinding_level = models.BooleanField(default=True, verbose_name="選項組：研磨")
-    option_roast_level = models.BooleanField(default=False, verbose_name="選項組：烘焙度")
-    option_order_origin = models.PositiveIntegerField(
-        default=0, blank=True, verbose_name="產地順序", help_text="數字越小越靠前，0=預設"
-    )
     option_order_grinding_level = models.PositiveIntegerField(
         default=0, blank=True, verbose_name="研磨順序", help_text="數字越小越靠前，0=預設"
-    )
-    option_order_roast_level = models.PositiveIntegerField(
-        default=0, blank=True, verbose_name="烘焙度順序", help_text="數字越小越靠前，0=預設"
     )
 
     flavor = models.TextField(max_length=200, blank=True)

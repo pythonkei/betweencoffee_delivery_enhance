@@ -251,14 +251,23 @@ class Bean(View):
         bean = get_object_or_404(BeanItem, id=product_id)
         cart = Cart(request)  # Initialize the cart
 
-        # 自訂選項組（2026-09-21）：與咖啡同一套機制 → 依該豆啟用的組 + Admin 排序數字排序，
-        # 唯讀組（產地/烘焙度）另帶 display_value 供前端顯示。
-        from eshop.models.option_definitions import get_bean_option_groups
+        # 自訂選項組（2026-09-21）：與咖啡同一套機制。
+        # - option_groups ＝前台用「按鈕 UI」渲染的組（＝客人可選的組，目前為研磨），
+        #   依 Admin 排序數字排序。
+        # - 產地為唯讀組，**不新增 UI** → 沿用詳情頁原有排版，只需解析中文值（含「其他（自填）」）。
+        from eshop.models.option_definitions import (
+            BEAN_OPTION_GROUPS,
+            bean_option_display_value,
+            get_bean_option_groups,
+        )
 
+        origin_group = next((g for g in BEAN_OPTION_GROUPS if g["key"] == "origin"), None)
         context = {
             "bean": bean,
             "cart": cart,  # keep cart count fn
             "option_groups": get_bean_option_groups(bean),
+            # 產地沿用既有排版顯示；中文值在此解析（「其他（自填）」→ origin_custom）
+            "origin_display": bean_option_display_value(bean, origin_group) if origin_group else "",
         }
         return render(request, "betweencoffee_delivery/bean.html", context)
 

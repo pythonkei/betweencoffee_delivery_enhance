@@ -181,10 +181,14 @@ ORIGIN_CHOICES = [
 
 BEAN_OPTION_GROUPS = [
     {
-        "key": "origin",  # 同 BeanItem.origin（值來源）
+        # 產地（唯讀；客人不能選）：值＝同名的 BeanItem.origin 欄位。
+        # ⚠ 前台「不」由選項組渲染 → 沿用詳情頁原有的產地排版（block-23 清單行：圖示＋中文值），
+        #   不新增任何 UI。Admin 的勾選 option_origin＝該行是否顯示；
+        #   中文標籤仍由 option_value 過濾器解析（get_option_value_label / bean_option_display_value）。
+        "key": "origin",
         "label": "產地",
         "icon": "pin_drop",
-        "customer_selectable": False,  # 唯讀顯示（客人不能選）
+        "customer_selectable": False,
         "choices": ORIGIN_CHOICES,
     },
     {
@@ -200,19 +204,8 @@ BEAN_OPTION_GROUPS = [
             ("Deep", "粗研磨"),
         ],
     },
-    {
-        "key": "roast_level",  # 同 BeanItem.roast_level（值來源）
-        "label": "烘焙度",
-        "icon": "local_fire_department",
-        "customer_selectable": False,  # 唯讀顯示
-        "choices": [
-            ("light", "浅"),
-            ("medium_light", "中浅"),
-            ("medium", "中"),
-            ("medium_dark", "中深"),
-            ("dark", "深"),
-        ],
-    },
+    # 註：烘焙度不納入選項組 —— 詳情頁已有專屬的「烘焙水平」視覺刻度（roastrange），
+    #     再開一組會重複顯示；如未來需要，比照上方格式補一組即可。
 ]
 
 BEAN_OPTION_KEYS = [g["key"] for g in BEAN_OPTION_GROUPS]
@@ -248,23 +241,20 @@ def get_option_icon(key):
 
 
 def get_bean_option_groups(bean):
-    """該咖啡豆「啟用」的選項組，依 Admin 排序數字排好（0=預設順序），並帶上顯示值。
+    """前台「選項按鈕 UI」要渲染的組（＝客人可選的組），依 Admin 排序數字排好（0=預設順序）。
 
-    回傳 list[dict]：原定義 + default（原始值）/ display_value（唯讀組要顯示的中文值）
-    唯讀組（customer_selectable=False）由前端直接顯示 display_value，不送值。
+    唯讀組（customer_selectable=False，例如產地）**不在此列** —— 它們沿用詳情頁既有排版，
+    由模板直接讀 bean 欄位顯示（中文標籤用 bean_option_display_value）。
+    回傳 list[dict]：原定義 + default（原始值＝客人可選時預設選中的值）。
     """
     enabled = []
     for i, g in enumerate(BEAN_OPTION_GROUPS):
+        if not g.get("customer_selectable"):
+            continue
         if not getattr(bean, "option_" + g["key"], False):
             continue
         g = dict(g)  # 複製，避免污染全域定義
-        raw = getattr(bean, g["key"], "") or ""
-        g["default"] = raw
-        g["display_value"] = bean_option_display_value(bean, g)
-        # 唯讀組沒有值時無東西可顯示 → 不渲染（例如尚未填產地的豆）；
-        # 可選組即使沒有預設值也要渲染（客人仍需選）
-        if not g["customer_selectable"] and not g["display_value"]:
-            continue
+        g["default"] = getattr(bean, g["key"], "") or ""
         enabled.append((i, g))
 
     def _order_key(item):

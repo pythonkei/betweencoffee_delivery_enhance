@@ -67,7 +67,11 @@
 
                 <div class="block-23 mb-3">
                     <ul>
-                        {# 2026-09-21：產地改由自訂選項組渲染（下方表單內），此處不再重複顯示 #}
+                        {# 產地（2026-09-21）：沿用既有排版，不新增 UI。值由 Admin 的下拉管理，
+                           中文在此顯示（「其他（自填）」顯示 origin_custom）；Admin 取消勾選「顯示產地」則整行不顯示。 #}
+                        {% if bean.option_origin and origin_display %}
+                        <li><span class="icon material-icons">pin_drop</span><span class="text">產地 :<span class="pl-3">{{ origin_display }}</span></span></li>
+                        {% endif %}
                         <li><span class="icon material-symbols-outlined">thermostat</span><span class="text">處理法 :<span class="pl-3">水洗處理後於白蘭地酒桶陳釀</span></span></li>
 
                         <!-- roast level -->
@@ -119,11 +123,10 @@
                                 <input type="hidden" name="weight" id="weight" value="200g">
                             </div>
 
-                        <!-- 自訂選項組（2026-09-21）：與咖啡同一套機制（Admin 勾選啟用 + 排序數字）
-                             可選組（customer_selectable=True）＝按鈕 + hidden option_<key>，必選不可取消
-                             唯讀組（產地／烘焙度）＝只顯示該豆的值，不送值（客人不能選） -->
+                        <!-- 自訂選項組（2026-09-21）：只渲染「客人可選」的組（目前為研磨）
+                             ＝既有 .bc-option-btn 按鈕 UI + hidden option_<key>（必選不可取消）；
+                             唯讀組（產地）沿用頁面上方既有排版，不在此渲染、不新增 UI。 -->
                         {% for group in option_groups %}
-                            {% if group.customer_selectable %}
                             <div class="w-100 form-group d-flex">
                                 <p>{{ group.label }} :</p>
                                 <div class="bc-option-group" id="option-group-{{ group.key }}" data-group="{{ group.key }}" data-required="1">
@@ -133,14 +136,6 @@
                                 </div>
                                 <input type="hidden" name="option_{{ group.key }}" id="option_{{ group.key }}" value="{{ group.default }}">
                             </div>
-                            {% else %}
-                            <div class="w-100 form-group d-flex">
-                                <p>{{ group.label }} :</p>
-                                <div class="bc-option-group bc-option-readonly" id="option-group-{{ group.key }}" data-group="{{ group.key }}">
-                                    <span class="bc-option-readonly-value"><span class="icon material-symbols-outlined">{{ group.icon }}</span>{{ group.display_value }}</span>
-                                </div>
-                            </div>
-                            {% endif %}
                         {% endfor %}
 
                         <!-- Quantity -->

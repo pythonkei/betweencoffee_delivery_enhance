@@ -4,19 +4,19 @@
 與咖啡端 verify_group_order.py 對應，涵蓋資料層 → Admin → 前台 → 購物車/訂單。
 
 A. 資料層
-   1. get_bean_option_groups(bean)：啟用組 + 依 option_order_<key> 排序（0=預設順序）
-   2. 唯讀組無值時不渲染（空產地不顯示空殼）
-   3. 產地「其他（自填）」→ 顯示 origin_custom
+   1. get_bean_option_groups(bean)：只回傳「客人可選」的組（唯讀組如產地不在此列），依排序數字排序
+   2. 排序機制：sort_option_keys_for_bean 依 option_order_<key>（數字小在前、0=預設）
+   3. 產地中文值：「其他（自填）」→ 顯示 origin_custom；代碼 → 中文（get_option_value_label）
    4. 合併查找不影響咖啡端（get_option_label / get_option_value_label / get_option_icon）
 B. Admin
-   5. Bean Admin 渲染 3 組「勾選 + 排序數字」；唯讀組標示「唯讀顯示」
+   5. Bean Admin 渲染各組（可選組＝勾選＋排序數字；唯讀組＝只有勾選，標示「唯讀 · 沿用原有排版」）
    6. Bean Admin 不再有分離欄位 name="option_origin"
-   7. POST 儲存：勾選 + 數字 → 正確寫回 6 個 option_* / option_order_* 欄位
-   8. Coffee Admin 回歸：仍 16 組、無「唯讀顯示」標示
+   7. POST 儲存：勾選／數字 → 正確寫回 option_origin / option_grinding_level / option_order_grinding_level
+   8. Coffee Admin 回歸：仍 16 組、排序數字欄位齊全、無唯讀標示
 C. 前台詳情頁（/bean/<id>/）
-   9. 每組渲染 id="option-group-<key>"（與咖啡同一組 class/標記）
-  10. 唯讀組：顯示值、不渲染 .bc-option-btn、不送 hidden input
-  11. 可選組：渲染 .bc-option-btn、預設值 active、hidden input 帶預設值
+   9. 產地：沿用既有排版（block-23 清單行的中文值），不新增任何選項 UI
+  10. 沒有唯讀晶片（.bc-option-readonly*）與 option-group-origin
+  11. 可選組（研磨）：.bc-option-btn + 預設值 active + hidden input 帶預設值
 D. 購物車 / 訂單
   12. add_to_cart：只收「客人可選」的組進 extra_options（唯讀組不入庫）
   13. CartItem.options_json / grinding_level 同步寫入
@@ -45,13 +45,17 @@ from eshop.models import BeanItem, CoffeeItem
 from eshop.models.option_definitions import (
     BEAN_OPTION_GROUPS,
     OPTION_GROUPS,
+    bean_option_display_value,
     get_bean_option_groups,
     get_option_icon,
     get_option_label,
     get_option_value_label,
+    sort_option_keys_for_bean,
 )
 
-BKEYS = [g["key"] for g in BEAN_OPTION_GROUPS]
+BKEYS = [g["key"] for g in BEAN_OPTION_GROUPS]  # 豆的選項組（含唯讀的產地）
+SKEYS = [g["key"] for g in BEAN_OPTION_GROUPS if g.get("customer_selectable")]  # 客人可選（按鈕 UI）
+RKEYS = [g["key"] for g in BEAN_OPTION_GROUPS if not g.get("customer_selectable")]  # 唯讀（沿用原有排版）
 CKEYS = [g["key"] for g in OPTION_GROUPS]
 
 
@@ -72,28 +76,44 @@ def section_a(results):
     """A. 資料層"""
     print("A. 資料層")
     bean = BeanItem.objects.filter(origin__in=["CO", "ET", "JP"]).order_by("id").first() or BeanItem.objects.order_by("id").first()
-    old = {k: (getattr(bean, f"option_{k}"), getattr(bean, f"option_order_{k}")) for k in BKEYS}
-    for k in BKEYS:  # 全部啟用、順序歸零
+    old = {k: getattr(bean, f"option_{k}", None) for k in BKEYS}
+    for k in BKEYS:  # 全部啟用
         setattr(bean, f"option_{k}", True)
+    for k in SKEYS:  # 排序歸零
         setattr(bean, f"option_order_{k}", 0)
-    default_order = [g["key"] for g in BEAN_OPTION_GROUPS]
+
     got = [g["key"] for g in get_bean_option_groups(bean)]
-    results.append(check("全 0 → BEAN_OPTION_GROUPS 順序", got == default_order, str(got)))
+    results.append(check("只回傳客人可選的組（唯讀組不在此列）", got == SKEYS, str(got)))
+    results.append(check("唯讀組（產地）不在按鈕 UI 清單", "origin" not in got, str(RKEYS)))
 
-    bean.option_order_grinding_level = 1
-    got2 = [g["key"] for g in get_bean_option_groups(bean)]
-    results.append(check("研磨 order=1 → 排到最前", got2[0] == "grinding_level", str(got2)))
-    bean.option_order_grinding_level = 0
+    # 排序機制：sort_option_keys_for_bean 依 option_order_<key>（用記憶體 stub 驗，不動 DB）
+    class _Stub:
+        pass
 
-    empty_bean = BeanItem.objects.filter(origin="").first()
-    if empty_bean:
-        keys = [g["key"] for g in get_bean_option_groups(empty_bean)]
-        results.append(check("唯讀無值組不渲染（空產地）", "origin" not in keys, str(keys)))
+    stub = _Stub()
+    stub.option_order_origin = 1
+    stub.option_order_grinding_level = 2
+    results.append(check("排序：origin=1 / grinding=2 → 產地在前",
+                         sort_option_keys_for_bean(stub, ["grinding_level", "origin"]) == ["origin", "grinding_level"]))
+    stub.option_order_origin = 0
+    stub.option_order_grinding_level = 0
+    results.append(check("排序：皆 0 → 依定義順序（BEAN_OPTION_GROUPS）",
+                         sort_option_keys_for_bean(stub, ["grinding_level", "origin"]) == ["origin", "grinding_level"]))
+
+    # 產地中文值（沿用既有排版，值由此解析）
     other = BeanItem.objects.filter(origin="OT").exclude(origin_custom="").first()
     if other:
-        g = [x for x in get_bean_option_groups(other) if x["key"] == "origin"]
-        results.append(check("產地『其他』→ 顯示 origin_custom", bool(g) and g[0]["display_value"] == other.origin_custom,
-                             f"{g[0]['display_value'] if g else '-'}"))
+        og = next(g for g in BEAN_OPTION_GROUPS if g["key"] == "origin")
+        results.append(check("產地『其他』→ 顯示 origin_custom",
+                             bean_option_display_value(other, og) == other.origin_custom,
+                             bean_option_display_value(other, og)))
+    coded = BeanItem.objects.exclude(origin__in=["", "OT"]).first()
+    if coded:
+        og = next(g for g in BEAN_OPTION_GROUPS if g["key"] == "origin")
+        results.append(check("產地代碼 → 中文（%s）" % coded.origin,
+                             bean_option_display_value(coded, og) == get_option_value_label("origin", coded.origin),
+                             bean_option_display_value(coded, og)))
+    results.append(check("烘焙度未納入選項組", "roast_level" not in BKEYS, str(BKEYS)))
 
     results.append(check("合併查找：咖啡標籤不受影響",
                          get_option_label("cup_level") == "杯量" and get_option_value_label("milk", "oat") == "燕麥奶"
@@ -101,9 +121,9 @@ def section_a(results):
     results.append(check("合併查找：豆標籤正確",
                          get_option_label("origin") == "產地" and get_option_value_label("origin", "ET") == "埃塞俄比亞"
                          and get_option_icon("origin") == "pin_drop"))
-    for k, (en, order) in old.items():  # 還原
-        setattr(bean, f"option_{k}", en)
-        setattr(bean, f"option_order_{k}", order)
+    for k, en in old.items():  # 還原
+        if en is not None:
+            setattr(bean, f"option_{k}", en)
     bean.save()
     return bean
 
@@ -115,13 +135,16 @@ def section_b(results, bean, c):
     coffee = CoffeeItem.objects.first()
     url = f"/admin/eshop/beanitem/{bean.pk}/change/"
     h = c.get(url).content.decode("utf-8", "replace")
-    results.append(check("3 組 checkbox 皆渲染", all(f'id="option_groups_config_{k}"' in h for k in BKEYS), str(BKEYS)))
-    results.append(check("3 組排序數字欄位皆渲染", all(f'name="option_groups_config_{k}_order"' in h for k in BKEYS)))
+    results.append(check("所有組 checkbox 皆渲染", all(f'id="option_groups_config_{k}"' in h for k in BKEYS), str(BKEYS)))
+    results.append(check("只有可選組有排序數字欄位",
+                         all(f'name="option_groups_config_{k}_order"' in h for k in SKEYS)
+                         and all(f'name="option_groups_config_{k}_order"' not in h for k in RKEYS)))
     results.append(check('不再有分離欄位 name="option_origin"', 'name="option_origin"' not in h))
     ro = h.count('class="og-readonly"')
-    results.append(check("唯讀標示數 = 2（產地/烘焙度）", ro == 2, f"實得 {ro}"))
+    results.append(check("唯讀組標示 1 個（產地）", ro == 1, f"實得 {ro}"))
 
-    old = {k: (getattr(bean, f"option_{k}"), getattr(bean, f"option_order_{k}")) for k in BKEYS}
+    old = {k: getattr(bean, f"option_{k}", None) for k in BKEYS}
+    old_orders = {k: getattr(bean, f"option_order_{k}", None) for k in SKEYS}
     data = {}
     for f in BeanItem._meta.fields:
         if not f.editable or f.name == "id":
@@ -141,9 +164,7 @@ def section_b(results, bean, c):
         data[f.name] = str(v)
     data["option_groups_config_grinding_level"] = "on"
     data["option_groups_config_grinding_level_order"] = "1"
-    data["option_groups_config_roast_level"] = "on"
-    data["option_groups_config_roast_level_order"] = "0"
-    data["option_groups_config_origin_order"] = "3"
+    # 產地不勾選（＝詳情頁不顯示產地那一行）
     r = c.post(url, data)
     results.append(check("POST 成功（302）", r.status_code == 302, f"status={r.status_code}"))
     if r.status_code != 302 and r.context:
@@ -152,23 +173,22 @@ def section_b(results, bean, c):
             for k, errs in form.form.errors.items():
                 print(f"     ⚠ {k}: {errs}")
     bean.refresh_from_db()
-    results.append(check("寫回：產地停用/order=3", bean.option_origin is False and bean.option_order_origin == 3,
-                         f"{bean.option_origin}/{bean.option_order_origin}"))
+    results.append(check("寫回：產地停用（未勾選）", bean.option_origin is False, str(bean.option_origin)))
     results.append(check("寫回：研磨啟用/order=1",
                          bean.option_grinding_level is True and bean.option_order_grinding_level == 1,
                          f"{bean.option_grinding_level}/{bean.option_order_grinding_level}"))
-    results.append(check("寫回：烘焙度啟用/order=0",
-                         bean.option_roast_level is True and bean.option_order_roast_level == 0,
-                         f"{bean.option_roast_level}/{bean.option_order_roast_level}"))
 
     hc = c.get(f"/admin/eshop/coffeeitem/{coffee.pk}/change/").content.decode("utf-8", "replace")
     n_ck = sum(1 for k in CKEYS if 'id="option_groups_config_%s"' % k in hc)
     results.append(check("Coffee Admin 仍 16 組", n_ck == len(CKEYS), f"{n_ck}/{len(CKEYS)}"))
     results.append(check("Coffee Admin 無「唯讀顯示」", 'class="og-readonly"' not in hc))
 
-    for k, (en, order) in old.items():  # 還原
-        setattr(bean, f"option_{k}", en)
-        setattr(bean, f"option_order_{k}", order)
+    for k, en in old.items():  # 還原
+        if en is not None:
+            setattr(bean, f"option_{k}", en)
+    for k, order in old_orders.items():
+        if order is not None:
+            setattr(bean, f"option_order_{k}", order)
     bean.save()
     bean.refresh_from_db()
     return bean
@@ -183,30 +203,37 @@ def section_cd(results, bean, c):
     from eshop.models import OrderModel
 
     print("C. 前台詳情頁 /bean/%s/" % bean.pk)
-    bean.option_origin, bean.option_grinding_level, bean.option_roast_level = True, True, False
-    bean.option_order_origin = bean.option_order_grinding_level = 0
+    og = next(g for g in BEAN_OPTION_GROUPS if g["key"] == "origin")
+    bean.option_origin = True
+    bean.option_grinding_level = True
+    bean.option_order_grinding_level = 0
     bean.save()
     h = c.get(f"/bean/{bean.pk}/").content.decode("utf-8", "replace")
-    results.append(check("唯讀組渲染 id=option-group-origin", 'id="option-group-origin"' in h))
-    results.append(check("可選組渲染 id=option-group-grinding_level", 'id="option-group-grinding_level"' in h))
-    results.append(check("未啟用組（烘焙度）不渲染", 'id="option-group-roast_level"' not in h))
-    ro = re.search(r'id="option-group-origin".*?</div>', h, re.S)
-    ro_html = ro.group(0) if ro else ""
-    results.append(check("唯讀組標記 bc-option-readonly-value", "bc-option-readonly-value" in ro_html))
-    results.append(check("唯讀組不含按鈕（客人不能選）", "bc-option-btn" not in ro_html))
-    results.append(check("唯讀組不送值", 'name="option_origin"' not in h))
-    results.append(check("唯讀組顯示中文值", "哥倫比亞" in ro_html or "埃塞俄比亞" in ro_html))
+
+    # 產地：沿用既有排版（block-23 清單行），不新增任何 UI
+    origin_line = re.search(r'<li><span class="icon material-icons">pin_drop</span><span class="text">產地 :.*?</li>', h, re.S)
+    results.append(check("產地沿用既有排版（block-23 清單行）", bool(origin_line)))
+    results.append(check("產地顯示中文值（非代碼）",
+                         bool(origin_line) and bean_option_display_value(bean, og) in origin_line.group(0),
+                         (origin_line.group(0)[:110].replace("\n", " ") if origin_line else "")))
+    results.append(check("沒有新增的唯讀晶片 UI（bc-option-readonly*）", "bc-option-readonly" not in h))
+    results.append(check("產地不在選項按鈕區（無 option-group-origin）", 'id="option-group-origin"' not in h))
+    results.append(check("產地不送值（無 hidden option_origin）", 'name="option_origin"' not in h))
+
+    # 可選組（研磨）：既有 .bc-option-btn UI
+    results.append(check("研磨渲染 id=option-group-grinding_level", 'id="option-group-grinding_level"' in h))
     gr = re.search(r'id="option-group-grinding_level".*?</div>', h, re.S)
     gr_html = gr.group(0) if gr else ""
-    results.append(check("可選組 4 顆按鈕", gr_html.count("bc-option-btn") == 4, f"{gr_html.count('bc-option-btn')} 顆"))
+    results.append(check("研磨 4 顆按鈕", gr_html.count("bc-option-btn") == 4, f"{gr_html.count('bc-option-btn')} 顆"))
     results.append(check("研磨預設值 active", 'bc-option-btn active' in gr_html))
     results.append(check("hidden input option_grinding_level", 'name="option_grinding_level"' in h))
 
-    bean.option_order_grinding_level = 1
+    # Admin 勾選「顯示產地」的實際效果
+    bean.option_origin = False
     bean.save()
-    order = re.findall(r'id="option-group-([a-z_]+)"', c.get(f"/bean/{bean.pk}/").content.decode("utf-8", "replace"))
-    results.append(check("排序：研磨 order=1 → 排最前", order == ["grinding_level", "origin"], str(order)))
-    bean.option_order_grinding_level = 0
+    h2 = c.get(f"/bean/{bean.pk}/").content.decode("utf-8", "replace")
+    results.append(check("取消勾選「顯示產地」→ 該行不顯示", 'material-icons">pin_drop' not in h2))
+    bean.option_origin = True
     bean.save()
 
     print("D. 購物車 / 訂單")

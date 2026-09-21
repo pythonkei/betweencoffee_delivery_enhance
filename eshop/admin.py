@@ -46,23 +46,27 @@ class OptionGroupConfigWidget(forms.Widget):
             enabled = bool(v.get("enabled"))
             order = int(v.get("order") or 0)
             cid = f"{name}_{key}"
-            # 唯讀顯示組（例：咖啡豆的產地／烘焙度）＝客人不能選，只在詳情頁顯示該商品的值
-            badge = (
-                ""
-                if g.get("customer_selectable", True)
-                else '<span class="og-readonly" title="客人不能選，只在詳情頁唯讀顯示">唯讀顯示</span>'
-            )
+            if g.get("customer_selectable", True):
+                # 客人可選的組：有按鈕 UI，可排序
+                tail = (
+                    f'<input type="number" name="{name}_{key}_order" value="{order}" '
+                    f'min="0" max="999" class="og-order-input" '
+                    'title="排序：數字越小越靠前，0=預設" aria-label="排序">'
+                )
+            else:
+                # 唯讀組（客人不能選，例：咖啡豆產地）：沿用前台既有排版 → 勾選＝是否顯示，無排序
+                tail = (
+                    '<span class="og-readonly" title="客人不能選；前台沿用原有排版，'
+                    '勾選＝是否顯示，不需排序">唯讀 · 沿用原有排版</span>'
+                )
             rows.append(
                 '<div class="og-row">'
                 f'<label class="og-check" for="{cid}">'
                 f'<input type="checkbox" id="{cid}" name="{name}_{key}"'
                 + (" checked" if enabled else "")
                 + f"> <span>{g['label']}</span></label>"
-                + badge
-                + f'<input type="number" name="{name}_{key}_order" value="{order}" '
-                f'min="0" max="999" class="og-order-input" '
-                'title="排序：數字越小越靠前，0=預設" aria-label="排序">'
-                "</div>"
+                + tail
+                + "</div>"
             )
         return '<div class="option-group-config-grid">' + "".join(rows) + "</div>"
 
@@ -632,17 +636,31 @@ class BeanItemAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "選項組值（各組的顯示值／預設值）",
+            "產地（詳情頁既有排版，不新增 UI）",
             {
-                "fields": ("origin", "origin_custom", "grinding_level", "roast_level"),
-                "description": "這四個欄位是下方各選項組的「值」：產地／烘焙度＝詳情頁唯讀顯示（客人不能選）；研磨＝客人可選時預設選中的值。產地請用下拉選單，選「其他（自填）」時填寫 origin_custom。",
+                "fields": ("origin", "origin_custom"),
+                "description": "產地「不是讓客人選」的：詳情頁只顯示這個值，沿用原本的產地那一行排版。請用下拉選單選擇；選「其他（自填）」時填寫 origin_custom。是否顯示請見下方「自訂選項組」。",
+            },
+        ),
+        (
+            "研磨（客人可選）",
+            {
+                "fields": ("grinding_level",),
+                "description": "客人可選的選項組（前台顯示為按鈕）；此欄位＝客人未改動時預設選中的值。是否顯示與排序請見下方「自訂選項組」。",
+            },
+        ),
+        (
+            "烘焙度（詳情頁「烘焙水平」刻度）",
+            {
+                "fields": ("roast_level",),
+                "description": "詳情頁原有的「烘焙水平」視覺刻度；未納入自訂選項組（避免重複顯示）。",
             },
         ),
         (
             "自訂選項組（勾選啟用 + 排序數字，0=預設順序）",
             {
                 "fields": ("option_groups_config",),
-                "description": "勾選 = 詳情頁顯示該選項組；右側數字 = 顯示排序（數字越小越靠前，0=預設）。標示「唯讀顯示」的組＝客人不能選，只顯示上方對應欄位的值（產地／烘焙度）；研磨為客人可選。對應關係見 eshop/models/option_definitions.py 的 BEAN_OPTION_GROUPS。",
+                "description": "研磨＝客人可選：勾選＝詳情頁顯示按鈕組、右側數字＝排序（數字越小越靠前，0=預設）。產地＝唯讀（客人不能選）：勾選＝詳情頁是否顯示產地那一行，沿用既有排版、不需排序。定義見 eshop/models/option_definitions.py 的 BEAN_OPTION_GROUPS。",
             },
         ),
         ("状态管理", {"fields": ("is_published", "is_shop_hot_item", "list_date")}),
