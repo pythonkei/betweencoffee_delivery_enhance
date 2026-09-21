@@ -146,8 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     {% elif item.type == 'bean' %}
                     <div class="meta pb-2 d-flex bc-order-item-meta-sm">
-                        {# 自訂選項組（2026-09-21）：可選組走 extra_options（與咖啡同一格式）；
-                           未帶 extra_options 的舊資料才用 grinding_level 舊欄位 #}
+                        {# 自訂選項組：可選組走 extra_options；未帶 extra_options 的舊資料才用 grinding_level #}
                         {% for opt_key, opt_val in item.extra_options.items %}
                         <div>
                             <span class="icon material-symbols-outlined">{{ opt_key|option_icon }}</span>

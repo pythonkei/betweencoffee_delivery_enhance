@@ -290,6 +290,24 @@ def section_cd(results, bean, c):
             results.append(check(f"編譯 {tpl}", False, str(e)[:80]))
 
 
+def section_f(results):
+    """F. 模板跨行註解掃描：Django 的 {# #} 不能跨行，跨行會被當成純文字輸出（2026-09-21 曾誤犯）"""
+    import glob
+    import re
+
+    print("F. 模板跨行註解掃描（{# #} 不可跨行）")
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    bad = []
+    for d in ("templates", "eshop/templates", "socialuser/templates", "cart/templates", "core/templates"):
+        for path in glob.glob(os.path.join(root, d, "**", "*.html"), recursive=True):
+            s = open(path, encoding="utf-8").read()
+            for m in re.finditer(r"\{#", s):
+                end = s.find("#}", m.start())
+                if end == -1 or "\n" in s[m.start() : end + 2]:
+                    bad.append("%s:%d" % (os.path.relpath(path, root), s[: m.start()].count("\n") + 1))
+    results.append(check("所有模板皆無跨行 {# #}", not bad, "; ".join(bad) or "0 處"))
+
+
 def main():
     results = []
     c = Client(HTTP_HOST="localhost:8081")
@@ -297,6 +315,7 @@ def main():
     bean = section_a(results)
     section_b(results, bean, c)
     section_cd(results, bean, c)
+    section_f(results)
     print(f"\n結果：{sum(1 for r in results if r)}/{len(results)} 通過")
     return 0 if all(results) else 1
 

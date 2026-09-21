@@ -67,8 +67,7 @@
 
                 <div class="block-23 mb-3">
                     <ul>
-                        {# 產地（2026-09-21）：沿用既有排版，不新增 UI。值由 Admin 的下拉管理，
-                           中文在此顯示（「其他（自填）」顯示 origin_custom）；Admin 取消勾選「顯示產地」則整行不顯示。 #}
+                        {# 產地沿用原有排版、不新增 UI；中文值由 view 的 origin_display 提供；取消勾選「顯示產地」則整行不顯示 #}
                         {% if bean.option_origin and origin_display %}
                         <li><span class="icon material-icons">pin_drop</span><span class="text">產地 :<span class="pl-3">{{ origin_display }}</span></span></li>
                         {% endif %}
