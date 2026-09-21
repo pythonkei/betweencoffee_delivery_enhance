@@ -2557,6 +2557,22 @@ body {
   flex: 1;
 }
 
+/* 2026-09-21（使用者指示）：詳情頁「立即購買／加入購物車」(.btn.btn-primary)
+   高度與 .bc-option-btn 一致（桌面／平板 60px）。
+   背景：style-bootstrap.css 的 `.product-details button{height:54px!important}` 使這兩個
+   按鈕比選項按鈕矮 6px → 此處以 (0,3,0)!important 蓋過；
+   同時補 inline-flex 置中（原本 display:block + padding 16px，文字偏上）。
+   ⚠ 以 min-width:768 包住：行動端維持既有縮小版（下方 ≤767.98 的
+   `.product-details .bc-product-action-btn{height:36px!important}`），不破壞原本一致的 36px。 */
+@media all and (min-width: 768px) {
+  .product-details .btn.btn-primary {
+    height: 60px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 /* Phase B: bean.html 專用（2026-08-13：active 烘焙水平文字/圓點改金色）
    需 .roastrange-item span 前綴勝過 style-custom.css 的 .roastrange-item span { color:#666 } */
 .roastrange-item span.bc-roast-active {
