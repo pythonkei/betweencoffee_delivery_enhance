@@ -436,8 +436,16 @@ class SlideoutCart {
         });
       }
     } else if (item.type === 'bean') {
-      if (item.grinding_level) {
-        const map = { Non: '免研磨', Light: '細', Medium: '中', Deep: '粗' };
+      // 咖啡豆自訂選項組（2026-09-21）：API 已回傳中文／圖示／標籤 → 直接使用，不再硬寫對照表
+      const cn = item.extra_options_cn || {};
+      const icons = item.extra_options_icons || {};
+      const labels = item.extra_options_labels || {};
+      Object.entries(cn).forEach(([k, v]) => {
+        parts.push(`<i class="icon material-symbols-outlined">${icons[k] || 'add_circle'}</i> ${labels[k] || k}: ${v}`);
+      });
+      // 舊資料／未啟用研磨組：沿用既有欄位（研磨已在 extra_options_cn 時不重複顯示）
+      if (item.grinding_level && !cn.grinding_level) {
+        const map = { Non: '免研磨', Light: '細研磨', Medium: '中研磨', Deep: '粗研磨' };
         parts.push(`<i class="icon material-symbols-outlined">roller_shades</i> 研磨:${map[item.grinding_level] || item.grinding_level}`);
       }
       if (item.weight) {

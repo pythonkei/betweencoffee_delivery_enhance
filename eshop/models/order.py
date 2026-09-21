@@ -412,13 +412,32 @@ class OrderModel(models.Model):
             elif item_type == "bean":
                 display_item["type_display"] = "咖啡豆"
                 options = []
-                if display_item.get("weight_cn"):
-                    options.append(f"重量: {display_item['weight_cn']}")
-                elif display_item.get("weight"):
-                    options.append(f"重量: {display_item['weight']}")
+                if display_item.get("weight_cn") or display_item.get("weight"):
+                    weight_text = display_item.get("weight_cn") or display_item.get("weight")
+                    options.append(
+                        f'<span class="option-item"><span class="icon material-symbols-outlined">scale</span> 重量: {weight_text}</span>'
+                    )
+                # 自訂選項組（2026-09-21）：與咖啡同一格式（icon + 中文標籤）
+                from eshop.models.option_definitions import (
+                    get_option_icon,
+                    get_option_label,
+                )
+
+                for opt_key, opt_val in (
+                    display_item.get("extra_options_cn") or {}
+                ).items():
+                    options.append(
+                        f'<span class="option-item"><span class="icon material-symbols-outlined">{get_option_icon(opt_key)}</span> {get_option_label(opt_key)}: {opt_val}</span>'
+                    )
                 if display_item.get("grinding_level_cn"):
-                    options.append(f"研磨: {display_item['grinding_level_cn']}")
-                display_item["options_display"] = " | ".join(options)
+                    options.append(
+                        f'<span class="option-item"><span class="icon material-symbols-outlined">roller_shades</span> 研磨: {display_item["grinding_level_cn"]}</span>'
+                    )
+                display_item["options_display"] = (
+                    '<div class="bc-options-row">' + "".join(options) + "</div>"
+                    if options
+                    else ""
+                )
             else:
                 display_item["type_display"] = "其他商品"
                 display_item["options_display"] = ""
@@ -681,10 +700,30 @@ class OrderModel(models.Model):
                     item.pop("weight", None)
 
             elif item_type == "bean":
+                # 咖啡豆自訂選項組（2026-09-21）：與咖啡同一格式（中文／圖示／標籤）
+                from eshop.models.option_definitions import (
+                    get_option_icon,
+                    get_option_label,
+                )
+
+                if item.get("extra_options"):
+                    item["extra_options_cn"] = {
+                        k: self.translate_option(k, v)
+                        for k, v in item["extra_options"].items()
+                    }
+                    item["extra_options_icons"] = {
+                        k: get_option_icon(k) for k in item["extra_options"]
+                    }
+                    item["extra_options_labels"] = {
+                        k: get_option_label(k) for k in item["extra_options"]
+                    }
                 if "grinding_level" in item:
                     item["grinding_level_cn"] = self.translate_option(
                         "grinding_level", item["grinding_level"]
                     )
+                    # 研磨已納入自訂選項組時移除舊欄位中文，避免各顯示端重複呈現同一選項
+                    if (item.get("extra_options") or {}).get("grinding_level"):
+                        item.pop("grinding_level_cn", None)
                 if "weight" in item:
                     item["weight_cn"] = self.translate_weight(item["weight"])
             else:
@@ -722,10 +761,10 @@ class OrderModel(models.Model):
                 "Extra": "特濃",
             },
         }
-        # 自訂選項組（2026-08-15）：從 option_definitions 合併映射
-        from eshop.models.option_definitions import OPTION_GROUPS
+        # 自訂選項組（2026-08-15 咖啡；2026-09-21 併入咖啡豆）：從 option_definitions 合併映射
+        from eshop.models.option_definitions import ALL_OPTION_GROUPS
 
-        for group in OPTION_GROUPS:
+        for group in ALL_OPTION_GROUPS:
             # choices 可能含第 3 元素（如杯量 oz meta）→ 只取 (value, label)
             mappings[group["key"]] = {
                 choice[0]: choice[1] for choice in group["choices"]

@@ -50,8 +50,10 @@
                   {% if item.milk_level %}| 奶量: {% if item.milk_level == 'Light' %}少{% elif item.milk_level == 'Medium' %}正常{% elif item.milk_level == 'Extra' %}追加{% endif %}{% endif %}
                   {% endif %}
                 {% elif item.type == 'bean' %}
+                  {# 自訂選項組（2026-09-21）：可選組走 extra_options；舊資料沿用 grinding_level #}
+                  {% for opt_key, opt_val in item.extra_options.items %}{{ opt_key|option_label }}: {{ opt_val|option_value:opt_key }} {% endfor %}
+                  {% if item.grinding_level and not item.extra_options.grinding_level %}研磨: {{ item.grinding_level|option_value:'grinding_level' }}{% endif %}
                   重量: {{ item.weight|default:"200g" }}
-                  | 研磨: {% if item.grinding_level == 'Non' %}免研磨{% elif item.grinding_level == 'Light' %}細{% elif item.grinding_level == 'Medium' %}中{% else %}粗{% endif %}
                 {% endif %}
               </div>
             </div>

@@ -146,17 +146,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     {% elif item.type == 'bean' %}
                     <div class="meta pb-2 d-flex bc-order-item-meta-sm">
+                        {# 自訂選項組（2026-09-21）：可選組走 extra_options（與咖啡同一格式）；
+                           未帶 extra_options 的舊資料才用 grinding_level 舊欄位 #}
+                        {% for opt_key, opt_val in item.extra_options.items %}
+                        <div>
+                            <span class="icon material-symbols-outlined">{{ opt_key|option_icon }}</span>
+                            {{ opt_key|option_label }} :
+                            <strong>{{ opt_val|option_value:opt_key }}</strong>
+                        </div>
+                        {% endfor %}
+                        {% if item.grinding_level and not item.extra_options.grinding_level %}
                         <div>
                             <span class="icon material-symbols-outlined">roller_shades</span>
                             研磨 :
-                            <strong>
-                            {% if item.grinding_level == 'Non' %}免研磨
-                            {% elif item.grinding_level == 'Light' %}細
-                            {% elif item.grinding_level == 'Medium' %}中
-                            {% elif item.grinding_level == 'Deep' %}粗
-                            {% endif %}
-                            </strong>
+                            <strong>{{ item.grinding_level|option_value:'grinding_level' }}</strong>
                         </div>
+                        {% endif %}
                         {% if item.weight %}
                         <div>
                             <span class="icon material-symbols-outlined">scale</span>
@@ -562,17 +567,21 @@ document.addEventListener('DOMContentLoaded', function() {
                                     {% elif item.type == 'bean' %}
                                     <div class="meta pb-2 d-flex bc-order-item-meta-sm">
 
+                                        {# 自訂選項組（2026-09-21）：與上方咖啡分支同一格式 #}
+                                        {% for opt_key, opt_val in item.extra_options.items %}
+                                        <div>
+                                            <span class="icon material-symbols-outlined">{{ opt_key|option_icon }}</span>
+                                            {{ opt_key|option_label }} :
+                                            <strong>{{ opt_val|option_value:opt_key }}</strong>
+                                        </div>
+                                        {% endfor %}
+                                        {% if item.grinding_level and not item.extra_options.grinding_level %}
                                         <div>
                                             <span class="icon material-symbols-outlined">roller_shades</span>
                                             研磨 :
-                                            <strong>
-                                            {% if item.grinding_level == 'Non' %}免研磨
-                                            {% elif item.grinding_level == 'Light' %}細
-                                            {% elif item.grinding_level == 'Medium' %}中
-                                            {% elif item.grinding_level == 'Deep' %}粗
-                                            {% endif %}
-                                            </strong>
+                                            <strong>{{ item.grinding_level|option_value:'grinding_level' }}</strong>
                                         </div>
+                                        {% endif %}
                                         {% if item.weight %}
                                         <div>
                                             <span class="icon material-symbols-outlined">scale</span>
