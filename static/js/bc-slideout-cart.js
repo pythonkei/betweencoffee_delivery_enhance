@@ -278,12 +278,19 @@ class SlideoutCart {
 
   _updateBadge(count, animatedOverride) {
     const val = count || '0';
+    const numeric = parseInt(val, 10) || 0;
     document.querySelectorAll(this.options.badgeSelector).forEach(el => {
       // 2026-08-14：值相同不重設 textContent（避免重繪造成文字閃爍）
       if (el.textContent !== val) {
         el.textContent = val;
       }
     });
+    // 2026-09-21（使用者指示）：浮動鈕圖示常駐顯示，數量為 0 時只隱藏它上面的數字圓圈
+    // （只針對浮動鈕的 badge；其他 .bc-cart-count（導覽列等）不受影響）
+    const fcBadge = this.floatingCart ? this.floatingCart.querySelector('.bc-floating-cart-badge') : null;
+    if (fcBadge) {
+      fcBadge.style.display = numeric > 0 ? '' : 'none';
+    }
     // 同步浮動購物車按鈕顯示狀態
     // 2026-08-14：頁面載入期（constructor + rAF 兩次初始同步）靜默顯示（無動畫）；
     // 延遲切換標記，確保所有初始同步皆靜默、之後操作（加入購物車等）才有滑入動畫
@@ -334,9 +341,9 @@ class SlideoutCart {
     const el = this.floatingCart;
     if (!el) return;
 
-    // 圖示字級：與 bc-components.css 各斷點一致（桌機 48 / 平板 44 / 手機 40；2026-09-21 縮小）
-    const size = window.matchMedia('(min-width: 992px)').matches ? 48
-      : window.matchMedia('(min-width: 768px)').matches ? 44 : 40;
+    // 圖示字級：與 bc-components.css 各斷點一致（桌機 44 / 平板 40 / 手機 36；2026-09-21 兩度縮小）
+    const size = window.matchMedia('(min-width: 992px)').matches ? 44
+      : window.matchMedia('(min-width: 768px)').matches ? 40 : 36;
     el.style.setProperty('--bc-fc-size', size + 'px');
     // 實際佔位＝max(44px 透明點擊區下限, 字級)：定位要用「盒子」而不是字形大小
     // （手機是 40px 字形裝在 44px 盒子裡——只縮字形、點擊區不變）
@@ -364,10 +371,12 @@ class SlideoutCart {
 
     // 首選：長條正上方；上方空間不足（例如首頁把整組按鈕對齊 navbar-brand 頂邊，
     // 上方就是視窗上緣）→ 改放整組下方，維持同一軸線往下延伸（Buy → 個人圓鈕 → 購物車）
+    // 與 Buy 按鈕的間距（2026-09-21 使用者指示「增加間距」；值定義在 bc-components.css 的 --bc-fc-gap）
+    const gap = parseFloat(getComputedStyle(el).getPropertyValue('--bc-fc-gap')) || 0;
     const MIN_TOP = 8;
-    let desiredTop = Math.round(barRect.top - box);
+    let desiredTop = Math.round(barRect.top - box - gap);
     if (desiredTop < MIN_TOP) {
-      desiredTop = Math.round((profileRect && profileRect.height) ? profileRect.bottom : barRect.bottom);
+      desiredTop = Math.round(((profileRect && profileRect.height) ? profileRect.bottom : barRect.bottom) + gap);
     }
     const desiredCx = barRect.left + barRect.width / 2;
 
@@ -446,24 +455,15 @@ class SlideoutCart {
   }
 
   /**
-   * 更新浮動購物車顯示狀態（根據購物車數量，有商品時常駐顯示）
+   * 更新浮動購物車顯示狀態
+   * 2026-09-21（使用者指示）：**空車也常駐顯示圖示**（只隱藏數字圓圈，見 _updateBadge），
+   * 因此不再依數量隱藏整個浮動鈕。
    */
   _updateFloatingCartVisibility(count, animated = true) {
     if (!this.floatingCart) return;
     // 購物車打開時不處理浮動按鈕顯示
     if (this._cartOpenHiddenFloating) return;
-    const itemCount = count !== undefined ? parseInt(count) : null;
-    if (itemCount !== null) {
-      if (itemCount <= 0) {
-        // 購物車為空時隱藏浮動按鈕
-        this.floatingCart.style.display = 'none';
-        this.floatingCart.classList.remove('show', 'hide', 'no-anim');
-        return;
-      } else {
-        // 購物車有商品時，常駐顯示浮動按鈕
-        this._showFloatingCart(animated);
-      }
-    }
+    this._showFloatingCart(animated);
   }
 
   /**
@@ -471,9 +471,7 @@ class SlideoutCart {
    */
   _showFloatingCart(animated = true) {
     if (!this.floatingCart) return;
-    // 如果購物車為空，不顯示
-    const badge = this.floatingCart.querySelector('.bc-floating-cart-badge');
-    if (badge && parseInt(badge.textContent) <= 0) return;
+    // 2026-09-21（使用者指示）：不再因「空車」而跳過顯示（空車仍顯示圖示、只隱藏數字圓圈）
 
     // 2026-08-24：已顯示（show）時直接返回——不移除 no-anim、不重播滑入動畫。
     // 否則加入商品時 animated=true 移除 no-anim → CSS 動畫從 none 變 bcFloatingIn → 每次重播
@@ -516,10 +514,8 @@ class SlideoutCart {
       // 2026-09-21：關閉抽屜後 body padding-right 已還原（.bc-attract-buy 的水平位置會回復），
       // 故重新量測定位，避免浮動鈕停留在補償後的偏移位置
       this._placeFloatingCart();
-      const badge = this.floatingCart.querySelector('.bc-floating-cart-badge');
-      if (badge && parseInt(badge.textContent) > 0) {
-        this._showFloatingCart();
-      }
+      // 2026-09-21（使用者指示）：空車也顯示圖示 → 一律恢復顯示
+      this._showFloatingCart();
     });
   }
 

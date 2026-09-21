@@ -36,7 +36,19 @@ JS = r"""
   out.yama_header_bot_display = bot ? getComputedStyle(bot).display : 'no-yama-on-page';
   out.yama_cart_row_rect = rect(botRow);
 
-  /* 2. 讓浮動鈕可見後量測（DOM 層模擬，不需真實購物車商品；顯示邏輯本身未改） */
+  /* 1b. 初始（未強制顯示）狀態：2026-09-21 使用者指示「空車也顯示圖示、只隱藏數字圓圈」 */
+  if (fc) {
+    var initBadge = fc.querySelector('.bc-floating-cart-badge');
+    out.initial_state = {
+      cart_display: getComputedStyle(fc).display,
+      cart_visible: getComputedStyle(fc).display !== 'none',
+      badge_display: initBadge ? getComputedStyle(initBadge).display : null,
+      badge_text: initBadge ? initBadge.textContent.trim() : null,
+      badge_hidden: !!(initBadge && getComputedStyle(initBadge).display === 'none')
+    };
+  }
+
+  /* 2. 讓浮動鈕可見後量測（DOM 層模擬，不需真實購物車商品） */
   if (fc) {
     fc.style.display = '';
     fc.classList.add('show','no-anim');
@@ -76,6 +88,8 @@ JS = r"""
     out.overlaps_bar = (out.cart_wrapper.y < (out.bar.y + out.bar.h) - 0.5)
                     && ((out.cart_wrapper.y + out.cart_wrapper.h) > out.bar.y + 0.5);
     out.placement = ((out.cart_wrapper.y + out.cart_wrapper.h) <= out.bar.y + 1) ? 'above-bar' : 'below-cluster';
+    /* 2026-09-21：與 Buy 按鈕的間距（使用者指示「增加間距」；CSS 定義 12px） */
+    out.gap_px = +(out.bar.y - (out.cart_wrapper.y + out.cart_wrapper.h)).toFixed(1);
   }
 
   /* 3. 點擊命中 */
@@ -100,9 +114,9 @@ PREP_JS = (
     "var fc=document.getElementById('bc-floating-cart');"
     "if(fc){fc.style.display='';}"
     "if(document.fonts&&document.fonts.load){"
-    "try{await document.fonts.load('48px \"Material Icons\"');"
-    "await document.fonts.load('44px \"Material Icons\"');"
-    "await document.fonts.load('40px \"Material Icons\"');}catch(e){}}"
+    "try{await document.fonts.load('44px \"Material Icons\"');"
+    "await document.fonts.load('40px \"Material Icons\"');"
+    "await document.fonts.load('36px \"Material Icons\"');}catch(e){}}"
     "return true;})()"
 )
 
@@ -153,7 +167,7 @@ async def main():
                     return False
                 await asyncio.sleep(0.4)
 
-        expected_size = {1440: 48, 1024: 48, 768: 44, 390: 40, 320: 40}   # 2026-09-21 圖示縮小：48/44/40
+        expected_size = {1440: 44, 1024: 44, 768: 40, 390: 36, 320: 36}   # 2026-09-21 兩度縮小：44/40/36
         fails = []
 
         for w, h, mobile in VIEWPORTS:
@@ -202,6 +216,13 @@ async def main():
                         fails.append(f"{tag}: 圖示被推出畫面外 y={(v.get('cart_wrapper') or {}).get('y')}")
                     if v.get("overlaps_bar"):
                         fails.append(f"{tag}: 圖示與 Buy 長條重疊")
+                    if v.get("placement") == "above-bar" and abs(v.get("gap_px", -99) - 12) > 1:
+                        fails.append(f"{tag}: 與 Buy 間距 {v.get('gap_px')}px != 12px")
+                ist = v.get("initial_state") or {}
+                if ist and not ist.get("cart_visible"):
+                    fails.append(f"{tag}: 初始狀態未顯示浮動鈕圖示（display={ist.get('cart_display')}）")
+                if ist and ist.get("badge_text") == "0" and not ist.get("badge_hidden"):
+                    fails.append(f"{tag}: 數量 0 時仍顯示數字圓圈")
                 if not v.get("hit_is_cart"):
                     fails.append(f"{tag}: 點擊中心未命中浮動鈕（{v.get('hit_at_center')}）")
                 if not v.get("icon_glyph_ok"):

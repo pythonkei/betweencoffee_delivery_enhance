@@ -869,9 +869,13 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
     var fcBox = Math.max(isFinite(fcSize) ? fcSize : 0, isFinite(fcMin) ? fcMin : 0);
     var attract = parseFloat(getComputedStyle(buy).getPropertyValue('--attract'));
     if (!isFinite(attract)) attract = 0;
+    /* 2026-09-21 追加：浮動鈕與 Buy 按鈕之間的間距（使用者指示「增加間距」），
+       值定義在 bc-components.css 的 --bc-fc-gap，與 bc-slideout-cart.js 共用同一來源。 */
+    var fcGap = fcEl ? parseFloat(getComputedStyle(fcEl).getPropertyValue('--bc-fc-gap')) : NaN;
+    if (!isFinite(fcGap)) fcGap = 0;
     // CSS 皆 transform: translateY(-50%) → inline top 即中心座標。
-    // buy 可見長條頂端 = anchor + fcBox：top(中心) = 該值 + attract + hB/2；另保 (hB/2)+6 下限防裁切
-    var buyTop = Math.max(anchor + fcBox + attract + hB / 2, Math.ceil(hB / 2) + 6);
+    // buy 可見長條頂端 = anchor + fcBox + fcGap：top(中心) = 該值 + attract + hB/2；另保 (hB/2)+6 下限防裁切
+    var buyTop = Math.max(anchor + fcBox + fcGap + attract + hB / 2, Math.ceil(hB / 2) + 6);
     buy.style.top = Math.round(buyTop) + 'px';
     prof.style.top = Math.round(buyTop + (hB + hP) / 2) + 'px';
     ready();
