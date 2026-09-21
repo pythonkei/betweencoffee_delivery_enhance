@@ -1645,7 +1645,10 @@ body {
   padding: 14px 10px;
   font-family: inherit;
   font-size: 1rem;
-  font-weight: 500;
+  /* 2026-09-21（使用者指示）：未選取狀態 font-weight 300（原 500）；
+     已選取（.active）為 400 —— 見下方 .bc-option-btn.active。
+     文字子元素（.bc-option-label-text）不設字重 → 直接繼承此值。 */
+  font-weight: 300;
   color: var(--bc-gold);
   background: transparent;
   border: 1px solid var(--bc-border);
@@ -1689,6 +1692,8 @@ body {
 .bc-option-btn.active {
   background: var(--bc-gold);
   color: #fff;
+  /* 2026-09-21（使用者指示）：已選取狀態 font-weight 400（未選取為 300） */
+  font-weight: 400;
 }
 
 .bc-option-btn.active .bc-option-icon,
