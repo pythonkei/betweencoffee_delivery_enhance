@@ -114,6 +114,10 @@ def _get_last_order_link(user):
                         val = item.get(key)
                         if val:
                             opts.append(f"{key}={val}")
+                    # 自訂選項組（2026-09-21）：客人可選的組另帶 option_<key>=<value> 供詳情頁預選
+                    for key, val in (item.get("extra_options") or {}).items():
+                        if val:
+                            opts.append(f"option_{key}={val}")
                 else:
                     for key in ("cup_level", "milk_level", "strength_level"):
                         val = item.get(key)
@@ -247,9 +251,14 @@ class Bean(View):
         bean = get_object_or_404(BeanItem, id=product_id)
         cart = Cart(request)  # Initialize the cart
 
+        # 自訂選項組（2026-09-21）：與咖啡同一套機制 → 依該豆啟用的組 + Admin 排序數字排序，
+        # 唯讀組（產地/烘焙度）另帶 display_value 供前端顯示。
+        from eshop.models.option_definitions import get_bean_option_groups
+
         context = {
             "bean": bean,
             "cart": cart,  # keep cart count fn
+            "option_groups": get_bean_option_groups(bean),
         }
         return render(request, "betweencoffee_delivery/bean.html", context)
 

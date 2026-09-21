@@ -81,10 +81,37 @@ def add_to_cart(request, product_id, product_type):
                 options["extra_options"] = extra_options
         elif product_type == "bean":
             product = get_object_or_404(BeanItem, id=product_id)
-            options = {
-                "grinding_level": request.POST.get("grinding_level", "Non"),
-                "weight": request.POST.get("weight", "200g"),
-            }
+            # 咖啡豆自訂選項組（2026-09-21）：與咖啡同一套收集邏輯。
+            # 只收「客人可選」的組（唯讀組如產地／烘焙度不進購物車），並依該豆排序收集。
+            from eshop.models.option_definitions import (
+                BEAN_OPTION_GROUPS,
+                sort_option_keys_for_bean,
+            )
+
+            selectable_keys = [
+                g["key"] for g in BEAN_OPTION_GROUPS if g.get("customer_selectable")
+            ]
+            extra_options = {}
+            for key in sort_option_keys_for_bean(product, selectable_keys):
+                # 新表單送 option_<key>；相容舊表單的裸 key（例：grinding_level）
+                val = (request.POST.get(f"option_{key}", "") or "").strip()
+                if not val:
+                    val = (request.POST.get(key, "") or "").strip()
+                if val:
+                    extra_options[key] = val
+
+            options = {"weight": request.POST.get("weight", "200g")}
+            # 研磨：沿用既有購物車欄位（舊訂單與各顯示端零改動）。
+            # 該豆未啟用研磨組時不寫入，避免詳情頁沒顯示卻出現在購物車/訂單上。
+            grinding = extra_options.get("grinding_level") or (
+                request.POST.get("grinding_level", "") or ""
+            ).strip()
+            if not grinding and getattr(product, "option_grinding_level", False):
+                grinding = product.grinding_level or "Non"
+            if grinding:
+                options["grinding_level"] = grinding
+            if extra_options:
+                options["extra_options"] = extra_options
         else:
             return JsonResponse({"success": False, "message": "無效的商品類型"})
 
@@ -343,11 +370,17 @@ def cart_count(request):
         items = []
         for item in cart:
             extra_opts = item.get("extra_options") or {}
-            # 自訂選項中文（2026-08-15）：供滑出購物車顯示，依咖啡排序
+            # 自訂選項中文（2026-08-15）：供滑出購物車顯示，依各商品排序
             from eshop.models import CoffeeItem, OrderModel
-            from eshop.models.option_definitions import sort_option_keys_for_coffee
+            from eshop.models.option_definitions import (
+                get_option_icon,
+                get_option_label,
+                sort_option_keys_for_bean,
+                sort_option_keys_for_coffee,
+            )
 
             coffee = None
+            bean = None
             if item.get("type") == "coffee" and item.get("item_id"):
                 try:
                     coffee = CoffeeItem.objects.get(
@@ -355,7 +388,19 @@ def cart_count(request):
                     )
                 except (CoffeeItem.DoesNotExist, ValueError, IndexError):
                     coffee = None
-            ordered_keys = sort_option_keys_for_coffee(coffee, list(extra_opts.keys()))
+            elif item.get("type") == "bean" and item.get("item_id"):
+                # 咖啡豆自訂選項組（2026-09-21）：依該豆的 Admin 排序
+                try:
+                    bean = BeanItem.objects.get(
+                        id=int(str(item["item_id"]).split("_")[1])
+                    )
+                except (BeanItem.DoesNotExist, ValueError, IndexError):
+                    bean = None
+            ordered_keys = (
+                sort_option_keys_for_bean(bean, list(extra_opts.keys()))
+                if bean is not None
+                else sort_option_keys_for_coffee(coffee, list(extra_opts.keys()))
+            )
 
             items.append(
                 {
@@ -376,6 +421,9 @@ def cart_count(request):
                         k: OrderModel.translate_option(k, extra_opts[k])
                         for k in ordered_keys
                     },
+                    # 2026-09-21：選項圖示／中文標籤（滑出購物車與員工端共用，前端不再各自硬寫）
+                    "extra_options_icons": {k: get_option_icon(k) for k in ordered_keys},
+                    "extra_options_labels": {k: get_option_label(k) for k in ordered_keys},
                 }
             )
         return JsonResponse(

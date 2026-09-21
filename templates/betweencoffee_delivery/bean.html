@@ -67,7 +67,7 @@
 
                 <div class="block-23 mb-3">
                     <ul>
-                        <li><span class="icon material-icons">pin_drop</span><span class="text">產地 :<span class="pl-3">{{ bean.origin }}</span></span></li>
+                        {# 2026-09-21：產地改由自訂選項組渲染（下方表單內），此處不再重複顯示 #}
                         <li><span class="icon material-symbols-outlined">thermostat</span><span class="text">處理法 :<span class="pl-3">水洗處理後於白蘭地酒桶陳釀</span></span></li>
 
                         <!-- roast level -->
@@ -119,17 +119,29 @@
                                 <input type="hidden" name="weight" id="weight" value="200g">
                             </div>
 
-                        <!-- Grinding Level -->
+                        <!-- 自訂選項組（2026-09-21）：與咖啡同一套機制（Admin 勾選啟用 + 排序數字）
+                             可選組（customer_selectable=True）＝按鈕 + hidden option_<key>，必選不可取消
+                             唯讀組（產地／烘焙度）＝只顯示該豆的值，不送值（客人不能選） -->
+                        {% for group in option_groups %}
+                            {% if group.customer_selectable %}
                             <div class="w-100 form-group d-flex">
-                                <p>研磨 :</p>
-                                <div class="bc-option-group" id="grinding-group">
-                                    <button type="button" class="bc-option-btn active" data-value="Non">免研磨</button>
-                                    <button type="button" class="bc-option-btn" data-value="Light">細</button>
-                                    <button type="button" class="bc-option-btn" data-value="Medium">中</button>
-                                    <button type="button" class="bc-option-btn" data-value="Deep">粗</button>
+                                <p>{{ group.label }} :</p>
+                                <div class="bc-option-group" id="option-group-{{ group.key }}" data-group="{{ group.key }}" data-required="1">
+                                    {% for choice in group.choices %}
+                                    <button type="button" class="bc-option-btn{% if choice.0 == group.default %} active{% endif %}" data-value="{{ choice.0 }}">{{ choice.1 }}</button>
+                                    {% endfor %}
                                 </div>
-                                <input type="hidden" name="grinding_level" id="grinding_level" value="Non">
+                                <input type="hidden" name="option_{{ group.key }}" id="option_{{ group.key }}" value="{{ group.default }}">
                             </div>
+                            {% else %}
+                            <div class="w-100 form-group d-flex">
+                                <p>{{ group.label }} :</p>
+                                <div class="bc-option-group bc-option-readonly" id="option-group-{{ group.key }}" data-group="{{ group.key }}">
+                                    <span class="bc-option-readonly-value"><span class="icon material-symbols-outlined">{{ group.icon }}</span>{{ group.display_value }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
 
                         <!-- Quantity -->
                         <div class="w-100 form-group">
@@ -265,10 +277,13 @@
         // 從 URL query 預選上次訂單選項（來自首頁最後訂單圖片連結：weight / grinding_level）
         (function preselectLastOrderOptions() {
             var params = new URLSearchParams(window.location.search);
-            var map = {
-                'weight': 'weight-group',
-                'grinding_level': 'grinding-group'
-            };
+            var map = { 'weight': 'weight-group' };
+            // 自訂選項組（2026-09-21）：可選組以 option_<key> 預選；
+            // 同時相容舊版最後訂單連結的裸 key（例：grinding_level）
+            document.querySelectorAll('.bc-option-group[data-group][data-required="1"]').forEach(function (g) {
+                map['option_' + g.dataset.group] = g.id;
+                map[g.dataset.group] = g.id;
+            });
             Object.keys(map).forEach(function(key) {
                 var val = params.get(key);
                 if (!val) return;
@@ -297,11 +312,17 @@
         });
 
         // Option Button Toggle - 研磨
-        document.querySelectorAll('#grinding-group .bc-option-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('#grinding-group .bc-option-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('grinding_level').value = this.dataset.value;
+        // 自訂選項組切換（2026-09-21）：通用版本（可選組＝必選，點選後不可取消；
+        // 咖啡端是可取消 toggle，故用 data-required 區分）
+        document.querySelectorAll('.bc-option-group[data-group][data-required="1"]').forEach(function (group) {
+            var key = group.dataset.group;
+            var input = document.getElementById('option_' + key);
+            group.querySelectorAll('.bc-option-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    group.querySelectorAll('.bc-option-btn').forEach(function (b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    if (input) input.value = btn.dataset.value;
+                });
             });
         });
 
