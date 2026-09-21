@@ -24,7 +24,15 @@
   transform-style: preserve-3d;
 }
 
-/* ===== Navbar 容器（Between Coffee 品牌） ===== */
+/* ===== Navbar 容器（Between Coffee 品牌） =====
+   2026-09-21：全站定位（static/js/bc-attract-place.js）完成前先隱藏整組，
+   避免先以 CSS top:50% 繪製、再由 JS 移到 navbar-brand 高度造成載入跳動。
+   由 base.html <head> 的 inline script 加上 html.bc-attract-pending，定位完成即移除；
+   該 inline script 另設 1.2s 保險計時器（腳本未執行時自動顯示，不會整組消失）。 */
+html.bc-attract-pending .bc-attract-nav {
+  visibility: hidden;
+}
+
 .bc-attract-nav {
   display: flex;
   align-items: center;

@@ -21,6 +21,18 @@
   transition: color .5s cubic-bezier(.23, 1, .32, 1);
 }
 
+/* ---- 顯示範圍（2026-09-21 使用者指示）：全站隱藏，只有 about 頁顯示 ----
+   由 nav.html 依 request.resolver_match.url_name=='about' 加 .weather--visible。
+   用 visibility（非 display:none）→ 保留 navbar 內的排版空間、navbar 不位移，
+   也讓 bc-attract-place.js 在找不到 navbar-brand 時仍能量到它的 rect 當備援基準。 */
+#ftco-navbar .weather {
+  visibility: hidden;
+}
+
+#ftco-navbar .weather.weather--visible {
+  visibility: visible;
+}
+
 /* ---- 與 c-attract（右側虛線/Order 按鈕）中心點對齊（2026-08-26 需求）
    weather 水平中心對齊 Order 按鈕視覺中心（2026-09-16 前同位置為 #borders 右側虛線）。
    位移 = weather centerX − 虛線 centerX（weekday 加大後 768+ 容器 84px / 移動端 60px）：

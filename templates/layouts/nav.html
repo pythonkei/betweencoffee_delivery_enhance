@@ -26,8 +26,11 @@
         </div>
         <!-- 2026-08-26: 橫濱 Timber Wharf 天氣元件（完整複製 yokohama-timberwharf.com .weather -font_en；右上角顯示）
              2026-08-26 新增時鐘：動畫循環順序 時鐘 → 天氣 icon → 溫度
-             2026-08-27 應用於全域（nav.html 無條件顯示，全站右上角） -->
-        <div class="weather -font_en -color_white" data-bc-weather>
+             2026-08-27 應用於全域（nav.html 無條件顯示，全站右上角）
+             2026-09-21（使用者指示）：**改為全站隱藏、只有 about 頁顯示** →
+               加 .weather--visible（bc-weather.css 預設 visibility: hidden——保留 navbar 排版空間、
+               不造成 navbar 位移；bc-weather.js 亦僅在 about 頁載入，見 base.html） -->
+        <div class="weather -font_en -color_white{% if request.resolver_match.url_name == 'about' %} weather--visible{% endif %}" data-bc-weather>
             <div class="view">
                 <div class="clock"><span class="value">--:--</span></div>
                 <div class="icon"></div>

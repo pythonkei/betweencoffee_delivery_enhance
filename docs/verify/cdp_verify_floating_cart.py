@@ -15,9 +15,15 @@ import websockets
 
 BASE = "http://127.0.0.1:8081"
 VIEWPORTS = [(1440, 900, False), (1024, 800, False), (768, 1024, True), (390, 844, True), (320, 640, True)]
-PAGES = [("index", "/"), ("coffee4", "/coffee/4/"), ("bean1", "/bean/1/"), ("coffee_menu", "/coffee_menu/")]
-# /coffee/4/、/bean/1/、/coffee_menu/：.bc-attract-nav 被隱藏 → 走 CSS 同軸線退化值
-# （註：舊版含 /cart/，但購物車為空時該網址 302 → /coffee_menu/，故改測 /coffee_menu/ 本身）
+PAGES = [("index", "/"), ("about", "/about/"), ("coffee4", "/coffee/4/"),
+         ("bean1", "/bean/1/"), ("coffee_menu", "/coffee_menu/")]
+# 2026-09-21（使用者指示）：
+#   · 浮動購物車「所有模板位置和 index 一樣」→ 全站（含本清單每頁）浮動鈕盒上緣
+#     都對齊 navbar-brand 頂邊；下方另做「跨頁位置一致性」與「對齊基準」檢查。
+#   · .weather 全站隱藏、僅 about 頁顯示（bc-weather.js 亦只在 about 載入）。
+#   · /coffee/4/、/bean/1/、/coffee_menu/：.bc-attract-nav 被 display:none →
+#     浮動鈕單獨對齊 navbar-brand 頂邊（不再退回 CSS 的垂直置中退化值）。
+#   （註：舊版含 /cart/，但購物車為空時該網址 302 → /coffee_menu/，故改測 /coffee_menu/ 本身）
 
 JS = r"""
 (function(){
@@ -36,7 +42,32 @@ JS = r"""
   out.yama_header_bot_display = bot ? getComputedStyle(bot).display : 'no-yama-on-page';
   out.yama_cart_row_rect = rect(botRow);
 
-  /* 1b. 初始（未強制顯示）狀態：2026-09-21 使用者指示「空車也顯示圖示、只隱藏數字圓圈」 */
+  /* 1b. weather 顯示範圍 ＋ 對齊基準（2026-09-21：weather 全站隱藏、僅 about 顯示） */
+  var wEl = document.querySelector('#ftco-navbar .weather');
+  var brandEl = document.querySelector('#ftco-navbar .navbar-brand');
+  var togglerEl = document.querySelector('#ftco-navbar .navbar-toggler');
+  var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+  out.weather = {
+    visibility: wEl ? getComputedStyle(wEl).visibility : 'no-weather',
+    has_visible_class: !!(wEl && wEl.classList.contains('weather--visible')),
+    script_loaded: !!document.querySelector('script[src*="bc-weather.js"]')
+  };
+  /* 浮動鈕的對齊基準＝navbar-brand 頂邊的「文件座標」（與 bc-attract-place.js 同算法）
+     2026-09-21：weather 可見（about 頁）時，整組會再往下讓開 weather 下緣 8px */
+  out.navbar_brand_top = brandEl ? +(brandEl.getBoundingClientRect().top + scrollTop).toFixed(1) : null;
+  var wBottomDoc = null;
+  if (wEl && getComputedStyle(wEl).visibility === 'visible') {
+    var _wr = wEl.getBoundingClientRect();
+    if (_wr.height) wBottomDoc = +(_wr.bottom + scrollTop + 8).toFixed(1);
+  }
+  out.weather_bottom_doc = wBottomDoc;
+  out.expected_cart_top = (wBottomDoc !== null &&
+                           (out.navbar_brand_top === null || wBottomDoc > out.navbar_brand_top))
+    ? wBottomDoc : out.navbar_brand_top;
+  out.attract_pending = document.documentElement.classList.contains('bc-attract-pending');
+  out.attract_ready = !!document.querySelector('.bc-attract-nav.bc-attract-ready');
+
+  /* 1c. 初始（未強制顯示）狀態：2026-09-21 使用者指示「空車也顯示圖示、只隱藏數字圓圈」 */
   if (fc) {
     var initBadge = fc.querySelector('.bc-floating-cart-badge');
     out.initial_state = {
@@ -60,6 +91,27 @@ JS = r"""
                        top: cs.getPropertyValue('--bc-fc-top').trim()} : null;
   out.cart_wrapper = rect(fc);
   out.cart_btn = rect(btn);
+  /* 2026-09-21：全站改為與 index 相同的「頂部對齊」後，確認沒蓋到 navbar 的 logo／漢堡選單 */
+  if (out.cart_wrapper) {
+    var hitRect = function (a, b) {
+      return !!(a && b && a.x < b.x + b.w - 0.5 && a.x + a.w > b.x + 0.5 &&
+                a.y < b.y + b.h - 0.5 && a.y + a.h > b.y + 0.5);
+    };
+    out.overlaps_brand = hitRect(out.cart_wrapper, rect(brandEl));
+    out.overlaps_toggler = hitRect(out.cart_wrapper, rect(togglerEl));
+    /* 2026-09-21：about 頁 weather 可見 → 不可與浮動鈕重疊（bc-attract-place.js 會讓開其下緣） */
+    out.overlaps_weather = hitRect(out.cart_wrapper, rect(wEl));
+    if (wEl) {
+      out.weather_display = getComputedStyle(wEl).visibility;
+    }
+    if (togglerEl && getComputedStyle(togglerEl).display !== 'none') {
+      var _tr = togglerEl.getBoundingClientRect();
+      var _hit = document.elementFromPoint(_tr.left + _tr.width / 2, _tr.top + _tr.height / 2);
+      out.toggler_clickable = !!(_hit && (togglerEl === _hit || togglerEl.contains(_hit)));
+    } else {
+      out.toggler_clickable = true;   /* 桌機（navbar-expand-lg）漢堡不存在 → 不適用 */
+    }
+  }
   var bcs = btn ? getComputedStyle(btn) : null;
   out.btn_style = bcs ? {borderWidth: bcs.borderTopWidth, borderStyle: bcs.borderTopStyle,
                          borderRadius: bcs.borderTopLeftRadius,
@@ -169,12 +221,16 @@ async def main():
 
         expected_size = {1440: 37, 1024: 37, 768: 34, 390: 31, 320: 31}   # 2026-09-21 三度縮小：37/34/31（再 −15%）
         fails = []
+        pos_map = {}   # {(w): {page: cart_y}} → 跨頁位置一致性（2026-09-21 使用者指示）
 
         for w, h, mobile in VIEWPORTS:
             await send(msg("Emulation.setDeviceMetricsOverride",
                            {"width": w, "height": h, "deviceScaleFactor": 1, "mobile": mobile}))
             for name, path in PAGES:
-                await send(msg("Page.navigate", {"url": BASE + path}))
+                # 2026-09-21：每次導航加一次性參數——瀏覽器會對 HTML 做 heuristic 快取
+                # （實測 390 那輪拿到舊版 HTML → 連帶舊 ?v= 的 CSS/JS，量到舊尺寸/舊 gap 的假失敗）
+                sep = "&" if "?" in path else "?"
+                await send(msg("Page.navigate", {"url": f"{BASE}{path}{sep}bcv={int(asyncio.get_event_loop().time() * 1000)}"}))
                 ready = await wait_ready()
                 if not ready:
                     # 慢速或重導頁面再試一次（強制忽略快取）
@@ -229,10 +285,50 @@ async def main():
                     fails.append(f"{tag}: 圖示字型可能缺字（寬 {v.get('icon_rect_w')} vs 字級 {v.get('icon_font_size')}）")
                 if name == "index" and v.get("yama_header_bot_display") != "none":
                     fails.append(f"{tag}: header-bot 未隱藏（{v.get('yama_header_bot_display')}）")
+                # 2026-09-21（使用者指示）：
+                #   · .weather 全站隱藏、僅 about 頁顯示（bc-weather.js 亦僅 about 載入）
+                #   · 浮動購物車全站位置與 index 相同（盒上緣對齊 navbar-brand 頂邊）
+                wx = v.get("weather") or {}
+                if name == "about":
+                    if wx.get("visibility") != "visible":
+                        fails.append(f"{tag}: about 頁 weather 應可見（目前 {wx.get('visibility')}）")
+                    if not wx.get("has_visible_class"):
+                        fails.append(f"{tag}: about 頁缺少 .weather--visible")
+                    if not wx.get("script_loaded"):
+                        fails.append(f"{tag}: about 頁未載入 bc-weather.js")
+                else:
+                    if wx.get("visibility") != "hidden":
+                        fails.append(f"{tag}: weather 應隱藏（目前 {wx.get('visibility')}）")
+                    if wx.get("has_visible_class"):
+                        fails.append(f"{tag}: 非 about 頁卻有 .weather--visible")
+                    if wx.get("script_loaded"):
+                        fails.append(f"{tag}: 非 about 頁不應載入 bc-weather.js")
+                anchor = v.get("navbar_brand_top")
+                exp_top = v.get("expected_cart_top")
+                cw = v.get("cart_wrapper") or {}
+                if exp_top is not None and abs((cw.get("y") if cw.get("y") is not None else -999) - exp_top) > 1:
+                    fails.append(f"{tag}: 浮動鈕 top {cw.get('y')} 未對齊預期基準 {exp_top}"
+                                 f"（navbar-brand {anchor}／weather 讓位）")
+                if v.get("overlaps_weather") and (v.get("weather") or {}).get("visibility") == "visible":
+                    fails.append(f"{tag}: 浮動鈕與 weather 天氣元件重疊")
+                if v.get("attract_pending"):
+                    fails.append(f"{tag}: .bc-attract-pending 未移除（整組可能仍隱藏）")
+                if v.get("overlaps_brand"):
+                    fails.append(f"{tag}: 浮動鈕與 navbar logo 重疊")
+                if v.get("toggler_clickable") is False:
+                    fails.append(f"{tag}: 漢堡選單被浮動鈕蓋住（無法點擊）")
+                # 跨頁一致性只比「weather 隱藏」的頁面（about 因讓開天氣會略低，另以 expected_cart_top 驗）
+                pos_map.setdefault(w, {})[name] = (cw.get("y") if wx.get("visibility") == "hidden" else None)
                 if not v.get("no_overflow"):
                     fails.append(f"{tag}: 水平溢出")
                 if not v.get("font_icons_ready"):
                     fails.append(f"{tag}: Material Icons 字型未就緒")
+
+        # 2026-09-21（使用者指示）：浮動鈕在「所有模板」的位置必須一致（＝與 index 相同）
+        for w, per in sorted(pos_map.items()):
+            ys = {k: val for k, val in per.items() if val is not None}
+            if len(ys) > 1 and len({round(val) for val in ys.values()}) > 1:
+                fails.append(f"{w}px：浮動鈕位置跨頁不一致 {ys}")
 
         print("\n=== 檢查結果 ===")
         if fails:
@@ -240,7 +336,8 @@ async def main():
             for f in fails:
                 print("  - " + f)
         else:
-            print("✓ 全部通過（尺寸／無框無底／中心線貼齊／點擊命中／yama 隱藏／無溢出／字型）")
+            print("✓ 全部通過（尺寸／無框無底／中心線貼齊／點擊命中／yama 隱藏／無溢出／字型"
+                  "／weather 顯示範圍／跨頁位置一致／不遮 navbar）")
 
         try:
             urllib.request.urlopen("http://127.0.0.1:9222/json/close/" + tab["id"])

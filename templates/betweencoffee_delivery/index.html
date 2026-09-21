@@ -793,11 +793,10 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
   height: 0;
 }
 /* select2 樣式 */
-/* 2026-09-06：首頁隱藏 navbar weather（visibility 保留排版位置，供下方 JS 量測其中心）；
-   同步隱藏 bc-attract-buy/profile，待 JS 將其移至 weather 位置後再顯示（避免位置跳動） */
-#ftco-navbar .weather { visibility: hidden !important; }
-.bc-attract-nav { visibility: hidden; }
-.bc-attract-nav.bc-home-attract-ready { visibility: visible; }
+/* 2026-09-21：首頁原本在此覆寫兩件事，現已改為全站規則 →
+     · navbar weather：全站隱藏、僅 about 頁顯示（bc-weather.css + nav.html 的 .weather--visible）
+     · .bc-attract-nav：整組定位完成前先隱藏（bc-attract.css + base.html <head> 的 .bc-attract-pending）
+   首頁不再需要個別覆寫。 */
 </style>
 {% endblock %}
 
@@ -813,99 +812,9 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <script src="{% static 'js/bc-gunte-hero.js' %}?v=20260907b"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
-<!-- 2026-09-07：首頁將 bc-attract-buy/profile 對齊 navbar-brand 頂部邊緣
-     （buy 頂邊 = navbar-brand 頂邊、profile 接在 buy 下方；沿用既有 translateY(-50%) 機制） -->
-<script>
-(function () {
-  'use strict';
-  function place() {
-    var nav = document.querySelector('.bc-attract-nav');
-    var buy = document.querySelector('.bc-attract-buy');
-    var prof = document.querySelector('.bc-attract-profile');
-    var ready = function () { if (nav) nav.classList.add('bc-home-attract-ready'); };
-    if (!nav || !buy || !prof) return;
-    var hB = buy.getBoundingClientRect().height;
-    var hP = prof.getBoundingClientRect().height;
-    /* 2026-09-18：.bc-attract-buy / .bc-attract-profile 是 position: fixed，inline top 屬「視窗座標」，
-       而此處對齊基準是「navbar-brand 在頁面上的位置」＝**文件座標** br.top + scrollTop。
-       此值與捲動無關（navbar 為文件流內 absolute，br.top 會隨捲動等量遞減 → 相加為定值），
-       因此按鈕等同「固定在與頁面頂端 navbar 對齊的高度」。
-       註：不可改用純 br.top（視窗座標）——捲動狀態下會量到負值或視窗外的值，
-       經下方防裁切 Math.max 下限後按鈕會被吸到視窗頂（已實測，故不採用）。 */
-    var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
-    var anchor = null; // 要對齊的「頂邊」文件座標
-    var brand = document.querySelector('#ftco-navbar .navbar-brand');
-    if (brand) {
-      var br = brand.getBoundingClientRect();
-      if (br.height) anchor = br.top + scrollTop;
-    }
-    if (anchor === null) {
-      // fallback：改取 weather 盒頂邊（weather 已隱藏但仍在 navbar 排版中）
-      var w = document.querySelector('#ftco-navbar .weather');
-      if (w) {
-        var wr = w.getBoundingClientRect();
-        if (wr.height) anchor = wr.top + scrollTop;
-      }
-    }
-    if (anchor === null) {
-      /* 2026-09-18：量不到基準時清掉 inline top，交回 CSS（top:50%），
-         避免殘留上一個裝置算出的舊值造成永久位移。 */
-      buy.style.top = '';
-      prof.style.top = '';
-      ready();
-      return;
-    }
-    /* 2026-09-21：浮動購物車改到 Buy 按鈕「正上方」→ 整組向下讓出購物袋的空間，
-       讓「購物袋 top」而非「Buy 按鈕 top」對齊基準（navbar-brand 頂邊）：
-         購物袋 top = anchor → 購物袋底緣 = anchor + 佔位 = 可見長條頂端
-         → 外層盒中心 top = anchor + 佔位 + --attract + hB/2
-       佔位 = max(44px 點擊區下限, --bc-fc-size)，與 bc-slideout-cart.js 的算一致；
-       --attract＝.c-attract 熱區負 margin（可見長條頂端比外層盒再高這麼多）。
-       兩者都直接讀 DOM/CSS，不再寫死第二份常數。 */
-    var fcEl = document.getElementById('bc-floating-cart');
-    var fcBtn = document.getElementById('bc-floating-cart-btn');
-    var fcSize = fcEl ? parseFloat(getComputedStyle(fcEl).getPropertyValue('--bc-fc-size')) : NaN;
-    var fcMin = fcBtn ? parseFloat(getComputedStyle(fcBtn).minHeight) : NaN;
-    var fcBox = Math.max(isFinite(fcSize) ? fcSize : 0, isFinite(fcMin) ? fcMin : 0);
-    var attract = parseFloat(getComputedStyle(buy).getPropertyValue('--attract'));
-    if (!isFinite(attract)) attract = 0;
-    /* 2026-09-21 追加：浮動鈕與 Buy 按鈕之間的間距（使用者指示「增加間距」），
-       值定義在 bc-components.css 的 --bc-fc-gap，與 bc-slideout-cart.js 共用同一來源。 */
-    var fcGap = fcEl ? parseFloat(getComputedStyle(fcEl).getPropertyValue('--bc-fc-gap')) : NaN;
-    if (!isFinite(fcGap)) fcGap = 0;
-    // CSS 皆 transform: translateY(-50%) → inline top 即中心座標。
-    // buy 可見長條頂端 = anchor + fcBox + fcGap：top(中心) = 該值 + attract + hB/2；另保 (hB/2)+6 下限防裁切
-    var buyTop = Math.max(anchor + fcBox + fcGap + attract + hB / 2, Math.ceil(hB / 2) + 6);
-    buy.style.top = Math.round(buyTop) + 'px';
-    prof.style.top = Math.round(buyTop + (hB + hP) / 2) + 'px';
-    ready();
-  }
-  var rAF = 0;
-  var settleTimer = 0;
-  function onResize() {
-    if (!rAF) {
-      rAF = requestAnimationFrame(function () { rAF = 0; place(); });
-    }
-    /* 2026-09-18：切換裝置當下 navbar 版面（字級/圖片）可能仍在重排，
-       rAF 那次會量到中間值（實測殘留 2~5px 偏差）→ 安定後再對齊一次。 */
-    clearTimeout(settleTimer);
-    settleTimer = setTimeout(place, 350);
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', place);
-  } else {
-    place();
-  }
-  window.addEventListener('load', place);
-  window.addEventListener('resize', onResize);
-  /* 2026-09-18：旋轉螢幕／手機網址列伸縮／網頁字型載入完成後各再對齊一次 */
-  window.addEventListener('orientationchange', onResize);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', onResize);
-  }
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(place).catch(function () {});
-  }
-})();
-</script>
+<!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
+     已抽成全站共用檔 static/js/bc-attract-place.js（base.html 全域載入）——
+     使用者指示「所有模板浮動購物車修改位置和 index 一樣」→ 全站（含首頁）共用同一套定位，
+     並新增『Buy 按鈕不存在時，浮動鈕單獨對齊 navbar-brand 頂邊』的分支。
+     首頁不再需要個別腳本。 -->
 {% endblock %}

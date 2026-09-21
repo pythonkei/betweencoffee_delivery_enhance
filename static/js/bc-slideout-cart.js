@@ -356,10 +356,20 @@ class SlideoutCart {
     const buyVisible = !!(buy && getComputedStyle(buy).display !== 'none' && buy.getBoundingClientRect().width > 0);
 
     if (!buyVisible) {
-      // Buy 按鈕不存在（咖啡／豆 詳情與選單頁、付款頁等 .bc-attract-nav 被隱藏者）
-      // → 移除 inline 變數、交回 CSS 各斷點的同軸線退化值
-      el.style.removeProperty('--bc-fc-top');
+      // Buy 按鈕不存在（咖啡／豆 詳情與選單、付款頁等 .bc-attract-nav 被 display:none 者）
+      // 2026-09-21（使用者指示「所有模板浮動購物車位置和 index 一樣」）：
+      //   改為與 index 相同——浮動鈕「盒上緣」對齊 navbar-brand 頂邊
+      //   （文件座標＝固定不動，與捲動無關），不再退回各斷點 CSS 的垂直置中退化值。
+      //   right 仍讀 CSS 的同軸線值（各斷點已對齊 Buy 按鈕軸線）。
+      const anchor = (window.bcAttractPlace && typeof window.bcAttractPlace.anchorTop === 'function')
+        ? window.bcAttractPlace.anchorTop()
+        : null;
       el.style.removeProperty('--bc-fc-right');
+      if (anchor === null || !isFinite(anchor) || anchor < 8) {
+        el.style.removeProperty('--bc-fc-top');
+      } else {
+        el.style.setProperty('--bc-fc-top', Math.round(anchor) + 'px');
+      }
       return;
     }
 
