@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from eshop.order_status_manager import OrderStatusManager
-from eshop.models.option_definitions import OPTION_GROUPS
+from eshop.models.option_definitions import BEAN_OPTION_GROUPS, OPTION_GROUPS
 
 from .models import (
     Barista,
@@ -25,26 +25,41 @@ logger = logging.getLogger(__name__)
 
 
 class OptionGroupConfigWidget(forms.Widget):
-    """自訂選項組 UI：每組一行「勾選啟用 + 排序數字」（2026-08-15）"""
+    """自訂選項組 UI：每組一行「勾選啟用 + 排序數字」（2026-08-15）
+
+    2026-09-21 泛化：可傳入 groups（預設 OPTION_GROUPS＝咖啡 16 組），
+    咖啡豆端傳 BEAN_OPTION_GROUPS；定義中 customer_selectable=False 的組會標示「唯讀顯示」。
+    """
 
     class Media:
         css = {"all": ("css/admin-option-order.css",)}
 
+    def __init__(self, groups=None, attrs=None):
+        super().__init__(attrs)
+        self.groups = groups or OPTION_GROUPS
+
     def render(self, name, value, attrs=None, renderer=None):
         rows = []
-        for g in OPTION_GROUPS:
+        for g in self.groups:
             key = g["key"]
             v = (value or {}).get(key) or {}
             enabled = bool(v.get("enabled"))
             order = int(v.get("order") or 0)
             cid = f"{name}_{key}"
+            # 唯讀顯示組（例：咖啡豆的產地／烘焙度）＝客人不能選，只在詳情頁顯示該商品的值
+            badge = (
+                ""
+                if g.get("customer_selectable", True)
+                else '<span class="og-readonly" title="客人不能選，只在詳情頁唯讀顯示">唯讀顯示</span>'
+            )
             rows.append(
                 '<div class="og-row">'
                 f'<label class="og-check" for="{cid}">'
                 f'<input type="checkbox" id="{cid}" name="{name}_{key}"'
                 + (" checked" if enabled else "")
                 + f"> <span>{g['label']}</span></label>"
-                f'<input type="number" name="{name}_{key}_order" value="{order}" '
+                + badge
+                + f'<input type="number" name="{name}_{key}_order" value="{order}" '
                 f'min="0" max="999" class="og-order-input" '
                 'title="排序：數字越小越靠前，0=預設" aria-label="排序">'
                 "</div>"
@@ -53,7 +68,7 @@ class OptionGroupConfigWidget(forms.Widget):
 
     def value_from_datadict(self, data, files, name):
         result = {}
-        for g in OPTION_GROUPS:
+        for g in self.groups:
             key = g["key"]
             enabled = bool(data.get(f"{name}_{key}"))
             try:
@@ -64,29 +79,27 @@ class OptionGroupConfigWidget(forms.Widget):
         return result
 
 
-class OptionGroupsConfigForm(forms.ModelForm):
-    """CoffeeItem 表單：把 16 組「啟用 checkbox + 排序數字」合併為單一欄位"""
+class OptionGroupsConfigFormMixin:
+    """自訂選項組表單共用邏輯（2026-09-21）
 
-    option_groups_config = forms.Field(
-        widget=OptionGroupConfigWidget(),
-        required=False,
-        label="選項組",
-        help_text="勾選 = 詳情頁顯示該選項組；右側數字 = 排序（數字越小越靠前，0=預設順序）",
-    )
+    子類別需宣告：
+      option_groups_source = 選項組定義（OPTION_GROUPS / BEAN_OPTION_GROUPS）
+      option_groups_config = forms.Field(widget=OptionGroupConfigWidget(groups=...))
+    行為與 2026-08-15 的 CoffeeItem 版完全相同（讀 option_<key>/option_order_<key> → 存回）。
+    """
 
-    class Meta:
-        model = CoffeeItem
-        fields = "__all__"
+    option_groups_source = OPTION_GROUPS
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["option_groups_config"].widget.groups = self.option_groups_source
         if self.instance and self.instance.pk:
             self.fields["option_groups_config"].initial = {
                 g["key"]: {
                     "enabled": bool(getattr(self.instance, f"option_{g['key']}", False)),
                     "order": int(getattr(self.instance, f"option_order_{g['key']}", 0) or 0),
                 }
-                for g in OPTION_GROUPS
+                for g in self.option_groups_source
             }
 
     def save(self, commit=True):
@@ -97,6 +110,40 @@ class OptionGroupsConfigForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class OptionGroupsConfigForm(OptionGroupsConfigFormMixin, forms.ModelForm):
+    """CoffeeItem 表單：把 16 組「啟用 checkbox + 排序數字」合併為單一欄位"""
+
+    option_groups_source = OPTION_GROUPS
+
+    option_groups_config = forms.Field(
+        widget=OptionGroupConfigWidget(groups=OPTION_GROUPS),
+        required=False,
+        label="選項組",
+        help_text="勾選 = 詳情頁顯示該選項組；右側數字 = 排序（數字越小越靠前，0=預設順序）",
+    )
+
+    class Meta:
+        model = CoffeeItem
+        fields = "__all__"
+
+
+class BeanOptionGroupsConfigForm(OptionGroupsConfigFormMixin, forms.ModelForm):
+    """BeanItem 表單（2026-09-21）：咖啡豆自訂選項組，機制與咖啡完全相同"""
+
+    option_groups_source = BEAN_OPTION_GROUPS
+
+    option_groups_config = forms.Field(
+        widget=OptionGroupConfigWidget(groups=BEAN_OPTION_GROUPS),
+        required=False,
+        label="選項組",
+        help_text="勾選 = 詳情頁顯示該選項組；右側數字 = 排序（數字越小越靠前，0=預設順序）",
+    )
+
+    class Meta:
+        model = BeanItem
+        fields = "__all__"
 
 
 # 員工訂單管理視圖
@@ -560,6 +607,8 @@ class BeanItemAdmin(admin.ModelAdmin):
     list_filter = ("is_published", "is_shop_hot_item", "roast_level", "list_date")
     search_fields = ("name", "highlight", "introduction", "description")
     list_editable = ("sort_order", "is_published", "is_shop_hot_item")  # 允许直接编辑排序字段
+    # 自訂選項組（2026-09-21）：與咖啡同一套 UI（勾選啟用 + 排序數字）
+    form = BeanOptionGroupsConfigForm
     fieldsets = (
         (
             "基本信息",
@@ -571,8 +620,6 @@ class BeanItemAdmin(admin.ModelAdmin):
                     "highlight",
                     "price_200g",
                     "price_500g",
-                    "origin",
-                    "roast_level",
                     "flavor",
                 )
             },
@@ -584,7 +631,20 @@ class BeanItemAdmin(admin.ModelAdmin):
                 "description": "详情页图片用于咖啡豆菜单和详情页，首页图片专门用于首页展示",
             },
         ),
-        ("研磨选项", {"fields": ("grinding_level",)}),
+        (
+            "選項組值（各組的顯示值／預設值）",
+            {
+                "fields": ("origin", "origin_custom", "grinding_level", "roast_level"),
+                "description": "這四個欄位是下方各選項組的「值」：產地／烘焙度＝詳情頁唯讀顯示（客人不能選）；研磨＝客人可選時預設選中的值。產地請用下拉選單，選「其他（自填）」時填寫 origin_custom。",
+            },
+        ),
+        (
+            "自訂選項組（勾選啟用 + 排序數字，0=預設順序）",
+            {
+                "fields": ("option_groups_config",),
+                "description": "勾選 = 詳情頁顯示該選項組；右側數字 = 顯示排序（數字越小越靠前，0=預設）。標示「唯讀顯示」的組＝客人不能選，只顯示上方對應欄位的值（產地／烘焙度）；研磨為客人可選。對應關係見 eshop/models/option_definitions.py 的 BEAN_OPTION_GROUPS。",
+            },
+        ),
         ("状态管理", {"fields": ("is_published", "is_shop_hot_item", "list_date")}),
         (
             "Sticker 貼紙（留空=不顯示）",
