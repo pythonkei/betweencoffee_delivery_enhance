@@ -10,6 +10,7 @@ from django.db import models
 from django.utils import timezone
 
 from .base import get_image_url
+from .option_definitions import ORIGIN_CHOICES
 
 logger = logging.getLogger(__name__)
 
@@ -315,7 +316,21 @@ class BeanItem(models.Model):
     )
     price_200g = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     price_500g = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    origin = models.CharField(max_length=50, blank=True)
+    # 產地（2026-09-18）：改為自訂選項組「產地」的值來源 → preset 下拉（含「其他（自填）」）。
+    # 既有自由文字值已由 migration 0072 正規化為代碼；「其他」的原文保留在 origin_custom。
+    origin = models.CharField(
+        max_length=50,
+        blank=True,
+        choices=ORIGIN_CHOICES,
+        verbose_name="產地（選項組值）",
+        help_text='下拉選單；選「其他（自填）」時請填下方「產地（其他自填）」',
+    )
+    origin_custom = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name="產地（其他自填）",
+        help_text="僅當產地選「其他（自填）」時使用",
+    )
 
     ROAST_LEVEL_CHOICES = [
         ("light", "浅"),
@@ -336,6 +351,23 @@ class BeanItem(models.Model):
     ]
     grinding_level = models.CharField(
         max_length=10, choices=GRINDING_LEVEL_CHOICES, default="Non"
+    )
+
+    # ===== 咖啡豆自訂選項組（2026-09-18）：與咖啡同一套機制 =====
+    # 定義見 eshop/models/option_definitions.py 的 BEAN_OPTION_GROUPS
+    # 勾選 = 詳情頁顯示該組；option_order_* = 顯示排序（數字越小越靠前，0=預設順序）
+    # 「值／預設值」來源＝同名欄位：origin（唯讀顯示）／grinding_level（客人可選）／roast_level（唯讀顯示）
+    option_origin = models.BooleanField(default=True, verbose_name="選項組：產地")
+    option_grinding_level = models.BooleanField(default=True, verbose_name="選項組：研磨")
+    option_roast_level = models.BooleanField(default=False, verbose_name="選項組：烘焙度")
+    option_order_origin = models.PositiveIntegerField(
+        default=0, blank=True, verbose_name="產地順序", help_text="數字越小越靠前，0=預設"
+    )
+    option_order_grinding_level = models.PositiveIntegerField(
+        default=0, blank=True, verbose_name="研磨順序", help_text="數字越小越靠前，0=預設"
+    )
+    option_order_roast_level = models.PositiveIntegerField(
+        default=0, blank=True, verbose_name="烘焙度順序", help_text="數字越小越靠前，0=預設"
     )
 
     flavor = models.TextField(max_length=200, blank=True)
