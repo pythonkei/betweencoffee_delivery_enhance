@@ -50,6 +50,13 @@ html.bc-attract-pending .bc-attract-nav {
   margin-left: auto;   /* 推到 navbar 右側 */
   padding-left: 8px;
   flex-shrink: 0;
+  /* 2026-09-21（使用者指示）：Order 長條（.bc-attract-buy）與個人圓鈕（.bc-attract-profile）
+     之間的間距。原本為 0（兩者外盒上下相接、沒有空隙）→ 改為 12px。
+     單一定義，兩個地方共用同一值：
+       ① bc-attract-place.js 定位時讀取此變數
+          （prof 中心 top = buyTop + (hB + hP) / 2 + gap）
+       ② 下方各斷點 .bc-attract-profile 的 fallback top（JS 未執行時）用 var() 引用。 */
+  --bc-buy-profile-gap: 12px;
 }
 
 /* ===== Buy & Order 按鈕（對應 cheesetart #buyButton / p-gh__button__buy）
@@ -120,7 +127,10 @@ html.bc-attract-pending .bc-attract-nav {
 }
 
 /* ===== 個人資料圓形按鈕（2026-08-18：複製 bc-attract-buy 外觀，圓形 + 圖標，連結 profile）
-   位置緊貼在 Buy & Order 按鈕下方（buy 底部 50%+112.5 + 半高 25 = 中心 50%+137.5，無間隙、中心點對齊）===== */
+   位置在 Buy & Order 按鈕下方、無間隙、中心點對齊
+   （buy 底部 50%+112.5 + 半高 25 = 中心 50%+137.5）；
+   2026-09-21（使用者指示「bc-attract-buy and 個人 profile 增加間距」）：
+   多讓 --bc-buy-profile-gap（12px），fallback top = (150+50)/2 + gap。===== */
 .bc-attract-profile {
   position: fixed;
   --attract: 24px;        /* 與 bc-attract-buy 相同的 hover 熱區擴展 */
@@ -128,7 +138,7 @@ html.bc-attract-pending .bc-attract-nav {
      = 17 + 25 + 24 = 66，與右側虛線中心（66）及 Buy 按鈕軸線一致
      （原 21px 實測中心 70，比虛線偏左 4px） */
   right: 17px;
-  top: calc(50% + 100px);
+  top: calc(50% + 100px + var(--bc-buy-profile-gap, 0px));
   transform: translateY(-50%);
   width: 50px;
   height: 50px;
@@ -328,7 +338,7 @@ html.bc-attract-pending .bc-attract-nav {
   .bc-attract-profile {
     --attract: 14px;
     right: 22px;            /* 中心 46px 不變（46 − 48/2） */
-    top: calc(50% + 92px);  /* fallback：(136 + 48)/2；JS 定位會覆寫 */
+    top: calc(50% + 92px + var(--bc-buy-profile-gap, 0px));  /* fallback：(136 + 48)/2 + gap；JS 定位會覆寫 */
     width: 48px;
     height: 48px;
   }
@@ -353,7 +363,7 @@ html.bc-attract-pending .bc-attract-nav {
   .bc-attract-profile {
     --attract: 10px;
     right: 8px;             /* 中心 29px 不變（29 − 42/2） */
-    top: calc(50% + 77px);  /* fallback：(112 + 42)/2；JS 定位會覆寫 */
+    top: calc(50% + 77px + var(--bc-buy-profile-gap, 0px));  /* fallback：(112 + 42)/2 + gap；JS 定位會覆寫 */
     width: 42px;
     height: 42px;
   }
@@ -378,7 +388,7 @@ html.bc-attract-pending .bc-attract-nav {
   .bc-attract-profile {
     --attract: 10px;
     right: 7px;             /* 中心 25px 不變（25 − 36/2） */
-    top: calc(50% + 66px);  /* fallback：(96 + 36)/2；JS 定位會覆寫 */
+    top: calc(50% + 66px + var(--bc-buy-profile-gap, 0px));  /* fallback：(96 + 36)/2 + gap；JS 定位會覆寫 */
     width: 36px;
     height: 36px;
   }

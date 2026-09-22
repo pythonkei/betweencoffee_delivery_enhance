@@ -18,6 +18,11 @@
  *   - 浮動購物車（--bc-fc-top 為「盒上緣」）由 bc-slideout-cart.js 依同一基準定位，
  *     本檔定位完會呼叫 bcCart._placeFloatingCart() 讓它跟著長條重算。
  *
+ * 2026-09-21（使用者指示「bc-attract-buy and 個人 profile 增加間距」）：
+ *   Order 長條與個人圓鈕原本「外盒上下相接、間距 0」→ 多讓一個 --bc-buy-profile-gap
+ *   （定義在 bc-attract.css 的 .bc-attract-nav，預設 12px；各斷點 .bc-attract-profile
+ *   的 CSS fallback top 亦 var() 引用同一值，JS 未執行時也一致）。
+ *
  * 避免載入瞬間位置跳動：base.html <head> 先對 <html> 加 .bc-attract-pending
  *   （bc-attract.css 讓 .bc-attract-nav 暫時 visibility: hidden），定位完成即移除；
  *   <head> 另有 1.2s 保險計時器，即使本檔未執行也會自動顯示，不會整組消失。
@@ -105,11 +110,16 @@
     if (!isFinite(attract)) attract = 0;
     var fcGap = fcEl ? parseFloat(getComputedStyle(fcEl).getPropertyValue('--bc-fc-gap')) : NaN;
     if (!isFinite(fcGap)) fcGap = 0;
+    /* Order 長條與個人圓鈕之間的間距（2026-09-21 使用者指示「增加間距」；
+       定義在 bc-attract.css 的 .bc-attract-nav，CSS fallback top 亦引用同一變數） */
+    var profileGap = parseFloat(getComputedStyle(buy).getPropertyValue('--bc-buy-profile-gap'));
+    if (!isFinite(profileGap)) profileGap = 0;
     /* 購物袋 top = anchor → 購物袋底緣 = anchor + fcBox = 可見長條頂端需再讓 --attract(熱區負 margin)
        → 外層盒中心 top = anchor + fcBox + fcGap + --attract + hB/2（CSS translateY(-50%)） */
     var buyTop = Math.max(anchor + fcBox + fcGap + attract + hB / 2, Math.ceil(hB / 2) + MIN_TOP);
     buy.style.top = Math.round(buyTop) + 'px';
-    prof.style.top = Math.round(buyTop + (hB + hP) / 2) + 'px';
+    /* 個人圓鈕中心 = buy 中心 + (hB + hP)/2（兩者邊緣相接）＋ profileGap（使用者指定的間距） */
+    prof.style.top = Math.round(buyTop + (hB + hP) / 2 + profileGap) + 'px';
     reveal();
     syncCart();
   }
