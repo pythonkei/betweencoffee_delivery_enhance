@@ -1451,7 +1451,9 @@ body {
 .bc-floating-cart {
   position: fixed;
   /* 2026-09-21：--bc-fc-gap＝浮動鈕與 Buy 按鈕之間的間距（JS 定位與首頁 place() 都讀這個值）
-     使用者兩度指示「增加間距」：0 → 12px → **20px** */
+     使用者指示：桌面/平板「增加間距」0 → 12px → **20px**；
+     2026-09-21 追加（手機端）「bc-attract-buy 與 profile 稍微向上移動、縮小浮動購物車間距」
+       → ≤767.98 覆寫為 **12px**（＝長條與圓鈕上移 8px，購物車不動） */
   --bc-fc-gap: 20px;
   /* 退化值＝「Buy 按鈕不存在時」的同軸線位置（軸線距右緣 66px、佔位 44px、間距 20px） */
   top: var(--bc-fc-top, calc(50% - 139px));
@@ -1593,15 +1595,21 @@ body {
 @media (max-width: 767.98px) {
   .bc-floating-cart {
     --bc-fc-size: 31px;
+    /* 2026-09-21（使用者指示「手機端：bc-attract-buy 與個人 profile 稍微向上移動、縮小浮動購物車間距」）：
+       購物車位置不動（仍對齊 navbar-brand 頂邊），改為**縮小它與 Buy 長條的間距**
+       20px → 12px → 長條與個人圓鈕同步上移 8px（同一件事）。
+       ⚠ 退化 top 同步換算：按鈕盒上緣(50% − 112/2) − 佔位 44px − 間距 12px */
+    --bc-fc-gap: 12px;
     --bc-fc-right: 17px;              /* 可見長條軸心 39（實測）− 44/2；佔位仍是 44px 點擊區 */
-    --bc-fc-top: calc(50% - 120px);   /* 按鈕盒上緣(50% − 112/2) − 佔位 44px − 間距 20px */
+    --bc-fc-top: calc(50% - 112px);
   }
 }
 
 @media (max-width: 575.98px) {
   .bc-floating-cart {
     --bc-fc-right: 13px;              /* 可見長條軸心 35（實測）− 44/2 */
-    --bc-fc-top: calc(50% - 112px);   /* 按鈕盒上緣(50% − 96/2) − 佔位 44px − 間距 20px */
+    /* 間距同手機端 12px → 按鈕盒上緣(50% − 96/2) − 佔位 44px − 間距 12px */
+    --bc-fc-top: calc(50% - 104px);
   }
 }
 

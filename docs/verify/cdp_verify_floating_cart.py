@@ -163,8 +163,13 @@ JS = r"""
     out.overlaps_bar = (out.cart_wrapper.y < (out.bar.y + out.bar.h) - 0.5)
                     && ((out.cart_wrapper.y + out.cart_wrapper.h) > out.bar.y + 0.5);
     out.placement = ((out.cart_wrapper.y + out.cart_wrapper.h) <= out.bar.y + 1) ? 'above-bar' : 'below-cluster';
-    /* 2026-09-21：與 Buy 按鈕的間距（使用者指示「增加間距」；CSS 定義 20px） */
+    /* 2026-09-21：與 Buy 按鈕的間距（使用者指示「增加間距」；CSS 定義 --bc-fc-gap：
+       桌面/平板 20px、手機（≤767.98）12px——2026-09-21 使用者追加「手機端縮小間距」） */
     out.gap_px = +(out.bar.y - (out.cart_wrapper.y + out.cart_wrapper.h)).toFixed(1);
+    out.fc_gap_css = (function () {
+      var v = parseFloat(getComputedStyle(fc).getPropertyValue('--bc-fc-gap'));
+      return isFinite(v) ? v : null;
+    })();
     /* 2026-09-21（使用者指示「全端 bc-attract-buy and profile 和 index 一樣」）：
        所有頁面的 Buy／個人圓鈕都要可見，且圓鈕在長條下方（＝index 的堆疊順序） */
     out.buy_visible = !!(buy && buy.getBoundingClientRect().width > 0);
@@ -305,8 +310,13 @@ async def main():
                         fails.append(f"{tag}: 圖示被推出畫面外 y={(v.get('cart_wrapper') or {}).get('y')}")
                     if v.get("overlaps_bar"):
                         fails.append(f"{tag}: 圖示與 Buy 長條重疊")
-                    if v.get("placement") == "above-bar" and abs(v.get("gap_px", -99) - 20) > 1:
-                        fails.append(f"{tag}: 與 Buy 間距 {v.get('gap_px')}px != 20px")
+                    # 2026-09-21（使用者指示「手機端縮小浮動購物車間距」）：
+                    #   間距期望值改讀 CSS 變數 --bc-fc-gap（桌面/平板 20px、手機 12px）
+                    exp_gap = v.get("fc_gap_css")
+                    if exp_gap is None:
+                        exp_gap = 20
+                    if v.get("placement") == "above-bar" and abs(v.get("gap_px", -99) - exp_gap) > 1:
+                        fails.append(f"{tag}: 與 Buy 間距 {v.get('gap_px')}px != {exp_gap}px（--bc-fc-gap）")
                 ist = v.get("initial_state") or {}
                 if ist and not ist.get("cart_visible"):
                     fails.append(f"{tag}: 初始狀態未顯示浮動鈕圖示（display={ist.get('cart_display')}）")
