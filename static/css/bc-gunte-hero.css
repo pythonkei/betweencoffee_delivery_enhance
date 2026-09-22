@@ -412,7 +412,7 @@
   height: 8px;
   border: 1px solid var(--color-black);
   border-radius: 4px;
-  background: #c49b63; /* 2026-09-07：正常狀態 → 主題金 */
+  background: var(--bc-theme2); /* 2026-09-21（使用者指示）：正常狀態 → 第二主題色 rgb(226,252,7)（原 #c49b63 主題金） */
   transition: var(--ease-out);
 }
 
