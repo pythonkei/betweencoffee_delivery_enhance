@@ -57,6 +57,18 @@ html.bc-attract-pending .bc-attract-nav {
           （prof 中心 top = buyTop + (hB + hP) / 2 + gap）
        ② 下方各斷點 .bc-attract-profile 的 fallback top（JS 未執行時）用 var() 引用。 */
   --bc-buy-profile-gap: 12px;
+  /* 2026-09-21（使用者指示）：手機/平板把整組（浮動購物車 ＋ Order 長條 ＋ 個人圓鈕）
+     「稍微向上移動」→ 桌面 0px、≤991.98 由下方 media query 覆寫為 8px。
+     由 bc-attract-place.js 的 anchorTop() 統一扣除（整組同步平移，三者相對關係不變）；
+     浮動購物車另外讀同一基準，故也一起上移。 */
+  --bc-attract-lift: 0px;
+}
+
+/* 2026-09-21（使用者指示「手機端/平板端 第3組整組三個一起向上移」）：
+   手機與平板整組上移 8px（桌面不受影響）；about 頁因 weather 讓位下限，
+   上移量會被 weather 下緣 +8px 吃掉（不會壓到天氣元件）。 */
+@media screen and (max-width: 991.98px) {
+  .bc-attract-nav { --bc-attract-lift: 8px; }
 }
 
 /* ===== Buy & Order 按鈕（對應 cheesetart #buyButton / p-gh__button__buy）

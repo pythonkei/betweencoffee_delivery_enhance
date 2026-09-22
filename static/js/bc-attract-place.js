@@ -23,6 +23,11 @@
  *   （定義在 bc-attract.css 的 .bc-attract-nav，預設 12px；各斷點 .bc-attract-profile
  *   的 CSS fallback top 亦 var() 引用同一值，JS 未執行時也一致）。
  *
+ * 2026-09-21（使用者指示「手機端/平板端 整組三個一起向上移」）：
+ *   anchorTop() 最後扣除 --bc-attract-lift（bc-attract.css：桌面 0px、≤991.98 8px），
+ *   購物車／Order 長條／個人圓鈕皆由此基準推導 → 整組同步上移；
+ *   上移後仍以 weather 下緣 + WEATHER_GAP 為下限（about 頁不會壓到天氣元件）。
+ *
  * 避免載入瞬間位置跳動：base.html <head> 先對 <html> 加 .bc-attract-pending
  *   （bc-attract.css 讓 .bc-attract-nav 暫時 visibility: hidden），定位完成即移除；
  *   <head> 另有 1.2s 保險計時器，即使本檔未執行也會自動顯示，不會整組消失。
@@ -55,15 +60,28 @@
       if (wr0.height) anchor = wr0.top + scrollTop;
     }
     if (anchor === null) return null;
-    /* weather 可見（about 頁）→ 不可讓浮動鈕壓在它上面 */
+    /* weather 可見（about 頁）→ 不可讓浮動鈕壓在它上面（此為下限，最後仍要守住） */
+    var floor = null;
     if (w && getComputedStyle(w).visibility === 'visible') {
       var wr = w.getBoundingClientRect();
-      if (wr.height) {
-        var belowWeather = wr.bottom + scrollTop + WEATHER_GAP;
-        if (belowWeather > anchor) anchor = belowWeather;
-      }
+      if (wr.height) floor = wr.bottom + scrollTop + WEATHER_GAP;
     }
+    if (floor !== null && floor > anchor) anchor = floor;
+    /* 2026-09-21（使用者指示「手機端/平板端 整組三個一起向上移」）：
+       整組上移 --bc-attract-lift（桌面 0、≤991.98 為 8px）；三者皆由此基準推導 → 一起平移。 */
+    anchor -= lift();
+    /* 上移後仍不可壓到 weather 元件 */
+    if (floor !== null && anchor < floor) anchor = floor;
     return anchor;
+  }
+
+  /** 整組上移量（2026-09-21 使用者指示：手機/平板「整組三個一起向上移」）
+   *  讀 bc-attract.css 的 --bc-attract-lift（桌面 0px、≤991.98 為 8px），單一來源。 */
+  function lift() {
+    var nav = document.querySelector('.bc-attract-nav');
+    if (!nav) return 0;
+    var v = parseFloat(getComputedStyle(nav).getPropertyValue('--bc-attract-lift'));
+    return isFinite(v) ? v : 0;
   }
 
   /** 定位完成 → 顯示整組（並移除 <head> 的 pending 標記） */

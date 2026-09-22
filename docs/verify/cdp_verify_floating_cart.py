@@ -53,17 +53,32 @@ JS = r"""
     script_loaded: !!document.querySelector('script[src*="bc-weather.js"]')
   };
   /* 浮動鈕的對齊基準＝navbar-brand 頂邊的「文件座標」（與 bc-attract-place.js 同算法）
-     2026-09-21：weather 可見（about 頁）時，整組會再往下讓開 weather 下緣 8px */
+     2026-09-21：weather 可見（about 頁）時，整組會再往下讓開 weather 下緣 8px
+     2026-09-21 追加：手機/平板整組上移 --bc-attract-lift（桌面 0、≤991.98 8px） */
   out.navbar_brand_top = brandEl ? +(brandEl.getBoundingClientRect().top + scrollTop).toFixed(1) : null;
+  out.attract_lift = (function () {
+    var navEl = document.querySelector('.bc-attract-nav');
+    if (!navEl) return 0;
+    var v = parseFloat(getComputedStyle(navEl).getPropertyValue('--bc-attract-lift'));
+    return isFinite(v) ? v : 0;
+  })();
   var wBottomDoc = null;
   if (wEl && getComputedStyle(wEl).visibility === 'visible') {
     var _wr = wEl.getBoundingClientRect();
     if (_wr.height) wBottomDoc = +(_wr.bottom + scrollTop + 8).toFixed(1);
   }
   out.weather_bottom_doc = wBottomDoc;
-  out.expected_cart_top = (wBottomDoc !== null &&
-                           (out.navbar_brand_top === null || wBottomDoc > out.navbar_brand_top))
-    ? wBottomDoc : out.navbar_brand_top;
+  /* 與 bc-attract-place.js 的 anchorTop() 完全同算法：
+     base = brand 頂邊 − lift；若 weather 讓位值較低則用之；上移後再以 weather 讓位值為下限 */
+  out.expected_cart_top = (out.navbar_brand_top === null)
+    ? null : +(out.navbar_brand_top - out.attract_lift).toFixed(1);
+  if (wBottomDoc !== null && out.navbar_brand_top !== null) {
+    if (wBottomDoc > out.navbar_brand_top) {
+      out.expected_cart_top = wBottomDoc;
+    } else if (out.expected_cart_top !== null && out.expected_cart_top < wBottomDoc) {
+      out.expected_cart_top = wBottomDoc;
+    }
+  }
   out.attract_pending = document.documentElement.classList.contains('bc-attract-pending');
   out.attract_ready = !!document.querySelector('.bc-attract-nav.bc-attract-ready');
   /* 2026-09-21（使用者指示「在全端隱藏右上角的選單」）：navbar 漢堡選單必須全站隱藏 */
