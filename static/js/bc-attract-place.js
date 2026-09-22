@@ -23,8 +23,9 @@
  *   （定義在 bc-attract.css 的 .bc-attract-nav，預設 12px；各斷點 .bc-attract-profile
  *   的 CSS fallback top 亦 var() 引用同一值，JS 未執行時也一致）。
  *
- * 2026-09-21（使用者指示「手機端/平板端 整組三個一起向上移」）：
- *   anchorTop() 最後扣除 --bc-attract-lift（bc-attract.css：桌面 0px、≤991.98 8px），
+ * 2026-09-21（使用者指示「手機端/平板端 整組三個一起向上移」，同日追加「桌面端也一起上移」）：
+ *   anchorTop() 最後扣除 --bc-attract-lift（bc-attract.css：**全斷點 8px**，
+ *   原為「桌面 0px、≤991.98 8px」，桌面已於同日追加改為 8px），
  *   購物車／Order 長條／個人圓鈕皆由此基準推導 → 整組同步上移；
  *   上移後仍以 weather 下緣 + WEATHER_GAP 為下限（about 頁不會壓到天氣元件）。
  *
@@ -67,16 +68,17 @@
       if (wr.height) floor = wr.bottom + scrollTop + WEATHER_GAP;
     }
     if (floor !== null && floor > anchor) anchor = floor;
-    /* 2026-09-21（使用者指示「手機端/平板端 整組三個一起向上移」）：
-       整組上移 --bc-attract-lift（桌面 0、≤991.98 為 8px）；三者皆由此基準推導 → 一起平移。 */
+    /* 2026-09-21（使用者指示「手機端/平板端 整組三個一起向上移」，同日追加桌面端）：
+       整組上移 --bc-attract-lift（全斷點 8px）；三者皆由此基準推導 → 一起平移。 */
     anchor -= lift();
     /* 上移後仍不可壓到 weather 元件 */
     if (floor !== null && anchor < floor) anchor = floor;
     return anchor;
   }
 
-  /** 整組上移量（2026-09-21 使用者指示：手機/平板「整組三個一起向上移」）
-   *  讀 bc-attract.css 的 --bc-attract-lift（桌面 0px、≤991.98 為 8px），單一來源。 */
+  /** 整組上移量（2026-09-21 使用者指示：手機/平板「整組三個一起向上移」，
+   *  同日追加桌面端「3 組一起稍微向上移動」）
+   *  讀 bc-attract.css 的 --bc-attract-lift（全斷點 8px），單一來源。 */
   function lift() {
     var nav = document.querySelector('.bc-attract-nav');
     if (!nav) return 0;
