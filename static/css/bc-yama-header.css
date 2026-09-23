@@ -18,7 +18,7 @@
 /* 2026-09-06 主題顏色變數：tax-nav 圓球背景與 hover 掃層色
    （2026-09-06 更新：背景 #774f18 深咖啡；hover #1a1919 近黑） */
 :root {
-  --bc-yama-circle: var(--bc-theme2, #e2fc07);   /* 圓球背景（2026-09-21 使用者指示：改為第二主題色 rgb(226,252,7)；原近黑 #131211） */
+  --bc-yama-circle: var(--bc-theme2, #fcff4b);   /* 圓球背景（2026-09-21 使用者指示：改為第二主題色 #FCFF4B／rgb(252,255,75)；原近黑 #131211。fallback 值同步為目前主題色） */
   --bc-yama-circle-hover: #1a1919;   /* hover 狀態（掃過層） */
 }
 
@@ -201,7 +201,7 @@
     text-align: center;
   }
   .bc-yama .tax-nav a p > span:first-child {
-    color: #fff;   /* 主行（按照之前口味落單?／登入補充咖啡因!）
+    color: #262626;   /* 主行（按照之前口味落單?／登入補充咖啡因!）
                       2026-09-21 使用者指示：改為白色（原 #ba833a 深金；圓球底色改亮色後深金不可讀） */
     display: block;
     font-size: min(1.111vw, 16px);   /* 中文適配：原站 min(1.25vw,18px) */
@@ -392,10 +392,10 @@
   white-space: nowrap;
 }
 .bc-yama .tax-nav a p .bc-yama-tagline--points {
-  color: #bfbfbf;   /* 同 .bc-welcome-points color */
+  color: #343434;   /* 同 .bc-welcome-points color */
 }
 .bc-yama .tax-nav a p .bc-yama-tagline--points .bc-yama-discount {
-  color: var(--bc-theme2, #e2fc07);   /* 2026-09-21 使用者指示：-5 積分數字改用第二主題色（原 var(--bc-gold) 金色粗體） */
+  color: var(--bc-theme2, #fcff4b);   /* 2026-09-21 使用者指示：-5 積分數字改用第二主題色（原 var(--bc-gold) 金色粗體）；fallback 值同步為目前主題色 */
   font-weight: 700;
 }
 
