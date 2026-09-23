@@ -93,10 +93,44 @@
     document.documentElement.classList.remove('bc-attract-pending');
   }
 
-  /** 整組移動後請浮動購物車重算（它貼著可見長條定位） */
+  /* 量不到基準（navbar-brand 尚未解析／高度 0）時的重試機制：
+     每幀重試一次，最多 60 次（約 1s，2026-09-21 由 12 次上調——
+     實測 navbar 在較慢的頁面（about）約 0.7~1s 才解析完成，
+     12 次（約 200ms）會提早放棄並以 CSS top:50% 顯示造成跳動）；
+     期間維持 pending 隱藏，量到基準就立刻顯示。
+     base.html <head> 的 1.2s 保險計時器仍是最終後盾（不管有沒有量到都會顯示）。 */
+  var degradedTries = 0;
+  var RETRY_LIMIT = 60;
+  var retryScheduled = false;
+  function retryNextFrame() {
+    if (retryScheduled) return;
+    retryScheduled = true;
+    requestAnimationFrame(function () {
+      retryScheduled = false;
+      place();
+    });
+  }
+
+  /** 整組移動後請浮動購物車重算（它貼著可見長條定位）
+   *  2026-09-21 追加（使用者回報「浮動購物車初始狀態下由頁面中間移至頂部」）：
+   *  本檔的定位可能早於 DOMContentLoaded 執行（`document.fonts.ready` 與下方 400ms 計時器），
+   *  那一刻 bc-slideout-cart.js 尚未建立 window.bcCart → 先前是 no-op，
+   *  導致 reveal()（解除 html.bc-attract-pending 的隱藏）之後、購物車仍停在
+   *  CSS 退化值（calc(50% - 139px)＝畫面中央），下一幀才被移到頂部（實測 1 幀）。
+   *  這裡在 bcCart 尚未就緒時，先以「同一基準」自行寫入 --bc-fc-top：
+   *  浮動購物車盒上緣 = anchorTop()（與 _placeFloatingCart() 的推導等價——
+   *  長條 top = anchor + fcBox + fcGap ⇒ 購物車 top = 長條 top − fcBox − gap = anchor）。
+   *  --bc-fc-right 仍交給 CSS 各斷點的同軸線值（與量測值一致），
+   *  之後 bc-slideout-cart.js 初始化時會再精算一次（含 right）。 */
   function syncCart() {
     if (window.bcCart && typeof window.bcCart._placeFloatingCart === 'function') {
       window.bcCart._placeFloatingCart();
+      return;
+    }
+    var el = document.getElementById('bc-floating-cart');
+    var anchor = anchorTop();
+    if (el && anchor !== null && isFinite(anchor) && anchor >= 8) {
+      el.style.setProperty('--bc-fc-top', Math.round(anchor) + 'px');
     }
   }
 
@@ -104,19 +138,32 @@
     var buy = document.querySelector('.bc-attract-buy');
     var prof = document.querySelector('.bc-attract-profile');
     if (!buy || !prof) {
+      /* 無整組按鈕的頁面：仍讓浮動購物車先就位（否則它以 CSS 退化值顯示） */
+      syncCart();
       reveal();
       return;
     }
     var anchor = anchorTop();
     if (anchor === null) {
       /* 量不到基準時清掉 inline top，交回 CSS（top: 50%），
-         避免殘留上一個裝置算出的舊值造成永久位移。 */
+         避免殘留上一個裝置算出的舊值造成永久位移。
+         2026-09-21 追加（about 頁逐幀實測發現）：此分支若立即 reveal()，
+         navbar-brand 尚未排版完成（高度 0）→ 整組與浮動購物車會先以 CSS
+         top:50%（畫面中央）顯示一瞬再跳到正確高度。改為「下一幀重試」，
+         量到基準就立刻顯示；連續多次仍量不到才 reveal（退化為 CSS 位置），
+         且 base.html 的 1.2s 保險計時器無論如何都會顯示。 */
       buy.style.top = '';
       prof.style.top = '';
-      reveal();
       syncCart();
+      degradedTries += 1;
+      if (degradedTries < RETRY_LIMIT) {
+        retryNextFrame();
+      } else {
+        reveal();
+      }
       return;
     }
+    degradedTries = 0;
     var hB = buy.getBoundingClientRect().height;
     var hP = prof.getBoundingClientRect().height;
     /* 浮動購物車佔位＝max(44px 透明點擊區下限, --bc-fc-size)，
@@ -140,8 +187,14 @@
     buy.style.top = Math.round(buyTop) + 'px';
     /* 個人圓鈕中心 = buy 中心 + (hB + hP)/2（兩者邊緣相接）＋ profileGap（使用者指定的間距） */
     prof.style.top = Math.round(buyTop + (hB + hP) / 2 + profileGap) + 'px';
-    reveal();
+    /* 2026-09-21：先讓浮動購物車重算、再 reveal()（移除 html.bc-attract-pending）。
+       理由：pending 期間浮動購物車與整組一起被隱藏（bc-attract.css），
+       若這裡先 reveal() 才同步購物車，購物車可能以 CSS 退化值（畫面中央）先顯示一瞬。
+       註：DOMContentLoaded 時 window.bcCart 尚未建立（bc-slideout-cart.js 的初始化
+       註冊在後）→ 該次交由其建構子的 _bindFloatingCartPlacement() 於「同一次事件分派」
+       內完成定位，故仍不會看到未定位的中間位置。 */
     syncCart();
+    reveal();
   }
 
   var rAF = 0;

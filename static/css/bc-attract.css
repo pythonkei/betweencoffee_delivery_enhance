@@ -28,8 +28,17 @@
    2026-09-21：全站定位（static/js/bc-attract-place.js）完成前先隱藏整組，
    避免先以 CSS top:50% 繪製、再由 JS 移到 navbar-brand 高度造成載入跳動。
    由 base.html <head> 的 inline script 加上 html.bc-attract-pending，定位完成即移除；
-   該 inline script 另設 1.2s 保險計時器（腳本未執行時自動顯示，不會整組消失）。 */
-html.bc-attract-pending .bc-attract-nav {
+   該 inline script 另設 1.2s 保險計時器（腳本未執行時自動顯示，不會整組消失）。
+
+   2026-09-21 追加（使用者回報「浮動購物車初始狀態下，從頁面中間移至頂部」）：
+   **浮動購物車（.bc-floating-cart）同樣納入 pending 隱藏**。原因：它的 CSS 退化值
+   （無 inline --bc-fc-top 時）是 `calc(50% - 139px)`＝畫面垂直中央，首屏繪製早於
+   頁尾腳本 → 使用者會先看到購物袋出現在畫面中間，DOMContentLoaded 定位後才跳到頂部
+   （CDP 逐幀實測：t≈1.5s 首次繪製 y=311、t≈1.85s 才變 y=48）。
+   定位在 DOMContentLoaded 的同一次事件分派內完成（place() 與 SlideoutCart 建構子）
+   → 中間不會有繪製，因此「顯示時即已就位」。 */
+html.bc-attract-pending .bc-attract-nav,
+html.bc-attract-pending .bc-floating-cart {
   visibility: hidden;
 }
 
