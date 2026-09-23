@@ -112,7 +112,7 @@
 .btn-confirm-fps-payment {
     background: var(--brand-primary) !important;
     border: 1px solid var(--brand-primary) !important;
-    color: white !important;
+    color: #0e0e0e !important;
     font-size: 1rem !important;
     line-height: 1.5 !important;
     border-radius: 2px !important;
@@ -124,7 +124,7 @@
 .btn-confirm-fps-payment:active {
     background: var(--brand-primary) !important;
     border: 1px solid var(--brand-primary) !important;
-    color: white !important;
+    color: #0e0e0e !important;
     box-shadow: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -249,9 +249,9 @@
    原使用 Bootstrap 默認 badge 太小（font-size:75%），
    統一為 .badge-expedited：較大內距 + 適中字體 + 品牌金色 */
 .badge-expedited {
-    background-color: var(--bc-gold, #c49b63) !important;
+    background-color: var(--bc-gold, #fcff4b) !important;
     color: #0e0e0e !important;
-    border: 1px solid var(--bc-gold, #c49b63) !important;
+    border: 1px solid var(--bc-gold, #fcff4b) !important;
     font-size: 0.85rem !important;
     font-weight: 700 !important;
     padding: 0.45em 0.8em !important;
@@ -469,7 +469,7 @@
     font-size: 1.05em;
     font-weight: 600;
     background-color: var(--brand-primary);
-    color: white;
+    color: #0e0e0e;
 
     border-radius: 8px;
     letter-spacing: 0.5px;
@@ -536,7 +536,7 @@
 .staff-nav-tabs .nav-link.active {
     background: transparent;
     border: none;
-    border-bottom: 2px solid var(--brand-primary, #c49b63);
+    border-bottom: 2px solid var(--brand-primary, #fcff4b);
     color: #ffffff;
     font-weight: 700;
 }
@@ -561,8 +561,8 @@
 }
 
 .staff-nav-tabs .nav-link .staff-badge.has-items {
-    background-color: var(--brand-primary, #c49b63) !important;
-    color: #ffffff !important;
+    background-color: var(--brand-primary, #fcff4b) !important;
+    color: #0e0e0e !important;
 }
 
 .staff-nav-tabs .nav-link .staff-badge.no-items {
@@ -609,12 +609,12 @@
 
 .staff-subnav-tabs .nav-link.active {
     color: #ffffff;
-    background: rgba(196, 155, 99, 0.12);
+    background: rgb(var(--bc-theme2-rgb) / 0.12);
 }
 
 .staff-subnav-tabs .nav-link.active::before {
     content: '●';
-    color: var(--brand-primary, #c49b63);
+    color: var(--brand-primary, #fcff4b);
 }
 
 /* 子標籤頁徽章（使用 !important 防止 Bootstrap .badge 覆蓋） */
@@ -632,8 +632,8 @@
 }
 
 .staff-subnav-tabs .nav-link .staff-badge.has-items {
-    background-color: var(--brand-primary, #c49b63) !important;
-    color: #ffffff !important;
+    background-color: var(--brand-primary, #fcff4b) !important;
+    color: #0e0e0e !important;
 }
 
 .staff-subnav-tabs .nav-link .staff-badge.no-items {
@@ -842,7 +842,7 @@ table td:nth-child(3) {
 .btn-primary.start-preparation-btn {
     background: var(--brand-primary) !important;
     border: 1px solid var(--brand-primary) !important;
-    color: white !important;
+    color: #0e0e0e !important;
     border-radius: 2px !important;
     box-shadow: none !important;
 }
@@ -853,7 +853,7 @@ table td:nth-child(3) {
 .btn-primary.start-preparation-btn:disabled {
     background: var(--brand-primary) !important;
     border: 1px solid var(--brand-primary) !important;
-    color: white !important;
+    color: #0e0e0e !important;
     transform: none !important;
     box-shadow: none !important;
     opacity: 1 !important;
@@ -1593,10 +1593,10 @@ td:contains("杯") {
     width: 58px;
     height: 58px;
     border-radius: 50%;
-    background: rgba(196, 155, 99, 0.25);
+    background: rgb(var(--bc-theme2-rgb) / 0.25);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(196, 155, 99, 0.3);
+    border: 1px solid rgb(var(--bc-theme2-rgb) / 0.3);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1619,7 +1619,7 @@ td:contains("杯") {
 }
 .bc-staff-back-top:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(196, 155, 99, 0.4);
+    box-shadow: 0 6px 20px rgb(var(--bc-theme2-rgb) / 0.4);
     background: #fff;
     color: var(--bc-gold);
 }

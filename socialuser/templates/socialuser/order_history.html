@@ -220,13 +220,13 @@
                                     <a href="{% url 'eshop:continue_payment' order.id %}" 
                                     style="
                                         display: inline-flex; align-items: center; gap: 6px;
-                                        background: #c49b63; color: #ffffff;
+                                        background: var(--bc-gold, #fcff4b); color: #0e0e0e;
                                         border: none; border-radius: 6px;
                                         padding: 6px 14px;
                                         font-size: 0.85rem; font-weight: 600;
                                         text-decoration: none; cursor: pointer;
                                         transition: all 0.2s; white-space: nowrap;
-                                    " onmouseover="this.style.background='#d4ab73'" onmouseout="this.style.background='#c49b63'">
+                                    " onmouseover="this.style.background='#ffffff'" onmouseout="this.style.background='#fcff4b'">
                                         <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i> 繼續支付
                                     </a>
                                     <button type="button" 
@@ -352,8 +352,8 @@
     line-height: 1.4;
 }
 .points-badge.points-positive {
-    background: #c49b63;
-    color: #fff;
+    background: var(--bc-gold, #fcff4b);
+    color: #0e0e0e;
 }
 
 /* 載入更多按鈕樣式 */
@@ -778,13 +778,13 @@ class OrderLoader {
         } else if (order.payment_status === 'pending' && !order.is_payment_timeout) {
             return `<a href="/eshop/continue-payment/${order.id}/" style="
                 display: inline-flex; align-items: center; gap: 6px;
-                background: #c49b63; color: #ffffff;
+                background: var(--bc-gold, #fcff4b); color: #0e0e0e;
                 border: none; border-radius: 6px;
                 padding: 6px 14px;
                 font-size: 0.85rem; font-weight: 600;
                 text-decoration: none; cursor: pointer;
                 transition: all 0.2s; white-space: nowrap;
-            " onmouseover="this.style.background='#d4ab73'" onmouseout="this.style.background='#c49b63'">
+            " onmouseover="this.style.background='#ffffff'" onmouseout="this.style.background='#fcff4b'">
                 <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i> 繼續支付
             </a>
             <button type="button" 

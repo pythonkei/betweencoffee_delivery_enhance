@@ -2,7 +2,7 @@
    bc-components.css — Between Coffee 品牌元件庫
    Sprint 1: 一頁式結帳 + 取餐通知
    ============================================================
-   品牌色: 金色 #c49b63 | 黑色背景 #0e0e0e | 白色文字
+   品牌色: 金色 var(--bc-gold, #fcff4b) | 黑色背景 #0e0e0e | 白色文字
    設計語言: 深色主題、半透明玻璃卡片、金色點綴
    ============================================================ */
 
@@ -199,8 +199,8 @@ body {
   width: 44px;
   height: 44px;
   margin: -22px 0 0 -22px; /* 置中（2026-08-08：移除文字後不需留文字空間） */
-  border: 3px solid rgba(196, 155, 99, 0.25);
-  border-top-color: var(--bc-gold, #c49b63);
+  border: 3px solid rgb(var(--bc-theme2-rgb) / 0.25);
+  border-top-color: var(--bc-gold, #fcff4b);
   border-radius: 50%;
   animation: bcSliderSpin 0.8s linear infinite;
 }
@@ -393,7 +393,7 @@ body {
 .payment-icon-cash {
   font-size: 78px;
   line-height: 1;
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
 }
 
 /* ===== FPS/Cash 支付頁操作按鈕（主要 +12%、次要 -12%、間距） ===== */
@@ -506,10 +506,15 @@ body {
 
 /* ===== CSS 變數 ===== */
 :root {
-  --bc-gold: #c49b63;
-  --bc-gold-hover: #d4ab73;
-  --bc-gold-light: rgba(196, 155, 99, 0.15);
-  --bc-gold-glow: rgba(196, 155, 99, 0.3);
+  /* 2026-09-21 使用者指示「修改全域：將目前的第一主題色改為第二主題色」：
+     第一主題色（品牌金）＝ 第二主題色 #FCFF4B（rgb 252 255 75）。
+     --bc-gold 直接指向 --bc-theme2 → 之後只需改下方 --bc-theme2 兩行即全站換色。
+     hover 沿用本專案萊姆強調色的既有慣例（hero 圓點、yama 圓球 hover＝白）。
+     註：變數名稱保留 gold（使用點 60+ 處，改名風險大），語意以本註解為準。 */
+  --bc-gold: var(--bc-theme2, #fcff4b);
+  --bc-gold-hover: #ffffff;
+  --bc-gold-light: rgb(var(--bc-theme2-rgb) / .15);
+  --bc-gold-glow: rgb(var(--bc-theme2-rgb) / .3);
   /* 2026-09-21（使用者指示）：**第二主題色（theme color 2）**＝ rgb(252, 255, 75) = #FCFF4B
      單一定義於此（bc-components.css 全站載入，其他檔案直接用 var() 取用）。
      - --bc-theme2-rgb：通道值，需要透明度時用 rgb(var(--bc-theme2-rgb) / .3)
@@ -524,7 +529,7 @@ body {
   --bc-bg-card-hover: rgba(255, 255, 255, 0.07);
   --bc-bg-input: rgba(255, 255, 255, 0.06);
   --bc-border: rgba(255, 255, 255, 0.08);
-  --bc-border-focus: rgba(196, 155, 99, 0.4);
+  --bc-border-focus: rgb(var(--bc-theme2-rgb) / 0.4);
   --bc-text: rgba(255, 255, 255, 0.9);
   --bc-text-muted: rgba(255, 255, 255, 0.6);
   --bc-text-dim: rgba(255, 255, 255, 0.3);
@@ -1076,6 +1081,11 @@ body {
   padding: 12px 24px;
   color: #fff;
 }
+/* 2026-09-21：第一主題色改為亮色（#FCFF4B）後，主要按鈕為亮底 → 必須深字，
+   否則被上方 .bc-cart-footer .bc-btn-lg{color:#fff}（(0,2,0)）蓋掉而消失。 */
+.bc-cart-footer .bc-btn-primary {
+  color: #0e0e0e;
+}
 .bc-cart-footer .bc-btn-secondary {
   font-size: 0.95rem;
   padding: 10px 20px;
@@ -1562,7 +1572,7 @@ body {
   min-width: 22px;
   height: 22px;
   border-radius: 11px;
-  background: var(--bc-theme2);  /* 2026-09-21（使用者指示）：第二主題色 #FCFF4B／rgb(252,255,75)（原主題金 #c49b63） */
+  background: var(--bc-theme2);  /* 2026-09-21（使用者指示）：第二主題色 #FCFF4B／rgb(252,255,75)（原主題金 var(--bc-gold, #fcff4b)） */
   color: var(--bc-bg);   /* 深色字 #0e0e0e（2026-09-21：亮色底必須配深字才可讀，原白色 #fff 對比不足） */
   font-family: Arial, Helvetica, sans-serif;  /* 2026-08-14：數字用系統字體，避免 webfont 載入延遲造成文字閃爍（FOUT） */
   font-size: 0.79rem;
@@ -1693,35 +1703,35 @@ body {
 
 .bc-option-btn:hover {
   background: var(--bc-gold);
-  color: #fff;
+  color: #0e0e0e;
   /* 2026-09-21（使用者指示）：hover（滑入）狀態也 font-weight 400，與已選取一致 */
   font-weight: 400;
 }
 
 .bc-option-btn:hover .bc-option-icon,
 .bc-option-btn:hover .bc-option-label-text {
-  color: #fff;
+  color: #0e0e0e;
 }
 
 .bc-option-btn:hover .bc-option-oz {
-  color: var(--bc-gold);
+  color: #0e0e0e;
   background: #fff;
 }
 
 .bc-option-btn.active {
   background: var(--bc-gold);
-  color: #fff;
+  color: #0e0e0e;
   /* 2026-09-21（使用者指示）：已選取狀態 font-weight 400（未選取為 300） */
   font-weight: 400;
 }
 
 .bc-option-btn.active .bc-option-icon,
 .bc-option-btn.active .bc-option-label-text {
-  color: #fff;
+  color: #0e0e0e;
 }
 
 .bc-option-btn.active .bc-option-oz {
-  color: var(--bc-gold);
+  color: #0e0e0e;
   background: #fff;
 }
 
@@ -1736,7 +1746,7 @@ body {
   right: 0;
   font-size: 0.72rem;
   font-weight: 400;
-  color: #fff;
+  color: #0e0e0e;
   line-height: 1;
   transition: all var(--bc-transition);
   background: var(--bc-gold);
@@ -1781,7 +1791,7 @@ body {
 .quantity-left-minus:hover,
 .quantity-right-plus:hover {
   background: var(--bc-gold);
-  color: #fff;
+  color: #0e0e0e;
 }
 
 .product-details .input-number {
@@ -1820,6 +1830,15 @@ body {
   font-size: 24px;
   width: 32px;
   color: var(--bc-text-ccc);
+}
+
+/* 2026-09-21：杯量 oz 標籤為「亮底（第一主題色＝第二主題色 #FCFF4B）深字」，
+   但被 style-bootstrap 的 .product-details span{color:#eee}（(0,1,1)）蓋掉 → 同級覆蓋。 */
+.product-details .bc-option-oz,
+.product-details .bc-option-btn .bc-option-oz,
+.product-details .bc-option-btn:hover .bc-option-oz,
+.product-details .bc-option-btn.active .bc-option-oz {
+  color: #0e0e0e;
 }
 
 /* 商品名稱（內層 span 被 style-bootstrap .product-details span{color:#eee} 覆寫，需同級覆蓋） */
@@ -1993,7 +2012,7 @@ body {
   flex-shrink: 0;
 }
 .payment-radio-circle.active {
-  border-color: #c49b63;
+  border-color: var(--bc-gold, #fcff4b);
   background: rgba(20, 20, 20, 0.45);   /* 深色內徑：強化金色圓點居中的視覺對比 */
 }
 .payment-radio-dot {
@@ -2004,11 +2023,11 @@ body {
   transition: all 0.2s ease;
 }
 .payment-radio-dot.active {
-  background: #c49b63;
+  background: var(--bc-gold, #fcff4b);
 }
 
 .payment-label-simple.active {
-  background: rgba(196, 155, 99, 0.08);
+  background: rgb(var(--bc-theme2-rgb) / 0.08);
 }
 
 .payment-label-text {
@@ -2077,11 +2096,11 @@ body {
   font-weight: 500;
 }
 .payment-countdown-icon {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
   margin-right: 6px;
 }
 .payment-countdown-time {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
   font-size: 1.2rem;
   font-weight: 700;
 }
@@ -2096,8 +2115,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #c49b63;
-  color: #ffffff;
+  background: var(--bc-gold, #fcff4b);
+  color: #0e0e0e;
   border: none;
   border-radius: 6px;
   padding: 6px 14px;
@@ -2109,8 +2128,8 @@ body {
   white-space: nowrap;
 }
 .bc-btn-continue-payment:hover {
-  background: #d4ab73;
-  color: #ffffff;
+  background: var(--bc-gold-hover, #ffffff);
+  color: #0e0e0e;
 }
 .bc-btn-continue-payment i {
   font-size: 0.75rem;
@@ -2147,14 +2166,14 @@ body {
   line-height: 1.6;
 }
 .payment-support-order-id {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
   font-size: 1.0rem;
   font-weight: 700;
 }
 
 /* ---- 待確認付款提示 ---- */
 .payment-pending-icon {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
   font-size: 2rem;
 }
 .payment-pending-message {
@@ -2163,14 +2182,15 @@ body {
   line-height: 1.6;
 }
 .payment-pending-order-id {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
   font-size: 1.3rem;
   font-weight: 700;
 }
 
 /* ---- 積分獎勵條 ---- */
 .bc-points-bar {
-  background-color: #c49b63;
+  background-color: var(--bc-gold, #fcff4b);
+  color: #0e0e0e;   /* 2026-09-21：底已改亮色（第一主題色＝第二主題色）→ 容器指定深字，子元素（star/label/number）繼承 */
   width: 100%;
   border-radius: 50px;
   height: 50px;
@@ -2204,7 +2224,7 @@ body {
   font-size: 1.05rem;
 }
 .bc-summary-icon-gold {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
 }
 .bc-summary-discount {
   color: #28a745;
@@ -2273,7 +2293,7 @@ body {
   color: #fff;
 }
 .bc-section-icon-gold {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
 }
 
 /* ---- 取貨時間列表 ---- */
@@ -2344,7 +2364,7 @@ body {
   margin-top: 2px;
 }
 .bc-reward-star {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
 }
 .bc-reward-discount {
   color: #28a745;
@@ -2379,7 +2399,7 @@ body {
   font-weight: 400;
 }
 .bc-total-gold {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
 }
 .bc-payment-btn {
   min-width: 200px;
@@ -2431,8 +2451,8 @@ body {
 }
 
 .reward-select-item input[type="checkbox"]:checked + .reward-select-label {
-  background: rgba(196, 155, 99, 0.08);
-  border-color: rgba(196, 155, 99, 0.35);
+  background: rgb(var(--bc-theme2-rgb) / 0.08);
+  border-color: rgb(var(--bc-theme2-rgb) / 0.35);
 }
 
 .reward-checkbox-box {
@@ -2658,7 +2678,7 @@ body {
 }
 .bc-staff .title-sub {
   position: static; /* 標題置於內文上方，不佔用左側 → 文字區域全寬 */
-  color: var(--bc-gold, #c49b63);
+  color: var(--bc-gold, #fcff4b);
   font-family: "Noto Sans TC", sans-serif;
   font-size: 13px;
   font-weight: bold;
@@ -2993,7 +3013,7 @@ body {
 /* ==================== CSS 統一 Phase F：管理頁面 inline → class ==================== */
 /* 審計日誌返回連結 */
 .bc-audit-back-link {
-  color: #c49b63;
+  color: var(--bc-gold, #fcff4b);
   text-decoration: none;
   font-size: .9rem;
   display: block;
@@ -3191,7 +3211,7 @@ body {
     border-radius: 50px;
     padding: 4px;
     gap: 4px;
-    box-shadow: 0 2px 8px rgba(196, 155, 99, 0.3);
+    box-shadow: 0 2px 8px rgb(var(--bc-theme2-rgb) / 0.3);
     box-sizing: border-box;
 }
 a.member-nav-item {
@@ -3204,7 +3224,7 @@ a.member-nav-item {
     border-radius: 50px;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #ffffff !important;
+    color: #0e0e0e !important;
     text-decoration: none !important;
     transition: none !important;
     white-space: nowrap;
@@ -3212,15 +3232,15 @@ a.member-nav-item {
     box-sizing: border-box;
 }
 a.member-nav-item:hover { color: #ffffff !important; text-decoration: none !important; background-color: rgba(255, 255, 255, 0.15); }
-a.member-nav-item.active { background-color: #ffffff; color: var(--brand-primary) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+a.member-nav-item.active { background-color: #ffffff; color: #1b1b1b !important; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 a.member-nav-item.active i { color: var(--brand-primary) !important; }
 a.member-nav-item i { font-size: 1rem; color: rgba(255,255,255,0.9) !important; flex-shrink: 0; }
 a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
-.profile-avatar-img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid rgba(196,155,99,0.3); }
+.profile-avatar-img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid rgb(var(--bc-theme2-rgb) / 0.3); }
 .profile-username { font-size: 1.5rem; font-weight: 600; color: #f8f9fa; margin: 0 0 0.75rem 0; }
 .profile-detail-item { font-size: 0.95rem; color: #adb5bd; display: flex; align-items: center; justify-content: center; margin-bottom: 0.35rem; }
 .profile-detail-item i { color: var(--brand-primary); width: 1.2rem; text-align: center; }
-.profile-section { border-top: 1px solid rgba(196,155,99,0.15); padding-top: 1.5rem; margin-bottom: 1.5rem; }
+.profile-section { border-top: 1px solid rgb(var(--bc-theme2-rgb) / 0.15); padding-top: 1.5rem; margin-bottom: 1.5rem; }
 .profile-section-title { font-size: 0.9rem; font-weight: 600; color: var(--brand-primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem; }
 .profile-section-content { font-size: 0.95rem; color: #ced4da; line-height: 1.6; }
 .profile-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; padding-top: 1.5rem; }
@@ -3231,7 +3251,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .avatar-upload-trigger { position: relative; display: inline-block; cursor: pointer; border-radius: 50%; overflow: hidden; }
 .avatar-upload-img { display: block; transition: filter 0.3s ease; }
 .avatar-upload-trigger:hover .avatar-upload-img { filter: brightness(0.6); }
-.avatar-upload-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(196,155,99,0.7); color: #fff; opacity: 0; transition: opacity 0.3s ease; border-radius: 50%; }
+.avatar-upload-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgb(var(--bc-theme2-rgb) / 0.7); color: #fff; opacity: 0; transition: opacity 0.3s ease; border-radius: 50%; }
 .avatar-upload-trigger:hover .avatar-upload-overlay { opacity: 1; }
 .avatar-upload-overlay i { font-size: 1.5rem; margin-bottom: 4px; }
 .avatar-upload-overlay span { font-size: 0.75rem; font-weight: 500; }
@@ -4209,7 +4229,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 
 .bc-order-collapse__total {
   margin-left: auto;
-  color: var(--bc-gold, #c49b63);
+  color: var(--bc-gold, #fcff4b);
   font-weight: 700;
   font-size: 1rem;
   line-height: 1.2;
@@ -4248,8 +4268,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
    樣式沿用原內聯設計（含既有 linear-gradient，待品牌重構時評估）。
    ============================================================ */
 .pending-order-warning-card {
-  background: linear-gradient(135deg, rgba(196,155,99,0.12) 0%, rgba(255,255,255,0.03) 100%);
-  border: 1px solid rgba(196,155,99,0.35);
+  background: linear-gradient(135deg, rgb(var(--bc-theme2-rgb) / 0.12) 0%, rgba(255,255,255,0.03) 100%);
+  border: 1px solid rgb(var(--bc-theme2-rgb) / 0.35);
   border-radius: 12px;
   padding: 20px 24px;
   margin-bottom: 24px;
@@ -4278,15 +4298,15 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .pending-order-warning-icon {
   width: 36px;
   height: 36px;
-  background: rgba(196,155,99,0.2);
+  background: rgb(var(--bc-theme2-rgb) / 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.pending-order-warning-icon i { color: #c49b63; font-size: 1rem; }
-.pending-order-warning-title { color: #c49b63; font-weight: 600; font-size: 1rem; }
+.pending-order-warning-icon i { color: var(--bc-gold, #fcff4b); font-size: 1rem; }
+.pending-order-warning-title { color: var(--bc-gold, #fcff4b); font-weight: 600; font-size: 1rem; }
 .pending-order-warning-subtitle {color: rgba(255,255,255,0.8);font-size: 0.85rem;}
 .pending-order-warning-list {
   display: flex;
@@ -4340,8 +4360,8 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #c49b63;
-  color: #ffffff;
+  background: var(--bc-gold, #fcff4b);
+  color: #0e0e0e;
   border: none;
   border-radius: 6px;
   padding: 6px 14px;
@@ -4352,7 +4372,7 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
   transition: all 0.2s;
   white-space: nowrap;
 }
-.pending-order-warning-btn-continue:hover { background: #d4ab73; color: #ffffff; }
+.pending-order-warning-btn-continue:hover { background: var(--bc-gold-hover, #ffffff); color: #0e0e0e; }
 .pending-order-warning-btn-continue i { font-size: 0.75rem; margin-top: -1px; }
 .pending-order-warning-btn-cancel {
   display: inline-flex;

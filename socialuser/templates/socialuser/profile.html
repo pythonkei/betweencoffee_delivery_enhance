@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}?v=20260921a">
 <style>
 /* 隱藏個人簡介欄位（保留程式碼，日後可恢復） */
 #field-info { display: none; }
@@ -145,7 +145,7 @@
                                 </button>
                                 <!-- 行內編輯表單（隱藏） -->
                                 <div class="profile-inline-form" id="edit-info">
-                                    <textarea id="input-info" rows="2" style="flex:1;min-width:200px;padding:8px 12px;border:1.5px solid #c49b63;border-radius:6px;font-size:0.95rem;background:rgba(255,255,255,0.1);color:#fff;">{{ profile.info|default:'' }}</textarea>
+                                    <textarea id="input-info" rows="2" style="flex:1;min-width:200px;padding:8px 12px;border:1.5px solid var(--bc-gold, #fcff4b);border-radius:6px;font-size:0.95rem;background:rgba(255,255,255,0.1);color:#fff;">{{ profile.info|default:'' }}</textarea>
                                     <button type="button" class="btn-confirm" data-field="info">確認</button>
                                     <button type="button" class="btn-cancel" data-field="info">取消</button>
                                     <div class="error-msg" id="error-info"></div>

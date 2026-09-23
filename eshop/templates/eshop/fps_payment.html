@@ -92,7 +92,7 @@
                                 
                                 <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                                     <h5 class="mb-0">總計:</h5>
-                                    <h5 class="mb-0" style="color: #c49b63;">HK$ {{ order.total_price|floatformat:2 }}</h5>
+                                    <h5 class="mb-0" style="color: var(--bc-gold, #fcff4b);">HK$ {{ order.total_price|floatformat:2 }}</h5>
                                 </div>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                                     <p class="mb-3">
                                         <strong>支付状态:</strong> <span class="badge badge-warning">待支付</span>
                                     </p>
-                                    <p class="h5 mb-0" style="color: #c49b63;">HK$ {{ order.total_price|floatformat:2 }}</p>
+                                    <p class="h5 mb-0" style="color: var(--bc-gold, #fcff4b);">HK$ {{ order.total_price|floatformat:2 }}</p>
                                 </div>
                             </div>
                         </div>
@@ -123,18 +123,18 @@
                                     <div class="d-flex align-items-center">
                                         <div>
                                             <div style="color: #fff; font-size: 0.95rem; font-weight: 500;">
-                                                <i class="fas fa-info-circle" style="color: #c49b63; margin-right: 6px;"></i> 付款說明
+                                                <i class="fas fa-info-circle" style="color: var(--bc-gold, #fcff4b); margin-right: 6px;"></i> 付款說明
                                             </div>
                                         </div>
                                     </div>
-                                    <i class="fas fa-chevron-down payment-arrow" style="color: #c49b63; transition: transform 0.3s ease; transform: rotate(180deg);"></i>
+                                    <i class="fas fa-chevron-down payment-arrow" style="color: var(--bc-gold, #fcff4b); transition: transform 0.3s ease; transform: rotate(180deg);"></i>
                                 </label>
                                 <div class="payment-details" style="max-height: 300px; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0.75rem 3rem;">
                                     <ul class="mb-0 pl-3" style="color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.8;">
                                         <li>打開您的手機銀行App</li>
                                         <li>選擇「轉數快」付款功能</li>
-                                        <li>掃描上方二維碼或手動輸入轉數快識別碼 <strong style="color: #c49b63;">68492033</strong></li>
-                                        <li>輸入參考編號 <strong style="color: #c49b63;">{{ fps_reference }}</strong> 以便我們識別您的訂單</li>
+                                        <li>掃描上方二維碼或手動輸入轉數快識別碼 <strong style="color: var(--bc-gold, #fcff4b);">68492033</strong></li>
+                                        <li>輸入參考編號 <strong style="color: var(--bc-gold, #fcff4b);">{{ fps_reference }}</strong> 以便我們識別您的訂單</li>
                                         <li>支付完成後請點擊下方「我已完成支付」按鈕</li>
                                     </ul>
                                 </div>
@@ -183,9 +183,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (arrow) {
                 arrow.style.transform = 'rotate(180deg)';
-                arrow.style.color = '#c49b63';
+                arrow.style.color = '#fcff4b';
             }
-            if (label) label.style.background = 'rgba(196,155,99,0.08)';
+            if (label) label.style.background = 'rgb(var(--bc-theme2-rgb) / 0.08)';
         } else {
             // 收起
             if (details) {

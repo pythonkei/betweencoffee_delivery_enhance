@@ -5,8 +5,8 @@
 	max-height: 150px;
 	min-width: 70px;
 	width: 20vw;
-	background: #c49b63;
-	color: #fff;
+	background: var(--bc-gold, #fcff4b);
+	color: #0e0e0e;
 	border: 1px solid #ddd;
 	z-index: 10001;
 }
@@ -39,9 +39,9 @@
 .ui-timepicker-standard {
 	display: flex;
 	overflow-y: auto;
-	background-color: #c49b63;
+	background-color: var(--bc-gold, #fcff4b);
 	border: 1px solid #ddd;
-	color: #fff;
+	color: #0e0e0e;
 	margin: 0;
 	padding: 2px;
 	height: 32px;
