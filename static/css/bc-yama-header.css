@@ -19,7 +19,8 @@
    （2026-09-06 更新：背景 #774f18 深咖啡；hover #1a1919 近黑） */
 :root {
   --bc-yama-circle: var(--bc-theme2, #fcff4b);   /* 圓球背景（2026-09-21 使用者指示：改為第二主題色 #FCFF4B／rgb(252,255,75)；原近黑 #131211。fallback 值同步為目前主題色） */
-  --bc-yama-circle-hover: #1a1919;   /* hover 狀態（掃過層） */
+  --bc-yama-circle-hover: #1a1919;   /* hover 狀態（掃過層）— ≤768 近黑球用；
+                                        2026-09-21：≥769 亮球層由檔尾 media 覆寫為白色 */
 }
 
 /* 2026-09-06：tax-nav .init 後圓形外陰影（桌面與 ≤768 通用；init 延遲淡入後出現） */
@@ -155,7 +156,7 @@
     pointer-events: none;
   }
   .bc-yama .tax-nav a:after {
-    background: var(--bc-yama-circle-hover);   /* hover #1a1919 */
+    background: var(--bc-yama-circle-hover);   /* hover 掃過層（2026-09-21：≥769 由檔尾覆寫為白色；≤768 仍 #1a1919） */
     content: "";
     display: block;
     height: 100%;
@@ -201,7 +202,7 @@
     text-align: center;
   }
   .bc-yama .tax-nav a p > span:first-child {
-    color: #262626;   /* 主行（按照之前口味落單?／登入補充咖啡因!）
+    color: #ffffff;   /* 主行（按照之前口味落單?／登入補充咖啡因!）
                       2026-09-21 使用者指示：改為白色（原 #ba833a 深金；圓球底色改亮色後深金不可讀） */
     display: block;
     font-size: min(1.111vw, 16px);   /* 中文適配：原站 min(1.25vw,18px) */
@@ -392,10 +393,14 @@
   white-space: nowrap;
 }
 .bc-yama .tax-nav a p .bc-yama-tagline--points {
-  color: #343434;   /* 同 .bc-welcome-points color */
+  color: #ffffff;   /* 同 .bc-welcome-points color */
 }
 .bc-yama .tax-nav a p .bc-yama-tagline--points .bc-yama-discount {
-  color: var(--bc-theme2, #fcff4b);   /* 2026-09-21 使用者指示：-5 積分數字改用第二主題色（原 var(--bc-gold) 金色粗體）；fallback 值同步為目前主題色 */
+  /* 2026-09-21 使用者指示：-5 積分數字改用第二主題色（原 var(--bc-gold) 金色粗體）。
+     分層處理：≤768 近黑球 → 主題色 #FCFF4B（亮字，對近黑底約 13:1）；
+     ≥769 亮球 → 由檔尾 media 覆寫為 #1b1b1b（深字，對亮球底約 16:1）。
+     註：先前此處為 rgb(21 21 21) 深色 → 會讓 ≤768 近黑球上的 -5 完全看不見（本次一併修正）。 */
+  color: var(--bc-theme2, #fcff4b);
   font-weight: 700;
 }
 
@@ -507,5 +512,37 @@
 .bc-yama .tax-nav a p {
   position: relative;
   top: 0.25em;
+}
+
+/* ============================================================
+   2026-09-21 使用者指示（第二主題色 #FCFF4B 亮球可讀性收尾）
+   ------------------------------------------------------------
+   ① 正常狀態：球內文字（主行／tagline／-5 積分）一律改為 #1b1b1b（深色）
+   ② hover 狀態：圓球（hover 掃過層 a:after）改為白色
+   ------------------------------------------------------------
+   適用範圍：≥769px 的「主題色亮球」層（含 744~1199.98 平板層中 ≥769 的部分）。
+   ≤768px 圓球仍為近黑 #131211（該層文字：主行 #ba833a 金、tagline 白、
+   -5 主題色），故不受本段影響（本段 media 不含 ≤768）。
+   白球 hover 無需另設文字色：同一深字在白球 17.2:1、在亮球 16.0:1（皆 AAA）。
+   實作：本段置於檔尾 —— 與檔案中段規則同特異度時「後者勝」，
+        故可穩定覆寫文字色；--bc-yama-circle-hover 亦在 .bc-yama 層級覆寫
+        （與 :root 同特異度、後者勝），只影響 ≥769 的圓球。
+   註：中段舊註解「hover #1a1919」為 ≤768 的值，≥769 以白色為準。
+   ============================================================ */
+@media (min-width: 769px) {
+  /* ② hover 圓球白色 */
+  .bc-yama {
+    --bc-yama-circle-hover: #ffffff;
+  }
+  /* ① 正常狀態文字深色（hover 沿用同色） */
+  .bc-yama .tax-nav a p,
+  .bc-yama .tax-nav a p > span:first-child,
+  .bc-yama .tax-nav a p .bc-yama-tagline--points,
+  .bc-yama .tax-nav a p .bc-yama-tagline--points .bc-yama-discount {
+    color: #1b1b1b;
+  }
+  .bc-yama .tax-nav a p > span:first-child em {
+    text-decoration-color: #1b1b1b;
+  }
 }
 
