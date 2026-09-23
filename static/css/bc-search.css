@@ -1,7 +1,7 @@
 /* ============================================================
    bc-search.css — 首頁 SALON/STORE SEARCH 大區塊
    參考 demido.jp <aside class="search"> 佈局（保留原樣風格）
-   + 品牌色系統（金色 var(--bc-gold, #fcff4b) / 黑底 #0e0e0e）
+   + 品牌色系統（金色 #c49b63 / 黑底 #0e0e0e）
    + 背景圖替換為咖啡主題（search_img01/02/03.png）
    動畫：GSAP is-on/is-out hover 浮動 + CSS floating 上浮
    ============================================================ */

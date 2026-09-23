@@ -250,7 +250,7 @@
     font-family: "Noto Sans TC", sans-serif;
     font-size: 16px; /* 2026-08-27 稍微減小：18→16 */
     font-weight: 500;
-    color: var(--bc-gold, #fcff4b);
+    color: var(--bc-gold, #c49b63);
     letter-spacing: 0.06em;
     line-height: 1.4;
     margin: 4px 0 0;

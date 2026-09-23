@@ -12,11 +12,8 @@
 ## 二、色系統（只用這些色）
 | 用途 | 值 | CSS 變數 |
 |------|------|----------|
-| 第一主題色（原品牌金；2026-09-21 起＝第二主題色） | `#FCFF4B`（rgb 252 255 75） | `--bc-gold`（＝`var(--bc-theme2)`） |
-| 第一主題色 hover | `#ffffff` | `--bc-gold-hover` |
-| 第二主題色（單一來源） | `#FCFF4B`（rgb 252 255 75） | `--bc-theme2`／`--bc-theme2-rgb` |
-| 第一主題色半透明底／光暈／聚焦框 | `rgb(var(--bc-theme2-rgb) / .15 / .3 / .4)` | `--bc-gold-light`／`--bc-gold-glow`／`--bc-border-focus` |
-| 亮底（主題色）上的文字 | `#0e0e0e`（白底用 `#1b1b1b`） | 直接用色值 |
+| 品牌金 | `#c49b63` | `--bc-gold` |
+| 金 hover | `#d4ab73` | `--bc-gold-hover` |
 | 背景 | `#0e0e0e` | `--bc-bg` |
 | 卡片 | `rgba(255,255,255,.04)` | `--bc-bg-card` |
 | 輸入框 | `rgba(255,255,255,.06)` | `--bc-bg-input` |

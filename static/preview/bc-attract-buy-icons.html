@@ -18,7 +18,7 @@
   body { margin: 0; padding: 32px; background: #0e0e0e; color: rgba(255, 255, 255, .9); font-family: 'Noto Sans TC', sans-serif; }
   h1 { font-size: 1.2rem; font-weight: 500; margin: 0 0 8px; }
   .note { font-size: .85rem; font-weight: 300; line-height: 1.8; color: rgba(255, 255, 255, .5); margin: 0 0 28px; }
-  .note code { color: #fcff4b; font-family: monospace; }
+  .note code { color: #c49b63; font-family: monospace; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 20px; }
   .card { background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 20px 8px 14px; text-align: center; }
   /* 預覽用覆寫：只取消 fixed 定位與垂直置中，讓 10 個按鈕能並排；
@@ -27,7 +27,7 @@
   /* 預覽用：補上與線上相同的 box-sizing（線上由全域 reset 提供；本頁未載入該檔）。
      少了它，.c-attract 的 width:100% + padding 24px 會以 content-box 計算 → link 變 88x198（線上為 48x150）→ 比例失真。 */
   .card .bc-attract-buy .c-attract { box-sizing: border-box; }
-  .no { font-size: 1.05rem; font-weight: 700; color: #fcff4b; line-height: 1; }
+  .no { font-size: 1.05rem; font-weight: 700; color: #c49b63; line-height: 1; }
   /* 放大檢視：同一圖示放大 40px，方便比較形狀（實際大小看下方按鈕） */
   .bigicon { display: block; font-size: 40px; line-height: 1; margin: 0 0 14px; color: #fff; }
   .nm { font-size: .68rem; color: rgba(255, 255, 255, .55); font-family: monospace; word-break: break-all; margin-top: 5px; }

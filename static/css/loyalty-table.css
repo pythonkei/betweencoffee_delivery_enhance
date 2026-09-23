@@ -179,8 +179,8 @@
 }
 
 .points-positive {
-    background-color: var(--brand-primary); /* 實色＝第一主題色（2026-09-21 改為第二主題色 #FCFF4B） */
-    color: #0e0e0e; /* 亮底配深字（原白色文字對比不足） */
+    background-color: var(--brand-primary); /* 實色綠色 */
+    color: #ffffff; /* 白色文字 */
     border: none; /* 取消邊框 */
 }
 
@@ -338,7 +338,7 @@
     display: flex;
     align-items: stretch;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgb(var(--bc-theme2-rgb) / 0.25);
+    border: 1px solid rgba(196, 155, 99, 0.25);
     border-radius: 8px;
     overflow: hidden;
     min-height: 120px;
@@ -384,7 +384,7 @@
 /* 垂直虛線分割線 */
 .reward-coupon-divider {
     width: 0;
-    border-left: 1px dashed rgb(var(--bc-theme2-rgb) / 0.4);
+    border-left: 1px dashed rgba(196, 155, 99, 0.4);
     flex-shrink: 0;
 }
 
@@ -465,7 +465,7 @@
 
 .stats-card {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgb(var(--bc-theme2-rgb) / 0.25);
+    border: 1px solid rgba(196, 155, 99, 0.25);
     border-radius: 8px;
     padding: 1.5rem 1rem;
     height: 100%;
@@ -535,7 +535,7 @@
         width: auto;
         height: 0;
         border-left: none;
-        border-top: 1px dashed rgb(var(--bc-theme2-rgb) / 0.3);
+        border-top: 1px dashed rgba(196, 155, 99, 0.3);
         margin: 0 1.25rem;
     }
 

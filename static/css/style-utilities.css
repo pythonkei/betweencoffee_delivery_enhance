@@ -751,7 +751,7 @@ select.form-control:focus::-ms-value  {
 }
 
 .allauth content a:hover {
-  color: var(--bc-gold, #fcff4b);
+  color: rgb(196,155,99);
 }
 
 /* profile */
@@ -828,7 +828,7 @@ button.alert:hover {
 /* Responsive adjustments */
 
 .color-theme {
-  color: var(--bc-gold, #fcff4b);
+  color: rgba(196,155,99, 1);
 }
 
 /* Add to your existing CSS */
@@ -1643,7 +1643,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .asymmetric-btn-v1 {
   background: var(--brand-primary);
   border: 2px solid var(--brand-primary);
-  color: #0e0e0e;
+  color: white;
   padding: 0.8rem 2.5rem;
   font-size: 1rem;
   font-weight: 400;
@@ -1658,7 +1658,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .asymmetric-btn-v1:hover {
   background: transparent;
   color: var(--brand-primary);
-  box-shadow: 0 8px 25px rgb(var(--bc-theme2-rgb) / 0.3);
+  box-shadow: 0 8px 25px rgba(196, 155, 99, 0.3);
 }
 
 /* 响应式设计 */
@@ -1790,7 +1790,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
   align-items: center;
   gap: 24px;
   padding: 16px 32px;
-  background: rgb(var(--bc-theme2-rgb) / 0.8);
+  background: rgba(196, 155, 99, 0.8);
   border-radius: 14px 0 0 14px;
   flex: 1;
   min-width: 0;
@@ -2250,9 +2250,9 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 /* 激活狀態的卡片 */
 .status-card.active {
-    background: rgb(var(--bc-theme2-rgb) / 0.1);
+    background: rgba(196, 155, 99, 0.1);
     border-color: var(--brand-primary);
-    box-shadow: 0 8px 25px rgb(var(--bc-theme2-rgb) / 0.2);
+    box-shadow: 0 8px 25px rgba(196, 155, 99, 0.2);
     transform: translateY(-5px);
 }
 
@@ -2363,7 +2363,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .connector-dot.active {
     background: var(--brand-primary);
     transform: scale(1.3);
-    box-shadow: 0 0 10px rgb(var(--bc-theme2-rgb) / 0.5);
+    box-shadow: 0 0 10px rgba(196, 155, 99, 0.5);
 }
 
 .connector-dot[data-dot="4"].active {
@@ -2465,13 +2465,13 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 /* 狀態卡片動畫 */
 @keyframes cardPulse {
     0% {
-        box-shadow: 0 8px 25px rgb(var(--bc-theme2-rgb) / 0.2);
+        box-shadow: 0 8px 25px rgba(196, 155, 99, 0.2);
     }
     50% {
-        box-shadow: 0 8px 30px rgb(var(--bc-theme2-rgb) / 0.4);
+        box-shadow: 0 8px 30px rgba(196, 155, 99, 0.4);
     }
     100% {
-        box-shadow: 0 8px 25px rgb(var(--bc-theme2-rgb) / 0.2);
+        box-shadow: 0 8px 25px rgba(196, 155, 99, 0.2);
     }
 }
 
@@ -2515,12 +2515,12 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgb(var(--bc-theme2-rgb) / 0.2);
+    background: rgba(196, 155, 99, 0.2);
     color: var(--brand-primary);
     font-size: 0.7rem;
     padding: 2px 6px;
     border-radius: 4px;
-    border: 1px solid rgb(var(--bc-theme2-rgb) / 0.3);
+    border: 1px solid rgba(196, 155, 99, 0.3);
     z-index: 10;
 }
 
@@ -2545,7 +2545,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
     font-style: italic;
     margin-top: 0.5rem;
     padding: 0.25rem 0.5rem;
-    background: rgb(var(--bc-theme2-rgb) / 0.1);
+    background: rgba(196, 155, 99, 0.1);
     border-radius: 4px;
     border-left: 3px solid var(--brand-primary);
 }
@@ -2744,7 +2744,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .traditional-login-form {
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid rgb(var(--bc-theme2-rgb) / 0.2);
+    border-top: 1px solid rgba(196, 155, 99, 0.2);
 }
 
 .form-group {
@@ -2764,7 +2764,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .form-control {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid rgb(var(--bc-theme2-rgb) / 0.3);
+    border: 1px solid rgba(196, 155, 99, 0.3);
     border-radius: 6px;
     /* background-color: rgba(0, 0, 0, 0.8); */
     /* color: #fff; */
@@ -2893,13 +2893,13 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .btn-brand {
     background-color: var(--brand-primary);
     border: 1px solid var(--brand-primary);
-    color: #0e0e0e;
+    color: #fff;
     transition: all 0.3s ease;
 }
 .btn-brand:hover {
     background-color: var(--brand-primary-dark);
     border-color: var(--brand-primary-dark);
-    color: #0e0e0e;
+    color: #fff;
 }
 .btn-brand-outline {
     background-color: transparent;
@@ -2909,7 +2909,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 }
 .btn-brand-outline:hover {
     background-color: var(--brand-primary);
-    color: #0e0e0e;
+    color: #fff;
 }
 
 /* 品牌卡片 */
@@ -2935,7 +2935,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 /* 品牌徽章 */
 .badge-brand {
     background-color: var(--brand-primary);
-    color: #0e0e0e;
+    color: #fff;
     font-weight: 500;
     padding: 0.35em 0.65em;
     border-radius: 0.25rem;
@@ -2963,7 +2963,7 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 .form-control-brand:focus {
     border-color: var(--brand-primary);
     outline: none;
-    box-shadow: 0 0 0 2px rgb(var(--bc-theme2-rgb) / 0.2);
+    box-shadow: 0 0 0 2px rgba(196, 155, 99, 0.2);
 }
 .form-control-brand::placeholder {
     color: var(--brand-text-muted);

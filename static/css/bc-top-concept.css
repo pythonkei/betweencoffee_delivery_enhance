@@ -295,7 +295,7 @@
       -ms-flex-pack: center;
           justify-content: center;
   background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgb(var(--bc-theme2-rgb) / 0.4);
+  border: 1px solid rgba(196, 155, 99, 0.4);
   border-radius: 8px;
 }
 .bc-top-concept .leader-placeholder { width: 48%; height: 48%; opacity: 0.75; }

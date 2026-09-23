@@ -18,7 +18,7 @@
   --white: #fff;
   --gray: #6c757d;
   --gray-dark: #343a40;
-  --primary: var(--bc-gold, #fcff4b);
+  --primary: #c49b63;
   --secondary: #6c757d;
   --success: #28a745;
   --info: #17a2b8;
@@ -34,14 +34,10 @@
   --font-family-sans-serif: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* ===== Between Coffee 品牌視覺變數 =====
-     2026-09-21 使用者指示「修改全域：將目前的第一主題色改為第二主題色」：
-     第一主題色（原品牌金）→ 第二主題色 #FCFF4B（rgb 252 255 75）。
-     變數指向 bc-components.css 的 --bc-theme2（附字面 fallback，單獨載入此檔仍正確）。
-     dark/light 變體同步改為萊姆家族（深／淺），供 hover、淺底文字等既有用途使用。 */
-  --brand-primary: var(--bc-theme2, #fcff4b);
-  --brand-primary-dark: #e4e73c;    /* 較深萊姆（原深金 #e4e73c）：hover／active／淺底文字 */
-  --brand-primary-light: #fdff9e;   /* 較白萊姆（原淺金 #fdff9e） */
+  /* ===== Between Coffee 品牌視覺變數 ===== */
+  --brand-primary: #c49b63;
+  --brand-primary-dark: #a67c3e;
+  --brand-primary-light: #d4b07a;
   --brand-bg: #1a1a2e;
   --brand-bg-light: #2a2a3e;
   --brand-bg-card: rgba(255, 255, 255, 0.05);
@@ -777,12 +773,12 @@ a.btn.disabled  {
 
   .btn-primary:hover  { 
     color: #212529;
-    background-color: var(--bc-gold-hover, #ffffff);
-    border-color: var(--bc-gold-hover, #ffffff); }
+    background-color: #56caeb;
+    border-color: #4ac7ea; }
 
   .btn-primary:focus, .btn-primary.focus  { 
-    -webkit-box-shadow: 0 0 0 0.2rem var(--bc-gold-glow);
-    box-shadow: 0 0 0 0.2rem var(--bc-gold-glow); }
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5); }
 
   .btn-primary.disabled, .btn-primary:disabled  { 
     color: #212529;
@@ -792,13 +788,13 @@ a.btn.disabled  {
   .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
   .show > .btn-primary.dropdown-toggle  { 
     color: #212529;
-    background-color: var(--brand-primary-dark);
-    border-color: var(--brand-primary-dark); }
+    background-color: #4ac7ea;
+    border-color: #3fc3e8; }
 
     .btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
     .show > .btn-primary.dropdown-toggle:focus  { 
-      -webkit-box-shadow: 0 0 0 0.2rem var(--bc-gold-glow);
-      box-shadow: 0 0 0 0.2rem var(--bc-gold-glow); }
+      -webkit-box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5);
+      box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5); }
 
 
 .btn-secondary  { 
@@ -999,8 +995,8 @@ a.btn.disabled  {
     border-color: var(--brand-primary); }
 
   .btn-outline-primary:focus, .btn-outline-primary.focus  { 
-    -webkit-box-shadow: 0 0 0 0.2rem var(--bc-gold-glow);
-    box-shadow: 0 0 0 0.2rem var(--bc-gold-glow); }
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5); }
 
   .btn-outline-primary.disabled, .btn-outline-primary:disabled  { 
     color: var(--brand-primary);
@@ -1014,8 +1010,8 @@ a.btn.disabled  {
 
     .btn-outline-primary:not(:disabled):not(.disabled):active:focus, .btn-outline-primary:not(:disabled):not(.disabled).active:focus,
     .show > .btn-outline-primary.dropdown-toggle:focus  { 
-      -webkit-box-shadow: 0 0 0 0.2rem var(--bc-gold-glow);
-      box-shadow: 0 0 0 0.2rem var(--bc-gold-glow); }
+      -webkit-box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5);
+      box-shadow: 0 0 0 0.2rem rgba(120, 213, 239, 0.5); }
 
 
 .btn-outline-secondary  { 
@@ -1976,7 +1972,7 @@ input[type="button"].btn-block  {
   .badge-primary[href]:hover, .badge-primary[href]:focus  { 
     color: #212529;
     text-decoration: none;
-    background-color: var(--bc-gold-hover, #ffffff); }
+    background-color: #4ac7ea; }
 
 
 .badge-secondary  { 
@@ -3026,7 +3022,7 @@ a.text-success:hover, a.text-success:focus  {
 
 
 .text-theme {
-  color: var(--bc-gold, #fcff4b) !important; }
+  color: rgba(196,155,99, 1) !important; }
 
 
 a.text-theme:hover, a.text-theme:focus  { 
@@ -3700,7 +3696,7 @@ h1, h2, h3, h4, h5,
       .btn.btn-primary.btn-outline-primary:hover  { 
         border: 1px solid transparent;
         background: var(--brand-primary);
-        color: #0e0e0e; }
+        color: #fff; }
 
   .btn.btn-white  { 
     background: #fff;

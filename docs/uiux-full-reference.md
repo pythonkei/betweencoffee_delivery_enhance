@@ -154,18 +154,16 @@
 
 | 用途 | 顏色值 | CSS 變數 |
 |------|--------|----------|
-| 第一主題色（原品牌金；2026-09-21 起＝第二主題色） | `#FCFF4B`（rgb 252 255 75） | `--bc-gold`（＝`var(--bc-theme2)`） |
-| 第一主題色懸浮 | `#ffffff` | `--bc-gold-hover` |
-| 第二主題色（全站單一來源） | `#FCFF4B`（rgb 252 255 75） | `--bc-theme2`／`--bc-theme2-rgb` |
-| 第一主題色半透明背景 | `rgb(var(--bc-theme2-rgb) / 0.15)` | `--bc-gold-light` |
-| 第一主題色發光陰影 | `rgb(var(--bc-theme2-rgb) / 0.3)` | `--bc-gold-glow` |
+| 品牌金色（主要強調） | `#c49b63` | `--bc-gold` |
+| 金色懸浮 | `#d4ab73` | `--bc-gold-hover` |
+| 金色半透明背景 | `rgba(196, 155, 99, 0.15)` | `--bc-gold-light` |
+| 金色發光陰影 | `rgba(196, 155, 99, 0.3)` | `--bc-gold-glow` |
 | 深黑背景 | `#0e0e0e` | `--bc-bg` |
 | 卡片背景 | `rgba(255, 255, 255, 0.04)` | `--bc-bg-card` |
 | 卡片懸浮 | `rgba(255, 255, 255, 0.07)` | `--bc-bg-card-hover` |
 | 輸入框背景 | `rgba(255, 255, 255, 0.06)` | `--bc-bg-input` |
 | 邊框 | `rgba(255, 255, 255, 0.08)` | `--bc-border` |
-| 邊框聚焦（第一主題色） | `rgb(var(--bc-theme2-rgb) / 0.4)` | `--bc-border-focus` |
-| 主題色亮底上的文字（必須深色） | `#0e0e0e`（純白底 `#1b1b1b`） | 直接用色值 |
+| 邊框聚焦（金色） | `rgba(196, 155, 99, 0.4)` | `--bc-border-focus` |
 | 主要文字 | `rgba(255, 255, 255, 0.9)` | `--bc-text` |
 | 次要文字 | `rgba(255, 255, 255, 0.5)` | `--bc-text-muted` |
 | 暗淡文字 | `rgba(255, 255, 255, 0.3)` | `--bc-text-dim` |

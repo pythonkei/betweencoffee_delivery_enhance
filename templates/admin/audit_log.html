@@ -9,17 +9,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Mogra&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href={% static 'css/style-bootstrap.css' %}?v=20260921a />
+    <link rel="stylesheet" href={% static 'css/style-bootstrap.css' %} />
     <link rel="stylesheet" href={% static 'css/style-custom.css' %} />
-    <link rel="stylesheet" href={% static 'css/style-utilities.css' %}?v=20260921a />
+    <link rel="stylesheet" href={% static 'css/style-utilities.css' %} />
     <link rel="stylesheet" href={% static "css/animate-custom.css" %} />
     <link rel="stylesheet" href={% static "css/magnific-popup.css" %} />
-    <link rel="stylesheet" href={% static "css/jquery.timepicker.min.css" %}?v=20260921a />
+    <link rel="stylesheet" href={% static "css/jquery.timepicker.min.css" %} />
     <link rel="stylesheet" href={% static "css/select2.min.css" %} />
     <link rel="stylesheet" href={% static "css/fontawesome/css/all.css" %} />
     <link rel="stylesheet" href={% static "css/icomoon.css" %} />
     <!-- bc-components.css 含 toast、payment-methods、member-nav 樣式 -->
-    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20260921n />
+    <link rel="stylesheet" href={% static "css/bc-components.css" %} />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
@@ -33,7 +33,7 @@
         .filter-group { flex: 1; min-width: 180px; }
         .filter-group label { display: block; color: rgba(255,255,255,0.5); font-size: .85rem; margin-bottom: 4px; }
         .filter-group select, .filter-group input { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: rgba(255,255,255,0.9); padding: 8px 28px 8px 12px; font-size: .9rem; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.6)' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
-        .filter-group select:focus, .filter-group input:focus { border-color: var(--bc-gold, #fcff4b); outline: none; background: rgba(255,255,255,0.1); color: #fff; }
+        .filter-group select:focus, .filter-group input:focus { border-color: #c49b63; outline: none; background: rgba(255,255,255,0.1); color: #fff; }
         .filter-group select option { background: #1a1a1a; color: rgba(255,255,255,0.9); }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; }
@@ -44,23 +44,23 @@
         .badge { display: inline-block; padding: 3px 10px; border-radius: 5px; font-size: .85rem; font-weight: 500; text-align: center; line-height: 1.5; }
         td .badge { vertical-align: middle; }
         .badge-ready { background: rgba(76,175,80,0.15); color: #81c784; }
-        .badge-preparing { background: rgb(var(--bc-theme2-rgb) / 0.15); color: var(--bc-gold, #fcff4b); }
+        .badge-preparing { background: rgba(196,155,99,0.15); color: #c49b63; }
         .badge-completed { background: rgba(33,150,243,0.15); color: #64b5f6; }
         .badge-cancelled { background: rgba(244,67,54,0.15); color: #e57373; }
         .badge-waiting { background: rgba(255,152,0,0.15); color: #ffb74d; }
         .badge-payment { background: rgba(0,200,83,0.15); color: #69f0ae; }
-        .staff-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgb(var(--bc-theme2-rgb) / 0.1); color: var(--bc-gold, #fcff4b); }
-        .order-link { color: var(--bc-gold, #fcff4b); text-decoration: none; }
+        .staff-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(196,155,99,0.1); color: #c49b63; }
+        .order-link { color: #c49b63; text-decoration: none; }
         .order-link:hover { text-decoration: underline; }
-        .btn-gold { background: var(--bc-gold, #fcff4b); color: #0e0e0e; border: none; border-radius: 6px; padding: 10px 20px; font-size: .9rem; cursor: pointer; }
-        .btn-gold:hover { background: var(--bc-gold-hover, #ffffff); }
+        .btn-gold { background: #c49b63; color: #fff; border: none; border-radius: 6px; padding: 10px 20px; font-size: .9rem; cursor: pointer; }
+        .btn-gold:hover { background: #d4ab73; }
         .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; }
         .pagination button { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: rgba(255,255,255,0.9); padding: 8px 14px; cursor: pointer; font-size: .85rem; }
-        .pagination button:hover { border-color: var(--bc-gold, #fcff4b); color: var(--bc-gold, #fcff4b); }
+        .pagination button:hover { border-color: #c49b63; color: #c49b63; }
         .pagination button:disabled { opacity: .4; cursor: not-allowed; }
         .pagination .info { color: rgba(255,255,255,0.5); font-size: .85rem; }
         .loading, .empty { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5); }
-        .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid rgb(var(--bc-theme2-rgb) / 0.3); border-top-color: var(--bc-gold, #fcff4b); border-radius: 50%; animation: spin .6s linear infinite; margin-bottom: 8px; }
+        .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid rgba(196,155,99,0.3); border-top-color: #c49b63; border-radius: 50%; animation: spin .6s linear infinite; margin-bottom: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 768px) { .filter-group { min-width: 100%; } th, td { padding: 8px 10px; } }
     </style>
