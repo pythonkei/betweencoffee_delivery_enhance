@@ -30,8 +30,11 @@
  *   上移後仍以 weather 下緣 + WEATHER_GAP 為下限（about 頁不會壓到天氣元件）。
  *
  * 避免載入瞬間位置跳動：base.html <head> 先對 <html> 加 .bc-attract-pending
- *   （bc-attract.css 讓 .bc-attract-nav 暫時 visibility: hidden），定位完成即移除；
- *   <head> 另有 1.2s 保險計時器，即使本檔未執行也會自動顯示，不會整組消失。
+ *   （bc-attract.css 讓 .bc-attract-nav 與 #bc-floating-cart 暫時 visibility: hidden），
+ *   定位完成即由 reveal() 移除；<head> 另有保險計時器——
+ *   本檔已上線（window.bcAttractPlace 存在）→ 交由本檔決定顯示時機；
+ *   未上線（404／JS 失效）→ 每 200ms 檢查、最慢 3s 強制顯示；
+ *   另設 3s 最終後盾，任何情況都不會整組消失。
  */
 (function () {
   'use strict';
