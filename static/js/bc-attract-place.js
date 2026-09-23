@@ -101,7 +101,7 @@
      實測 navbar 在較慢的頁面（about）約 0.7~1s 才解析完成，
      12 次（約 200ms）會提早放棄並以 CSS top:50% 顯示造成跳動）；
      期間維持 pending 隱藏，量到基準就立刻顯示。
-     base.html <head> 的 1.2s 保險計時器仍是最終後盾（不管有沒有量到都會顯示）。 */
+     base.html <head> 的保險計時器（本檔未上線時最慢 3s）與 3s 最終後盾仍是最後防線。 */
   var degradedTries = 0;
   var RETRY_LIMIT = 60;
   var retryScheduled = false;
@@ -154,7 +154,7 @@
          navbar-brand 尚未排版完成（高度 0）→ 整組與浮動購物車會先以 CSS
          top:50%（畫面中央）顯示一瞬再跳到正確高度。改為「下一幀重試」，
          量到基準就立刻顯示；連續多次仍量不到才 reveal（退化為 CSS 位置），
-         且 base.html 的 1.2s 保險計時器無論如何都會顯示。 */
+         且 base.html 的保險計時器／3s 最終後盾無論如何都會顯示。 */
       buy.style.top = '';
       prof.style.top = '';
       syncCart();
