@@ -132,8 +132,12 @@ html.bc-attract-pending .bc-floating-cart {
   border-color: #fff;         /* hover 邊框不變色（維持白色） */
   text-decoration: none;
 }
+/* 2026-09-24（使用者指示「隱藏 c-attract 內部圖示」）：Order 長條內的 Material 圖示
+   （span.c-icon，目前為 coffee）隱藏 → 只留豎排「Order」文字。
+   markup 與 10 個候選圖示清單保留在 templates/layouts/nav.html（要恢復＝刪掉 display:none 即可）。 */
 .bc-attract-buy .bc-attract-buy__link .c-icon {
-  font-size: 1.1rem;
+  display: none;      /* 2026-09-24：隱藏圖示 */
+  font-size: 1.1rem;  /* 保留設定，日後恢復顯示時不需重調 */
   line-height: 1;
 }
 .bc-attract-buy .bc-attract-buy__link [lang='en'] {
