@@ -79,8 +79,11 @@ load_context() {
         echo "├── 技術架構: Django + PostgreSQL + WebSocket"
         echo "├── 部署平台: Render（Docker 運行時，autoDeploy 已關閉 → 每次上線需 dashboard 手動 Manual Deploy）"
         echo "├── Live URL: https://betweencoffee-delivery-enhance-v1.onrender.com/"
-        echo "├── 系統狀態: 已部署到 Render，核心功能完整（⚠ 2026-09-21~23 批次尚未上線）"
+        echo "├── 系統狀態: 已部署到 Render，核心功能完整（⚠ 2026-09-21~24 批次尚未上線）"
         echo "├── 最新改動: 第一主題色已還原為品牌金 #c49b63（2026-09-23 改成 #FCFF4B 後使用者反映效果不理想 → git revert 7ed076cd），第二主題色維持 #FCFF4B；同日完成 yama 圓球亮球可讀性與浮動購物車初始跳動修正 ✅（2026-09-23）"
+        echo "│   2026-09-24 ✅"
+        echo "│   ├── 首頁商品圖更名（使用者指示）：black_blend_4.png→black_blend_v4.png、coffee_07_1_ywGMC7S.png→friuty.png、shunshine_kFPsy3b.png→sunshine.png（皆 CoffeeItem.image_index 首頁圖；#9 果香浅煎原留空 → 補 friuty）→ data migration 0074（部署時自動套用）；新檔自 static/images 複製進 media/coffee_images/index/（ImageField.url 一律走 MEDIA_URL）；image（詳情頁／訂單快照）不動、舊檔保留不 404；驗證 hero 圓圈 3 張 840×1200、HTTP 200、0 破圖"
+
         echo "│   2026-09-21~23 ✅"
         echo "│   ├── 全域把第一主題色改為第二主題色（品牌金 #c49b63 → #FCFF4B，使用者指示「修改全域把目前的第一主題色改為第二主題色」，2026-09-23）：單一來源＝bc-components.css :root 的 --bc-theme2／--bc-theme2-rgb；--bc-gold 改 var(--bc-theme2)、--bc-gold-hover 改白 #ffffff、--bc-gold-light／-glow／--bc-border-focus 改 rgb(var(--bc-theme2-rgb) / .15/.3/.4)；style-bootstrap.css 的 --primary／--brand-primary 同步指向（-dark #e4e73c、-light #fdff9e）；26 檔／154 行硬寫色值替換；亮底必配深字 31 筆（選項鈕含 hover/active 的 icon/label/oz、繼續支付、待確認付款、購物車前往結帳按鈕、積分條、member-nav、timepicker、admin .btn-gold、order_history、profile／loyalty-table／staff_order_management／style-utilities）；順修原模板殘留藍色（.btn-primary:hover/active、.btn-outline-primary、.badge-primary:hover 與 4 組 primary focus ring）；補 9 處完全缺失的 ?v=（否則 1 年快取沿用舊色）＋升 7 處版號；驗證：執行期對比稽核（CDP 逐元素字色 vs 底色）5 頁 × 1440/390 → 本次新增低對比 0 筆；commit 7ed076cd（已 push）→ **同日 revert 還原，見下方還原條目**"
         echo "│   ├── yama 圓球亮球可讀性（使用者指示，2026-09-23）：正常狀態球內文字（主行／tagline／-5）改 #1b1b1b、hover 圓球改白色（≥769 覆寫 --bc-yama-circle-hover）；-5 由 rgb(21 21 21) 改回 var(--bc-theme2)（同時修掉 ≤768 深球上不可見的舊問題）；實作置於 bc-yama-header.css 檔尾 @media(min-width:769px)（同特異度後者勝）；CDP 1440/1024 與 768/430 雙層驗證、對比 16.03:1／17.22:1；版號 bc-yama-header.css f（commits 80dfcbe5、9e04392e）"
