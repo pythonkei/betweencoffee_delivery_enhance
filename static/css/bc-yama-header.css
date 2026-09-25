@@ -546,3 +546,59 @@
   }
 }
 
+/* ============================================================
+   2026-09-25 使用者指示：bc-yama 圓球「外圈、留間距」新增 ORDER NOW 文字環
+   ＋ 繞圓心自轉動畫；文字白色（使用者指定）。
+   ------------------------------------------------------------
+   ① 文字：SVG <textPath> 沿圓形路徑排「ORDER NOW」×7（textLength 精準繞滿一圈）
+   ② 位置：外圈留間距 —— 路徑半徑 97＝球半徑 87＋10；文字在基線外側
+      （band 約 94.8~105.3）→ 與圓球邊緣實際留白約 7.8px，不貼邊
+   ③ 動畫：整個 SVG 以圓心為軸 24s／圈 linear 無限（無漸變、無花巧）
+   實作：SVG 外框以 left/top:-19% + width/height:138% 放大 38%（240/174），
+         viewBox 中心＝圓心 → 圓球在各斷點縮放時文字環自動等比，不需另寫斷點。
+         （百分比基準＝.tax-nav 內距框；實測與圓球外框同尺寸，桌面 174px／手機 390 為 96px）
+   2026-09-25 實測（Chrome，dpr1）：
+     桌面 1440：球 173.98px → 環框 240.09px（1.3800）、路徑半徑 97.04px、
+                與球邊淨空 7.84px、同心誤差 0.01px、右／下各留 22.9／56.9px；
+     手機 390 ：球 96px → 環框 132.45px、路徑半徑 53.53px、淨空 4.33px、
+                文字外緣僅超出視窗 0.12px（次像素、無可見裁切）、文件無水平溢出；
+     兩者點擊測試 elementFromPoint 仍在 <a> 內、轉動矩陣 2.5s 內確實變化。
+   註：white 文字在亮色區塊（首屏 hero、bc-search 等）需極淡暗柔邊才看得見，
+       故加 drop-shadow（兩層）；不要柔邊＝刪掉 filter 那行即可（會變成純白）。
+       白色字壓過白色 deco（z-index 4 > 3）→ 圓頂弧不會被裝飾吃掉。
+   ============================================================ */
+.bc-yama .tax-nav .bc-yama-ring {
+  position: absolute;
+  /* 外框＝圓球 138%（240/174），圓心與圓球同心；
+     ⚠ SVG 是 replaced element，inset 不會撐開它（實測會變成預設 300×300）
+        → 必須明確給 width/height。 */
+  left: -19%;
+  top: -19%;
+  width: 138%;
+  height: 138%;
+  z-index: 4;               /* 高於圓球(1) 與白色 deco(3)，圓頂弧不會被遮 */
+  pointer-events: none;     /* 不影響圓球本身的點擊 */
+  overflow: visible;
+  transform-origin: 50% 50%;
+  animation: bc-yama-ring-spin 24s linear infinite;
+  /* 2026-09-25：白字在亮色區塊（首屏 hero／bc-search）的可讀性柔邊；可刪 */
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+.bc-yama .tax-nav .bc-yama-ring text {
+  fill: #ffffff;            /* 2026-09-25 使用者指定：白色 */
+  font-family: "Noto Sans TC", "Noto Sans JP", sans-serif;
+  font-size: 11px;          /* 以 viewBox 174 為基準，隨圓球等比縮放 */
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+@keyframes bc-yama-ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+/* 沿用 bc-rotate-mau.css 的慣例：使用者要求減少動態時暫停 */
+@media (prefers-reduced-motion: reduce) {
+  .bc-yama .tax-nav .bc-yama-ring {
+    animation-play-state: paused;
+  }
+}
+
