@@ -157,8 +157,9 @@
 
                         <!-- Submit Buttons -->
                         <div class="d-flex button-d-flex justify-content-between px-2 bc-product-action-row" style="gap: 1rem;">
-                            <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">立即購買</button>
+                            <!-- 2026-09-25（使用者指示「立即購買與加入購物車位置互換」）：加入購物車在左、立即購買在右 -->
                             <button type="submit" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">加入購物車</button>
+                            <button type="button" id="buy-now-btn" class="btn btn-primary btn-outline-primary calltoaction-btn px-4 py-3 bc-product-action-btn">立即購買</button>
                         </div>
                         <div class="text-center mt-3">
                             <span class="r-btn btn"><a href="{% url 'bean_menu' %}">返回</a></span>

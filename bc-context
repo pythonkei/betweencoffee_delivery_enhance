@@ -82,6 +82,8 @@ load_context() {
         echo "├── 系統狀態: 已部署到 Render，核心功能完整（⚠ 2026-09-21~24 批次尚未上線）"
         echo "├── 最新改動: 第一主題色已還原為品牌金 #c49b63（2026-09-23 改成 #FCFF4B 後使用者反映效果不理想 → git revert 7ed076cd），第二主題色維持 #FCFF4B；同日完成 yama 圓球亮球可讀性與浮動購物車初始跳動修正 ✅（2026-09-23）"
         echo "│   2026-09-25 ✅"
+        echo "│   ├── 詳情頁「立即購買／加入購物車」位置互換（使用者指示，2026-09-25）：coffee.html 與 bean.html 的 .bc-product-action-row 兩顆按鈕順序對調 → 加入購物車在左、立即購買在右；只動 markup，CSS/JS 未動（無 first/last-child 依賴、JS 以 #buy-now-btn 綁定）；驗證 1440：x=768/1018、兩顆 234×60；390：39/202、兩顆 149×36（尺寸與換前相同）"
+
         echo "│   ├── 咖啡詳情頁圖修正（使用者回報「詳情頁顯示了首頁的圖片」，2026-09-25）：像素比對確認 #3 flat_white.png／#4 black_blend_fRQ6OTF.png 與各自首頁圖是同一張畫（差 5.31／4.93；參考 #2 為 101）→ data migration 0076 把兩款 image 改為同設計滿版舊站照片 coffee_images/coffee_03_1.png（#3 紅杯）／coffee_images/coffee_02_1.png（#4 黑杯），皆 860×1100 與 #2 同格式；image_index（首頁圖）不動、舊檔保留；氣泡文字為空故不影響定位；驗證三頁照片框 516×458／圖 358×458、新圖 HTTP 200、首頁 index 圖不變"
 
         echo "│   2026-09-24 ✅"
