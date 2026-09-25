@@ -565,7 +565,10 @@
      兩者點擊測試 elementFromPoint 仍在 <a> 內、轉動矩陣 2.5s 內確實變化。
    註：white 文字在亮色區塊（首屏 hero、bc-search 等）需極淡暗柔邊才看得見，
        故加 drop-shadow（兩層）；不要柔邊＝刪掉 filter 那行即可（會變成純白）。
-       白色字壓過白色 deco（z-index 4 > 3）→ 圓頂弧不會被裝飾吃掉。
+       白色字原本壓過白色 deco（z-index 4 > 3）→ 圓頂弧會被文字環切過；
+       2026-09-25 使用者指示（第二輪）：改為 z-index 2（＝ deco 3 之下、圓球 1 之上），
+       圓頂突出的白色裝飾／上次訂單照片改為蓋過文字環（只用 <a> 內的 z-index 無法影響外部，
+       故此值僅在 .tax-nav 這個堆疊脈絡內有意義）。
    2026-09-25 修正（使用者回報「中心有個黑色圓形」）：
      <path> 沒設 fill → 沿用 SVG 預設 fill:black，整條圓形路徑被當成實心圓盤塗黑
      （半徑 97 > 球半徑 87，且 z-index 4 蓋在圓球 1 之上 → 整顆黃球看不到）。
@@ -580,7 +583,9 @@
   top: -19%;
   width: 138%;
   height: 138%;
-  z-index: 4;               /* 高於圓球(1) 與白色 deco(3)，圓頂弧不會被遮 */
+  z-index: 2;               /* 2026-09-25 使用者指示（第二輪）：改到 bc-yama-deco-photo 下方
+                               → 堆疊為 deco/deco-photo(3) > 文字環(2) > 圓球(1)，
+                                 圓頂突出的白色裝飾／上次訂單照片會蓋過文字環（原本 4 會壓過 deco 造成重疊） */
   pointer-events: none;     /* 不影響圓球本身的點擊 */
   overflow: visible;
   transform-origin: 50% 50%;

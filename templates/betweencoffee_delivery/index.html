@@ -74,7 +74,9 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                   bc-yama-header.css 亦有 .bc-yama-ring path{fill:none} 防呆）。
              textLength 609.5＝2π×97 → 7 組 ORDER NOW 精準繞滿一圈、接縫均勻。
              aria-hidden：純裝飾，圓球本身的文字/連結已具語意。
-             位置：須在 .tax-nav 內部（inset:% 參照 .tax-nav＝圓球外框）。 -->
+             位置：須在 .tax-nav 內部（inset:% 參照 .tax-nav＝圓球外框）。
+             堆疊：z-index 2（見 bc-yama-header.css）＝ 在 .bc-yama-deco/-photo(3) 之下、
+             圓球(1) 之上（2026-09-25 使用者指示：圓頂的白色裝飾/上次訂單照片要蓋過文字環）。 -->
         <svg class="bc-yama-ring" viewBox="-33 -33 240 240" aria-hidden="true" focusable="false">
             <path id="bc-yama-ring-path" fill="none" d="M87 87m-97 0a97 97 0 1 1 194 0a97 97 0 1 1 -194 0"></path>
             <text class="bc-yama-ring-text">
@@ -793,7 +795,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                  並移除原本讓浮動購物車避讓到左側的規則（新位置＝Buy 按鈕正上方） -->
 <!-- 2026-09-06：reviews 水平跑馬燈（首頁 feed 下方反向版） -->
 <link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20260906a">
-<link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20260925b">
+<link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20260925c">
 <!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class） -->
 <link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20260921b">
