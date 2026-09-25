@@ -68,11 +68,15 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
              圓球在各斷點縮放時文字環自動等比（詳見 bc-yama-header.css 的 .bc-yama-ring，
              桌面 174px／手機 390 的 96px 皆已實測）。
              ⚠ SVG 是 replaced element：只給 inset 不會被撐開（會變預設尺寸），已改明確 width/height。
+             ⚠ <path> 的預設 fill 是 black（自動填色）！漏寫 fill="none" 會在圓心畫出一顆
+                半徑 97 的黑色圓盤（97 > 球半徑 87 → 整顆黃球被黑盤蓋住）。
+                → 必須明確 fill="none"（2026-09-25 使用者回報「中心有個黑色圓形」後修正；
+                  bc-yama-header.css 亦有 .bc-yama-ring path{fill:none} 防呆）。
              textLength 609.5＝2π×97 → 7 組 ORDER NOW 精準繞滿一圈、接縫均勻。
              aria-hidden：純裝飾，圓球本身的文字/連結已具語意。
              位置：須在 .tax-nav 內部（inset:% 參照 .tax-nav＝圓球外框）。 -->
         <svg class="bc-yama-ring" viewBox="-33 -33 240 240" aria-hidden="true" focusable="false">
-            <path id="bc-yama-ring-path" d="M87 87m-97 0a97 97 0 1 1 194 0a97 97 0 1 1 -194 0"></path>
+            <path id="bc-yama-ring-path" fill="none" d="M87 87m-97 0a97 97 0 1 1 194 0a97 97 0 1 1 -194 0"></path>
             <text class="bc-yama-ring-text">
                 <textPath href="#bc-yama-ring-path" startOffset="0" textLength="609.5" lengthAdjust="spacing">ORDER NOW ORDER NOW ORDER NOW ORDER NOW ORDER NOW ORDER NOW ORDER NOW </textPath>
             </text>
@@ -789,7 +793,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                  並移除原本讓浮動購物車避讓到左側的規則（新位置＝Buy 按鈕正上方） -->
 <!-- 2026-09-06：reviews 水平跑馬燈（首頁 feed 下方反向版） -->
 <link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20260906a">
-<link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20260925a">
+<link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20260925b">
 <!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class） -->
 <link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20260921b">

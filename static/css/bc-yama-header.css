@@ -566,6 +566,10 @@
    註：white 文字在亮色區塊（首屏 hero、bc-search 等）需極淡暗柔邊才看得見，
        故加 drop-shadow（兩層）；不要柔邊＝刪掉 filter 那行即可（會變成純白）。
        白色字壓過白色 deco（z-index 4 > 3）→ 圓頂弧不會被裝飾吃掉。
+   2026-09-25 修正（使用者回報「中心有個黑色圓形」）：
+     <path> 沒設 fill → 沿用 SVG 預設 fill:black，整條圓形路徑被當成實心圓盤塗黑
+     （半徑 97 > 球半徑 87，且 z-index 4 蓋在圓球 1 之上 → 整顆黃球看不到）。
+     → markup 補 fill="none" 屬性 ＋ 本檔補 .bc-yama-ring path{fill:none} 防呆。
    ============================================================ */
 .bc-yama .tax-nav .bc-yama-ring {
   position: absolute;
@@ -590,6 +594,13 @@
   font-size: 11px;          /* 以 viewBox 174 為基準，隨圓球等比縮放 */
   font-weight: 500;
   letter-spacing: 0.04em;
+}
+/* 2026-09-25 修正（使用者回報「圓心有個黑色圓形」）：
+   SVG <path> 的預設 fill 是 black → 只當文字路徑用時必須 fill:none，
+   否則整條圓形路徑會被當成實心圓盤塗黑（半徑 97 > 球半徑 87 → 黃球全被蓋住）。
+   markup 已補 fill="none" 屬性，這裡再補一層 CSS 防呆（改 markup 也擋得住）。 */
+.bc-yama .tax-nav .bc-yama-ring path {
+  fill: none;
 }
 @keyframes bc-yama-ring-spin {
   from { transform: rotate(0deg); }
