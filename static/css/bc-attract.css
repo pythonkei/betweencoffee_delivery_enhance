@@ -62,11 +62,13 @@ html.bc-attract-pending .bc-floating-cart {
   flex-shrink: 0;
   /* 2026-09-21（使用者指示）：Order 長條（.bc-attract-buy）與個人圓鈕（.bc-attract-profile）
      之間的間距。原本為 0（兩者外盒上下相接、沒有空隙）→ 改為 12px。
+     2026-10-02（使用者指示「bc-attract-buy and 個人 profile 之間稍微縮小一點間距」）：
+     12px → 8px。⚠ 只改這一行即可生效（JS 定位與各斷點 CSS fallback 皆讀同一變數）。
      單一定義，兩個地方共用同一值：
        ① bc-attract-place.js 定位時讀取此變數
           （prof 中心 top = buyTop + (hB + hP) / 2 + gap）
        ② 下方各斷點 .bc-attract-profile 的 fallback top（JS 未執行時）用 var() 引用。 */
-  --bc-buy-profile-gap: 12px;
+  --bc-buy-profile-gap: 8px;
   /* 2026-09-21（使用者指示）：手機/平板把整組（浮動購物車 ＋ Order 長條 ＋ 個人圓鈕）
      「稍微向上移動」→ 由 bc-attract-place.js 的 anchorTop() 統一扣除
      （整組同步平移，三者相對關係不變）；浮動購物車另外讀同一基準，故也一起上移。
@@ -152,7 +154,9 @@ html.bc-attract-pending .bc-floating-cart {
    位置在 Buy & Order 按鈕下方、無間隙、中心點對齊
    （buy 底部 50%+112.5 + 半高 25 = 中心 50%+137.5）；
    2026-09-21（使用者指示「bc-attract-buy and 個人 profile 增加間距」）：
-   多讓 --bc-buy-profile-gap（12px），fallback top = (150+50)/2 + gap。===== */
+   多讓 --bc-buy-profile-gap（當時 12px），fallback top = (150+50)/2 + gap。
+   2026-10-02（使用者指示「稍微縮小一點間距」）：該變數值縮為 8px
+   （見 .bc-attract-nav 註解），本處公式與其他斷點 fallback 皆不變。===== */
 .bc-attract-profile {
   position: fixed;
   --attract: 24px;        /* 與 bc-attract-buy 相同的 hover 熱區擴展 */

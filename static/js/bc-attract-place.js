@@ -22,6 +22,8 @@
  *   Order 長條與個人圓鈕原本「外盒上下相接、間距 0」→ 多讓一個 --bc-buy-profile-gap
  *   （定義在 bc-attract.css 的 .bc-attract-nav，預設 12px；各斷點 .bc-attract-profile
  *   的 CSS fallback top 亦 var() 引用同一值，JS 未執行時也一致）。
+ * 2026-10-02（使用者指示「bc-attract-buy and 個人 profile 之間稍微縮小一點間距」）：
+ *   該變數值由 12px 改為 8px（仍讀同一變數，本檔程式碼無需修改）。
  *
  * 2026-09-21（使用者指示「手機端/平板端 整組三個一起向上移」，同日追加「桌面端也一起上移」）：
  *   anchorTop() 最後扣除 --bc-attract-lift（bc-attract.css：**全斷點 8px**，
