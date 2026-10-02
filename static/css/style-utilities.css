@@ -1745,6 +1745,18 @@ $sp-pad:$sp-pad-num/$design-num-sp*100vw;
 
 /* 支付提醒popup样式 */
 /* ===== Toast 風格購物車彈窗（底部滑入）- 重新設計 ===== */
+/* 2026-10-02（使用者指示）：「當有商品加入購物車時，這個 cart-popup 彈跳窗模組不需再顯示」
+   → 停用「加入購物車 Toast」（bean.html:213 / coffee.html:189 的 #cart-popup）。
+   ⚠ 只以 ID 覆蓋：#payment-reminder-popup（支付提醒，base.html:103）共用 .cart-popup 類別，
+     故不動下方任何 .cart-popup 樣式，確保支付提醒彈窗不受影響。
+   markup 與 showPopup()（bean.html:441 / coffee.html:399）皆保留未刪、
+   呼叫點（bean.html:382 / coffee.html:337）亦保留 → 只需移除本規則即可完全恢復。
+   （加入購物車的其他回饋仍照舊：.bc-cart-count 徽章更新 + cart:updated 事件同步
+     浮動購物車／滑出購物車。） */
+#cart-popup {
+  display: none !important;
+}
+
 .cart-popup {
   position: fixed;
   bottom: 30px;
