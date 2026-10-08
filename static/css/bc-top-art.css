@@ -1,0 +1,290 @@
+/* ============================================================================
+   bc-top-art.css — loogg.jp「.top_art」sticky 堆疊卡片模組（1:1 移植）
+   ----------------------------------------------------------------------------
+   2026-10-04 建立
+   來源：
+     · https://loogg.jp/  assets/css/common.css 第 669–789 行（模組樣式本體）
+     · loogg.jp HTML <head> 內嵌 <style>（11 張卡的 :after 底部 scrim 陰影）
+     · loogg.jp HTML 內嵌 <script>（scroll 縮放動畫 → 見 static/js/bc-top-art.js）
+
+   移植原則：
+     1. 區塊結構 / 類名 / 數值（vw、svh、calc）／媒體查詢斷點 1024px 全部與原站相同。
+     2. 所有選擇器前面加 .bc-top-art（scope），不動站上其他區塊。
+     3. 原站有一組全域 reset（*{margin/padding:0;box-sizing:border-box;
+        line-height:1;letter-spacing:0;border-radius:0}），本站沒有 → 於此檔
+        針對模組子樹補上，並刻意排在移植規則「之前」：同權重時靠後者勝出，
+        移植規則自帶的 padding / line-height / transition 才不會被 reset 蓋掉。
+     4. 站上全域 rule 需在模組內中和（已置於 reset 區）：
+        · style-bootstrap.css:3136「a{transition:.3s all ease;color:var(--brand-primary)}」
+          → JS 每 frame 寫入的 transform 會變成 .3s 補間動畫（原站無此過渡）→ 取消。
+        · style-bootstrap.css:3150「h1~h6{line-height:1.4;font-family:"Josefin Sans"…}」
+          + 104 行「h2{margin-bottom:.5rem}」→ 由移植規則 + margin 歸零覆蓋。
+        · 104 行「p{margin-bottom:1rem}」→ 由移植規則 margin:0 0 1vw 覆蓋。
+        · responsive-system「img{max-width:100%;height:auto}」→ 權重低於
+          .bc-top-art .top_art_item_photo > img，height:100% 生效。
+     · 陰影 scrim 使用 linear-gradient：與原站逐字相同（此為本模組的原樣呈現，
+       使用者要求 UI 100% 一致）。若不希望站上出現漸層，可將下方 11 條改成
+       純色（例如 background:rgba(0,0,0,.1)）。
+
+   注意：卡片數固定 11 張（陰影 :nth-child 規則與「最後一張不縮放」皆以此為準）。
+   ========================================================================= */
+
+.bc-top-art {
+  display: block;
+  /* 原站 :root 的 --key-color（hover 文字色）＝ loogg 桃紅 #ff005a。
+     2026-10-05 追加 ③（使用者指示「滑鼠懸停時的文字顏色改為主題色」）：
+     改指向本站**第一主題色（品牌金）**--bc-gold = #c49b63
+     —— 單一來源 static/css/bc-components.css :root；本站既有慣例（style-bootstrap.css
+     的 --primary／--brand-primary 亦為 #c49b63），品牌色系唯一。
+     使用處（皆共用本變數）：
+       · PC（>1024）`.top_art_item_text_wrap:hover` 的 .top_art_item_name／.top_art_item_title
+       · ≤1024 觸控裝置 `.top_art_item_text_wrap:active`（點按回饋；≤1024 的 :hover 仍
+         照原站維持白 #fff＝「SP hover 不變色」）
+     還原方式：本行改回 #ff005a 即回原站 1:1。 */
+  --key-color: var(--bc-gold, #c49b63);
+}
+
+/* ---- 原站全域 reset 的模組等價版（必須維持在移植規則之前） ---- */
+.bc-top-art,
+.bc-top-art * {
+  box-sizing: border-box;
+  border-radius: 0;
+  line-height: 1;
+  letter-spacing: 0;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  margin: 0;
+  /* 站上 a{transition:.3s all ease} 會讓 JS 寫入的 transform 變補間動畫；
+     原站除 .top_art_item_photo > img 的 0.5s 外沒有任何過渡 → 一律關閉 */
+  transition: none;
+}
+
+/* 連結外觀歸零（站上 a{color:var(--brand-primary)} / hover 同色） */
+.bc-top-art a,
+.bc-top-art a:hover,
+.bc-top-art a:active,
+.bc-top-art a:focus {
+  color: inherit;
+  text-decoration: none;
+  transition: none;
+}
+
+/* 站上 h2{margin-bottom:.5rem} 歸零（移植規則不含 margin） */
+.bc-top-art .top_art_item_title {
+  margin: 0;
+}
+
+/* ---- 原站 .pc_block / .sp_block（<br> 的 PC 專用換行）：原站只在 ≤1024 隱藏
+       .pc_block、顯示 .sp_block，PC 端不加 display 讓 <br> 走預設換行行為 ---- */
+.bc-top-art .sp_block {
+  display: none;
+}
+
+/* ---- 以下為 loogg.jp common.css 第 669–789 行的 1:1 移植 ---- */
+
+.bc-top-art .top_art_item_wrap {
+  position: sticky;
+  top: 0;
+  display: block;
+  height: calc(100svh - 6.84vw);
+  padding: 3.47vw 0 0 3.47vw;
+}
+
+.bc-top-art > .top_art_item_wrap:last-child {
+  padding: 3.47vw 0 3.47vw 3.47vw;
+}
+
+.bc-top-art .top_art_item {
+  position: relative;
+  display: block;
+  height: 100%;
+  transform-origin: right center;
+}
+
+.bc-top-art > .top_art_item_wrap:not(:first-child) > .top_art_item {
+  transform: scale(0.96);
+  transform-origin: right top;
+}
+
+.bc-top-art .top_art_item:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  /*background: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.5));*/
+}
+
+.bc-top-art .top_art_item_photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.bc-top-art .top_art_item_photo > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.bc-top-art .top_art_item_text_wrap {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 2.08vw 0 2.08vw 3.75vw;
+}
+
+.bc-top-art .top_art_item_name {
+  /* 原站 din-2014（300）→ 本站以 Inter（已於 index.html 載入）代替 */
+  font-family: "Inter", sans-serif;
+  font-weight: 300;
+  font-size: 0.97vw;
+  color: #fff;
+  margin: 0 0 1vw;
+}
+
+.bc-top-art .top_art_item_title {
+  /* 原站 noto-sans-cjk-jp（700）→ 本站以 Noto Sans TC / JP（已載入）代替 */
+  font-family: "Noto Sans TC", "Noto Sans JP", sans-serif;
+  font-weight: 700;
+  font-size: 1.52vw;
+  line-height: calc(34 / 22);
+  color: #fff;
+  padding-right: 3.75vw;
+}
+
+.bc-top-art .top_art_item_text_wrap:hover .top_art_item_name,
+.bc-top-art .top_art_item_text_wrap:hover .top_art_item_title {
+  color: var(--key-color);
+}
+
+.bc-top-art .top_art_item:hover .top_art_item_photo > img {
+  transform: scale(1.1);
+}
+
+.bc-top-art .top_art_item_translucent_bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+}
+
+@media screen and (max-width: 1024px) {
+  .bc-top-art .pc_block {
+    display: none;
+  }
+
+  .bc-top-art .sp_block {
+    display: block;
+  }
+
+  .bc-top-art .top_art_item_wrap {
+    height: calc(100svh - 21.06vw);
+    padding: 6.66vw 0 0 6.66vw;
+  }
+
+  .bc-top-art > .top_art_item_wrap:last-child {
+    padding: 6.66vw 0 6.66vw 6.66vw;
+  }
+
+  .bc-top-art > .top_art_item_wrap:not(:first-child) > .top_art_item {
+    transform: scale(0.93);
+    transform-origin: right top;
+  }
+
+  .bc-top-art .top_art_item_text_wrap {
+    padding: 5.2vw 0 5.2vw 6.93vw;
+  }
+
+  .bc-top-art .top_art_item_name {
+    font-size: 2.93vw;
+    margin: 0 0 2.8vw;
+  }
+
+  .bc-top-art .top_art_item_title {
+    font-size: 3.73vw;
+    line-height: calc(42 / 28);
+    padding-right: 6.93vw;
+  }
+
+  /* SP：hover 不變色（觸控裝置改走 :active） */
+  .bc-top-art .top_art_item_text_wrap:hover .top_art_item_name,
+  .bc-top-art .top_art_item_text_wrap:hover .top_art_item_title {
+    color: #fff;
+  }
+
+  .bc-top-art .top_art_item_text_wrap:active .top_art_item_name,
+  .bc-top-art .top_art_item_text_wrap:active .top_art_item_title {
+    color: var(--key-color);
+  }
+
+  .bc-top-art .top_art_item:hover .top_art_item_photo > img {
+    transform: scale(1);
+  }
+
+  .bc-top-art .top_art_item:active .top_art_item_photo > img {
+    transform: scale(1.1);
+  }
+
+  /* ---- 2026-10-06 復原（使用者指示「行動端和平板端恢復顯示圖片」）----
+     2026-10-05 曾在本媒體查詢內追加兩條規則：
+       ① `.top_art_item_photo{display:none}`（圖片僅桌面端顯示）
+       ② `.top_art_item{background-color:var(--bc-bg)}`
+          （① 讓卡片變透明 → sticky 堆疊時下層卡文案會穿透，故補不透明底色遮蔽）
+     使用者指示恢復行動／平板端圖片 → **① ② 一併移除**（② 只是 ① 的配套：
+     圖片恢復後本身即為不透明遮體，② 不再需要）⇒ 回到原站 1:1。
+     ≤1024 由 markup 既有的 `<picture><source media="(max-width:1024px)">`
+     選中 SP 素材（510×680）顯示；sticky 堆疊位置、卡片幾何（高度來自
+     .top_art_item_wrap）、底部文字與 ::after scrim、捲動縮放動畫皆不受影響。
+     若要再次隱藏圖片：於此處加回 ①（必要時再連同 ②）。 */
+}
+
+/* ---- 底部 scrim 陰影：逐字取自 loogg.jp <head> 內嵌 <style>
+       （11 張卡；第 6 張原站即無設定，故保持一致不補） ---- */
+.bc-top-art .top_art_item_wrap:nth-child(1) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(2) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(3) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(4) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(5) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(7) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(8) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(9) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.3));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(10) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+}
+
+.bc-top-art .top_art_item_wrap:nth-child(11) .top_art_item:after {
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+}

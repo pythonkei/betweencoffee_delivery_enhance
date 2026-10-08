@@ -14,13 +14,24 @@
    動畫：GSAP x:0 → -半寬、repeat:-1、線性 ~80px/s（原站 4311.8px/53.9s）。
    黑底適配：原站深棕 rgb(102,36,11) → 白色系（Between Coffee 黑底）；
    原站橙 rgb(254,130,54) → 2026-09-04 重點字改品牌主題金 var(--bc-gold, #c49b63)；白字（--line/maru/dot）不變。
+
+   2026-10-07：尺寸倍率化（--rv-scale）。所有尺寸 = calc(原基準px * var(--rv-scale, 1))，
+   預設 1 → 渲染與原本完全等值。首頁 section 追加 .bc-reviews-section--lg（--rv-scale:1.15）
+   將整個模組「全端」放大 15%；about 頁不套用、維持原尺寸。要改倍率只要動下方那一行。
    ============================================================ */
+
+/* 首頁專屬放大倍率（2026-10-07）：只命中首頁帶 .bc-reviews-section--lg 的 section；
+   經 CSS 變數繼承讓其下 .bc-reviews / reviewsBox / reviewsMark 全部 ×1.15（全端）。
+   由 JS 讀取 scrollWidth 的跑馬燈會自動等比例（duration 隨內容變長，線性速度不變）。 */
+.bc-reviews-section--lg {
+  --rv-scale: 1.15;
+}
 
 /* 包裹容器（about 頁內定位，僅提供寬度與上下間距；不改變原站 reviews 樣式） */
 .bc-reviews {
   width: 100%;
   overflow: hidden;
-  padding: 48px 0;
+  padding: calc(48px * var(--rv-scale, 1)) 0;
   font-size: 0;
   line-height: 0;
 }
@@ -33,7 +44,7 @@
   white-space: nowrap;
   font-size: 0;
   line-height: 0;
-  padding: 2px 0 0;
+  padding: calc(2px * var(--rv-scale, 1)) 0 0;
 }
 .bc-reviews .reviewsInner {
   display: inline-block;
@@ -48,8 +59,8 @@
 /* ---- reviewsBox：膠囊/圓形/線框（原站 1px solid 深棕 → 黑底白色系） ---- */
 .bc-reviews .reviewsBox {
   display: inline-block;
-  height: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  height: calc(25px * var(--rv-scale, 1));
+  border: calc(1px * var(--rv-scale, 1)) solid rgba(255, 255, 255, 0.35);
   box-sizing: border-box;
 }
 .bc-reviews .reviewsBox--line {
@@ -62,7 +73,7 @@
   border-radius: 9999px;
 }
 .bc-reviews .reviewsBox--maru {
-  width: 25px;
+  width: calc(25px * var(--rv-scale, 1));
   border-radius: 50%;
 }
 
@@ -70,17 +81,17 @@
 .bc-reviews .reviewsBox__text {
   display: block;
   font-family: "Noto Serif JP", "Noto Serif TC", "Noto Sans TC", serif;
-  font-size: 15px;
+  font-size: calc(15px * var(--rv-scale, 1));
   font-weight: 600;
-  line-height: 21px;
-  padding: 0 15px;
+  line-height: calc(21px * var(--rv-scale, 1));
+  padding: 0 calc(15px * var(--rv-scale, 1));
   transform: scaleX(1.15);
   white-space: nowrap;
   color: rgba(255, 255, 255, 0.9);
 }
 /* 膠囊圓角（--borderR）：文字橫向 padding 加大（原站 0 25px） */
 .bc-reviews .reviewsBox--borderR .reviewsBox__text {
-  padding: 0 25px;
+  padding: 0 calc(25px * var(--rv-scale, 1));
 }
 /* 填充底（--bgColor）：文字用品牌主題金 var(--bc-gold, #c49b63)（2026-09-04 由原站橙改，白字不變） */
 .bc-reviews .reviewsBox--bgColor .reviewsBox__text {
@@ -88,7 +99,7 @@
 }
 /* 圓形（--maru）：14px / 置中 / 無 padding */
 .bc-reviews .reviewsBox--maru .reviewsBox__text {
-  font-size: 14px;
+  font-size: calc(14px * var(--rv-scale, 1));
   padding: 0;
   text-align: center;
 }
@@ -101,23 +112,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 25px;
-  margin: 0 8px;
+  width: calc(26px * var(--rv-scale, 1));
+  height: calc(25px * var(--rv-scale, 1));
+  margin: 0 calc(8px * var(--rv-scale, 1));
   vertical-align: top;
 }
 .bc-reviews .reviewsMark {
   display: block;
   position: relative;
-  width: 22px;
-  height: 18px;
+  width: calc(22px * var(--rv-scale, 1));
+  height: calc(18px * var(--rv-scale, 1));
   margin: 0;
   padding: 0;
 }
 .bc-reviews .reviewsMark__inner {
   display: block;
-  width: 18px;
-  height: 18px;
+  width: calc(18px * var(--rv-scale, 1));
+  height: calc(18px * var(--rv-scale, 1));
   background-color: rgba(255, 255, 255, 0.9);
   -webkit-mask-image: url("/static/images/reviews--dot.svg");
   mask-image: url("/static/images/reviews--dot.svg");
@@ -132,75 +143,78 @@
    - ≤768px：膠囊 25→22px、主字 15→13px、模組上下 padding 48→34px
    - ≤480px：膠囊 22→18px、主字 13→11px、模組上下 padding 34→24px
    （含 reviewsBox/maru/dot/reviewsMark 同步縮放，維持原比例）
+
+   2026-10-07：以下數值同樣乘上 --rv-scale（首頁 1.15 / 其餘 1），
+   使放大率「全端」一致（桌機、平板、手機皆 ×1.15）。
    ============================================================ */
 @media (max-width: 768px) {
   .bc-reviews {
-    padding: 34px 0;
+    padding: calc(34px * var(--rv-scale, 1)) 0;
   }
   .bc-reviews .reviewsBox {
-    height: 22px;
+    height: calc(22px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox__text {
-    font-size: 13px;
-    line-height: 18px;
-    padding: 0 12px;
+    font-size: calc(13px * var(--rv-scale, 1));
+    line-height: calc(18px * var(--rv-scale, 1));
+    padding: 0 calc(12px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--borderR .reviewsBox__text {
-    padding: 0 20px;
+    padding: 0 calc(20px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru {
-    width: 22px;
+    width: calc(22px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru .reviewsBox__text {
-    font-size: 12px;
+    font-size: calc(12px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark__box {
-    width: 24px;
-    height: 22px;
-    margin: 0 6px;
+    width: calc(24px * var(--rv-scale, 1));
+    height: calc(22px * var(--rv-scale, 1));
+    margin: 0 calc(6px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark {
-    width: 19px;
-    height: 16px;
+    width: calc(19px * var(--rv-scale, 1));
+    height: calc(16px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark__inner {
-    width: 16px;
-    height: 16px;
+    width: calc(16px * var(--rv-scale, 1));
+    height: calc(16px * var(--rv-scale, 1));
   }
 }
 
 @media (max-width: 480px) {
   .bc-reviews {
-    padding: 24px 0;
+    padding: calc(24px * var(--rv-scale, 1)) 0;
   }
   .bc-reviews .reviewsBox {
-    height: 18px;
+    height: calc(18px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox__text {
-    font-size: 11px;
-    line-height: 15px;
-    padding: 0 9px;
+    font-size: calc(11px * var(--rv-scale, 1));
+    line-height: calc(15px * var(--rv-scale, 1));
+    padding: 0 calc(9px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--borderR .reviewsBox__text {
-    padding: 0 15px;
+    padding: 0 calc(15px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru {
-    width: 18px;
+    width: calc(18px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru .reviewsBox__text {
-    font-size: 10px;
+    font-size: calc(10px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark__box {
-    width: 20px;
-    height: 18px;
-    margin: 0 5px;
+    width: calc(20px * var(--rv-scale, 1));
+    height: calc(18px * var(--rv-scale, 1));
+    margin: 0 calc(5px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark {
-    width: 15px;
-    height: 13px;
+    width: calc(15px * var(--rv-scale, 1));
+    height: calc(13px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark__inner {
-    width: 13px;
-    height: 13px;
+    width: calc(13px * var(--rv-scale, 1));
+    height: calc(13px * var(--rv-scale, 1));
   }
 }

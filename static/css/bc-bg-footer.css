@@ -1,0 +1,219 @@
+/* ============================================================================
+   BC brand footer - ported from bleibtgleich.dev (Webflow) footer
+   ----------------------------------------------------------------------------
+   2026-10-07 port:
+   - Every selector prefixed with `#bc-bg-footer ` (incl. #w-node-* kept as-is)
+     to avoid Webflow generic classes (.grid/.img/.h1/.footer...) colliding with
+     BC Bootstrap + bc-* styles.
+   - Source defined html{font-size:1vw} so 1rem == 1vw; literal rem -> vw here to
+     keep the exact fluid scaling (desktop ratio 14.4, <=991px 3.93) w/o touching
+     the global html font-size.
+   - @font-face Akzidenz Grotesk Pro is self-hosted at static/fonts.
+   ============================================================================ */
+
+@font-face{
+  font-family:"Akzidenz Grotesk Pro";
+  src:url("../fonts/AkzidenzGroteskPro-Md.woff2") format("woff2");
+  font-weight:500;font-style:normal;font-display:swap;
+}
+
+#bc-bg-footer{--_fonts---font-body:"Akzidenz Grotesk Pro",Arial,sans-serif;--_colors---content--primary:var(--_global-colors---black--100);--_fonts---font-display:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---h1--size:calc(90vw/var(--_special-units---global--scale-ratio));--_fonts---h1--line-height:88%;--_fonts---h1--letter-spacing:-.30938vw;--_fonts---h2--size:calc(40vw/var(--_special-units---global--scale-ratio));--_fonts---h2--line-height:80%;--_fonts---h2--letter-spacing:-.1vw;--_fonts---h3--size:0vw;--_fonts---h3--line-height:0%;--_fonts---h3--letter-spacing:0em;--_fonts---h4--size:0vw;--_fonts---h4--line-height:0%;--_fonts---h4--letter-spacing:0em;--_fonts---h5--size:0vw;--_fonts---h5--line-height:0%;--_fonts---h5--letter-spacing:0em;--_fonts---h6--size:0vw;--_fonts---h6--line-height:0%;--_fonts---h6--letter-spacing:0em;--_fonts---p1--size:calc(14vw/var(--_special-units---global--scale-ratio));--_fonts---p1--line-height:107.143%;--_fonts---p1--letter-spacing:-.02625vw;--_units---u-0:var(--0px);--_special-units---global--100vh:100vh;--_units---u-120:var(--120px);--_units---u-104:var(--104px);--_special-units---1-cell:calc(162vw/var(--_special-units---global--scale-ratio));--_special-units---grid-gap:var(--16px);--_special-units---global--scale-ratio:14.4;--_units---u-240:var(--240px);--_colors---content--secondary:var(--_global-colors---black--50);--_special-units---stroke:calc(.25vw/var(--_special-units---global--scale-ratio));--_colors---border--100:var(--_global-colors---black--100);--_units---u-72:var(--72px);--_units---u-4:var(--4px);--_units---u-8:var(--8px);--_units---u-12:var(--12px);--_units---u-16:var(--16px);--_units---u-24:var(--24px);--_units---u-32:var(--32px);--_units---u-48:var(--48px);--_units---u-64:var(--64px);--_units---u-96:var(--96px);--_units---u-144:var(--144px);--_colors---additional--success:#1ba64b;--_colors---additional--alert:#ffa800;--_colors---additional--error:#e23d3d;--_units---u-192:var(--192px);--_fonts---l1--size:1vw;--_fonts---l1--line-height:100%;--_fonts---l1--letter-spacing:-.016em;--_colors---background--transparent:transparent;--_colors---background--bg:var(--_global-colors---white--100);--_special-units---global--padding:var(--_units---u-16);--_global-colors---black--5:#0000000d;--_global-colors---black--10:#0000001a;--_colors--nav---indicator--fill:var(--_global-colors---black--100);--_colors--nav---indicator--content-active:var(--_global-colors---white--100);--_colors---fill--tertiary:var(--_global-colors---black--5);--_colors--nav---background--bg-1:var(--_global-colors---gray--base-200);--_colors--nav---background--bg-3:var(--_global-colors---gray--base-075);--_colors--nav---background--bg-2:var(--_global-colors---gray--base-150);--_colors--nav---indicator--border:var(--_colors---border--100);--_colors--nav---indicator--content:var(--_global-colors---black--100);--104px:calc(104vw/var(--_special-units---global--scale-ratio));--72px:calc(72vw/var(--_special-units---global--scale-ratio));--_units---u-20:var(--20px);--_units---u-80:var(--80px);--_units---u-6:var(--6px);--64px:calc(64vw/var(--_special-units---global--scale-ratio));--_colors---fill--primary:var(--_global-colors---black--100);--_colors---border--10:var(--_global-colors---black--10);--_units---u-200:var(--200px);--_colors---background--bg-2:#f2f2f2;--_units---u-128:var(--128px);--96px:calc(96vw/var(--_special-units---global--scale-ratio));--_colors---content-diff--primary:var(--_global-colors---white--100);--_global-colors---white--100:white;--_units---u-10:var(--10px);--_colors---content--tertiary:var(--_global-colors---black--30);--_units---u-2:var(--2px);--_global-colors---black--100:#000;--_units---u-40:var(--40px);--0px:calc(0vw/var(--_special-units---global--scale-ratio));--1px:calc(1vw/var(--_special-units---global--scale-ratio));--2px:calc(2vw/var(--_special-units---global--scale-ratio));--4px:calc(4vw/var(--_special-units---global--scale-ratio));--6px:calc(6vw/var(--_special-units---global--scale-ratio));--8px:calc(8vw/var(--_special-units---global--scale-ratio));--10px:calc(10vw/var(--_special-units---global--scale-ratio));--12px:calc(12vw/var(--_special-units---global--scale-ratio));--16px:calc(16vw/var(--_special-units---global--scale-ratio));--20px:calc(20vw/var(--_special-units---global--scale-ratio));--24px:calc(24vw/var(--_special-units---global--scale-ratio));--28px:calc(28vw/var(--_special-units---global--scale-ratio));--32px:calc(32vw/var(--_special-units---global--scale-ratio));--36px:calc(36vw/var(--_special-units---global--scale-ratio));--40px:calc(40vw/var(--_special-units---global--scale-ratio));--44px:calc(44vw/var(--_special-units---global--scale-ratio));--48px:calc(48vw/var(--_special-units---global--scale-ratio));--52px:calc(52vw/var(--_special-units---global--scale-ratio));--56px:calc(56vw/var(--_special-units---global--scale-ratio));--60px:calc(60vw/var(--_special-units---global--scale-ratio));--68px:calc(68vw/var(--_special-units---global--scale-ratio));--80px:calc(80vw/var(--_special-units---global--scale-ratio));--88px:calc(88vw/var(--_special-units---global--scale-ratio));--112px:calc(112vw/var(--_special-units---global--scale-ratio));--120px:calc(120vw/var(--_special-units---global--scale-ratio));--128px:calc(128vw/var(--_special-units---global--scale-ratio));--144px:calc(144vw/var(--_special-units---global--scale-ratio));--168px:calc(168vw/var(--_special-units---global--scale-ratio));--192px:calc(192vw/var(--_special-units---global--scale-ratio));--200px:calc(200vw/var(--_special-units---global--scale-ratio));--240px:calc(240vw/var(--_special-units---global--scale-ratio));--_units---u-36:var(--36px);--_global-colors---black--50:#00000080;--_global-colors---black--30:#0000004d;--_global-colors---white--50:#ffffff80;--_global-colors---white--30:#ffffff4d;--_global-colors---white--10:#ffffff1a;--_global-colors---white--5:#ffffff0d;--_global-colors---limestone--100:#cebdb2;--_global-colors---limestone--50:#cebdb280;--_global-colors---limestone--30:#cebdb24d;--_global-colors---limestone--10:#cebdb21a;--_global-colors---limestone--5:#cebdb20d;--_global-colors---gray--base-200:#cbcccd;--_global-colors---gray--base-150:#d8d9da;--_global-colors---gray--base-075:#e6e6e6;--_global-colors---сoncrete--base:#bec1ca;--_global-colors---сoncrete--base-200:#989aa2;--_global-colors---сoncrete--base-150:#a2a4ac;--_global-colors---сoncrete--base-075:#b0b3bb;--_global-colors---rust--base:#ff633d;--_global-colors---rust--base-200:#cc4f31;--_global-colors---rust--base-150:#d95434;--_global-colors---rust--base-075:#ec5c38;--_global-colors---verdigris--base:#919e44;--_global-colors---verdigris--base-200:#747e36;--_global-colors---verdigris--base-150:#7b863a;--_global-colors---verdigris--base-075:#86923f;--_global-colors---blood--base:#c31f26;--_global-colors---blood--base-200:#9c191e;--_global-colors---blood--base-150:#a61a20;--_global-colors---blood--base-075:#b41d23;
+  /* ---- BC palette override (source was white bg / black text -> brand black bg / gold) ---- */
+  --_colors---background--bg:#0e0e0e;
+  --_colors---content--primary:rgba(255,255,255,.9);
+  --_colors---content--secondary:rgba(255,255,255,.5);
+  --_colors---content--tertiary:rgba(255,255,255,.5);
+  --_colors---border--100:rgba(255,255,255,.08);
+  --_colors---fill--primary:#c49b63;
+  --_colors---fill--tertiary:rgba(255,255,255,.06);
+  --_colors---base-1000--primary:#0e0e0e;
+  --_colors---content-diff--primary:#0e0e0e;
+  --_global-colors---black--100:#0e0e0e;
+  --_global-colors---black--50:rgba(255,255,255,.5);
+  --_global-colors---black--30:rgba(255,255,255,.4);
+  /* ---- motion curves (source inline :root) ---- */
+  --dur-s:.4s;--dur-m:.8s;--dur-l:1.2s;
+  --ease-in-out:cubic-bezier(.76,0,.24,1);
+  /* ---- inherited base text (source body rule) ---- */
+  font-family:var(--_fonts---font-body);
+  color:var(--_colors---content--primary);
+  font-weight:400;
+  line-height:1;
+  background-color:var(--_colors---background--bg);
+  position:relative;
+  overflow:hidden;
+}
+
+/* ---- element reset (source global reset, scoped to footer; class rules win by specificity) ---- */
+#bc-bg-footer,#bc-bg-footer div,#bc-bg-footer span,#bc-bg-footer h1,#bc-bg-footer h2,#bc-bg-footer h3,#bc-bg-footer h4,#bc-bg-footer h5,#bc-bg-footer h6,#bc-bg-footer p,#bc-bg-footer blockquote,#bc-bg-footer pre,#bc-bg-footer a,#bc-bg-footer img,#bc-bg-footer ol,#bc-bg-footer ul,#bc-bg-footer li,#bc-bg-footer figure,#bc-bg-footer figcaption,#bc-bg-footer footer,#bc-bg-footer header,#bc-bg-footer nav,#bc-bg-footer section,#bc-bg-footer svg,#bc-bg-footer path,#bc-bg-footer button,#bc-bg-footer input{margin:0;padding:0;border:0;vertical-align:baseline;box-sizing:border-box}
+#bc-bg-footer article,#bc-bg-footer aside,#bc-bg-footer details,#bc-bg-footer figcaption,#bc-bg-footer figure,#bc-bg-footer footer,#bc-bg-footer header,#bc-bg-footer hgroup,#bc-bg-footer menu,#bc-bg-footer nav,#bc-bg-footer section{display:block}
+#bc-bg-footer ol,#bc-bg-footer ul{list-style:none}
+#bc-bg-footer img{max-width:none}
+/* ---- 文字色固定為品牌值（避免 BC 全域 h1/p 顏色蓋過 footer 設計） ---- */
+#bc-bg-footer .h1,#bc-bg-footer .p1{color:var(--_colors---content--primary)}
+/* ---- reveal initial state (GSAP sets visible; footer JS restores immediately if libs missing) ---- */
+#bc-bg-footer [data-reveal]{visibility:hidden}
+/* ---- social icon uses currentColor; turns dark on gold hover ---- */
+#bc-bg-footer .social-item svg{color:currentColor}
+#bc-bg-footer .social-item:hover svg{color:#0e0e0e}
+
+#bc-bg-footer a{background-color:#0000;}
+#bc-bg-footer h1{margin:.67em 0;font-size:2em;}
+#bc-bg-footer img{border:0;}
+#bc-bg-footer svg:not(:root){overflow:hidden;}
+#bc-bg-footer img{vertical-align:middle;max-width:100%;display:inline-block;}
+#bc-bg-footer .w-inline-block{max-width:100%;display:inline-block;}
+#bc-bg-footer h1,#bc-bg-footer h2,#bc-bg-footer h3,#bc-bg-footer h4,#bc-bg-footer h5,#bc-bg-footer h6{margin-bottom:10px;font-weight:700;}
+#bc-bg-footer h1{margin-top:20px;font-size:38px;line-height:44px;}
+#bc-bg-footer h2{margin-top:20px;font-size:32px;line-height:36px;}
+#bc-bg-footer h3{margin-top:20px;font-size:24px;line-height:30px;}
+#bc-bg-footer h4{margin-top:10px;font-size:18px;line-height:24px;}
+#bc-bg-footer h5{margin-top:10px;font-size:14px;line-height:20px;}
+#bc-bg-footer h6{margin-top:10px;font-size:12px;line-height:18px;}
+#bc-bg-footer p{margin-top:0;margin-bottom:10px;}
+#bc-bg-footer blockquote{border-left:5px solid #e2e2e2;margin:0 0 10px;padding:10px 20px;font-size:18px;line-height:22px;}
+#bc-bg-footer figure{margin:0 0 10px;}
+#bc-bg-footer ul,#bc-bg-footer ol{margin-top:0;margin-bottom:10px;padding-left:40px;}
+@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}
+#bc-bg-footer .w-dyn-empty{background-color:#ddd;padding:10px;}
+#bc-bg-footer .w-dyn-hide,#bc-bg-footer .w-dyn-bind-empty,#bc-bg-footer .w-condition-invisible{display:none!important;}
+#bc-bg-footer .w-layout-grid{grid-row-gap:16px;grid-column-gap:16px;grid-template-rows:auto auto;grid-template-columns:1fr 1fr;grid-auto-columns:1fr;display:grid;}
+#bc-bg-footer h1{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h1--size);line-height:var(--_fonts---h1--line-height);letter-spacing:var(--_fonts---h1--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-bg-footer h2{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h2--size);line-height:var(--_fonts---h2--line-height);letter-spacing:var(--_fonts---h2--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-bg-footer h3{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h3--size);line-height:var(--_fonts---h3--line-height);letter-spacing:var(--_fonts---h3--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-bg-footer h4{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h4--size);line-height:var(--_fonts---h4--line-height);letter-spacing:var(--_fonts---h4--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-bg-footer h5{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h5--size);line-height:var(--_fonts---h5--line-height);letter-spacing:var(--_fonts---h5--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-bg-footer h6{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h6--size);line-height:var(--_fonts---h6--line-height);letter-spacing:var(--_fonts---h6--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-bg-footer p{font-family:var(--_fonts---font-body);font-size:var(--_fonts---p1--size);line-height:var(--_fonts---p1--line-height);letter-spacing:var(--_fonts---p1--letter-spacing);margin-bottom:0;}
+#bc-bg-footer a{color:var(--_colors---content--primary);text-decoration:none;}
+#bc-bg-footer ul,#bc-bg-footer ol{margin-top:var(--_units---u-0);margin-bottom:var(--_units---u-0);padding-left:var(--_units---u-0);}
+#bc-bg-footer img{object-fit:cover;max-width:none;}
+#bc-bg-footer blockquote{margin-bottom:var(--_units---u-0);padding:var(--_units---u-0);border:1px #000;font-size:1em;line-height:1;}
+#bc-bg-footer figure{margin-bottom:10px;}
+#bc-bg-footer .h1{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h1--size);line-height:var(--_fonts---h1--line-height);letter-spacing:var(--_fonts---h1--letter-spacing);font-weight:500;}
+#bc-bg-footer .h1.left-offset-120{padding-left:var(--_units---u-120);}
+#bc-bg-footer .h1.left-offset-120.mb-104{margin-bottom:var(--_units---u-104);}
+#bc-bg-footer .h1._1-cell-offset{margin-left:calc(var(--_special-units---1-cell) + var(--_special-units---grid-gap));}
+#bc-bg-footer .h1.is-modified{transform-origin:0 100%;transform:rotate(5.5deg);}
+#bc-bg-footer .h2.is-2{position:absolute;inset:auto auto 0% 0%;}
+#bc-bg-footer .p1{font-family:var(--_fonts---font-body);font-size:var(--_fonts---p1--size);line-height:var(--_fonts---p1--line-height);letter-spacing:var(--_fonts---p1--letter-spacing);font-weight:500;}
+#bc-bg-footer .p1.blend-diff{color:var(--_colors---content--primary);mix-blend-mode:difference;}
+#bc-bg-footer .p1.mb-104{margin-bottom:var(--_units---u-104);}
+#bc-bg-footer .p1.mt-240{margin-top:var(--_units---u-240);}
+#bc-bg-footer .p1.is-award-year:where(.w-variant-78805aba-8548-3c69-5f2a-f5eb89ffd343),#bc-bg-footer .p1.is-award-year:where(.w-variant-fab919ce-b69e-785b-a31d-f18aa1d876f1),#bc-bg-footer .p1.is-award-project:where(.w-variant-78805aba-8548-3c69-5f2a-f5eb89ffd343),#bc-bg-footer .p1.is-award-project:where(.w-variant-fab919ce-b69e-785b-a31d-f18aa1d876f1){display:none;}
+#bc-bg-footer .p1.is-secondary{color:var(--_colors---content--secondary);}
+#bc-bg-footer .p1.is-2{position:absolute;inset:auto auto 0% 0%;}
+#bc-bg-footer .p1.is-cut-counter{display:none;}
+#bc-bg-footer .p1.events-auto{pointer-events:auto;}
+#bc-bg-footer .p1.demo-item-2{width:max-content;position:absolute;}
+#bc-bg-footer .grid{grid-column-gap:var(--_special-units---grid-gap);grid-row-gap:var(--_special-units---grid-gap);grid-template-rows:auto;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;grid-auto-columns:1fr;display:grid;}
+#bc-bg-footer .grid.fill{flex:1;}
+#bc-bg-footer .grid.row-0{grid-row-gap:var(--_units---u-0);}
+#bc-bg-footer .grid._6-cols{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}
+#bc-bg-footer .grid.is-footer{padding-top:var(--_units---u-120);border-top:var(--_special-units---stroke)solid var(--_colors---border--100);}
+#bc-bg-footer .img{flex:none;width:100%;height:100%;}
+#bc-bg-footer .img.contain{object-fit:contain;}
+/* 2026-10-07：移除 .img.is-invert（filter:invert(1)）—改由 deco_*.svg 檔案內白色 fill 於黑底呈現。 */
+#bc-bg-footer .img.is-cover-works{width:auto;}
+#bc-bg-footer .btn_label_text.is-2{position:absolute;inset:0% auto auto 0%;}
+#bc-bg-footer .heading-group-wrap{flex-flow:column;justify-content:flex-start;align-items:flex-start;margin-left:0;display:flex;}
+#bc-bg-footer .heading-group-wrap.offset-16{margin-top:calc(var(--_units---u-16)*-1);}
+#bc-bg-footer .heading-group-wrap.is-right{justify-content:flex-start;align-items:flex-end;}
+#bc-bg-footer .mt-8{margin-top:var(--_units---u-8);}
+#bc-bg-footer .svg{grid-column-gap:16px;grid-row-gap:16px;grid-template-rows:auto auto;grid-template-columns:1fr 1fr;grid-auto-columns:1fr;display:block;}
+#bc-bg-footer .path{display:block;}
+#bc-bg-footer .icon-wrap.is-logo{top:var(--_units---u-16);width:calc(95vw/var(--_special-units---global--scale-ratio));height:calc(160vw/var(--_special-units---global--scale-ratio));position:absolute;}
+#bc-bg-footer .icon-wrap.is-15{width:calc(15vw/var(--_special-units---global--scale-ratio));height:calc(15vw/var(--_special-units---global--scale-ratio));justify-content:center;align-items:center;display:flex;}
+#bc-bg-footer .icon-wrap.is-20{width:var(--_units---u-20);height:var(--_units---u-20);}
+#bc-bg-footer .icon-wrap.is-contact{width:calc(80vw/var(--_special-units---global--scale-ratio));}
+#bc-bg-footer .footer{background-color:var(--_colors---background--bg);}
+#bc-bg-footer .footer-inner{padding:var(--_units---u-16)var(--_units---u-16)var(--_units---u-120);}
+#bc-bg-footer .link-button{padding:var(--_units---u-4)var(--_units---u-8);border-radius:var(--_units---u-32);justify-content:center;align-items:center;display:flex;}
+#bc-bg-footer .link-button.left-offset{margin-left:calc(var(--_units---u-6)*-1);min-width:max-content;}
+#bc-bg-footer .social-list{grid-column-gap:var(--_units---u-8);grid-row-gap:var(--_units---u-8);flex-flow:row;display:flex;}
+#bc-bg-footer .social-item{width:var(--_units---u-64);height:var(--64px);border:var(--_special-units---stroke)solid var(--_colors---border--100);cursor:pointer;border-radius:50%;flex:none;justify-content:center;align-items:center;display:flex;}
+#bc-bg-footer .social-item:hover{background-color:var(--_colors---fill--primary);}
+#bc-bg-footer .link-inner{flex:none;display:block;position:relative;}
+#bc-bg-footer .link-inner.events-auto.pointer{cursor:pointer;}
+#bc-bg-footer .is-desktop{display:block;}
+#bc-bg-footer .name-part-wrap.is-right{justify-content:flex-end;align-items:center;}
+#bc-bg-footer .is-mobile{display:none;}
+#bc-bg-footer .opacity-0-5{opacity:.5;}
+#bc-bg-footer .text-404.is-2{color:var(--_colors---background--bg);mix-blend-mode:difference;left:calc(389vw/var(--_special-units---global--scale-ratio));position:absolute;}
+#bc-bg-footer .code-embed-2.is-2{transform-style:preserve-3d;position:absolute;left:31.6vw;transform:rotateX(-180deg)rotateY(0)rotate(0);}
+#bc-bg-footer .code-embed-2.is-2{position:absolute;left:31.6vw;transform:none;}
+#bc-bg-footer .text-link.is-2{position:absolute;inset:auto auto 0% 0%;}
+#bc-bg-footer .foooter-mail{grid-column-gap:var(--_units---u-40);grid-row-gap:var(--_units---u-40);flex-flow:column;justify-content:flex-end;align-items:stretch;display:flex;}
+#bc-bg-footer .foooter-mail.flex-align-left{justify-content:center;align-items:center;}
+#bc-bg-footer .foooter-mail.flex-align-right{justify-content:flex-end;align-items:center;}
+#bc-bg-footer .footer-socials{padding-top:var(--_units---u-104);justify-content:center;align-items:center;display:flex;}
+#bc-bg-footer .footer-socials.flex-align-left{justify-content:center;align-items:center;}
+#bc-bg-footer .footer-socials.flex-align-right{justify-content:flex-end;align-items:center;}
+#bc-bg-footer .footer-time{margin-top:var(--_units---u-104);margin-bottom:var(--_units---u-104);grid-column-gap:var(--_special-units---grid-gap);grid-row-gap:var(--_special-units---grid-gap);grid-template-rows:auto;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;grid-auto-columns:1fr;display:grid;}
+#bc-bg-footer .footer-time-inner{justify-content:center;align-items:center;display:flex;}
+/* 2026-10-07：移除品牌金釘牌底色（--_colors---fill--primary），改與 footer 同底色，
+   由 deco_*.svg 白色 fill 於黑底呈現（不再需要反相）。 */
+#bc-bg-footer .footer-logo-cell{padding-top:var(--_units---u-40);padding-bottom:var(--_units---u-40);cursor:pointer;width:calc(192vw/var(--_special-units---global--scale-ratio));}
+#bc-bg-footer .footer-logo-item{height:calc(184vw/var(--_special-units---global--scale-ratio));display:none;position:absolute;inset:0%;}
+#bc-bg-footer .footer-logo-item:first-child{display:block;position:relative;}
+#bc-bg-footer .footer-logo-list{position:relative;}
+/* 2026-10-08：about footer 的 .footer-mail-inner（email CTA）改用 index footer 的 .scroller-box 跑馬燈。
+   樣式來源：static/css/style-utilities.css（.scroller-box / .scroller / .tag-list）
+   捲動來源：static/js/main.js querySelectorAll('.scroller')（設 data-animated + 複製 li 無縫循環）
+   [補償] 上方 reset `#bc-bg-footer div,ul,li{margin:0;padding:0}`（ID 特異度 1,0,1）會蓋掉
+   `.scroller__inner{padding-block:2rem}`(0,1,0) 與 `.tag-list li{padding:.1rem}`(0,1,1)，導致跑馬燈
+   上下留白歸零、高度塌陷；故以同樣的 #bc-bg-footer 前綴提升特異度補回，數值與 index footer 完全一致
+   （維持 rem 不改用 vw：index footer 未受 --scale-ratio 影響，2rem == 32px 在所有斷點相同）。
+   [行動端鏡射] bc-components.css 的 @media (max-width:767.98px) 會縮小 index footer 跑馬燈，但 ID 前綴
+   規則特異度更高會蓋掉它 → 於下方同一斷點鏡射同樣數值，維持 about / index 兩處一致。
+   [防護] .scroller 恆設 overflow:hidden：prefers-reduced-motion 時 main.js 不設 data-animated，
+   此時 li{width:1108px} 會把 flex 格子撐爆，加此規則至少被裁切而不產生水平溢出。
+   .scroller-box 加 min-width:0/max-width:100% 確保 run-time 收縮不溢出（flex item 預設 min-width:auto）。 */
+#bc-bg-footer .scroller-box{min-width:0;max-width:100%;}
+#bc-bg-footer .scroller{overflow:hidden;}
+#bc-bg-footer .scroller__inner{padding-block:2rem;}
+#bc-bg-footer .tag-list li{padding:.1rem;}
+/* 行動端鏡射（2026-10-08）：bc-components.css:2916-2917 的 @media (max-width:767.98px) 會把跑馬燈縮小成
+   .tag-list li{padding:.05rem} / .scroller__inner{padding-block:.75rem}（index footer 用這組值），
+   但上方 ID 前綴規則（1,1,1）／（1,1,0）特異度較高，會蓋掉那組響應式值 → about footer 在行動端會比
+   index footer 高出約 20px。故在同一斷點鏡射同樣數值，確保 ≤767.98px 時兩處完全一致。
+   （font-size / width 未被上方 reset 影響，仍由 bc-components.css 的響應式規則決定，不需鏡射。） */
+@media all and (max-width:767.98px){
+  #bc-bg-footer .scroller__inner{padding-block:.75rem;}
+  #bc-bg-footer .tag-list li{padding:.05rem;}
+}
+/* 2026-10-08：修掉 ≤991px 跑馬燈衝出欄位（量到 2000px）的缺陷。
+   [成因] 下方 Webflow 原樣規則 `#bc-bg-footer #w-node-a204f672-…8ea-032bc8db{grid-area:5/1/6/4;justify-self:start}`
+   （平板欄寬僅 341px）讓 .foooter-mail 走 shrink-to-fit：item 寬 = fit-content = min(max-content, …)，
+   而 max-content 由跑馬燈決定 —— main.js 設 data-animated=true 後 .scroller__inner{flex-wrap:nowrap}，
+   2 個 li 各 1108px（.tag-list li{width:1108px}）＋ .scroller{max-width:2000px} → item 量到 2000px
+   （行動 2000px、平板 1108px→2000px，desktop 因 justify-self:auto 本來就拉伸到欄寬 336px）。
+   超出欄位的部分只能靠 #bc-bg-footer{overflow:hidden} 裁掉，視覺上跑馬燈橫貫整個 footer、
+   壓到相鄰裝飾字。
+   [修法] width:100%（＝自己的 grid area 寬）＋ min-width:0：.foooter-mail 不再 shrink-to-fit，
+   跑馬燈恆被限制在欄寬內（平板 341px／行動 173px），再由 .scroller 自身的 overflow:hidden 裁切、
+   捲動動畫照常；min-width:0 用來擋 min-width:auto 以 min-content(min=2000px) 反過來把格子撐開。
+   [影響] ≥992px 走 `justify-self:auto`（stretch）＋ grid-area:5/3/6/5，實測 336px 完全不變；
+   全站只有 about.html 使用 #bc-bg-footer/.foooter-mail。 */
+#bc-bg-footer .foooter-mail{min-width:0;width:100%;}
+@media screen and (max-width:991px){#bc-bg-footer{--_fonts---font-body:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---font-display:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---h1--size:calc(45vw/var(--_special-units---global--scale-ratio));--_fonts---h1--line-height:90%;--_fonts---h1--letter-spacing:-.6vw;--_fonts---h2--size:calc(40vw/var(--_special-units---global--scale-ratio));--_fonts---h2--line-height:80%;--_fonts---h2--letter-spacing:-.1vw;--_fonts---h3--size:0vw;--_fonts---h3--line-height:0%;--_fonts---h3--letter-spacing:0em;--_fonts---h4--size:0vw;--_fonts---h4--line-height:0%;--_fonts---h4--letter-spacing:0em;--_fonts---h5--size:0vw;--_fonts---h5--line-height:0%;--_fonts---h5--letter-spacing:0em;--_fonts---h6--size:0vw;--_fonts---h6--line-height:0%;--_fonts---h6--letter-spacing:0em;--_fonts---p1--size:calc(12vw/var(--_special-units---global--scale-ratio));--_fonts---p1--line-height:100%;--_fonts---p1--letter-spacing:-.02625vw;--_fonts---l1--size:1vw;--_fonts---l1--line-height:100%;--_fonts---l1--letter-spacing:-.016em;--104px:calc(104vw/var(--_special-units---global--scale-ratio));--72px:calc(72vw/var(--_special-units---global--scale-ratio));--64px:calc(64vw/var(--_special-units---global--scale-ratio));--96px:calc(96vw/var(--_special-units---global--scale-ratio));--0px:calc(0vw/var(--_special-units---global--scale-ratio));--1px:calc(1vw/var(--_special-units---global--scale-ratio));--2px:calc(2vw/var(--_special-units---global--scale-ratio));--4px:calc(4vw/var(--_special-units---global--scale-ratio));--6px:calc(6vw/var(--_special-units---global--scale-ratio));--8px:calc(8vw/var(--_special-units---global--scale-ratio));--10px:calc(10vw/var(--_special-units---global--scale-ratio));--12px:calc(12vw/var(--_special-units---global--scale-ratio));--16px:calc(16vw/var(--_special-units---global--scale-ratio));--20px:calc(20vw/var(--_special-units---global--scale-ratio));--24px:calc(24vw/var(--_special-units---global--scale-ratio));--28px:calc(28vw/var(--_special-units---global--scale-ratio));--32px:calc(32vw/var(--_special-units---global--scale-ratio));--36px:calc(36vw/var(--_special-units---global--scale-ratio));--40px:calc(40vw/var(--_special-units---global--scale-ratio));--44px:calc(44vw/var(--_special-units---global--scale-ratio));--48px:calc(48vw/var(--_special-units---global--scale-ratio));--52px:calc(52vw/var(--_special-units---global--scale-ratio));--56px:calc(56vw/var(--_special-units---global--scale-ratio));--60px:calc(60vw/var(--_special-units---global--scale-ratio));--68px:calc(68vw/var(--_special-units---global--scale-ratio));--80px:calc(80vw/var(--_special-units---global--scale-ratio));--88px:calc(88vw/var(--_special-units---global--scale-ratio));--112px:calc(112vw/var(--_special-units---global--scale-ratio));--120px:calc(120vw/var(--_special-units---global--scale-ratio));--128px:calc(128vw/var(--_special-units---global--scale-ratio));--144px:calc(144vw/var(--_special-units---global--scale-ratio));--168px:calc(168vw/var(--_special-units---global--scale-ratio));--192px:calc(192vw/var(--_special-units---global--scale-ratio));--200px:calc(200vw/var(--_special-units---global--scale-ratio));--240px:calc(240vw/var(--_special-units---global--scale-ratio));--_special-units---global--100vh:100vh;--_special-units---1-cell:calc(162vw/var(--_special-units---global--scale-ratio));--_special-units---grid-gap:var(--12px);--_special-units---global--scale-ratio:3.93;--_special-units---stroke:calc(.25vw/var(--_special-units---global--scale-ratio));--_special-units---global--padding:var(--_units---u-16);--_units---u-0:var(--0px);--_units---u-120:var(--120px);--_units---u-104:var(--104px);--_units---u-240:var(--240px);--_units---u-72:var(--72px);--_units---u-4:var(--4px);--_units---u-8:var(--8px);--_units---u-12:var(--12px);--_units---u-16:var(--16px);--_units---u-24:var(--24px);--_units---u-32:var(--32px);--_units---u-48:var(--48px);--_units---u-64:var(--64px);--_units---u-96:var(--96px);--_units---u-144:var(--144px);--_units---u-192:var(--192px);--_units---u-20:var(--20px);--_units---u-80:var(--80px);--_units---u-6:var(--6px);--_units---u-200:var(--200px);--_units---u-128:var(--128px);--_units---u-10:var(--10px);--_units---u-2:var(--2px);--_units---u-40:var(--40px);--_units---u-36:var(--36px);}#bc-bg-footer .h1._1-cell-offset{margin-left:calc(66vw/var(--_special-units---global--scale-ratio));}#bc-bg-footer .h1.is-display{font-size:calc(75vw/var(--_special-units---global--scale-ratio));}#bc-bg-footer .h1.is-modified{transform:rotate(10deg);}#bc-bg-footer .p1.mt-240{margin-top:var(--_units---u-120);}#bc-bg-footer .grid{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-bg-footer .grid.is-footer{padding-top:var(--_units---u-72);}#bc-bg-footer .img.width-auto{width:auto;}#bc-bg-footer .heading-group-wrap.mt-8,#bc-bg-footer .heading-group-wrap.is-right.mt-8{margin-top:var(--_units---u-0);}#bc-bg-footer .icon-wrap.is-contact{width:calc(56vw/var(--_special-units---global--scale-ratio));}#bc-bg-footer .footer-inner{padding-top:var(--_units---u-0);padding-bottom:var(--_units---u-72);}#bc-bg-footer .footer-inner:where(.w-variant-27776d25-5053-5aa6-2108-a99a2e23347b){display:none;}#bc-bg-footer .link-button{background-color:var(--_colors---fill--tertiary);}#bc-bg-footer .social-item:hover{background-color:var(--_colors---background--transparent);}#bc-bg-footer .is-desktop{display:none;}#bc-bg-footer .m-footer-name{padding-right:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:center;align-items:center;display:flex;}#bc-bg-footer .m-footer-meta{padding-right:var(--_units---u-16);padding-bottom:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:space-between;align-items:center;display:flex;}#bc-bg-footer .is-mobile{display:block;}#bc-bg-footer .m-footer-inner-wrap{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);flex-flow:column;display:flex;}#bc-bg-footer ._404-description.grid{padding-right:var(--_units---u-48);padding-left:var(--_units---u-48);text-align:center;}#bc-bg-footer .foooter-mail{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);}#bc-bg-footer .foooter-mail.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-bg-footer .footer-socials{padding-top:var(--_units---u-72);}#bc-bg-footer .footer-socials.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-bg-footer .footer-time{margin-top:var(--_units---u-48);margin-bottom:var(--_units---u-48);grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-bg-footer .footer-logo-cell{padding-top:var(--_units---u-24);padding-bottom:var(--_units---u-24);}#bc-bg-footer .footer-logo-item{height:calc(120vw/var(--_special-units---global--scale-ratio));}}
+@media screen and (max-width:479px){#bc-bg-footer .grid{width:100%;}}
+#bc-bg-footer #w-node-_2e3db1fa-aa68-b925-5a97-e4970eb60ce1-032bc8db{grid-area:1/3/2/7;}
+#bc-bg-footer #w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db{grid-area:2/4/3/7;}
+#bc-bg-footer #w-node-_213460a0-6380-6d65-6b0f-fd3acdaa218e-032bc8db{grid-area:3/1/4/9;}
+/* 2026-10-08：桌面時鐘 { 15 : … : 41 } 的 { 15 41 } 四項改為「置中對齊」——
+   原本 { place-self:center end + 15 center start 會讓 {15 貼在一起、15 與 : 之間空 163px；
+   改為各列置中後 { ↔ 15 ↔ : 間距約 123/125px，左右對稱。
+   行動版（≤991px，{ } 隱藏）於下方 media query 還原數字靠邊對齊，維持原設計。 */
+#bc-bg-footer #w-node-_157a5a4e-7569-22a7-457a-9c1b331b2982-032bc8db{place-self:center;}
+#bc-bg-footer #w-node-_7ca5700c-b458-a30e-59bf-d4e05ebb478b-032bc8db{place-self:center;}
+#bc-bg-footer #w-node-be8336b7-b244-3f21-53f7-49695207e6e1-032bc8db{grid-area:1/8/2/9;place-self:center;}
+#bc-bg-footer #w-node-f72de753-7ddd-b236-f650-3cfafb0e604b-032bc8db{grid-area:span 1/span 2/span 1/span 2;}
+#bc-bg-footer #w-node-_48f40b3e-3499-ddf0-fe35-2f88866d5fb0-032bc8db{grid-area:1/3/2/4;place-self:center;}
+#bc-bg-footer #w-node-_420f084b-ac62-c608-af37-250aeb96832a-032bc8db{grid-area:1/7/2/8;place-self:center;}
+#bc-bg-footer #w-node-a3109718-9166-bfda-4238-04d33411177e-032bc8db{grid-area:1/6/2/7;place-self:center;}
+#bc-bg-footer #w-node-_6861e4a1-aa8e-1804-6ccf-f84cf2e77729-032bc8db{grid-area:4/3/5/6;}
+#bc-bg-footer #w-node-_1a97522f-532e-4187-0fb4-cf59944e37c8-032bc8db{grid-area:5/4/6/7;}
+#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8de-032bc8db{grid-area:6/3/7/7;}
+#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8ea-032bc8db{grid-area:5/3/6/5;}
+@media screen and (max-width:991px){#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8db-032bc8db{grid-column-end:5;}#bc-bg-footer #w-node-_2e3db1fa-aa68-b925-5a97-e4970eb60ce1-032bc8db{grid-column:1/7;}#bc-bg-footer #w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db{grid-column:3/7;}#bc-bg-footer #w-node-_213460a0-6380-6d65-6b0f-fd3acdaa218e-032bc8db{grid-column-end:7;}#bc-bg-footer #w-node-_157a5a4e-7569-22a7-457a-9c1b331b2982-032bc8db{justify-self:start;}#bc-bg-footer #w-node-_7ca5700c-b458-a30e-59bf-d4e05ebb478b-032bc8db{grid-area:1/1/2/2;}#bc-bg-footer #w-node-be8336b7-b244-3f21-53f7-49695207e6e1-032bc8db{justify-self:end;}#bc-bg-footer #w-node-f72de753-7ddd-b236-f650-3cfafb0e604b-032bc8db{grid-area:1/3/2/5;}#bc-bg-footer #w-node-_48f40b3e-3499-ddf0-fe35-2f88866d5fb0-032bc8db{grid-column:2/3;}#bc-bg-footer #w-node-_420f084b-ac62-c608-af37-250aeb96832a-032bc8db{grid-column:6/7;}#bc-bg-footer #w-node-a3109718-9166-bfda-4238-04d33411177e-032bc8db{grid-column:5/6;}#bc-bg-footer #w-node-_6861e4a1-aa8e-1804-6ccf-f84cf2e77729-032bc8db{grid-column:1/5;}#bc-bg-footer #w-node-_1a97522f-532e-4187-0fb4-cf59944e37c8-032bc8db{grid-column:4/7;}#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8de-032bc8db{grid-column:1/7;justify-self:center;}#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8ea-032bc8db{grid-area:5/1/6/4;justify-self:start;}#bc-bg-footer #w-node-_7ca5700c-b458-a30e-59bf-d4e05ebb478b-032bc8db{justify-self:start;}#bc-bg-footer #w-node-_420f084b-ac62-c608-af37-250aeb96832a-032bc8db{justify-self:end;}}

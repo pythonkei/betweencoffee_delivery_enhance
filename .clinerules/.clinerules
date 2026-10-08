@@ -78,7 +78,7 @@
 - **核心業務流程**: 顧客下單 → 支付處理 → 加入製作隊列 → 員工製作 → 訂單就緒 → 顧客取餐
 - **Live URL**: https://betweencoffee-delivery-enhance-v1.onrender.com/
 - **GitHub**: https://github.com/pythonkei/betweencoffee_delivery_enhance
-- **部署方式**: Render（Docker 運行時），使用 Dockerfile 構建，autoDeploy 啟用
+- **部署方式**: Render（Docker 運行時，service `srv-d8jce6rtqb8s73897t4g`／singapore／free plan），使用 Dockerfile 構建；**autoDeploy 已關閉（2026-10-06 起）→ 每次上線需在 dashboard 按 Manual Deploy**（部署時自動套用 migration）
 - **Celery 狀態**: Render free plan 無 Redis，Celery 已配置 MockCelery 優雅降級，任務同步執行
 - **WebSocket**: 使用 Django Channels + InMemoryChannelLayer（無 Redis），ASGI 已禁用 AllowedHostsOriginValidator
 
@@ -368,8 +368,42 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [x] 咖啡豆自訂選項組（產地＋研磨，選項組驅動）／產地改回既有排版／烘焙度退出選項組 — ✅ 2026-09-21
 ├── [x] 修正模板 {# #} 跨行導致前台顯示註解文字（Django 4.2 的 {# #} 只支援單行）＋驗證腳本新增全站掃描防再犯 — ✅ 2026-09-21
 ├── [x] **還原：全域第一主題色回品牌金 `#c49b63`（`git revert 7ed076cd`）**— ✅ 2026-09-23（使用者反映「更改第二主題色後，效果不理想，恢復到之前的狀態」：第一主題色／hover／light／glow 與 `--primary`、`--brand-primary` 全回品牌金；**第二主題色維持 `#FCFF4B`**（hero 圓點、購物車徽章、yama 圓球仍為萊姆）；31 處亮底深字、殘留藍色修補、9 處 `?v=` 與 7 處版號升級一併還原（原「內容↔版號」配對正確、無快取風險）；色表規範文件同步還原）
-└── [!] 待部署：正式站尚未部署本批改動（Render autoDeploy=no → dashboard 按 Manual Deploy；或提供 RENDER_API_KEY 以 API 觸發；migration 0070~0073 於部署時自動套用）
+└── [!] 待部署：正式站尚未部署本批改動（Render autoDeploy=no → dashboard 按 Manual Deploy；或提供 RENDER_API_KEY 以 API 觸發；migration 0070~0080 於部署時自動套用；2026-10-08 已 push `origin/main`）
 ```
+
+## 近期任務（2026-10-02 ~ 10-08）
+
+```text
+2026-10-02 ~ 10-08（10 月批次；2026-10-08 一次提交並推送 origin/main）
+├── [x] 加入購物車彈窗停用（`#cart-popup{display:none!important}` 只以 ID 覆蓋；markup／`showPopup()` 保留 ⇒ 刪一行即還原）— ✅ 2026-10-02
+├── [x] Order 長條與個人圓鈕間距縮小（`--bc-buy-profile-gap` 12 → 8px）— ✅ 2026-10-02
+├── [x] 首頁 `.top_art` sticky 堆疊卡片模組（loogg.jp 移植；11 張卡；css `?v=20261006a`／js `?v=20261004a`）— ✅ 2026-10-04
+├── [x] `.top_art` 圖片僅桌面端顯示 → **10-06 撤回（恢復行動／平板顯示）** — ✅ 2026-10-05 / 10-06
+├── [x] `.top_art` hover／點按文字色 → 品牌金（`--key-color:var(--bc-gold,#c49b63)` 單行改動）— ✅ 2026-10-05
+├── [x] 咖啡自訂選項組新增「烘焙」（migration **0079**）／「茶種」（migration **0080**）（咖啡 16 → 18 組）— ✅ 2026-10-06
+├── [x] 滑出購物車選項改由 API `extra_options_labels`／`_icons` 驅動（`bc-slideout-cart.js ?v=20261006a`）— ✅ 2026-10-06
+├── [x] 新增 `docs/verify/CDP_SETUP.md` ＋ `cdp_verify_top_art.py`（355 項）＋ top_art 診斷腳本 — ✅ 2026-10-06
+├── [x] 首頁 `bc-reviews-section` 跑馬燈全端放大 15%（`--rv-scale`；about 頁像素等值）— ✅ 2026-10-07
+├── [x] about 頁「BC 動態 footer」移植（`#bc-bg-footer`；GSAP 3.13.0＋SplitText／CustomEase；自架字型）— ✅ 2026-10-07
+├── [x] 動態 footer 收尾：時鐘 `( )` → `{ }`、deco 白線稿（`fill:#ffffff`＋`?v=20261008a`）、釘牌去 `is-invert`、email CTA → `.scroller-box` 跑馬燈 — ✅ 2026-10-08
+├── [x] index.html「第二主題色 → 第一主題色」（4 處改回品牌金 `#c49b63`；`bc-components`／`bc-yama-header`／`bc-gunte-hero` → `?v=20261008e`）— ✅ 2026-10-08
+├── [x] 10 月批次一次提交並推送 `origin/main` ＋ 記憶文件三處同步（`04`／`05`／本檔 ＋ 根目錄 `bc-context`）— ✅ 2026-10-08
+└── [!] 待部署：本批（含 migration 0074~0080）已 push、尚未上線（Render `autoDeploy=no` → dashboard 手動 Manual Deploy）
+```
+
+**10 月關鍵實作細節**
+
+- **about 頁 BC 動態 footer（`#bc-bg-footer`）**：`static/css/bc-bg-footer.css`（219 行；所有選擇器前綴 `#bc-bg-footer ` 避免 Webflow 泛用類 `.grid/.img/.h1/.footer` 撞 BC Bootstrap／`bc-*`；原站 `html{font-size:1vw}` → 逐字 `rem` 換 `vw` 保留流體縮放（桌機 14.4／≤991px 3.93）而不動全域 html font-size；`@font-face` 自架 `static/fonts/AkzidenzGroteskPro-Md.woff2`；BC 黑底／品牌金配色覆寫）＋ `static/js/bc-bg-footer.js`（283 行；只移植 footer 需要的 reveal／goo 文字揭示／時間／logo／連結 hover，不依賴 Barba／Lenis；動畫庫缺失時立即還原 `[data-reveal]` 可見並照常啟動時間／logo）。`about.html` 新增 `{% block bcc_footer %}` 覆寫 base 的 footer；`base.html` 把原 footer 包進 `{% block bcc_footer %}`（其他頁零影響）；`base.html` GSAP `3.12.5 → 3.13.0`（SplitText／CustomEase 自 3.13 起免費）＋ about 以 defer 載入兩支外掛。收尾三項＝① 時鐘括號 `( )`→`{ }`；② `deco_02/05/06/07.svg` 檔內 root `fill:#ffffff`（原黑線稿在深底不可見）＋ `<img>` 加 `?v=20261008a`、釘牌不再套 `.is-invert`；③ 刪 `.footer-mail-inner`（`mailto:hello@betweencoffee.hk`）→ 換成與 base footer 逐字相同的 `.scroller-box` 跑馬燈（2 個 `BETWEEN` `li`、`animation:scroll 60s linear`），CSS 需 `#bc-bg-footer` scoped 補償（`#bc-bg-footer div,ul,li{margin:0;padding:0}` 的 ID 特異度會蓋掉 `.scroller__inner{padding-block:2rem}`／`.tag-list li{padding:.1rem}`）。
+
+- **首頁 `.top_art`（loogg.jp 移植）**：`static/css/bc-top-art.css` ＋ `static/js/bc-top-art.js`（vanilla）＋ `views.py` 新增 `_build_top_art_cards()`（11 筆 dict＝文案與素材的唯一修改點）＋ `index.html` 於 reviews 段後插 11 張卡。唯一必要改寫＝捲動模型（原站 `.top_wrap` 內部容器捲動用 `offset().top` → 本站 window 捲動改 `getBoundingClientRect().top`；`innerHeight()` → `getBoundingClientRect().height`）；縮放數學逐行照抄（通過卡 `clamp(1-|t|/2000, 0.6)`／下一張 `clamp(0.96/0.93+|t|/2000, 1)`／第 11 張不參與／origin `right top → right center`）。站上全域 `a{transition:.3s all ease}`、`h2{margin-bottom}`、`.pc_block` 需在模組內中和。10-05 追加「圖片僅桌面端」與不透明底色 → 10-06 兩條一併撤回（圖片本身即不透明遮體，回到原站 1:1；≤1024 由 `<picture><source media="(max-width:1024px)">` 取 SP 素材）。
+
+- **咖啡自訂選項組「烘焙」／「茶種」（migration 0079／0080）**：只動 3 檔＝`option_definitions.py`（`OPTION_GROUPS` 末尾追加 `roast_level`／`tea_type`，含 `icon`、`default="1"`）＋ `shop_items.py`（`CoffeeItem.option_roast_level`／`option_tea_type`＝`BooleanField(default=False)` **逐款由 Admin 啟用**，未啟用者詳情頁完全不渲染 ⇒ 舊資料零影響；`option_order_*` 排序）＋ migration（各 `AddField` ×2）。**Admin／前台／購物車／訂單／staff 端零改動**（`OptionGroupsConfigFormMixin.save()` 泛型 `option_<key>` setattr）；`eshop/admin.py` 註解同步 18 組；回歸腳本 `docs/verify/verify_bean_group_order.py` 改 18 組並修正已登入購物車取值（`sync_with_database` 會殘留他項 → 取 `type == 'bean'`）。
+
+- **滑出購物車選項標籤化**：`bc-slideout-cart.js` 直接採用 API 的 `extra_options_labels`／`extra_options_icons`（新增選項組自動生效），`labelMap` 只作舊資料後備（補 `roast_level`／`tea_type`）；`base.html` 版號 `?v=20260921g → 20261006a`。
+
+- **CDP 驗證教訓（跨任務通用）**：① 本機 `DEBUG=False` ＋ `runserver --noreload` 走 cached template loader ⇒ **改模板必須重啟**；② CDP `Page.setCacheDisabled` 單獨無效，需 `Network.enable` ＋ `Network.setCacheDisabled`；③ 被遮蔽／背景分頁會暫停 CSS 動畫（yama 淡入可能凍結在 `opacity:0`，故驗證需加 opacity 前置斷言）；④ hero 自動輪播＋圓點 0.3s 過渡會把 active 取樣誤判 → 先注入 `*{transition:none}` 凍結；⑤ headless 下 CSS animation 會停 pending → 先以 1×1 截圖強制產生 frame；⑥ 對 GSAP 釘住區段 `captureBeyondViewport` 會渲染空白 → 改 viewport-only 截圖。
+
+
 
 ## Phase 3 規劃
 
@@ -788,7 +822,7 @@ Phase 4：效能優化與架構精簡 — ✅ 2026-07-27
 1. **元素元件** — 卡片、按鈕、輸入框、列表等元件風格一致
 2. **字體** — 嚴格遵循字型系統規範（Noto Serif TC / Noto Sans TC / Mogra）
 3. **按鈕** — 統一使用 `.bc-btn` 系列樣式，不自行定義新按鈕風格
-4. **色彩** — 嚴格使用品牌色系統中的顏色值，不引入新色（**第一主題色＝品牌金 `#c49b63`（hover `#d4ab73`）、第二主題色＝`#FCFF4B`（hero 圓點／購物車數字圓圈／yama 圓球）；一律用 `var(--bc-gold)`／`var(--bc-theme2)` 變數不寫死色值；亮底（主題色）上的文字必須深色 `#0e0e0e`／`#1b1b1b`。2026-09-23 曾全域把第一主題色換成 `#FCFF4B`，使用者反映效果不理想 → 當日已 `git revert` 還原**）
+4. **色彩** — 嚴格使用品牌色系統中的顏色值，不引入新色（**第一主題色＝品牌金 `#c49b63`（hover `#d4ab73`）、第二主題色＝`#FCFF4B`（2026-10-08 起**已無任何元件引用**，僅 `bc-components.css` 的 `--bc-theme2` 定義保留）；一律用 `var(--bc-gold)`／`var(--bc-theme2)` 變數不寫死色值；亮底（主題色）上的文字必須深色 `#0e0e0e`／`#1b1b1b`。2026-09-23 曾全域把第一主題色換成 `#FCFF4B`，使用者反映效果不理想 → 當日已 `git revert` 還原；**2026-10-08 使用者指示「index.html 目前第二主題色改為第一主題色」→ 舊有 4 處第二主題色渲染點（yama 圓球／hero 圓點／購物車數字圓圈／登入後 ≤768 的 `-5`）全數改回品牌金**，之後新增 UI 一律用第一主題色**）
 5. **圖標** — 優先使用 icomoon 字型圖標，不引入新圖標集
 
 ### 品牌視覺設計風格

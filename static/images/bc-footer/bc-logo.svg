@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Between Coffee">
+  <!-- 2026-10-07: BC 動態 footer logo cell（原站為 9 張 Webflow logo 輪播，BC 先以單一識別 static 顯示） -->
+  <g fill="#0e0e0e" text-anchor="middle" font-family="'Noto Serif TC', Georgia, serif">
+    <text x="100" y="96" font-size="30" font-weight="700" letter-spacing="1">&#123; Between &#125;</text>
+    <text x="100" y="132" font-size="19" font-weight="400" letter-spacing="6">COFFEE</text>
+  </g>
+</svg>

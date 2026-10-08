@@ -6,11 +6,11 @@
 {% block title %}Between Coffee - About{% endblock %}
 
 {% block extra_css %}
-<!-- About 頁面 SERIES 滑桿（完全複製 designing.jp/series container_3HNAz） -->
+<!-- About 頁面 SERIES 滑桿 -->
 <link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20260828q" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}" />
-<!-- hakujuji csBlock__leader 逐字亮起（完整複製原站樣式） -->
+<!-- hakujuji csBlock__leader 逐字亮起） -->
 <link rel="stylesheet" href="{% static 'css/bc-top-concept.css' %}?v=20260821ag" />
 <!-- 2026-08-28: ramenclub.jp #utsuwa SVG symbol（c-sec-product-real 標題 i-utsuwa 使用） -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -22,7 +22,7 @@
   </defs>
 </svg>
 
-<!-- mauinterview rotate-mau 旋轉標誌（完全複製 mauinterview.musabi.ac.jp，純 CSS 動畫） -->
+<!-- mauinterview rotate-mau 旋轉標誌 -->
 <link rel="stylesheet" href="{% static 'css/bc-rotate-mau.css' %}?v=20260822p" />
 <!-- sukima who section（sukima.tokyo.jp .section.who 完整複製；黑底白字適配、#BFFF00 高亮保留） -->
 <link rel="stylesheet" href="{% static 'css/bc-who.css' %}?v=20260825e" />
@@ -40,6 +40,8 @@
 <link rel="stylesheet" href="{% static 'css/bc-fujiya-photo.css' %}?v=20260901k" />
 <!-- florporto 產品模組樣式（自 index 移入；wrapper 封裝 .bc-flor-menu） -->
 <link rel="stylesheet" href="{% static 'css/bc-flor-menu.css' %}?v=20260907h">
+<!-- 2026-10-07: BC 動態 footer（移植自 bleibtgleich.dev Webflow footer；全樣式 scoped 於 #bc-bg-footer） -->
+<link rel="stylesheet" href="{% static 'css/bc-bg-footer.css' %}?v=20261008d" />
 {% endblock %}
 
 
@@ -1318,4 +1320,133 @@
 <script src="{% static 'js/bc-fujiya-photo.js' %}?v=20260901h"></script>
 <!-- florporto 產品模組捲動 crossfade / rail（自 index 移入） -->
 <script src="{% static 'js/bc-flor-menu.js' %}?v=20260907b"></script>
+<!-- 2026-10-07: BC 動態 footer 所需的 GSAP 外掛（SplitText / CustomEase 於 gsap 3.13 起免費；
+     gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可） -->
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
+<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261008a"></script>
+{% endblock %}
+
+{% block bcc_footer %}
+<div id="bc-bg-footer">
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="w-layout-grid grid is-footer">
+      <div id="w-node-_2e3db1fa-aa68-b925-5a97-e4970eb60ce1-032bc8db" class="heading-group-wrap">
+        <h1 data-reveal="text" class="h1">Hug in</h1>
+        <h1 data-reveal="text" class="h1">a Cup</h1>
+      </div>
+      <div id="w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db" class="heading-group-wrap mt-8">
+        <h1 data-reveal="text" class="h1">Perfect</h1>
+        <h1 data-reveal="text" class="h1">to Go</h1>
+      </div>
+      <div id="w-node-_213460a0-6380-6d65-6b0f-fd3acdaa218e-032bc8db" class="footer-time">
+        <!-- 2026-10-08：時間括號由 ( ) 改為 { }，與兩側冒號同一組標點視覺 -->
+        <h1 data-reveal="text" id="w-node-_157a5a4e-7569-22a7-457a-9c1b331b2982-032bc8db" class="h1 is-desktop">{</h1>
+        <h1 data-footer-time="hours" data-reveal="text" id="w-node-_7ca5700c-b458-a30e-59bf-d4e05ebb478b-032bc8db" class="h1">00</h1>
+        <h1 data-reveal="text" id="w-node-be8336b7-b244-3f21-53f7-49695207e6e1-032bc8db" class="h1 is-desktop">}</h1>
+        <div id="w-node-f72de753-7ddd-b236-f650-3cfafb0e604b-032bc8db" class="footer-time-inner">
+          <div data-footer-logo="wrap" data-reveal="clip-down" class="footer-logo-cell">
+            <div class="footer-logo-list-wrap w-dyn-list">
+              <div data-footer-logo="list" role="list" class="footer-logo-list w-dyn-items">
+                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                  <!-- 2026-10-08：加版本查詢字串，避免瀏覽器續用快取中的舊黑色 deco SVG（白 fill 版本才會生效） -->
+                  <img src="{% static 'images/deco_01.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                </div>
+                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                  <img src="{% static 'images/deco_02.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                </div>
+                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                  <img src="{% static 'images/deco_05.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                </div>
+                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                  <img src="{% static 'images/deco_06.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                </div>
+                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                  <img src="{% static 'images/deco_07.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h1 data-reveal="text" id="w-node-_48f40b3e-3499-ddf0-fe35-2f88866d5fb0-032bc8db" class="h1">:</h1>
+        <h1 data-footer-time="minutes" data-reveal="text" id="w-node-_420f084b-ac62-c608-af37-250aeb96832a-032bc8db" class="h1">00</h1>
+        <h1 data-reveal="text" id="w-node-a3109718-9166-bfda-4238-04d33411177e-032bc8db" class="h1">:</h1>
+      </div>
+      <div id="w-node-_6861e4a1-aa8e-1804-6ccf-f84cf2e77729-032bc8db" class="heading-group-wrap is-right">
+        <h1 data-reveal="text" class="h1">Fresh</h1>
+        <h1 data-reveal="text" class="h1">beans</h1>
+      </div>
+      <div id="w-node-_1a97522f-532e-4187-0fb4-cf59944e37c8-032bc8db" class="heading-group-wrap is-right mt-8">
+        <h1 data-reveal="text" class="h1">roasted</h1>
+        <h1 data-reveal="text" class="h1">daily</h1>
+      </div>
+      <div id="w-node-a204f672-ea1b-c502-70d3-3fa0032bc8de-032bc8db" class="footer-socials">
+        <div class="socials-list-wrap w-dyn-list">
+          <div data-reveal="w" role="list" class="social-list w-dyn-items">
+            <div data-reveal="div" role="listitem" class="social-item w-dyn-item">
+              <a href="#" data-haptic="medium" target="_blank" rel="noopener" aria-label="WhatsApp" class="social-item-inner w-inline-block">
+                <div class="icon-wrap is-15">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="none" fill="none" class="svg">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm5.8 14.13c-.24.68-1.4 1.3-1.93 1.35-.5.05-1.13.07-1.82-.11-.42-.11-.96-.3-1.66-.6-2.92-1.26-4.83-4.2-4.98-4.4-.14-.19-1.19-1.58-1.19-3.02s.75-2.14 1.02-2.43c.26-.29.58-.36.77-.36l.55.01c.18.01.42-.07.65.5.24.58.83 2.01.9 2.16.07.14.12.31.02.5-.1.19-.15.31-.29.48l-.44.51c-.14.14-.29.3-.13.58.16.29.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.24 1.38.28.14.44.12.6-.07.16-.19.69-.8.87-1.08.19-.28.37-.23.62-.14.25.1 1.6.75 1.87.89.28.14.46.21.53.32.07.12.07.66-.17 1.34z" fill="currentColor" class="path"></path>
+                  </svg>
+                </div>
+              </a>
+            </div>
+            <div data-reveal="div" role="listitem" class="social-item w-dyn-item">
+              <a href="#" data-haptic="medium" target="_blank" rel="noopener" aria-label="Facebook" class="social-item-inner w-inline-block">
+                <div class="icon-wrap is-15">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="none" fill="none" class="svg">
+                    <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z" fill="currentColor" class="path"></path>
+                  </svg>
+                </div>
+              </a>
+            </div>
+            <div data-reveal="div" role="listitem" class="social-item w-dyn-item">
+              <a href="#" data-haptic="medium" target="_blank" rel="noopener" aria-label="Instagram" class="social-item-inner w-inline-block">
+                <div class="icon-wrap is-15">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="none" fill="none" class="svg">
+                    <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07zm0 3.68a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zm0 10.16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z" fill="currentColor" class="path"></path>
+                  </svg>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="w-node-a204f672-ea1b-c502-70d3-3fa0032bc8ea-032bc8db" class="foooter-mail">
+        <div data-reveal="text" class="p1">
+          Available for
+          <br/>
+          takeaway &amp; Relaxing
+        </div>
+        <!-- 2026-10-08：原本的「Write directly to:」email CTA（.footer-mail-inner）改為 index footer 的水平跑馬燈
+             （與 base.html footer 的 .scroller-box 逐字相同）。樣式來自 css/style-utilities.css；
+             捲動由 static/js/main.js 全域初始化 .scroller（設 data-animated + 複製 li 成 4 個達成無縫循環），
+             about 頁已載入以上兩檔，故此處不需新增任何 JS。 -->
+        <div class="scroller-box">
+          <div class="scroller">
+            <ul class="tag-list scroller__inner">
+              <li>BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN</li>
+              <li>BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="m-footer-inner is-mobile">
+    <div class="m-footer-inner-wrap">
+      <div class="m-footer-name">
+        <div data-reveal="text" class="h1 is-display">Between Coffee</div>
+      </div>
+      <div class="m-footer-meta">
+        <div data-reveal="text" class="p1">&copy; 2026 All Right Reserved</div>
+        <div data-reveal="text" class="p1">Hug in a Cup, Perfect to Go</div>
+      </div>
+    </div>
+  </div>
+</footer>
+</div>
+
 {% endblock %}

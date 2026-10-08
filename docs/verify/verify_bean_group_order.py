@@ -12,7 +12,7 @@ B. Admin
    5. Bean Admin 渲染各組（可選組＝勾選＋排序數字；唯讀組＝只有勾選，標示「唯讀 · 沿用原有排版」）
    6. Bean Admin 不再有分離欄位 name="option_origin"
    7. POST 儲存：勾選／數字 → 正確寫回 option_origin / option_grinding_level / option_order_grinding_level
-   8. Coffee Admin 回歸：仍 16 組、排序數字欄位齊全、無唯讀標示
+   8. Coffee Admin 回歸：仍 18 組、排序數字欄位齊全、無唯讀標示
 C. 前台詳情頁（/bean/<id>/）
    9. 產地：沿用既有排版（block-23 清單行的中文值），不新增任何選項 UI
   10. 沒有唯讀晶片（.bc-option-readonly*）與 option-group-origin
@@ -180,7 +180,7 @@ def section_b(results, bean, c):
 
     hc = c.get(f"/admin/eshop/coffeeitem/{coffee.pk}/change/").content.decode("utf-8", "replace")
     n_ck = sum(1 for k in CKEYS if 'id="option_groups_config_%s"' % k in hc)
-    results.append(check("Coffee Admin 仍 16 組", n_ck == len(CKEYS), f"{n_ck}/{len(CKEYS)}"))
+    results.append(check(f"Coffee Admin 仍 {len(CKEYS)} 組", n_ck == len(CKEYS), f"{n_ck}/{len(CKEYS)}"))
     results.append(check("Coffee Admin 無「唯讀顯示」", 'class="og-readonly"' not in hc))
 
     for k, en in old.items():  # 還原
@@ -240,7 +240,9 @@ def section_cd(results, bean, c):
     r = c.post(reverse("cart:add_to_cart", args=[bean.pk, "bean"]),
                {"option_grinding_level": "Deep", "weight": "500g", "quantity": "2"})
     cart = c.session.get("cart") or {}
-    item = list(cart.values())[0] if cart else {}
+    # 已登入用戶的購物車會與 DB CartItem 同步（Cart.sync_with_database），
+    # 帳號可能有殘留項目 → 明確取「bean」那筆，避免取到清單中的第一筆。
+    item = next((v for v in cart.values() if v.get("type") == "bean"), {})
     results.append(check("加入購物車成功", r.status_code == 200 and bool(item), f"status={r.status_code}"))
     results.append(check("extra_options 只含可選組", item.get("extra_options") == {"grinding_level": "Deep"},
                          str(item.get("extra_options"))))
@@ -248,7 +250,7 @@ def section_cd(results, bean, c):
     results.append(check("舊欄位同步 grinding_level", item.get("grinding_level") == "Deep"))
 
     j = c.get(reverse("cart:cart_count")).json()
-    it = (j.get("items") or [{}])[0]
+    it = next((x for x in (j.get("items") or []) if x.get("type") == "bean"), (j.get("items") or [{}])[0])
     results.append(check("cart_count extra_options_cn 研磨=粗研磨",
                          (it.get("extra_options_cn") or {}).get("grinding_level") == "粗研磨",
                          str(it.get("extra_options_cn"))))

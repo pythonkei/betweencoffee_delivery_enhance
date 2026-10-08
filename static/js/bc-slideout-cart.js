@@ -547,11 +547,15 @@ class SlideoutCart {
         const label = map[item.milk_level] || item.milk_level;
         parts.push(`<i class="icon material-symbols-outlined">humidity_mid</i> 奶量: ${label}`);
       }
-      // 自訂選項組（2026-08-15）：API 已翻譯為中文（extra_options_cn）
+      // 自訂選項組（2026-08-15；2026-10-06 修正）：API 已譯為中文並回傳標籤／圖示
+      //   → 直接採用（前端不再維護清單，新增選項組自動生效）；
+      //   labelMap 僅作舊資料／未知 key 的後備（同時補上 roast_level／tea_type）。
       if (item.extra_options_cn) {
-        const labelMap = { cup_level:'杯量', strength_level:'濃度', milk_level:'奶量', milk:'奶類', caramel:'焦糖', butter:'黃油', coconut:'椰奶', vanilla:'香草', special:'特調', oolong:'烏龍茶', jasmine:'茉莉花茶', matcha:'抹茶', green:'綠茶', hojicha:'焙茶', topping:'面層配料', bean_blend:'配豆' };
+        const labelMap = { cup_level:'杯量', strength_level:'濃度', milk_level:'奶量', milk:'奶類', caramel:'焦糖', butter:'黃油', coconut:'椰奶', vanilla:'香草', special:'特調', oolong:'烏龍茶', jasmine:'茉莉花茶', matcha:'抹茶', green:'綠茶', hojicha:'焙茶', topping:'面層配料', bean_blend:'配豆', roast_level:'烘焙', tea_type:'茶種' };
+        const icons = item.extra_options_icons || {};
+        const labels = item.extra_options_labels || {};
         Object.entries(item.extra_options_cn).forEach(([k, v]) => {
-          parts.push(`${labelMap[k] || k}: ${v}`);
+          parts.push(`<i class="icon material-symbols-outlined">${icons[k] || 'add_circle'}</i> ${labels[k] || labelMap[k] || k}: ${v}`);
         });
       }
     } else if (item.type === 'bean') {

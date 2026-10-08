@@ -514,7 +514,10 @@ body {
      單一定義於此（bc-components.css 全站載入，其他檔案直接用 var() 取用）。
      - --bc-theme2-rgb：通道值，需要透明度時用 rgb(var(--bc-theme2-rgb) / .3)
      - --bc-theme2：慣用寫法（等於 rgb(252, 255, 75)）
-     目前用途：hero_nav 正常狀態圓點、浮動購物車數字圓圈（badge）、bc-yama 圓球底色（tax-nav）。
+     目前用途：**2026-10-08 起全站已無元件引用**。
+     使用者指示「index.html 目前第二主題色改為第一主題色」→ 原三處引用（hero_nav 正常狀態圓點、
+     浮動購物車數字圓圈 badge、bc-yama 圓球底色／-5 積分）全部改回第一主題色 --bc-gold #c49b63；
+     第二主題色的定義保留（日後要再用時直接 var(--bc-theme2) 即可，不必重定義）。
      2026-09-21 使用者指示：色值由 #E2FC07（rgb 226 252 7）改為 **#FCFF4B（rgb 252 255 75）**
      —— 只需改這兩行（全站單一來源；其他檔案只 var() 取用或寫 fallback 值）。 */
   --bc-theme2-rgb: 252 255 75;
@@ -1562,8 +1565,8 @@ body {
   min-width: 22px;
   height: 22px;
   border-radius: 11px;
-  background: var(--bc-theme2);  /* 2026-09-21（使用者指示）：第二主題色 #FCFF4B／rgb(252,255,75)（原主題金 #c49b63） */
-  color: var(--bc-bg);   /* 深色字 #0e0e0e（2026-09-21：亮色底必須配深字才可讀，原白色 #fff 對比不足） */
+  background: var(--bc-gold);  /* 2026-10-08（使用者指示「index.html 目前第二主題色改為第一主題色」）：改回第一主題色／品牌金 #c49b63（全站元件；2026-09-21 曾改為第二主題色 #FCFF4B） */
+  color: var(--bc-bg);   /* 深色字 #0e0e0e（亮底必配深字：對品牌金 #c49b63 實測 7.5:1；原白色 #fff 對亮底對比不足） */
   font-family: Arial, Helvetica, sans-serif;  /* 2026-08-14：數字用系統字體，避免 webfont 載入延遲造成文字閃爍（FOUT） */
   font-size: 0.79rem;
   font-weight: 700;

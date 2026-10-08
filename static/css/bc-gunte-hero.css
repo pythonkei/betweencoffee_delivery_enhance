@@ -412,7 +412,7 @@
   height: 8px;
   border: 1px solid var(--color-black);
   border-radius: 4px;
-  background: var(--bc-theme2); /* 2026-09-21（使用者指示）：正常狀態 → 第二主題色 #FCFF4B／rgb(252,255,75)（原 #c49b63 主題金） */
+  background: var(--bc-gold, #c49b63); /* 2026-10-08（使用者指示「index.html 目前第二主題色改為第一主題色」）：正常狀態 → 第一主題色／品牌金 #c49b63（還原 2026-09-21 的第二主題色 #FCFF4B；選取/active 仍白、hover 只變寬不變色） */
   transition: var(--ease-out);
 }
 

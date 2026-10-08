@@ -144,6 +144,31 @@ OPTION_GROUPS = [
             ("brand", "品牌配豆"),
         ],
     },
+    {
+        # 烘焙（2026-10-06）：值域 "1"/"2" 與 BeanItem.roast_level（烘焙水平刻度 light/…）不同；
+        # BEAN_OPTION_GROUPS 目前無同名組，ALL_OPTION_GROUPS 的 key 不重疊。
+        # 若未來咖啡豆也要開「烘焙度」選項組，需先改用不同 key（避免 ALL_OPTION_GROUPS 撞 key）。
+        "key": "roast_level",
+        "label": "烘焙",
+        "icon": "local_fire_department",
+        "default": "1",  # 浅烘預設選中
+        "choices": [
+            ("1", "浅烘"),
+            ("2", "中烘"),
+        ],
+    },
+    {
+        # 茶種（2026-10-06）：值域 "1"/"2" 為本商品層級選項值，與 BeanItem 任何欄位無關；
+        # key 與 BEAN_OPTION_GROUPS（origin / grinding_level / roast_level）不重疊。
+        "key": "tea_type",
+        "label": "茶種",
+        "icon": "emoji_food_beverage",
+        "default": "1",  # 碧螺春預設選中
+        "choices": [
+            ("1", "碧螺春"),
+            ("2", "白芽奇蘭"),
+        ],
+    },
 ]
 
 OPTION_KEYS = [g["key"] for g in OPTION_GROUPS]
@@ -210,7 +235,7 @@ BEAN_OPTION_GROUPS = [
 
 BEAN_OPTION_KEYS = [g["key"] for g in BEAN_OPTION_GROUPS]
 
-# 顯示端合併查找用（咖啡 16 組 + 豆 3 組；key 不重疊）
+# 顯示端合併查找用（咖啡 18 組 + 豆 3 組；key 不重疊）
 ALL_OPTION_GROUPS = OPTION_GROUPS + BEAN_OPTION_GROUPS
 
 

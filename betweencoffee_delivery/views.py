@@ -18,6 +18,7 @@ from django.db.models import Q
 
 # betweencoffee_delivery/views.py
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views import View
 
 from cart.cart import Cart  # Import the Cart class
@@ -69,6 +70,8 @@ def _build_landing_context(request):
         "user_avatar": "",
         "last_order_image": "",
         "last_order_link": "",
+        # 2026-10-04：首頁 .top_art sticky 堆疊卡片（loogg.jp 模組移植）
+        "top_art_cards": _build_top_art_cards(),
     }
 
     if request.user.is_authenticated:
@@ -77,6 +80,134 @@ def _build_landing_context(request):
         context["last_order_link"] = _get_last_order_link(request.user)
 
     return context
+
+
+def _build_top_art_cards():
+    """首頁 .top_art（loogg.jp sticky 堆疊卡片模組移植）11 張卡內容。
+
+    2026-10-04 建立。素材全部取自站上既有圖（非新圖）：
+      · 7 張 hero 素材（PC 方圖 + SP 510x680；與 GUNTE hero 同一組、同一 PC/SP 配對）
+      · 3 張 fujiya-photo（PC 取 _b 半尺寸 1360x600 省頻寬；SP 取 photoN_sp 750x1040）
+      · 1 張 bc_machine.jpg（門市烘豆機；站上無 SP 版本 → PC/SP 共用，
+        由 CSS object-fit:cover 置中裁切）
+    文案沿用站上既有商品名與 hero 文案語氣；三個 atmosphere 卡的文案為品牌語氣的
+    氛圍字（非商品描述），如需調整只改這個 list。
+
+    數量固定 11：bc-top-art.css 的 :nth-child 陰影、bc-top-art.js 的
+    「最後一張不縮放」皆以 11 張為準。
+    """
+    return [
+        {
+            "name_label": "Coffee Vol.01: ",
+            "name_strong": "Black Blend",
+            "title_pc": "專屬配豆驅動您最佳狀態，",
+            "title_sp": "釋放能量。",
+            "img_pc": "images/01_1080.webp",
+            "img_sp": "images/01_sp_510x680.webp",
+            "alt": "Black Blend 咖啡",
+            "href": reverse("coffee", args=[4]),
+        },
+        {
+            "name_label": "Coffee Vol.02: ",
+            "name_strong": "Butter King",
+            "title_pc": "極致豐厚焦糖黃油定番，",
+            "title_sp": "餘味完全覆蓋在味蕾上。",
+            "img_pc": "images/02_1080.webp",
+            "img_sp": "images/02_sp_510x680.webp",
+            "alt": "Butter King 咖啡",
+            "href": reverse("coffee", args=[10]),
+        },
+        {
+            "name_label": "Coffee Vol.03: ",
+            "name_strong": "果香浅煎",
+            "title_pc": "果香先行，",
+            "title_sp": "淺焙明亮、甜感收尾。",
+            "img_pc": "images/03_1080.webp",
+            "img_sp": "images/03_sp_510x680.webp",
+            "alt": "果香浅煎 咖啡",
+            "href": reverse("coffee", args=[9]),
+        },
+        {
+            "name_label": "Coffee Vol.04: ",
+            "name_strong": "抹茉",
+            "title_pc": "静岡縣產抹茶，",
+            "title_sp": "在牛奶裡慢慢散開。",
+            "img_pc": "images/04_660.webp",
+            "img_sp": "images/04_sp_510x680.webp",
+            "alt": "抹茉 抹茶咖啡",
+            "href": reverse("coffee", args=[8]),
+        },
+        {
+            "name_label": "Coffee Vol.05: ",
+            "name_strong": "Flat White",
+            "title_pc": "濃縮與牛奶的黃金比例，",
+            "title_sp": "只留剛剛好的那一口。",
+            "img_pc": "images/05_630.webp",
+            "img_sp": "images/05_sp_510x680.webp",
+            "alt": "Flat White 咖啡",
+            "href": reverse("coffee", args=[3]),
+        },
+        {
+            "name_label": "Coffee Vol.06: ",
+            "name_strong": "Sunshine",
+            "title_pc": "連接專屬於您的味蕾，",
+            "title_sp": "從一天的第一口開始。",
+            "img_pc": "images/06_720.jpg",
+            "img_sp": "images/06_sp_510x680.webp",
+            "alt": "Sunshine 咖啡",
+            "href": reverse("coffee", args=[2]),
+        },
+        {
+            "name_label": "Coffee Vol.07: ",
+            "name_strong": "WakeMeup",
+            "title_pc": "醒來的那一口，",
+            "title_sp": "由這裡開始。",
+            "img_pc": "images/07_1080.jpg",
+            "img_sp": "images/07_sp_510x680.webp",
+            "alt": "WakeMeup 咖啡",
+            "href": reverse("coffee", args=[1]),
+        },
+        {
+            "name_label": "Atmosphere Vol.01: ",
+            "name_strong": "Strawberry",
+            "title_pc": "季節的果物，",
+            "title_sp": "先替甜點預告了顏色。",
+            "img_pc": "images/fujiya-photo/photo1_b.jpg",
+            "img_sp": "images/fujiya-photo/photo1_sp.jpg",
+            "alt": "季節果物",
+            "href": reverse("about"),
+        },
+        {
+            "name_label": "Atmosphere Vol.02: ",
+            "name_strong": "Shortcake",
+            "title_pc": "一層一層夾起來的，",
+            "title_sp": "是剛剛好的甜。",
+            "img_pc": "images/fujiya-photo/photo2_b.jpg",
+            "img_sp": "images/fujiya-photo/photo2_sp.jpg",
+            "alt": "手作蛋糕",
+            "href": reverse("about"),
+        },
+        {
+            "name_label": "Atmosphere Vol.03: ",
+            "name_strong": "Baked",
+            "title_pc": "出爐的那一刻，",
+            "title_sp": "整間店都醒了。",
+            "img_pc": "images/fujiya-photo/photo3_b.jpg",
+            "img_sp": "images/fujiya-photo/photo3_sp.jpg",
+            "alt": "出爐甜點",
+            "href": reverse("about"),
+        },
+        {
+            "name_label": "Bean Vol.01: ",
+            "name_strong": "Kingsman",
+            "title_pc": "機器裡養著今天的豆子，",
+            "title_sp": "磨豆聲，就是開店的信號。",
+            "img_pc": "images/bc_machine.jpg",
+            "img_sp": "images/bc_machine.jpg",
+            "alt": "門市烘豆機裡的咖啡豆",
+            "href": reverse("bean", args=[3]),
+        },
+    ]
 
 
 def _get_last_order_image(user):

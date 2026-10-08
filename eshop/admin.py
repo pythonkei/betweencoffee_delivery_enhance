@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class OptionGroupConfigWidget(forms.Widget):
     """自訂選項組 UI：每組一行「勾選啟用 + 排序數字」（2026-08-15）
 
-    2026-09-21 泛化：可傳入 groups（預設 OPTION_GROUPS＝咖啡 16 組），
+    2026-09-21 泛化：可傳入 groups（預設 OPTION_GROUPS＝咖啡 18 組），
     咖啡豆端傳 BEAN_OPTION_GROUPS；定義中 customer_selectable=False 的組會標示「唯讀顯示」。
     """
 
@@ -117,7 +117,7 @@ class OptionGroupsConfigFormMixin:
 
 
 class OptionGroupsConfigForm(OptionGroupsConfigFormMixin, forms.ModelForm):
-    """CoffeeItem 表單：把 16 組「啟用 checkbox + 排序數字」合併為單一欄位"""
+    """CoffeeItem 表單：把 18 組「啟用 checkbox + 排序數字」合併為單一欄位"""
 
     option_groups_source = OPTION_GROUPS
 
