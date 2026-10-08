@@ -374,7 +374,7 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ## 近期任務（2026-10-02 ~ 10-08）
 
 ```text
-2026-10-02 ~ 10-08（10 月批次；2026-10-08 一次提交並推送 origin/main）
+2026-10-02 ~ 10-08（10 月批次；2026-10-08 一次提交並推送 origin/main，commit 18a14070／72 檔）
 ├── [x] 加入購物車彈窗停用（`#cart-popup{display:none!important}` 只以 ID 覆蓋；markup／`showPopup()` 保留 ⇒ 刪一行即還原）— ✅ 2026-10-02
 ├── [x] Order 長條與個人圓鈕間距縮小（`--bc-buy-profile-gap` 12 → 8px）— ✅ 2026-10-02
 ├── [x] 首頁 `.top_art` sticky 堆疊卡片模組（loogg.jp 移植；11 張卡；css `?v=20261006a`／js `?v=20261004a`）— ✅ 2026-10-04

@@ -1,6 +1,6 @@
 # 05_PRIORITY_TASKS
 
-> **收尾（2026-10-08）**: **10 月批次（2026-10-02 ~ 10-08）已一次提交並推送 GitHub（`origin/main`）＋ 記憶文件三處同步**（本檔／`04_SYSTEM_STATE.md`／`.clinerules/.clinerules`＋根目錄 `bc-context`）；⚠️ 仍未部署（Render `autoDeploy=no`）。
+> **收尾（2026-10-08）**: **10 月批次（2026-10-02 ~ 10-08）已一次提交並推送 GitHub（`origin/main`，commit `18a14070`）＋ 記憶文件三處同步**（本檔／`04_SYSTEM_STATE.md`／`.clinerules/.clinerules`＋根目錄 `bc-context`）；⚠️ 仍未部署（Render `autoDeploy=no`）。
 
 > **最後更新**: 2026-10-08（**index.html 第二主題色 → 第一主題色**：使用者指示「index.html 目前第二主題色改為第一主題色」→ yama 圓球 `--bc-yama-circle`、hero 圓點、`.bc-floating-cart-badge`、`.bc-yama-discount`（-5）全數由 `#FCFF4B` 改回品牌金 `#c49b63`；純前端、可逆、無 migration；`bc-components`／`bc-yama-header`／`bc-gunte-hero` 版號 → `20261008e`；新增 `docs/verify/cdp_verify_theme_color_index.py` 100/100＋`cdp_verify_floating_cart.py` 25/25）；上次（2026-10-06）：追加 ㉓：**咖啡自訂選項組新增「茶種」（`tea_type`：`1 碧螺春`／`2 白芽奇蘭`），機制全資料驅動、migration 0080（AddField ×2）**；上次（2026-10-06）：追加 ㉒：**咖啡自訂選項組新增「烘焙」（`roast_level`：`1 浅烘`／`2 中烘`），機制全資料驅動、migration 0079（AddField ×2）**；上次（2026-10-06）：追加 ㉑：**首頁 `.top_art` 行動／平板恢復顯示卡片圖片（撤回 2026-10-05 的「圖片僅桌面端顯示」與其配套不透明底色）**，純前端、可逆、無 migration、無新圖；上次（2026-10-05）：追加：**首頁 `.top_art` hover／點按文字色改為主題色（原站桃紅 `#ff005a` → 品牌金 `#c49b63`）**，純前端、可逆、無 migration；同日稍早：**圖片僅桌面端顯示（行動／平板 ≤1024px 不顯示卡片圖片）**＋**行動／平板卡片不透明底色（遮蔽堆疊文案）**，純前端、可逆、無 migration、無新圖）
 

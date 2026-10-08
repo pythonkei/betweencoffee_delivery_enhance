@@ -94,7 +94,7 @@ load_context() {
         echo "│   ├── 加入購物車彈窗停用（使用者指示「加入購物車時 cart-popup 彈跳窗不需再顯示」，2026-10-02）：style-utilities.css 的 .cart-popup 段開頭新增 #cart-popup{display:none!important}（只以 ID 覆蓋、類別樣式 0 改動 → 支付提醒彈窗 #payment-reminder-popup 共用 .cart-popup 類別不受影響；markup／showPopup() 保留 ⇒ 刪該行即完全還原）"
         echo "│   ├── Order 長條與個人圓鈕間距縮小（2026-10-02）：bc-attract.css 的 .bc-attract-nav 單一變數 --bc-buy-profile-gap 12px → 8px（純前端、無 migration）"
         echo "│   ├── 新增 docs/verify/CDP_SETUP.md（2026-10-06）：CDP 驗證環境啟動方式（port 9222；必須用非 snap 的 Playwright chromium，snap 版會把啟動轉給現有實例而不開埠；setsid nohup ＋ < /dev/null 才不會被 shell 收掉；pkill 用 por[t] 避免殺到自己的 shell；單次 1~2 分鐘、輸出導檔再 grep）"
-        echo "│   └── ⚠️ 本批（2026-10-02~08）已於 2026-10-08 全部提交並 push origin/main（含上述全部＋圖片資產更新、deco svg 白線稿、換圖用底線備份檔）；仍未部署（Render autoDeploy=no → 手動 Manual Deploy）"
+        echo "│   └── ⚠️ 本批（2026-10-02~08）已於 2026-10-08 全部提交並 push origin/main（commit 18a14070／72 檔；含上述全部＋圖片資產更新、deco svg 白線稿、換圖用底線備份檔）；仍未部署（Render autoDeploy=no → 手動 Manual Deploy）"
         echo "│"
 
 
