@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""CDP 驗證：/about/ footer 的 .footer-mail-inner（email CTA）已改為 index footer 的 .scroller-box 跑馬燈。
+"""CDP 驗證：/about/ footer 的 .footer-mail-inner（email CTA）已改為共用 partial 的 .scroller-box 跑馬燈
+（與 base.html ftco 頁尾逐字相同；2026-10-09 起首頁 / 亦改用同一 partial 的 #bc-bg-footer 版本）。
 
 改動背景（2026-10-08）
   templates/.../about.html：刪 <div class="footer-mail-inner">（"Write directly to:" + mailto hello@betweencoffee.hk），
@@ -19,17 +20,45 @@
      前進 + transform 隨時間位移（向左、負值）；最後 pause + seek(50%) 驗 keyframes 可解析
      （to = translate(calc(-50% - 0.1rem))），且位移量 = -(inner 寬/4 + 0.1rem/2)
      （0.1rem 的 px 值各斷點不同，由 keyframe 反推，linear 內插）。
-  E. 補償生效（保真基準法）：在**同一 viewport** 另開 / 量測 index footer（.ftco-footer .scroller-box .scroller），
+  E. 補償生效（保真基準法）：在**同一 viewport** 另開 /coffee_menu/ 量測 base.html 的 ftco 頁尾
+     （.ftco-footer .scroller-box .scroller —— 2026-10-09 起這是全站唯一仍渲染靜態 ftco 頁尾的頁面），
      逐項比對 .scroller__inner padding-block、.tag-list li padding、li font-size/width、flex-wrap、
      animation（name / duration / timing-function）必須完全一致；
      桌面額外驗絕對值 32px / 1.6px / 1108px / 22px。
+     （2026-10-09：首頁 / 的頁尾已改為共用 partial 的 #bc-bg-footer，基準頁因此由 / 移往 /coffee_menu/；
+       首頁自身的保真度改由 J 項驗。）
   F. 幾何：.scroller 寬 <= .foooter-mail 寬 + 1；.scroller overflow == hidden；無水平溢出；
      F5/F6（2026-10-08 新增）「.foooter-mail 未撐破所屬 grid」＋「寬 <= viewport 寬」——
      舊版只驗 scroller <= mail，當 .foooter-mail 走 shrink-to-fit 被 .scroller{max-width:2000px}
      撐到 2000px（平板 1108px）時兩邊同步變大、照樣 PASS，抓不到「跑馬燈橫貫 footer」的缺陷。
   G. 相鄰文字仍在：.foooter-mail 內 .p1 仍含 "Available for" / "takeaway & Relaxing"
-  H. index footer 無回歸：/ 的 .ftco-footer .scroller-box 仍 data-animated + 4 子節點 + padding-block 32px
-     + li 桌面值 1108px / 22px + 動畫 scroll / 60s / linear（H1–H7）
+  H. base.html ftco 頁尾無回歸（/coffee_menu/）：.ftco-footer .scroller-box 仍 data-animated + 4 子節點
+     + padding-block 32px + li 桌面值 1108px / 22px + 動畫 scroll / 60s / linear（H1–H7）
+  J. 首頁 / 的 #bc-bg-footer 跑馬燈保真（2026-10-09 新增，配合首頁頁尾置換）：與 H 的 base.html 基準
+     在同一 viewport 逐項一致（data-animated / 4 子節點 / padding-block / li 尺寸字級 / overflow /
+     animation），且 / 已無 .ftco-footer（置換未留殘骸）。
+  J11–J15（2026-10-09 同日稍後新增）：模組由頁尾移到首頁「最上方」當第一個 hero ——
+     J11 .bc-page-content 的第一個 section 是 .hero.bc-bg-hero（:first-of-type 命中）；
+     J12 該 hero（內含 #bc-bg-footer）在文件順序上位於 .bc-gunte-hero 之前；
+     J13 載入時（未捲動）#bc-bg-footer 已在首屏視口內（rect.top < innerHeight / 2）；
+     J14 .bc-bg-hero 的 computed margin-top = 0px（蓋掉 bc-components.css 首 section 的 100px）；
+     J15 / 已無 footer 元素（querySelectorAll('footer').length == 0）——置頂模組最外層改用 div
+         （partials/bc_hero.html），bc-yama-header.js 的 document.querySelector('footer')
+         因此為 null、footer 交會邏輯 no-op（否則一載入就把 tax-nav／header-bot 藏起來）。
+  J16–J19（2026-10-09，配合「置頂 hero 去掉頁尾感」）：index.html extra_css 新增
+     `.bc-bg-hero #bc-bg-footer{background:transparent}` / `.bc-bg-hero #bc-bg-footer .footer{同上}` /
+     `.bc-bg-hero #bc-bg-footer .grid.is-footer{border-top:0 none}`（只覆寫首頁、不動
+     bc-bg-footer.css，故 about 真頁尾不受影響）——
+     J16 置頂 hero 的頂部分隔線已移除：.grid.is-footer computed border-top-width 0px / style none
+         （原本 bc-bg-footer.css:113 的 1px solid rgba(255,255,255,.08)，實測繪出 y=14 的
+         rgb(32,32,32) 線），且 padding-top 仍非 0（桌面 106.667px＝calc(120vw/14.4)）→ 文字零位移；
+     J17 自帶黑底已移除：#bc-bg-footer 與 .footer computed background-color 皆 rgba(0,0,0,0)
+         → 由頁面自身底色穿透（body 的固定背景照片 bg_4.jpg，style-bootstrap.css:3118，
+         與首頁其餘區塊一致）；
+     J18 作用域錨點正確：首頁 #bc-bg-footer 的父層是 SECTION.hero.bc-bg-hero（about 頁為 BODY）
+         → 覆寫只命中首頁；
+     J19 反向守門：同一腳本 goto /about/ 量 about 的真頁尾仍保有 1px solid 分隔線 +
+         #0e0e0e 黑底、父層為 BODY（首頁覆寫未波及 about）。
   I. prefers-reduced-motion: reduce 時：不設 data-animated、仍無水平溢出（驗證防護 overflow:hidden）、
      I5/I6 同一 grid / viewport 越欄防線（2026-10-08 新增：無動畫時 li{width:1108px} 更容易撐爆欄位）
 多個 viewport：桌面 1280×800 / 平板 768×1024 / 行動 390×844，各存一張 about footer 截圖。
@@ -151,7 +180,7 @@ MEASURE_JS = r"""
     out.p1_text = p1 ? p1.textContent.replace(/\s+/g, ' ').trim() : null;
   }
 
-  // H. index footer（首頁 = 保真基準；about 的 E 項會在同 viewport 比對這裡的值）
+  // H. base.html ftco 頁尾（/coffee_menu/ = 保真基準；about 的 E 項會在同 viewport 比對這裡的值）
   var ft = document.querySelector('.ftco-footer .scroller-box .scroller');
   if (ft) {
     var fin = ft.querySelector('.scroller__inner');
@@ -178,7 +207,114 @@ MEASURE_JS = r"""
       out.ftco_li_text_align = flcs.textAlign;
     }
   }
+  // J. 首頁 / 的 #bc-bg-footer 跑馬燈（2026-10-09：首頁頁尾改用共用 partial，保真度與 base.html 比對）
+  var bg = document.querySelector('#bc-bg-footer .foooter-mail .scroller')
+        || document.querySelector('#bc-bg-footer .scroller');
+  out.bg_found = !!bg;
+  out.index_ftco_count = document.querySelectorAll('.ftco-footer').length;
+  if (bg) {
+    var bin = bg.querySelector('.scroller__inner');
+    out.bg_data_animated = bg.getAttribute('data-animated');
+    out.bg_child_count = bin ? bin.children.length : 0;
+    out.bg_overflow = getComputedStyle(bg).overflow;
+    if (bin) {
+      var bics = getComputedStyle(bin);
+      out.bg_inner_pad_top = bics.paddingTop;
+      out.bg_inner_pad_bottom = bics.paddingBottom;
+      out.bg_inner_flex_wrap = bics.flexWrap;
+      out.bg_anim_name = bics.animationName;
+      out.bg_anim_duration = bics.animationDuration;
+      out.bg_anim_timing_function = bics.animationTimingFunction;
+    }
+    var bli = bin ? bin.querySelector(':scope > li') : null;
+    if (bli) {
+      var blcs = getComputedStyle(bli);
+      out.bg_li_pad = blcs.padding;
+      out.bg_li_width_css = blcs.width;
+      out.bg_li_font_size = blcs.fontSize;
+      out.bg_li_text_align = blcs.textAlign;
+    }
+  }
   return out;
+})()
+"""
+
+# 首頁 hero 位置／標籤（2026-10-09：BC 動態模組由頁尾移到最上方當第一個 hero）
+INDEX_HERO_JS = r"""
+(function(){
+  var out = {};
+  var pc = document.querySelector('.bc-page-content');
+  var first = pc ? pc.querySelector(':scope > section:first-of-type') : null;
+  var anySec = pc ? pc.querySelector(':scope > section') : null;
+  out.hero_found = !!(first && first.classList.contains('bc-bg-hero')
+                      && first.classList.contains('hero'));
+  out.first_section_classes = first ? first.className : null;
+  out.is_first_of_type = !!(first && anySec && first === anySec);
+
+  var root = document.getElementById('bc-bg-footer');
+  var gunte = document.querySelector('.bc-gunte-hero');
+  out.gunte_found = !!gunte;
+  out.hero_has_root = !!(root && first && first.contains(root));
+  if (root && gunte) {
+    // root 在 gunte 之前 → gunte.compareDocumentPosition(root) 會帶 PRECEDING
+    out.hero_before_gunte =
+      (gunte.compareDocumentPosition(root) & Node.DOCUMENT_POSITION_PRECEDING) !== 0;
+  } else {
+    out.hero_before_gunte = null;
+  }
+  if (root) {
+    var r = root.getBoundingClientRect();
+    out.hero_top = Math.round(r.top);
+    out.hero_h = Math.round(r.height);
+  }
+  out.inner_h = window.innerHeight;
+  out.scroll_y = Math.round(window.scrollY);
+  if (first) out.margin_top = getComputedStyle(first).marginTop;
+  out.footer_tag_count = document.querySelectorAll('footer').length;
+
+  // 2026-10-09（使用者指示）：置頂 hero 去掉「頁尾感」——移除頂部 1px 分隔線與自帶黑底。
+  // 這三組值由 index.html extra_css 的 .bc-bg-hero #bc-bg-footer … 覆寫提供；
+  // about 頁（真頁尾）不受影響，由下方 ABOUT_GUARD_JS 反向確認。
+  if (root) {
+    var grid = root.querySelector('.grid.is-footer');
+    var fdiv = root.querySelector('.footer');
+    out.grid_found = !!grid;
+    if (grid) {
+      var gs = getComputedStyle(grid);
+      out.grid_border_top_w = gs.borderTopWidth;
+      out.grid_border_top_style = gs.borderTopStyle;
+      out.grid_border_top_color = gs.borderTopColor;
+      out.grid_padding_top = gs.paddingTop;
+    }
+    out.root_bg = getComputedStyle(root).backgroundColor;
+    out.footer_bg = fdiv ? getComputedStyle(fdiv).backgroundColor : null;
+    out.root_parent_tag = root.parentElement ? root.parentElement.tagName : null;
+    out.root_parent_classes = root.parentElement ? root.parentElement.className : null;
+  }
+  return out;
+})()
+"""
+
+# /about/ 反向守門（2026-10-09）：本頁覆寫只加 .bc-bg-hero 前綴 → about 的真頁尾必須「仍有」
+# 1px 分隔線與 #0e0e0e 黑底；且其 #bc-bg-footer 的父層是 BODY（不是 SECTION.bc-bg-hero），
+# 證明作用域錨點正確、沒有誤傷 about。
+ABOUT_GUARD_JS = r"""
+(function(){
+  var root = document.getElementById('bc-bg-footer');
+  if (!root) return {found: false};
+  var grid = root.querySelector('.grid.is-footer');
+  var fdiv = root.querySelector('.footer');
+  var gs = grid ? getComputedStyle(grid) : null;
+  return {
+    found: true,
+    border_w: gs ? gs.borderTopWidth : null,
+    border_style: gs ? gs.borderTopStyle : null,
+    border_color: gs ? gs.borderTopColor : null,
+    root_bg: getComputedStyle(root).backgroundColor,
+    footer_bg: fdiv ? getComputedStyle(fdiv).backgroundColor : null,
+    parent_tag: root.parentElement ? root.parentElement.tagName : null,
+    parent_classes: root.parentElement ? root.parentElement.className : null
+  };
 })()
 """
 
@@ -263,7 +399,13 @@ async def main():
             await send(msg("Page.navigate", {"url": url}))
             for _ in range(60):
                 await asyncio.sleep(0.25)
-                if await evaljs("document.readyState === 'complete'"):
+                # 2026-10-09：除 readyState 外必須同時確認 location.href 已切到目標 URL ——
+                # Page.navigate 之後、新 document 尚未 commit 前，舊頁面的 readyState 仍然是
+                # 'complete'，只驗 readyState 會提早跳出，並在「上一個頁面」上量測。
+                # （實測：/about/ 390x844 迴圈裡的 /coffee_menu/ 基準量測偶發落在 about 頁，
+                #   ftco_* 全為 None → E1–E4/E6 假 FAIL。加上 href 條件後即為確定性。）
+                if await evaljs("document.readyState === 'complete' && location.href === "
+                                + json.dumps(url)):
                     break
             await asyncio.sleep(1.2)  # 等 main.js 初始化 .scroller
 
@@ -399,40 +541,40 @@ async def main():
                                   and re.fullmatch(r"translate\(calc\(-50% - [\d.]+px\)\)", kf_end or "")
                                   is not None,
                                   f"{kf_list} -> 0.1rem = {kf_px}px"))
-            await shot(name)  # 先截 about 頁（下方 E 會切到 / 取基準）
-            # E（保真基準法：同一 viewport 的 index footer 計算值即為正解；不寫死單一斷點數值）
-            await goto(f"{BASE}/")
+            await shot(name)  # 先截 about 頁（下方 E 會切到 /coffee_menu/ 取基準）
+            # E（保真基準法：同一 viewport 的 base.html ftco 頁尾計算值即為正解；不寫死單一斷點數值）
+            await goto(f"{BASE}/coffee_menu/")
             mi = await evaljs(MEASURE_JS) or {}
-            print(f"   [基準] index footer @ {w}x{h}：inner {mi.get('ftco_inner_pad_top')}/"
+            print(f"   [基準] base.html ftco 頁尾 @ {w}x{h}：inner {mi.get('ftco_inner_pad_top')}/"
                   f"{mi.get('ftco_inner_pad_bottom')}、li {mi.get('ftco_li_pad')} "
                   f"{mi.get('ftco_li_font_size')} {mi.get('ftco_li_width_css')} "
                   f"wrap={mi.get('ftco_inner_flex_wrap')}")
-            failures.append(check("E1 .scroller__inner padding-block 與 index footer 一致（補償生效）",
+            failures.append(check("E1 .scroller__inner padding-block 與 /coffee_menu/ ftco 頁尾一致（補償生效）",
                                   m.get("inner_pad_top") == mi.get("ftco_inner_pad_top")
                                   and m.get("inner_pad_bottom") == mi.get("ftco_inner_pad_bottom")
                                   and m.get("inner_pad_top") not in (None, "0px"),
                                   f"about {m.get('inner_pad_top')}/{m.get('inner_pad_bottom')}"
-                                  f" vs index {mi.get('ftco_inner_pad_top')}/{mi.get('ftco_inner_pad_bottom')}"))
-            failures.append(check("E2 .tag-list li padding 與 index footer 一致（補償生效）",
+                                  f" vs ftco {mi.get('ftco_inner_pad_top')}/{mi.get('ftco_inner_pad_bottom')}"))
+            failures.append(check("E2 .tag-list li padding 與 /coffee_menu/ ftco 頁尾一致（補償生效）",
                                   m.get("li_pad") == mi.get("ftco_li_pad")
                                   and m.get("li_pad") not in (None, "0px"),
-                                  f"about {m.get('li_pad')} vs index {mi.get('ftco_li_pad')}"))
-            failures.append(check("E3 li font-size/width 與 index footer 一致（未被 reset 影響）",
+                                  f"about {m.get('li_pad')} vs ftco {mi.get('ftco_li_pad')}"))
+            failures.append(check("E3 li font-size/width 與 /coffee_menu/ ftco 頁尾一致（未被 reset 影響）",
                                   m.get("li_font_size") == mi.get("ftco_li_font_size")
                                   and m.get("li_width_css") == mi.get("ftco_li_width_css"),
                                   f"about {m.get('li_font_size')}/{m.get('li_width_css')}"
-                                  f" vs index {mi.get('ftco_li_font_size')}/{mi.get('ftco_li_width_css')}"))
-            failures.append(check("E4 .scroller__inner flex-wrap 與 index footer 一致（跑馬燈皆 nowrap）",
+                                  f" vs ftco {mi.get('ftco_li_font_size')}/{mi.get('ftco_li_width_css')}"))
+            failures.append(check("E4 .scroller__inner flex-wrap 與 /coffee_menu/ ftco 頁尾一致（跑馬燈皆 nowrap）",
                                   m.get("inner_flex_wrap") is not None
                                   and m.get("inner_flex_wrap") == mi.get("ftco_inner_flex_wrap"),
-                                  f"about {m.get('inner_flex_wrap')} vs index {mi.get('ftco_inner_flex_wrap')}"))
-            failures.append(check("E6 animation 屬性與 index footer 一致（name / duration / timing）",
+                                  f"about {m.get('inner_flex_wrap')} vs ftco {mi.get('ftco_inner_flex_wrap')}"))
+            failures.append(check("E6 animation 屬性與 /coffee_menu/ ftco 頁尾一致（name / duration / timing）",
                                   m.get("anim_name") is not None
                                   and m.get("anim_name") == mi.get("ftco_anim_name")
                                   and m.get("anim_duration") == mi.get("ftco_anim_duration")
                                   and m.get("anim_timing_function") == mi.get("ftco_anim_timing_function"),
                                   f"about {m.get('anim_name')}/{m.get('anim_duration')}/"
-                                  f"{m.get('anim_timing_function')} vs index {mi.get('ftco_anim_name')}/"
+                                  f"{m.get('anim_timing_function')} vs ftco {mi.get('ftco_anim_name')}/"
                                   f"{mi.get('ftco_anim_duration')}/{mi.get('ftco_anim_timing_function')}"))
             if name == "desktop":
                 # 桌面另驗絕對值，保留原本可追溯的硬性數值（2rem / .1rem / 桌面 li 尺寸）
@@ -466,11 +608,11 @@ async def main():
                                   and "takeaway" in (m.get("p1_text") or ""),
                                   m.get("p1_text")))
 
-        # ================= / ：index footer 回歸 =================
+        # ================= /coffee_menu/ ：base.html ftco 頁尾回歸（保真基準） =================
         await set_viewport(1280, 800)
-        await goto(f"{BASE}/")
+        await goto(f"{BASE}/coffee_menu/")
         m2 = await evaljs(MEASURE_JS) or {}
-        print("\n=== / (index footer 回歸) 1280x800 ===")
+        print("\n=== /coffee_menu/ (base.html ftco 頁尾回歸) 1280x800 ===")
         failures.append(check("H1 .ftco-footer .scroller 存在", m2.get("ftco_found") is True))
         failures.append(check("H2 data-animated=true", m2.get("ftco_data_animated") == "true",
                               m2.get("ftco_data_animated")))
@@ -486,13 +628,115 @@ async def main():
                               m2.get("ftco_li_width_css") == "1108px"
                               and m2.get("ftco_li_font_size") == "22px",
                               f"{m2.get('ftco_li_width_css')} / {m2.get('ftco_li_font_size')}"))
-        failures.append(check("H7 index footer animation 仍為 scroll / 60s / linear（未受本次 CSS 影響）",
+        failures.append(check("H7 base.html ftco footer animation 仍為 scroll / 60s / linear（未受本次 CSS 影響）",
                               m2.get("ftco_anim_name") == "scroll"
                               and m2.get("ftco_anim_duration") == "60s"
                               and m2.get("ftco_anim_timing_function") == "linear",
                               f"{m2.get('ftco_anim_name')}/{m2.get('ftco_anim_duration')}/"
                               f"{m2.get('ftco_anim_timing_function')}"))
-        await shot("index_footer", ".ftco-footer .scroller-box")
+        await shot("coffee_menu_ftco_footer", ".ftco-footer .scroller-box")
+
+        # ================= / ：#bc-bg-footer 保真（與上方 H 基準逐項比對） =================
+        await set_viewport(1280, 800)
+        await goto(f"{BASE}/")
+        mj = await evaljs(MEASURE_JS) or {}
+        print("\n=== / (#bc-bg-footer 保真) 1280x800 ===")
+        failures.append(check("J1 首頁 #bc-bg-footer .scroller 存在（已改用共用 partial）",
+                              mj.get("bg_found") is True))
+        failures.append(check("J2 首頁已無 .ftco-footer（頁尾只剩 #bc-bg-footer）",
+                              mj.get("index_ftco_count") == 0, mj.get("index_ftco_count")))
+        failures.append(check("J3 data-animated=true", mj.get("bg_data_animated") == "true",
+                              mj.get("bg_data_animated")))
+        failures.append(check("J4 子節點數與 /coffee_menu/ ftco 一致（4）",
+                              mj.get("bg_child_count") == m2.get("ftco_child_count"),
+                              f"{mj.get('bg_child_count')} vs {m2.get('ftco_child_count')}"))
+        failures.append(check("J5 padding-block 與 /coffee_menu/ ftco 一致",
+                              mj.get("bg_inner_pad_top") == m2.get("ftco_inner_pad_top")
+                              and mj.get("bg_inner_pad_bottom") == m2.get("ftco_inner_pad_bottom")
+                              and mj.get("bg_inner_pad_top") not in (None, "0px"),
+                              f"{mj.get('bg_inner_pad_top')}/{mj.get('bg_inner_pad_bottom')}"
+                              f" vs {m2.get('ftco_inner_pad_top')}/{m2.get('ftco_inner_pad_bottom')}"))
+        failures.append(check("J6 overflow 與 /coffee_menu/ ftco 一致（皆 hidden）",
+                              mj.get("bg_overflow") == m2.get("ftco_overflow")
+                              and mj.get("bg_overflow") == "hidden",
+                              f"{mj.get('bg_overflow')} vs {m2.get('ftco_overflow')}"))
+        failures.append(check("J7 li 尺寸/字級 與 /coffee_menu/ ftco 一致（1108px / 22px）",
+                              mj.get("bg_li_width_css") == m2.get("ftco_li_width_css")
+                              and mj.get("bg_li_font_size") == m2.get("ftco_li_font_size"),
+                              f"{mj.get('bg_li_width_css')}/{mj.get('bg_li_font_size')}"
+                              f" vs {m2.get('ftco_li_width_css')}/{m2.get('ftco_li_font_size')}"))
+        failures.append(check("J8 li padding-block 已補償（非 0px，與 ftco 一致）",
+                              mj.get("bg_li_pad") == m2.get("ftco_li_pad")
+                              and mj.get("bg_li_pad") not in (None, "0px"),
+                              f"{mj.get('bg_li_pad')} vs {m2.get('ftco_li_pad')}"))
+        failures.append(check("J9 .scroller__inner flex-wrap 與 ftco 一致（nowrap）",
+                              mj.get("bg_inner_flex_wrap") == m2.get("ftco_inner_flex_wrap"),
+                              f"{mj.get('bg_inner_flex_wrap')} vs {m2.get('ftco_inner_flex_wrap')}"))
+        failures.append(check("J10 animation（name/duration/timing）與 ftco 一致",
+                              mj.get("bg_anim_name") == m2.get("ftco_anim_name")
+                              and mj.get("bg_anim_duration") == m2.get("ftco_anim_duration")
+                              and mj.get("bg_anim_timing_function") == m2.get("ftco_anim_timing_function"),
+                              f"{mj.get('bg_anim_name')}/{mj.get('bg_anim_duration')}/"
+                              f"{mj.get('bg_anim_timing_function')} vs {m2.get('ftco_anim_name')}/"
+                              f"{m2.get('ftco_anim_duration')}/{m2.get('ftco_anim_timing_function')}"))
+        # ---- J11–J15：模組由頁尾移到首頁最上方當第一個 hero（2026-10-09，同一 / 分頁、未捲動） ----
+        hero = await evaljs(INDEX_HERO_JS) or {}
+        print("   [hero] " + json.dumps(
+            {k: hero.get(k) for k in
+             ("hero_found", "first_section_classes", "is_first_of_type", "hero_has_root",
+              "hero_before_gunte", "gunte_found", "hero_top", "hero_h", "inner_h",
+              "scroll_y", "margin_top", "footer_tag_count",
+              "grid_found", "grid_border_top_w", "grid_border_top_style",
+              "grid_border_top_color", "grid_padding_top",
+              "root_bg", "footer_bg", "root_parent_tag", "root_parent_classes")},
+            ensure_ascii=False))
+        failures.append(check("J11 .bc-page-content 第一個 section 是 .hero.bc-bg-hero 且內含 #bc-bg-footer",
+                              hero.get("hero_found") is True
+                              and hero.get("is_first_of_type") is True
+                              and hero.get("hero_has_root") is True,
+                              hero.get("first_section_classes")))
+        failures.append(check("J12 BC hero 在文件順序上位於 GUNTE hero 之前",
+                              hero.get("hero_before_gunte") is True,
+                              f"gunte_found={hero.get('gunte_found')}"))
+        failures.append(check("J13 載入時 #bc-bg-footer 已在首屏視口內（0 <= rect.top < innerHeight/2）",
+                              isinstance(hero.get("hero_top"), int)
+                              and hero.get("hero_top") < (hero.get("inner_h") or 0) / 2,
+                              f"top={hero.get('hero_top')} innerH={hero.get('inner_h')} "
+                              f"scrollY={hero.get('scroll_y')}"))
+        failures.append(check("J14 .bc-bg-hero computed margin-top = 0px（未被首 section 100px 推擠）",
+                              hero.get("margin_top") == "0px", hero.get("margin_top")))
+        failures.append(check("J15 / 已無 footer 元素（querySelector('footer') 為 null → yama 交會邏輯 no-op）",
+                              hero.get("footer_tag_count") == 0, hero.get("footer_tag_count")))
+        failures.append(check("J16 置頂 hero 的頂部分隔線已移除（.grid.is-footer border-top 0px/none，"
+                              "原本為 1px solid rgba(255,255,255,.08)）且 padding-top 未被動到",
+                              hero.get("grid_border_top_w") == "0px"
+                              and hero.get("grid_border_top_style") == "none"
+                              and hero.get("grid_padding_top") not in (None, "0px"),
+                              f"border={hero.get('grid_border_top_w')}/{hero.get('grid_border_top_style')} "
+                              f"padTop={hero.get('grid_padding_top')}"))
+        failures.append(check("J17 自帶黑底已移除（#bc-bg-footer 與 .footer 皆 transparent → 由頁面底色穿透）",
+                              hero.get("root_bg") == "rgba(0, 0, 0, 0)"
+                              and hero.get("footer_bg") == "rgba(0, 0, 0, 0)",
+                              f"root={hero.get('root_bg')} footer={hero.get('footer_bg')}"))
+        failures.append(check("J18 覆寫作用域錨點正確（首頁 #bc-bg-footer 的父層是 SECTION.hero.bc-bg-hero）",
+                              hero.get("root_parent_tag") == "SECTION"
+                              and "bc-bg-hero" in (hero.get("root_parent_classes") or ""),
+                              f"{hero.get('root_parent_tag')}.{hero.get('root_parent_classes')}"))
+        # ---- J19：about 頁反向守門（同一腳本內以新分頁前的同頁面 goto 量測，1280x800） ----
+        await goto(f"{BASE}/about/")
+        ag = await evaljs(ABOUT_GUARD_JS) or {}
+        print("   [about-guard] " + json.dumps(ag, ensure_ascii=False))
+        failures.append(check("J19 首頁覆寫未波及 about 真頁尾（仍有 1px solid 分隔線 + #0e0e0e 黑底，父層為 BODY）",
+                              ag.get("found") is True
+                              and ag.get("border_w") == "1px"
+                              and ag.get("border_style") == "solid"
+                              and ag.get("footer_bg") == "rgb(14, 14, 14)"
+                              and ag.get("root_bg") == "rgb(14, 14, 14)"
+                              and ag.get("parent_tag") == "BODY",
+                              f"border={ag.get('border_w')}/{ag.get('border_style')} "
+                              f"footer_bg={ag.get('footer_bg')} parent={ag.get('parent_tag')}"))
+        await goto(f"{BASE}/")  # 回到 / 續跑下方 index 截圖
+        await shot("index_bg_footer", "#bc-bg-footer .scroller-box")
 
         # ================= prefers-reduced-motion: reduce =================
         await send(msg("Emulation.setEmulatedMedia", {

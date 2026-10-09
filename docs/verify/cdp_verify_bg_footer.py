@@ -1,8 +1,26 @@
 #!/usr/bin/env python3
-"""CDP 驗證：#bc-bg-footer（/about/ 專屬品牌 footer）的釘牌 logo 與頁面範圍。
+"""CDP 驗證：#bc-bg-footer（品牌 footer）的釘牌 logo 與頁面範圍。
+
+2026-10-09（使用者指示）：首頁 / 的 footer 由 base.html 靜態 ftco 頁尾改為
+與 /about/ 共用的 #bc-bg-footer（同一 partials/bc_bg_footer.html）。
+本腳本因此把 / 一併納入斷言（文字層 + 瀏覽器層）。
+
+2026-10-09（同日稍後，使用者指示）：首頁的 #bc-bg-footer 再由頁尾移到**最上方**當第一個 hero
+（GUNTE hero 移到它下方）。置頂版 markup ＝ partials/bc_hero.html，與 footer 版逐字相同，
+只把最外層 <footer class="footer"> 換成 <div class="footer">：bc-yama-header.js 用
+document.querySelector('footer')（DOM 第一個 footer 元素）當「footer 交會」觀察目標，
+置頂模組若仍用 footer 標籤，一載入就把 tax-nav／header-bot 藏起來。
+→ / 的 footer 標籤數由 1 改為 0（本腳本同步調整；/ 也因此沒有頁尾 <footer> 元素，
+DOM footer 元素數改由 J 系列（cdp_verify_footer_scroller.py）與本檔 scoping 一併驗）。
 
 檢查項目
-  1. 頁面範圍：僅 /about/ 有 #bc-bg-footer；/coffee_menu/ 沒有（且用 .ftco-footer）。
+  0. markup（文字層，不經瀏覽器）：/ 與 /about/ 的 HTML 內
+     id="bc-bg-footer" 恰好 1 個、無 ftco 頁尾字樣、
+     且引用 bc-bg-footer.css / bc-bg-footer.js；</footer> 個數 / = 0、/about/ = 1；
+     /coffee_menu/ 反向（仍用 ftco 頁尾，</footer> = 1）。
+  1. 頁面範圍：/ 與 /about/ 有 #bc-bg-footer 且不重複；
+     DOM footer 元素數 = 0（/）、1（/about/）、1（/coffee_menu/）；
+     /coffee_menu/ 沒有 #bc-bg-footer（且仍用 .ftco-footer）。
   2. 釘牌（.footer-logo-cell）：無品牌金底色（background 透明）、幾何尺寸。
   3. 白色線稿：deco 一律白（deco_*.svg 檔案內 root fill:#ffffff），
      <img> 不再套用 .is-invert（filter 為 none）。
@@ -22,6 +40,9 @@ MEASURE_JS = r"""
   var root = document.getElementById('bc-bg-footer');
   out.has_bg_footer = !!root;
   out.has_ftco_footer = !!document.querySelector('.ftco-footer');
+  out.bg_footer_count = document.querySelectorAll('#bc-bg-footer').length;
+  out.ftco_count = document.querySelectorAll('.ftco-footer').length;
+  out.footer_tag_count = document.querySelectorAll('footer').length;
   out.doc_scroll_w = document.documentElement.scrollWidth;
   out.inner_w = window.innerWidth;
   out.no_h_overflow = out.doc_scroll_w <= out.inner_w + 1;
@@ -57,6 +78,53 @@ MEASURE_JS = r"""
   return out;
 })()
 """
+
+
+def fetch(path):
+    """取得未經瀏覽器處理的伺服器端 HTML（模板渲染結果）。"""
+    with urllib.request.urlopen(BASE + path, timeout=20) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+def markup_checks():
+    """文字層斷言：不需瀏覽器即可驗證 footer 置換是否真的生效（最快抓到模板問題）。
+
+    注意：Django 在 --noreload 下會快取模板，改 .html 後務必重啟 8081，
+    否則這裡看到的是開機當時的舊渲染。
+    """
+    print("=== markup (文字層) ===")
+    # path, 期望 id="bc-bg-footer" 次數, 期望 ftco 頁尾次數比較式, 期望 </footer> 次數
+    spec = [
+        # 2026-10-09：/ 的 #bc-bg-footer 已由頁尾移到最上方當 hero，最外層標籤由 footer 改為 div
+        # （見 partials/bc_hero.html）→ / 不再有 </footer>；/about/ 仍是頁尾版 = 1；
+        # /coffee_menu/ 走 base.html 的 .ftco-footer = 1。
+        ("/", 1, "==0", 0),
+        ("/about/", 1, "==0", 1),
+        ("/coffee_menu/", 0, ">=1", 1),
+    ]
+    all_ok = True
+    for path, want_bg, ftco_mode, want_footer in spec:
+        html = fetch(path)
+        got_bg = html.count('id="bc-bg-footer"')
+        got_ftco = html.count("ftco-footer")
+        got_footer = html.count("</footer>")
+        ok_bg = got_bg == want_bg
+        ok_ftco = (got_ftco == 0) if ftco_mode == "==0" else (got_ftco >= 1)
+        print(f"  {path}: id=\"bc-bg-footer\"={got_bg} ftco-footer={got_ftco} </footer>={got_footer}")
+        results = {
+            f"{path} id=\"bc-bg-footer\" 次數 == {want_bg}": ok_bg,
+            f"{path} ftco-footer 次數 {ftco_mode}（got {got_ftco}）": ok_ftco,
+            f"{path} </footer> 個數 == {want_footer}（got {got_footer}）": got_footer == want_footer,
+        }
+        if want_bg:
+            for asset in ("css/bc-bg-footer.css", "js/bc-bg-footer.js"):
+                results[f"{path} 引用 {asset}"] = asset in html
+        for k, v in results.items():
+            all_ok = all_ok and v
+            print(("  PASS " if v else "  FAIL ") + k)
+    print("  markup 總結:", "PASS" if all_ok else "FAIL")
+    return all_ok
+
 
 
 async def main():
@@ -99,15 +167,35 @@ async def main():
                     f.write(base64.b64decode(data))
                 print(f"   shot -> _verify_bgfooter_{name}.png")
 
-        # ---- 1. 頁面範圍 ----
+        # ---- 0. markup 文字層 ----
+        markup_checks()
+
+        # ---- 1. 頁面範圍（2026-10-09 起含首頁 /） ----
         print("=== 頁面範圍 (scoping) ===")
-        for path in ["/about/", "/coffee_menu/"]:
+        # path, 期望 has_bg_footer, 期望 has_ftco_footer, 期望 DOM footer 元素數
+        # 2026-10-09：/ 的模組已改為 div（置頂 hero）→ footer 元素 0；
+        #             /about/ 仍為 footer 標籤 = 1；/coffee_menu/ base.html ftco = 1。
+        scoping = [("/", True, False, 0), ("/about/", True, False, 1),
+                   ("/coffee_menu/", False, True, 1)]
+        for path, want_bg, want_ftco, want_footer in scoping:
             await send(msg("Emulation.setDeviceMetricsOverride",
                            {"width": 1280, "height": 800, "deviceScaleFactor": 1, "mobile": False}))
             await send(msg("Page.navigate", {"url": BASE + path}))
             await asyncio.sleep(3)
             r = await evaljs(MEASURE_JS)
-            print(f"  {path}: bg_footer={r.get('has_bg_footer')} ftco_footer={r.get('has_ftco_footer')}")
+            print(f"  {path}: bg_footer={r.get('has_bg_footer')} ftco_footer={r.get('has_ftco_footer')} "
+                  f"bg_id_count={r.get('bg_footer_count')} ftco_dom_count={r.get('ftco_count')} "
+                  f"footer_tags={r.get('footer_tag_count')}")
+            checks = {
+                f"{path} #bc-bg-footer 存在 == {want_bg}": bool(r.get("has_bg_footer")) is want_bg,
+                f"{path} .ftco-footer 存在 == {want_ftco}": bool(r.get("has_ftco_footer")) is want_ftco,
+                f"{path} #bc-bg-footer 不重複（<= {1 if want_bg else 0}）":
+                    (r.get("bg_footer_count") or 0) <= (1 if want_bg else 0),
+            }
+            checks[f"{path} DOM footer 元素數 == {want_footer}"
+                   f"（got {r.get('footer_tag_count')}）"] = r.get("footer_tag_count") == want_footer
+            for k, v in checks.items():
+                print(("  PASS " if v else "  FAIL ") + k)
 
         # ---- 2/3/4. 各 viewport 量測 ----
         for w, h, m_, name in [(1280, 800, False, "desktop"), (768, 1024, False, "tablet"), (390, 844, True, "mobile")]:

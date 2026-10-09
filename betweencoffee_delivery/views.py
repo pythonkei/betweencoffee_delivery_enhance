@@ -71,6 +71,8 @@ def _build_landing_context(request):
         "last_order_image": "",
         "last_order_link": "",
         # 2026-10-04：首頁 .top_art sticky 堆疊卡片（loogg.jp 模組移植）
+        # 2026-10-08：模組已依指示移至 About 頁（見 About.get → 同一 builder）；
+        #            index.html 不再輸出此區塊，landing context 保留供其他 landing 模板沿用。
         "top_art_cards": _build_top_art_cards(),
     }
 
@@ -83,9 +85,10 @@ def _build_landing_context(request):
 
 
 def _build_top_art_cards():
-    """首頁 .top_art（loogg.jp sticky 堆疊卡片模組移植）11 張卡內容。
+    """About 頁 .top_art（loogg.jp sticky 堆疊卡片模組移植）11 張卡內容。
 
-    2026-10-04 建立。素材全部取自站上既有圖（非新圖）：
+    2026-10-04 建立（當時位於首頁）；2026-10-08 依指示自 index.html 移至 About 頁
+    （.bc-fujiya-photo 區塊正下方），內容與動畫參數不變，素材全部取自站上既有圖（非新圖）：
       · 7 張 hero 素材（PC 方圖 + SP 510x680；與 GUNTE hero 同一組、同一 PC/SP 配對）
       · 3 張 fujiya-photo（PC 取 _b 半尺寸 1360x600 省頻寬；SP 取 photoN_sp 750x1040）
       · 1 張 bc_machine.jpg（門市烘豆機；站上無 SP 版本 → PC/SP 共用，
@@ -450,6 +453,10 @@ class About(View):
             "cart": cart,  # keep cart count fn
             "series_coffees": series_coffees,
             "series_beans": series_beans,
+            # 2026-10-08：loogg.jp「.top_art」sticky 堆疊卡片模組自 index.html 移至本頁
+            # （置於 .bc-fujiya-photo 區塊正下方）。內容與動畫參數不變，
+            # 與 landing context 共用同一個 builder。
+            "top_art_cards": _build_top_art_cards(),
         }
         return render(request, "betweencoffee_delivery/about.html", context)
 

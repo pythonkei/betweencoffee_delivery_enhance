@@ -4,7 +4,22 @@
 > （`fetch /json/new?about:blank` 開分頁 → WebSocket `Input.dispatchMouseEvent` /
 > `Emulation.setDeviceMetricsOverride` / `Runtime.evaluate`）。**跑腳本前必須先有這個瀏覽器**。
 >
-> **最後更新**：2026-10-06（配合 `cdp_verify_top_art.py` 的圖片斷言復原——行動／平板恢復顯示圖片——時確認；腳本項目數 347 → 355）
+> **最後更新**：2026-10-09（首頁 BC 動態模組 `#bc-bg-footer` 自頁尾移到最上方當第一個 hero、
+> GUNTE hero 下移 → `cdp_verify_footer_scroller.py` 追加 J11–J15：第一 section ＝ `.hero.bc-bg-hero`、
+> 載入即在首屏（`rect.top` 0）、`computed margin-top` 0px、DOM 順序在 `.bc-gunte-hero` 之前、
+> 且全頁已無 `footer` 元素；同日稍後追加 J16–J19：置頂 hero 去掉頁尾感（`index.html` extra_css 覆寫
+> `.grid.is-footer{border-top:0 none}` ＋ `#bc-bg-footer`/`.footer{background:transparent}`）——
+> J16 分隔線已移除且 `padding-top` 未動、J17 黑底已透明（由頁面底色 `bg_4.jpg` 穿透）、
+> J18 覆寫錨點＝`SECTION.hero.bc-bg-hero` 只命中首頁、J19 `goto /about/` 反向守門（真頁尾仍保有
+> `1px solid` 分隔線 ＋ `#0e0e0e` 黑底）；該檔項目數 **111 → 116 → 120**。
+> 另新增 `cdp_shot_index_hero_viewport.py`＝新 hero 的 3 斷點視窗截圖（含捲到 GUNTE hero 的第二張））
+>
+> 沿革：2026-10-06 配合圖片斷言復原（行動／平板恢復顯示圖片）時確認，347 → 355。
+>       2026-10-08 `cdp_verify_top_art.py` 隨 `.top_art` 模組自首頁移至 `/about/`、
+>       改連 `http://localhost:8081/about/`，並追加 3 項「位置」斷言——模組須緊接
+>       `.bc-fujiya-photo` 之後、後接既有 `.ftco-section-blank`；腳本項目數 355 → 367。
+>       2026-10-09 `cdp_verify_footer_scroller.py` 的跨頁基準自首頁 `/`（已改用 `#bc-bg-footer`）
+>       改指向 `/coffee_menu/`（唯一仍渲染靜態 `.ftco-footer` 的頁面），並新增 J 系列驗首頁保真。
 
 ## ⚠️ 本機踩雷：不要用 snap 版 chromium
 
@@ -58,13 +73,19 @@ curl -s --max-time 5 http://127.0.0.1:9222/json/version
 ## 執行驗證
 
 ```bash
-python3 docs/verify/cdp_verify_top_art.py          # 首頁 .top_art 模組（355 項）
+python3 docs/verify/cdp_verify_top_art.py          # 關於頁 /about/ 的 .top_art 模組（367 項）
 python3 docs/verify/cdp_verify_floating_cart.py    # 浮動購物車（5 斷點 × 4 頁，25 項）
+python3 docs/verify/cdp_verify_footer_scroller.py  # 首頁 BC 動態 hero ＋ /coffee_menu/ 頁尾跑馬燈（3 斷點，120 項）
+python3 docs/verify/cdp_shot_index_hero_viewport.py # 首頁新 hero 外觀截圖（3 斷點 × 2 張；只截圖＋印幾何，無斷言）
 ```
 
 - 腳本會自己 `PUT /json/new?about:blank` 開一個分頁、跑完 `Page.close`；**不會**動到 9222 那個
   `about:blank` 常駐分頁。
 - 需要 DJANGO 站台同時在跑（本機 `python3 manage.py runserver 8081`）。
+- ⚠️ **改過 `templates/**` 之後要重啟站台再跑腳本**：Django 4.1+ 的 `TEMPLATES` 預設使用
+  `cached.Loader`，長時間執行的 `runserver`（尤其 `--noreload`）會把舊的編譯結果留在記憶體，
+  `curl` 會看到舊 HTML，驗證腳本量到的也是舊 DOM（現象＝改了 template 卻「怎麼跑都一樣」）。
+  重啟方式：`pkill -f 'manage.py runserver 8081'` 後重新啟動（或對任一 `.py` 存檔觸發 autoreload）。
 - 單次執行約 1～2 分鐘（4 個 viewport × 逐頁量測）；輸出量大，建議導到檔案再 grep：
 
 ```bash

@@ -87,7 +87,27 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 </div>
 
 
-<!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp） -->
+<!-- 2026-10-09（使用者指示）：BC 動態模組（#bc-bg-footer，Hug in a Cup 時鐘）由頁尾移到
+     首頁最上方，成為第一個 hero；原本的 GUNTE hero 緊接在它下方（順序＝本檔 DOM 順序）。
+     1. markup 取自 partials/bc_hero.html（＝ partials/bc_bg_footer.html 的 hero 變體：
+        兩者逐字相同，僅把最外層的 footer 標籤（class="footer"）改為 div 標籤，
+        原因見該檔註解 —— bc-yama-header.js 會用 document.querySelector('footer')
+        （取 DOM 第一個 footer 元素）當「footer 交會」觀察目標；置頂模組若仍用 footer 標籤，
+        頁面一載入它就在視口內 → tax-nav 被移除 init、header-bot 加 is-hide，右下角元件開站即消失）。
+     2. 外層 <section class="hero bc-bg-hero">：讓它成為 .bc-page-content 的第一個 section，
+        與 GUNTE hero 同為「置頂 hero」語意（.hero 這個類別在其他 CSS 沒有任何裸規則，
+        僅 bc-gunte-hero.css 的 .bc-page-content > section.bc-gunte-hero.hero 一條，
+        且必須同時有 .bc-gunte-hero → 不會影響本 wrapper，已全庫 grep 確認）。
+        附帶效果：GUNTE hero 不再是 first-of-type，其 margin-top 由 bc-gunte-hero.css 的
+        class 規則壓為 0（不依賴 section 序位），兩塊 hero 之間不會多出 100px 空隙。
+     3. 本 section 的 margin-top 由下方 extra_css 覆寫為 0
+        （蓋掉 bc-components.css 首 section 的 100px 預留）。 -->
+<section class="hero bc-bg-hero">
+{% include 'betweencoffee_delivery/partials/bc_hero.html' %}
+</section>
+
+<!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
+     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。 -->
 <section class="hero bc-gunte-hero">
             <div class="hero_wrap">
                 <h2 class="hero_catch">
@@ -168,7 +188,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                             <img class="hide-sp" src="{% static 'images/05_630.webp' %}" alt="" width="540" height="540">
                                             <img class="vis-sp" src="{% static 'images/05_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
-                                        <h3 class="hero_slide_item_cap">FLAT WHITE｜Bean</h3>
+                                        <h3 class="hero_slide_item_cap -black">FLAT WHITE｜Bean</h3>
                                         <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
@@ -472,32 +492,54 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
     </div>
 </section>
 
-{% comment %}
-2026-10-04：loogg.jp「.top_art」sticky 堆疊卡片模組移植（UI / 動畫 1:1）
-  樣式：static/css/bc-top-art.css（scope：.bc-top-art）
-  動畫：static/js/bc-top-art.js（原站為 .top_wrap 內部容器捲動 → 本站一般 window
-        捲動，觸發量測改 getBoundingClientRect().top，數學與原站相同）
-  內容：views.py _build_landing_context() → top_art_cards（11 張，唯一修改點）
-  DOM 結構／類名／屬性（含空白 ontouchstart）與原站一致，僅在 .top_art 上並加本站
-  scope 類 .bc-top-art（同一元素）。第 2 張起加 loading="lazy"（原站無此屬性 →
-  純效能加值，不影響外觀與動畫）。
-{% endcomment %}
-<div class="top_art bc-top-art">
-    {% for card in top_art_cards %}
-    <div class="top_art_item_wrap">
-        <a href="{{ card.href }}" class="top_art_item" ontouchstart="">
-            <picture class="top_art_item_photo">
-                <source srcset="{% static card.img_sp %}" media="(max-width:1024px)" />
-                <img src="{% static card.img_pc %}" alt="{{ card.alt }}"{% if not forloop.first %} loading="lazy"{% endif %} />
-            </picture>
-            <div class="top_art_item_text_wrap">
-                <p class="top_art_item_name">{{ card.name_label }}<strong>{{ card.name_strong }}</strong></p>
-                <h2 class="top_art_item_title">{{ card.title_pc }}<br class="pc_block">{{ card.title_sp }}</h2>
-            </div>
-        </a>
+
+<section hidden class="feed overflow-hidden">
+    <div class="feed__layer">
+        <div class="feed__layer-parts feed__layer-parts--01"></div>
+        <div class="feed__layer-parts feed__layer-parts--02"></div>
     </div>
-    {% endfor %}
-</div>
+    <div class="feed__mask_middle">
+        <svg id="_レイヤー_1" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
+            <clipPath id="mask" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
+            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
+            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
+            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
+            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
+        </clipPath>
+        </svg>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+<!-- 2026-09-11：複製一組 .feed（第二組，加 .feed--video）；底層「背景圖片」
+     index_feed_image.png 改為影片容器（.feed__video > video roasting.webm）→
+     蒙版形狀輪廓內顯示的內容由靜態照片改為烘焙影片；蒙版幾何與 feedScroll 動畫
+     與第一組 .feed 完全相同（mask id 改為 feedMaskVideo/ExcludeFeedVideo，
+     避免同文件重複 id）。 -->
+<section class="feed feed--video overflow-hidden">
+    <div class="feed__video">
+        <video class="video" muted playsinline loop preload="none" aria-hidden="true"
+               data-feed-video>
+            <source src="{% static 'roasting.webm' %}" type="video/webm">
+            <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
+        </video>
+    </div>
+    <div class="feed__layer">
+        <div class="feed__layer-parts feed__layer-parts--01"></div>
+        <div class="feed__layer-parts feed__layer-parts--02"></div>
+    </div>
+    <div class="feed__mask_middle">
+        <svg id="_レイヤー_1_feedVideo" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
+            <clipPath id="feedMaskVideo" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
+            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
+            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
+            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
+            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
+        </clipPath>
+        </svg>
+    </div>
+</section>
 
 <section class="ftco-section-blank-small"></section>
 
@@ -527,99 +569,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
     </a>
 </aside>
 
-
-<!-- owl-carousel config file: main.js, animate.css -->
-<!-- 2026-08-07：inline style 鎖定高度（HTML 首字節即生效，不等 CSS 載入），
-     避免 owl 初始化前 .slider-item 無高度 → 內容堆疊 → 首屏抖動縮放。
-     min-height 雙保險；響應式由 bc-components.css media query + !important 覆蓋。
-     載入動畫層由 CSS 偽元素（.home-slider::before/::after）實作：
-     深黑背景 + 品牌 Mogra 字 + 金色 spinner，owl 初始化後由 main.js
-     加上 is-loaded class 淡出。不使用實體 div（會被 owl 包成 slide）。 -->
-<section hidden class="home-slider owl-carousel" style="height:750px; min-height:750px; overflow:hidden; background-color:#0e0e0e;">
-    <div class="slider-item slider-first" style="background-image: url({% static 'images/section_bg_01.svg' %});">
-        <div class="overlay"></div>
-        <div class="container">
-            <!-- 第一個 Slider：文字移到整個橫幅左下角（直接子層級，相對於 .slider-item 定位） -->
-            <div class="slider-first-text">
-                <h2 class="subheading">No bullsh*t... Just Caffeine!!</h2>
-                <h2 class="mb-2">恰度好的一杯</h2>
-                <h5 class=" mb-md-4"></h5>
-                <p class="mb-4 mb-md-5">保存自己節奏<br>其實。不難</p>
-                <p><a href="{% url 'coffee_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">立即落單</a></p>
-            </div>
-            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
-                <div class="col-md-12 col-sm-12 text-center">
-                    <img src="{% static 'images/coffee_04.png' %}" class="slider-coffee-img" alt="Between Coffee">
-                </div>
-            </div>
-            <span hidden class="img-owl-bg">
-                <div class="gif-box"><img src= {% static 'images/_cup_360.gif' %} class=""></div>
-            </span>
-            <span class="img-owl-bg">
-                <div class="noise-img"><img src= {% static 'images/coffee_border_02.svg' %} class="noise_animation"></div>
-            </span>
-        </div>
-    </div>
-
-    <div class="slider-item">
-        <!-- 咖啡豆烘焙影片背景（webm 2.2MB；延遲載入：preload=none 首屏不載入，
-             輪播切到這格時由 main.js 設 preload=auto + play()，節省首屏 2.2MB） -->
-        <div class="bc-banner-video blobsVideo loadEnd">
-            <div class="banner-stage">
-                <div class="inner">
-                    <video class="video" muted playsinline loop autoplay preload="none" data-lazy-video>
-                        <source src="{% static 'roasting.webm' %}" type="video/webm">
-                    </video>
-                </div>
-                <!-- 2026-08-08：owl_title_bg_02.svg 移到 .inner（morph 動畫容器）之外、.banner-stage 內，
-                     疊在動畫容器上方，避免被 morph 圓角 + overflow:hidden 裁剪，SVG 完整顯示 -->
-                <span class="img-owl-bg">
-                    <div class="svg-box"><img src= {% static 'images/owl_title_bg_02.svg' %} class="noise_animation" loading="lazy"></div>
-                </span>
-            </div>
-        </div>
-        <div class="container">
-            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
-                <div class="col-md-12 col-sm-12 text-center">
-                    <span class="subheading">Handcrafted Roastery</span>
-                    <h1 class="mb-4">好豆 &#8226; 是會呼吸的</h1>
-                    <p class="mb-4 mb-md-5">從「火」與「嚴謹」出發<br>曲線烘焙設計與適切度</p>
-                    <p><a href="{% url 'bean_menu' %}" class="btn btn-primary p-3 px-xl-4 py-xl-3">我們的配方</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="slider-item">
-        <!-- 2026-08-10: 全幅背景影片（填滿整個橫幅，無橢圓遮罩）
-             使用 .bc-banner-video 基礎樣式（非 blobsVideo 橢圓 morph 遮罩），
-             video object-fit:cover 鋪滿全幅，取代原本 bg_3.jpg 背景圖片；
-             影片更改為 coffee_machine.webm（2026-08-10） -->
-        <div class="bc-banner-video loadEnd">
-            <video class="video" muted playsinline loop autoplay preload="none" data-lazy-video>
-                <source src="{% static 'images/coffee_machine.webm' %}" type="video/webm">
-            </video>
-        </div>
-        <div class="overlay"></div>
-        <div class="container">
-            <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
-                <div class="col-md-12 col-sm-12 text-center">
-                    <span class="subheading">~ Brew with Soul ~</span>
-                    <h1 class="mb-4">啡咖師的日常</h1>
-                    <p class="mb-4 mb-md-5">不只是余韻，更是生命!</p>
-                    <p><a href="#" class="btn btn-primary p-3 px-xl-4 py-xl-3">了解更多</a></p>
-                </div>
-            </div>
-            <span class="img-owl-bg">
-                <div class="gif-box"><img src= {% static 'images/cup_360.gif' %} class="" loading="lazy"></div>
-            </span>
-            <span class="img-owl-bg">
-                <div class="noise-img"><img src= {% static 'images/owl_title_bg_01.svg' %} class="noise_animation" loading="lazy"></div>
-            </span>
-        </div>
-    </div>
-</section>
-<!-- end owl-carousel -->
 
 
 <!-- sns account -->
@@ -749,54 +698,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 
 
 
-<!-- 保留 DEMI DO 原樣風格（黑底、背景浮動圖、圓形箭頭 icon）；背景圖替換為咖啡主題 -->
-<section hidden class="feed overflow-hidden">
-    <div class="feed__layer">
-        <div class="feed__layer-parts feed__layer-parts--01"></div>
-        <div class="feed__layer-parts feed__layer-parts--02"></div>
-    </div>
-    <div class="feed__mask_middle">
-        <svg id="_レイヤー_1" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
-            <clipPath id="mask" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
-            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
-            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
-            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
-            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
-        </clipPath>
-        </svg>
-    </div>
-</section>
 
-<section class="ftco-section-blank-small"></section>
-
-<!-- 2026-09-11：複製一組 .feed（第二組，加 .feed--video）；底層「背景圖片」
-     index_feed_image.png 改為影片容器（.feed__video > video roasting.webm）→
-     蒙版形狀輪廓內顯示的內容由靜態照片改為烘焙影片；蒙版幾何與 feedScroll 動畫
-     與第一組 .feed 完全相同（mask id 改為 feedMaskVideo/ExcludeFeedVideo，
-     避免同文件重複 id）。 -->
-<section class="feed feed--video overflow-hidden">
-    <div class="feed__video">
-        <video class="video" muted playsinline loop preload="none" aria-hidden="true"
-               data-feed-video>
-            <source src="{% static 'roasting.webm' %}" type="video/webm">
-            <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
-        </video>
-    </div>
-    <div class="feed__layer">
-        <div class="feed__layer-parts feed__layer-parts--01"></div>
-        <div class="feed__layer-parts feed__layer-parts--02"></div>
-    </div>
-    <div class="feed__mask_middle">
-        <svg id="_レイヤー_1_feedVideo" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
-            <clipPath id="feedMaskVideo" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
-            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
-            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
-            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
-            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
-        </clipPath>
-        </svg>
-    </div>
-</section>
 
 
 
@@ -821,11 +723,13 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <!-- 2026-10-07：首頁 section 追加 .bc-reviews-section--lg（--rv-scale:1.15）→ 整個模組全端放大 15% -->
 <link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20261007a">
 <link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20261008e">
-<!-- 2026-10-04：首頁 loogg.jp「.top_art」sticky 堆疊卡片模組樣式（11 張卡，UI 1:1） -->
-<link rel="stylesheet" href="{% static 'css/bc-top-art.css' %}?v=20261006a">
 <!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class） -->
 <link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20261008e">
+<!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
+     BC 動態 footer（#bc-bg-footer）——markup 共用 partials/bc_bg_footer.html（單一來源）；
+     全樣式 scoped 於 #bc-bg-footer，故與 about 頁共用同一份 CSS 不會互相影響。 -->
+<link rel="stylesheet" href="{% static 'css/bc-bg-footer.css' %}?v=20261008d" />
 <style>
 /* 2026-09-04：首頁 feed 為頂部首屏（home-slider 已 hidden）→ 比照 home-slider：
    feed 照片/形狀由視口頂部開始、穿入 navbar 後方透出，navbar（z-index:100、
@@ -841,6 +745,42 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 }
 .bc-page-content > section:first-of-type.feed::before {
   height: 0;
+}
+/* 2026-10-09：首頁第一個 section 現為 BC 動態 hero（.bc-bg-hero，內含 #bc-bg-footer）→
+   比照 .feed / .bc-gunte-hero 的處理：不被 bc-components.css 的
+   `.bc-page-content > section:first-of-type:not(.home-slider){margin-top:100px}`
+   （及其 768/576 斷點的 72px、60px）推擠，模組才能由視口頂部開始。
+   用 !important 是必要的：該全域規則在各斷點以媒體查詢重複宣告，
+   本頁 <style> 只覆寫一次即可全斷點生效（與 .feed 同一寫法）。 */
+.bc-page-content > section:first-of-type.bc-bg-hero {
+  margin-top: 0 !important;
+}
+/* 2026-10-09（使用者指示）：置頂 hero 去掉「頁尾感」——移除頂部分隔線與自帶黑底。
+   [來源] 該模組（#bc-bg-footer，Hug in a Cup 時鐘）原本是頁尾，樣式沿用 Webflow 來源：
+     · 線 = bc-bg-footer.css:113 `#bc-bg-footer .grid.is-footer{border-top:1px solid
+       var(--_colors---border--100)}`，--_colors---border--100 = rgba(255,255,255,.08)
+       → 實測繪出 y=14、x=14–1250、rgb(32,32,32) 的 1px 線（頁面底色為 rgb(14,14,14)）。
+       這條線在原設計是「與頁尾上方內容分隔」用；置頂當 hero 時就會在畫面頂端
+       出現一條突兀的細線，故移除。
+     · 黑底 = bc-bg-footer.css:42 `#bc-bg-footer{background-color:var(--_colors---background--bg)}`
+       與 :129 `#bc-bg-footer .footer{background-color:…}`（兩者皆 #0e0e0e）→ 讓模組成為
+       一塊自帶黑底的方塊。移除後由頁面自身的底色穿透（body 的固定背景照片，
+       style-bootstrap.css:3118 `background:url(../images/bg_4.jpg) no-repeat fixed`），
+       與首頁其餘區塊（.feed--video / ftco-section-blank-* 等，實測已露出同一張照片）一致。
+   [範圍] 只覆寫本頁：about 頁的 #bc-bg-footer 是「真正的頁尾」，仍保留分隔線與黑底。
+   [特異度] 加上 .bc-bg-hero（多一個 class）即高於原始 `#bc-bg-footer …` 規則；
+     border-top 全檔只在 :113 宣告一次（≤991px 的媒體查詢只改 padding-top、未重新宣告邊框）
+     → 本覆寫在各斷點皆生效，不需 !important，也不必逐斷點鏡射。
+   [不動] .grid.is-footer 的 padding-top（桌面 120px／≤991px 72px）保持不變 →
+     文字與時鐘位置零位移（僅少掉 1px 線）。 */
+.bc-bg-hero #bc-bg-footer {
+  background-color: transparent;
+}
+.bc-bg-hero #bc-bg-footer .footer {
+  background-color: transparent;
+}
+.bc-bg-hero #bc-bg-footer .grid.is-footer {
+  border-top: 0 none;
 }
 /* select2 樣式 */
 /* 2026-09-21：首頁原本在此覆寫兩件事，現已改為全站規則 →
@@ -862,12 +802,29 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <script src="{% static 'js/bc-gunte-hero.js' %}?v=20260907b"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
-<!-- 2026-10-04：首頁 .top_art sticky 堆疊卡片 scroll 縮放動畫（loogg.jp 1:1 移植，
-     window 捲動等價量測；卡片數 11、最後一張不縮放） -->
-<script src="{% static 'js/bc-top-art.js' %}?v=20261004a"></script>
 <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
      已抽成全站共用檔 static/js/bc-attract-place.js（base.html 全域載入）——
      使用者指示「所有模板浮動購物車修改位置和 index 一樣」→ 全站（含首頁）共用同一套定位，
      並新增『Buy 按鈕不存在時，浮動鈕單獨對齊 navbar-brand 頂邊』的分支。
      首頁不再需要個別腳本。 -->
+<!-- 2026-10-09（使用者指示）：首頁 footer 改為 about 頁的 BC 動態 footer（#bc-bg-footer），
+     需要的 GSAP 外掛：SplitText / CustomEase（gsap 3.13 起免費）；
+     gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可。 -->
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
+<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261008a"></script>
+{% endblock %}
+
+{% block bcc_footer %}
+{% comment %}
+2026-10-09（使用者指示）：本頁不再需要「頁尾的」BC 動態模組 —— 該模組（#bc-bg-footer，
+Hug in a Cup 時鐘）已移到本頁最上方當第一個 hero（見上方 <!-- 2026-10-09 ... -->
+註解與 partials/bc_hero.html）。此處刻意覆寫為空，避免同一模組在頁面出現兩次
+（#bc-bg-footer 這個 id 重複時，bc-bg-footer.js 的 getElementById 只會綁到第一個，
+ 第二個會停在未初始化的 [data-reveal] 隱藏狀態）。
+也刻意「不」回退 base.html 的 .ftco-footer 靜態頁尾：#bc-bg-footer 已承接本頁
+全部的頁尾內容（社群、跑馬燈、© 版權），再放回 ftco 會變成兩套 footer 視覺並存。
+（若日後要恢復頁尾，把本 block 內容換回 include 'betweencoffee_delivery/partials/bc_bg_footer.html'
+ 即可，但需同步處理 id 重複問題。）
+{% endcomment %}
 {% endblock %}

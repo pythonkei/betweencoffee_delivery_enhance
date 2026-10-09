@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""CDP 驗證：首頁 loogg.jp「.top_art」sticky 堆疊卡片模組（UI / 動畫 1:1）
+"""CDP 驗證：關於頁 loogg.jp「.top_art」sticky 堆疊卡片模組（UI / 動畫 1:1）
+
+模組已於 2026-10-08 自首頁移至 /about/（置於 .bc-fujiya-photo 區塊正下方）。
 
 驗證項目（每個視窗寬度各跑一次：1440 / 1024 / 768 / 390）
   1. DOM：11 張 .top_art_item_wrap / .top_art_item / .top_art_item_photo / <source>
@@ -24,6 +26,8 @@
      *_sp_510x680 等）、>1024 選中 PC 素材（<img src>）；卡片底色透明
      （2026-10-05 追加 ② 的 ≤1024 不透明底色已隨本次復原移除，回原站 1:1）
   8. 無水平溢出
+  9. 位置（2026-10-08）：緊接 .bc-fujiya-photo 區塊之後（前一個兄弟）、
+     後接原有 .ftco-section-blank；全頁僅 1 個 .bc-fujiya-photo
 """
 import asyncio
 import json
@@ -31,7 +35,7 @@ import urllib.request
 
 import websockets
 
-URL = "http://localhost:8081/"
+URL = "http://localhost:8081/about/"
 
 JS_DOM = r"""
 (function () {
@@ -39,6 +43,16 @@ JS_DOM = r"""
   var art = document.querySelector('.bc-top-art');
   if (!art) { out.error = 'not found: .bc-top-art'; return out; }
   out.art_class = art.className;
+  /* 2026-10-08：位置驗證——模組自 index.html 移至本頁 .bc-fujiya-photo 區塊正下方 */
+  var sibs = [].slice.call(art.parentElement.children);
+  var si = sibs.indexOf(art);
+  function _d(el) {
+    return el ? el.tagName.toLowerCase() + '.' +
+      (el.className || '').toString().trim().replace(/\s+/g, '.') : '';
+  }
+  out.loc_prev = _d(sibs[si - 1]);
+  out.loc_next = _d(sibs[si + 1]);
+  out.loc_fujiya_n = document.querySelectorAll('.bc-fujiya-photo').length;
   var wraps = [].slice.call(art.children).filter(function (el) {
     return el.classList.contains('top_art_item_wrap');
   });
@@ -281,9 +295,26 @@ async def main():
             await ev("window.scrollTo(0,0)")
             await asyncio.sleep(0.3)
 
+            # 2026-10-08：模組移至體積較大的 /about/ 後，偶發性（同一頁連續換斷點時）
+            # 會在第 3.5 秒量到尚未解析完成／被換掉的 document，導致下面 KeyError 中斷
+            # 整支腳本。改為：先輪詢等待 .bc-top-art 出現（最多 12 秒），再量測；
+            # 並把 JS 端的 error（找不到模組）轉成正常 FAIL，不再讓腳本崩掉。
+            dom = {}
+            for _ in range(24):
+                dom = await ev(
+                    "(function(){return {ok:!!document.querySelector('.bc-top-art'),"
+                    "url:location.href, ready:document.readyState};})()"
+                )
+                if dom.get("ok"):
+                    break
+                await asyncio.sleep(0.5)
+
             dom = await ev(JS_DOM)
             if dom.get("__error__"):
                 chk(False, "DOM 讀取", dom["__error__"])
+                continue
+            if dom.get("error"):
+                chk(False, "DOM 讀取", dom["error"])
                 continue
             sp = w <= 1024
             chk(dom["wraps"] == 11, "11 張 .top_art_item_wrap", dom["wraps"])
@@ -291,6 +322,12 @@ async def main():
             chk(dom["photos"] == 11, "11 個 picture.top_art_item_photo", dom["photos"])
             chk(dom["sources"] == 11, "11 個 SP <source media=max-width:1024px>", dom["sources"])
             chk(dom["imgs"] == 11, "11 個 <img>（PC 版）", dom["imgs"])
+            # 2026-10-08：位置（自 index.html 移至 /about/，緊接 .bc-fujiya-photo 之後）
+            chk(dom["loc_prev"].startswith("section.bc-fujiya-photo"),
+                "位於 .bc-fujiya-photo 區塊正下方（前一個兄弟）", dom["loc_prev"])
+            chk(dom["loc_next"].startswith("section.ftco-section-blank"),
+                "後接既有 .ftco-section-blank（原頁面節奏不變）", dom["loc_next"])
+            chk(dom["loc_fujiya_n"] == 1, "全頁僅 1 個 .bc-fujiya-photo", dom["loc_fujiya_n"])
             chk(dom["wrap_position"] == "sticky", "wrap position:sticky", dom["wrap_position"])
             chk(dom["wrap_top"] == "0px", "wrap top:0px（sticky 基準）", dom["wrap_top"])
 

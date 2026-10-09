@@ -405,6 +405,30 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 
 
 
+## 近期任務（2026-10-09）
+
+```text
+2026-10-09（首頁 BC 動態 hero「Hug in a Cup 時鐘」由頁尾移到最上方；無 migration；尚未提交／尚未部署）
+├── [x] 新增 `templates/betweencoffee_delivery/partials/bc_hero.html`（＝ `bc_bg_footer.html` 逐字相同，只把最外層 `<footer class="footer">` 改成 `<div class="footer">`）— ✅ 2026-10-09
+├── [x] `index.html`：`bc-page-content` 最前加 `<section class="hero bc-bg-hero">` ＋ include 該 partial；GUNTE hero 整段下移；`block bcc_footer` 覆寫為空；`extra_css` 補 `margin-top:0 !important` — ✅ 2026-10-09
+├── [x] 驗證：`cdp_verify_footer_scroller.py` 追加 J11–J19（**120 項 PASS 120 / FAIL 0**；J11–J15 為置頂位置、J16–J19 為「去頁尾感」）＋ about 頁 `cdp_verify_bg_footer.py` 0 FAIL ＋ `cdp_verify_floating_cart.py` 全通過 ＋ 新增 `cdp_shot_index_hero_viewport.py`（3 斷點 × 2 張截圖）— ✅ 2026-10-09
+├── [x] 置頂 hero 去掉「頁尾感」（同日稍後，使用者指示「把最上面的邊框線和黑色背景拿掉」）：只在 `index.html` 的 `extra_css` 加三條頁面級覆寫 `.bc-bg-hero #bc-bg-footer{background-color:transparent}`／`.bc-bg-hero #bc-bg-footer .footer{同上}`／`.bc-bg-hero #bc-bg-footer .grid.is-footer{border-top:0 none}`（**不動 `bc-bg-footer.css`** ⇒ about 頁真頁尾仍保留分隔線＋黑底）— ✅ 2026-10-09
+└── [!] 待提交／待部署（純 `/` 前端外觀變更；`bc-bg-footer.css`／`bc-bg-footer.js`／`bc-gunte-hero.css`／`bc-components.css` 皆未動）
+```
+
+**關鍵實作細節（2026-10-09）**
+
+- **為什麼要把 `<footer>` 改成 `<div>`（本次最容易誤判、也最關鍵的一點）**：`static/js/bc-yama-header.js:24` 用 `document.querySelector('footer')`（＝DOM 第一個 `<footer>` 元素）當「footer 交會」的觀察目標。模組置頂後這個元素一載入就在視口內 ⇒ `IntersectionObserver` 立刻回呼：`.tax-nav` 被移除 `init`（右下 Order 圓球不再淡入）、`header-bot` 加 `is-hide`（浮動購物車鈕被藏），**一開站右下角元件就消失**。改成 `<div>` 後 `querySelector('footer')` 為 `null`、交會邏輯自然 no-op（首頁已無 `<footer>` 可遮擋）；`bc-bg-footer.css` 只用 `.footer` **類別**選取 ⇒ 改標籤不動任何樣式。
+- **零 CSS／JS 改動**：hero 版保留 `id="bc-bg-footer"`（`bc-bg-footer.css` 的 135 條選擇器全以此 id 為前綴、`bc-bg-footer.js` 以 `getElementById('bc-bg-footer')` 綁定）⇒ 與 about 頁共用同一份 CSS／JS（不同頁面、同 id 不衝突）；`bc_bg_footer.html` 仍為 about 頁來源。
+- **100px 預留**：`bc-components.css` 的 `.bc-page-content > section:first-of-type:not(.home-slider){margin-top:100px}`（768→72px、576→60px）會推擠新的第一個 section ⇒ `index.html` 的 `extra_css` 以 `.bc-page-content > section:first-of-type.bc-bg-hero{margin-top:0 !important}` 蓋掉（與既有 `.feed` 同寫法；用 `!important` 是為了讓三個斷點一次生效）。
+- **兩個 hero 之間零空隙**：GUNTE hero 的 `margin-top:0` 來自 `bc-gunte-hero.css` 的 **class 規則**（不依賴 `:first-of-type`）⇒ 下移後仍是 0；`.hero` 這個類別全庫沒有裸規則（唯一一條同時要求 `.bc-gunte-hero`）⇒ 新 wrapper 不繼承任何樣式。
+- **`block bcc_footer` 刻意留空**：同一 id 若出現兩次，`bc-bg-footer.js` 的 `getElementById` 只會綁到第一個（第二個會停在未初始化的 `[data-reveal]` 隱藏狀態）；也刻意**不**回退 `base.html` 的 `.ftco-footer` 靜態頁尾（該模組已承接全部頁尾內容，再放回會變兩套視覺並存）。
+- **驗證**：新增 J11（第一 section＝`.hero.bc-bg-hero` 且內含 `#bc-bg-footer`）／J12（DOM 順序在 `.bc-gunte-hero` 之前）／J13（載入即 `rect.top=0`、已在首屏）／J14（computed `margin-top:0px`）／J15（`querySelectorAll('footer').length==0`）；實測 desktop 1280×800 → hero 1449px、GUNTE hero `top=1449`（零空隙）。
+- **置頂 hero 的「頁尾感」兩個來源（2026-10-09 同日稍後移除）**：①線＝`bc-bg-footer.css:113` `#bc-bg-footer .grid.is-footer{border-top:calc(.25vw/14.4)solid rgba(255,255,255,.08)}`（Webflow 原設計的「與上方內容分隔」），在 1280×800 實測繪出 **y=14、x=14–1250、rgb(32,32,32) 的 1px 線**（頁面底色 rgb(14,14,14)）；②黑底＝`bc-bg-footer.css:42` `#bc-bg-footer{background-color:var(--_colors---background--bg)}` ＋ `:129` `#bc-bg-footer .footer{同}`（皆 `#0e0e0e`）。**覆寫只加在 `index.html` 的 `extra_css` 並前綴 `.bc-bg-hero`**（特異度 (1,1,0)／(1,2,0)／(1,3,0) 皆高於原規則；`border-top` 全檔只在 :113 宣告一次 ⇒ 全斷點生效、免 `!important`）；`.grid.is-footer` 的 `padding-top`（桌面 106.667px）刻意不動 ⇒ **零位移**（同頁 A/B 隔離測試：唯一差異＝該 1px，hero 1449.36→1448.36、GUNTE top 1449→1448）。
+- **移除黑底後露出的是什麼**：`body` 的 computed 底色是 `transparent` —— `style-bootstrap.css:3118` 起的 `body` 規則先 `background:#151111`，但**同規則後一行** `background:url(../images/bg_4.jpg) no-repeat fixed;background-size:cover` 的 shorthand 把它覆蓋 ⇒ 全站頁面底其實是**固定不滾動的深色背景照片 `bg_4.jpg`**（動態縮放時務必記得：首頁 `.feed--video`／`ftco-section-blank-*` 等區塊本來就看得到它，所以置頂 hero 透明化是「與頁面一致」而非新增視覺）。同理，要「讓某區塊融入頁面底色」時，正解是 `background:transparent` 而非再寫一次 `#0e0e0e`。
+- **回復點**：改前備份 `templates/betweencoffee_delivery/backup/index.html.20261009`（`backup/` 已 gitignore）、改前 commit `dc118b78`；回復＝把 `block bcc_footer` 內容換回 `{% include '.../bc_bg_footer.html' %}`、刪掉最上方 section、GUNTE hero 移回原位。只回退「去頁尾感」＝刪掉 `extra_css` 內那三條 `.bc-bg-hero #bc-bg-footer …` 覆寫。
+
+
 ## Phase 3 規劃
 
 ```
