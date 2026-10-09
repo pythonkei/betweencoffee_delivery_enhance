@@ -413,7 +413,7 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [x] `index.html`：`bc-page-content` 最前加 `<section class="hero bc-bg-hero">` ＋ include 該 partial；GUNTE hero 整段下移；`block bcc_footer` 覆寫為空；`extra_css` 補 `margin-top:0 !important` — ✅ 2026-10-09
 ├── [x] 驗證：`cdp_verify_footer_scroller.py` 追加 J11–J19（**120 項 PASS 120 / FAIL 0**；J11–J15 為置頂位置、J16–J19 為「去頁尾感」）＋ about 頁 `cdp_verify_bg_footer.py` 0 FAIL ＋ `cdp_verify_floating_cart.py` 全通過 ＋ 新增 `cdp_shot_index_hero_viewport.py`（3 斷點 × 2 張截圖）— ✅ 2026-10-09
 ├── [x] 置頂 hero 去掉「頁尾感」（同日稍後，使用者指示「把最上面的邊框線和黑色背景拿掉」）：只在 `index.html` 的 `extra_css` 加三條頁面級覆寫 `.bc-bg-hero #bc-bg-footer{background-color:transparent}`／`.bc-bg-hero #bc-bg-footer .footer{同上}`／`.bc-bg-hero #bc-bg-footer .grid.is-footer{border-top:0 none}`（**不動 `bc-bg-footer.css`** ⇒ about 頁真頁尾仍保留分隔線＋黑底）— ✅ 2026-10-09
-└── [!] 待提交／待部署（純 `/` 前端外觀變更；`bc-bg-footer.css`／`bc-bg-footer.js`／`bc-gunte-hero.css`／`bc-components.css` 皆未動）
+└── [x] 已提交 `c5016e29`（2026-10-09 批次，含上述 hero 置頂＋去頁尾感）；**待部署**（純 `/` 前端外觀變更；`bc-bg-footer.css`／`bc-bg-footer.js`／`bc-gunte-hero.css`／`bc-components.css` 皆未動）
 ```
 
 **關鍵實作細節（2026-10-09）**
