@@ -413,18 +413,19 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [x] Render 部署 `dep-db67vu2jnfac73cp8tcg`：commit `458e1780`、trigger=`api`、status=`live`、14:36→14:39 +08:00 完成（同日稍早另有一次 `dep-db677p142hec73b62qb0`／manual／`dc118b78`，已被本次取代並 deactivated）— ✅ 2026-10-12
 ├── [x] 生產驗證（`https://betweencoffee-delivery-enhance-v1.onrender.com`）：`/` HTTP 200（90,949 bytes；7 張 hero 咖啡照齊全＝`class="img contain"` ×7／`href="/coffee/N/"`；`bc-bg-footer.css?v=20261009a` 到位）＋ `/about/` HTTP 200（動態 footer／logo 釘牌／`.scroller-box` 跑馬燈齊全）— ✅ 2026-10-12
 ├── [x] 啟動日誌檢視：僅 `django_site` 重複鍵告警（`django.contrib.sites` 資料列重複 → 非阻斷、已知無害）與 Celery 同步降級訊息（free plan 無 Redis，MockCelery 為預期行為）— ✅ 2026-10-12
-└── [!] 本機 worktree 仍有**未提交、未部署**改動 ⇒ 正式站 ≠ worktree：① `templates/betweencoffee_delivery/index.html` GUNTE hero 段由 line 111 下移至 line 343（reviews 段之後、`<section hidden class="feed">` 之前；reviews 段由 264 上移至 line 109；`git diff` hunk＝`@@ -109,155 +108,0 @@` → `@@ -495,0 +341,157 @@`、淨 +2 行）；② `partials/bc_hero.html`（8 行 diff）＝ 三處 `<h1>` 首字母大寫（`beans`→`Beans`／`roasted`→`Roasted`／`daily`→`Daily`）＋「Perfect / to Go」標題組加 `hidden`（`#w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db`）
+└── [x] 上述本機改動已於 2026-10-12 提交並 push（commit `6e29b447`，見下一節；10 檔／607 insertions）⇒ **worktree ＝ origin/main（0 0）**，但**尚未部署**（正式站仍為 `458e1780`）⇒ 正式站 ≠ worktree：① `templates/betweencoffee_delivery/index.html` GUNTE hero 段由 line 111 下移至 line 343（reviews 段之後、`<section hidden class="feed">` 之前；reviews 段由 264 上移至 line 109；`git diff` hunk＝`@@ -109,155 +108,0 @@` → `@@ -495,0 +341,157 @@`、淨 +2 行）；② `partials/bc_hero.html`（8 行 diff）＝ 三處 `<h1>` 首字母大寫（`beans`→`Beans`／`roasted`→`Roasted`／`daily`→`Daily`）＋「Perfect / to Go」標題組加 `hidden`（`#w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db`）
 ```
 
 ## 近期任務（2026-10-12 前端：時鐘 { } ＋ w-node 語意化）
 
 ```text
-2026-10-12（使用者兩項指示；純前端＋模板、無 migration、可逆；未提交、未部署）
+2026-10-12（使用者兩項指示；純前端＋模板、無 migration、可逆；已提交 `6e29b447` 並 push origin/main；**未部署**——正式站仍為 `458e1780`）
 ├── [x] 手機／平板時鐘顯示 { }（原「消失」）：成因＝{ } 沿用 Webflow h1.is-desktop，≤991px 被 #bc-bg-footer .is-desktop{display:none} 隱藏（該斷點時鐘列 6 欄、已被 `15 : 照片 : 19` 佔滿，`}` 的 grid-area:1/8/2/9 還會產生隱式欄）→ { } 改 .h1.bc-clock-brace（＋語意 id）；≤991px 時鐘列改 9 欄 repeat(9,minmax(0,1fr))＝`{ 15 : 照片(跨 3 欄) : 19 }`；照片佔 3/9＝原 6 欄 2/6 ⇒ 尺寸零變動（768px 220px／390px 111px 逐值相同）；minmax(0,1fr) 必要（純 1fr → 數字 min-content 撐大欄位、照片被壓到 196px）；數字改各欄置中 — ✅ 2026-10-12
 ├── [x] w-node-* id 語意化：bc-clock／-brace-open／-hours／-colon-before-minutes／-photos／-colon-after-minutes／-minutes／-brace-close、bc-heading-hug-in-a-cup／-perfect-to-go／-fresh-beans／-roasted-daily、bc-footer-socials／-mail（bc-footer-mail-inner 無元素仍更名）；同名 id 兩頁共用 → bc_hero.html＋bc_bg_footer.html＋bc-bg-footer.css 三檔同步（只改一檔會讓 hero 失去 grid 定位）— ✅ 2026-10-12
 ├── [x] 版號 bc-bg-footer.css ?v=20261009a → 20261012a（index.html:734／about.html:47）— ✅ 2026-10-12
-├── [x] 驗證：新增 docs/verify/cdp_verify_clock_braces.py（390／480／768／991／992／1440 × / ＋ 390／768 × /about/）112 PASS / 0 FAIL（括號 display≠none＋visibility:visible＋寬>0、排列 `{ 時 : 照片 : 分 }`、≤991 9 欄／≥992 8 欄皆等寬、7 可見子項 0 重疊、0 橫向溢出、照片欄＝3 欄+2 gap、0 個 w-node id）；回歸 cdp_verify_hero_coffee_photos.py 116/116 — ✅ 2026-10-12
-└── [!] 未提交、未部署（與 10-09 批次／咖啡照 +50% 改動同批待提交）
+├── [x] 驗證：新增 docs/verify/cdp_verify_clock_braces.py（390／480／768／991／992／1440 × / ＋ 390／768 × /about/）112 PASS / 0 FAIL（括號 display≠none＋visibility:visible＋寬>0、排列 `{ 時 : 照片 : 分 }`、≤991 9 欄／≥992 8 欄皆等寬、7 可見子項 0 重疊、0 橫向溢出、照片欄＝3 欄+2 gap、0 個 w-node id）；回歸 cdp_verify_hero_coffee_photos.py 116/116（★ 兩腳本並行會互搶 dev server → C1／F2／F3 偽 FAIL；序列執行即全綠）— ✅ 2026-10-12
+├── [x] 提交並 push origin/main：commit `6e29b447`（10 檔／607 insertions；含 10-09 遺留的 index.html GUNTE hero 段下移、bc_hero.html h1 首字大寫 ＋「Perfect／to Go」加 hidden —— index.html／bc_hero.html 同時含兩批故無法切分）— ✅ 2026-10-12
+└── [!] **未部署**：正式站仍為 `458e1780`（最新 deploy `dep-db67vu2jnfac73cp8tcg`；Render autoDeploy=off ⇒ push 不會上線）
 ```
 
 
