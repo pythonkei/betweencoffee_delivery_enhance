@@ -1,0 +1,133 @@
+/* ============================================================
+   bc-hero-description.css — About 頁面 hero-description-wrapper 模組
+   ------------------------------------------------------------
+   2026-10-12：完整移植自 https://bkkdw26.greydientlab.com/（WordPress 主題
+   bkkdw）acf/blocks/hero 的 .hero-description-wrapper（位於 section.gl-b-header）。
+   放置位置：about.html 之 .bc-who-section 正下方。
+
+   移植原則（使用者要求：顯示與動畫效果與原站完全一樣、不添加任何額外 UI）：
+   - 標記（HTML）與原站 1:1，class 名稱原樣保留。
+   - 原站樣式 100% 來自 Tailwind 產出（tailwind/dist/output.min.css）的 utility
+     class；本機未使用 Tailwind，故在此以「同名 class、同值、同斷點」scoped 於
+     .hero-description-wrapper 重建。斷點與 Tailwind 預設一致：
+       md = min-width:768px、lg = min-width:1024px
+     原站實測（computed style）對照：
+       base : padding 141px 15px 60px / margin-top -4px / font-size 28px
+              line-height 115% / letter-spacing -1px
+       md   : padding 70px 24px 32px  / margin-top 0
+              font-size 26px / line-height 32px / letter-spacing -1px / width 720px
+       lg   : padding 180px 45px 60px / font-size 46px / line-height 110%
+              letter-spacing -1.2px / width auto
+   - 原站此模組沒有任何自訂 CSS（.hero-description / .number 皆無規則），
+     其餘樣式由 SplitType 內嵌 style（word/char 之 display:inline-block、
+     .number 之 display:inline-block;position:relative）產生 → 故本檔不含這些。
+   - 字型 BDO Grotesk / Geist Mono 自原站自架（原站字型回應無
+     Access-Control-Allow-Origin，跨域 @font-face 會被瀏覽器阻擋）。
+   - 動畫：bc-hero-description.js（GSAP ScrollTrigger scrub + SplitType）。
+   ============================================================ */
+
+/* ---------- 字型（自原站 frontend/static/fonts 自架） ---------- */
+@font-face {
+    font-family: "BDO Grotesk";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/bdo-grotesk/BDOGrotesk-Regular-BF648a656fd543a.woff2") format("woff2"),
+         url("../fonts/bdo-grotesk/BDOGrotesk-Regular-BF648a656fd543a.woff") format("woff"),
+         url("../fonts/bdo-grotesk/BDOGrotesk-Regular-BF648a656fd543a.ttf") format("truetype"),
+         url("../fonts/bdo-grotesk/BDOGrotesk-Regular-BF648a656f74a27.otf") format("opentype");
+}
+
+@font-face {
+    font-family: "Geist Mono";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/geist-mono/GeistMono-Regular.ttf") format("truetype");
+}
+
+/* ---------- base（<768px，含 mobile） ---------- */
+/* .relative .-mt-1 .bg-black .pt-[141px] .px-[15px] .pb-[60px] */
+.hero-description-wrapper {
+    position: relative;
+    margin-top: -4px;              /* .-mt-1 = -.25rem（原站 html font-size 16px） */
+    background-color: #000;        /* .bg-black */
+    padding: 141px 15px 60px;
+    /* 原站由 html 繼承：font-family BDO Grotesk / font-feature-settings cv02..cv11 /
+       -webkit-font-smoothing antialiased；本機 html 為 Noto Sans TC，
+       故於模組範圍內補回同一繼承值，確保字型渲染完全一致 */
+    font-family: "BDO Grotesk", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 16px;
+    line-height: 24px;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* .hero-description .font-bdoGrotesk .text-[28px] .font-normal .leading-[115%] .-tracking-[1px] */
+.hero-description-wrapper .hero-description {
+    margin: 0;                     /* 原站 Tailwind preflight；還原 Bootstrap 之 p{margin-bottom:1rem} */
+    padding: 0;
+    font-family: "BDO Grotesk", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 115%;
+    letter-spacing: -1px;
+}
+
+/* .number .font-geistMono（黃色數字；顏色由 JS 逐字設定） */
+.hero-description-wrapper .hero-description .number {
+    font-family: "Geist Mono", sans-serif;
+}
+
+/* ---------- 中和外部全域污染（維持與原站相同的 computed 值） ----------
+   本機 static/css/blobs.css 為另一模組 .morphing（about.html:1207 使用中）定義了
+   *全域* 的 .word 規則：position:absolute / top,left 50% / translate(-50%,-50%) /
+   text-wrap:nowrap / 16s opacity+blur 動畫。原站沒有任何 .word / .char 規則，
+   SplitType 產生的 .word/.char 只有 inline 的 display:inline-block，其餘為預設值。
+   故以更高特異性（僅限本模組）還原成原站 computed 值，不影響 .morphing 模組。
+   原站實測：position static / top,left auto / transform none /
+            white-space normal / text-wrap wrap / opacity 1 / filter none / animation none */
+.hero-description-wrapper .hero-description .word,
+.hero-description-wrapper .hero-description .char {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    white-space: normal;
+    text-wrap: wrap;
+    opacity: 1;
+    filter: none;
+    animation: none;
+}
+
+/* ---------- md（min-width:768px） ---------- */
+@media (min-width: 768px) {
+    /* .md:mt-0 .md:pt-[70px] .md:px-6 .md:pb-8 */
+    .hero-description-wrapper {
+        margin-top: 0;
+        padding: 70px 24px 32px;
+    }
+    /* .md:w-[720px] .md:text-[26px] .md:leading-[32px] .md:-tracking-[1px] */
+    .hero-description-wrapper .hero-description {
+        width: 720px;
+        font-size: 26px;
+        line-height: 32px;
+        letter-spacing: -1px;
+    }
+}
+
+/* ---------- lg（min-width:1024px） ---------- */
+@media (min-width: 1024px) {
+    /* .lg:pt-[180px] .lg:px-[45px] .lg:pb-[60px] */
+    .hero-description-wrapper {
+        padding: 180px 45px 60px;
+    }
+    /* .lg:w-auto .lg:text-[46px] .lg:leading-[110%] .lg:-tracking-[1.2px] */
+    .hero-description-wrapper .hero-description {
+        width: auto;
+        font-size: 46px;
+        line-height: 110%;
+        letter-spacing: -1.2px;
+    }
+}

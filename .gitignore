@@ -122,6 +122,7 @@ yarn-error.log*
 # 本機驗證截圖（CDP 產出；腳本入庫於 docs/verify/，截圖不進版控）
 /_verify_*.png
 /_verify_*.jpg
+/_herocmp/
 # 本機診斷截圖（手動診斷產出）
 /_diag*.png
 /_diag*.jpg

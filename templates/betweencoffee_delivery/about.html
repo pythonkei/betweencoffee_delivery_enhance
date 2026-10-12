@@ -45,6 +45,9 @@
 <link rel="stylesheet" href="{% static 'css/bc-flor-menu.css' %}?v=20260907h">
 <!-- 2026-10-07: BC 動態 footer（移植自 bleibtgleich.dev Webflow footer；全樣式 scoped 於 #bc-bg-footer） -->
 <link rel="stylesheet" href="{% static 'css/bc-bg-footer.css' %}?v=20261012a" />
+<!-- 2026-10-12: bkkdw26.greydientlab.com .hero-description-wrapper 模組（含 @font-face 自架
+     BDO Grotesk / Geist Mono、Tailwind utility 1:1 scoped 重建 + 768/1024 斷點） -->
+<link rel="stylesheet" href="{% static 'css/bc-hero-description.css' %}?v=20261012a" />
 {% endblock %}
 
 
@@ -499,6 +502,16 @@
         </div>
     </div>
 </section>
+
+<!-- 2026-10-12（使用者指示）：完全移植 https://bkkdw26.greydientlab.com/ 的 .hero-description-wrapper 模組
+     （WordPress 主題 bkkdw acf/blocks/hero）——HTML 1:1、Tailwind 響應式結構 1:1、
+     GSAP ScrollTrigger scrub 逐字變色動畫 1:1；置於 .bc-who-section 正下方。
+     依賴：css/bc-hero-description.css + js/vendor/split-type.min.js + js/bc-hero-description.js -->
+<div class="hero-description-wrapper relative -mt-1 bg-black px-[15px] pb-[60px] pt-[141px] md:mt-0 md:px-6 md:pb-8 md:pt-[70px] lg:px-[45px] lg:pb-[60px] lg:pt-[180px]">
+		<p class="hero-description font-bdoGrotesk text-[28px] font-normal leading-[115%] -tracking-[1px] md:w-[720px] md:text-[26px] md:leading-[32px] md:-tracking-[1px] lg:w-auto lg:text-[46px] lg:leading-[110%] lg:-tracking-[1.2px]">
+			Bangkok produces over <span class="number font-geistMono">100,000,000,000</span> grams of coffee waste each year. Left untreated, it adds to pollution and landfill overflow. Coffee Ground Zero shows how small daily choices, starting with your coffee, can turn waste into compost, urban farms, and a greener city.
+		</p>
+	</div>
 
 <!-- sukima row-animation video scrub（完整複製 sukima.tokyo.jp .row-animation；黑底適配、hard-light 混合保留） -->
 <section class="row-animation bc-row-animation">
@@ -1362,6 +1375,10 @@
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
 <script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261008a"></script>
+<!-- 2026-10-12: hero-description-wrapper 逐字變色動畫所需函式庫（SplitType 0.3.3，與原站同版；
+     以 defer 於本檔前載入 → 執行順序 gsap → ScrollTrigger → SplitText → CustomEase → SplitType → 本模組） -->
+<script defer src="{% static 'js/vendor/split-type.min.js' %}"></script>
+<script defer src="{% static 'js/bc-hero-description.js' %}?v=20261012a"></script>
 {% endblock %}
 
 {% block bcc_footer %}
