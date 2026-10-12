@@ -2,13 +2,31 @@
    BC brand footer - ported from bleibtgleich.dev (Webflow) footer
    ----------------------------------------------------------------------------
    2026-10-07 port:
-   - Every selector prefixed with `#bc-bg-footer ` (incl. #w-node-* kept as-is)
+   - Every selector prefixed with `#bc-bg-footer ` (incl. #w-node-*, renamed to
+     semantic ids on 2026-10-12 — see below)
      to avoid Webflow generic classes (.grid/.img/.h1/.footer...) colliding with
      BC Bootstrap + bc-* styles.
    - Source defined html{font-size:1vw} so 1rem == 1vw; literal rem -> vw here to
      keep the exact fluid scaling (desktop ratio 14.4, <=991px 3.93) w/o touching
      the global html font-size.
    - @font-face Akzidenz Grotesk Pro is self-hosted at static/fonts.
+
+   2026-10-12（使用者指示）語意化命名：Webflow 匯出的 `#w-node-<uuid>-032bc8db`
+   選取器全部改為「元件＋屬性」命名。同一組 id 由兩頁共用（index 的
+   partials/bc_hero.html、about 的 partials/bc_bg_footer.html）→ 改名必須 3 檔同步，
+   否則 hero 會失去 grid 定位。對照表（舊 → 新）：
+     _2e3db1fa… → bc-heading-hug-in-a-cup    _7dac5ba3… → bc-heading-perfect-to-go
+     _213460a0… → bc-clock                   _157a5a4e… → bc-clock-brace-open
+     _7ca5700c… → bc-clock-hours             be8336b7… → bc-clock-brace-close
+     f72de753… → bc-clock-photos             _48f40b3e… → bc-clock-colon-before-minutes
+     _420f084b… → bc-clock-minutes           a3109718… → bc-clock-colon-after-minutes
+     _6861e4a1… → bc-heading-fresh-beans     _1a97522f… → bc-heading-roasted-daily
+     a204f672…8de → bc-footer-socials        a204f672…8ea → bc-footer-mail
+     a204f672…8db → bc-footer-mail-inner（已無對應元素：email CTA 已改跑馬燈）
+   同批：時鐘的 { } 由 `h1.is-desktop` 改為 `.h1.bc-clock-brace`（≤991px 原本被
+   `.is-desktop{display:none}` 隱藏），手機／平板改為 9 欄顯示 → 見檔尾區塊。
+   （`.is-desktop` / `.is-mobile` 工具類規則保留：`.is-mobile` 仍由 .m-footer-inner
+   使用；`.is-desktop` 目前無元素使用，保留以維持 Webflow 移植原樣。）
    ============================================================================ */
 
 @font-face{
@@ -190,7 +208,7 @@
   #bc-bg-footer .tag-list li{padding:.05rem;}
 }
 /* 2026-10-08：修掉 ≤991px 跑馬燈衝出欄位（量到 2000px）的缺陷。
-   [成因] 下方 Webflow 原樣規則 `#bc-bg-footer #w-node-a204f672-…8ea-032bc8db{grid-area:5/1/6/4;justify-self:start}`
+   [成因] 下方 Webflow 原樣規則 `#bc-bg-footer #bc-footer-mail{grid-area:5/1/6/4;justify-self:start}`
    （平板欄寬僅 341px）讓 .foooter-mail 走 shrink-to-fit：item 寬 = fit-content = min(max-content, …)，
    而 max-content 由跑馬燈決定 —— main.js 設 data-animated=true 後 .scroller__inner{flex-wrap:nowrap}，
    2 個 li 各 1108px（.tag-list li{width:1108px}）＋ .scroller{max-width:2000px} → item 量到 2000px
@@ -205,22 +223,57 @@
 #bc-bg-footer .foooter-mail{min-width:0;width:100%;}
 @media screen and (max-width:991px){#bc-bg-footer{--_fonts---font-body:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---font-display:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---h1--size:calc(45vw/var(--_special-units---global--scale-ratio));--_fonts---h1--line-height:90%;--_fonts---h1--letter-spacing:-.6vw;--_fonts---h2--size:calc(40vw/var(--_special-units---global--scale-ratio));--_fonts---h2--line-height:80%;--_fonts---h2--letter-spacing:-.1vw;--_fonts---h3--size:0vw;--_fonts---h3--line-height:0%;--_fonts---h3--letter-spacing:0em;--_fonts---h4--size:0vw;--_fonts---h4--line-height:0%;--_fonts---h4--letter-spacing:0em;--_fonts---h5--size:0vw;--_fonts---h5--line-height:0%;--_fonts---h5--letter-spacing:0em;--_fonts---h6--size:0vw;--_fonts---h6--line-height:0%;--_fonts---h6--letter-spacing:0em;--_fonts---p1--size:calc(12vw/var(--_special-units---global--scale-ratio));--_fonts---p1--line-height:100%;--_fonts---p1--letter-spacing:-.02625vw;--_fonts---l1--size:1vw;--_fonts---l1--line-height:100%;--_fonts---l1--letter-spacing:-.016em;--104px:calc(104vw/var(--_special-units---global--scale-ratio));--72px:calc(72vw/var(--_special-units---global--scale-ratio));--64px:calc(64vw/var(--_special-units---global--scale-ratio));--96px:calc(96vw/var(--_special-units---global--scale-ratio));--0px:calc(0vw/var(--_special-units---global--scale-ratio));--1px:calc(1vw/var(--_special-units---global--scale-ratio));--2px:calc(2vw/var(--_special-units---global--scale-ratio));--4px:calc(4vw/var(--_special-units---global--scale-ratio));--6px:calc(6vw/var(--_special-units---global--scale-ratio));--8px:calc(8vw/var(--_special-units---global--scale-ratio));--10px:calc(10vw/var(--_special-units---global--scale-ratio));--12px:calc(12vw/var(--_special-units---global--scale-ratio));--16px:calc(16vw/var(--_special-units---global--scale-ratio));--20px:calc(20vw/var(--_special-units---global--scale-ratio));--24px:calc(24vw/var(--_special-units---global--scale-ratio));--28px:calc(28vw/var(--_special-units---global--scale-ratio));--32px:calc(32vw/var(--_special-units---global--scale-ratio));--36px:calc(36vw/var(--_special-units---global--scale-ratio));--40px:calc(40vw/var(--_special-units---global--scale-ratio));--44px:calc(44vw/var(--_special-units---global--scale-ratio));--48px:calc(48vw/var(--_special-units---global--scale-ratio));--52px:calc(52vw/var(--_special-units---global--scale-ratio));--56px:calc(56vw/var(--_special-units---global--scale-ratio));--60px:calc(60vw/var(--_special-units---global--scale-ratio));--68px:calc(68vw/var(--_special-units---global--scale-ratio));--80px:calc(80vw/var(--_special-units---global--scale-ratio));--88px:calc(88vw/var(--_special-units---global--scale-ratio));--112px:calc(112vw/var(--_special-units---global--scale-ratio));--120px:calc(120vw/var(--_special-units---global--scale-ratio));--128px:calc(128vw/var(--_special-units---global--scale-ratio));--144px:calc(144vw/var(--_special-units---global--scale-ratio));--168px:calc(168vw/var(--_special-units---global--scale-ratio));--192px:calc(192vw/var(--_special-units---global--scale-ratio));--200px:calc(200vw/var(--_special-units---global--scale-ratio));--240px:calc(240vw/var(--_special-units---global--scale-ratio));--_special-units---global--100vh:100vh;--_special-units---1-cell:calc(162vw/var(--_special-units---global--scale-ratio));--_special-units---grid-gap:var(--12px);--_special-units---global--scale-ratio:3.93;--_special-units---stroke:calc(.25vw/var(--_special-units---global--scale-ratio));--_special-units---global--padding:var(--_units---u-16);--_units---u-0:var(--0px);--_units---u-120:var(--120px);--_units---u-104:var(--104px);--_units---u-240:var(--240px);--_units---u-72:var(--72px);--_units---u-4:var(--4px);--_units---u-8:var(--8px);--_units---u-12:var(--12px);--_units---u-16:var(--16px);--_units---u-24:var(--24px);--_units---u-32:var(--32px);--_units---u-48:var(--48px);--_units---u-64:var(--64px);--_units---u-96:var(--96px);--_units---u-144:var(--144px);--_units---u-192:var(--192px);--_units---u-20:var(--20px);--_units---u-80:var(--80px);--_units---u-6:var(--6px);--_units---u-200:var(--200px);--_units---u-128:var(--128px);--_units---u-10:var(--10px);--_units---u-2:var(--2px);--_units---u-40:var(--40px);--_units---u-36:var(--36px);}#bc-bg-footer .h1._1-cell-offset{margin-left:calc(66vw/var(--_special-units---global--scale-ratio));}#bc-bg-footer .h1.is-display{font-size:calc(75vw/var(--_special-units---global--scale-ratio));}#bc-bg-footer .h1.is-modified{transform:rotate(10deg);}#bc-bg-footer .p1.mt-240{margin-top:var(--_units---u-120);}#bc-bg-footer .grid{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-bg-footer .grid.is-footer{padding-top:var(--_units---u-72);}#bc-bg-footer .img.width-auto{width:auto;}#bc-bg-footer .heading-group-wrap.mt-8,#bc-bg-footer .heading-group-wrap.is-right.mt-8{margin-top:var(--_units---u-0);}#bc-bg-footer .icon-wrap.is-contact{width:calc(56vw/var(--_special-units---global--scale-ratio));}#bc-bg-footer .footer-inner{padding-top:var(--_units---u-0);padding-bottom:var(--_units---u-72);}#bc-bg-footer .footer-inner:where(.w-variant-27776d25-5053-5aa6-2108-a99a2e23347b){display:none;}#bc-bg-footer .link-button{background-color:var(--_colors---fill--tertiary);}#bc-bg-footer .social-item:hover{background-color:var(--_colors---background--transparent);}#bc-bg-footer .is-desktop{display:none;}#bc-bg-footer .m-footer-name{padding-right:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:center;align-items:center;display:flex;}#bc-bg-footer .m-footer-meta{padding-right:var(--_units---u-16);padding-bottom:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:space-between;align-items:center;display:flex;}#bc-bg-footer .is-mobile{display:block;}#bc-bg-footer .m-footer-inner-wrap{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);flex-flow:column;display:flex;}#bc-bg-footer ._404-description.grid{padding-right:var(--_units---u-48);padding-left:var(--_units---u-48);text-align:center;}#bc-bg-footer .foooter-mail{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);}#bc-bg-footer .foooter-mail.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-bg-footer .footer-socials{padding-top:var(--_units---u-72);}#bc-bg-footer .footer-socials.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-bg-footer .footer-time{margin-top:var(--_units---u-48);margin-bottom:var(--_units---u-48);grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-bg-footer .footer-logo-cell{padding-top:var(--_units---u-24);padding-bottom:var(--_units---u-24);}#bc-bg-footer .footer-logo-item{height:calc(120vw/var(--_special-units---global--scale-ratio));}}
 @media screen and (max-width:479px){#bc-bg-footer .grid{width:100%;}}
-#bc-bg-footer #w-node-_2e3db1fa-aa68-b925-5a97-e4970eb60ce1-032bc8db{grid-area:1/3/2/7;}
-#bc-bg-footer #w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db{grid-area:2/4/3/7;}
-#bc-bg-footer #w-node-_213460a0-6380-6d65-6b0f-fd3acdaa218e-032bc8db{grid-area:3/1/4/9;}
+#bc-bg-footer #bc-heading-hug-in-a-cup{grid-area:1/3/2/7;}
+#bc-bg-footer #bc-heading-perfect-to-go{grid-area:2/4/3/7;}
+#bc-bg-footer #bc-clock{grid-area:3/1/4/9;}
 /* 2026-10-08：桌面時鐘 { 15 : … : 41 } 的 { 15 41 } 四項改為「置中對齊」——
    原本 { place-self:center end + 15 center start 會讓 {15 貼在一起、15 與 : 之間空 163px；
    改為各列置中後 { ↔ 15 ↔ : 間距約 123/125px，左右對稱。
-   行動版（≤991px，{ } 隱藏）於下方 media query 還原數字靠邊對齊，維持原設計。 */
-#bc-bg-footer #w-node-_157a5a4e-7569-22a7-457a-9c1b331b2982-032bc8db{place-self:center;}
-#bc-bg-footer #w-node-_7ca5700c-b458-a30e-59bf-d4e05ebb478b-032bc8db{place-self:center;}
-#bc-bg-footer #w-node-be8336b7-b244-3f21-53f7-49695207e6e1-032bc8db{grid-area:1/8/2/9;place-self:center;}
-#bc-bg-footer #w-node-f72de753-7ddd-b236-f650-3cfafb0e604b-032bc8db{grid-area:span 1/span 2/span 1/span 2;}
-#bc-bg-footer #w-node-_48f40b3e-3499-ddf0-fe35-2f88866d5fb0-032bc8db{grid-area:1/3/2/4;place-self:center;}
-#bc-bg-footer #w-node-_420f084b-ac62-c608-af37-250aeb96832a-032bc8db{grid-area:1/7/2/8;place-self:center;}
-#bc-bg-footer #w-node-a3109718-9166-bfda-4238-04d33411177e-032bc8db{grid-area:1/6/2/7;place-self:center;}
-#bc-bg-footer #w-node-_6861e4a1-aa8e-1804-6ccf-f84cf2e77729-032bc8db{grid-area:4/3/5/6;}
-#bc-bg-footer #w-node-_1a97522f-532e-4187-0fb4-cf59944e37c8-032bc8db{grid-area:5/4/6/7;}
-#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8de-032bc8db{grid-area:6/3/7/7;}
-#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8ea-032bc8db{grid-area:5/3/6/5;}
-@media screen and (max-width:991px){#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8db-032bc8db{grid-column-end:5;}#bc-bg-footer #w-node-_2e3db1fa-aa68-b925-5a97-e4970eb60ce1-032bc8db{grid-column:1/7;}#bc-bg-footer #w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db{grid-column:3/7;}#bc-bg-footer #w-node-_213460a0-6380-6d65-6b0f-fd3acdaa218e-032bc8db{grid-column-end:7;}#bc-bg-footer #w-node-_157a5a4e-7569-22a7-457a-9c1b331b2982-032bc8db{justify-self:start;}#bc-bg-footer #w-node-_7ca5700c-b458-a30e-59bf-d4e05ebb478b-032bc8db{grid-area:1/1/2/2;}#bc-bg-footer #w-node-be8336b7-b244-3f21-53f7-49695207e6e1-032bc8db{justify-self:end;}#bc-bg-footer #w-node-f72de753-7ddd-b236-f650-3cfafb0e604b-032bc8db{grid-area:1/3/2/5;}#bc-bg-footer #w-node-_48f40b3e-3499-ddf0-fe35-2f88866d5fb0-032bc8db{grid-column:2/3;}#bc-bg-footer #w-node-_420f084b-ac62-c608-af37-250aeb96832a-032bc8db{grid-column:6/7;}#bc-bg-footer #w-node-a3109718-9166-bfda-4238-04d33411177e-032bc8db{grid-column:5/6;}#bc-bg-footer #w-node-_6861e4a1-aa8e-1804-6ccf-f84cf2e77729-032bc8db{grid-column:1/5;}#bc-bg-footer #w-node-_1a97522f-532e-4187-0fb4-cf59944e37c8-032bc8db{grid-column:4/7;}#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8de-032bc8db{grid-column:1/7;justify-self:center;}#bc-bg-footer #w-node-a204f672-ea1b-c502-70d3-3fa0032bc8ea-032bc8db{grid-area:5/1/6/4;justify-self:start;}#bc-bg-footer #w-node-_7ca5700c-b458-a30e-59bf-d4e05ebb478b-032bc8db{justify-self:start;}#bc-bg-footer #w-node-_420f084b-ac62-c608-af37-250aeb96832a-032bc8db{justify-self:end;}}
+   2026-10-12 起 ≤991px 也顯示 { }，改為 9 欄並同樣置中各欄 → 見檔尾區塊。 */
+#bc-bg-footer #bc-clock-brace-open{place-self:center;}
+#bc-bg-footer #bc-clock-hours{place-self:center;}
+#bc-bg-footer #bc-clock-brace-close{grid-area:1/8/2/9;place-self:center;}
+#bc-bg-footer #bc-clock-photos{grid-area:span 1/span 2/span 1/span 2;}
+#bc-bg-footer #bc-clock-colon-before-minutes{grid-area:1/3/2/4;place-self:center;}
+#bc-bg-footer #bc-clock-minutes{grid-area:1/7/2/8;place-self:center;}
+#bc-bg-footer #bc-clock-colon-after-minutes{grid-area:1/6/2/7;place-self:center;}
+#bc-bg-footer #bc-heading-fresh-beans{grid-area:4/3/5/6;}
+#bc-bg-footer #bc-heading-roasted-daily{grid-area:5/4/6/7;}
+#bc-bg-footer #bc-footer-socials{grid-area:6/3/7/7;}
+#bc-bg-footer #bc-footer-mail{grid-area:5/3/6/5;}
+/* 2026-10-12（使用者指示）：「手機和平板時鐘中的 { } 消失了」→ 改為顯示。
+   [原狀] { } 沿用 Webflow 原生的 h1.is-desktop，被上方 Webflow 區塊
+          `#bc-bg-footer .is-desktop{display:none}` 於 ≤991px 隱藏；此時時鐘列為 6 欄，
+          該列已被 `15 : 照片 : 19` 佔滿（欄 1..6 全滿），且 `}` 的原 grid-area:1/8/2/9
+          在 6 欄格中會產生隱式欄 → 直接顯示會撐爆版面，故原設計隱藏。
+   [修法] ① { } 改語意 class/id（.h1.bc-clock-brace ＋ bc-clock-brace-open/close），
+             不再依賴 .is-desktop。
+          ② 時鐘列改 9 欄：`{ 15 : 照片(跨 3 欄) : 19 }`。
+             照片佔 3/9 = 33.3%，與原 6 欄的 2/6 完全相同 → 照片尺寸零變動
+             （實測 768px 220px、390px 111px，與改動前逐值相同）。
+          ③ 必須用 minmax(0,1fr)：用純 1fr 時數字（min-content 85px）會把欄位撐大，
+             照片被壓成 196px（768px 實測）。
+          ④ 數字改為各欄置中（原 ≤991px 為靠邊對齊），與 ≥992px 的置中對齊一致。
+   [驗證] ≤991px：390/480/768/991 皆 0 重疊、0 橫向溢出、照片寬度＝改動前；
+          ≥992px 走上方 8 欄規則完全不受影響（見 docs/verify/cdp_verify_clock_braces.py）。 */
+@media screen and (max-width:991px){
+  /* 時鐘 9 欄（覆寫上方 Webflow 區塊的 1fr 1fr 1fr 1fr 1fr 1fr） */
+  #bc-bg-footer .footer-time{grid-template-columns:repeat(9,minmax(0,1fr));}
+  /* 由外而內：{ 15 : 照片 : 19 } → 欄 1..9 */
+  #bc-bg-footer #bc-clock-brace-open{grid-area:1/1/2/2;}
+  #bc-bg-footer #bc-clock-hours{grid-area:1/2/2/3;justify-self:center;}
+  #bc-bg-footer #bc-clock-colon-before-minutes{grid-area:1/3/2/4;}
+  #bc-bg-footer #bc-clock-photos{grid-area:1/4/2/7;}
+  #bc-bg-footer #bc-clock-colon-after-minutes{grid-area:1/7/2/8;}
+  #bc-bg-footer #bc-clock-minutes{grid-area:1/8/2/9;justify-self:center;}
+  #bc-bg-footer #bc-clock-brace-close{grid-area:1/9/2/10;}
+  /* 以下為 2026-10-08 原樣規則，本次僅 id 改名（值未動） */
+  #bc-bg-footer #bc-footer-mail-inner{grid-column-end:5;}
+  #bc-bg-footer #bc-heading-hug-in-a-cup{grid-column:1/7;}
+  #bc-bg-footer #bc-heading-perfect-to-go{grid-column:3/7;}
+  #bc-bg-footer #bc-clock{grid-column-end:7;}
+  #bc-bg-footer #bc-heading-fresh-beans{grid-column:1/5;}
+  #bc-bg-footer #bc-heading-roasted-daily{grid-column:4/7;}
+  #bc-bg-footer #bc-footer-socials{grid-column:1/7;justify-self:center;}
+  #bc-bg-footer #bc-footer-mail{grid-area:5/1/6/4;justify-self:start;}
+}

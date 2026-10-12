@@ -79,6 +79,7 @@
 - **Live URL**: https://betweencoffee-delivery-enhance-v1.onrender.com/
 - **GitHub**: https://github.com/pythonkei/betweencoffee_delivery_enhance
 - **部署方式**: Render（Docker 運行時，service `srv-d8jce6rtqb8s73897t4g`／singapore／free plan），使用 Dockerfile 構建；**autoDeploy 已關閉（2026-10-06 起）→ 每次上線需在 dashboard 按 Manual Deploy**（部署時自動套用 migration）
+- **目前上線版本（2026-10-12）**: ✅ 正式站＝commit **`458e1780`**（Render deploy **`dep-db67vu2jnfac73cp8tcg`**，status `live`、**trigger=`api`**（以 `RENDER_API_KEY` 觸發，非 dashboard 手動），2026-10-12 14:36→14:39 +08:00 建置完成；migration 0074~0080 已套用）
 - **Celery 狀態**: Render free plan 無 Redis，Celery 已配置 MockCelery 優雅降級，任務同步執行
 - **WebSocket**: 使用 Django Channels + InMemoryChannelLayer（無 Redis），ASGI 已禁用 AllowedHostsOriginValidator
 
@@ -368,7 +369,7 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [x] 咖啡豆自訂選項組（產地＋研磨，選項組驅動）／產地改回既有排版／烘焙度退出選項組 — ✅ 2026-09-21
 ├── [x] 修正模板 {# #} 跨行導致前台顯示註解文字（Django 4.2 的 {# #} 只支援單行）＋驗證腳本新增全站掃描防再犯 — ✅ 2026-09-21
 ├── [x] **還原：全域第一主題色回品牌金 `#c49b63`（`git revert 7ed076cd`）**— ✅ 2026-09-23（使用者反映「更改第二主題色後，效果不理想，恢復到之前的狀態」：第一主題色／hover／light／glow 與 `--primary`、`--brand-primary` 全回品牌金；**第二主題色維持 `#FCFF4B`**（hero 圓點、購物車徽章、yama 圓球仍為萊姆）；31 處亮底深字、殘留藍色修補、9 處 `?v=` 與 7 處版號升級一併還原（原「內容↔版號」配對正確、無快取風險）；色表規範文件同步還原）
-└── [!] 待部署：正式站尚未部署本批改動（Render autoDeploy=no → dashboard 按 Manual Deploy；或提供 RENDER_API_KEY 以 API 觸發；migration 0070~0080 於部署時自動套用；2026-10-08 已 push `origin/main`）
+└── [x] **已上線（2026-10-12）**：deploy `dep-db67vu2jnfac73cp8tcg`／commit `458e1780`（trigger=`api`、status=`live`；migration 0070~0080 於部署時自動套用）⇒ 本批（2026-09-21~23 段）已隨 10 月批次上正式站
 ```
 
 ## 近期任務（2026-10-02 ~ 10-08）
@@ -388,7 +389,7 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [x] 動態 footer 收尾：時鐘 `( )` → `{ }`、deco 白線稿（`fill:#ffffff`＋`?v=20261008a`）、釘牌去 `is-invert`、email CTA → `.scroller-box` 跑馬燈 — ✅ 2026-10-08
 ├── [x] index.html「第二主題色 → 第一主題色」（4 處改回品牌金 `#c49b63`；`bc-components`／`bc-yama-header`／`bc-gunte-hero` → `?v=20261008e`）— ✅ 2026-10-08
 ├── [x] 10 月批次一次提交並推送 `origin/main` ＋ 記憶文件三處同步（`04`／`05`／本檔 ＋ 根目錄 `bc-context`）— ✅ 2026-10-08
-└── [!] 待部署：本批（含 migration 0074~0080）已 push、尚未上線（Render `autoDeploy=no` → dashboard 手動 Manual Deploy）
+└── [x] **已上線（2026-10-12）**：本批（含 migration 0074~0080）已 push `origin/main` 並於 2026-10-12 部署上正式站（deploy `dep-db67vu2jnfac73cp8tcg`／commit `458e1780`、trigger=`api`、status=`live`）
 ```
 
 **10 月關鍵實作細節**
@@ -405,15 +406,37 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 
 
 
+## 近期任務（2026-10-12 部署）
+
+```text
+2026-10-12（把 2026-10-09 批次推上正式站；無程式碼變更，純上線 ＋ 生產驗證 ＋ 記憶文件同步）
+├── [x] Render 部署 `dep-db67vu2jnfac73cp8tcg`：commit `458e1780`、trigger=`api`、status=`live`、14:36→14:39 +08:00 完成（同日稍早另有一次 `dep-db677p142hec73b62qb0`／manual／`dc118b78`，已被本次取代並 deactivated）— ✅ 2026-10-12
+├── [x] 生產驗證（`https://betweencoffee-delivery-enhance-v1.onrender.com`）：`/` HTTP 200（90,949 bytes；7 張 hero 咖啡照齊全＝`class="img contain"` ×7／`href="/coffee/N/"`；`bc-bg-footer.css?v=20261009a` 到位）＋ `/about/` HTTP 200（動態 footer／logo 釘牌／`.scroller-box` 跑馬燈齊全）— ✅ 2026-10-12
+├── [x] 啟動日誌檢視：僅 `django_site` 重複鍵告警（`django.contrib.sites` 資料列重複 → 非阻斷、已知無害）與 Celery 同步降級訊息（free plan 無 Redis，MockCelery 為預期行為）— ✅ 2026-10-12
+└── [!] 本機 worktree 仍有**未提交、未部署**改動 ⇒ 正式站 ≠ worktree：① `templates/betweencoffee_delivery/index.html` GUNTE hero 段由 line 111 下移至 line 343（reviews 段之後、`<section hidden class="feed">` 之前；reviews 段由 264 上移至 line 109；`git diff` hunk＝`@@ -109,155 +108,0 @@` → `@@ -495,0 +341,157 @@`、淨 +2 行）；② `partials/bc_hero.html`（8 行 diff）＝ 三處 `<h1>` 首字母大寫（`beans`→`Beans`／`roasted`→`Roasted`／`daily`→`Daily`）＋「Perfect / to Go」標題組加 `hidden`（`#w-node-_7dac5ba3-75b3-d297-693a-71a77bf5e06c-032bc8db`）
+```
+
+## 近期任務（2026-10-12 前端：時鐘 { } ＋ w-node 語意化）
+
+```text
+2026-10-12（使用者兩項指示；純前端＋模板、無 migration、可逆；未提交、未部署）
+├── [x] 手機／平板時鐘顯示 { }（原「消失」）：成因＝{ } 沿用 Webflow h1.is-desktop，≤991px 被 #bc-bg-footer .is-desktop{display:none} 隱藏（該斷點時鐘列 6 欄、已被 `15 : 照片 : 19` 佔滿，`}` 的 grid-area:1/8/2/9 還會產生隱式欄）→ { } 改 .h1.bc-clock-brace（＋語意 id）；≤991px 時鐘列改 9 欄 repeat(9,minmax(0,1fr))＝`{ 15 : 照片(跨 3 欄) : 19 }`；照片佔 3/9＝原 6 欄 2/6 ⇒ 尺寸零變動（768px 220px／390px 111px 逐值相同）；minmax(0,1fr) 必要（純 1fr → 數字 min-content 撐大欄位、照片被壓到 196px）；數字改各欄置中 — ✅ 2026-10-12
+├── [x] w-node-* id 語意化：bc-clock／-brace-open／-hours／-colon-before-minutes／-photos／-colon-after-minutes／-minutes／-brace-close、bc-heading-hug-in-a-cup／-perfect-to-go／-fresh-beans／-roasted-daily、bc-footer-socials／-mail（bc-footer-mail-inner 無元素仍更名）；同名 id 兩頁共用 → bc_hero.html＋bc_bg_footer.html＋bc-bg-footer.css 三檔同步（只改一檔會讓 hero 失去 grid 定位）— ✅ 2026-10-12
+├── [x] 版號 bc-bg-footer.css ?v=20261009a → 20261012a（index.html:734／about.html:47）— ✅ 2026-10-12
+├── [x] 驗證：新增 docs/verify/cdp_verify_clock_braces.py（390／480／768／991／992／1440 × / ＋ 390／768 × /about/）112 PASS / 0 FAIL（括號 display≠none＋visibility:visible＋寬>0、排列 `{ 時 : 照片 : 分 }`、≤991 9 欄／≥992 8 欄皆等寬、7 可見子項 0 重疊、0 橫向溢出、照片欄＝3 欄+2 gap、0 個 w-node id）；回歸 cdp_verify_hero_coffee_photos.py 116/116 — ✅ 2026-10-12
+└── [!] 未提交、未部署（與 10-09 批次／咖啡照 +50% 改動同批待提交）
+```
+
+
 ## 近期任務（2026-10-09）
 
 ```text
-2026-10-09（首頁 BC 動態 hero「Hug in a Cup 時鐘」由頁尾移到最上方；無 migration；尚未提交／尚未部署）
+2026-10-09（首頁 BC 動態 hero「Hug in a Cup 時鐘」由頁尾移到最上方；無 migration；當時尚未提交 —— **已於 2026-10-12 隨 10 月批次（`458e1780`）部署上線**）
 ├── [x] 新增 `templates/betweencoffee_delivery/partials/bc_hero.html`（＝ `bc_bg_footer.html` 逐字相同，只把最外層 `<footer class="footer">` 改成 `<div class="footer">`）— ✅ 2026-10-09
 ├── [x] `index.html`：`bc-page-content` 最前加 `<section class="hero bc-bg-hero">` ＋ include 該 partial；GUNTE hero 整段下移；`block bcc_footer` 覆寫為空；`extra_css` 補 `margin-top:0 !important` — ✅ 2026-10-09
 ├── [x] 驗證：`cdp_verify_footer_scroller.py` 追加 J11–J19（**120 項 PASS 120 / FAIL 0**；J11–J15 為置頂位置、J16–J19 為「去頁尾感」）＋ about 頁 `cdp_verify_bg_footer.py` 0 FAIL ＋ `cdp_verify_floating_cart.py` 全通過 ＋ 新增 `cdp_shot_index_hero_viewport.py`（3 斷點 × 2 張截圖）— ✅ 2026-10-09
 ├── [x] 置頂 hero 去掉「頁尾感」（同日稍後，使用者指示「把最上面的邊框線和黑色背景拿掉」）：只在 `index.html` 的 `extra_css` 加三條頁面級覆寫 `.bc-bg-hero #bc-bg-footer{background-color:transparent}`／`.bc-bg-hero #bc-bg-footer .footer{同上}`／`.bc-bg-hero #bc-bg-footer .grid.is-footer{border-top:0 none}`（**不動 `bc-bg-footer.css`** ⇒ about 頁真頁尾仍保留分隔線＋黑底）— ✅ 2026-10-09
-└── [x] 已提交 `c5016e29`（2026-10-09 批次，含上述 hero 置頂＋去頁尾感）；**待部署**（純 `/` 前端外觀變更；`bc-bg-footer.css`／`bc-bg-footer.js`／`bc-gunte-hero.css`／`bc-components.css` 皆未動）
+└── [x] 已提交 `c5016e29`（2026-10-09 批次，含上述 hero 置頂＋去頁尾感）；**✅ 已上線 2026-10-12**（由後續 commit `458e1780` 的 deploy `dep-db67vu2jnfac73cp8tcg` 一併帶上正式站；純 `/` 前端外觀變更；`bc-bg-footer.css`／`bc-bg-footer.js`／`bc-gunte-hero.css`／`bc-components.css` 皆未動）
 ```
 
 **關鍵實作細節（2026-10-09）**

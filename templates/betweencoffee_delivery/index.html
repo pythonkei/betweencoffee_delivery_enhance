@@ -106,161 +106,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 {% include 'betweencoffee_delivery/partials/bc_hero.html' %}
 </section>
 
-<!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
-     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。 -->
-<section class="hero bc-gunte-hero">
-            <div class="hero_wrap">
-                <h2 class="hero_catch">
-                    <span class="hero_catch_txt" aria-hidden="true">Please relax and become stimulated. <br>Feel vibrant flow in you.</span>
-                    <span class="vis-hide">NO WHERE NOW HERE... WE ALSO ARE PLACES</span>
-                </h2>
-                <div class="hero_slide">
-                    <div class="splide">
-                        <div class="splide__track">
-                            <ul class="splide__list">
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/01_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/01_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">BLACK BLEND ｜Coffee</h3>
-                                        <p class="hero_slide_item_en">BLACK BLEND ｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-05-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="320" href="#bc-gunte-05-path">充分展現苦澀濃鬱, 不失柔和。</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/02_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/02_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">BUTTER KING｜Coffee</h3>
-                                        <p class="hero_slide_item_en">BUTTER KING｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-06-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="350" href="#bc-gunte-06-path">極致豐厚焦糖黃油定番。放大</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/03_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/03_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap -black">果香浅煎｜Coffee</h3>
-                                        <p class="hero_slide_item_en">果香浅煎｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-07-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="220" href="#bc-gunte-07-path">富山縣產西柚檸檬, 柑橘季節限定, 配碧螺春/白芽奇蘭, 深具有明亮的漿果風味</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/04_660.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/04_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap -black">抹茉｜Coffee</h3>
-                                        <p class="hero_slide_item_en">抹茉｜Coffee </p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-01-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="290" href="#bc-gunte-01-path">靜岡縣笹間町的茶葉, 採用JAS有機咖啡豆。</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/05_630.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/05_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap -black">FLAT WHITE｜Bean</h3>
-                                        <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="320" href="#bc-gunte-02-path">採用天然烘焙特有的濃鬱醇厚風味, 放大。</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/06_720.jpg' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/06_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">SUNSHINE｜Coffee</h3>
-                                        <p class="hero_slide_item_en">SUNSHINE｜Coffeee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-03-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="370" href="#bc-gunte-03-path">餘味完全覆蓋在味蕾上, 採用JAS有機咖啡豆, </textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/07_1080.jpg' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/07_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">WAKEMEUP｜Coffee</h3>
-                                        <p class="hero_slide_item_en">WAKEMEUP｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-04-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="330" href="#bc-gunte-04-path">專屬早晨配方, 驅動您最佳狀態釋放能量!</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="hero_hand">
-                    <div id="hero_hand_list" class="hero_hand_list">
-
-                        <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"></a></div>
-                    </div>
-                </div>
-            </div>
-            <ol id="hero_nav" class="hero_nav">
-                <li><button type="button">1</button></li>
-                <li><button type="button">2</button></li>
-                <li><button type="button">3</button></li>
-                <li><button type="button">4</button></li>
-                <li><button type="button">5</button></li>
-                <li><button type="button">6</button></li>
-                <li><button type="button">7</button></li>
-            </ol>
-        </section>
-
-
-<!-- 2026-09-06：複製 .bc-reviews-section（hakujuji waffle reviews 跑馬燈）至首頁 feed 下方；水平反向 data-bc-reviews-reverse（向右捲） -->
-
 <section class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
     <div class="bc-reviews">
         <div class="reviews">
@@ -491,6 +336,163 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         </div>
     </div>
 </section>
+
+
+<!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
+     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。 -->
+<section class="hero bc-gunte-hero">
+            <div class="hero_wrap">
+                <h2 class="hero_catch">
+                    <span class="hero_catch_txt" aria-hidden="true">Please relax and become stimulated. <br>Feel vibrant flow in you.</span>
+                    <span class="vis-hide">NO WHERE NOW HERE... WE ALSO ARE PLACES</span>
+                </h2>
+                <div class="hero_slide">
+                    <div class="splide">
+                        <div class="splide__track">
+                            <ul class="splide__list">
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/01_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/01_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">BLACK BLEND ｜Coffee</h3>
+                                        <p class="hero_slide_item_en">BLACK BLEND ｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-05-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="320" href="#bc-gunte-05-path">充分展現苦澀濃鬱, 不失柔和。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/02_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/02_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">BUTTER KING｜Coffee</h3>
+                                        <p class="hero_slide_item_en">BUTTER KING｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-06-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="350" href="#bc-gunte-06-path">極致豐厚焦糖黃油定番。放大</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/03_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/03_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">果香浅煎｜Coffee</h3>
+                                        <p class="hero_slide_item_en">果香浅煎｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-07-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="220" href="#bc-gunte-07-path">富山縣產西柚檸檬, 柑橘季節限定, 配碧螺春/白芽奇蘭, 深具有明亮的漿果風味</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/04_660.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/04_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">抹茉｜Coffee</h3>
+                                        <p class="hero_slide_item_en">抹茉｜Coffee </p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-01-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="290" href="#bc-gunte-01-path">靜岡縣笹間町的茶葉, 採用JAS有機咖啡豆。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/05_630.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/05_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">FLAT WHITE｜Bean</h3>
+                                        <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="320" href="#bc-gunte-02-path">採用天然烘焙特有的濃鬱醇厚風味, 放大。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/06_720.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/06_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">SUNSHINE｜Coffee</h3>
+                                        <p class="hero_slide_item_en">SUNSHINE｜Coffeee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-03-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="370" href="#bc-gunte-03-path">餘味完全覆蓋在味蕾上, 採用JAS有機咖啡豆, </textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" src="{% static 'images/07_1080.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" src="{% static 'images/07_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">WAKEMEUP｜Coffee</h3>
+                                        <p class="hero_slide_item_en">WAKEMEUP｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-04-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="330" href="#bc-gunte-04-path">專屬早晨配方, 驅動您最佳狀態釋放能量!</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero_hand">
+                    <div id="hero_hand_list" class="hero_hand_list">
+
+                        <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"></a></div>
+                    </div>
+                </div>
+            </div>
+            <ol id="hero_nav" class="hero_nav">
+                <li><button type="button">1</button></li>
+                <li><button type="button">2</button></li>
+                <li><button type="button">3</button></li>
+                <li><button type="button">4</button></li>
+                <li><button type="button">5</button></li>
+                <li><button type="button">6</button></li>
+                <li><button type="button">7</button></li>
+            </ol>
+        </section>
+
+
+<!-- 2026-09-06：複製 .bc-reviews-section（hakujuji waffle reviews 跑馬燈）至首頁 feed 下方；水平反向 data-bc-reviews-reverse（向右捲） -->
+
 
 
 <section hidden class="feed overflow-hidden">
@@ -729,7 +731,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
      BC 動態 footer（#bc-bg-footer）——markup 共用 partials/bc_bg_footer.html（單一來源）；
      全樣式 scoped 於 #bc-bg-footer，故與 about 頁共用同一份 CSS 不會互相影響。 -->
-<link rel="stylesheet" href="{% static 'css/bc-bg-footer.css' %}?v=20261009a" />
+<link rel="stylesheet" href="{% static 'css/bc-bg-footer.css' %}?v=20261012a" />
 <style>
 /* 2026-09-04：首頁 feed 為頂部首屏（home-slider 已 hidden）→ 比照 home-slider：
    feed 照片/形狀由視口頂部開始、穿入 navbar 後方透出，navbar（z-index:100、
@@ -781,6 +783,35 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 }
 .bc-bg-hero #bc-bg-footer .grid.is-footer {
   border-top: 0 none;
+}
+/* 2026-10-12（使用者指示）：「bc-bg-footer 內的咖啡照片列尺寸增加 50%」。
+   [標的] 首頁 hero 內 #bc-bg-footer 的 7 張咖啡照列 —— .footer-logo-cell（寬）
+     與 .footer-logo-item（高）；照片本身是 .img{width:100%;height:100%}＋
+     .img.contain（object-fit:contain），故放大格子即放大照片。
+   [原始值] bc-bg-footer.css:156 寬 calc(192vw/scale-ratio)、:157 高 calc(184vw/scale-ratio)；
+     同檔 :206 的 @media (max-width:991px) 再把高改為 calc(120vw/scale-ratio)。
+     ⇒ 桌機 192×184（@1440 實測 cell 192×264＝上下 padding 40＋184）、
+        ≤991px 高 30.53vw。×1.5 後＝寬 288／高 276，≤991px 高 180。
+   [範圍] 只覆寫本頁：about 頁的真頁尾共用同一組 class（.footer-logo-*）與同一份 CSS，
+     仍維持原尺寸（deco 標誌釘牌不變）。
+   [特異度] 多一個 .bc-bg-hero class ⇒ 高於 bc-bg-footer.css 的原規則，不需 !important
+     （與上方三條覆寫同一寫法）。高度必須逐斷點鏡射，因為該檔在 ≤991px 用的是
+     不同的基準值（120 而非 184），單一條 calc(276vw/scale-ratio) 在 ≤991px 會變成
+     70.23vw（＝+130%，非 +50%）。
+   [≤991px 寬度] 刻意不鏡射：該斷點下 .footer-logo-cell 是 .footer-time-inner 內的
+     flex item（flex-shrink:1），而 .footer-time-inner 在 6 欄格中只佔 3/5 兩欄
+     ⇒ 宣告寬度本來就被容器壓到 28.58vw（原宣告 48.86vw 早就被壓縮），覆寫宣告寬度
+     不改變實際寬度；該斷點的有效尺寸來自高度，故只鏡射高度。 */
+.bc-bg-hero #bc-bg-footer .footer-logo-cell {
+  width: calc(288vw / var(--_special-units---global--scale-ratio));
+}
+.bc-bg-hero #bc-bg-footer .footer-logo-item {
+  height: calc(276vw / var(--_special-units---global--scale-ratio));
+}
+@media screen and (max-width: 991px) {
+  .bc-bg-hero #bc-bg-footer .footer-logo-item {
+    height: calc(180vw / var(--_special-units---global--scale-ratio));
+  }
 }
 /* select2 樣式 */
 /* 2026-09-21：首頁原本在此覆寫兩件事，現已改為全站規則 →
