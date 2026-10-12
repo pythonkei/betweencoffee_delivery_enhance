@@ -11,6 +11,9 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
         交會邏輯自然 no-op（頁尾已無 <footer>，不需再遮擋）。
         （bc-bg-footer.css 只用 .footer 類別選取，與標籤無關 → 改標籤不動任何樣式。）
   2. 本註解。
+  3. 照片列（.footer-logo-list）內容不同：本檔改用「咖啡照＋連結」（比照 index.html
+     #hero_hand_list 的 hero_coffees.0~6，7 張），footer 版（bc_bg_footer.html）仍為
+     5 張 deco 標誌。詳見本檔 L41 起的註解。
 保留 id="bc-bg-footer"：bc-bg-footer.css 的選擇器全以此 id 為前綴、
 bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共用同一份 CSS/JS。
 （index 與 about 是不同頁面，同 id 不衝突。）
@@ -38,22 +41,35 @@ bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共�
         <div id="w-node-f72de753-7ddd-b236-f650-3cfafb0e604b-032bc8db" class="footer-time-inner">
           <div data-footer-logo="wrap" data-reveal="clip-down" class="footer-logo-cell">
             <div class="footer-logo-list-wrap w-dyn-list">
+              <!-- 2026-10-09（使用者指示）：本照片列改用首頁 GUNTE hero 的「咖啡照列」——
+                   照片來源與連結完全比照 index.html 的 #hero_hand_list（hero_coffees.0~6）：
+                   src = CoffeeItem.get_index_image（image_index → image → default-coffee-index.png），
+                   href = url('coffee', <咖啡 id>)。數量由 5 張 deco 標誌改為 7 張咖啡照，
+                   以逐字對齊 hero_hand_list 的 7 筆（hero_coffees 由 index view 提供；
+                   about 頁尾的 bc_bg_footer.html 未同步、仍為 deco 標誌）。
+                   輪播 hook（data-footer-logo="item"）與 .img.contain、data-reveal="clip-down" 皆保留，
+                   bc-bg-footer.js 的 5 秒自動輪播不受影響；<a> 填滿格子的樣式見 bc-bg-footer.css。 -->
               <div data-footer-logo="list" role="list" class="footer-logo-list w-dyn-items">
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <!-- 2026-10-08：加版本查詢字串，避免瀏覽器續用快取中的舊黑色 deco SVG（白 fill 版本才會生效） -->
-                  <img src="{% static 'images/deco_01.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                  <a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}" loading="lazy" class="img contain"/></a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <img src="{% static 'images/deco_02.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                  <a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}" loading="lazy" class="img contain"/></a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <img src="{% static 'images/deco_05.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                  <a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}" loading="lazy" class="img contain"/></a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <img src="{% static 'images/deco_06.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                  <a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}" loading="lazy" class="img contain"/></a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <img src="{% static 'images/deco_07.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
+                  <a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}" loading="lazy" class="img contain"/></a>
+                </div>
+                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                  <a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}" loading="lazy" class="img contain"/></a>
+                </div>
+                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                  <a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}" loading="lazy" class="img contain"/></a>
                 </div>
               </div>
             </div>

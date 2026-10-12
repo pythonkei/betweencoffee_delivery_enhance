@@ -157,6 +157,13 @@
 #bc-bg-footer .footer-logo-item{height:calc(184vw/var(--_special-units---global--scale-ratio));display:none;position:absolute;inset:0%;}
 #bc-bg-footer .footer-logo-item:first-child{display:block;position:relative;}
 #bc-bg-footer .footer-logo-list{position:relative;}
+/* 2026-10-09（使用者指示）：首頁 hero 的照片列改為「咖啡照＋連結」後（照片與連結比照
+   index.html #hero_hand_list 的 hero_coffees.0~6；see partials/bc_hero.html），
+   每個 .footer-logo-item 內多包一層 <a>。因 reset（L48）不會讓 a 撐開，且 `.img` 的
+   width/height:100% 需有 block 父層才能解析（inline 高度塌陷），故讓 <a> 填滿整個格子；
+   其餘輪播用的絕對定位 / display 切換仍由上面兩條 .footer-logo-item 規則決定，不受影響。
+   （about 頁尾的 bc_bg_footer.html 仍為 deco 標誌，此規則對它無作用、無副作用。） */
+#bc-bg-footer .footer-logo-item a{display:block;width:100%;height:100%;}
 /* 2026-10-08：about footer 的 .footer-mail-inner（email CTA）改用 index footer 的 .scroller-box 跑馬燈。
    樣式來源：static/css/style-utilities.css（.scroller-box / .scroller / .tag-list）
    捲動來源：static/js/main.js querySelectorAll('.scroller')（設 data-animated + 複製 li 無縫循環）
