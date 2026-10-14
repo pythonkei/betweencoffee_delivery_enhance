@@ -1,7 +1,14 @@
 /* ============================================================
-   bc-weather.js — 橫濱 Timber Wharf 天氣元件（about 頁右上角）
-   2026-08-26 整合
+   bc-weather.js — 橫濱 Timber Wharf 天氣元件
+   2026-08-26 整合（about 頁 navbar 右上角）
    ------------------------------------------------------------------
+   2026-10-14（使用者指示）：首頁 hero 的 #bc-clock 模組也加入同一顆天氣元件
+     （在左側 { 之上、放大 30%）→ 本檔改為「about ＋ index」兩頁都載入
+     （見 base.html），並掃描頁面上所有 .weather：
+       · about  navbar  : 80px 滑動距離（--wc-scale 未設 → 1）
+       · index  那顆    : 104px（--wc-scale:1.3，slideDist() 逐實例量測）
+     另抽出 fillLocalDate() 在 main() 一開始先填本地日期（該顆不在 nav.html
+     inline script 的覆蓋範圍內）。
    完整複製 yokohama-timberwharf.com/wp-content/themes/ytw/assets/js/main.js
    的 weather 邏輯（minified 反推還原，行為一致）：
    1. XMLHttpRequest → OpenWeatherMap API（原站 URL + 公開 key，完全一致）
@@ -76,6 +83,26 @@
 
   /* 原站 e()：日期 + 溫度填充 */
   function fillDate(data, nodes) {
+    fillLocalDate(nodes);
+    nodes.forEach(function (c) {
+      /* 注意：時鐘加入後 DOM 有兩個 .value（.clock .value / .temperature .value），
+         必須用精確 selector，否則會選中時鐘 */
+      var t = c.querySelector('.temperature');
+      var v = c.querySelector('.temperature .value');
+      var u = c.querySelector('.temperature .unit');
+      if (t) {
+        if (v) v.textContent = Math.round(data.main.temp);
+        if (u) u.textContent = '\u00B0C';
+      }
+    });
+  }
+
+  /* 只填「本地日期」（month / day / year / weekday）——完全不依賴 API。
+     2026-10-14：抽出並在 main() 一開始就呼叫一次。
+     nav.html 的 inline script 只會填 DOM 第一個 .weather（navbar 那顆），
+     首頁 hero 內新增的這顆在 API（或 sessionStorage 快取）回應前會是空日期；
+     與 updateClock() 同時先填本地日期，首訪（無快取）也不會出現空日期區塊。 */
+  function fillLocalDate(nodes) {
     var now = new Date();
     var monthNum = (now.getMonth() + 1).toString();
     var day = now.getDate().toString().padStart(2, '0');
@@ -95,17 +122,17 @@
       var wd = c.querySelector('.weekday');
       if (wd) wd.textContent = weekday;
     });
-    nodes.forEach(function (c) {
-      /* 注意：時鐘加入後 DOM 有兩個 .value（.clock .value / .temperature .value），
-         必須用精確 selector，否則會選中時鐘 */
-      var t = c.querySelector('.temperature');
-      var v = c.querySelector('.temperature .value');
-      var u = c.querySelector('.temperature .unit');
-      if (t) {
-        if (v) v.textContent = Math.round(data.main.temp);
-        if (u) u.textContent = '\u00B0C';
-      }
-    });
+  }
+
+  /* 三元素的水平滑動距離（＝.view 的寬度）。
+     2026-10-14：原本硬寫 80px，hero 版（bc-weather.css 的 --wc-scale:1.3）的
+     .view 是 104px（≤991.98px 為 38*1.3＝49.4px）→ 用實際寬度才不會殘留圖示邊角。
+     讀 getBoundingClientRect().width（含小數；offsetWidth 會四捨五入成整數，
+     49.4px 會取 49 → 右側殘留 0.4px）；取不到時退回原本的 80px。 */
+  function slideDist(el) {
+    var v = el.querySelector('.view');
+    var w = v ? v.getBoundingClientRect().width : 0;
+    return w > 0 ? w : 80;
   }
 
   /* 立即定位（2026-08-28：不依賴 GSAP/defer 時序——script 在 body 尾、首 paint 前
@@ -113,9 +140,10 @@
      無需 opacity 隱藏，weather 保持可見不消失彈出） */
   function applyPositions(nodes) {
     nodes.forEach(function (l) {
+      var d = slideDist(l);
       ORDER.forEach(function (n, i) {
         var el = l.querySelector('.' + n);
-        if (el) el.style.transform = 'translateX(' + (i === currentIndex ? 0 : 80) + 'px)';
+        if (el) el.style.transform = 'translateX(' + (i === currentIndex ? 0 : d) + 'px)';
       });
     });
   }
@@ -135,10 +163,12 @@
         var cur = c.querySelector('.' + curName);
         var next = c.querySelector('.' + nextName);
         var other = c.querySelector('.' + otherName);
+        /* 2026-10-14：滑動距離改為逐實例量測（navbar 80px、hero 104px） */
+        var d = slideDist(c);
         if (window.gsap) {
-          if (cur) gsap.to(cur, { x: -80, duration: 0.8, ease: EASE });
-          if (next) gsap.fromTo(next, { x: 80 }, { x: 0, duration: 0.8, ease: EASE });
-          if (other) gsap.set(other, { x: 80 });
+          if (cur) gsap.to(cur, { x: -d, duration: 0.8, ease: EASE });
+          if (next) gsap.fromTo(next, { x: d }, { x: 0, duration: 0.8, ease: EASE });
+          if (other) gsap.set(other, { x: d });
         }
       });
       currentIndex = (currentIndex + 1) % ORDER.length;
@@ -187,6 +217,11 @@
     /* 時鐘：立即填入一次 + 每秒更新（與天氣/溫度動畫獨立） */
     updateClock();
     setInterval(updateClock, 1000);
+
+    /* 2026-10-14：本地日期也立即填入（month/day/year/weekday 不依賴 API）。
+       hero 內的 .weather 不在 nav.html inline script 的範圍（那裡只填第一個 .weather），
+       沒有這行的話首訪（無 sessionStorage 快取）時日期會空白到 OpenWeatherMap 回應為止。 */
+    fillLocalDate(nodes);
 
     /* 立即定位：恢復上次動畫狀態（sessionStorage），首 paint 即正確狀態 */
     var savedIdx = parseInt(sessionStorage.getItem('bcWeatherIndex') || '-1', 10);

@@ -23,7 +23,9 @@
      且 class 為 `h1 bc-clock-brace`（不含 is-desktop）。
   C. 排列：依 left 由小到大＝{ / 時 / : / 照片 / : / 分 / }（＝桌面版同一排列）。
   D. 欄數：≤991px → 9 欄；≥992px → 8 欄（桌面原樣）；兩者各欄皆等寬（1fr）。
-  E. 幾何：7 個可見子項兩兩無重疊（>0.5px 才算）、無水平溢出。
+  E. 幾何：（index 8 個／about 7 個）可見子項兩兩無重疊（>0.5px 才算）、無水平溢出。
+     index 多的 1 個＝2026-10-14 新增的天氣元件 #bc-clock-weather（只在首頁 hero）；
+     兩兩無重疊這條同時就是「天氣元件不與 { 或其他時鐘項重疊」的守門。
   F. 照片欄寬與佔比：≤991px 照片欄＝3 欄＋2 gap、佔時鐘寬 ≈1/3（＝原 6 欄 2/6 的比例，
      證明尺寸零變動）；≥992px ＝2 欄＋1 gap、佔比 ≈1/4。
   G. about 頁（共用同一份 CSS）：390 / 768 亦顯示 { }、排列相同、無重疊、無溢出。
@@ -205,8 +207,12 @@ async def main():
                                   near(m.get("track_min"), m.get("track_max"), 1.5),
                                   f"{m.get('track_min')} .. {m.get('track_max')}"))
             # E 幾何
-            failures.append(check("E1 可見子項 7 個且兩兩無重疊",
-                                  m.get("visible_count") == 7 and not m.get("overlaps"),
+            # 2026-10-14：首頁可見子項 7 → 8（新增 #bc-clock-weather 天氣元件；
+            # about 頁的真頁尾沒有天氣元件 → 仍為 7）。兩兩無重疊的檢查原樣不變。
+            exp_visible = 7 if "about" in url else 8
+            failures.append(check(f"E1 可見子項 {exp_visible} 個且兩兩無重疊",
+                                  m.get("visible_count") == exp_visible
+                                  and not m.get("overlaps"),
                                   f"count={m.get('visible_count')} overlaps={m.get('overlaps')}"))
             failures.append(check("E2 無水平溢出",
                                   (m.get("doc_scroll_w") or 0) <= (m.get("inner_w") or 0) + 1,

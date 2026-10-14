@@ -44,6 +44,36 @@ bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共�
         <h1 data-reveal="text" class="h1">to Go</h1>
       </div>
       <div id="bc-clock" class="footer-time">
+        <!-- 2026-10-14（使用者指示）：把 about 頁 navbar 右上角的天氣/時鐘元件搬進本模組，
+             放在時鐘列左側 { 之上（尺寸 +30%，--wc-scale 見 index.html 的 <style>）。
+             [結構] 與 nav.html:33-48 的天氣元件逐字相同（同一份 markup），差別只有兩處：
+               · 外層多一層 #bc-clock-weather（負責 grid 定位 ＋ data-reveal="clip-down"）
+               · 自帶 .weather--visible —— navbar 那顆是「全站隱藏、只有 about 頁顯示」，
+                 本顆位於首頁 hero，直接標記可見（bc-weather.css 的 visibility 開關維持
+                 #ftco-navbar 專用，不影響本顆）。
+             [定位] 放進 .footer-time（#bc-clock）這個 grid 的「欄 1、列 1」＝與 { 同一格；
+               index.html 對它設 align-self:start → 貼齊該格頂端，恆在垂直置中的 { 之上。
+               ≥992px 必須同時把 #bc-clock-brace-open 明確釘在同一格，否則自動置位
+               會把 { 擠到欄 2，並連帶把照片列推到隱式欄位（見 index.html 註解）。
+             [資料] 由 bc-weather.js 填充（base.html 的天氣腳本已改為 about ＋ index 都載入；
+               該檔已支援多實例，滑動距離逐實例量測）。 -->
+        <div id="bc-clock-weather" class="bc-clock-weather" data-reveal="clip-down">
+          <div class="weather -font_en -color_white weather--visible" data-bc-weather>
+            <div class="view">
+              <div class="clock"><span class="value">--:--</span></div>
+              <div class="icon"></div>
+              <span class="temperature">
+                <span class="value"></span>
+                <span class="unit">°C</span>
+              </span>
+            </div>
+            <span class="date">
+              <span class="month"></span>, <span class="day"></span><span class="year"></span>
+              <span class="weekday">--</span>
+            </span>
+            <span class="border"></span>
+          </div>
+        </div>
         <!-- 2026-10-08：時間括號由 ( ) 改為 { }，與兩側冒號同一組標點視覺 -->
         <h1 data-reveal="text" id="bc-clock-brace-open" class="h1 bc-clock-brace">{</h1>
         <h1 data-footer-time="hours" data-reveal="text" id="bc-clock-hours" class="h1">00</h1>
@@ -58,28 +88,77 @@ bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共�
                    以逐字對齊 hero_hand_list 的 7 筆（hero_coffees 由 index view 提供；
                    about 頁尾的 bc_bg_footer.html 未同步、仍為 deco 標誌）。
                    輪播 hook（data-footer-logo="item"）與 .img.contain、data-reveal="clip-down" 皆保留，
-                   bc-bg-footer.js 的 5 秒自動輪播不受影響；<a> 填滿格子的樣式見 bc-bg-footer.css。 -->
+                   bc-bg-footer.js 的 5 秒自動輪播不受影響；<a> 填滿格子的樣式見 bc-bg-footer.css。
+                   2026-10-14（使用者指示）：每張照片下方加該筆咖啡的「名稱 + highlight」。
+                   等級重用既有元件 .bc-series-caption / -name / -highlight（bc-series.css；
+                   SERIES 區塊已在用、highlight 已是品牌金），尺寸改在 index.html 的 <style> 內
+                   以 #bc-bg-footer 前綴重設（避免影響 SERIES 區塊）。
+                   結構：照片與文字同包在 <a class="footer-logo-link"> 內（flex column：
+                   照片 flex:1、文字自然高）→ .footer-logo-item 高度＝照片＋文字高度
+                   （見 index.html；照片尺寸不變）。 --> -->
               <div data-footer-logo="list" role="list" class="footer-logo-list w-dyn-items">
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}" loading="lazy" class="img contain"/></a>
+                  <a href="{% url 'coffee' hero_coffees.0.id %}" class="footer-logo-link">
+                    <img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}" loading="lazy" class="img contain"/>
+                    <div class="bc-series-caption footer-logo-caption">
+                      <p class="bc-series-caption-name">{{ hero_coffees.0.name }}</p>
+                      <p class="bc-series-caption-highlight">{{ hero_coffees.0.highlight }}</p>
+                    </div>
+                  </a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}" loading="lazy" class="img contain"/></a>
+                  <a href="{% url 'coffee' hero_coffees.1.id %}" class="footer-logo-link">
+                    <img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}" loading="lazy" class="img contain"/>
+                    <div class="bc-series-caption footer-logo-caption">
+                      <p class="bc-series-caption-name">{{ hero_coffees.1.name }}</p>
+                      <p class="bc-series-caption-highlight">{{ hero_coffees.1.highlight }}</p>
+                    </div>
+                  </a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}" loading="lazy" class="img contain"/></a>
+                  <a href="{% url 'coffee' hero_coffees.2.id %}" class="footer-logo-link">
+                    <img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}" loading="lazy" class="img contain"/>
+                    <div class="bc-series-caption footer-logo-caption">
+                      <p class="bc-series-caption-name">{{ hero_coffees.2.name }}</p>
+                      <p class="bc-series-caption-highlight">{{ hero_coffees.2.highlight }}</p>
+                    </div>
+                  </a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}" loading="lazy" class="img contain"/></a>
+                  <a href="{% url 'coffee' hero_coffees.3.id %}" class="footer-logo-link">
+                    <img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}" loading="lazy" class="img contain"/>
+                    <div class="bc-series-caption footer-logo-caption">
+                      <p class="bc-series-caption-name">{{ hero_coffees.3.name }}</p>
+                      <p class="bc-series-caption-highlight">{{ hero_coffees.3.highlight }}</p>
+                    </div>
+                  </a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}" loading="lazy" class="img contain"/></a>
+                  <a href="{% url 'coffee' hero_coffees.4.id %}" class="footer-logo-link">
+                    <img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}" loading="lazy" class="img contain"/>
+                    <div class="bc-series-caption footer-logo-caption">
+                      <p class="bc-series-caption-name">{{ hero_coffees.4.name }}</p>
+                      <p class="bc-series-caption-highlight">{{ hero_coffees.4.highlight }}</p>
+                    </div>
+                  </a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}" loading="lazy" class="img contain"/></a>
+                  <a href="{% url 'coffee' hero_coffees.5.id %}" class="footer-logo-link">
+                    <img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}" loading="lazy" class="img contain"/>
+                    <div class="bc-series-caption footer-logo-caption">
+                      <p class="bc-series-caption-name">{{ hero_coffees.5.name }}</p>
+                      <p class="bc-series-caption-highlight">{{ hero_coffees.5.highlight }}</p>
+                    </div>
+                  </a>
                 </div>
                 <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}" loading="lazy" class="img contain"/></a>
+                  <a href="{% url 'coffee' hero_coffees.6.id %}" class="footer-logo-link">
+                    <img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}" loading="lazy" class="img contain"/>
+                    <div class="bc-series-caption footer-logo-caption">
+                      <p class="bc-series-caption-name">{{ hero_coffees.6.name }}</p>
+                      <p class="bc-series-caption-highlight">{{ hero_coffees.6.highlight }}</p>
+                    </div>
+                  </a>
                 </div>
               </div>
             </div>

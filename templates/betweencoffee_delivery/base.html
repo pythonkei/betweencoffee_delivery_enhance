@@ -63,8 +63,10 @@
     </script>
 
     <!-- 2026-08-27: Timber Wharf 天氣/時鐘元件（2026-09-21：全站隱藏、僅 about 頁顯示；
-         樣式仍全域載入以保留 navbar 內排版空間，避免 navbar 位移） -->
-    <link rel="stylesheet" href={% static "css/bc-weather.css" %}?v=20260921a />
+         樣式仍全域載入以保留 navbar 內排版空間，避免 navbar 位移）
+          2026-10-14（使用者指示）：首頁 hero 的 #bc-clock 模組也用同一顆天氣元件
+          （見 partials/bc_hero.html）→ 本檔改為兩處共用（新增 #bc-bg-footer .weather 規則與 --wc-scale 縮放支援），升版號 -->
+    <link rel="stylesheet" href={% static "css/bc-weather.css" %}?v=20261014a />
 
     <!-- 2026-08-10: GSAP 動畫引擎（全域載入，供 SALON SEARCH + 流動選單使用）
          2026-10-07: 3.12.5 → 3.13.0（SplitText/CustomEase 已於 3.13 全面免費，供 about 頁 BC 動態 footer 使用） -->
@@ -323,9 +325,13 @@
 
     <!-- 2026-08-27: Timber Wharf 天氣/時鐘元件（OpenWeatherMap 香港葵涌 + 時鐘/日期/weekday + GSAP 3 元素循環動畫）
          2026-09-21（使用者指示）：weather 全站隱藏、僅 about 頁顯示 → 只有 about 需要這段腳本
-         （其他頁面不必再發 OpenWeatherMap 請求、也不需保留隱藏的動畫計時器） -->
-    {% if request.resolver_match.url_name == 'about' %}
-    <script src={% static "js/bc-weather.js" %}?v=20260828i></script>
+         （其他頁面不必再發 OpenWeatherMap 請求、也不需保留隱藏的動畫計時器）
+         2026-10-14（使用者指示）：首頁 hero 的 #bc-clock 模組也加入同一顆天氣元件
+         → 條件改為 about ＋ index（首頁需要它填 hero 那顆的日期/溫度/循環動畫）；
+            升版號 bc-weather.js ?v=20260828i → ?v=20261014a（新增 slideDist 逐實例滑動距離
+            ＋ fillLocalDate 立即填日期） -->
+    {% if request.resolver_match.url_name == 'about' or request.resolver_match.url_name == 'index' %}
+    <script src={% static "js/bc-weather.js" %}?v=20261014a></script>
     {% endif %}
 
     <!-- 2026-08-10: 水平跑馬燈（bc-marquee，JS rAF 整數像素 + 循環 buffer 避免抖動/閃出） -->

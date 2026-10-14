@@ -20,7 +20,8 @@ PAGES = [("index", "/"), ("about", "/about/"), ("coffee4", "/coffee/4/"),
 # 2026-09-21（使用者指示）：
 #   · 浮動購物車「所有模板位置和 index 一樣」→ 全站（含本清單每頁）浮動鈕盒上緣
 #     都對齊 navbar-brand 頂邊；下方另做「跨頁位置一致性」與「對齊基準」檢查。
-#   · .weather 全站隱藏、僅 about 頁顯示（bc-weather.js 亦只在 about 載入）。
+#   · .weather 全站隱藏、僅 about 頁顯示（bc-weather.js 於 about ＋ index 載入；
+#     2026-10-14 起因首頁 hero 的 #bc-clock 也用同一顆天氣元件）。
 #   · /coffee/4/、/bean/1/、/coffee_menu/：.bc-attract-nav 被 display:none →
 #     浮動鈕單獨對齊 navbar-brand 頂邊（不再退回 CSS 的垂直置中退化值）。
 #   （註：舊版含 /cart/，但購物車為空時該網址 302 → /coffee_menu/，故改測 /coffee_menu/ 本身）
@@ -329,8 +330,11 @@ async def main():
                 if name == "index" and v.get("yama_header_bot_display") != "none":
                     fails.append(f"{tag}: header-bot 未隱藏（{v.get('yama_header_bot_display')}）")
                 # 2026-09-21（使用者指示）：
-                #   · .weather 全站隱藏、僅 about 頁顯示（bc-weather.js 亦僅 about 載入）
+                #   · .weather 全站隱藏、僅 about 頁顯示
                 #   · 浮動購物車全站位置與 index 相同（盒上緣對齊 navbar-brand 頂邊）
+                # 2026-10-14：bc-weather.js 改為 about ＋ index 都載入（首頁 hero 的
+                #   #bc-clock 也要同一顆天氣元件）→ 下方斷言由「非 about 一律未載入」
+                #   改為「index/about 需載入、其餘頁面未載入」。
                 wx = v.get("weather") or {}
                 if name == "about":
                     if wx.get("visibility") != "visible":
@@ -344,8 +348,12 @@ async def main():
                         fails.append(f"{tag}: weather 應隱藏（目前 {wx.get('visibility')}）")
                     if wx.get("has_visible_class"):
                         fails.append(f"{tag}: 非 about 頁卻有 .weather--visible")
-                    if wx.get("script_loaded"):
-                        fails.append(f"{tag}: 非 about 頁不應載入 bc-weather.js")
+                    if name == "index":
+                        # 2026-10-14：首頁 hero 的 #bc-clock 內也有天氣元件 → 需載入
+                        if not wx.get("script_loaded"):
+                            fails.append(f"{tag}: index 頁未載入 bc-weather.js")
+                    elif wx.get("script_loaded"):
+                        fails.append(f"{tag}: 非 about/index 頁不應載入 bc-weather.js")
                 anchor = v.get("navbar_brand_top")
                 exp_top = v.get("expected_cart_top")
                 cw = v.get("cart_wrapper") or {}

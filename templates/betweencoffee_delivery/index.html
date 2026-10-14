@@ -830,16 +830,138 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
    [≤991px 寬度] 刻意不鏡射：該斷點下 .footer-logo-cell 是 .footer-time-inner 內的
      flex item（flex-shrink:1），而 .footer-time-inner 在 6 欄格中只佔 3/5 兩欄
      ⇒ 宣告寬度本來就被容器壓到 28.58vw（原宣告 48.86vw 早就被壓縮），覆寫宣告寬度
-     不改變實際寬度；該斷點的有效尺寸來自高度，故只鏡射高度。 */
+     不改變實際寬度；該斷點的有效尺寸來自高度，故只鏡射高度。
+     2026-10-14（使用者指示）：每張照片下方新增「名稱 ＋ highlight」，照片高度維持不變
+       → 上述高度再加 --bc-hero-caption-h（＝文字區總高，逐斷點值見本檔 <style> 的 B 段）。
+       .footer-logo-cell 的寬度不動（文字沿用同一格寬度、置中對齊）。 */
 .bc-bg-hero #bc-bg-footer .footer-logo-cell {
   width: calc(288vw / var(--_special-units---global--scale-ratio));
 }
 .bc-bg-hero #bc-bg-footer .footer-logo-item {
-  height: calc(276vw / var(--_special-units---global--scale-ratio));
+  height: calc(276vw / var(--_special-units---global--scale-ratio) + var(--bc-hero-caption-h, 0px));
 }
 @media screen and (max-width: 991px) {
   .bc-bg-hero #bc-bg-footer .footer-logo-item {
-    height: calc(180vw / var(--_special-units---global--scale-ratio));
+    height: calc(180vw / var(--_special-units---global--scale-ratio) + var(--bc-hero-caption-h, 0px));
+  }
+}
+/* ============================================================
+   2026-10-14（使用者指示）
+   A. about 頁的天氣/時鐘元件搬進 #bc-clock（位於左側 { 之上、尺寸 +30%）
+   B. 照片列每張照片下方加「咖啡名稱 ＋ highlight」
+   ============================================================ */
+/* ---- A. 天氣/時鐘元件（markup 見 partials/bc_hero.html 的 #bc-clock-weather） ----
+   [縮放] --wc-scale:1.3。bc-weather.css 的所有尺寸都是 calc(原值 * var(--wc-scale,1))
+     （先例＝bc-reviews.css 的 --rv-scale）；只在 hero 內宣告 → about 頁 navbar 那顆
+     不繼承（×1）→ about 外觀零變動。
+   [定位] 放進 #bc-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格：
+     · align-self:start：貼齊該格頂端。該格高度＝整條時鐘列高（由照片格撐出，
+       桌面 356px），若用預設的 stretch 會撐滿整列並讓內容垂直置中而與 { 重疊；
+       center 更是直接疊上去。start 讓它恆在垂直置中的 { 之上
+       （實測 1440 間距 55px、992 為 12px、390 為 14px，全斷點皆不重疊）。
+     · justify-self:center：與同格的 { 水平同中心（兩者都置中於欄 1）。
+   [高度] .weather 在 hero 內改為 height:auto（見 bc-weather.css）：navbar 的
+     height:100%／80px 是為 flex 容器設計，照搬到 grid 格會與 { 重疊。 */
+.bc-bg-hero #bc-bg-footer #bc-clock-weather {
+  grid-area: 1 / 1 / 2 / 2;
+  align-self: start;
+  justify-self: center;
+}
+/* ≥992px 必須把 { 明確釘回「欄 1、列 1」。
+   [原因] 本頁 .footer-time 8 欄配置的排列靠 grid 自動置位：`{` 與 `15` 只宣告了
+     place-self:center、沒有 grid-area（≤991px 才有明確值，見 bc-bg-footer.css）。
+     新增的天氣格先佔走欄 1 後，自動置位會把 `{` 放到欄 2、`15` 往後找空格
+     （撞上明確定位的冒號／照片再退），照片列（span 2）最終落點也會偏移
+     —— 實測會出現隱式欄、整列跑版。
+   [作法] 把 `{` 釘在欄 1（＝天氣所在的同一格，兩者上下不重疊，理由見上），
+     自動置位序列即完全不變：欄 1={(+天氣) 2=15 3=: 4-5=照片 6=: 7=19 8=}。 */
+@media screen and (min-width: 992px) {
+  .bc-bg-hero #bc-bg-footer #bc-clock-brace-open {
+    grid-area: 1 / 1 / 2 / 2;
+  }
+}
+.bc-bg-hero #bc-bg-footer #bc-clock-weather .weather {
+  --wc-scale: 1.3;
+}
+
+/* ---- B. 照片列文字（名稱 ＋ highlight） ----
+   [文字高度] 逐斷點的字級不同（見下方三段），故用 --bc-hero-caption-h 表達
+     「文字區總高 = padding-top 8 + 名稱行高 1.3 + highlight 上緣 4 + 行高 1.4」，
+     再加到 .footer-logo-item 的既有高度上 → 照片高度維持原值不變。 */
+.bc-bg-hero #bc-bg-footer {
+  --bc-hero-caption-h: calc(8px + 16px * 1.3 + 4px + 12px * 1.4);
+}
+/* [結構] <a class="footer-logo-link"> 由 block 改 flex column：
+   圖片 flex:1 1 auto 吃掉「格子高 − 文字高」，文字按內容高度排在下緣。
+   img 必須覆寫 `.img{width:100%;height:100%}` 的 height:100%
+   —— flex column 中 height:100% ＝整個格子高（含文字），會把文字擠出格子。 */
+.bc-bg-hero #bc-bg-footer .footer-logo-item a.footer-logo-link {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+.bc-bg-hero #bc-bg-footer .footer-logo-item a.footer-logo-link > img {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+/* [文字樣式] 沿用 SERIES 區塊的 .bc-series-caption 系列命名與其視覺定義
+   （bc-series.css；about 頁的咖啡/咖啡豆卡片已在用）。
+   ⚠ bc-series.css 只載入 about 頁（本頁 extra_css 未載）→ 本頁必須自帶同值宣告，
+     否則名稱沒有 Josefin Sans／大寫／白字，highlight 也不會是品牌金
+     （實測會繼承 #bc-bg-footer 的 rgba(255,255,255,.9)，與設計不符）。
+   [與 bc-series.css 逐值相同] font-family / font-weight / text-transform /
+     letter-spacing / color（highlight 的 var(--bc-gold,#c49b63) 由全站載入的
+     bc-components.css :root 提供）。
+   [刻意不同] 字級（SERIES 26/16px 在 288px 的照片格太大 → 見下方三段）與
+     padding-top（8px；SERIES 為 16/12px）——後者須與 --bc-hero-caption-h 一致。
+   [reset] margin/padding 必須一併改寫：bc-bg-footer.css 的
+     `#bc-bg-footer p{margin:0;padding:0}`（1,0,1）會蓋掉 class 規則（0,1,0），
+     用 #bc-bg-footer 前綴（1,1,0）才贏得了 reset。 */
+.bc-bg-hero #bc-bg-footer .footer-logo-caption.bc-series-caption {
+  padding: 8px 4px 0;
+  text-align: center;
+}
+.bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
+  margin: 0;
+  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: normal;
+  color: #fff;
+  text-transform: uppercase;
+}
+.bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
+  margin: 4px 0 0;
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  color: var(--bc-gold, #c49b63);
+}
+@media screen and (max-width: 991px) {
+  .bc-bg-hero #bc-bg-footer {
+    --bc-hero-caption-h: calc(8px + 13px * 1.3 + 4px + 10px * 1.4);
+  }
+  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
+    font-size: 13px;
+  }
+  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
+    font-size: 10px;
+  }
+}
+@media screen and (max-width: 767px) {
+  .bc-bg-hero #bc-bg-footer {
+    --bc-hero-caption-h: calc(8px + 11px * 1.3 + 4px + 9px * 1.4);
+  }
+  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
+    font-size: 11px;
+  }
+  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
+    font-size: 9px;
   }
 }
 /* select2 樣式 */

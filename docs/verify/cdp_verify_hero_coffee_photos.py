@@ -24,9 +24,11 @@
         `naturalWidth > 0`（照片已抓取解碼，非 404／破圖）。
      C3 7 個 src 互不相同，且以 HTTP 直取皆為 200 ＋ `Content-Type: image/*`。
   D. 輪播初始狀態與幾何：恰 1 格顯示（index 0；其餘 display:none ＋ position:absolute）、
-     顯示格 position:relative；顯示格 rect 寬高 > 0；`<a>` computed display == block 且
-     a_rect ≈ item_rect（溢差 <= 1px）；img_rect ≈ a_rect（<= 1px）且高度 > 100px（未塌陷）；
-     無水平溢出。
+     顯示格 position:relative；顯示格 rect 寬高 > 0；`<a>` computed display == flex
+     （2026-10-14 起改 flex column，以容納下方文字）且 a_rect ≈ item_rect（溢差 <= 1px）；
+     img 橫向撐滿 `<a>`、高度 = `<a>` 高 − 文字高（±1px）且 > 100px（未塌陷）；
+     D9 顯示格 name == img alt、highlight 非空且為品牌金 rgb(196,155,99)；
+     D10 文字在照片下方；D11 7 格皆帶文字區（輪播切到任何一格都有名稱）；無水平溢出。
   E. 輪播仍會前進：手動觸發 wrap.click()（同 bc-bg-footer.js 的點擊前進）應前進 1 格、且仍只 1 格顯示。
   F. 連結可點：對「當時顯示中」那格的 `<a>` 中心送 CDP 真實滑鼠事件
      （mousePressed + mouseReleased），應導覽到該 `<a>` 的 href（`/coffee/<id>/`）。
@@ -80,12 +82,25 @@ MEASURE_JS = r"""
     var a = el.querySelector('a'), img = el.querySelector('img');
     var csel = getComputedStyle(el), ca = a ? getComputedStyle(a) : null;
     var ir = rect(img), ar = rect(a), er = rect(el);
+    /* 2026-10-14：每張照片下方新增「名稱 + highlight」（.bc-series-caption.footer-logo-caption） */
+    var cap = el.querySelector('.footer-logo-caption');
+    var nm = cap ? cap.querySelector('.bc-series-caption-name') : null;
+    var hl = cap ? cap.querySelector('.bc-series-caption-highlight') : null;
+    var cr = rect(cap);
     return {
       href: a ? a.getAttribute('href') : null,
       src: img ? img.getAttribute('src') : null,
       alt: img ? (img.getAttribute('alt') || '') : null,
       img_cls: img ? img.className : '',
+      a_cls: a ? a.className : '',
       a_display: ca ? ca.display : null,
+      cap_found: !!cap, cap_rect: cr, cap_h: cr ? cr.h : 0,
+      cap_name: nm ? nm.textContent : null,
+      cap_hl: hl ? hl.textContent : null,
+      hl_color: hl ? getComputedStyle(hl).color : null,
+      hl_fs: hl ? parseFloat(getComputedStyle(hl).fontSize) : 0,
+      name_fs: nm ? parseFloat(getComputedStyle(nm).fontSize) : 0,
+      img_is_above_cap: (ir && cr) ? (ir.y + ir.h) <= cr.y + 1 : false,
       a_count: el.querySelectorAll('a').length,
       img_count: el.querySelectorAll('img').length,
       display: csel.display, position: csel.position,
@@ -396,16 +411,39 @@ async def main():
             er, ar, ir = shown.get("item_rect"), shown.get("a_rect"), shown.get("img_rect")
             failures.append(check("D4 顯示格 rect 寬高 > 0",
                                   bool(er) and er["w"] > 0 and er["h"] > 0, er))
-            failures.append(check("D5 <a> computed display == block",
-                                  shown.get("a_display") == "block", shown.get("a_display")))
+            # 2026-10-14：每張照片下方新增「名稱 + highlight」→ <a> 由 block 改為
+            # flex column（D5 改寫）、img 不再撐滿 <a>（D7 改寫），並新增 D9–D11。
+            failures.append(check("D5 <a> computed display == flex（2026-10-14 起為 flex column）",
+                                  shown.get("a_display") == "flex", shown.get("a_display")))
             failures.append(check("D6 <a> 撐滿顯示格（rect 溢差 <= 1px）",
                                   shown.get("a_fills_item") is True, f"a {ar} vs item {er}"))
-            failures.append(check("D7 img 撐滿 <a>（<= 1px）且高度 > 100px（未塌陷）",
-                                  shown.get("img_fills_a") is True
-                                  and bool(ir) and ir["h"] > 100, f"img {ir} vs a {ar}"))
+            cap_h = shown.get("cap_h") or 0
+            failures.append(check("D7 img 橫向撐滿 <a>、高度 = <a> 高 − 文字高（±1px）且 > 100px",
+                                  bool(ir) and bool(ar)
+                                  and abs(ir["w"] - ar["w"]) <= 1
+                                  and abs(ir["h"] - (ar["h"] - cap_h)) <= 1
+                                  and ir["h"] > 100,
+                                  f"img {ir} / a {ar} / 文字高 {cap_h}"))
             failures.append(check("D8 無水平溢出",
                                   (m.get("doc_scroll_w") or 0) <= (m.get("inner_w") or 0) + 1,
                                   f"scrollW {m.get('doc_scroll_w')} vs innerW {m.get('inner_w')}"))
+            failures.append(check("D9 顯示格文字：name == img alt、highlight 非空且為品牌金",
+                                  shown.get("cap_found") is True
+                                  and bool((shown.get("cap_name") or "").strip())
+                                  and shown.get("cap_name") == shown.get("alt")
+                                  and bool((shown.get("cap_hl") or "").strip())
+                                  and shown.get("hl_color") == "rgb(196, 155, 99)",
+                                  (shown.get("cap_name"), shown.get("cap_hl"),
+                                   shown.get("hl_color"))))
+            failures.append(check("D10 文字在照片下方（照片底 <= 文字頂 + 1px）",
+                                  shown.get("img_is_above_cap") is True,
+                                  (ir, shown.get("cap_rect"))))
+            failures.append(check("D11 輪播 7 格皆帶文字區（每格切到時都有名稱/highlight）",
+                                  len(rows) == 7
+                                  and all(r.get("cap_found") is True
+                                          and (r.get("cap_name") or "").strip()
+                                          and (r.get("cap_hl") or "").strip() for r in rows),
+                                  [r.get("cap_found") for r in rows]))
             await shot_viewport(name)
 
             # E 輪播前進（點 wrap → 前進一格）
