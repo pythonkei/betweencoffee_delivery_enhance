@@ -31,7 +31,16 @@
       interval: 5000,
       speed: 1200,
       rewindSpeed: 2400,
-      start: 3,
+      // 2026-10-13（使用者指示：載入時就要看得到環形字）：環形字只有 DOM 第 2 張
+      // （BUTTER KING，aria-label「2 of 7」，path #bc-gunte-06-path）顯示 —— 其餘 6 張是
+      // <text class="bc-ring-hide">，由 bc-gunte-hero.css 的 display:none 隱藏；而
+      // .hero_slide_item_ttl 又只在 .state-active（＝置中那張）時 opacity 1 → start 必須指到
+      // 第 2 張，載入當下才會出現環形字。
+      // ⚠ Splide 的 start 是 **0-based 索引**（不是「第幾張」）：實測 start: 2 置中的是
+      //   aria-label「3 of 7」＝ 第 3 張「果香浅煎」（環形字被隱藏）；原 start: 3 → 第 4 張。
+      //   因此第 2 張（aria-label「2 of 7」）＝ start: 1；start: 0 才是第 1 張 BLACK BLEND
+      //   （環形字同樣被隱藏 → 那三個值的載入畫面都不會有環形字）。
+      start: 1,
       easing: 'ease'
     });
 

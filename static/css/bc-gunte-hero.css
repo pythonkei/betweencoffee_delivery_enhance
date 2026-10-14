@@ -318,13 +318,36 @@
   opacity: 1;
 }
 
+/* 2026-10-13（使用者指示：「尺寸改動」）：環形字字級改為與 cap／en 同一套 --bc-item-k 基準
+   （＝設計值 24px 在「432px 參考圖寬」下渲染成 24px；cap＝14、en＝12 同基準）。
+   [為什麼不是 font-size: calc(var(--bc-item-k) * 24)] 環形字在 <svg viewBox="0 0 540 540"> 內，
+   而整個 SVG 已隨 --bc-item-w 縮放（width:var(--bc-item-w)）→ 實際渲染字級 ＝ viewBox 單位 ×
+   框寬/540，本身已經等比。若再乘一次 k 會與 SVG 自身的縮放「重複相乘」（渲染值變 24k²）：
+   桌機／平板 k≈1 看似沒差，但短視窗桌機（scale 0.55 → k 0.6875）會縮到 9.1px、
+   手機（k 0.59）縮到 7.0px（比同層的 cap 10px 還小）→ 這才是尺寸跑掉的寫法。
+   [正確換算] 把「432 基準的 24px」換算成 viewBox 單位：24 × 540/432 ＝ 30 viewBox 單位
+   → 渲染 30 × 框寬/540 ＝ 24 × 框寬/432（＝24k）。
+   實測（改動前 → 後）：桌機 19.2 → 24px、平板 19.3 → 24.3px、手機（框 266px）11.8 → 14.8px
+   —— 全斷點一致 ×1.25，且與 cap／en 的 --bc-item-k 基準相同。 */
 .bc-gunte-hero .hero_slide_item_ttl text {
   font-weight: 900;
-  font-size: 24px;
+  font-size: calc(24px * 540 / 432);
   paint-order: stroke;
-  stroke-width: 1.5;
+  /* 描邊同為 viewBox 單位 → 跟著字級一起 ×1.25（1.5 → 1.875），外框與字的比例不變 */
+  stroke-width: calc(1.5 * 540 / 432);
   stroke: var(--color-black);
   fill: var(--color-primary);
+}
+
+/* 2026-10-13（使用者指示）：環形字（曲線標題）只有第 2 張 slide（BUTTER KING，path
+   #bc-gunte-06-path）要顯示，其餘 6 張的文案節點改為 <text class="bc-ring-hide"> 並在此隱藏。
+   [為什麼改 markup] 使用者原先把開啟標籤手寫成 <hidden text>（意思＝「這個 text 要隱藏」），
+   但那不是合法元素，而且以 </text> 收尾（開／閉不成對）→ 改為合法 <text> ＋ 修飾 class，
+   由 CSS 負責隱藏（文案保留在 markup 內備查；只隱藏 <text>，同一個 SVG 的 <path> 不動）。
+   [作用範圍] 只命中 .bc-gunte-hero 內這 6 個節點（其餘頁面無此 class）；不影響 slide 圖片、
+   直排 cap／en 標籤與手套圓。 */
+.bc-gunte-hero .hero_slide_item_ttl text.bc-ring-hide {
+  display: none;
 }
 
 /* ---- 手套圓 ---- */
@@ -572,7 +595,9 @@
   }
 
   .bc-gunte-hero .hero_slide_item_ttl text {
-    stroke-width: 2;
+    /* 2026-10-13：字級已改由 viewBox 單位表達（calc(24px*540/432)＝30）→ 手機手調描邊 2
+       同步 ×1.25（2 → 2.5），維持與字級相同的外框比例。 */
+    stroke-width: calc(2 * 540 / 432);
   }
 
   .bc-gunte-hero .hero_hand_list {

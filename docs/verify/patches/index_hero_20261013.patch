@@ -1,0 +1,979 @@
+diff --git a/docs/verify/CDP_SETUP.md b/docs/verify/CDP_SETUP.md
+index f62c2a31..ff97636a 100644
+--- a/docs/verify/CDP_SETUP.md
++++ b/docs/verify/CDP_SETUP.md
+@@ -4,14 +4,26 @@
+ > （`fetch /json/new?about:blank` 開分頁 → WebSocket `Input.dispatchMouseEvent` /
+ > `Emulation.setDeviceMetricsOverride` / `Runtime.evaluate`）。**跑腳本前必須先有這個瀏覽器**。
+ >
+-> **最後更新**：2026-10-09（首頁 BC 動態模組 `#bc-bg-footer` 自頁尾移到最上方當第一個 hero、
+-> GUNTE hero 下移 → `cdp_verify_footer_scroller.py` 追加 J11–J15：第一 section ＝ `.hero.bc-bg-hero`、
+-> 載入即在首屏（`rect.top` 0）、`computed margin-top` 0px、DOM 順序在 `.bc-gunte-hero` 之前、
+-> 且全頁已無 `footer` 元素；同日稍後追加 J16–J19：置頂 hero 去掉頁尾感（`index.html` extra_css 覆寫
++> **最後更新**：2026-10-13（首頁順序再反轉 —— GUNTE hero 回到「第一眼看到的第一屏」、BC 動態 hero
++> `#bc-bg-footer` 下移到它之後；`index.html` 的 `.bc-reviews-section` 加 `hidden` →
++> `cdp_verify_footer_scroller.py` 的 J11–J14 改寫：第一個「可見」section ＝ `.hero.bc-gunte-hero`、
++> DOM 第一個 section ＝ `.bc-reviews-section`（`display:none`）、`.bc-gunte-hero` 在文件順序上在
++> `.bc-bg-hero` 之前、載入時 GUNTE hero `rect.top` 0（`scrollY` 0、無 100px 空隙）且 `#bc-bg-footer`
++> 接在其後（不重疊）、兩塊 hero `computed margin-top` 皆 0px；同日另追加 K1–K4：GUNTE hero 環形字
++> markup 修正（非法的 `<hidden text>…</text>` → `<text class="bc-ring-hide">`，只有 BUTTER KING 顯示，
++> 由 `bc-gunte-hero.css` 的 `display:none` 隱藏）；同日稍後追加 K5–K7：環形字尺寸改由 viewBox 單位表達
++> （`font-size: 24px → calc(24px * 540 / 432)`＝30、`stroke-width: 1.5 → calc(1.5 * 540 / 432)`＝1.875、
++> 手機 2 → 2.5）＋ Splide **`start: 3 → 1`**（⚠ Splide 的 `start` 是 0-based 索引：實測 `start: 2`
++> 置中的是 `aria-label="3 of 7"`＝第 3 張「果香浅煎」、環形字仍被 `.bc-ring-hide` 隱藏 →
++> `start: 1` 才是 DOM 第 2 張 BUTTER KING）＝載入當下就看得見環形字；
++> 該檔項目數 **120 → 124 → 127**（PASS 127 / FAIL 0）。
++> 前次（2026-10-09）：BC 動態模組置頂當第一個 hero（J11–J15：第一 section ＝ `.hero.bc-bg-hero`、
++> 載入即在首屏、`margin-top` 0px、DOM 順序在 `.bc-gunte-hero` 之前、全頁已無 `footer` 元素）；
++> 同日稍後追加 J16–J19：置頂 hero 去掉頁尾感（`index.html` extra_css 覆寫
+ > `.grid.is-footer{border-top:0 none}` ＋ `#bc-bg-footer`/`.footer{background:transparent}`）——
+ > J16 分隔線已移除且 `padding-top` 未動、J17 黑底已透明（由頁面底色 `bg_4.jpg` 穿透）、
+ > J18 覆寫錨點＝`SECTION.hero.bc-bg-hero` 只命中首頁、J19 `goto /about/` 反向守門（真頁尾仍保有
+-> `1px solid` 分隔線 ＋ `#0e0e0e` 黑底）；該檔項目數 **111 → 116 → 120**。
++> `1px solid` 分隔線 ＋ `#0e0e0e` 黑底）；項目數 111 → 116 → 120。
+ > 另新增 `cdp_shot_index_hero_viewport.py`＝新 hero 的 3 斷點視窗截圖（含捲到 GUNTE hero 的第二張））
+ >
+ > 沿革：2026-10-06 配合圖片斷言復原（行動／平板恢復顯示圖片）時確認，347 → 355。
+@@ -20,6 +32,12 @@
+ >       `.bc-fujiya-photo` 之後、後接既有 `.ftco-section-blank`；腳本項目數 355 → 367。
+ >       2026-10-09 `cdp_verify_footer_scroller.py` 的跨頁基準自首頁 `/`（已改用 `#bc-bg-footer`）
+ >       改指向 `/coffee_menu/`（唯一仍渲染靜態 `.ftco-footer` 的頁面），並新增 J 系列驗首頁保真。
++>       2026-10-13 首頁順序反轉（GUNTE hero 回第一屏、BC 動態 hero 下移）→ 該檔 J11–J14 改寫、
++>       新增 K1–K4（GUNTE 環形字 markup 修正），項目數 120 → 124。
++>       2026-10-13 稍後追加 K5–K7（環形字尺寸 ×1.25：改以 viewBox 單位 `calc(24px*540/432)`＝30、
++>       描邊同步 1.875；Splide `start 3 → 1` 讓載入當下置中的是 BUTTER KING；K7 量測分三段 ——
++>       逼 frame 前先記下載入時那張、用 `Page.captureScreenshot` 逼 frame 讓 CSS transition 前進、
++>       收尾補 `Page.close`），項目數 124 → 127。
+ 
+ ## ⚠️ 本機踩雷：不要用 snap 版 chromium
+ 
+@@ -75,10 +93,22 @@ curl -s --max-time 5 http://127.0.0.1:9222/json/version
+ ```bash
+ python3 docs/verify/cdp_verify_top_art.py          # 關於頁 /about/ 的 .top_art 模組（367 項）
+ python3 docs/verify/cdp_verify_floating_cart.py    # 浮動購物車（5 斷點 × 4 頁，25 項）
+-python3 docs/verify/cdp_verify_footer_scroller.py  # 首頁 BC 動態 hero ＋ /coffee_menu/ 頁尾跑馬燈（3 斷點，120 項）
+-python3 docs/verify/cdp_shot_index_hero_viewport.py # 首頁新 hero 外觀截圖（3 斷點 × 2 張；只截圖＋印幾何，無斷言）
++python3 docs/verify/cdp_verify_footer_scroller.py  # 首頁 hero 順序（GUNTE 第一屏）＋ 環形字尺寸／載入可見性（K1–K7）＋ /coffee_menu/ 頁尾跑馬燈（3 斷點，127 項）
++python3 docs/verify/cdp_shot_index_hero_viewport.py # 首頁新 hero 外觀截圖（3 斷點 × 2 張；只截圖＋印幾何：ttlFont/ttlStroke、loadIndex/loadAriaLabel/loadRevealed、activeSlideIndex，無斷言）
+ ```
+ 
++- ⚠️ **CSS transition 在本機 CDP「不會自己前進」→ 量「淡入後」的值必須逼 frame**：headful
++  （`DISPLAY=:0`）實測 `el.getAnimations()` 的 CSSTransition 會停在 `playState='running'` 但
++  `startTime=null`／`currentTime=0` 的 pending 狀態 → computed opacity 一直是過渡起點，等 15 秒也不動。
++  解法＝用 `Page.captureScreenshot`（`{"format":"jpeg","quality":10}`、結果丟棄）逼出 frame，
++  transition 才會前進（實測 0 → 0.30 → 1）：`cdp_verify_footer_scroller.py` 的 K7 與
++  `cdp_shot_index_hero_viewport.py` 都這樣做。
++  ⚠ 逼 frame 同時會讓 `setInterval`／Splide autoplay 真的走動 → 「載入時」的狀態必須在逼 frame
++  **之前**先記下（本輪做法：`window.__bcHeroLoadIndex`，斷言讀 `*_at_load` 欄位）。
++- ⚠️ **`Page.captureScreenshot` 可能卡死整支腳本**（等不到 frame，無回應）→ 一定要用
++  `asyncio.wait_for` 包逾時（本輪 3 秒）；且每個 `cdp_*.py` 跑完要 `Page.close` 自己開的分頁 ——
++  否則每跑一次留一個分頁，殘留多個背景分頁時 compositor 不再為本分頁產 frame（實測殘留 5 個時踩到）。
++
+ - 腳本會自己 `PUT /json/new?about:blank` 開一個分頁、跑完 `Page.close`；**不會**動到 9222 那個
+   `about:blank` 常駐分頁。
+ - 需要 DJANGO 站台同時在跑（本機 `python3 manage.py runserver 8081`）。
+diff --git a/docs/verify/cdp_shot_index_hero_viewport.py b/docs/verify/cdp_shot_index_hero_viewport.py
+index 73458708..b06219b6 100644
+--- a/docs/verify/cdp_shot_index_hero_viewport.py
++++ b/docs/verify/cdp_shot_index_hero_viewport.py
+@@ -1,12 +1,28 @@
+ #!/usr/bin/env python3
+-"""以「viewport-only」截圖驗首頁最上方 BC 動態 hero（#bc-bg-footer）與其下方的 GUNTE hero。
+-
+-2026-10-09：首頁把 BC 動態模組（Hug in a Cup 時鐘，原為頁尾）移到最上方當第一個 hero，
+-GUNTE hero 移到它下方。本腳本產出 3 斷點 × 2 張視窗截圖作視覺證據，並印出幾何資訊
+-（首 section 類別、margin-top、footer 元素數、兩個 hero 的 rect）。
++"""以「viewport-only」截圖驗首頁最上方 GUNTE hero（.bc-gunte-hero）與其下方的 BC 動態 hero
++（.bc-bg-hero，內含 #bc-bg-footer）。本腳本產出 3 斷點 × 2 張視窗截圖作視覺證據，並印出幾何資訊
++（首 section 類別、第一個可見 section、margin-top、footer 元素數、兩個 hero 的 rect）。
+ （captureBeyondViewport 對 GSAP 釘住／reveal 區段會渲染成空白，故一律用視窗截圖。）
+ 用法：站台須在 http://127.0.0.1:8081 跑、CDP 瀏覽器須在 9222（見 CDP_SETUP.md）。
+-"""
++
++2026-10-13（使用者指示）：首頁順序反轉 —— GUNTE hero 回到第一屏、BC 動態模組下移到它之後
++（`.bc-reviews-section` 另加 hidden）。故第二張截圖由「捲到 GUNTE hero」改為「捲到 BC hero」
++（證明 GUNTE hero 在它上方）；`gunteBeforeBg` 這個（舊順序的）旗標改名為語意正確的
++`bgAfterGunte`，並追加 `firstVisibleSec`（DOM 第一個 section 已是 hidden 的 reviews 段，
++「第一眼看到的第一屏」需以可見性判定）。
++
++2026-10-13 稍後（使用者指示「尺寸改動」＋「載入時就要看得到環形字」）：追加跨斷點證據 ——
++`ttlFont`／`ttlStroke`（環形字 computed font-size ＝ 30px、stroke-width ＝ 1.875px，均為 viewBox 單位；
++stroke-width 因 Chromium 對 SVG 幾何屬性保留 calc() 字面，另同時輸出原始 `ttlStrokeRaw`）、
++`ttlBoxW`／`ttlRenderedFont`（環形字 SVG 框寬與「字級 × 框寬/540」的實際渲染字級）、
++`loadButterKing`／`loadIndex`／`loadAriaLabel`／`loadRevealed`
++（載入時置中的是 DOM 第 2 張 BUTTER KING、aria-label「2 of 7」且逼 frame 後其環形字確實到過
++opacity 1 → Splide start 3 → 1；start 為 0-based，實測 start 2 置中的是「3 of 7」＝第 3 張）＋
++`activeSlideIndex`／`activeAriaLabel`／`activeButterKing`／`activeTtlOpacity`／`loadTtlOpacity`
++（讀值當下那張，僅診斷 —— autoplay 換張後載入時那張的 opacity 會退回 0）。
++⚠ 「載入時那張」必須在逼 frame 前先記下（autoplay interval 5000ms 之後會換張）；讀值前再以
++`Page.captureScreenshot` 逼出 frame —— 本機 CDP 的 compositor 不一定產 frame，CSS transition 會停在
++pending，computed opacity 會一直是過渡起點的 0。"""
+ import asyncio, base64, json, urllib.request
+ import websockets
+ 
+@@ -21,13 +37,67 @@ INFO_JS = (
+     "var g=document.querySelector('.bc-gunte-hero');"
+     "var r=function(e){if(!e)return null;var b=e.getBoundingClientRect();"
+     "return {top:Math.round(b.top),h:Math.round(b.height)};};"
++    "var vis=null;"
++    "for(var i=0;i<secs.length;i++){var cs=getComputedStyle(secs[i]);"
++    "if(cs.display!=='none'&&cs.visibility!=='hidden'){vis=secs[i];break;}}"
++    # 2026-10-13 稍後（使用者指示「尺寸改動」＋「載入時就要看得到環形字」）：
++    # 追加環形字尺寸（K5/K6）與載入時置中那張（K7）的跨斷點證據。
++    "var ts=document.querySelector('.bc-gunte-hero .hero_slide_item_ttl');"
++    "var tcs=(ts&&ts.querySelector('text'))?getComputedStyle(ts.querySelector('text')):null;"
++    "var bw=ts?Math.round(ts.getBoundingClientRect().width*100)/100:null;"
++    "var active=document.querySelector('.bc-gunte-hero .splide__slide.state-active');"
++    "var at=active?active.querySelector('.hero_slide_item_ttl'):null;"
++    "var sli=document.querySelectorAll('.bc-gunte-hero .splide__slide');"
++    "var actIdx=-1;for(var k=0;k<sli.length;k++){"
++    "if(sli[k].classList.contains('state-active')){actIdx=k;break;}}"
++    "var loadIdx=(typeof window.__bcHeroLoadIndex==='number')?window.__bcHeroLoadIndex:-1;"
++    "var loadSlide=loadIdx>=0?sli[loadIdx]:null;"
++    "var loadTtl=loadSlide?loadSlide.querySelector('.hero_slide_item_ttl'):null;"
+     "return {y:Math.round(window.scrollY),sh:document.body.scrollHeight,"
+-    "firstSec:secs.length?secs[0].className.trim():null,secCount:secs.length,"
++    "firstSec:secs.length?secs[0].className.trim():null,"
++    "firstVisibleSec:vis?vis.className.trim():null,"
++    "secCount:secs.length,"
+     "heroMT:hero?getComputedStyle(hero).marginTop:null,"
++    "gunteMT:g?getComputedStyle(g).marginTop:null,"
+     "footerCount:document.querySelectorAll('footer').length,"
+     "bgIdCount:document.querySelectorAll('#bc-bg-footer').length,"
+-    "bg:r(bg),gunte:r(g),gunteBeforeBg:!!(g&&bg)&&"
+-    "(g.compareDocumentPosition(bg)&Node.DOCUMENT_POSITION_PRECEDING)>0};})()"
++    "bg:r(bg),gunte:r(g),"
++    "bgAfterGunte:!!(g&&bg)&&"
++    "(g.compareDocumentPosition(bg)&Node.DOCUMENT_POSITION_FOLLOWING)>0,"
++    "ttlFont:tcs?tcs.fontSize:null,"
++    # Chromium 對 SVG 幾何屬性的 computed style 會保留 calc() 字面（stroke-width → "calc(1.875px)"）
++    # → 剝除外層 calc() 後才是可比對的 1.875px（font-size 不受影響，本來就會解析成單一值）。
++    "ttlStroke:(tcs?String(tcs.strokeWidth).replace(/^calc\\((.*)\\)$/,'$1'):null),"
++    "ttlStrokeRaw:tcs?tcs.strokeWidth:null,"
++    "ttlBoxW:bw,ttlRenderedFont:(tcs&&bw)?"
++    "Math.round(parseFloat(tcs.fontSize)*bw/540*100)/100:null,"
++    "activeButterKing:!!active&&active.textContent.indexOf('BUTTER KING')!==-1,"
++    "slideCount:sli.length,activeSlideIndex:actIdx,"
++    "activeAriaLabel:active?active.getAttribute('aria-label'):null,"
++    "activeTtlOpacity:at?getComputedStyle(at).opacity:null,"
++    # 2026-10-13 稍後：載入時置中的那張由 LOAD_JS 記到 window.__bcHeroLoadIndex（逼 frame 前記錄，
++    # 所以不受 autoplay 之後換張影響）→ 這裡讀回作為「載入即見環形字」的證據。
++    "loadIndex:(typeof window.__bcHeroLoadIndex==='number')?window.__bcHeroLoadIndex:null,"
++    "loadAriaLabel:loadSlide?loadSlide.getAttribute('aria-label'):null,"
++    "loadButterKing:loadSlide?loadSlide.textContent.indexOf('BUTTER KING')!==-1:null,"
++    # loadRevealed＝逼 frame 後「載入時那張」的環形字確實到過 opacity 1（由等待迴圈記錄）。
++    # loadTtlOpacity＝讀值當下的值 —— autoplay 換張後那張會退回 0，故僅供診斷。
++    "loadRevealed:(window.__bcHeroLoadRevealed===true),"
++    "loadTtlOpacity:loadTtl?getComputedStyle(loadTtl).opacity:null};})()"
++)
++
++# 2026-10-13 稍後：在「.state-active 一出現、尚未逼 frame」時記錄載入時置中的那一張
++# （逼 frame 之後 autoplay 會繼續走動，讀值當下的 state-active 可能已經不是載入時那張）。
++LOAD_JS = (
++    "(function(){"
++    "var sli=document.querySelectorAll('.bc-gunte-hero .splide__slide');"
++    "var idx=-1;for(var i=0;i<sli.length;i++){"
++    "if(sli[i].classList.contains('state-active')){idx=i;break;}}"
++    "if(idx>=0)window.__bcHeroLoadIndex=idx;"
++    "var s=idx>=0?sli[idx]:null;var t=s?s.querySelector('.hero_slide_item_ttl'):null;"
++    "return {index:idx>=0?idx:null,ariaLabel:s?s.getAttribute('aria-label'):null,"
++    "butterKing:s?s.textContent.indexOf('BUTTER KING')!==-1:null,"
++    "ttlOpacity:t?getComputedStyle(t).opacity:null};})()"
+ )
+ 
+ 
+@@ -63,7 +133,41 @@ async def main():
+             await send(msg("Emulation.setDeviceMetricsOverride",
+                            {"width": w, "height": h, "deviceScaleFactor": 1, "mobile": mobile}))
+             await send(msg("Page.navigate", {"url": BASE + "/"}))
+-            await asyncio.sleep(5)  # 等 GSAP reveal / 時鐘 / hero 輪播初始化
++            # 2026-10-13 稍後：**不用固定 sleep**（原本 sleep 5s）—— 暖機狀態下（compositor 正在
++            # 產 frame）Splide autoplay（interval 5000ms）會先換張，之後才記錄就會記到第 2 張之後
++            # （實測 tablet／mobile 曾記成 index 4）。改為 navigate 後立刻以 0.1s 間隔輪詢
++            # .state-active，一出現就記下「載入時置中的那張」（存 window.__bcHeroLoadIndex）。
++            load = {}
++            for _ in range(150):
++                load = await evaljs(LOAD_JS) or {}
++                if load.get("index") is not None:
++                    break
++                await asyncio.sleep(0.1)
++            print(f"   [{name}] 載入時置中: {load}")
++            if load and load.get("index") is not None:
++                # 逼 frame 直到「載入時記錄的那張」環形字 reveal 完成（opacity 1）、且整個
++                # `.hero_slide`（1.5s delay + 0.5s）也已淡入 → 截圖才是有內容的畫面；
++                # 一達到就把「環形字確實可見」記到 window.__bcHeroLoadRevealed
++                # （讀值當下 autoplay 可能已換張、那張 opacity 會退回 0 → 不能只看 loadTtlOpacity）。
++                ready = ("(function(){var s=document.querySelectorAll("
++                         "'.bc-gunte-hero .splide__slide')[%d];if(!s)return null;"
++                         "var t=s.querySelector('.hero_slide_item_ttl');"
++                         "var o=t?getComputedStyle(t).opacity:null;"
++                         "if(o==='1')window.__bcHeroLoadRevealed=true;"
++                         "var sl=document.querySelector('.bc-gunte-hero .hero_slide');"
++                         "var so=sl?getComputedStyle(sl).opacity:null;"
++                         "return o==='1'&&so==='1';})()" % load["index"])
++                for _ in range(40):
++                    if (await evaljs(ready)) is True:
++                        break
++                    # 同 verify 腳本：captureScreenshot 可能等不到 frame 而卡死 → 包 3 秒逾時。
++                    try:
++                        await asyncio.wait_for(
++                            send(msg("Page.captureScreenshot",
++                                     {"format": "jpeg", "quality": 10})), timeout=3)
++                    except asyncio.TimeoutError:
++                        print(f"   [{name}] captureScreenshot 逾時（3s）→ 續試")
++                    await asyncio.sleep(0.25)
+             info = await evaljs(INFO_JS)
+             print(f"[{name} {w}x{h}] {info}")
+             res = await send(msg("Page.captureScreenshot", {"format": "png"}))
+@@ -71,16 +175,16 @@ async def main():
+                 f.write(base64.b64decode(res["data"]))
+             print(f"   shot -> _verify_index_hero_top_{name}.png")
+ 
+-            # 捲到 GUNTE hero 頂端，證明它緊接在 BC hero 下方
+-            await evaljs("(function(){var g=document.querySelector('.bc-gunte-hero');"
+-                         "if(g)window.scrollTo(0, Math.round(window.scrollY +"
+-                         " g.getBoundingClientRect().top));})()")
++            # 捲到 BC 動態 hero 頂端，證明 GUNTE hero（第一屏）在它上方、兩者不重疊
++            await evaljs("(function(){var b=document.querySelector('.bc-bg-hero');"
++                         "if(b)window.scrollTo(0, Math.round(window.scrollY +"
++                         " b.getBoundingClientRect().top));})()")
+             await asyncio.sleep(2)
+-            print(f"   gunte scroll -> {await evaljs(INFO_JS)}")
++            print(f"   bg scroll -> {await evaljs(INFO_JS)}")
+             res = await send(msg("Page.captureScreenshot", {"format": "png"}))
+-            with open(f"{ROOT}/_verify_index_hero_gunte_{name}.png", "wb") as f:
++            with open(f"{ROOT}/_verify_index_hero_bg_{name}.png", "wb") as f:
+                 f.write(base64.b64decode(res["data"]))
+-            print(f"   shot -> _verify_index_hero_gunte_{name}.png")
++            print(f"   shot -> _verify_index_hero_bg_{name}.png")
+         await send(msg("Page.close"))
+ 
+ asyncio.run(main())
+diff --git a/docs/verify/cdp_verify_footer_scroller.py b/docs/verify/cdp_verify_footer_scroller.py
+index 33c25187..3f862f1a 100644
+--- a/docs/verify/cdp_verify_footer_scroller.py
++++ b/docs/verify/cdp_verify_footer_scroller.py
+@@ -37,14 +37,55 @@
+   J. 首頁 / 的 #bc-bg-footer 跑馬燈保真（2026-10-09 新增，配合首頁頁尾置換）：與 H 的 base.html 基準
+      在同一 viewport 逐項一致（data-animated / 4 子節點 / padding-block / li 尺寸字級 / overflow /
+      animation），且 / 已無 .ftco-footer（置換未留殘骸）。
+-  J11–J15（2026-10-09 同日稍後新增）：模組由頁尾移到首頁「最上方」當第一個 hero ——
+-     J11 .bc-page-content 的第一個 section 是 .hero.bc-bg-hero（:first-of-type 命中）；
+-     J12 該 hero（內含 #bc-bg-footer）在文件順序上位於 .bc-gunte-hero 之前；
+-     J13 載入時（未捲動）#bc-bg-footer 已在首屏視口內（rect.top < innerHeight / 2）；
+-     J14 .bc-bg-hero 的 computed margin-top = 0px（蓋掉 bc-components.css 首 section 的 100px）；
++  J11–J15（2026-10-09 新增；2026-10-13 隨首頁順序反轉改寫）：首頁 hero 的順序與位置 ——
++     2026-10-13（使用者指示）：GUNTE hero 回到「第一眼看到的第一屏」，BC 動態模組下移到它之後。
++     本檔 DOM 順序：① <section hidden class="bc-reviews-section">（10-13 加 hidden）
++     ② <section class="hero bc-gunte-hero"> ③ <section class="ftco-section-blank-small">
++     ④ <section class="hero bc-bg-hero">（內含 #bc-bg-footer，＝ 10-09 的置頂模組）。
++     J11 第一個「可見」section（以 computed display／visibility 判定）＝ .bc-gunte-hero，
++         且 DOM 第一個 section 是 .bc-reviews-section 且 display:none；
++     J12 .bc-gunte-hero 在文件順序上位於 .bc-bg-hero（內含 #bc-bg-footer）之前；
++     J13 載入時（未捲動）GUNTE hero 由視口頂端開始（scrollY 0 且 0 <= rect.top <= 8
++         → 與 navbar 之間沒有 100px 空隙），且 #bc-bg-footer 已不在首屏
++         （rect.top >= innerHeight）＝舊順序無殘留；
++     J14 .bc-gunte-hero 與 .bc-bg-hero 的 computed margin-top 皆 0px
++         （GUNTE 由 bc-gunte-hero.css 的 class 規則壓為 0、不依賴 first-of-type 序位；
++          BC hero 已非 first-of-type → bc-components.css:4438 的 100px 不再命中）；
+      J15 / 已無 footer 元素（querySelectorAll('footer').length == 0）——置頂模組最外層改用 div
+          （partials/bc_hero.html），bc-yama-header.js 的 document.querySelector('footer')
+-         因此為 null、footer 交會邏輯 no-op（否則一載入就把 tax-nav／header-bot 藏起來）。
++          因此為 null、footer 交會邏輯 no-op（否則一載入就把 tax-nav／header-bot 藏起來）。
++  K1–K4（2026-10-13 新增）：GUNTE hero 的環形字（曲線標題）markup 修正 —— 使用者原先把 6 張
++     不顯示的環形字開啟標籤手寫成不存在的 <hidden>（而且以 </text> 收尾，開／閉不成對）
++     → 改為合法 <text class="bc-ring-hide">，由 bc-gunte-hero.css 的 display:none 隱藏
++     （只有第 2 張 BUTTER KING 顯示）。
++     K1 全頁已無 <hidden> 元素（getElementsByTagName('hidden') == 0）；
++     K2 7 張 slide 的 .hero_slide_item_ttl SVG 各自 1 個 <text>（開／閉成對 ＝ 7）；
++     K3 6 個 text.bc-ring-hide 的 computed display ＝ none；
++     K4 只有 1 個環形字可見，且其文案含 "BUTTER KING"。
++  K5–K7（2026-10-13 稍後，使用者指示「尺寸改動」＋「載入時就要看得到環形字」）：
++     K5 環形字 computed font-size ＝ 30px（＝ calc(24px * 540/432)：把「432 參考圖寬下的 24px」
++        換算成 SVG viewBox 單位 → 與 cap 14／en 12 同一套 --bc-item-k 基準）且 stroke-width
++        ＝ 1.875px（＝ calc(1.5 * 540/432)，與字級同步 ×1.25）。
++        ⚠ Chromium 對 SVG 幾何屬性（stroke-width）的 computed style 會保留 calc() 字面
++        （回傳 "calc(1.875px)"；font-size 則解析成單一值）→ 斷言比對剝除外層 calc() 的值，
++        原始字串另存 ttl_stroke_width_raw 一起印出。
++        ⚠ 不可寫成 calc(var(--bc-item-k) * 24)：SVG 本身已隨 --bc-item-w 縮放 → 會與自身縮放
++        重複相乘（渲染值變 24k²，短視窗桌機縮到 9.1px、手機 7.0px，比同層 cap 10px 還小）。
++     K6 環形字 SVG 框寬 ＝ 投影片圖片寬（＝ --bc-item-w；本腳本量測的 1280×800 屬短視窗層
++        → --bc-gunte-scale 0.55 → 297px）→ 渲染字級 ＝ 30 × 框寬/540 ＝ 24 × 框寬/432
++        ＝ 16.5px（改動前 13.2px，×1.25；高 >900px 的滿版桌機框寬 432 則為 19.2 → 24px）；
++     K7 載入時（未捲動）置中的 slide 是 BUTTER KING（DOM 第 2 張：aria-label「2 of 7」、
++        索引 1），且該張環形字 reveal 後 computed opacity ＝ 1、display ≠ none。
++        ⚠ Splide 的 start 是 **0-based 索引**（不是「第幾張」）：實測 start: 2 置中的是
++        aria-label「3 of 7」＝第 3 張「果香浅煎」（環形字被隱藏）、原 start: 3 是第 4 張、
++        start: 0 是第 1 張 BLACK BLEND（同樣被隱藏）→ 正解為 start: 1。
++        ⚠ 量測分兩段（皆為實測踩到假 FAIL 後才加）：① 先在「.state-active 一出現、尚未逼 frame」
++        時用 HERO_LOAD_JS 記下載入時置中的那張（index 存到 window.__bcHeroLoadIndex，斷言讀
++        *_at_load 欄位）—— 這階段不逼 frame，否則 autoplay（interval 5000ms）會先換張；
++        ② 再用 Page.captureScreenshot 逼 frame 讓 CSS transition 前進（本機 CDP 的 compositor
++        不一定產 frame → transition 停在 pending：playState=running、startTime=null、
++        currentTime=0，computed opacity 一直停在過渡起點 0，等 15 秒也不動；逼 frame 後
++        實測 0 → 0.30 → 1，約 1 秒），等「記錄的那張」opacity 為 1 才讀值。
+   J16–J19（2026-10-09，配合「置頂 hero 去掉頁尾感」）：index.html extra_css 新增
+      `.bc-bg-hero #bc-bg-footer{background:transparent}` / `.bc-bg-hero #bc-bg-footer .footer{同上}` /
+      `.bc-bg-hero #bc-bg-footer .grid.is-footer{border-top:0 none}`（只覆寫首頁、不動
+@@ -239,39 +280,132 @@ MEASURE_JS = r"""
+ })()
+ """
+ 
+-# 首頁 hero 位置／標籤（2026-10-09：BC 動態模組由頁尾移到最上方當第一個 hero）
++# 首頁 hero 順序／位置（2026-10-09 建立；2026-10-13 順序反轉後改寫）
++# 2026-10-13（使用者指示）：GUNTE hero 回到第一屏、BC 動態 hero（#bc-bg-footer）下移到它之後；
++# 同日另修 GUNTE hero 的環形字 markup（原本不合法 <hidden text> → <text class="bc-ring-hide">）。
+ INDEX_HERO_JS = r"""
+ (function(){
+   var out = {};
+   var pc = document.querySelector('.bc-page-content');
+-  var first = pc ? pc.querySelector(':scope > section:first-of-type') : null;
+-  var anySec = pc ? pc.querySelector(':scope > section') : null;
+-  out.hero_found = !!(first && first.classList.contains('bc-bg-hero')
+-                      && first.classList.contains('hero'));
+-  out.first_section_classes = first ? first.className : null;
+-  out.is_first_of_type = !!(first && anySec && first === anySec);
++  var secs = pc ? Array.prototype.slice.call(pc.querySelectorAll(':scope > section')) : [];
++  function isVisible(el){
++    var cs = getComputedStyle(el);
++    return cs.display !== 'none' && cs.visibility !== 'hidden';
++  }
++  var vis = secs.filter(isVisible);
++  out.section_count = secs.length;
++  out.section_classes = secs.map(function(s){ return s.className || s.tagName.toLowerCase(); });
++  out.first_visible_classes = vis.length ? vis[0].className : null;
++  out.first_visible_is_gunte = !!(vis.length && vis[0].classList.contains('bc-gunte-hero'));
++  out.first_dom_classes = secs.length
++      ? (secs[0].className || secs[0].tagName.toLowerCase()) : null;
++  out.first_dom_display = secs.length ? getComputedStyle(secs[0]).display : null;
+ 
+-  var root = document.getElementById('bc-bg-footer');
+   var gunte = document.querySelector('.bc-gunte-hero');
++  var wrap = document.querySelector('.bc-bg-hero');
++  var root = document.getElementById('bc-bg-footer');
+   out.gunte_found = !!gunte;
+-  out.hero_has_root = !!(root && first && first.contains(root));
+-  if (root && gunte) {
+-    // root 在 gunte 之前 → gunte.compareDocumentPosition(root) 會帶 PRECEDING
+-    out.hero_before_gunte =
+-      (gunte.compareDocumentPosition(root) & Node.DOCUMENT_POSITION_PRECEDING) !== 0;
++  out.bg_hero_found = !!wrap;
++  out.hero_has_root = !!(root && wrap && wrap.contains(root));
++  if (gunte && wrap) {
++    // wrap 在 gunte 之後 → gunte.compareDocumentPosition(wrap) 會帶 FOLLOWING
++    out.gunte_before_wrap =
++      (gunte.compareDocumentPosition(wrap) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+   } else {
+-    out.hero_before_gunte = null;
++    out.gunte_before_wrap = null;
+   }
+-  if (root) {
+-    var r = root.getBoundingClientRect();
+-    out.hero_top = Math.round(r.top);
+-    out.hero_h = Math.round(r.height);
++  if (gunte) {
++    var gr = gunte.getBoundingClientRect();
++    out.gunte_top = Math.round(gr.top);
++    out.gunte_h = Math.round(gr.height);
++    out.gunte_margin_top = getComputedStyle(gunte).marginTop;
++  }
++  if (wrap) {
++    var wr = wrap.getBoundingClientRect();
++    out.hero_top = Math.round(wr.top);
++    out.hero_h = Math.round(wr.height);
++    out.hero_margin_top = getComputedStyle(wrap).marginTop;
+   }
++  if (root) out.footer_root_top = Math.round(root.getBoundingClientRect().top);
+   out.inner_h = window.innerHeight;
+   out.scroll_y = Math.round(window.scrollY);
+-  if (first) out.margin_top = getComputedStyle(first).marginTop;
+   out.footer_tag_count = document.querySelectorAll('footer').length;
+ 
++  // 2026-10-13：GUNTE hero 的環形字（曲線標題）—— markup 合法性與可見性。
++  // 原 markup 把 6 張不顯示的環形字開啟標籤寫成不存在的 <hidden>（且以 </text> 收尾）→ 已改為
++  // <text class="bc-ring-hide">，由 bc-gunte-hero.css 的 display:none 隱藏（只留 BUTTER KING）。
++  out.hidden_tag_count = document.getElementsByTagName('hidden').length;
++  var ttlSvgs = document.querySelectorAll('.bc-gunte-hero .hero_slide_item_ttl');
++  var ttlTexts = document.querySelectorAll('.bc-gunte-hero .hero_slide_item_ttl text');
++  out.ttl_svg_count = ttlSvgs.length;
++  out.ttl_text_count = ttlTexts.length;
++  out.ttl_ring_hide_count = document.querySelectorAll(
++      '.bc-gunte-hero .hero_slide_item_ttl text.bc-ring-hide').length;
++  out.ttl_hidden_by_css = 0;
++  out.ttl_visible_texts = [];
++  Array.prototype.forEach.call(ttlTexts, function(t){
++    if (getComputedStyle(t).display === 'none') {
++      out.ttl_hidden_by_css++;
++    } else {
++      out.ttl_visible_texts.push(t.textContent.trim());
++    }
++  });
++
++  // 2026-10-13 稍後：環形字尺寸（K5／K6）——字級改由「432 參考寬的 24px」換算成 viewBox 單位。
++  var ttlSvg0 = document.querySelector('.bc-gunte-hero .hero_slide_item_ttl');
++  if (ttlSvg0 && ttlSvg0.querySelector('text')) {
++    var tcs = getComputedStyle(ttlSvg0.querySelector('text'));
++    out.ttl_font_size = tcs.fontSize;        // 期望 30px（＝calc(24px*540/432)）
++    // ⚠ Chromium 對 SVG 幾何屬性（stroke-width）的 computed style 會「保留 calc() 字面」
++    // （回傳 'calc(1.875px)'；font-size 這類則會解析成單一值 '30px'）→ 比對前先剝掉外層 calc()，
++    // 原始字串另存 ttl_stroke_width_raw 一起印出（避免看起來像斷言把值「洗」過）。
++    out.ttl_stroke_width_raw = tcs.strokeWidth;
++    out.ttl_stroke_width = String(tcs.strokeWidth).replace(/^calc\((.*)\)$/, '$1');
++    out.ttl_box_w = Math.round(ttlSvg0.getBoundingClientRect().width * 100) / 100;
++    out.ttl_rendered_font = Math.round(parseFloat(tcs.fontSize) * out.ttl_box_w / 540 * 100) / 100;
++    // 環形字框應與投影片圖片同寬（＝--bc-item-w；1280×800 屬短視窗層 → scale 0.55 → 297px）
++    var ttlImg = document.querySelector('.bc-gunte-hero .hero_slide_item_img img.hide-sp');
++    out.ttl_item_img_w = ttlImg
++        ? Math.round(ttlImg.getBoundingClientRect().width * 100) / 100 : null;
++  } else {
++    out.ttl_font_size = null;
++    out.ttl_stroke_width = null;
++    out.ttl_stroke_width_raw = null;
++    out.ttl_box_w = null;
++    out.ttl_rendered_font = null;
++    out.ttl_item_img_w = null;
++  }
++
++  // 2026-10-13 稍後：載入時置中那張的環形字（K7）——Splide start 3 → 1（start 為 0-based）。
++  // ① 「載入時置中的是哪一張」由前置的 HERO_LOAD_JS 記到 window.__bcHeroLoadIndex
++  //    （在 .state-active 一出現、尚未逼 frame 前就記錄 → 不受 autoplay 5s 後換張影響）；
++  // ② 下面的 active_slide_* 則是「讀值當下」置中的那一張（autoplay 可能已前進），僅作診斷。
++  var sliList = document.querySelectorAll('.bc-gunte-hero .splide__slide');
++  var li = (typeof window.__bcHeroLoadIndex === 'number') ? window.__bcHeroLoadIndex : -1;
++  var loadSlide = li >= 0 ? sliList[li] : null;
++  var loadTtl = loadSlide ? loadSlide.querySelector('.hero_slide_item_ttl') : null;
++  var loadTtlText = loadTtl ? loadTtl.querySelector('text') : null;
++  out.active_slide_index_at_load = li >= 0 ? li : null;
++  out.active_slide_is_butter_king_at_load = loadSlide
++      ? loadSlide.textContent.indexOf('BUTTER KING') !== -1 : null;
++  out.active_slide_aria_label_at_load = loadSlide ? loadSlide.getAttribute('aria-label') : null;
++  out.active_ttl_opacity_at_load = loadTtl ? getComputedStyle(loadTtl).opacity : null;
++  out.active_ttl_text_display_at_load = loadTtlText
++      ? getComputedStyle(loadTtlText).display : null;
++
++  var activeSlide = document.querySelector('.bc-gunte-hero .splide__slide.state-active');
++  out.active_slide_is_butter_king = !!activeSlide
++      && activeSlide.textContent.indexOf('BUTTER KING') !== -1;
++  out.active_slide_index = activeSlide
++      ? Array.prototype.indexOf.call(sliList, activeSlide)
++      : null;
++  out.active_slide_aria_label = activeSlide ? activeSlide.getAttribute('aria-label') : null;
++  var activeTtl = activeSlide ? activeSlide.querySelector('.hero_slide_item_ttl') : null;
++  out.active_ttl_opacity = activeTtl ? getComputedStyle(activeTtl).opacity : null;
++  var activeTtlText = activeTtl ? activeTtl.querySelector('text') : null;
++  out.active_ttl_text_display = activeTtlText
++      ? getComputedStyle(activeTtlText).display : null;
++
+   // 2026-10-09（使用者指示）：置頂 hero 去掉「頁尾感」——移除頂部 1px 分隔線與自帶黑底。
+   // 這三組值由 index.html extra_css 的 .bc-bg-hero #bc-bg-footer … 覆寫提供；
+   // about 頁（真頁尾）不受影響，由下方 ABOUT_GUARD_JS 反向確認。
+@@ -295,6 +429,32 @@ INDEX_HERO_JS = r"""
+ })()
+ """
+ 
++# 2026-10-13 稍後（K7 前置）：在「.state-active 一出現、尚未逼 frame」時記錄『載入時置中的那一張』，
++# 並把 index 存到 window.__bcHeroLoadIndex 供 INDEX_HERO_JS 讀回（*_at_load 系列欄位）。
++# [為什麼要分兩段] 逼 frame（Page.captureScreenshot，見下方 J11 段說明）會讓 CSS transition 前進、
++# 但也會讓 Splide autoplay（interval 5000ms）真的走動 —— 讀值當下的 .state-active 可能已經不是
++# 載入時那張，所以「載入時是哪一張」必須在逼 frame 之前先記下來。
++HERO_LOAD_JS = r"""
++(function(){
++  var sli = document.querySelectorAll('.bc-gunte-hero .splide__slide');
++  var idx = -1;
++  for (var i = 0; i < sli.length; i++) {
++    if (sli[i].classList.contains('state-active')) { idx = i; break; }
++  }
++  var s = idx >= 0 ? sli[idx] : null;
++  var t = s ? s.querySelector('.hero_slide_item_ttl') : null;
++  var tt = t ? t.querySelector('text') : null;
++  if (idx >= 0) { window.__bcHeroLoadIndex = idx; }
++  return {
++    index: idx >= 0 ? idx : null,
++    aria_label: s ? s.getAttribute('aria-label') : null,
++    is_butter_king: s ? s.textContent.indexOf('BUTTER KING') !== -1 : null,
++    ttl_opacity: t ? getComputedStyle(t).opacity : null,
++    ttl_text_display: tt ? getComputedStyle(tt).display : null
++  };
++})()
++"""
++
+ # /about/ 反向守門（2026-10-09）：本頁覆寫只加 .bc-bg-hero 前綴 → about 的真頁尾必須「仍有」
+ # 1px 分隔線與 #0e0e0e 黑底；且其 #bc-bg-footer 的父層是 BODY（不是 SECTION.bc-bg-hero），
+ # 證明作用域錨點正確、沒有誤傷 about。
+@@ -638,7 +798,19 @@ async def main():
+ 
+         # ================= / ：#bc-bg-footer 保真（與上方 H 基準逐項比對） =================
+         await set_viewport(1280, 800)
+-        await goto(f"{BASE}/")
++        # 2026-10-13 稍後（K7 用）：**不用 goto()** —— 它會等到 readyState complete 再 +1.2s，
++        # 暖機狀態下（compositor 正在產 frame）Splide autoplay（interval 5000ms）可能已經換張，
++        # 之後才記錄就會記到第 2 張之後（實測 shot 腳本固定 sleep 5s 曾記到 index 4）。
++        # 改為 navigate 後立刻以 0.1s 間隔輪詢 .state-active，一出現就記錄（HERO_LOAD_JS）。
++        # 前一頁是 /coffee_menu/（無 .bc-gunte-hero）→ 舊 document 階段輪詢必為 null，不會誤判。
++        await send(msg("Page.navigate", {"url": f"{BASE}/"}))
++        hero_load = {}
++        for _ in range(150):
++            hero_load = await evaljs(HERO_LOAD_JS) or {}
++            if hero_load.get("index") is not None:
++                break
++            await asyncio.sleep(0.1)
++        print("   [hero] 載入時置中: " + json.dumps(hero_load, ensure_ascii=False))
+         mj = await evaljs(MEASURE_JS) or {}
+         print("\n=== / (#bc-bg-footer 保真) 1280x800 ===")
+         failures.append(check("J1 首頁 #bc-bg-footer .scroller 存在（已改用共用 partial）",
+@@ -679,34 +851,150 @@ async def main():
+                               f"{mj.get('bg_anim_name')}/{mj.get('bg_anim_duration')}/"
+                               f"{mj.get('bg_anim_timing_function')} vs {m2.get('ftco_anim_name')}/"
+                               f"{m2.get('ftco_anim_duration')}/{m2.get('ftco_anim_timing_function')}"))
+-        # ---- J11–J15：模組由頁尾移到首頁最上方當第一個 hero（2026-10-09，同一 / 分頁、未捲動） ----
++        # ---- J11–J15：首頁 hero 順序（2026-10-13 反轉：GUNTE hero 第一屏、BC hero 下移） ----
++        # 2026-10-13 稍後（K7 前置）：載入時置中的那張已在上方「navigate 後立刻輪詢」時記下
++        # （window.__bcHeroLoadIndex，INDEX_HERO_JS 讀 *_at_load 欄位）→ 這裡只負責逼 frame：
++        # 本機 CDP（headful，但 compositor 不一定產 frame）下 CSS transition 會停在 pending：
++        # playState='running'、startTime=null、currentTime=0（el.getAnimations() 實測
++        # CSSTransition opacity delay=1500 dur=500），computed opacity 一直停在過渡起點 0
++        # （`.hero_slide` 與環形字都是），等 15 秒也不會動；逼 frame 後實測 0 → 0.30 → 1
++        # （約 1 秒內完成）。等待條件只看「載入時記錄的那張」，autoplay 之後換張不影響斷言。
++        if hero_load.get("index") is not None:
++            op_ready = ("(function(){var s=document.querySelectorAll("
++                        "'.bc-gunte-hero .splide__slide')[%d];if(!s)return false;"
++                        "var t=s.querySelector('.hero_slide_item_ttl');"
++                        "return !!t&&getComputedStyle(t).opacity==='1';})()"
++                        % hero_load["index"])
++            for _ in range(40):
++                if await evaljs(op_ready):
++                    break
++                # ⚠ captureScreenshot 本身可能「等不到 frame 而卡死」（殘留多個背景分頁時遇到過）
++                # → 包 3 秒逾時；逾時就當這輪沒逼到 frame，下一輪再試（不可讓整支腳本卡住）。
++                try:
++                    await asyncio.wait_for(
++                        send(msg("Page.captureScreenshot",
++                                 {"format": "jpeg", "quality": 10})), timeout=3)
++                except asyncio.TimeoutError:
++                    print("   [hero] captureScreenshot 逾時（3s）→ 續試")
++                await asyncio.sleep(0.25)
+         hero = await evaljs(INDEX_HERO_JS) or {}
+         print("   [hero] " + json.dumps(
+             {k: hero.get(k) for k in
+-             ("hero_found", "first_section_classes", "is_first_of_type", "hero_has_root",
+-              "hero_before_gunte", "gunte_found", "hero_top", "hero_h", "inner_h",
+-              "scroll_y", "margin_top", "footer_tag_count",
++             ("section_count", "first_dom_classes", "first_dom_display", "first_visible_classes",
++              "first_visible_is_gunte", "gunte_found", "bg_hero_found", "hero_has_root",
++              "gunte_before_wrap", "gunte_top", "gunte_h", "gunte_margin_top",
++              "hero_top", "hero_h", "hero_margin_top", "footer_root_top",
++              "inner_h", "scroll_y", "footer_tag_count",
++              "hidden_tag_count", "ttl_svg_count", "ttl_text_count",
++              "ttl_ring_hide_count", "ttl_hidden_by_css", "ttl_visible_texts",
++              "ttl_font_size", "ttl_stroke_width", "ttl_stroke_width_raw",
++              "ttl_box_w", "ttl_rendered_font",
++              "ttl_item_img_w",
++              "active_slide_is_butter_king_at_load", "active_slide_index_at_load",
++              "active_slide_aria_label_at_load", "active_ttl_opacity_at_load",
++              "active_ttl_text_display_at_load",
++              "active_slide_is_butter_king", "active_slide_index",
++              "active_slide_aria_label",
++              "active_ttl_opacity",
++              "active_ttl_text_display",
+               "grid_found", "grid_border_top_w", "grid_border_top_style",
+               "grid_border_top_color", "grid_padding_top",
+               "root_bg", "footer_bg", "root_parent_tag", "root_parent_classes")},
+             ensure_ascii=False))
+-        failures.append(check("J11 .bc-page-content 第一個 section 是 .hero.bc-bg-hero 且內含 #bc-bg-footer",
+-                              hero.get("hero_found") is True
+-                              and hero.get("is_first_of_type") is True
++        failures.append(check("J11 第一個「可見」section 是 .hero.bc-gunte-hero，"
++                              "且 DOM 第一個 section 是 .bc-reviews-section（display:none）",
++                              hero.get("first_visible_is_gunte") is True
++                              and hero.get("first_dom_display") == "none"
++                              and "bc-reviews-section" in (hero.get("first_dom_classes") or ""),
++                              f"firstVisible={hero.get('first_visible_classes')} / "
++                              f"firstDom={hero.get('first_dom_classes')} "
++                              f"display={hero.get('first_dom_display')}"))
++        failures.append(check("J12 GUNTE hero 在文件順序上位於 BC hero（.bc-bg-hero）之前，"
++                              "且該 BC hero 內仍含 #bc-bg-footer",
++                              hero.get("gunte_before_wrap") is True
++                              and hero.get("bg_hero_found") is True
+                               and hero.get("hero_has_root") is True,
+-                              hero.get("first_section_classes")))
+-        failures.append(check("J12 BC hero 在文件順序上位於 GUNTE hero 之前",
+-                              hero.get("hero_before_gunte") is True,
+-                              f"gunte_found={hero.get('gunte_found')}"))
+-        failures.append(check("J13 載入時 #bc-bg-footer 已在首屏視口內（0 <= rect.top < innerHeight/2）",
+-                              isinstance(hero.get("hero_top"), int)
+-                              and hero.get("hero_top") < (hero.get("inner_h") or 0) / 2,
+-                              f"top={hero.get('hero_top')} innerH={hero.get('inner_h')} "
+-                              f"scrollY={hero.get('scroll_y')}"))
+-        failures.append(check("J14 .bc-bg-hero computed margin-top = 0px（未被首 section 100px 推擠）",
+-                              hero.get("margin_top") == "0px", hero.get("margin_top")))
++                              f"gunte={hero.get('gunte_found')} wrap={hero.get('bg_hero_found')} "
++                              f"wrapHasRoot={hero.get('hero_has_root')}"))
++        failures.append(check("J13 載入時（未捲動）GUNTE hero 由視口頂端開始（scrollY 0 且 0 <= top <= 8）"
++                              "→ 與 navbar 間無 100px 空隙；且 BC hero（#bc-bg-footer）接在它之後"
++                              "（top >= GUNTE hero 底緣 → 兩塊 hero 不重疊）",
++                              hero.get("scroll_y") == 0
++                              and isinstance(hero.get("gunte_top"), int)
++                              and 0 <= hero.get("gunte_top") <= 8
++                              and isinstance(hero.get("footer_root_top"), int)
++                              and isinstance(hero.get("gunte_h"), int)
++                              and hero.get("footer_root_top")
++                              >= hero.get("gunte_top") + hero.get("gunte_h"),
++                              f"gunteTop={hero.get('gunte_top')} gunteH={hero.get('gunte_h')} "
++                              f"scrollY={hero.get('scroll_y')} "
++                              f"rootTop={hero.get('footer_root_top')} innerH={hero.get('inner_h')}"))
++        failures.append(check("J14 兩塊 hero computed margin-top 皆 0px（GUNTE 由 bc-gunte-hero.css 的 "
++                              "class 規則壓制；BC hero 已非 first-of-type → 100px 不再命中）",
++                              hero.get("gunte_margin_top") == "0px"
++                              and hero.get("hero_margin_top") == "0px",
++                              f"gunte={hero.get('gunte_margin_top')} "
++                              f"bcHero={hero.get('hero_margin_top')}"))
+         failures.append(check("J15 / 已無 footer 元素（querySelector('footer') 為 null → yama 交會邏輯 no-op）",
+                               hero.get("footer_tag_count") == 0, hero.get("footer_tag_count")))
++        # ---- K1–K4：2026-10-13 環形字 markup 修正（非法的 <hidden text> → <text class="bc-ring-hide">） ----
++        failures.append(check("K1 全頁已無非法 <hidden> 元素（getElementsByTagName('hidden') == 0）",
++                              hero.get("hidden_tag_count") == 0, hero.get("hidden_tag_count")))
++        failures.append(check("K2 7 張 slide 的環形字 SVG 各自 1 個 <text>（開／閉成對 ＝ 7）",
++                              hero.get("ttl_svg_count") == 7 and hero.get("ttl_text_count") == 7,
++                              f"svg={hero.get('ttl_svg_count')} text={hero.get('ttl_text_count')}"))
++        failures.append(check("K3 6 個 text.bc-ring-hide 的 computed display ＝ none（CSS 隱藏生效）",
++                              hero.get("ttl_ring_hide_count") == 6
++                              and hero.get("ttl_hidden_by_css") == 6,
++                              f"class={hero.get('ttl_ring_hide_count')} "
++                              f"hidden={hero.get('ttl_hidden_by_css')}"))
++        failures.append(check("K4 只有 1 個環形字可見且文案含 BUTTER KING",
++                              len(hero.get("ttl_visible_texts") or []) == 1
++                              and "BUTTER KING" in (hero.get("ttl_visible_texts") or [""])[0],
++                              hero.get("ttl_visible_texts")))
++        # ---- K5–K7：2026-10-13 稍後（環形字尺寸 ×1.25 ＋ Splide start 3 → 2） ----
++        # 期望渲染字級 ＝ 24 × 框寬/432（＝設計值 24px 在 432px 參考圖寬下）；框寬由瀏覽器實測。
++        exp_ttl_rendered = (round(24 * hero.get("ttl_box_w") / 432, 2)
++                            if isinstance(hero.get("ttl_box_w"), (int, float)) else None)
++        failures.append(check("K5 環形字 computed font-size ＝ 30px（＝calc(24px*540/432)："
++                              "432 參考圖寬下的 24px 換算成 viewBox 單位、與 cap 14／en 12 同一套 "
++                              "--bc-item-k 基準）且 stroke-width ＝ 1.875px（＝calc(1.5*540/432)；"
++                              "Chromium 對 SVG 幾何屬性的 computed style 保留 calc() 字面 → "
++                              "斷言比對剝除外層 calc() 後的值，原始字串另印 ttl_stroke_width_raw）",
++                              hero.get("ttl_font_size") == "30px"
++                              and hero.get("ttl_stroke_width") == "1.875px"
++                              and hero.get("ttl_stroke_width_raw") in ("1.875px", "calc(1.875px)"),
++                              f"font={hero.get('ttl_font_size')} "
++                              f"stroke={hero.get('ttl_stroke_width')} "
++                              f"raw={hero.get('ttl_stroke_width_raw')}"))
++        failures.append(check("K6 環形字 SVG 框寬 ＝ 投影片圖片寬（＝--bc-item-w；1280×800 屬短視窗層 "
++                              "scale 0.55 → 297px）→ 渲染字級 ＝ 24 × 框寬/432（改動前 ×1.25）",
++                              hero.get("ttl_box_w") == hero.get("ttl_item_img_w")
++                              and hero.get("ttl_box_w") not in (None, 0)
++                              and hero.get("ttl_rendered_font") == exp_ttl_rendered,
++                              f"box={hero.get('ttl_box_w')} "
++                              f"img={hero.get('ttl_item_img_w')} "
++                              f"rendered={hero.get('ttl_rendered_font')} "
++                              f"期望={exp_ttl_rendered} "
++                              f"（改動前＝{round(exp_ttl_rendered / 1.25, 2) if exp_ttl_rendered else None}）"))
++        failures.append(check("K7 載入時（未捲動）置中的 slide 是 BUTTER KING（DOM 第 2 張："
++                              "aria-label「2 of 7」、index 1）且其環形字 reveal 後 computed opacity ＝ 1、"
++                              "computed display ≠ none（Splide start 3 → 1；start 為 0-based → 實測 "
++                              "start 2 置中的是「3 of 7」＝果香浅煎、start 0 是 BLACK BLEND，"
++                              "兩者的環形字皆 .bc-ring-hide），為 *_at_load 系列欄位（逼 frame 前記錄）",
++                              hero.get("active_slide_is_butter_king_at_load") is True
++                              and hero.get("active_slide_index_at_load") == 1
++                              and hero.get("active_slide_aria_label_at_load") == "2 of 7"
++                              and hero.get("active_ttl_opacity_at_load") == "1"
++                              and hero.get("active_ttl_text_display_at_load") != "none",
++                              f"atLoad[butter={hero.get('active_slide_is_butter_king_at_load')} "
++                              f"index={hero.get('active_slide_index_at_load')} "
++                              f"aria={hero.get('active_slide_aria_label_at_load')} "
++                              f"opacity={hero.get('active_ttl_opacity_at_load')} "
++                              f"textDisplay={hero.get('active_ttl_text_display_at_load')}] "
++                              f"讀值當下[index={hero.get('active_slide_index')} "
++                              f"aria={hero.get('active_slide_aria_label')} "
++                              f"opacity={hero.get('active_ttl_opacity')}]"))
+         failures.append(check("J16 置頂 hero 的頂部分隔線已移除（.grid.is-footer border-top 0px/none，"
+                               "原本為 1px solid rgba(255,255,255,.08)）且 padding-top 未被動到",
+                               hero.get("grid_border_top_w") == "0px"
+@@ -765,6 +1053,10 @@ async def main():
+         await shot("mobile_reduced_motion")
+         await send(msg("Emulation.setEmulatedMedia", {"features": []}))
+ 
++        # 收尾：關掉本腳本開的分頁（原本沒有這行 → 每跑一次就留一個分頁；實測殘留 5 個頁面時
++        # compositor 不再為本分頁產 frame，逼 frame 用的 Page.captureScreenshot 會卡住不回應）。
++        await send(msg("Page.close"))
++
+     total = len(failures)
+     bad = sum(1 for f in failures if not f)
+     print(f"\n===== 合計 {total} 項，PASS {total - bad}，FAIL {bad} =====")
+diff --git a/static/css/bc-gunte-hero.css b/static/css/bc-gunte-hero.css
+index 55a78d61..62bec524 100644
+--- a/static/css/bc-gunte-hero.css
++++ b/static/css/bc-gunte-hero.css
+@@ -318,15 +318,38 @@
+   opacity: 1;
+ }
+ 
++/* 2026-10-13（使用者指示：「尺寸改動」）：環形字字級改為與 cap／en 同一套 --bc-item-k 基準
++   （＝設計值 24px 在「432px 參考圖寬」下渲染成 24px；cap＝14、en＝12 同基準）。
++   [為什麼不是 font-size: calc(var(--bc-item-k) * 24)] 環形字在 <svg viewBox="0 0 540 540"> 內，
++   而整個 SVG 已隨 --bc-item-w 縮放（width:var(--bc-item-w)）→ 實際渲染字級 ＝ viewBox 單位 ×
++   框寬/540，本身已經等比。若再乘一次 k 會與 SVG 自身的縮放「重複相乘」（渲染值變 24k²）：
++   桌機／平板 k≈1 看似沒差，但短視窗桌機（scale 0.55 → k 0.6875）會縮到 9.1px、
++   手機（k 0.59）縮到 7.0px（比同層的 cap 10px 還小）→ 這才是尺寸跑掉的寫法。
++   [正確換算] 把「432 基準的 24px」換算成 viewBox 單位：24 × 540/432 ＝ 30 viewBox 單位
++   → 渲染 30 × 框寬/540 ＝ 24 × 框寬/432（＝24k）。
++   實測（改動前 → 後）：桌機 19.2 → 24px、平板 19.3 → 24.3px、手機（框 266px）11.8 → 14.8px
++   —— 全斷點一致 ×1.25，且與 cap／en 的 --bc-item-k 基準相同。 */
+ .bc-gunte-hero .hero_slide_item_ttl text {
+   font-weight: 900;
+-  font-size: 24px;
++  font-size: calc(24px * 540 / 432);
+   paint-order: stroke;
+-  stroke-width: 1.5;
++  /* 描邊同為 viewBox 單位 → 跟著字級一起 ×1.25（1.5 → 1.875），外框與字的比例不變 */
++  stroke-width: calc(1.5 * 540 / 432);
+   stroke: var(--color-black);
+   fill: var(--color-primary);
+ }
+ 
++/* 2026-10-13（使用者指示）：環形字（曲線標題）只有第 2 張 slide（BUTTER KING，path
++   #bc-gunte-06-path）要顯示，其餘 6 張的文案節點改為 <text class="bc-ring-hide"> 並在此隱藏。
++   [為什麼改 markup] 使用者原先把開啟標籤手寫成 <hidden text>（意思＝「這個 text 要隱藏」），
++   但那不是合法元素，而且以 </text> 收尾（開／閉不成對）→ 改為合法 <text> ＋ 修飾 class，
++   由 CSS 負責隱藏（文案保留在 markup 內備查；只隱藏 <text>，同一個 SVG 的 <path> 不動）。
++   [作用範圍] 只命中 .bc-gunte-hero 內這 6 個節點（其餘頁面無此 class）；不影響 slide 圖片、
++   直排 cap／en 標籤與手套圓。 */
++.bc-gunte-hero .hero_slide_item_ttl text.bc-ring-hide {
++  display: none;
++}
++
+ /* ---- 手套圓 ---- */
+ .bc-gunte-hero .hero_hand {
+   opacity: 0;
+@@ -572,7 +595,9 @@
+   }
+ 
+   .bc-gunte-hero .hero_slide_item_ttl text {
+-    stroke-width: 2;
++    /* 2026-10-13：字級已改由 viewBox 單位表達（calc(24px*540/432)＝30）→ 手機手調描邊 2
++       同步 ×1.25（2 → 2.5），維持與字級相同的外框比例。 */
++    stroke-width: calc(2 * 540 / 432);
+   }
+ 
+   .bc-gunte-hero .hero_hand_list {
+diff --git a/static/js/bc-gunte-hero.js b/static/js/bc-gunte-hero.js
+index 60d354e0..3820cfa6 100644
+--- a/static/js/bc-gunte-hero.js
++++ b/static/js/bc-gunte-hero.js
+@@ -31,7 +31,16 @@
+       interval: 5000,
+       speed: 1200,
+       rewindSpeed: 2400,
+-      start: 3,
++      // 2026-10-13（使用者指示：載入時就要看得到環形字）：環形字只有 DOM 第 2 張
++      // （BUTTER KING，aria-label「2 of 7」，path #bc-gunte-06-path）顯示 —— 其餘 6 張是
++      // <text class="bc-ring-hide">，由 bc-gunte-hero.css 的 display:none 隱藏；而
++      // .hero_slide_item_ttl 又只在 .state-active（＝置中那張）時 opacity 1 → start 必須指到
++      // 第 2 張，載入當下才會出現環形字。
++      // ⚠ Splide 的 start 是 **0-based 索引**（不是「第幾張」）：實測 start: 2 置中的是
++      //   aria-label「3 of 7」＝ 第 3 張「果香浅煎」（環形字被隱藏）；原 start: 3 → 第 4 張。
++      //   因此第 2 張（aria-label「2 of 7」）＝ start: 1；start: 0 才是第 1 張 BLACK BLEND
++      //   （環形字同樣被隱藏 → 那三個值的載入畫面都不會有環形字）。
++      start: 1,
+       easing: 'ease'
+     });
+ 
+diff --git a/templates/betweencoffee_delivery/index.html b/templates/betweencoffee_delivery/index.html
+index 6f8f4b69..851323e7 100644
+--- a/templates/betweencoffee_delivery/index.html
++++ b/templates/betweencoffee_delivery/index.html
+@@ -87,7 +87,21 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+ </div>
+ 
+ 
+-<!-- 2026-10-09（使用者指示）：BC 動態模組（#bc-bg-footer，Hug in a Cup 時鐘）由頁尾移到
++<!-- 2026-10-13（使用者指示）：首頁順序反轉 —— GUNTE hero 回到「第一眼看到的第一屏」，
++     BC 動態模組（<section class="hero bc-bg-hero">，內含 #bc-bg-footer）下移到它之後。
++     本檔 DOM 順序 ＝ 畫面順序：
++       [1] <section hidden class="bc-reviews-section">（reviews 跑馬燈；本輪加 hidden → 不顯示）
++       [2] <section class="hero bc-gunte-hero">（第一屏。margin-top 由 bc-gunte-hero.css 的
++           `.bc-page-content > section.bc-gunte-hero.hero{margin-top:0 !important}` 壓為 0，
++           是 class 規則、不依賴 first-of-type 序位 → 與 navbar 之間不會多出 100px 空隙）
++       [3] <section class="ftco-section-blank-small">（兩塊 hero 之間的留白）
++       [4] <section class="hero bc-bg-hero">（＝下方 10-09 註解的模組，現為第二塊 hero）
++     註：extra_css 的 `.bc-page-content > section:first-of-type.bc-bg-hero{margin-top:0 !important}`
++     在 10-13 已不是命中該 hero 的那一條（first-of-type 現為 [1] 的 reviews section）
++     —— 保留作為「若日後把 BC hero 移回最上方」的保險；目前真正生效的是 bc-gunte-hero.css 的 class 規則。
++     ～～ 以下為 2026-10-09 舊註解（其順序已被 10-13 反轉），保留供追查歷史 ～～
++
++2026-10-09（使用者指示）：BC 動態模組（#bc-bg-footer，Hug in a Cup 時鐘）由頁尾移到
+      首頁最上方，成為第一個 hero；原本的 GUNTE hero 緊接在它下方（順序＝本檔 DOM 順序）。
+      1. markup 取自 partials/bc_hero.html（＝ partials/bc_bg_footer.html 的 hero 變體：
+         兩者逐字相同，僅把最外層的 footer 標籤（class="footer"）改為 div 標籤，
+@@ -102,11 +116,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+         class 規則壓為 0（不依賴 section 序位），兩塊 hero 之間不會多出 100px 空隙。
+      3. 本 section 的 margin-top 由下方 extra_css 覆寫為 0
+         （蓋掉 bc-components.css 首 section 的 100px 預留）。 -->
+-<section class="hero bc-bg-hero">
+-{% include 'betweencoffee_delivery/partials/bc_hero.html' %}
+-</section>
+ 
+-<section class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
++<section hidden class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
+     <div class="bc-reviews">
+         <div class="reviews">
+             <div class="reviewsInner">
+@@ -339,7 +350,16 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+ 
+ 
+ <!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
+-     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。 -->
++     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。
++     2026-10-13（使用者指示）：順序反轉 —— 本段回到 .bc-page-content 最前（第一眼看到的第一屏），
++     BC 動態 hero 下移到本段之後（完整說明見檔頭 10-13 註解）。
++     環形字（<text>）只有第 2 張（BUTTER KING，path bc-gunte-06-path）顯示，
++     其餘 6 張加 .bc-ring-hide → 由 bc-gunte-hero.css 的 display:none 隱藏（文案保留在 markup 內）。
++     2026-10-13 稍後（使用者指示）：① Splide start 3 → **1**（Splide 的 start 是 0-based 索引；
++     實測 start: 2 置中的是 aria-label「3 of 7」＝第 3 張「果香浅煎」→ 環形字仍被隱藏）→
++     載入當下置中的是第 2 張 BUTTER KING，環形字第一眼可見；② 環形字字級改由 viewBox 單位表達
++     （calc(24px*540/432)＝30 ＝432 參考圖寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準，
++     描邊同步 ×1.25）。 -->
+ <section class="hero bc-gunte-hero">
+             <div class="hero_wrap">
+                 <h2 class="hero_catch">
+@@ -360,7 +380,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+                                         <p class="hero_slide_item_en">BLACK BLEND ｜Coffee</p>
+                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path id="bc-gunte-05-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+-                                            <text>
++                                            <text class="bc-ring-hide">
+                                                 <textPath startOffset="320" href="#bc-gunte-05-path">充分展現苦澀濃鬱, 不失柔和。</textPath>
+                                             </text>
+                                         </svg>
+@@ -377,7 +397,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path id="bc-gunte-06-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                             <text>
+-                                                <textPath startOffset="350" href="#bc-gunte-06-path">極致豐厚焦糖黃油定番。放大</textPath>
++                                                <textPath startOffset="350" href="#bc-gunte-06-path">BUTTER KING 極致豐厚焦糖黃油定番。放大</textPath>
+                                             </text>
+                                         </svg>
+                                     </a>
+@@ -392,7 +412,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+                                         <p class="hero_slide_item_en">果香浅煎｜Coffee</p>
+                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path id="bc-gunte-07-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+-                                            <text>
++                                            <text class="bc-ring-hide">
+                                                 <textPath startOffset="220" href="#bc-gunte-07-path">富山縣產西柚檸檬, 柑橘季節限定, 配碧螺春/白芽奇蘭, 深具有明亮的漿果風味</textPath>
+                                             </text>
+                                         </svg>
+@@ -408,7 +428,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+                                         <p class="hero_slide_item_en">抹茉｜Coffee </p>
+                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path id="bc-gunte-01-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+-                                            <text>
++                                            <text class="bc-ring-hide">
+                                                 <textPath startOffset="290" href="#bc-gunte-01-path">靜岡縣笹間町的茶葉, 採用JAS有機咖啡豆。</textPath>
+                                             </text>
+                                         </svg>
+@@ -424,7 +444,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+                                         <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
+                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+-                                            <text>
++                                            <text class="bc-ring-hide">
+                                                 <textPath startOffset="320" href="#bc-gunte-02-path">採用天然烘焙特有的濃鬱醇厚風味, 放大。</textPath>
+                                             </text>
+                                         </svg>
+@@ -440,7 +460,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+                                         <p class="hero_slide_item_en">SUNSHINE｜Coffeee</p>
+                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path id="bc-gunte-03-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+-                                            <text>
++                                            <text class="bc-ring-hide">
+                                                 <textPath startOffset="370" href="#bc-gunte-03-path">餘味完全覆蓋在味蕾上, 採用JAS有機咖啡豆, </textPath>
+                                             </text>
+                                         </svg>
+@@ -456,7 +476,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+                                         <p class="hero_slide_item_en">WAKEMEUP｜Coffee</p>
+                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path id="bc-gunte-04-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+-                                            <text>
++                                            <text class="bc-ring-hide">
+                                                 <textPath startOffset="330" href="#bc-gunte-04-path">專屬早晨配方, 驅動您最佳狀態釋放能量!</textPath>
+                                             </text>
+                                         </svg>
+@@ -491,8 +511,15 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+         </section>
+ 
+ 
+-<!-- 2026-09-06：複製 .bc-reviews-section（hakujuji waffle reviews 跑馬燈）至首頁 feed 下方；水平反向 data-bc-reviews-reverse（向右捲） -->
++<!-- 2026-10-13（使用者指示）：BC 動態 hero 由頁首下移到 GUNTE hero 之後（見檔頭 10-13 註解）；
++     上方 .ftco-section-blank-small 是兩塊 hero 之間的留白（10-09 版本兩者相鄰、無留白）。
++     （2026-09-06 註解所述、加了 data-bc-reviews-reverse 的首頁反向跑馬燈 section 即檔頭 [1]） -->
+ 
++<section class="ftco-section-blank-small"></section>
++
++<section class="hero bc-bg-hero">
++{% include 'betweencoffee_delivery/partials/bc_hero.html' %}
++</section>
+ 
+ 
+ <section hidden class="feed overflow-hidden">
+@@ -512,6 +539,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+     </div>
+ </section>
+ 
++<section class="ftco-section-blank-small"></section>
+ <section class="ftco-section-blank-small"></section>
+ 
+ <!-- 2026-09-11：複製一組 .feed（第二組，加 .feed--video）；底層「背景圖片」
+@@ -700,10 +728,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+ 
+ 
+ 
+-
+-
+-
+-
+ <section class="ftco-section-blank-small"></section>
+ 
+ {% endblock %}
+@@ -725,9 +749,14 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+ <!-- 2026-10-07：首頁 section 追加 .bc-reviews-section--lg（--rv-scale:1.15）→ 整個模組全端放大 15% -->
+ <link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20261007a">
+ <link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20261008e">
+-<!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class） -->
++<!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class）
++     2026-10-13：bc-gunte-hero.css 新增環形字隱藏規則（.hero_slide_item_ttl text.bc-ring-hide）
++                 → 版號 ?v=20261008e 升為 ?v=20261013a（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
++     2026-10-13 稍後（使用者指示「尺寸改動」）：環形字字級 24px → calc(24px * 540/432)
++                 （＝viewBox 單位 30＝432 參考寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準）、
++                 描邊同步 ×1.25 → 版號再升為 ?v=20261013b。 -->
+ <link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
+-<link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20261008e">
++<link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20261013b">
+ <!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
+      BC 動態 footer（#bc-bg-footer）——markup 共用 partials/bc_bg_footer.html（單一來源）；
+      全樣式 scoped 於 #bc-bg-footer，故與 about 頁共用同一份 CSS 不會互相影響。 -->
+@@ -828,9 +857,12 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
+ <script src="{% static 'js/bc-yama-header.js' %}?v=20260916b"></script>
+ <!-- 2026-09-06：reviews 跑馬燈動畫（支援 data-bc-reviews-reverse 反向；GSAP base defer） -->
+ <script src="{% static 'js/bc-reviews.js' %}?v=20260906a"></script>
+-<!-- 2026-09-07：GUNTE Lab. hero 動畫（Splide 引擎 + hero 初始化） -->
++<!-- 2026-09-07：GUNTE Lab. hero 動畫（Splide 引擎 + hero 初始化）
++     2026-10-13（使用者指示：載入時就要看得到環形字）：Splide start 3 → 1
++     （Splide start 為 0-based；環形字只有第 2 張 BUTTER KING 顯示）
++     → 版號 ?v=20260907b 升為 ?v=20261013a -->
+ <script src="{% static 'library/splide-4.1.3/dist/js/splide.min.js' %}"></script>
+-<script src="{% static 'js/bc-gunte-hero.js' %}?v=20260907b"></script>
++<script src="{% static 'js/bc-gunte-hero.js' %}?v=20261013a"></script>
+ <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
+ <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
+ <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
+@@ -853,6 +885,8 @@ Hug in a Cup 時鐘）已移到本頁最上方當第一個 hero（見上方 <!--
+ 註解與 partials/bc_hero.html）。此處刻意覆寫為空，避免同一模組在頁面出現兩次
+ （#bc-bg-footer 這個 id 重複時，bc-bg-footer.js 的 getElementById 只會綁到第一個，
+  第二個會停在未初始化的 [data-reveal] 隱藏狀態）。
++2026-10-13（使用者指示）：該模組現為「第二塊 hero」（GUNTE hero 之後，見檔頭 10-13 註解）；
++本 block 的處置不變（仍覆寫為空）。
+ 也刻意「不」回退 base.html 的 .ftco-footer 靜態頁尾：#bc-bg-footer 已承接本頁
+ 全部的頁尾內容（社群、跑馬燈、© 版權），再放回 ftco 會變成兩套 footer 視覺並存。
+ （若日後要恢復頁尾，把本 block 內容換回 include 'betweencoffee_delivery/partials/bc_bg_footer.html'

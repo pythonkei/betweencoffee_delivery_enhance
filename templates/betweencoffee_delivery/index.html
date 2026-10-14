@@ -87,7 +87,21 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 </div>
 
 
-<!-- 2026-10-09（使用者指示）：BC 動態模組（#bc-bg-footer，Hug in a Cup 時鐘）由頁尾移到
+<!-- 2026-10-13（使用者指示）：首頁順序反轉 —— GUNTE hero 回到「第一眼看到的第一屏」，
+     BC 動態模組（<section class="hero bc-bg-hero">，內含 #bc-bg-footer）下移到它之後。
+     本檔 DOM 順序 ＝ 畫面順序：
+       [1] <section hidden class="bc-reviews-section">（reviews 跑馬燈；本輪加 hidden → 不顯示）
+       [2] <section class="hero bc-gunte-hero">（第一屏。margin-top 由 bc-gunte-hero.css 的
+           `.bc-page-content > section.bc-gunte-hero.hero{margin-top:0 !important}` 壓為 0，
+           是 class 規則、不依賴 first-of-type 序位 → 與 navbar 之間不會多出 100px 空隙）
+       [3] <section class="ftco-section-blank-small">（兩塊 hero 之間的留白）
+       [4] <section class="hero bc-bg-hero">（＝下方 10-09 註解的模組，現為第二塊 hero）
+     註：extra_css 的 `.bc-page-content > section:first-of-type.bc-bg-hero{margin-top:0 !important}`
+     在 10-13 已不是命中該 hero 的那一條（first-of-type 現為 [1] 的 reviews section）
+     —— 保留作為「若日後把 BC hero 移回最上方」的保險；目前真正生效的是 bc-gunte-hero.css 的 class 規則。
+     ～～ 以下為 2026-10-09 舊註解（其順序已被 10-13 反轉），保留供追查歷史 ～～
+
+2026-10-09（使用者指示）：BC 動態模組（#bc-bg-footer，Hug in a Cup 時鐘）由頁尾移到
      首頁最上方，成為第一個 hero；原本的 GUNTE hero 緊接在它下方（順序＝本檔 DOM 順序）。
      1. markup 取自 partials/bc_hero.html（＝ partials/bc_bg_footer.html 的 hero 變體：
         兩者逐字相同，僅把最外層的 footer 標籤（class="footer"）改為 div 標籤，
@@ -102,11 +116,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         class 規則壓為 0（不依賴 section 序位），兩塊 hero 之間不會多出 100px 空隙。
      3. 本 section 的 margin-top 由下方 extra_css 覆寫為 0
         （蓋掉 bc-components.css 首 section 的 100px 預留）。 -->
-<section class="hero bc-bg-hero">
-{% include 'betweencoffee_delivery/partials/bc_hero.html' %}
-</section>
 
-<section class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
+<section hidden class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
     <div class="bc-reviews">
         <div class="reviews">
             <div class="reviewsInner">
@@ -339,7 +350,16 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 
 
 <!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
-     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。 -->
+     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。
+     2026-10-13（使用者指示）：順序反轉 —— 本段回到 .bc-page-content 最前（第一眼看到的第一屏），
+     BC 動態 hero 下移到本段之後（完整說明見檔頭 10-13 註解）。
+     環形字（<text>）只有第 2 張（BUTTER KING，path bc-gunte-06-path）顯示，
+     其餘 6 張加 .bc-ring-hide → 由 bc-gunte-hero.css 的 display:none 隱藏（文案保留在 markup 內）。
+     2026-10-13 稍後（使用者指示）：① Splide start 3 → **1**（Splide 的 start 是 0-based 索引；
+     實測 start: 2 置中的是 aria-label「3 of 7」＝第 3 張「果香浅煎」→ 環形字仍被隱藏）→
+     載入當下置中的是第 2 張 BUTTER KING，環形字第一眼可見；② 環形字字級改由 viewBox 單位表達
+     （calc(24px*540/432)＝30 ＝432 參考圖寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準，
+     描邊同步 ×1.25）。 -->
 <section class="hero bc-gunte-hero">
             <div class="hero_wrap">
                 <h2 class="hero_catch">
@@ -360,7 +380,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                         <p class="hero_slide_item_en">BLACK BLEND ｜Coffee</p>
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-05-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
+                                            <text class="bc-ring-hide">
                                                 <textPath startOffset="320" href="#bc-gunte-05-path">充分展現苦澀濃鬱, 不失柔和。</textPath>
                                             </text>
                                         </svg>
@@ -377,7 +397,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-06-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
                                             <text>
-                                                <textPath startOffset="350" href="#bc-gunte-06-path">極致豐厚焦糖黃油定番。放大</textPath>
+                                                <textPath startOffset="350" href="#bc-gunte-06-path">BUTTER KING 極致豐厚焦糖黃油定番。放大</textPath>
                                             </text>
                                         </svg>
                                     </a>
@@ -392,7 +412,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                         <p class="hero_slide_item_en">果香浅煎｜Coffee</p>
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-07-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
+                                            <text class="bc-ring-hide">
                                                 <textPath startOffset="220" href="#bc-gunte-07-path">富山縣產西柚檸檬, 柑橘季節限定, 配碧螺春/白芽奇蘭, 深具有明亮的漿果風味</textPath>
                                             </text>
                                         </svg>
@@ -408,7 +428,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                         <p class="hero_slide_item_en">抹茉｜Coffee </p>
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-01-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
+                                            <text class="bc-ring-hide">
                                                 <textPath startOffset="290" href="#bc-gunte-01-path">靜岡縣笹間町的茶葉, 採用JAS有機咖啡豆。</textPath>
                                             </text>
                                         </svg>
@@ -424,7 +444,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                         <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
+                                            <text class="bc-ring-hide">
                                                 <textPath startOffset="320" href="#bc-gunte-02-path">採用天然烘焙特有的濃鬱醇厚風味, 放大。</textPath>
                                             </text>
                                         </svg>
@@ -440,7 +460,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                         <p class="hero_slide_item_en">SUNSHINE｜Coffeee</p>
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-03-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
+                                            <text class="bc-ring-hide">
                                                 <textPath startOffset="370" href="#bc-gunte-03-path">餘味完全覆蓋在味蕾上, 採用JAS有機咖啡豆, </textPath>
                                             </text>
                                         </svg>
@@ -456,7 +476,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                         <p class="hero_slide_item_en">WAKEMEUP｜Coffee</p>
                                         <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path id="bc-gunte-04-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
+                                            <text class="bc-ring-hide">
                                                 <textPath startOffset="330" href="#bc-gunte-04-path">專屬早晨配方, 驅動您最佳狀態釋放能量!</textPath>
                                             </text>
                                         </svg>
@@ -491,8 +511,15 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         </section>
 
 
-<!-- 2026-09-06：複製 .bc-reviews-section（hakujuji waffle reviews 跑馬燈）至首頁 feed 下方；水平反向 data-bc-reviews-reverse（向右捲） -->
+<!-- 2026-10-13（使用者指示）：BC 動態 hero 由頁首下移到 GUNTE hero 之後（見檔頭 10-13 註解）；
+     上方 .ftco-section-blank-small 是兩塊 hero 之間的留白（10-09 版本兩者相鄰、無留白）。
+     （2026-09-06 註解所述、加了 data-bc-reviews-reverse 的首頁反向跑馬燈 section 即檔頭 [1]） -->
 
+<section class="ftco-section-blank-small"></section>
+
+<section class="hero bc-bg-hero">
+{% include 'betweencoffee_delivery/partials/bc_hero.html' %}
+</section>
 
 
 <section hidden class="feed overflow-hidden">
@@ -512,6 +539,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
     </div>
 </section>
 
+<section class="ftco-section-blank-small"></section>
 <section class="ftco-section-blank-small"></section>
 
 <!-- 2026-09-11：複製一組 .feed（第二組，加 .feed--video）；底層「背景圖片」
@@ -700,10 +728,6 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 
 
 
-
-
-
-
 <section class="ftco-section-blank-small"></section>
 
 {% endblock %}
@@ -725,9 +749,14 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <!-- 2026-10-07：首頁 section 追加 .bc-reviews-section--lg（--rv-scale:1.15）→ 整個模組全端放大 15% -->
 <link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20261007a">
 <link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20261008e">
-<!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class） -->
+<!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class）
+     2026-10-13：bc-gunte-hero.css 新增環形字隱藏規則（.hero_slide_item_ttl text.bc-ring-hide）
+                 → 版號 ?v=20261008e 升為 ?v=20261013a（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
+     2026-10-13 稍後（使用者指示「尺寸改動」）：環形字字級 24px → calc(24px * 540/432)
+                 （＝viewBox 單位 30＝432 參考寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準）、
+                 描邊同步 ×1.25 → 版號再升為 ?v=20261013b。 -->
 <link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
-<link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20261008e">
+<link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20261013b">
 <!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
      BC 動態 footer（#bc-bg-footer）——markup 共用 partials/bc_bg_footer.html（單一來源）；
      全樣式 scoped 於 #bc-bg-footer，故與 about 頁共用同一份 CSS 不會互相影響。 -->
@@ -828,9 +857,12 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <script src="{% static 'js/bc-yama-header.js' %}?v=20260916b"></script>
 <!-- 2026-09-06：reviews 跑馬燈動畫（支援 data-bc-reviews-reverse 反向；GSAP base defer） -->
 <script src="{% static 'js/bc-reviews.js' %}?v=20260906a"></script>
-<!-- 2026-09-07：GUNTE Lab. hero 動畫（Splide 引擎 + hero 初始化） -->
+<!-- 2026-09-07：GUNTE Lab. hero 動畫（Splide 引擎 + hero 初始化）
+     2026-10-13（使用者指示：載入時就要看得到環形字）：Splide start 3 → 1
+     （Splide start 為 0-based；環形字只有第 2 張 BUTTER KING 顯示）
+     → 版號 ?v=20260907b 升為 ?v=20261013a -->
 <script src="{% static 'library/splide-4.1.3/dist/js/splide.min.js' %}"></script>
-<script src="{% static 'js/bc-gunte-hero.js' %}?v=20260907b"></script>
+<script src="{% static 'js/bc-gunte-hero.js' %}?v=20261013a"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
 <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
@@ -853,6 +885,8 @@ Hug in a Cup 時鐘）已移到本頁最上方當第一個 hero（見上方 <!--
 註解與 partials/bc_hero.html）。此處刻意覆寫為空，避免同一模組在頁面出現兩次
 （#bc-bg-footer 這個 id 重複時，bc-bg-footer.js 的 getElementById 只會綁到第一個，
  第二個會停在未初始化的 [data-reveal] 隱藏狀態）。
+2026-10-13（使用者指示）：該模組現為「第二塊 hero」（GUNTE hero 之後，見檔頭 10-13 註解）；
+本 block 的處置不變（仍覆寫為空）。
 也刻意「不」回退 base.html 的 .ftco-footer 靜態頁尾：#bc-bg-footer 已承接本頁
 全部的頁尾內容（社群、跑馬燈、© 版權），再放回 ftco 會變成兩套 footer 視覺並存。
 （若日後要恢復頁尾，把本 block 內容換回 include 'betweencoffee_delivery/partials/bc_bg_footer.html'

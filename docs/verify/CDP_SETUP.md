@@ -4,14 +4,26 @@
 > （`fetch /json/new?about:blank` 開分頁 → WebSocket `Input.dispatchMouseEvent` /
 > `Emulation.setDeviceMetricsOverride` / `Runtime.evaluate`）。**跑腳本前必須先有這個瀏覽器**。
 >
-> **最後更新**：2026-10-09（首頁 BC 動態模組 `#bc-bg-footer` 自頁尾移到最上方當第一個 hero、
-> GUNTE hero 下移 → `cdp_verify_footer_scroller.py` 追加 J11–J15：第一 section ＝ `.hero.bc-bg-hero`、
-> 載入即在首屏（`rect.top` 0）、`computed margin-top` 0px、DOM 順序在 `.bc-gunte-hero` 之前、
-> 且全頁已無 `footer` 元素；同日稍後追加 J16–J19：置頂 hero 去掉頁尾感（`index.html` extra_css 覆寫
+> **最後更新**：2026-10-13（首頁順序再反轉 —— GUNTE hero 回到「第一眼看到的第一屏」、BC 動態 hero
+> `#bc-bg-footer` 下移到它之後；`index.html` 的 `.bc-reviews-section` 加 `hidden` →
+> `cdp_verify_footer_scroller.py` 的 J11–J14 改寫：第一個「可見」section ＝ `.hero.bc-gunte-hero`、
+> DOM 第一個 section ＝ `.bc-reviews-section`（`display:none`）、`.bc-gunte-hero` 在文件順序上在
+> `.bc-bg-hero` 之前、載入時 GUNTE hero `rect.top` 0（`scrollY` 0、無 100px 空隙）且 `#bc-bg-footer`
+> 接在其後（不重疊）、兩塊 hero `computed margin-top` 皆 0px；同日另追加 K1–K4：GUNTE hero 環形字
+> markup 修正（非法的 `<hidden text>…</text>` → `<text class="bc-ring-hide">`，只有 BUTTER KING 顯示，
+> 由 `bc-gunte-hero.css` 的 `display:none` 隱藏）；同日稍後追加 K5–K7：環形字尺寸改由 viewBox 單位表達
+> （`font-size: 24px → calc(24px * 540 / 432)`＝30、`stroke-width: 1.5 → calc(1.5 * 540 / 432)`＝1.875、
+> 手機 2 → 2.5）＋ Splide **`start: 3 → 1`**（⚠ Splide 的 `start` 是 0-based 索引：實測 `start: 2`
+> 置中的是 `aria-label="3 of 7"`＝第 3 張「果香浅煎」、環形字仍被 `.bc-ring-hide` 隱藏 →
+> `start: 1` 才是 DOM 第 2 張 BUTTER KING）＝載入當下就看得見環形字；
+> 該檔項目數 **120 → 124 → 127**（PASS 127 / FAIL 0）。
+> 前次（2026-10-09）：BC 動態模組置頂當第一個 hero（J11–J15：第一 section ＝ `.hero.bc-bg-hero`、
+> 載入即在首屏、`margin-top` 0px、DOM 順序在 `.bc-gunte-hero` 之前、全頁已無 `footer` 元素）；
+> 同日稍後追加 J16–J19：置頂 hero 去掉頁尾感（`index.html` extra_css 覆寫
 > `.grid.is-footer{border-top:0 none}` ＋ `#bc-bg-footer`/`.footer{background:transparent}`）——
 > J16 分隔線已移除且 `padding-top` 未動、J17 黑底已透明（由頁面底色 `bg_4.jpg` 穿透）、
 > J18 覆寫錨點＝`SECTION.hero.bc-bg-hero` 只命中首頁、J19 `goto /about/` 反向守門（真頁尾仍保有
-> `1px solid` 分隔線 ＋ `#0e0e0e` 黑底）；該檔項目數 **111 → 116 → 120**。
+> `1px solid` 分隔線 ＋ `#0e0e0e` 黑底）；項目數 111 → 116 → 120。
 > 另新增 `cdp_shot_index_hero_viewport.py`＝新 hero 的 3 斷點視窗截圖（含捲到 GUNTE hero 的第二張））
 >
 > 沿革：2026-10-06 配合圖片斷言復原（行動／平板恢復顯示圖片）時確認，347 → 355。
@@ -20,6 +32,12 @@
 >       `.bc-fujiya-photo` 之後、後接既有 `.ftco-section-blank`；腳本項目數 355 → 367。
 >       2026-10-09 `cdp_verify_footer_scroller.py` 的跨頁基準自首頁 `/`（已改用 `#bc-bg-footer`）
 >       改指向 `/coffee_menu/`（唯一仍渲染靜態 `.ftco-footer` 的頁面），並新增 J 系列驗首頁保真。
+>       2026-10-13 首頁順序反轉（GUNTE hero 回第一屏、BC 動態 hero 下移）→ 該檔 J11–J14 改寫、
+>       新增 K1–K4（GUNTE 環形字 markup 修正），項目數 120 → 124。
+>       2026-10-13 稍後追加 K5–K7（環形字尺寸 ×1.25：改以 viewBox 單位 `calc(24px*540/432)`＝30、
+>       描邊同步 1.875；Splide `start 3 → 1` 讓載入當下置中的是 BUTTER KING；K7 量測分三段 ——
+>       逼 frame 前先記下載入時那張、用 `Page.captureScreenshot` 逼 frame 讓 CSS transition 前進、
+>       收尾補 `Page.close`），項目數 124 → 127。
 
 ## ⚠️ 本機踩雷：不要用 snap 版 chromium
 
@@ -75,9 +93,21 @@ curl -s --max-time 5 http://127.0.0.1:9222/json/version
 ```bash
 python3 docs/verify/cdp_verify_top_art.py          # 關於頁 /about/ 的 .top_art 模組（367 項）
 python3 docs/verify/cdp_verify_floating_cart.py    # 浮動購物車（5 斷點 × 4 頁，25 項）
-python3 docs/verify/cdp_verify_footer_scroller.py  # 首頁 BC 動態 hero ＋ /coffee_menu/ 頁尾跑馬燈（3 斷點，120 項）
-python3 docs/verify/cdp_shot_index_hero_viewport.py # 首頁新 hero 外觀截圖（3 斷點 × 2 張；只截圖＋印幾何，無斷言）
+python3 docs/verify/cdp_verify_footer_scroller.py  # 首頁 hero 順序（GUNTE 第一屏）＋ 環形字尺寸／載入可見性（K1–K7）＋ /coffee_menu/ 頁尾跑馬燈（3 斷點，127 項）
+python3 docs/verify/cdp_shot_index_hero_viewport.py # 首頁新 hero 外觀截圖（3 斷點 × 2 張；只截圖＋印幾何：ttlFont/ttlStroke、loadIndex/loadAriaLabel/loadRevealed、activeSlideIndex，無斷言）
 ```
+
+- ⚠️ **CSS transition 在本機 CDP「不會自己前進」→ 量「淡入後」的值必須逼 frame**：headful
+  （`DISPLAY=:0`）實測 `el.getAnimations()` 的 CSSTransition 會停在 `playState='running'` 但
+  `startTime=null`／`currentTime=0` 的 pending 狀態 → computed opacity 一直是過渡起點，等 15 秒也不動。
+  解法＝用 `Page.captureScreenshot`（`{"format":"jpeg","quality":10}`、結果丟棄）逼出 frame，
+  transition 才會前進（實測 0 → 0.30 → 1）：`cdp_verify_footer_scroller.py` 的 K7 與
+  `cdp_shot_index_hero_viewport.py` 都這樣做。
+  ⚠ 逼 frame 同時會讓 `setInterval`／Splide autoplay 真的走動 → 「載入時」的狀態必須在逼 frame
+  **之前**先記下（本輪做法：`window.__bcHeroLoadIndex`，斷言讀 `*_at_load` 欄位）。
+- ⚠️ **`Page.captureScreenshot` 可能卡死整支腳本**（等不到 frame，無回應）→ 一定要用
+  `asyncio.wait_for` 包逾時（本輪 3 秒）；且每個 `cdp_*.py` 跑完要 `Page.close` 自己開的分頁 ——
+  否則每跑一次留一個分頁，殘留多個背景分頁時 compositor 不再為本分頁產 frame（實測殘留 5 個時踩到）。
 
 - 腳本會自己 `PUT /json/new?about:blank` 開一個分頁、跑完 `Page.close`；**不會**動到 9222 那個
   `about:blank` 常駐分頁。
