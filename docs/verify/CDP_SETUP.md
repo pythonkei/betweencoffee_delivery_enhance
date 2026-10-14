@@ -4,7 +4,20 @@
 > （`fetch /json/new?about:blank` 開分頁 → WebSocket `Input.dispatchMouseEvent` /
 > `Emulation.setDeviceMetricsOverride` / `Runtime.evaluate`）。**跑腳本前必須先有這個瀏覽器**。
 >
-> **最後更新**：2026-10-13（首頁順序再反轉 —— GUNTE hero 回到「第一眼看到的第一屏」、BC 動態 hero
+> **最後更新**：2026-10-14（首頁 hero `#bc-clock` 加入 about 頁的天氣/時鐘元件（在左側 `{` 之上、
+> +30%，`--wc-scale:1.3`）＋ 照片列每張照片下方加「名稱 + highlight」。新增本清單第一支腳本
+> `cdp_verify_hero_weather.py`（**208 項**：A 結構／B 幾何（與 7 個時鐘子項 0 重疊、在 `{` 之上、
+> 欄位與改動前逐值相同）／C `--wc-scale` 與 ×1.3 逐值／D 內容填充／E 首頁 navbar 那顆仍隱藏且未縮放／
+> F 照片列文字（name＝img alt、highlight 品牌金、照片高度不變）／G `/about/` 反向守門）；
+> 另改寫 3 支既有腳本的過時斷言 → **cdp_verify_clock_braces.py 112/112**（E1 可見子項 7→8，
+> index 多出天氣那一格；about 仍 7）、**cdp_verify_hero_coffee_photos.py 128/128**
+> （D5 改驗 `<a>` display:flex、D7 改驗「img 橫向撐滿 `<a>`、高度 = `<a>` 高 − 文字高」，
+> 新增 D9–D11 文字斷言）、**cdp_verify_floating_cart.py 25/25**（`bc-weather.js` 的載入斷言由
+> 「非 about 不載入」改為「index 需載入、非 about/index 不載入」）；`cdp_verify_bg_footer.py` 與
+> `cdp_verify_footer_scroller.py`（127 項）回歸全過。驗證跑法：`bash` 先啟動本清單的 CDP 指令，
+> 再 `timeout 240 python3 docs/verify/cdp_verify_hero_weather.py`（約 50 秒／7 斷點）。）
+>
+> **前次（2026-10-13）**：首頁順序再反轉 —— GUNTE hero 回到「第一眼看到的第一屏」、BC 動態 hero
 > `#bc-bg-footer` 下移到它之後；`index.html` 的 `.bc-reviews-section` 加 `hidden` →
 > `cdp_verify_footer_scroller.py` 的 J11–J14 改寫：第一個「可見」section ＝ `.hero.bc-gunte-hero`、
 > DOM 第一個 section ＝ `.bc-reviews-section`（`display:none`）、`.bc-gunte-hero` 在文件順序上在
@@ -91,6 +104,7 @@ curl -s --max-time 5 http://127.0.0.1:9222/json/version
 ## 執行驗證
 
 ```bash
+python3 docs/verify/cdp_verify_hero_weather.py     # 首頁 hero #bc-clock 的天氣/時鐘元件（{ 之上、+30%）＋照片列名稱/highlight（7 斷點 × A–F ＋ /about/ 反向守門 G，208 項）
 python3 docs/verify/cdp_verify_top_art.py          # 關於頁 /about/ 的 .top_art 模組（367 項）
 python3 docs/verify/cdp_verify_floating_cart.py    # 浮動購物車（5 斷點 × 4 頁，25 項）
 python3 docs/verify/cdp_verify_footer_scroller.py  # 首頁 hero 順序（GUNTE 第一屏）＋ 環形字尺寸／載入可見性（K1–K7）＋ /coffee_menu/ 頁尾跑馬燈（3 斷點，127 項）
