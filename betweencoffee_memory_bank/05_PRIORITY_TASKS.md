@@ -1,5 +1,8 @@
 # 05_PRIORITY_TASKS
 
+> **提交／推送（2026-10-14）**: ✅ **10-13 批次（任務 #51：首頁順序反轉 GUNTE hero 回第一屏 ＋ GUNTE 環形字 markup／尺寸／載入可見性修正）已提交並推送 `origin/main`** —— commit **`bf495475`**（7 檔／1567 insertions／94 deletions；含新入庫的回復點 `docs/verify/patches/index_hero_20261013.patch`），推送範圍 `ec8fcadb..bf495475`（同批先前未 push 的 `0dc72714` 一併推上）⇒ `main` ＝ `origin/main`（`0 0`）。⚠ **未部署**：Render `autoDeploy=no` ⇒ 正式站仍為 `458e1780`（`dep-db67vu2jnfac73cp8tcg`）；待使用者決定是否以 API 觸發部署。
+
+
 > **部署（2026-10-12）**: ✅ **正式站已上線** — Render deploy **`dep-db67vu2jnfac73cp8tcg`**（status `live`、trigger **`api`**＝以 `RENDER_API_KEY` 觸發）於 2026-10-12 14:36→14:39（+08:00）完成，部署 commit **`458e1780`**（10-09 第二批：hero 照片列改「咖啡照＋連結」＋ `bc-bg-footer.css` 補 `<a>` 撐滿規則／CSS 版號升 `20261009a`）。生產驗證：`/` HTTP 200（90,949 bytes、7 張 hero 咖啡照、`bc-bg-footer.css?v=20261009a`）＋ `/about/` HTTP 200；啟動日誌僅 `django_site` 重複鍵告警（已知無害）。✅ 本機 worktree 先前的**未提交、未部署**改動（`index.html` GUNTE hero 段由 line 111 下移至 line 343（reviews 段上移至 line 109）／`bc_hero.html` 三處 `<h1>` 首字母大寫 ＋「Perfect / to Go」加 `hidden`），不在本次上線範圍；**2026-10-12 追加改動**：首頁 hero 咖啡照列 +50%、時鐘 ≤991px 顯示 `{ }` 改 9 欄、`#bc-bg-footer` 的 `w-node-*` id 語意化改名（`bc-bg-footer.css ?v=20261012a`）——**已於 2026-10-12 一併提交並 push `origin/main`（commit `6e29b447`、10 檔／607 insertions）**；**尚未部署**（正式站仍為 `458e1780`／`dep-db67vu2jnfac73cp8tcg`；`autoDeploy=off` ⇒ push 不會上線）。
 
 > **收尾（2026-10-08）**: **10 月批次（2026-10-02 ~ 10-08）已一次提交並推送 GitHub（`origin/main`，commit `18a14070`）＋ 記憶文件三處同步**（本檔／`04_SYSTEM_STATE.md`／`.clinerules/.clinerules`＋根目錄 `bc-context`）；✅ **已於 2026-10-12 部署上線**（見上行；deploy `dep-db67vu2jnfac73cp8tcg`／commit `458e1780`）。
