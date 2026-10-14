@@ -473,8 +473,8 @@ main → 生產環境 | develop → 開發環境 | feature/* → 功能開發 | 
 ├── [!] **未決（待使用者決定）** — 2026-10-14
 │   ├── [!] 是否觸發 **10-13 批次新部署**（`0dc72714`＋`bf495475`）？Render `autoDeploy=no` ⇒ push 不會上線，須以 API／dashboard 手動觸發（服務 `srv-d8jce6rtqb8s73897t4g` → `https://dashboard.render.com/web/srv-d8jce6rtqb8s73897t4g`）
 │   └── [!] `.bc-reviews-section` 現為 `hidden`（使用者自己的編輯）→ 待確認「移到 GUNTE hero 之後顯示（需同步 `docs/verify/cdp_verify_footer_scroller.py` 的 J11 斷言）」或「整段刪除」
-└── [x] 更正後文件 commit（純文件變更，無程式碼影響）— ✅ 2026-10-14：`git add` 四檔（`.clinerules/.clinerules`／`bc-context`／`04_SYSTEM_STATE.md`／`05_PRIORITY_TASKS.md`）一次提交 ⇒ `origin/main` 尖端＝本提交（本提交＝**`2a39a1ea` 的純文件子提交**，與 `2a39a1ea` 之於 `bf495475` 同一慣例）；複驗指令：`git rev-list --left-right --count main...origin/main` ⇒ `0 0`、`git status --short` 應為空
-    └── ⚠ **範圍註記（避免再產生一版落差）**：四份文件其餘各處所記「`origin/main` 尖端＝`2a39a1ea`」，皆指**本更正提交之前**的尖端；本提交之後的尖端一律以 `git log -1 --format='%h %s'` 讀取、**不寫死 hash**（寫死必然自落後一版 —— 這正是本輪要修的病灶）
+└── [x] 更正後文件 commit（純文件變更，無程式碼影響）— ✅ 2026-10-14：`git add` 四檔（`.clinerules/.clinerules`／`bc-context`／`04_SYSTEM_STATE.md`／`05_PRIORITY_TASKS.md`）一次提交得 **`e8cfc26f`**（＝**`2a39a1ea` 的純文件子提交**，與 `2a39a1ea` 之於 `bf495475` 同一慣例），已 `git push origin main`、推送後 `git status --short` 為空 ⇒ 當時 `origin/main` 尖端＝`e8cfc26f`；複驗指令：`git rev-list --left-right --count main...origin/main` ⇒ `0 0`、`git status --short` 應為空
+    └── ⚠ **範圍註記（避免再產生一版落差）**：四份文件其餘各處所記「`origin/main` 尖端＝`2a39a1ea`」，皆指**本更正提交之前**的尖端；本提交之後的尖端一律以 `git log -1 --format='%h %s'` 讀取、**不寫死 hash**（寫死必然自落後一版 —— 這正是本輪要修的病灶）；同一註記已同步寫入 `04_SYSTEM_STATE.md`／`05_PRIORITY_TASKS.md`／`bc-context` 三檔，各檔所載「更正提交＝`e8cfc26f`」亦為**歷史定值**、非當前尖端（本同步註記本身即又前移一版；已於同日第二次純文件提交／push）
 ```
 
 
