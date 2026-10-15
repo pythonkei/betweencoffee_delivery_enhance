@@ -28,6 +28,11 @@
        ≥992px 的 .footer-logo-list 高改為 480vw/ratio、.footer-logo-cell 上下內距歸零
        ⇒ 照片區高度與 cell 內距**不再等於改動前**（這是刻意的）；≤991px 逐值不變。
        本檔下方 F4 的期望值已同步改為 4.80 * w / 14.4（見 expected_img_h()）。
+       ⚠ 2026-10-15 稍後（使用者指示「桌機的咖啡照片太大、名稱與 highlight 太小」）：
+       ≥992px 的同一組三處宣告再改一次（照片區 480 → 400vw/ratio、照片寬 336 → 280vw/ratio、
+       名稱 16 → 20px、highlight 12 → 16px）⇒ 本檔 F4 期望值 4.80 → **4.00** * w / 14.4、
+       F5 文字區 49.59 → **60.39px**（＝8 + 20×1.3 + 4 + 16×1.4）、F7 字級 16/12 → **20/16**；
+       ≤991px（991／768／480／390）逐值不變。
 
 改動前基準（同腳本量的「before」，2026-10-14，改動前原始碼；供下方斷言對照）
   viewport      clock 高   { 的 y  欄數/照片位置            照片 img 高
@@ -42,6 +47,11 @@
     已改為 1440 = 480.00、1280 = 426.67、992 = 330.67（＝480vw/ratio；改動前分別是
     276.00 / 245.33 / 190.13）；其餘欄位（clock 高、`{` 的 y、欄數）與 ≤991px 四列
     逐值不變。F4 的期望值已改為 4.80 * w / 14.4（見 expected_img_h()）。
+  ⚠ 2026-10-15 稍後（照片縮小＋文字放大）：上表 ≥992px 三列的「照片 img 高」再改為
+    1440 = 400.00、1280 = 355.56、992 = 275.56（＝400vw/ratio；本輪之前為 480.00 / 426.67 /
+    330.67、原始為 276.00 / 245.33 / 190.13）；≤991px 四列與 clock 高、`{` 的 y、欄數仍逐值
+    不變（列變矮時時鐘數字／`{ }` 隨列內置中上移，那是置中的必然結果、不是欄位跑版）。
+    F4 的期望值已改為 4.00 * w / 14.4（見 expected_img_h()）。
 
 檢查項目（A–F 每個 viewport 各一輪；G 為 /about/ 反向守門）
   A. 結構：#bc-clock 的第一個子項是 #bc-clock-weather，其內恰 1 顆 .weather（含
@@ -70,9 +80,9 @@
      7 個 .hero_hand_item（每筆 alt 非空）＋ [data-bc-ring-caption] 內 7 筆
      [data-bc-ring-caption-item]，恰 1 筆 -current、name/highlight 非空、且與環的 -current
      同索引（顯示中的 name == 該筆 img alt）；文字區高度 = --bc-hero-caption-h（±1px）；
-     照片區（.footer-logo-list）高度 = ≥992px 480vw/ratio（@1440 = 480.00）／
+     照片區（.footer-logo-list）高度 = ≥992px 400vw/ratio（@1440 = 400.00）／
      ≤991px 180vw/ratio（＝改動前值，未動）（皆 ±1px）；
-     首頁已無舊輪播 hook（data-footer-logo=item）；font-size 為 16/12（≥992）、13/10（768–991）、
+     首頁已無舊輪播 hook（data-footer-logo=item）；font-size 為 20/16（≥992）、13/10（768–991）、
      11/9（≤767）；highlight 為品牌金 rgb(196, 155, 99)；name 為 Josefin Sans ＋ uppercase ＋ 白字。
   G. /about/ 反向守門：navbar 那顆仍 visible、未縮放（--wc-scale 1、view 80、仍被填充）；
      about 的真頁尾 #bc-bg-footer 內 0 顆 .weather、無 #bc-clock-weather；
@@ -99,11 +109,11 @@ SCALE_DESKTOP, SCALE_SHARED = 14.4, 3.93
 
 
 def expected_img_h(w):
-    """照片區（.footer-logo-list）高度：≥992px 為 `calc(480vw / 14.4)`
-    （2026-10-15 使用者指示「桌機咖啡照片放大到 1440 時 336×480」；改動前為 276vw/14.4）、
+    """照片區（.footer-logo-list）高度：≥992px 為 `calc(400vw / 14.4)`
+    （2026-10-15 使用者指示「桌機咖啡照片太大」；上一輪（同日稍早）為 480vw/14.4、原始為 276vw/14.4）、
     ≤991px 為 `calc(180vw / 3.93)`（未動）。
-    → ≥992px = 4.80 * viewportWidth、≤991px = 1.80 * viewportWidth。"""
-    return (4.80 * w / SCALE_DESKTOP) if w >= 992 else (1.80 * w / SCALE_SHARED)
+    → ≥992px = 4.00 * viewportWidth、≤991px = 1.80 * viewportWidth。"""
+    return (4.00 * w / SCALE_DESKTOP) if w >= 992 else (1.80 * w / SCALE_SHARED)
 
 MEASURE_JS = r"""
 (function(){
@@ -547,17 +557,17 @@ async def main():
                                    ring_alts[ring_cur] if ok_cur else None)))
             exp_h = expected_img_h(w)
             failures.append(check(
-                f"F4 照片區高度 = {exp_h:.2f}px ±1（≥992px = 480vw/ratio；≤991px = 改動前 180vw/ratio）",
+                f"F4 照片區高度 = {exp_h:.2f}px ±1（≥992px = 400vw/ratio；≤991px = 改動前 180vw/ratio）",
                 abs((m.get("photo_h") or 0) - exp_h) <= 1,
                 m.get("photo_h")))
-            exp_cap = (8 + 16 * 1.3 + 4 + 12 * 1.4) if w >= 992 else (
+            exp_cap = (8 + 20 * 1.3 + 4 + 16 * 1.4) if w >= 992 else (
                 (8 + 13 * 1.3 + 4 + 10 * 1.4) if w >= 768 else (8 + 11 * 1.3 + 4 + 9 * 1.4))
             failures.append(check(f"F5 文字區高度 = --bc-hero-caption-h（{exp_cap:.2f}px ±1）",
                                   abs((m.get("cap_h") or 0) - exp_cap) <= 1,
                                   (m.get("cap_h"), m.get("cap_h_var"))))
             failures.append(check("F6 首頁照片格已無舊輪播 hook（data-footer-logo=item）",
                                   m.get("legacy_items") == 0, m.get("legacy_items")))
-            exp_fs = (16.0, 12.0) if w >= 992 else ((13.0, 10.0) if w >= 768 else (11.0, 9.0))
+            exp_fs = (20.0, 16.0) if w >= 992 else ((13.0, 10.0) if w >= 768 else (11.0, 9.0))
             failures.append(check(f"F7 字級 {exp_fs[0]:.0f}/{exp_fs[1]:.0f}px（7 筆文字皆同）",
                                   len(caps) == 7
                                   and all(abs(c.get("name_fs", 0) - exp_fs[0]) <= 0.01

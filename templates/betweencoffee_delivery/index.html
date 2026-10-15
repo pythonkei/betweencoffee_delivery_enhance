@@ -852,15 +852,28 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         · --bc-hand-img-w（見下方 B1）193vw/ratio → 336vw/ratio（＝480 ÷ 1.4286）。
         ⇒ 逐斷點照片尺寸（寬×高）：1905 = 444.5×635.0、1440 = 336.0×480.0、
           1280 = 298.7×426.7、992 = 231.5×330.7；時鐘列（＝cell）高 @1440 419.6 → 529.6
-          （＝480 ＋ 文字區 49.6，內距已歸零）。 */
+          （＝480 ＋ 文字區 49.6，內距已歸零）。
+       2026-10-15 稍後（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」
+         → 同一組三處宣告再改一次（仍然只影響 ≥992px、≤991px 逐值不動；回歸斷言見 E7/E8）：
+         · .footer-logo-list（照片區高）480vw/ratio → 400vw/ratio（@1440 = 400px）；
+         · --bc-hand-img-w 336vw/ratio → 280vw/ratio（＝400 ÷ 1.4286，仍精確整除）；
+         · 文字：名稱 16px → 20px、highlight 12px → 16px（--bc-hero-caption-h 49.6 → 60.4）。
+         ⇒ 逐斷點照片尺寸（寬×高）：1905 = 370.4×529.1、1440 = 280×400、
+           1280 = 248.9×355.6、992 = 192.9×275.6；時鐘列（＝cell）高：1905 684.6 → 589.6、
+           1440 529.6 → 460.4、1280 476.3 → 415.9、992 380.3 → 335.9。
+         ⇒ 時鐘列頂端與 #bc-bg-footer 的文件座標仍然 Δ0；列變矮 ⇒ 時鐘數字／`{ }` 隨列內置中
+           上移 34.6px（@1440 document y 1280.69 → 1246.09），上一輪「左鄰居與 `{` 重疊」的
+           副作用也同步變小（見下方 B1 的 [與時鐘列子項的關係]）。 */
 .bc-bg-hero #bc-bg-footer .footer-logo-cell {
   width: calc(288vw / var(--_special-units---global--scale-ratio));
 }
 @media screen and (min-width: 992px) {
-  /* 桌機：照片區（＝照片高度）放大；內距歸零見下方 B1「[為什麼要 +14px]」之後的那條
-     （必須排在該規則之後才蓋得掉 —— 兩者特異度相同，CSS 以來源順序決勝） */
+  /* 桌機：照片區（＝照片高度）縮小；內距歸零見下方 B1「[為什麼要 +14px]」之後的那條
+     （必須排在該規則之後才蓋得掉 —— 兩者特異度相同，CSS 以來源順序決勝）
+     2026-10-15（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」
+     → 480vw/ratio → 400vw/ratio（@1440 = 480 → 400px、@1905 = 635 → 529.17px）。 */
   .bc-bg-hero #bc-bg-footer .footer-logo-list {
-    height: calc(480vw / var(--_special-units---global--scale-ratio));
+    height: calc(400vw / var(--_special-units---global--scale-ratio));
   }
 }
 @media screen and (max-width: 991px) {
@@ -883,10 +896,11 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      不繼承（×1）→ about 外觀零變動。
    [定位] 放進 #bc-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格：
      · align-self:start：貼齊該格頂端。該格高度＝整條時鐘列高（由照片格撐出；2026-10-15
-       照片放大後 @1440 = 529.6px，之前 419.6px），若用預設的 stretch 會撐滿整列並讓內容
-       垂直置中而與 { 重疊；center 更是直接疊上去。start 讓它恆在垂直置中的 { 之上
-       （實測 1440 間距 81.8px → 136.8px（2026-10-15 起 +55，因列高 +110 而 { 置中下移
-       55px、天氣留在列頂）；≤991px 各斷點與改動前逐值相同、全斷點皆不重疊）。
+       原始 419.6px → 照片放大 529.6px → 當日稍後照片縮小 460.4px），若用預設的 stretch
+       會撐滿整列並讓內容垂直置中而與 { 重疊；center 更是直接疊上去。start 讓它恆在垂直
+       置中的 { 之上（實測 1440 間距 81.8 → 136.8 → 102.2px：天氣留在列頂、{ 隨列高置中
+       ⇒ 列高 +110 時 +55、列高 −69.2 時 −34.6；≥992px 其餘斷點 1905 = 154.0、1280 = 84.4、
+       992 = 52.3px，皆遠大於 0；≤991px 各斷點與改動前逐值相同、全斷點皆不重疊）。
      · justify-self:center：與同格的 { 水平同中心（兩者都置中於欄 1）。
    [高度] .weather 在 hero 內改為 height:auto（見 bc-weather.css）：navbar 的
      height:100%／80px 是為 flex 容器設計，照搬到 grid 格會與 { 重疊。 */
@@ -923,9 +937,10 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      · --bc-hand-img-w：hero 是 calc(420px * --bc-gunte-scale)（該旋鈕只存在 .bc-gunte-hero
        內，照片格取用不到 ⇒ 兩邊實測皆 420px*0.55＝231×330）。照片寬一律取
        「照片區高 ÷ 1.4286」（咖啡照實測 840×1200 ⇒ 比例 1.429）：
-         ≥992px：480vw/ratio ÷ 1.429 ≈ 336vw/ratio（@1440 = 336×480、@1905 = 444.5×635）
+         ≥992px：400vw/ratio ÷ 1.429 ≈ 280vw/ratio（@1440 = 280×400、@1905 = 370.4×529.1）
          ≤991px：180vw/ratio ÷ 1.429 ≈ 126vw/ratio（@390 = 126×180；2026-10-15 未動）
-       （2026-10-15 前為 276vw/ratio ÷ 1.429 ≈ 193vw/ratio ⇒ @1440 = 193×276、@1905 = 255×365。）
+       （沿革：2026-10-15 之前為 276vw/ratio ÷ 1.429 ≈ 193vw/ratio ⇒ @1440 = 193×276、
+         @1905 = 255×365；同日稍早曾放大到 480 ÷ 1.429 ≈ 336vw/ratio ⇒ @1440 = 336×480。）
        ⇒ current 那張上下剛好貼齊照片區＝照片區高；半徑與 hero 同級（100vw），
          照片尺寸永遠由「照片區高」決定 ⇒ 改照片區高即等比改照片，兩者零落差。
    [圓心位置] .hero_hand 的定位點＝圓弧頂點（＝current 那張的中心）→ 水平放 50%
@@ -939,20 +954,24 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
        實測側邊鄰居的 rect 存在、圖片也已載入，卻被它整張切掉（elementFromPoint 命中的是
        #bc-clock）。故 bc-bg-footer.js 的 clip 揭示改為「跑完即釋放含 [data-bc-hand-ring]
        容器的 clip-path」（2026-10-14 稍後；/about/ 沒有該標記 ⇒ 行為不變）。
-   [與時鐘列子項的關係] 實測 @1440（2026-10-15 放大後；文件座標。時鐘數字／`{ }` 隨列高置中
-     ⇒ 比改動前下移 55px，但列的頂端與 #bc-bg-footer／.grid 完全不動，見下）：
-     · 時鐘數字 `00`/`46` 在 x 226–318／1106–1200 ⇒ 與鄰居「實際不透明內容」的水平範圍
-       （x 10–184／1241–1415）不交集 ⇒ 不重疊。（不透明內容 bbox 由原圖 alpha 推得：
-       x 18.8–80.6%、y 17.5–95.3%，即 840×1200 中咖啡本體。）
-     · `{`（x 85–107、y 466–545）與左鄰居的不透明內容 bbox 上緣（y 471 起）在 x 85–107
-       這條帶內重疊約 22px —— 改動前同一處是「擦過、留 +24px 空隙」。實測截圖
-       `_verify_clock_photos_1440_after.png`：`{` 完整可讀、咖啡白線稿尖端距字緣約 10px，
-       視覺上仍分離（咖啡照四周本是透明留白）。要更寬鬆只能改照片尺寸（半徑須維持
-       100vw＝與 hero 同值，見 cdp_verify_hero_coffee_photos.py 的 C5 斷言）。
+   [與時鐘列子項的關係] 實測 @1440（2026-10-15 照片縮小後；文件座標。時鐘數字／`{ }` 隨列高置中
+     ⇒ 比上一輪（照片放大）上移 34.6px、比原始（276vw/ratio）只下移 20.4px；列的頂端與
+     #bc-bg-footer／.grid 全程完全不動，見下）：
+     · 時鐘數字 `00`/`46` 在 x 229–315／1110–1196 ⇒ 與鄰居照片框（x −2–210／1215–1427）
+       的水平範圍不交集 ⇒ 不重疊（距離 19px／20px）。
+     · `{`（x 85–107）與左鄰居的**不透明內容**（依原圖 alpha 推得 bbox：x 18.8–80.6%、
+       y 17.5–95.3%，即 840×1200 中咖啡本體）：重疊帶高由上一輪的約 23px 縮到約 **13px**
+       （原始 276vw/ratio 時是「擦過、留 +24px 空隙」）。像素級量測（cdp_verify_clock_clash.py：
+       逐層隱藏後與基準相減取交集）@1440 為 **0 px**（照片真正畫到的像素與 `{` 不落在同一點）、
+       992 由 7 → 3 px、≤991px 逐值不變（991 仍 83px）；「明顯遮蔽 ≥2000px」六斷點 0 組。
+       截圖 `_verify_clock_photos_1440_after.png`：`{` 完整可讀、與咖啡白線稿分離。
+       要更寬鬆只能改照片尺寸（半徑須維持 100vw＝與 hero 同值，見
+       cdp_verify_hero_coffee_photos.py 的 C5 斷言）。
      · 文字列：鄰居 bbox 與它零交集（橫向距離更遠）；current 那張底緣仍精準貼齊文字列頂端。
-   [版面影響] 列高＝cell 高：@1440 419.6 → 529.6（+110）。cell 頂端、#bc-bg-footer、.grid.is-footer
-     三者文件座標完全不動（實測 Δ0）；只有列高向下長、下方內容（.footer-socials 等）等量下移，
-     頁面總高 +110（實測 docHeight 3826 → 3936）。≤991px 全部逐值不變（docHeight 相同）。 */
+   [版面影響] 列高＝cell 高：@1440 419.6（原始）→ 529.6（2026-10-15 照片放大）→ 460.4（同日稍後
+     照片縮小）。cell 頂端、#bc-bg-footer、.grid.is-footer 三者文件座標全程完全不動（實測 Δ0）；
+     列變高／變矮時下方內容（.footer-socials 等）等量移動，頁面總高 @1440 3826 → 3936 → 3867
+     （實測 docHeight）。≤991px 全部逐值不變（docHeight 亦相同）。 */
 
 .bc-bg-hero #bc-bg-footer .footer-logo-cell {
   /* [為什麼要 +14px] 原結構（7 個 .footer-logo-item，其中 :first-child 為 position:relative）
@@ -960,12 +979,14 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      （1905/1280/991/390 四斷點皆為 14.0px，與 vw 無關）。改為環形照片列後該間隙消失，
      時鐘列會矮 14px（內容再置中 ⇒ 整列下移 7px）。為維持照片區起點、時鐘列高度與
      改動前逐值相同，這裡把 14px 明確補回（≥992px 的內距來源＝--_units---u-40）。
-     ⚠ 2026-10-15 起：≥992px 由下方那條 media query 覆寫為 0（照片放大後這段補償不再需要），
-       本條只剩 ≤991px 在用（該斷點見檔尾的 u-24 版本）—— 逐值與改動前相同。 */
+     ⚠ 2026-10-15 起：≥992px 由下方那條 media query 覆寫為 0（照片放大後這段補償不再需要；
+       同日稍後照片改為縮小，仍維持 0），本條只剩 ≤991px 在用（該斷點見檔尾的 u-24 版本）
+       —— 逐值與改動前相同。 */
   padding-top: calc(var(--_units---u-40) + 14px);
 }
 /* 2026-10-15（使用者指示）：≥992px 把這段內距歸零 —— 留白「吸收」進照片區
-   （照片區 276vw/ratio → 480vw/ratio，見上方 A/B 段），照片頂緣因此上移到時鐘列頂端。
+   （照片區 276vw/ratio → 480vw/ratio（同日稍早放大）→ 400vw/ratio（同日稍後縮小），見上方 A/B 段），
+   照片頂緣因此上移到時鐘列頂端。
    [為什麼放在這裡] 本條與上方那條同特異度（1,2,0）⇒ 只能靠來源順序取勝；寫在上方會失效
      （會量到 padding-top 仍是 u-40 + 14px）。
    [≤991px] 不動：該斷點仍用上方這條（u-40 → u-24，見檔尾的 ≤991px 段），逐值與改動前相同。 */
@@ -982,8 +1003,9 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
   /* 與 hero 逐值相同的大圓（bc-hand-ring.css 的預設值就是 100vw；這裡明寫，讓
      「照片格也是同一顆整頁大圓」在原始碼裡看得見，日後改動時不會被誤當成筆誤刪掉）。 */
   --circle-radius: 100vw;
-  /* 照片區高（480vw/ratio）÷ 咖啡照比例 1.429 ＝ 剛好填滿照片區（見上方 B1） */
-  --bc-hand-img-w: calc(336vw / var(--_special-units---global--scale-ratio));
+  /* 照片區高（400vw/ratio）÷ 咖啡照比例 1.429 ＝ 剛好填滿照片區（見上方 B1）
+     2026-10-15（使用者指示）「照片太大」：336vw/ratio → 280vw/ratio（@1440 = 336×480 → 280×400） */
+  --bc-hand-img-w: calc(280vw / var(--_special-units---global--scale-ratio));
   top: 50%;
   left: 50%;
   /* [為什麼要 width:0] .hero_hand 是 absolute + left:50%，寬度若交給 shrink-to-fit，
@@ -1025,7 +1047,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      2026-10-14 稍後：文字區改為 .footer-logo-list（照片區）之後的自然流區塊
      ⇒ 兩者相加＝改動前的 .footer-logo-item 高度（照片區與時鐘列高度皆不變）。 */
 .bc-bg-hero #bc-bg-footer {
-  --bc-hero-caption-h: calc(8px + 16px * 1.3 + 4px + 12px * 1.4);
+  --bc-hero-caption-h: calc(8px + 20px * 1.3 + 4px + 16px * 1.4);
 }
 /* [2026-10-14 稍後移除] 原本這裡的兩條規則（`.footer-logo-item a.footer-logo-link`
    由 block 改 flex column、讓 img 撐滿「格子高 − 文字高」）隨照片格改為環形照片列而失效：
@@ -1040,8 +1062,13 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
    [與 bc-series.css 逐值相同] font-family / font-weight / text-transform /
      letter-spacing / color（highlight 的 var(--bc-gold,#c49b63) 由全站載入的
      bc-components.css :root 提供）。
-   [刻意不同] 字級（SERIES 26/16px 在 288px 的照片格太大 → 見下方三段）與
+   [刻意不同] 字級（SERIES 為 26/16px；本頁 ≥992px 為 20/16px、≤991px 13/10、≤767px 11/9 ——
+     名稱刻意比 SERIES 小，highlight 於 ≥992px 與 SERIES 同值 16px）與
      padding-top（8px；SERIES 為 16/12px）——後者須與 --bc-hero-caption-h 一致。
+     ⚠ 2026-10-15 稍後（使用者指示「名稱與 highlight 太小」）：≥992px 由 16/12 → 20/16
+       （≤991px 未動）⇒ --bc-hero-caption-h ≥992px 由 49.6 → 60.4（實測 60.39）。
+       實測 992（本頁最窄的桌機斷點、文字區可用寬 190px）：highlight 16px 的文字寬 152.6px、
+       name 20px 的文字寬 134.2px，兩者皆單行未折行（行高 22.4／26），仍有餘裕。
    [reset] margin/padding 必須一併改寫：bc-bg-footer.css 的
      `#bc-bg-footer p{margin:0;padding:0}`（1,0,1）會蓋掉 class 規則（0,1,0），
      用 #bc-bg-footer 前綴（1,1,0）才贏得了 reset。 */
@@ -1052,7 +1079,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
   margin: 0;
   font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 400;
   line-height: 1.3;
   letter-spacing: normal;
@@ -1062,7 +1089,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
   margin: 4px 0 0;
   font-family: "Noto Sans TC", sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0.06em;

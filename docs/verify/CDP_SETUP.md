@@ -4,7 +4,29 @@
 > （`fetch /json/new?about:blank` 開分頁 → WebSocket `Input.dispatchMouseEvent` /
 > `Emulation.setDeviceMetricsOverride` / `Runtime.evaluate`）。**跑腳本前必須先有這個瀏覽器**。
 >
-> **最後更新**：2026-10-15（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片放大 —— 1440 時
+> **最後更新**：2026-10-15 稍後（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片縮小 ＋
+> 名稱／highlight 字級放大 —— 1440 時 280×400、字級 20/16px**；使用者指示「桌機的咖啡照片太大、
+> 名稱與 highlight 太小」）：四處宣告全部落在 `templates/betweencoffee_delivery/index.html` 的
+> extra_css，**未動任何 .css／.js ⇒ 無版號變更**：① `.footer-logo-list` 高 `480vw/ratio` →
+> `400vw/ratio` ② `--bc-hand-img-w` `336vw/ratio` → `280vw/ratio`（＝400 ÷ 1.4286，仍精確整除）
+> ③ `.bc-series-caption-name` 16 → 20px ④ `.bc-series-caption-highlight` 12 → 16px
+> （⇒ `--bc-hero-caption-h` 49.59 → 60.39）。逐斷點照片尺寸：1905 = 370.41×529.14、1440 = 280×400、
+> 1280 = 248.88×355.53、992 = 192.88×275.53；列高（＝cell 高）：1905 684.59 → 589.55、
+> 1440 529.59 → 460.39、1280 476.25 → 415.94、992 380.25 → 335.94。**`.footer-logo-cell` 頂端／
+> `#bc-bg-footer`／`.grid.is-footer` 的文件座標全程 Δ0（實測）**，列變矮 ⇒ 下方內容等量上移、
+> 頁面總高 @1440 3936 → 3867；時鐘數字／`{ }` 隨列高置中**上移 34.6px**，天氣格 ↔ `{` 間距
+> 136.8 → 102.2px（≥992px 各斷點 1905 = 154.0／1280 = 84.4／992 = 52.3px，皆遠大於 0），
+> 連帶上一輪的已知代價「左鄰居咖啡與 `{` 重疊約 22px」縮到約 13px（像素級量測 @1440 本就是 0px、
+> 992 由 7 → 3px、照片×山大黃球 @1440 由 723 → 381px）；**≤991px（991／768／390）逐值不變**
+> （cell 寬高／list 高／caption 高／row 高／cell 內距／docHeight／字級 13-10／天氣↔`{` 間距全等於
+> 改動前）。驗證：`cdp_verify_hero_coffee_photos.py` **193/193**（EXPECT 四列改為新值、`exp_img_w()`
+> 336→280）＋回歸 `cdp_verify_hero_weather.py` **208/208**（F4 `4.80`→`4.00`×w/14.4、F5 `exp_cap`
+> 60.39、F7 字級 20/16）／`cdp_verify_clock_braces.py` **112/112**／`cdp_verify_bg_footer.py` PASS／
+> `cdp_verify_footer_scroller.py` **127/127**／`cdp_verify_clock_clash.py` **48 PASS / 2 FAIL**（2 條為
+> 1440 的瞬態殘留 1578px、與改動前基準同值 ⇒ 既有環境抖動；明顯遮蔽 ≥2000px = 0 組）＋
+> `manage.py check` 0 issue；截圖 `_verify_clock_photos_{1905,1440,1280,992,991,390}_{before,after}.png`
+> （`before` 由 CDP 注入上一輪舊值即時產生）。**僅本機：未 push、未部署**（正式站仍為 `ec8fcadb`）。
+> 原：2026-10-15（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片放大 —— 1440 時
 > 336×480**；使用者指示「桌機的咖啡照片放大到 1440 時 336×480，與 GUNTE hero 視覺同級」）：
 > 三處宣告全部落在 `templates/betweencoffee_delivery/index.html` 的 extra_css，**未動任何 .css／.js
 > ⇒ 無版號變更**：① `.bc-bg-hero … .footer-logo-cell` 於 `@media (min-width:992px)` 內
