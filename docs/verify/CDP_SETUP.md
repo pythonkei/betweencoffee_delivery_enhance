@@ -25,7 +25,7 @@
 > `cdp_verify_footer_scroller.py` **127/127**／`cdp_verify_clock_clash.py` **48 PASS / 2 FAIL**（2 條為
 > 1440 的瞬態殘留 1578px、與改動前基準同值 ⇒ 既有環境抖動；明顯遮蔽 ≥2000px = 0 組）＋
 > `manage.py check` 0 issue；截圖 `_verify_clock_photos_{1905,1440,1280,992,991,390}_{before,after}.png`
-> （`before` 由 CDP 注入上一輪舊值即時產生）。**僅本機：未 push、未部署**（正式站仍為 `ec8fcadb`）。
+> （`before` 由 CDP 注入上一輪舊值即時產生）。**僅本機：已提交 `373f3bfd`（7 檔／142 insertions／60 deletions）、未 push、未部署**（正式站仍為 `ec8fcadb`）。
 > 原：2026-10-15（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片放大 —— 1440 時
 > 336×480**；使用者指示「桌機的咖啡照片放大到 1440 時 336×480，與 GUNTE hero 視覺同級」）：
 > 三處宣告全部落在 `templates/betweencoffee_delivery/index.html` 的 extra_css，**未動任何 .css／.js
