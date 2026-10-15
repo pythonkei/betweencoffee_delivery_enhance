@@ -6,8 +6,8 @@
   1. templates/.../partials/bc_hero.html
      · #bc-clock 內、{ 之前新增 <div id="bc-clock-weather" class="bc-clock-weather"
        data-reveal="clip-down"> ＋ 與 nav.html:33-48 逐字相同的 .weather（自帶 .weather--visible）。
-     · 照片列 7 格：<a> 加 class="footer-logo-link"、內容改為 img ＋
-       .bc-series-caption.footer-logo-caption（-name / -highlight）。
+     · 照片格 7 筆（2026-10-14 稍後再改為 GUNTE hero 的環形照片列縮小版 ——
+       .hero_hand / .hero_hand_item ＋ 一組 7 筆「名稱/highlight」，只有 -current 顯示）。
   2. static/css/bc-weather.css
      · 幾何規則由 `#ftco-navbar .weather` 擴為 `#ftco-navbar .weather, #bc-bg-footer .weather`，
        所有尺寸改為 calc(原值 * var(--wc-scale, 1))（先例＝bc-reviews.css 的 --rv-scale）；
@@ -20,9 +20,14 @@
      · #bc-clock-weather{grid-area:1/1/2/2;align-self:start;justify-self:center}、
        ≥992px 把 #bc-clock-brace-open 釘回 1/1/2/2（否則自動置位會整列跑版）、
        .weather{--wc-scale:1.3}；
-     · .footer-logo-link{flex column}、img{flex:1 1 auto;height:auto;min-height:0}、
-       .footer-logo-caption 字級與顏色（bc-series.css 只載入 about 頁，故本頁自帶同值宣告）；
-       .footer-logo-item 高度 += --bc-hero-caption-h（照片高度維持不變）。
+     · .footer-logo-caption 字級與顏色（bc-series.css 只載入 about 頁，故本頁自帶同值宣告）；
+       2026-10-14 稍後：照片格改為環形照片列（見 docs/verify/cdp_verify_hero_coffee_photos.py），
+       高度改掛 .footer-logo-list（照片區）＋ .bc-ring-caption 7 筆文字（只顯示一筆）
+       ⇒ 兩者相加仍等於改動前的 .footer-logo-item 高度。
+       ⚠ 2026-10-15（使用者指示「桌機（≥992px）咖啡照片放大到 1440 時 336×480」）：
+       ≥992px 的 .footer-logo-list 高改為 480vw/ratio、.footer-logo-cell 上下內距歸零
+       ⇒ 照片區高度與 cell 內距**不再等於改動前**（這是刻意的）；≤991px 逐值不變。
+       本檔下方 F4 的期望值已同步改為 4.80 * w / 14.4（見 expected_img_h()）。
 
 改動前基準（同腳本量的「before」，2026-10-14，改動前原始碼；供下方斷言對照）
   viewport      clock 高   { 的 y  欄數/照片位置            照片 img 高
@@ -33,6 +38,10 @@
   768x1024      445.53     473.0   同上                     351.75
   480x900       278.47     426.0   同上                     219.84
   390x844       226.25     402.0   同上                     178.63
+  ⚠ 2026-10-15「桌機咖啡照片放大到 1440 時 336×480」⇒ 上表 ≥992px 三列的「照片 img 高」
+    已改為 1440 = 480.00、1280 = 426.67、992 = 330.67（＝480vw/ratio；改動前分別是
+    276.00 / 245.33 / 190.13）；其餘欄位（clock 高、`{` 的 y、欄數）與 ≤991px 四列
+    逐值不變。F4 的期望值已改為 4.80 * w / 14.4（見 expected_img_h()）。
 
 檢查項目（A–F 每個 viewport 各一輪；G 為 /about/ 反向守門）
   A. 結構：#bc-clock 的第一個子項是 #bc-clock-weather，其內恰 1 顆 .weather（含
@@ -57,11 +66,14 @@
      year 有值但 computed display:none、溫度為數字、icon <img> 存在且 naturalWidth > 0。
   E. 首頁 navbar 那顆不受影響：visibility hidden、.view 寬 80（≥992）/38（≤991，
      皆未縮放）、仍被填充。
-  F. 照片列文字：7 格皆有 .footer-logo-caption；每格 name == img alt、highlight 非空；
-     輪播恰 1 格顯示，幾何類斷言只驗顯示格（其餘 display:none、rect 為 0）；
-     font-size 為 16/12（≥992）、13/10（768–991）、11/9（≤767）；highlight 為品牌金
-     rgb(196, 155, 99)；name 為 Josefin Sans ＋ uppercase ＋ 白字；<a> computed display flex；
-     顯示格高度 = 照片基準高 + 文字高（±1px），照片高 = 基準值（±1px）。
+  F. 照片格（2026-10-14 改版：GUNTE hero 環形照片列縮小版 ＋ 單一「當前咖啡」文字）：
+     7 個 .hero_hand_item（每筆 alt 非空）＋ [data-bc-ring-caption] 內 7 筆
+     [data-bc-ring-caption-item]，恰 1 筆 -current、name/highlight 非空、且與環的 -current
+     同索引（顯示中的 name == 該筆 img alt）；文字區高度 = --bc-hero-caption-h（±1px）；
+     照片區（.footer-logo-list）高度 = ≥992px 480vw/ratio（@1440 = 480.00）／
+     ≤991px 180vw/ratio（＝改動前值，未動）（皆 ±1px）；
+     首頁已無舊輪播 hook（data-footer-logo=item）；font-size 為 16/12（≥992）、13/10（768–991）、
+     11/9（≤767）；highlight 為品牌金 rgb(196, 155, 99)；name 為 Josefin Sans ＋ uppercase ＋ 白字。
   G. /about/ 反向守門：navbar 那顆仍 visible、未縮放（--wc-scale 1、view 80、仍被填充）；
      about 的真頁尾 #bc-bg-footer 內 0 顆 .weather、無 #bc-clock-weather；
      時鐘列仍為 8 欄、`{` 的 x/寬與改動前一致。
@@ -82,14 +94,16 @@ BASE = "http://localhost:8081"
 ROOT = "/home/kei/Desktop/betweencoffee_delivery_enhance"
 CDP = "http://localhost:9222"
 
-# 照片高度的基準斷點（= bc-bg-footer.css 的 `276vw / scale-ratio`、≤991px 180vw）
+# 照片高度基準（= bc-bg-footer.css 的 `180vw / scale-ratio`，僅剩 ≤991px 在用的值）
 SCALE_DESKTOP, SCALE_SHARED = 14.4, 3.93
 
 
 def expected_img_h(w):
-    """照片基準高度：CSS 是 `calc(276vw / 14.4)`（≤991px 為 180vw/3.93）
-    → 276vw = 2.76 * viewportWidth。"""
-    return (2.76 * w / SCALE_DESKTOP) if w >= 992 else (1.80 * w / SCALE_SHARED)
+    """照片區（.footer-logo-list）高度：≥992px 為 `calc(480vw / 14.4)`
+    （2026-10-15 使用者指示「桌機咖啡照片放大到 1440 時 336×480」；改動前為 276vw/14.4）、
+    ≤991px 為 `calc(180vw / 3.93)`（未動）。
+    → ≥992px = 4.80 * viewportWidth、≤991px = 1.80 * viewportWidth。"""
+    return (4.80 * w / SCALE_DESKTOP) if w >= 992 else (1.80 * w / SCALE_SHARED)
 
 MEASURE_JS = r"""
 (function(){
@@ -183,31 +197,54 @@ MEASURE_JS = r"""
                 img_nw: (nq('.icon img') || {}).naturalWidth || 0 };
   }
 
-  /* ---- F 照片列文字 ---- */
-  var items = Array.prototype.slice.call(
-      document.querySelectorAll('#bc-bg-footer [data-footer-logo="item"]'));
-  out.items = items.map(function(el){
-    var a = el.querySelector('a'), im = el.querySelector('img');
-    var cap = el.querySelector('.footer-logo-caption');
-    var nm = cap ? cap.querySelector('.bc-series-caption-name') : null;
-    var hl = cap ? cap.querySelector('.bc-series-caption-highlight') : null;
+  /* ---- F 照片格（2026-10-14 改版：環形照片列 ＋ 單一「當前咖啡」文字） ----
+     照片格不再是「7 格輪播、每格一組名稱/highlight」，而是 GUNTE hero 的環形照片列
+     （7 個 .hero_hand_item）＋ 一組 7 筆的名稱/highlight（只有 -current 那筆顯示）。
+     故 F 改驗：環形筆數/alt、文字 7 筆且恰 1 筆顯示、該筆與環的 -current 同索引、
+     文字高度＝--bc-hero-caption-h、照片區高度＝改動前照片高度、字級/顏色斷點。 */
+  var ringItems = Array.prototype.slice.call(
+      document.querySelectorAll('#bc-clock-photos .hero_hand_item'));
+  out.ring_count = ringItems.length;
+  out.ring_alts = ringItems.map(function(el){
+    var im = el.querySelector('img');
+    return im ? (im.getAttribute('alt') || '') : null;
+  });
+  out.ring_cur = (function(){
+    var k = -1;
+    ringItems.forEach(function(el, i){ if (el.classList.contains('-current')) k = i; });
+    return k;
+  })();
+  var caps = Array.prototype.slice.call(
+      document.querySelectorAll('#bc-clock-photos [data-bc-ring-caption-item]'));
+  out.caps = caps.map(function(el){
+    var nm = el.querySelector('.bc-series-caption-name');
+    var hl = el.querySelector('.bc-series-caption-highlight');
     var cnm = nm ? getComputedStyle(nm) : null, chl = hl ? getComputedStyle(hl) : null;
-    return { item: r(el), a: r(a), img: r(im), cap: r(cap),
-             vis: getComputedStyle(el).display !== 'none',
-             a_disp: a ? getComputedStyle(a).display : null,
-             a_cls: a ? a.className : null,
-             img_cls: im ? im.className : null,
-             img_h: im ? +im.getBoundingClientRect().height.toFixed(2) : 0,
-             alt: im ? (im.getAttribute('alt') || '') : null,
+    return { cur: el.classList.contains('-current'),
              name: nm ? nm.textContent : null, hl: hl ? hl.textContent : null,
              name_fs: cnm ? parseFloat(cnm.fontSize) : 0,
              hl_fs: chl ? parseFloat(chl.fontSize) : 0,
              hl_color: chl ? chl.color : null,
              name_ff: cnm ? cnm.fontFamily : null,
              name_tt: cnm ? cnm.textTransform : null,
-             name_color: cnm ? cnm.color : null,
-             cap_h: cap ? +cap.getBoundingClientRect().height.toFixed(2) : 0 };
+             name_color: cnm ? cnm.color : null };
   });
+  out.caps_cur = (function(){
+    var k = -1;
+    caps.forEach(function(el, i){ if (el.classList.contains('-current')) k = i; });
+    return k;
+  })();
+  out.cap_vis = caps.filter(function(el){ return el.classList.contains('-current'); }).length;
+  out.cap_h = (function(){
+    var c = document.querySelector('#bc-clock-photos .footer-logo-caption');
+    return c ? +c.getBoundingClientRect().height.toFixed(2) : 0;
+  })();
+  out.photo_h = (function(){
+    var a = document.querySelector('#bc-clock-photos .footer-logo-list');
+    return a ? +a.getBoundingClientRect().height.toFixed(2) : 0;
+  })();
+  out.legacy_items = document.querySelectorAll(
+      '#bc-clock-photos [data-footer-logo="item"]').length;
   var root = document.getElementById('bc-bg-footer');
   out.cap_h_var = root
       ? getComputedStyle(root).getPropertyValue('--bc-hero-caption-h').trim() : '';
@@ -312,7 +349,15 @@ async def main():
             await asyncio.sleep(0.4)
 
         async def shot(name):
-            res = await send(msg("Page.captureScreenshot", {"format": "png"}))
+            # 2026-10-14：本機 CDP 的 Page.captureScreenshot 偶爾會卡死（等不到 frame、永不回應；
+            # 見 CDP_SETUP.md 的踩雷段）。截圖只是視覺證據、不參與斷言 ⇒ 包 20s 逾時，逾時就跳過，
+            # 不讓整支腳本卡在單張截圖上（此前實測會在 1280 這一張無限等待）。
+            try:
+                res = await asyncio.wait_for(
+                    send(msg("Page.captureScreenshot", {"format": "png"})), 20)
+            except asyncio.TimeoutError:
+                print(f"   shot -> SKIP（captureScreenshot 逾時 20s：{name}）")
+                return
             data = res.get("data")
             if data:
                 path = f"{ROOT}/_verify_hero_weather_{name}.png"
@@ -476,64 +521,57 @@ async def main():
 
 
             # ---------- F 照片列文字 ----------
-            items = m.get("items") or []
-            # 輪播一次只顯示 1 格（其餘 display:none → rect 全 0）→ 幾何類斷言只驗
-            # 「顯示中」那格；樣式（font-size/color）則 7 格全驗。
-            vis_items = [i for i in items if i.get("vis")]
-            failures.append(check("F1 7 格皆有 .footer-logo-caption（name ＋ highlight）"
-                                  "且 img 維持 .img.contain",
-                                  len(items) == 7
-                                  and all(i.get("cap") and (i.get("name") or "").strip()
-                                          and (i.get("hl") or "").strip()
-                                          and "img" in (i.get("img_cls") or "")
-                                          and "contain" in (i.get("img_cls") or "")
-                                          for i in items),
-                                  len(items)))
-            failures.append(check("F2 每格 name == img alt（同源 hero_coffees.N.name）",
-                                  len(items) == 7
-                                  and all(i.get("name") == i.get("alt") for i in items),
-                                  [(i.get("name"), i.get("alt")) for i in items[:3]]))
-            failures.append(check("F3 恰 1 格顯示（輪播）且 <a> 為 flex column、撐滿格子（<= 1px）",
-                                  len(vis_items) == 1
-                                  and all(i.get("a_disp") == "flex"
-                                          and "footer-logo-link" in (i.get("a_cls") or "")
-                                          and abs((i.get("a") or {}).get("h", 0)
-                                                  - (i.get("item") or {}).get("h", 0)) <= 1
-                                          for i in vis_items),
-                                  [(i.get("a_disp"), i.get("a_cls"), i.get("item")) for i in vis_items]))
+            # 照片格＝環形照片列（2026-10-14 改版）：7 個 .hero_hand_item ＋ 一組 7 筆文字，
+            # 只有 -current 那筆顯示（索引由 GUNTE hero 的 Splide 推播；環形幾何/同步的細節由
+            # docs/verify/cdp_verify_hero_coffee_photos.py 專責驗）。
+            ring_alts = m.get("ring_alts") or []
+            caps = m.get("caps") or []
+            vis_caps = [c for c in caps if c.get("cur")]
+            failures.append(check("F1 環形照片列 7 筆、每筆都有非空 alt",
+                                  m.get("ring_count") == 7 and len(ring_alts) == 7
+                                  and all((a or "").strip() for a in ring_alts),
+                                  (m.get("ring_count"), ring_alts[:2])))
+            failures.append(check("F2 文字列 7 筆、恰 1 筆 -current、name/highlight 皆非空",
+                                  len(caps) == 7 and m.get("cap_vis") == 1
+                                  and all((c.get("name") or "").strip()
+                                          and (c.get("hl") or "").strip() for c in caps),
+                                  (len(caps), m.get("cap_vis"))))
+            ring_cur = m.get("ring_cur")
+            ok_cur = (0 <= (ring_cur if ring_cur is not None else -1) < len(ring_alts))
+            failures.append(check("F3 顯示中的 name == 環形 -current 那筆 img alt（兩者同索引）",
+                                  ok_cur and m.get("caps_cur") == ring_cur and bool(vis_caps)
+                                  and (vis_caps[0].get("name") or "").strip()
+                                  == (ring_alts[ring_cur] or "").strip(),
+                                  (m.get("caps_cur"), ring_cur,
+                                   (vis_caps[0].get("name") if vis_caps else None),
+                                   ring_alts[ring_cur] if ok_cur else None)))
             exp_h = expected_img_h(w)
-            failures.append(check(f"F4 顯示格照片高度不變（基準 {exp_h:.2f}px ±1）",
-                                  len(vis_items) == 1
-                                  and all(abs(i.get("img_h", 0) - exp_h) <= 1
-                                          for i in vis_items),
-                                  [i.get("img_h") for i in vis_items]))
+            failures.append(check(
+                f"F4 照片區高度 = {exp_h:.2f}px ±1（≥992px = 480vw/ratio；≤991px = 改動前 180vw/ratio）",
+                abs((m.get("photo_h") or 0) - exp_h) <= 1,
+                m.get("photo_h")))
             exp_cap = (8 + 16 * 1.3 + 4 + 12 * 1.4) if w >= 992 else (
                 (8 + 13 * 1.3 + 4 + 10 * 1.4) if w >= 768 else (8 + 11 * 1.3 + 4 + 9 * 1.4))
-            failures.append(check(f"F5 顯示格高度 = 照片 + 文字（{exp_cap:.2f}px ±1）",
-                                  len(vis_items) == 1
-                                  and all(abs((i.get("item") or {}).get("h", 0)
-                                              - exp_h - exp_cap) <= 1 for i in vis_items),
-                                  [i.get("item", {}).get("h") for i in vis_items]))
+            failures.append(check(f"F5 文字區高度 = --bc-hero-caption-h（{exp_cap:.2f}px ±1）",
+                                  abs((m.get("cap_h") or 0) - exp_cap) <= 1,
+                                  (m.get("cap_h"), m.get("cap_h_var"))))
+            failures.append(check("F6 首頁照片格已無舊輪播 hook（data-footer-logo=item）",
+                                  m.get("legacy_items") == 0, m.get("legacy_items")))
             exp_fs = (16.0, 12.0) if w >= 992 else ((13.0, 10.0) if w >= 768 else (11.0, 9.0))
-            failures.append(check(f"F6 字級 {exp_fs[0]:.0f}/{exp_fs[1]:.0f}px",
-                                  len(items) == 7
-                                  and all(abs(i.get("name_fs", 0) - exp_fs[0]) <= 0.01
-                                          and abs(i.get("hl_fs", 0) - exp_fs[1]) <= 0.01
-                                          for i in items),
-                                  [(i.get("name_fs"), i.get("hl_fs")) for i in items[:2]]))
-            failures.append(check("F7 highlight 為品牌金（rgb(196, 155, 99)）",
-                                  len(items) == 7
-                                  and all(i.get("hl_color") == "rgb(196, 155, 99)"
-                                          for i in items),
-                                  [i.get("hl_color") for i in items[:3]]))
-            failures.append(check("F8 name 為 Josefin Sans ＋ uppercase ＋ 白字",
-                                  len(items) == 7
-                                  and all("Josefin Sans" in (i.get("name_ff") or "")
-                                          and i.get("name_tt") == "uppercase"
-                                          and i.get("name_color") == "rgb(255, 255, 255)"
-                                          for i in items),
-                                  [(i.get("name_ff"), i.get("name_tt"),
-                                    i.get("name_color")) for i in items[:2]]))
+            failures.append(check(f"F7 字級 {exp_fs[0]:.0f}/{exp_fs[1]:.0f}px（7 筆文字皆同）",
+                                  len(caps) == 7
+                                  and all(abs(c.get("name_fs", 0) - exp_fs[0]) <= 0.01
+                                          and abs(c.get("hl_fs", 0) - exp_fs[1]) <= 0.01
+                                          for c in caps),
+                                  [(c.get("name_fs"), c.get("hl_fs")) for c in caps[:2]]))
+            failures.append(check("F8 highlight 品牌金 ＋ name Josefin Sans/uppercase/白字",
+                                  len(caps) == 7
+                                  and all(c.get("hl_color") == "rgb(196, 155, 99)"
+                                          and "Josefin Sans" in (c.get("name_ff") or "")
+                                          and c.get("name_tt") == "uppercase"
+                                          and c.get("name_color") == "rgb(255, 255, 255)"
+                                          for c in caps),
+                                  [(c.get("hl_color"), c.get("name_color")) for c in caps[:2]]))
             await shot(name)
 
 

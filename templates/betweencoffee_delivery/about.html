@@ -1371,10 +1371,13 @@
 <!-- florporto 產品模組捲動 crossfade / rail（自 index 移入） -->
 <script src="{% static 'js/bc-flor-menu.js' %}?v=20260907b"></script>
 <!-- 2026-10-07: BC 動態 footer 所需的 GSAP 外掛（SplitText / CustomEase 於 gsap 3.13 起免費；
-     gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可） -->
+     gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可）
+     2026-10-14 稍後：bc-bg-footer.js 新增「clip-down 揭示跑完後釋放含環形照片列容器的
+     clip-path」（首頁整頁扇形用）→ 版號同步升為 20261014b；本頁無 [data-bc-hand-ring]，
+     該分支不會命中 ⇒ /about/ 的進場與裁切行為完全不變。 -->
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261008a"></script>
+<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261014b"></script>
 <!-- 2026-10-12: hero-description-wrapper 逐字變色動畫所需函式庫（SplitType 0.3.3，與原站同版；
      以 defer 於本檔前載入 → 執行順序 gsap → ScrollTrigger → SplitText → CustomEase → SplitType → 本模組） -->
 <script defer src="{% static 'js/vendor/split-type.min.js' %}"></script>

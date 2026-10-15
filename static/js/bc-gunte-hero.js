@@ -44,19 +44,20 @@
       easing: 'ease'
     });
 
-    var handList = root.querySelector('#hero_hand_list');
-    var handItems = handList ? handList.querySelectorAll('.hero_hand_item') : [];
     var navButtons = root.querySelectorAll('#hero_nav button');
     var slides = root.querySelectorAll('.splide__slide');
 
-    function rotateHeroHand(index) {
-      if (!handList || !handItems.length) return;
-      var targetAngle = index * -25;
-      handList.style.transform = 'rotate(' + targetAngle + 'deg)';
-      Array.prototype.forEach.call(handItems, function (item, i) {
-        item.classList.toggle('-current', i === index);
-      });
-    }
+    /* 2026-10-14（使用者指示）：環形照片列的驅動改由共用模組 BC_HAND_RING
+       （static/js/bc-hand-ring.js）負責 —— 本 hero 與其下方 BC 動態 hero 的照片格
+       （#bc-clock-photos）註冊在同一個模組上，索引一律由本 hero 的 Splide 推播
+       （見 updateSlideStates → goAll），兩邊因此永遠同一支咖啡。
+       [為何註冊在 mount 之前] 'mounted' 事件就會呼叫 updateSlideStates → 屆時環必須已註冊，
+         第一次的索引（start: 1）才會一起套上去。
+       [旋轉公式/時機] 原本的 rotateHeroHand() 內容（rotate(index × -25deg) ＋ -current）
+         已原封不動移進模組；過渡由模組的 .is-ready 控制（＝原 :has(.is-initialized)）。
+       [載入順序] bc-hand-ring.js 於 index.html 緊接本檔之前載入（同步）→ 一定已存在；
+         仍保留存在性檢查，模組缺失時只是不旋轉，不影響 Splide 本身。 */
+    if (window.BC_HAND_RING) window.BC_HAND_RING.register(root.querySelector('.hero_hand'));
 
     function updateSlideStates() {
       Array.prototype.forEach.call(slides, function (slide) {
@@ -70,7 +71,6 @@
 
         if (current === splideHero.index + 1) {
           slide.classList.add('state-active');
-          rotateHeroHand(splideHero.index);
         } else if (current === (splideHero.index + 2 <= total ? splideHero.index + 2 : 1)) {
           slide.classList.add('state-next');
         } else if (current === (splideHero.index === 0 ? total : splideHero.index)) {
@@ -81,6 +81,9 @@
       Array.prototype.forEach.call(navButtons, function (button, index) {
         button.classList.toggle('-current', index === splideHero.index);
       });
+
+      // 環形照片列（hero ＋ 首頁照片格）跟到同一個索引
+      if (window.BC_HAND_RING) window.BC_HAND_RING.goAll(splideHero.index);
     }
 
     Array.prototype.forEach.call(navButtons, function (button, index) {

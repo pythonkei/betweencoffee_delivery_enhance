@@ -1,0 +1,87 @@
+/* ============================================================================
+   bc-hand-ring.css — 「手套圓」環形照片列（共用模組）
+   ----------------------------------------------------------------------------
+   來源：static/css/bc-gunte-hero.css 的 .hero_hand 系列（GUNTE Lab. 首頁 hero 移植）。
+   2026-10-14（使用者指示）：抽成獨立模組，讓首頁 GUNTE hero 與其下方 BC 動態 hero 的
+   照片格（#bc-clock-photos）共用同一組環形結構與旋轉動畫，並由「同一個索引」
+   （GUNTE hero 的 Splide index）驅動 —— 兩邊都是同一顆「整頁大圓」（--circle-radius
+   預設 100vw），差別只在圓心位置與照片寬度（hero 由 .bc-gunte-hero 覆寫；照片格由
+   index.html 以 #bc-clock-photos 覆寫），兩邊永遠指著同一支咖啡。
+   （2026-10-14 稍後：使用者指正照片格不該是「縮小版、裁在格子裡」（區域太小），
+    指定「動畫展示是使用整個頁面的，參考 hero_hand」⇒ 照片格回歸 100vw。）
+
+   [結構]
+     .hero_hand                       定位點＝圓心正上方 R 處（＝環的頂點/apex）
+       └ .hero_hand_list              2R × 2R 的旋轉盤（transform: rotate(index × -25deg)）
+           └ 7 × .hero_hand_item      style="--angle:-90|-65|…|60"（每格差 25°）
+               └ <a href="…"><img></a> -current 那格 scale 1，其餘 0.5
+
+   [為什麼類別名沿用 hero_hand / hero_hand_list / hero_hand_item]
+     兩邊（GUNTE hero 與照片格）共用同一組 markup 與同一份 JS；改名只會製造 diff 風險。
+     本檔已把選擇器「去前綴」（不再限定在 .bc-gunte-hero 內）⇒ 任何容器都能用。
+     hero 專屬的部分留在 bc-gunte-hero.css：進場動畫（.-load）、圓心高度（top）、
+     逐斷點的 --bc-hand-img-w。
+
+   [可覆寫的 CSS 變數]
+     --circle-radius   圓半徑（預設 100vw＝hero 值；照片格亦同值 ⇒ 兩者是同一顆整頁大圓）
+     --bc-hand-img-w   單張照片寬度（預設 420px；hero 逐斷點覆寫、照片格自訂）
+     --bc-hand-ease    旋轉／縮放過渡時間（預設 1.2s＝hero 原值）
+
+   [JS 掛勾] bc-hand-ring.js 的 BC_HAND_RING.register() 會在根節點加上 .is-ready
+     —— 加上後才啟用 transform / scale 過渡（避免第一次定位（載入瞬間）就播動畫，
+     與原本 :has(.is-initialized) 的時機相同：Splide 掛載完成時才加）。
+   ============================================================================ */
+
+.hero_hand {
+  --circle-radius: 100vw;
+  --bc-hand-img-w: 420px;
+  --bc-hand-ease: 1.2s;
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.hero_hand_list {
+  width: calc(var(--circle-radius) * 2);
+  margin-left: calc(var(--circle-radius) * -1);
+  aspect-ratio: 1;
+}
+
+.hero_hand.is-ready .hero_hand_list {
+  transition: transform var(--bc-hand-ease);
+}
+
+.hero_hand_item {
+  position: absolute;
+  pointer-events: auto;
+  translate: calc(cos(var(--angle) * 1deg) * var(--circle-radius) - 50%)
+    calc(sin(var(--angle) * 1deg) * var(--circle-radius) * 1 - 50%);
+  rotate: calc((var(--angle) - 270) * 1deg);
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+}
+
+/* 2026-09-07：改為咖啡頁連結後，current 也保持可點擊 */
+.hero_hand_item.-current {
+  pointer-events: auto;
+}
+
+.hero_hand_item a {
+  display: block;
+}
+
+/* 2026-09-07：img 已被 <a> 包住 → 用後代選擇器（否則參考網站尺寸/scale 失效、圖過大） */
+.hero_hand_item img {
+  width: var(--bc-hand-img-w);
+  scale: 0.5;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+.hero_hand.is-ready .hero_hand_item img {
+  transition: scale var(--bc-hand-ease);
+}
+
+.hero_hand_item.-current img {
+  scale: 1;
+}

@@ -11,13 +11,16 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
         交會邏輯自然 no-op（頁尾已無 <footer>，不需再遮擋）。
         （bc-bg-footer.css 只用 .footer 類別選取，與標籤無關 → 改標籤不動任何樣式。）
   2. 本註解。
-  3. 照片列（.footer-logo-list）內容不同：本檔改用「咖啡照＋連結」（比照 index.html
-     #hero_hand_list 的 hero_coffees.0~6，7 張），footer 版（bc_bg_footer.html）仍為
-     5 張 deco 標誌。詳見本檔 L41 起的註解。
-保留 id="bc-bg-footer"：bc-bg-footer.css 的選擇器全以此 id 為前綴、
-bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共用同一份 CSS/JS。
+  3. 照片格（#bc-clock-photos 內的 .footer-logo-list）內容不同：本檔為「GUNTE hero 的環形
+     照片列」——2026-10-14 稍後起與 hero 同一顆**整頁大圓**（--circle-radius:100vw，7 筆
+     hero_coffees.0~6，與 index.html #hero_hand_list 同源、共用 static/css/bc-hand-ring.css
+     與 static/js/bc-hand-ring.js，索引由 hero 的 Splide 推播）；
+     footer 版（bc_bg_footer.html）仍為 5 張 deco 標誌的 5 秒輪播。詳見本檔 L84 起的註解。
+ 保留 id="bc-bg-footer"：bc-bg-footer.css 的選擇器全以此 id 為前綴、
+ bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共用同一份 CSS/JS。
 （index 與 about 是不同頁面，同 id 不衝突。）
 依賴：static/css/bc-bg-footer.css、static/js/bc-bg-footer.js、
+      static/css/bc-hand-ring.css、static/js/bc-hand-ring.js（環形照片列，見 2026-10-14 註解）、
       gsap 3.13 + SplitText + CustomEase（index.html extra_scripts 以 defer 依序載入）。
 用法：index.html 內包在 <section class="hero bc-bg-hero"> 再 include 本檔。
 
@@ -79,86 +82,80 @@ bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共�
         <h1 data-footer-time="hours" data-reveal="text" id="bc-clock-hours" class="h1">00</h1>
         <h1 data-reveal="text" id="bc-clock-brace-close" class="h1 bc-clock-brace">}</h1>
         <div id="bc-clock-photos" class="footer-time-inner">
-          <div data-footer-logo="wrap" data-reveal="clip-down" class="footer-logo-cell">
+          <div data-reveal="clip-down" class="footer-logo-cell">
             <div class="footer-logo-list-wrap w-dyn-list">
-              <!-- 2026-10-09（使用者指示）：本照片列改用首頁 GUNTE hero 的「咖啡照列」——
-                   照片來源與連結完全比照 index.html 的 #hero_hand_list（hero_coffees.0~6）：
-                   src = CoffeeItem.get_index_image（image_index → image → default-coffee-index.png），
-                   href = url('coffee', <咖啡 id>)。數量由 5 張 deco 標誌改為 7 張咖啡照，
-                   以逐字對齊 hero_hand_list 的 7 筆（hero_coffees 由 index view 提供；
-                   about 頁尾的 bc_bg_footer.html 未同步、仍為 deco 標誌）。
-                   輪播 hook（data-footer-logo="item"）與 .img.contain、data-reveal="clip-down" 皆保留，
-                   bc-bg-footer.js 的 5 秒自動輪播不受影響；<a> 填滿格子的樣式見 bc-bg-footer.css。
-                   2026-10-14（使用者指示）：每張照片下方加該筆咖啡的「名稱 + highlight」。
-                   等級重用既有元件 .bc-series-caption / -name / -highlight（bc-series.css；
-                   SERIES 區塊已在用、highlight 已是品牌金），尺寸改在 index.html 的 <style> 內
-                   以 #bc-bg-footer 前綴重設（避免影響 SERIES 區塊）。
-                   結構：照片與文字同包在 <a class="footer-logo-link"> 內（flex column：
-                   照片 flex:1、文字自然高）→ .footer-logo-item 高度＝照片＋文字高度
-                   （見 index.html；照片尺寸不變）。 --> -->
-              <div data-footer-logo="list" role="list" class="footer-logo-list w-dyn-items">
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.0.id %}" class="footer-logo-link">
-                    <img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}" loading="lazy" class="img contain"/>
-                    <div class="bc-series-caption footer-logo-caption">
-                      <p class="bc-series-caption-name">{{ hero_coffees.0.name }}</p>
-                      <p class="bc-series-caption-highlight">{{ hero_coffees.0.highlight }}</p>
-                    </div>
-                  </a>
+              <!-- 2026-10-14（使用者指示）：本格由「一次顯示一張的輪播照片」改為 GUNTE hero 的
+                   環形照片列（.hero_hand）——**與 hero 同一顆整頁大圓**（--circle-radius:100vw）：
+                   換張時整片扇形旋轉、current 置中、左右鄰居落在頁面兩緣（scale 0.5、低約 9.4vw），
+                   ±50° 以後的項目落在畫面外（由 #bc-bg-footer 的 overflow:hidden 裁掉；
+                   另外 .footer-logo-cell 的 clip-down 進場裁切由 bc-bg-footer.js 在跑完後釋放，
+                   否則側邊鄰居會被 GSAP 留下的 clip-path:inset(0%) 整張切掉）。
+                   （2026-10-14 稍後：使用者指正「區域太小了，動畫展示是使用整個頁面的，
+                     參考 hero_hand」→ 原「半徑縮進格子、超出由 overflow:clip 裁掉」已改為此版。）
+                   [結構] 與 index.html 的 #hero_hand_list 同源（同一組 class、同樣 7 筆
+                     hero_coffees.0~6、--angle 同樣 -90/-65/…/60 步進 25°），因此可直接用
+                     共用模組 static/js/bc-hand-ring.js（BC_HAND_RING）註冊，
+                     樣式來自 static/css/bc-hand-ring.css。
+                   [不再有 data-footer-logo="item"] 本格已不是 bc-bg-footer.js 的 5 秒輪播
+                     （該輪播僅剩 /about/ 真頁尾的 deco 標誌在用）；索引改由 GUNTE hero 的
+                     Splide index 推播（bc-gunte-hero.js 的 updateSlideStates →
+                     BC_HAND_RING.goAll）⇒ 環形字與本格永遠同一支咖啡。
+                   [為何不用 loading="lazy"] 環上 7 張只有 3 張在畫面內，其餘 4 張依角度落在
+                     畫面外（整頁扇形後距離更遠）→ lazy 會讓它們「輪到置中時還沒載入」而出現
+                     空窗；這 7 張與 hero 用的是同一組 src（已在快取），故 7 張一律 eager
+                     （與 index.html #hero_hand_list 的寫法一致）。
+                   [尺寸] 半徑＝hero 的 100vw；照片寬（--bc-hand-img-w）＝「既有照片區高 ÷
+                     咖啡照比例 1.429」＝ 193vw/ratio（≤991px 126vw/ratio）；圓心＝照片區的
+                     水平中心＋垂直中心。以上全在 index.html 的 <style> 內以 #bc-clock-photos
+                     前綴設定（詳見該處 B1 註解）。 -->
+              <div class="footer-logo-list">
+                <div class="hero_hand" data-bc-hand-ring>
+                  <div id="bc-clock-hand-list" class="hero_hand_list">
+                    <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}" aria-label="{{ hero_coffees.0.name }}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"/></a></div>
+                    <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}" aria-label="{{ hero_coffees.1.name }}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"/></a></div>
+                    <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}" aria-label="{{ hero_coffees.2.name }}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"/></a></div>
+                    <div class="hero_hand_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}" aria-label="{{ hero_coffees.3.name }}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"/></a></div>
+                    <div class="hero_hand_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}" aria-label="{{ hero_coffees.4.name }}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"/></a></div>
+                    <div class="hero_hand_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}" aria-label="{{ hero_coffees.5.name }}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"/></a></div>
+                    <div class="hero_hand_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}" aria-label="{{ hero_coffees.6.name }}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"/></a></div>
+                  </div>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.1.id %}" class="footer-logo-link">
-                    <img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}" loading="lazy" class="img contain"/>
-                    <div class="bc-series-caption footer-logo-caption">
-                      <p class="bc-series-caption-name">{{ hero_coffees.1.name }}</p>
-                      <p class="bc-series-caption-highlight">{{ hero_coffees.1.highlight }}</p>
-                    </div>
-                  </a>
+              </div>
+              <!-- 2026-10-14（使用者指示）：每張照片下方的「名稱 + highlight」—— 環形一次只有
+                   一格是 -current，故 7 筆文字收攏成一組、由 bc-hand-ring.js 跟著環同步
+                   （[data-bc-ring-caption-item] 逐筆切換 -current；未載入 JS 時顯示第 1 筆）。
+                   等級/顏色沿用既有元件 .bc-series-caption / -name / -highlight，
+                   字級等尺寸仍在 index.html 的 <style> 內以 #bc-bg-footer 前綴設定。
+                   [高度] 只顯示一筆 ⇒ 佔位與原本 7 格各一組時相同（--bc-hero-caption-h），
+                   照片格與整條時鐘列的高度因此不變。 -->
+              <div class="bc-series-caption footer-logo-caption bc-ring-caption" data-bc-ring-caption>
+                <div data-bc-ring-caption-item class="bc-ring-caption-item -current">
+                  <p class="bc-series-caption-name">{{ hero_coffees.0.name }}</p>
+                  <p class="bc-series-caption-highlight">{{ hero_coffees.0.highlight }}</p>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.2.id %}" class="footer-logo-link">
-                    <img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}" loading="lazy" class="img contain"/>
-                    <div class="bc-series-caption footer-logo-caption">
-                      <p class="bc-series-caption-name">{{ hero_coffees.2.name }}</p>
-                      <p class="bc-series-caption-highlight">{{ hero_coffees.2.highlight }}</p>
-                    </div>
-                  </a>
+                <div data-bc-ring-caption-item class="bc-ring-caption-item">
+                  <p class="bc-series-caption-name">{{ hero_coffees.1.name }}</p>
+                  <p class="bc-series-caption-highlight">{{ hero_coffees.1.highlight }}</p>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.3.id %}" class="footer-logo-link">
-                    <img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}" loading="lazy" class="img contain"/>
-                    <div class="bc-series-caption footer-logo-caption">
-                      <p class="bc-series-caption-name">{{ hero_coffees.3.name }}</p>
-                      <p class="bc-series-caption-highlight">{{ hero_coffees.3.highlight }}</p>
-                    </div>
-                  </a>
+                <div data-bc-ring-caption-item class="bc-ring-caption-item">
+                  <p class="bc-series-caption-name">{{ hero_coffees.2.name }}</p>
+                  <p class="bc-series-caption-highlight">{{ hero_coffees.2.highlight }}</p>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.4.id %}" class="footer-logo-link">
-                    <img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}" loading="lazy" class="img contain"/>
-                    <div class="bc-series-caption footer-logo-caption">
-                      <p class="bc-series-caption-name">{{ hero_coffees.4.name }}</p>
-                      <p class="bc-series-caption-highlight">{{ hero_coffees.4.highlight }}</p>
-                    </div>
-                  </a>
+                <div data-bc-ring-caption-item class="bc-ring-caption-item">
+                  <p class="bc-series-caption-name">{{ hero_coffees.3.name }}</p>
+                  <p class="bc-series-caption-highlight">{{ hero_coffees.3.highlight }}</p>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.5.id %}" class="footer-logo-link">
-                    <img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}" loading="lazy" class="img contain"/>
-                    <div class="bc-series-caption footer-logo-caption">
-                      <p class="bc-series-caption-name">{{ hero_coffees.5.name }}</p>
-                      <p class="bc-series-caption-highlight">{{ hero_coffees.5.highlight }}</p>
-                    </div>
-                  </a>
+                <div data-bc-ring-caption-item class="bc-ring-caption-item">
+                  <p class="bc-series-caption-name">{{ hero_coffees.4.name }}</p>
+                  <p class="bc-series-caption-highlight">{{ hero_coffees.4.highlight }}</p>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
-                  <a href="{% url 'coffee' hero_coffees.6.id %}" class="footer-logo-link">
-                    <img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}" loading="lazy" class="img contain"/>
-                    <div class="bc-series-caption footer-logo-caption">
-                      <p class="bc-series-caption-name">{{ hero_coffees.6.name }}</p>
-                      <p class="bc-series-caption-highlight">{{ hero_coffees.6.highlight }}</p>
-                    </div>
-                  </a>
+                <div data-bc-ring-caption-item class="bc-ring-caption-item">
+                  <p class="bc-series-caption-name">{{ hero_coffees.5.name }}</p>
+                  <p class="bc-series-caption-highlight">{{ hero_coffees.5.highlight }}</p>
+                </div>
+                <div data-bc-ring-caption-item class="bc-ring-caption-item">
+                  <p class="bc-series-caption-name">{{ hero_coffees.6.name }}</p>
+                  <p class="bc-series-caption-highlight">{{ hero_coffees.6.highlight }}</p>
                 </div>
               </div>
             </div>

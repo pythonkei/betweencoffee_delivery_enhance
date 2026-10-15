@@ -1,235 +1,238 @@
 #!/usr/bin/env python3
-"""CDP 驗證：首頁 hero 的照片列（.footer-logo-list）已由 5 張 deco 標誌改為
-「7 張咖啡照 ＋ 對應 /coffee/<id>/ 連結」，內容與同頁 #hero_hand_list 逐筆一致。
+"""CDP 驗證：首頁照片格（#bc-clock-photos）＝ GUNTE hero 的「環形照片列」（與 hero 同一顆大圓）。
 
-改動背景（2026-10-09，使用者指示）
-  templates/.../partials/bc_hero.html：`.footer-logo-list` 內 5 個 deco SVG 格
-  （deco_01/02/05/06/07.svg）換成 7 個
-  `<div data-footer-logo="item"><a href="{url coffee hero_coffees.N.id}">`
-  `<img src="{{ hero_coffees.N.get_index_image }}" alt="{{ hero_coffees.N.name }}" class="img contain">`
-  `</a></div>`，與 index.html `#hero_hand_list`（同為 hero_coffees.0~6）逐字同源。
-  static/css/bc-bg-footer.css：新增 `#bc-bg-footer .footer-logo-item a{display:block;width:100%;height:100%;}`
-  —— `.img{width:100%;height:100%}` 需 block 父層才有高度，`<a>` 預設 inline 會使圖片高度塌陷。
-  about 頁尾來源 partials/bc_bg_footer.html 未同步（仍為 5 張 deco），由 G 項反向守門。
+2026-10-14（使用者指示）：照片格由「7 格輪播（一次只顯示一張）」改為與 GUNTE hero 共用的
+環形照片列 —— 同一組 class（.hero_hand / .hero_hand_list / .hero_hand_item）、同一份
+static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Splide index** 驅動
+（bc-gunte-hero.js 的 updateSlideStates → BC_HAND_RING.goAll）：圓盤旋轉 idx × −25°、
+-current 那張放大、其餘 0.5 倍。
+2026-10-14 稍後（使用者指正「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，動畫展示是
+使用整個頁面的。參考 hero_hand」）：照片格的 --circle-radius 改回 **hero 的 100vw** —— 同一個
+25° 步進下左右鄰居落在 ±0.423R ＝ ±42vw ⇒ 扇形橫跨整個頁面寬、鄰居落在頁面兩緣；照片格與
+照片區不再裁切（唯一的裁切框是頁面層級的 `#bc-bg-footer{overflow:hidden}`，與 hero 由
+.bc-gunte-hero{overflow:hidden} 裁切是同一件事）；照片寬改取「照片區高 ÷ 咖啡照比例
+1.429」＝ 336vw/ratio（≤991px 126vw/ratio）⇒ current 那張上下剛好貼齊照片區、不壓到文字列
+（2026-10-15 放大前為 276 ÷ 1.429 ＝ 193vw/ratio）。
+本檔取代原「7 張咖啡照輪播」版的斷言。
 
-檢查項目（每個 viewport 各一輪；G 僅 /about/）
-  A. 結構：`#bc-bg-footer [data-footer-logo="list"]` 內恰 7 個 `[data-footer-logo="item"]`，
-     每格恰 1 個 `<a>` ＋ 1 個 `<img class="img contain">`；`#bc-bg-footer` 內已無 `deco_*` 圖片。
-  B. 與 #hero_hand_list 同源：筆數相同（7），且 href 清單、src 清單「順序逐一相同」；
-     連結皆為 /coffee/<id>/；src 皆為 `_index.png` 咖啡照；alt 皆非空。
-  C. 圖片真的載入（分三項；成因見下方註解）：
-     C1 顯示中那格（恰 1 格）`complete == true` 且 `naturalWidth > 0`。
-     C2 其餘 6 格為 `loading="lazy"` ＋ `display:none`（輪播隱藏格）→ img.complete 恆為
-        false 屬正常（Chrome 對 display:none 的 lazy 圖不會走完載入流程），改驗
-        `naturalWidth > 0`（照片已抓取解碼，非 404／破圖）。
-     C3 7 個 src 互不相同，且以 HTTP 直取皆為 200 ＋ `Content-Type: image/*`。
-  D. 輪播初始狀態與幾何：恰 1 格顯示（index 0；其餘 display:none ＋ position:absolute）、
-     顯示格 position:relative；顯示格 rect 寬高 > 0；`<a>` computed display == flex
-     （2026-10-14 起改 flex column，以容納下方文字）且 a_rect ≈ item_rect（溢差 <= 1px）；
-     img 橫向撐滿 `<a>`、高度 = `<a>` 高 − 文字高（±1px）且 > 100px（未塌陷）；
-     D9 顯示格 name == img alt、highlight 非空且為品牌金 rgb(196,155,99)；
-     D10 文字在照片下方；D11 7 格皆帶文字區（輪播切到任何一格都有名稱）；無水平溢出。
-  E. 輪播仍會前進：手動觸發 wrap.click()（同 bc-bg-footer.js 的點擊前進）應前進 1 格、且仍只 1 格顯示。
-  F. 連結可點：對「當時顯示中」那格的 `<a>` 中心送 CDP 真實滑鼠事件
-     （mousePressed + mouseReleased），應導覽到該 `<a>` 的 href（`/coffee/<id>/`）。
-     輪播 interval 於點擊前先清掉以求確定性（否則 5 秒計時器可能在量測與點擊之間換格）。
-     F3 在 F2 偵測到新路徑後「輪詢等新 document 就緒」才驗（新頁可能還在解析 <head>，
-     `document.body` 仍為 null）；驗 `#section-single-product` 存在、標題逐字等於
-     `Between Coffee - <咖啡名>`（coffee.html 的 title 即此格式、alt 即 coffee.name），
-     並以 PerformanceNavigationTiming.responseStatus 排除 404。
-  G. 反向守門：/about/ 的頁尾（來源 partials/bc_bg_footer.html）仍是 5 格 deco 標誌、
-     0 個 /coffee/ 連結 —— 首頁改動未波及 about。
+2026-10-15（使用者指示）：「桌機（≥992px）的咖啡照片放大到 1440 時 336×480」——只改 ≥992px：
+  .footer-logo-cell 上下內距歸零（留白吸收進照片區）＋ .footer-logo-list 高 276vw/ratio →
+  480vw/ratio ＋ --bc-hand-img-w 193vw/ratio → 336vw/ratio（＝480 ÷ 1.4286）。
+  逐斷點照片尺寸：1905 = 444.5×635.0、1440 = 336.0×480.0、1280 = 298.7×426.7、
+  992 = 231.5×330.7；≤991px 全部逐值不變（含 cell 內距，E7）。時鐘列的頂端、#bc-bg-footer、
+  .grid.is-footer 的文件座標完全不動，只有列高向下長（@1440 419.6 → 529.6），下方內容等量下移。
 
-多個 viewport：桌面 1280×800 / 平板 991×900（`calc(184vw/scale)` 尺寸切換帶）/ 平板 768×1024 /
-行動 390×844，各存一張 hero 視窗截圖（viewport-only，因 `captureBeyondViewport` 對 GSAP 釘住／
-reveal 區段會渲染成空白）。
-用法：站台須在 http://127.0.0.1:8081 跑、CDP 瀏覽器須在 9222（見 CDP_SETUP.md）；
-      改過 templates/** 後務必先重啟站台（cached.Loader）。
+檢查項目（A–F 每個 viewport 各一輪；G＝/about/ 反向守門；H＝互動）
+  A 結構：`#bc-clock-photos` 內有 .hero_hand > #bc-clock-hand-list > 恰 7 個 .hero_hand_item；
+    --angle 依序 -90/-65/-40/-15/10/35/60；每個含 <a href="/coffee/N/"> ＋ <img>（非 lazy）；
+    文字列 [data-bc-ring-caption] 內恰 7 筆 [data-bc-ring-caption-item]；
+    首頁已無舊輪播 hook（[data-footer-logo="item"] / "wrap"）；
+    照片格與照片區 overflow = visible（扇形必須離開格子才能「用整個頁面」）、
+    #bc-bg-footer overflow = hidden（頁面層級的裁切框）。
+  B 與 hero 同源：7 筆 href / src / --angle 與 #hero_hand_list 逐筆相同。
+  C 索引同步：-current 索引 == hero 的 Splide index（以 #hero_nav 的 -current 與
+    .state-active 的 aria-label「k of 7」雙重換算）== BC_HAND_RING.index() == 文字列 -current；
+    圓盤 inline transform == rotate(idx × −25deg)（讀 inline style，不受過渡中影響）；
+    照片格的 --circle-radius 與 hero 逐值相同（皆 100vw ＝同一顆整頁大圓）。
+  D 環形幾何：7 張圖到圓盤中心的距離 ≈ 半徑（±2px，證明確實「在圓上」）；半徑 = 100vw；
+    current 那張 scale 1、其餘 0.5；current 的水平中心 == 照片格中心（±2px）；
+    current 寬 == 336vw/ratio（D7；@1440 = 336×480、@1905 = 444.5×635）；
+    current 上下剛好填滿照片區（img 底緣 == 文字列頂端 ±2px ⇒ 不壓文字）；
+    實質可見 2–3 張且必為 current ± 1（循環，端點索引時只有一側鄰居）；
+    左右鄰居的水平中心在圓心 ±0.423R（±2%）且落在頁面兩緣（≤20% / ≥80% 頁寬）＝整頁扇形；
+    鄰居 rect 與文字列 rect 無交集；無水平溢出（＝扇形被 #bc-bg-footer 的 overflow:hidden 裁掉）；
+    揭示跑完後照片格無殘留 clip-path（＝側邊鄰居不被 .footer-logo-cell 的 inset(0%) 切掉）。
+    ⚠ 量測前會先「捲到照片格」——該 cell 在首屏之外，不捲的話 data-reveal="clip-down" 永不觸發，
+      就會驗到揭示前的狀態（那正是上述 clip-path 裁切問題的藏身處）。
+  E 零回歸：首頁不再有 5 秒輪播（window.__footerLogoInterval 為 null）；
+    .footer-logo-cell 寬/高、.footer-logo-list 高、.footer-logo-caption 高、
+    時鐘列（.footer-time）高 逐值比對（基準表 EXPECT，±1px；≥992px 用「改動後」值、
+    ≤991px 用「改動前」值 ⇒ 同時守住兩件事）；E7 專門守「改動只限 ≥992px」——桌機 cell
+    上下內距必須是 0，≤991px 必須仍是 u-24 + 14px / u-24（逐值與改動前相同）；
+    E8 守連動關係「照片寬 ＝ 照片區高 ÷ 1.4286」（放大／縮小後仍必須成立）。
+  F 圖片：7 個 src 皆 HTTP 200 且 Content-Type 為 image/*（環形圖不看 img.complete）。
+  G /about/ 反向守門：真頁尾仍為 5 格 deco 的 5 秒輪播（[data-footer-logo="item"] == 5、
+    __footerLogoInterval 有值）、該頁沒有 #bc-clock-hand-list / .hero_hand。
+  H 互動（僅第一個 viewport）：點 #hero_nav 第 k 顆 → hero、照片格、文字列三者都跟到 k，
+    且圓盤 inline transform == rotate(−25k deg)。
+
+用法：站台須在 http://localhost:8081 跑、CDP 瀏覽器須在 9222（見 CDP_SETUP.md）。
 """
-import asyncio, base64, json, re, urllib.error, urllib.request
+import asyncio
+import json
+import os
+import time
+import urllib.error
+import urllib.request
+
 import websockets
 
-BASE = "http://localhost:8081"
-ROOT = "/home/kei/Desktop/betweencoffee_delivery_enhance"
+BASE = os.environ.get("BC_BASE", "http://localhost:8081")
 CDP = "http://localhost:9222"
 
-# 首頁量測：結構 / 同源比對 / 幾何 / 載入狀態
-MEASURE_JS = r"""
+# 改動前實測（2026-10-14，改用環形照片列之前；CDP 1905/1280/991/768/390 × 900）：
+#   viewport: (.footer-logo-cell 寬, .footer-logo-cell 高, .footer-logo-list 高,
+#              .footer-logo-caption 高, .footer-time 高)
+# .footer-logo-list 的高度＝改動前的「照片高度」（原 .footer-logo-item 高 − 文字高）：
+# 因為環形照片列是 absolute、不佔流內高度，照片區高度改由 .footer-logo-list 撐起，
+# 文字區再接在它後面。
+# ⚠ 2026-10-15（使用者指示）：「桌機（≥992px）咖啡照片放大到 1440 時 336×480」⇒ 1905/1280
+#   兩列的 cell 高／list 高已被 EXPECT 取代（本表只留 991/768/390 三列作「≤991px 逐值不變」
+#   的回歸基準；桌機改動前值＝ 1905: 534.53/365.13、1280: 380.02/245.33）。
+BEFORE = {
+    1905: (381.00, 534.53, 365.13, 49.59, 534.53),
+    1280: (256.00, 380.02, 245.33, 49.59, 380.02),
+    991: (278.28, 631.81, 453.89, 42.89, 631.81),
+    768: (214.53, 502.42, 351.75, 42.89, 502.42),
+    390: (106.47, 279.14, 178.63, 38.89, 279.14),
+}
+
+# 改動後期望值（2026-10-15 實測）＝ cell 內距 0 ＋ 照片區 480vw/ratio ＋ 文字區 49.59（≥992px）：
+#   @1440 = 480.00／336.0×480.0（★使用者指定的目標斷點）、@1905 = 635.00／444.5×635.0、
+#   @1280 = 426.66／298.7×426.7、@992 = 330.66／231.5×330.7
+#   （1440/992 未列入 VIEWPORTS，僅供手動量測對照）。
+# ≤991px 三列沿用 BEFORE（＝與改動前逐值相同）；E7 另驗 cell 內距與斷點歸屬。
+EXPECT = dict(BEFORE)
+EXPECT.update({
+    1905: (381.00, 684.59, 635.00, 49.59, 684.59),
+    1440: (288.00, 529.59, 480.00, 49.59, 529.59),
+    1280: (256.00, 476.26, 426.66, 49.59, 476.26),
+    992: (198.39, 380.25, 330.66, 49.59, 380.25),
+})
+
+# ---------------------------------------------------------------------------
+# 量測 JS：單次 evaluate 原子讀取（避免「過渡中」與「autoplay 換張」造成前後不一致）
+# ---------------------------------------------------------------------------
+PROBE_JS = r"""
 (function(){
-  var out = {};
-  var root = document.getElementById('bc-bg-footer');
-  out.root_found = !!root;
-  var list = root ? root.querySelector('[data-footer-logo="list"]') : null;
-  out.list_found = !!list;
-  var items = list ? Array.prototype.slice.call(list.querySelectorAll('[data-footer-logo="item"]')) : [];
-  out.item_count = items.length;
-  out.deco_srcs = Array.prototype.slice.call((root || document).querySelectorAll('img[src*="deco_"]'))
-      .map(function(i){ return i.getAttribute('src'); });
+  function R(e){ if(!e) return null; var b=e.getBoundingClientRect();
+    return {x:+b.x.toFixed(2),y:+b.y.toFixed(2),w:+b.width.toFixed(2),h:+b.height.toFixed(2),
+            right:+b.right.toFixed(2),bottom:+b.bottom.toFixed(2)}; }
+  function C(e){ if(!e) return null; var b=e.getBoundingClientRect();
+    return {x:+(b.x+b.width/2).toFixed(2), y:+(b.y+b.height/2).toFixed(2)}; }
+  function cur(arr){ var k=-1; arr.forEach(function(e,i){ if(e.classList.contains('-current')) k=i; }); return k; }
+  function v(e,n){ return e?getComputedStyle(e).getPropertyValue(n).trim():null; }
+  function p(e,k){ return e?getComputedStyle(e)[k]:null; }
 
-  var rect = function(e){
-    if (!e) return null;
-    var b = e.getBoundingClientRect();
-    return { x: Math.round(b.left), y: Math.round(b.top),
-             w: Math.round(b.width * 100) / 100, h: Math.round(b.height * 100) / 100 };
-  };
-  var near = function(a, b, tol){
-    if (!a || !b) return false;
-    return Math.abs(a.w - b.w) <= tol && Math.abs(a.h - b.h) <= tol
-        && Math.abs(a.x - b.x) <= tol && Math.abs(a.y - b.y) <= tol;
-  };
+  var cell=document.getElementById('bc-clock-photos');
+  var cellBox=cell?cell.querySelector('.footer-logo-cell'):null;
+  var area=cell?cell.querySelector('.footer-logo-list'):null;
+  var hand=cell?cell.querySelector('.hero_hand'):null;
+  var list=document.getElementById('bc-clock-hand-list');
+  var items=list?Array.prototype.slice.call(list.querySelectorAll('.hero_hand_item')):[];
+  var caption=cell?cell.querySelector('.footer-logo-caption'):null;
+  var caps=Array.prototype.slice.call(
+      document.querySelectorAll('#bc-clock-photos [data-bc-ring-caption-item]'));
+  var heroList=document.getElementById('hero_hand_list');
+  var heroItems=heroList?Array.prototype.slice.call(heroList.querySelectorAll('.hero_hand_item')):[];
+  var slides=document.querySelectorAll('.bc-gunte-hero .splide__slide');
+  var active=document.querySelector('.bc-gunte-hero .splide__slide.state-active');
+  var actIdx=-1;
+  Array.prototype.forEach.call(slides,function(s,i){ if(s.classList.contains('state-active')) actIdx=i; });
+  var navBtns=Array.prototype.slice.call(document.querySelectorAll('#hero_nav button'));
+  var lc=C(list), radiusPx=list?(parseFloat(getComputedStyle(list).width)/2):null;
 
-  out.rows = items.map(function(el){
-    var a = el.querySelector('a'), img = el.querySelector('img');
-    var csel = getComputedStyle(el), ca = a ? getComputedStyle(a) : null;
-    var ir = rect(img), ar = rect(a), er = rect(el);
-    /* 2026-10-14：每張照片下方新增「名稱 + highlight」（.bc-series-caption.footer-logo-caption） */
-    var cap = el.querySelector('.footer-logo-caption');
-    var nm = cap ? cap.querySelector('.bc-series-caption-name') : null;
-    var hl = cap ? cap.querySelector('.bc-series-caption-highlight') : null;
-    var cr = rect(cap);
-    return {
-      href: a ? a.getAttribute('href') : null,
-      src: img ? img.getAttribute('src') : null,
-      alt: img ? (img.getAttribute('alt') || '') : null,
-      img_cls: img ? img.className : '',
-      a_cls: a ? a.className : '',
-      a_display: ca ? ca.display : null,
-      cap_found: !!cap, cap_rect: cr, cap_h: cr ? cr.h : 0,
-      cap_name: nm ? nm.textContent : null,
-      cap_hl: hl ? hl.textContent : null,
-      hl_color: hl ? getComputedStyle(hl).color : null,
-      hl_fs: hl ? parseFloat(getComputedStyle(hl).fontSize) : 0,
-      name_fs: nm ? parseFloat(getComputedStyle(nm).fontSize) : 0,
-      img_is_above_cap: (ir && cr) ? (ir.y + ir.h) <= cr.y + 1 : false,
-      a_count: el.querySelectorAll('a').length,
-      img_count: el.querySelectorAll('img').length,
-      display: csel.display, position: csel.position,
-      item_rect: er, a_rect: ar, img_rect: ir,
-      a_fills_item: near(ar, er, 1), img_fills_a: near(ir, ar, 1),
-      img_nw: img ? img.naturalWidth : 0, img_nh: img ? img.naturalHeight : 0,
-      img_complete: img ? img.complete : false,
-      img_loading: img ? img.getAttribute('loading') : null,
-      visible: csel.display !== 'none'
-    };
+  var itemsOut=items.map(function(el){
+    var im=el.querySelector('img'), a=el.querySelector('a'), ci=C(im), dist=null;
+    if(ci&&lc){ dist=+Math.sqrt(Math.pow(ci.x-lc.x,2)+Math.pow(ci.y-lc.y,2)).toFixed(2); }
+    return {angle:v(el,'--angle'), cur:el.classList.contains('-current'),
+            cls:el.className, rect:R(el), img:R(im), imgCenter:ci, dist:dist,
+            scale:p(im,'scale'), href:a?a.getAttribute('href'):null,
+            loading:im?im.getAttribute('loading'):null,
+            src:im?im.getAttribute('src'):null, alt:im?im.getAttribute('alt'):null};
   });
-  out.visible_idx = [];
-  out.rows.forEach(function(r, i){ if (r.visible) out.visible_idx.push(i); });
+  var heroOut=heroItems.map(function(el){
+    var im=el.querySelector('img'), a=el.querySelector('a');
+    return {angle:v(el,'--angle'), href:a?a.getAttribute('href'):null,
+            src:im?im.getAttribute('src'):null};
+  });
 
-  // 同頁基準：#hero_hand_list（GUNTE hero 的咖啡照列）
-  var hand = document.getElementById('hero_hand_list');
-  out.hand_found = !!hand;
-  out.hand_hrefs = hand ? Array.prototype.slice.call(hand.querySelectorAll('a'))
-      .map(function(a){ return a.getAttribute('href'); }) : [];
-  out.hand_srcs = hand ? Array.prototype.slice.call(hand.querySelectorAll('img'))
-      .map(function(i){ return i.getAttribute('src'); }) : [];
-
-  out.doc_scroll_w = document.documentElement.scrollWidth;
-  out.inner_w = window.innerWidth;
-  return out;
+  var section=document.getElementById('bc-bg-footer');
+  var clipChain=[];
+  (function(){
+    var el=hand, stop=section;
+    while(el && el!==stop && el!==document.documentElement){
+      var c=getComputedStyle(el);
+      if((c.clipPath && c.clipPath!=='none')||(c.webkitClipPath && c.webkitClipPath!=='none')
+         || c.overflow!=='visible')
+        clipChain.push([String(el.className||el.id), 'clip='+c.clipPath, 'ov='+c.overflow]);
+      el=el.parentElement;
+    }
+  })();
+  return {
+    cellBox:R(cellBox), area:R(area), captionBox:R(caption),
+    clockRow:R(document.querySelector('.footer-time')),
+    section:R(section), sectionOverflow:p(section,'overflow'),
+    innerW:window.innerWidth, docScrollW:document.documentElement.scrollWidth,
+    cellOverflow:p(cellBox,'overflow'), areaOverflow:p(area,'overflow'),
+    cellClip:p(cellBox,'clipPath'), areaClip:p(area,'clipPath'), clipChain:clipChain,
+    cellPadTop:v(cellBox,'padding-top'), cellPadBottom:v(cellBox,'padding-bottom'),
+    itemCount:items.length, items:itemsOut,
+    capCount:caps.length, capCur:cur(caps),
+    capText:(caps.length&&cur(caps)>=0)?caps[cur(caps)].textContent.replace(/\s+/g,' ').trim():null,
+    handCount:document.querySelectorAll('#bc-clock-photos .hero_hand').length,
+    handCur:cur(items), ready:hand?hand.classList.contains('is-ready'):null,
+    listInline:list?list.style.transform:null, listComputed:p(list,'transform'),
+    radiusVar:v(hand,'--circle-radius'), imgWVar:v(hand,'--bc-hand-img-w'), radiusPx:radiusPx,
+    heroCount:heroItems.length, hero:heroOut, heroCur:cur(heroItems),
+    navCur:cur(navBtns), slideCount:slides.length, actIdx:actIdx,
+    ariaLabel:active?active.getAttribute('aria-label'):null,
+    ringIndex:(window.BC_HAND_RING&&window.BC_HAND_RING.index)?window.BC_HAND_RING.index():null,
+    ringCount:(window.BC_HAND_RING&&window.BC_HAND_RING.count)?window.BC_HAND_RING.count():null,
+    interval:window.__footerLogoInterval?true:false,
+    legacyItems:document.querySelectorAll('#bc-clock-photos [data-footer-logo="item"]').length,
+    legacyWrap:!!document.querySelector('#bc-clock-photos [data-footer-logo="wrap"]')
+  };
 })()
 """
 
-# /about/ 反向守門：真頁尾仍為 deco 標誌
+# 停掉 GUNTE hero 的 autoplay（Splide pauseOnHover）→ 量測期間 index 不再跳動。
+PAUSE_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');"
+            "if(!s) return false;"
+            "['mouseenter','mouseover'].forEach(function(t){"
+            "s.dispatchEvent(new MouseEvent(t,{bubbles:true}));});return true;})()")
+
+READY_JS = ("(function(){return !!(document.getElementById('bc-clock-hand-list')"
+            "&&document.querySelector('#bc-clock-photos .hero_hand.is-ready')"
+            "&&document.querySelector('.bc-gunte-hero .splide__slide.state-active'));})()")
+
+# 捲到照片格正中（讓 GSAP 的進場揭示（data-reveal="clip-down"）真的觸發）
+SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-clock-photos');"
+                  "if(!e) return null;var r=e.getBoundingClientRect();"
+                  "window.scrollTo(0, Math.round(window.scrollY + r.top - "
+                  "(window.innerHeight - r.height)/2));return Math.round(window.scrollY);})()")
+
+# 本機 CDP 的 rAF 被節流：GSAP 的 lagSmoothing 把每次 tick 的推進夾在 33ms ⇒ DUR_L 1.2s 的
+# clip-down 揭示實測要 16–36 秒（真瀏覽器 1.2s）。本腳本只需要「揭示結束後的穩態」，故量測前
+# 把 GSAP 全域時間軸加速（timeScale 100）→ 下一個 tick 就跑到終點（含 onComplete）。
+# 其餘 GSAP 動畫（文字揭示等）同樣被推到結束狀態＝它們本來就會到的狀態，不影響任何斷言。
+SPEED_GSAP_JS = ("(function(){if(window.gsap&&window.gsap.globalTimeline){"
+                 "window.gsap.globalTimeline.timeScale(100);return true;}return false;})()")
+
+# .footer-logo-cell（data-reveal="clip-down"）目前的 clip-path；揭示跑完且被釋放時為 'none'
+CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-clock-photos .footer-logo-cell');"
+                "return e?getComputedStyle(e).clipPath:null;})()")
+
+NAV_CLICK_JS = ("(function(){var b=document.querySelectorAll('#hero_nav button');"
+                "if(b.length<=%d)return null;b[%d].click();return b.length;})()")
+
 ABOUT_JS = r"""
 (function(){
-  var root = document.getElementById('bc-bg-footer');
-  if (!root) return { found: false };
-  var list = root.querySelector('[data-footer-logo="list"]');
-  var items = list ? list.querySelectorAll('[data-footer-logo="item"]') : [];
+  var root=document.getElementById('bc-bg-footer');
   return {
-    found: true,
-    item_count: items.length,
-    deco_imgs: root.querySelectorAll('img[src*="deco_"]').length,
-    coffee_links: root.querySelectorAll('a[href^="/coffee/"]').length
-  };
-})()
-"""
-
-# 點擊測試：先停掉 5 秒輪播以求確定性，回傳當時顯示中那格的 <a> 中心點與 href
-CLICK_TARGET_JS = r"""
-(function(){
-  if (window.__footerLogoInterval) { clearInterval(window.__footerLogoInterval);
-                                     window.__footerLogoInterval = null; }
-  var root = document.getElementById('bc-bg-footer');
-  var items = root.querySelectorAll('[data-footer-logo="item"]');
-  for (var i = 0; i < items.length; i++) {
-    if (getComputedStyle(items[i]).display === 'none') continue;
-    var a = items[i].querySelector('a');
-    if (!a) continue;
-    var b = a.getBoundingClientRect();
-    return { idx: i, href: a.getAttribute('href'),
-             x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2),
-             w: Math.round(b.width), h: Math.round(b.height),
-             in_view: b.top >= 0 && b.bottom <= window.innerHeight };
-  }
-  return null;
-})()
-"""
-
-# 輪播：清掉舊 interval → 手動觸發 wrap.click() → 回報前／後顯示格
-CAROUSEL_JS = r"""
-(function(){
-  if (window.__footerLogoInterval) { clearInterval(window.__footerLogoInterval);
-                                     window.__footerLogoInterval = null; }
-  var root = document.getElementById('bc-bg-footer');
-  var wrap = root.querySelector('[data-footer-logo="wrap"]');
-  var items = root.querySelectorAll('[data-footer-logo="item"]');
-  var idx = function(){
-    for (var i = 0; i < items.length; i++) {
-      if (getComputedStyle(items[i]).display !== 'none') return i;
-    }
-    return -1;
-  };
-  var before = idx();
-  wrap.click();                       // 同 bc-bg-footer.js：點擊 wrap 前進一格並重啟計時
-  var afterClick = idx();
-  return { before: before, afterClick: afterClick, count: items.length };
-})()
-"""
-
-VISIBLE_COUNT_JS = r"""
-(function(){
-  if (window.__footerLogoInterval) { clearInterval(window.__footerLogoInterval);
-                                     window.__footerLogoInterval = null; }
-  var n = 0;
-  document.querySelectorAll('#bc-bg-footer [data-footer-logo="item"]').forEach(function(el){
-    if (getComputedStyle(el).display !== 'none') n++;
-  });
-  return n;
-})()
-"""
-
-
-# 導覽後就緒檢查（F3）：F2 一偵測到 location.pathname 變成 /coffee/<id>/ 就跳出，但那只代表
-# 新 document 已 commit，<head> 可能還在解析（document.body == null）→ 直接驗 body 會誤判
-# （舊寫法 4 個 viewport 有 3 個 FAIL，而同時印出的 document.title 其實已是正確標題）。
-# 因此改為輪詢「body 出現 ＋ 商品頁標記出現 ＋ title 已有值」才驗。
-# 另取 PerformanceNavigationTiming.responseStatus 來排除 404（JS 讀不到 HTTP 狀態的替代）：
-# 0＝cross-origin／不支援 → 視為未知（不當失敗）。
-NAV_READY_JS = r"""
-(function(){
-  var nav = performance.getEntriesByType('navigation')[0] || {};
-  var s = nav.responseStatus;
-  if (s === 0 || s === undefined || s === null) s = null;
-  var body = document.body;
-  return {
-    path: location.pathname,
-    body: !!body,
-    detail: !!document.querySelector('#section-single-product'),   // coffee.html 商品頁專屬 id
-    title: document.title || '',
-    status: s,
-    empty: !body || ((body.innerText || '').trim().length === 0)
+    items: document.querySelectorAll('#bc-bg-footer [data-footer-logo="item"]').length,
+    list: !!document.querySelector('#bc-bg-footer [data-footer-logo="list"]'),
+    hand: document.querySelectorAll('#bc-bg-footer .hero_hand').length,
+    ringList: document.querySelectorAll('#bc-clock-hand-list, #bc-bg-footer .hero_hand_list').length,
+    interval: window.__footerLogoInterval?true:false,
+    isFooter: !!root&&root.querySelectorAll('footer').length>0
   };
 })()
 """
 
 
 def fetch_image(src):
-    """以 HTTP 直取圖片，回傳 (status, content_type)。src 可為相對路徑或絕對網址。
-
-    用途（C3）：輪播只有 1 格在顯示，其餘 6 格 display:none ＋ loading="lazy"，
-    瀏覽器端 img.complete 不可靠；直接對 7 個 src 發請求可確定「有這個檔、是圖片」。
-    """
+    """以 HTTP 直取圖片，回傳 (status, content_type)（src 可為相對路徑或絕對網址）。"""
     url = src if src.startswith("http") else BASE + src
     req = urllib.request.Request(url, headers={"Range": "bytes=0-63"})
     try:
@@ -237,7 +240,7 @@ def fetch_image(src):
             return r.status, (r.headers.get("Content-Type") or "")
     except urllib.error.HTTPError as e:
         return e.code, ""
-    except Exception as e:                                        # noqa: BLE001（連線層錯誤）
+    except Exception as e:                                       # noqa: BLE001
         return None, f"ERR {e}"
 
 
@@ -246,13 +249,54 @@ def check(label, ok, detail=""):
     return bool(ok)
 
 
+def overlaps(a, b, eps=0.5):
+    if not a or not b:
+        return False
+    return (a["x"] < b["right"] - eps and a["right"] > b["x"] + eps
+            and a["y"] < b["bottom"] - eps and a["bottom"] > b["y"] + eps)
+
+
+def cover_ratio(a, b):
+    """a（項目 rect）落在 b（裁切框）內的面積比例 —— 用來排除貼邊的 1px 細邊。"""
+    if not a or not b:
+        return 0.0
+    w = max(0.0, min(a["right"], b["right"]) - max(a["x"], b["x"]))
+    h = max(0.0, min(a["bottom"], b["bottom"]) - max(a["y"], b["y"]))
+    if w <= 0 or h <= 0:
+        return 0.0
+    return (w * h) / max(a["w"] * a["h"], 1e-6)
+
+
+def pxnum(s):
+    """'54px' → 54.0；無法解析回 None（供 E7 比較 computed padding）。"""
+    try:
+        return float(str(s).replace("px", "").strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def exp_radius(w):
+    """照片格的 --circle-radius 期望值（px）：與 hero 同值 ＝ 100vw（1vw = w/100 px）。"""
+    return float(w)
+
+
+def exp_img_w(w):
+    """照片格的 --bc-hand-img-w 期望值（px）：照片區高（≥992px 480vw/ratio，≤991px 180vw/ratio）
+    ÷ 咖啡照實際比例 1.4286（840×1200）＝ 336vw/ratio ／ 126vw/ratio。
+    （2026-10-15 放大前為 276vw/ratio ⇒ 193vw/ratio。）"""
+    return w * (336.0 / 14.4) / 100 if w >= 992 else w * (126.0 / 3.93) / 100
+
+
+ANGLES = ["-90", "-65", "-40", "-15", "10", "35", "60"]
+VIEWPORTS = [(1905, 900), (1280, 800), (991, 800), (768, 900), (390, 800)]
+
+
 async def main():
     req = urllib.request.Request(f"{CDP}/json/new?about:blank", method="PUT")
     tab = json.loads(urllib.request.urlopen(req).read())
-    ws_url = tab["webSocketDebuggerUrl"]
     failures = []
 
-    async with websockets.connect(ws_url, max_size=200 * 1024 * 1024) as ws:
+    async with websockets.connect(tab["webSocketDebuggerUrl"], max_size=200 * 1024 * 1024) as ws:
         mid = 1
 
         def msg(m, p=None):
@@ -270,10 +314,7 @@ async def main():
 
         await send(msg("Page.enable"))
         await send(msg("Runtime.enable"))
-        await send(msg("Network.enable"))
-        # 本次同時改了 bc-bg-footer.css（新增 .footer-logo-item a 規則）→ 一律關快取
         await send(msg("Page.setCacheDisabled", {"cacheDisabled": True}))
-        await send(msg("Network.setCacheDisabled", {"cacheDisabled": True}))
 
         async def evaljs(expr):
             r = await send(msg("Runtime.evaluate", {"expression": expr, "returnByValue": True}))
@@ -282,252 +323,317 @@ async def main():
                 print("   JS error:", res.get("description"))
             return res.get("value")
 
+        async def frame():
+            await asyncio.wait_for(send(msg("Page.captureScreenshot",
+                                            {"format": "jpeg", "quality": 5})), 30)
+
         async def goto(url):
             await send(msg("Page.navigate", {"url": url}))
-            for _ in range(60):
+            for _ in range(80):
                 await asyncio.sleep(0.25)
-                # readyState 之外必須同時確認 href 已切換：Page.navigate 之後、新 document
-                # 尚未 commit 前，舊頁的 readyState 仍是 'complete'，只驗它會提早跳出。
                 if await evaljs("document.readyState === 'complete' && location.href === "
                                 + json.dumps(url)):
                     break
-            await asyncio.sleep(1.6)   # 等 bc-bg-footer.js 的 reveal / 輪播初始化
+            for _ in range(40):
+                await asyncio.sleep(0.25)
+                if await evaljs(READY_JS):
+                    break
+            await frame()
+            await asyncio.sleep(0.4)
+
+        async def wait_reveal(timeout=20.0):
+            """等到 .footer-logo-cell 的 clip-down 揭示跑完並被釋放（clip-path = none）。
+               ⚠ 本機 rAF 被節流 → 先加速 GSAP 時間軸（見 SPEED_GSAP_JS），再每 0.4s 截圖逼 frame
+                 輪詢；真瀏覽器不需要這招（1.2s 自然跑完）。"""
+            await evaljs(SPEED_GSAP_JS)
+            t0 = time.time()
+            while time.time() - t0 < timeout:
+                await frame()
+                await asyncio.sleep(0.4)
+                if await evaljs(CELL_CLIP_JS) == "none":
+                    return True
+            return False
+
+        async def measure():
+            """捲到照片格（讓 GSAP 的進場揭示真的跑完 → .footer-logo-cell 的 clip-path 被釋放）
+               → 暫停 hero autoplay → 等圓盤過渡（1.2s）跑完 → 原子讀取。
+               ⚠ 不捲的話揭示永不觸發（該 cell 在首屏之外），就會驗到「揭示前」的狀態
+                 —— 那正是「側邊鄰居被 clip-path:inset(0%) 切掉」這個 bug 藏身之處。"""
+            await evaljs(SCROLL_CELL_JS)
+            await asyncio.sleep(0.6)
+            await wait_reveal()
+            await evaljs(PAUSE_JS)
+            await asyncio.sleep(1.5)
+            await frame()
+            await asyncio.sleep(0.2)
+            return await evaljs(PROBE_JS)
 
         async def set_viewport(w, h, mobile=False):
             await send(msg("Emulation.setDeviceMetricsOverride",
                            {"width": w, "height": h, "deviceScaleFactor": 1, "mobile": mobile}))
             await asyncio.sleep(0.4)
 
-        async def shot_viewport(name):
-            res = await send(msg("Page.captureScreenshot", {"format": "png"}))
-            data = res.get("data")
-            if data:
-                path = f"{ROOT}/_verify_hero_coffee_photos_{name}.png"
-                with open(path, "wb") as f:
-                    f.write(base64.b64decode(data))
-                print(f"   shot -> {path}")
-
-        async def click_at(x, y):
-            for t, btns in (("mousePressed", 1), ("mouseReleased", 0)):
-                await send(msg("Input.dispatchMouseEvent", {
-                    "type": t, "x": x, "y": y, "button": "left", "clickCount": 1,
-                    "buttons": btns}))
-
-        # ================= 首頁：各 viewport =================
-        for w, h, mobile, name in ((1280, 800, False, "desktop"),
-                                   (991, 900, False, "pad991"),
-                                   (768, 1024, False, "tablet"),
-                                   (390, 844, True, "mobile")):
-            await set_viewport(w, h, mobile)
+        # ================= per-viewport（A–F） =================
+        for idx, (w, h) in enumerate(VIEWPORTS):
+            await set_viewport(w, h)
             await goto(f"{BASE}/")
-            # 釘牌位於首屏 hero 內；平板／手機 hero 較高，先把 wrap 捲進視野中央再量幾何
-            await evaljs("(function(){var c=document.querySelector('#bc-bg-footer "
-                         "[data-footer-logo=\"wrap\"]');"
-                         "if(c)c.scrollIntoView({block:'center'});})()")
-            await asyncio.sleep(1.4)
-            m = await evaljs(MEASURE_JS) or {}
-            rows = m.get("rows") or []
+            m = await measure()
+            print(f"\n=== {w}x{h} 首頁 ===")
+            if not m:
+                failures.append(check(f"{w}: PROBE_JS 有回傳值", False))
+                continue
+            items = m.get("items") or []
+            bfw, bfh, bfl, bfc, bfr = EXPECT.get(w, (0, 0, 0, 0, 0))
 
-            print(f"\n=== 首頁 hero 照片列 {w}x{h} ({name}) ===")
-            # A 結構
-            failures.append(check("A1 #bc-bg-footer 存在", m.get("root_found") is True))
-            failures.append(check("A2 [data-footer-logo=list] 存在", m.get("list_found") is True))
-            failures.append(check("A3 7 個 data-footer-logo=item", m.get("item_count") == 7,
-                                  m.get("item_count")))
-            failures.append(check("A4 每格恰 1 個 <a> ＋ 1 個 <img>",
-                                  len(rows) == 7
-                                  and all(r.get("a_count") == 1 and r.get("img_count") == 1
-                                          for r in rows),
-                                  [(r.get("a_count"), r.get("img_count")) for r in rows]))
-            failures.append(check("A5 每張 img 帶 .img.contain",
-                                  bool(rows) and all("img" in (r.get("img_cls") or "")
-                                                     and "contain" in (r.get("img_cls") or "")
-                                                     for r in rows),
-                                  (rows[0].get("img_cls") if rows else None)))
-            failures.append(check("A6 已無 deco_* 圖片殘留", not m.get("deco_srcs"),
-                                  m.get("deco_srcs")))
-            # B 與 #hero_hand_list 同源
-            hrefs = [r.get("href") for r in rows]
-            srcs = [r.get("src") for r in rows]
-            alt_by_href = {r.get("href"): (r.get("alt") or "").strip() for r in rows}
-            failures.append(check("B1 #hero_hand_list 存在且 7 筆",
-                                  m.get("hand_found") is True
-                                  and len(m.get("hand_hrefs") or []) == 7,
-                                  len(m.get("hand_hrefs") or [])))
-            failures.append(check("B2 href 順序與 #hero_hand_list 逐一相同",
-                                  hrefs == (m.get("hand_hrefs") or []), hrefs))
-            failures.append(check("B3 src 順序與 #hero_hand_list 逐一相同",
-                                  srcs == (m.get("hand_srcs") or []), srcs))
-            failures.append(check("B4 7 個連結皆為 /coffee/<id>/",
-                                  len(hrefs) == 7
-                                  and all(re.fullmatch(r"/coffee/\d+/", x or "") for x in hrefs),
-                                  hrefs))
-            failures.append(check("B5 7 個 src 皆為 _index.png 咖啡照",
-                                  len(srcs) == 7
-                                  and all(re.search(r"_index\.png$", x or "") for x in srcs),
-                                  srcs))
-            failures.append(check("B6 每張 img 皆有 alt",
-                                  all((r.get("alt") or "").strip() for r in rows),
-                                  [r.get("alt") for r in rows]))
-            # C 實際載入
-            # 輪播一次只顯示 1 格，其餘 6 格是 display:none ＋ loading="lazy"。Chrome 對
-            # display:none 的 lazy 圖不會走完載入流程 → img.complete 恆為 false，
-            # 但資源仍已抓取並解出尺寸（實測 4 個 viewport 的 7 張 naturalWidth 皆為 840）。
-            # 故「complete」只對顯示中那格要求；隱藏格改驗 naturalWidth > 0（非 404／破圖），
-            # 並由 C3 直接以 HTTP 確認 7 個 src 都是可用的圖片檔。
-            vis_rows = [r for r in rows if r.get("visible")]
-            failures.append(check("C1 顯示中那格（恰 1 格）img complete 且 naturalWidth > 0",
-                                  len(vis_rows) == 1
-                                  and vis_rows[0].get("img_complete") is True
-                                  and (vis_rows[0].get("img_nw") or 0) > 0,
-                                  [(r.get("img_complete"), r.get("img_nw")) for r in vis_rows]))
-            hid_rows = [r for r in rows if not r.get("visible")]
-            failures.append(check('C2 其餘 6 格 loading="lazy" ＋ naturalWidth > 0'
-                                  "（display:none 使 complete 恆 false，屬正常）",
-                                  len(hid_rows) == 6
-                                  and all(r.get("img_loading") == "lazy"
-                                          and (r.get("img_nw") or 0) > 0 for r in hid_rows),
-                                  [(r.get("display"), r.get("img_loading"), r.get("img_nw"))
-                                   for r in hid_rows]))
-            statuses = [(s, fetch_image(s)) for s in srcs]
-            failures.append(check("C3 7 個 src 互異且 HTTP 直取皆 200 ＋ image/*",
-                                  len(srcs) == 7
-                                  and len(set(srcs)) == 7
-                                  and all(st == 200 and ct.startswith("image/")
-                                          for _, (st, ct) in statuses),
-                                  [(s, st, ct) for s, (st, ct) in statuses]))
-            # D 輪播初始狀態 / 幾何
-            vis = m.get("visible_idx") or []
-            failures.append(check("D1 恰 1 格顯示（輪播狀態）", vis == [0], vis))
-            hidden = [r for r in rows if not r.get("visible")]
-            failures.append(check("D2 其餘 6 格 display:none ＋ position:absolute",
-                                  len(hidden) == 6
-                                  and all(r.get("position") == "absolute" for r in hidden),
-                                  [(r.get("display"), r.get("position")) for r in hidden][:3]))
-            shown = rows[0] if vis == [0] else (rows[vis[0]] if vis else {})
-            failures.append(check("D3 顯示格 position:relative",
-                                  shown.get("position") == "relative",
-                                  shown.get("position")))
-            er, ar, ir = shown.get("item_rect"), shown.get("a_rect"), shown.get("img_rect")
-            failures.append(check("D4 顯示格 rect 寬高 > 0",
-                                  bool(er) and er["w"] > 0 and er["h"] > 0, er))
-            # 2026-10-14：每張照片下方新增「名稱 + highlight」→ <a> 由 block 改為
-            # flex column（D5 改寫）、img 不再撐滿 <a>（D7 改寫），並新增 D9–D11。
-            failures.append(check("D5 <a> computed display == flex（2026-10-14 起為 flex column）",
-                                  shown.get("a_display") == "flex", shown.get("a_display")))
-            failures.append(check("D6 <a> 撐滿顯示格（rect 溢差 <= 1px）",
-                                  shown.get("a_fills_item") is True, f"a {ar} vs item {er}"))
-            cap_h = shown.get("cap_h") or 0
-            failures.append(check("D7 img 橫向撐滿 <a>、高度 = <a> 高 − 文字高（±1px）且 > 100px",
-                                  bool(ir) and bool(ar)
-                                  and abs(ir["w"] - ar["w"]) <= 1
-                                  and abs(ir["h"] - (ar["h"] - cap_h)) <= 1
-                                  and ir["h"] > 100,
-                                  f"img {ir} / a {ar} / 文字高 {cap_h}"))
-            failures.append(check("D8 無水平溢出",
-                                  (m.get("doc_scroll_w") or 0) <= (m.get("inner_w") or 0) + 1,
-                                  f"scrollW {m.get('doc_scroll_w')} vs innerW {m.get('inner_w')}"))
-            failures.append(check("D9 顯示格文字：name == img alt、highlight 非空且為品牌金",
-                                  shown.get("cap_found") is True
-                                  and bool((shown.get("cap_name") or "").strip())
-                                  and shown.get("cap_name") == shown.get("alt")
-                                  and bool((shown.get("cap_hl") or "").strip())
-                                  and shown.get("hl_color") == "rgb(196, 155, 99)",
-                                  (shown.get("cap_name"), shown.get("cap_hl"),
-                                   shown.get("hl_color"))))
-            failures.append(check("D10 文字在照片下方（照片底 <= 文字頂 + 1px）",
-                                  shown.get("img_is_above_cap") is True,
-                                  (ir, shown.get("cap_rect"))))
-            failures.append(check("D11 輪播 7 格皆帶文字區（每格切到時都有名稱/highlight）",
-                                  len(rows) == 7
-                                  and all(r.get("cap_found") is True
-                                          and (r.get("cap_name") or "").strip()
-                                          and (r.get("cap_hl") or "").strip() for r in rows),
-                                  [r.get("cap_found") for r in rows]))
-            await shot_viewport(name)
+            # ---------- A 結構 ----------
+            failures.append(check("A1 #bc-clock-hand-list 內恰 7 個 .hero_hand_item",
+                                  m.get("itemCount") == 7, m.get("itemCount")))
+            failures.append(check("A2 --angle 依序 -90/-65/-40/-15/10/35/60",
+                                  [i.get("angle") for i in items] == ANGLES,
+                                  [i.get("angle") for i in items]))
+            failures.append(check("A3 每格都有 <a href=/coffee/N/> ＋ <img src/alt>",
+                                  len(items) == 7
+                                  and all((i.get("href") or "").startswith("/coffee/")
+                                          and (i.get("src") or "").strip()
+                                          and (i.get("alt") or "").strip()
+                                          for i in items),
+                                  [(i.get("href"), (i.get("src") or "")[-18:]) for i in items[:2]]))
+            failures.append(check("A4 .hero_hand.is-ready（模組已註冊）",
+                                  m.get("ready") is True and m.get("handCount") == 1,
+                                  (m.get("ready"), m.get("handCount"))))
+            failures.append(check("A5 文字列 = 7 筆 [data-bc-ring-caption-item]、有 -current、文字非空",
+                                  m.get("capCount") == 7 and (m.get("capCur") or -1) >= 0
+                                  and bool((m.get("capText") or "").strip()),
+                                  (m.get("capCount"), m.get("capCur"), m.get("capText"))))
+            failures.append(check("A6 首頁已無舊輪播 hook（data-footer-logo item/wrap）",
+                                  m.get("legacyItems") == 0 and m.get("legacyWrap") is False,
+                                  (m.get("legacyItems"), m.get("legacyWrap"))))
+            # A7：整頁扇形的關鍵 —— 照片格／照片區必須讓照片離開格子，唯一的裁切框是頁面層級的
+            #     #bc-bg-footer{overflow:hidden}（與 hero 由 .bc-gunte-hero 裁切是同一件事）。
+            failures.append(check("A7 照片格／照片區 overflow = visible、#bc-bg-footer = hidden",
+                                  m.get("cellOverflow") == "visible"
+                                  and m.get("areaOverflow") == "visible"
+                                  and m.get("sectionOverflow") == "hidden",
+                                  (m.get("cellOverflow"), m.get("areaOverflow"),
+                                   m.get("sectionOverflow"))))
+            # A8：環上 7 張只有 2–3 張在畫面內（其餘依角度落在畫面外）→ lazy 會讓「輪到置中時
+            #     還沒載入」而出現空窗；7 張一律 eager（與 index.html #hero_hand_list 同寫法）。
+            failures.append(check("A8 7 張照片皆非 loading=lazy（整頁扇形下必須 eager）",
+                                  [i.get("loading") for i in items] == [None] * 7,
+                                  [i.get("loading") for i in items]))
 
-            # E 輪播前進（點 wrap → 前進一格）
-            c = await evaljs(CAROUSEL_JS) or {}
-            failures.append(check("E1 點 wrap 後輪播前進 1 格（mod 7）",
-                                  c.get("before") in range(7)
-                                  and c.get("afterClick") == ((c.get("before") or 0) + 1) % 7,
-                                  c))
-            failures.append(check("E2 前進後仍只有 1 格顯示",
-                                  (await evaljs(VISIBLE_COUNT_JS)) == 1,
-                                  await evaljs(VISIBLE_COUNT_JS)))
+            # ---------- B 與 hero 同源 ----------
+            hero = m.get("hero") or []
+            failures.append(check("B1 #hero_hand_list 亦為 7 筆",
+                                  m.get("heroCount") == 7, m.get("heroCount")))
+            failures.append(check("B2 href 順序與 #hero_hand_list 逐筆相同",
+                                  [i.get("href") for i in items] == [i.get("href") for i in hero],
+                                  [(i.get("href"), j.get("href")) for i, j in zip(items, hero)][:2]))
+            failures.append(check("B3 src 順序與 #hero_hand_list 逐筆相同",
+                                  [i.get("src") for i in items] == [i.get("src") for i in hero]))
+            failures.append(check("B4 --angle 順序與 #hero_hand_list 逐筆相同",
+                                  [i.get("angle") for i in items] == [i.get("angle") for i in hero]))
 
-            # F 連結可點（先停 interval 求確定性）
-            t = await evaljs(CLICK_TARGET_JS)
-            failures.append(check("F1 取得顯示中連結的中心點",
-                                  bool(t) and t.get("w", 0) > 0 and t.get("h", 0) > 0, t))
-            if t and t.get("w", 0) > 0:
-                # 無條件先把該格捲到視野中央再重新取點：固定 navbar / 浮動鈕可能蓋住
-                # 視口上緣，直接用原座標送真實滑鼠事件會命中覆蓋層而非 <a>。
-                await evaljs("(function(){var el=document.querySelectorAll('#bc-bg-footer "
-                             "[data-footer-logo=\"item\"]')[" + str(t["idx"]) + "];"
-                             "if(el)el.scrollIntoView({block:'center'});})()")
-                await asyncio.sleep(0.6)
-                t2 = await evaljs(CLICK_TARGET_JS)
-                if t2 and t2.get("w", 0) > 0:
-                    t = t2
-                await click_at(t["x"], t["y"])
-                path = None
-                for _ in range(48):
-                    await asyncio.sleep(0.25)
-                    path = await evaljs("location.pathname")
-                    if path and path.startswith("/coffee/"):
-                        break
-                failures.append(check("F2 點照片導覽到該筆 /coffee/<id>/",
-                                      path == t.get("href"), f"{path} vs {t.get('href')}"))
-                # F3：F2 一偵測到 pathname 改變就跳出，但那只代表新 document 已 commit，
-                # <head> 可能還在解析（document.body == null）→ 直接驗 body 會誤判 FAIL
-                # （舊寫法 4 個 viewport 有 3 個 FAIL，而同時印出的 title 其實已正確）。
-                # 改為輪詢等「body ＋ 商品頁標記 ＋ title」皆就緒，再用 alt（＝ coffee.name）
-                # 推出的預期標題逐字比對（coffee.html 的 <title> 即 "Between Coffee - <名稱>"）。
-                exp_name = alt_by_href.get(path or "", "")
-                exp_title = f"Between Coffee - {exp_name}" if exp_name else ""
-                nav = {}
-                for _ in range(40):
-                    nav = await evaljs(NAV_READY_JS) or {}
-                    if nav.get("body") and nav.get("detail") and nav.get("title"):
-                        break
-                    await asyncio.sleep(0.25)
-                failures.append(check("F3 導覽後為該筆商品頁（200、非 404、標題正確）",
-                                      nav.get("body") is True
-                                      and nav.get("detail") is True
-                                      and nav.get("status") in (200, None)
-                                      and bool(exp_name)
-                                      and nav.get("title") == exp_title,
-                                      f"status={nav.get('status')} title={nav.get('title')!r} "
-                                      f"expected={exp_title!r} detail={nav.get('detail')}"))
+            # ---------- C 索引同步 ----------
+            hc = m.get("heroCur")
+            failures.append(check("C1 hero 的 Splide index 一致（nav -current / state-active / aria）",
+                                  hc is not None and hc >= 0
+                                  and m.get("navCur") == hc and m.get("actIdx") == hc
+                                  and m.get("ariaLabel") == f"{hc + 1} of {m.get('slideCount')}",
+                                  (m.get("navCur"), m.get("actIdx"), m.get("ariaLabel"))))
+            failures.append(check("C2 照片格 cur == 文字列 cur == BC_HAND_RING.index() == hero index",
+                                  hc is not None and m.get("handCur") == hc
+                                  and m.get("capCur") == hc and m.get("ringIndex") == hc,
+                                  (m.get("handCur"), m.get("capCur"), m.get("ringIndex"), hc)))
+            failures.append(check(f"C3 圓盤 inline transform == rotate({(hc or 0) * -25}deg)",
+                                  m.get("listInline") == f"rotate({(hc or 0) * -25}deg)",
+                                  m.get("listInline")))
+            failures.append(check("C4 兩個環都註冊在 BC_HAND_RING（hero ＋ 照片格）",
+                                  m.get("ringCount") == 2, m.get("ringCount")))
+            failures.append(check("C5 --circle-radius 與 hero 同值（100vw ＝同一顆整頁大圓）",
+                                  (m.get("radiusVar") or "") == "100vw",
+                                  (m.get("radiusVar"), m.get("imgWVar"))))
+
+            # ---------- D 環形幾何 ----------
+            rp = m.get("radiusPx") or 0
+            failures.append(check(f"D1 半徑 = {exp_radius(w):.1f}px ±2（100vw ＝ hero 同值）",
+                                  abs(rp - exp_radius(w)) <= 2, round(rp, 2)))
+            dists = [i.get("dist") for i in items]
+            failures.append(check("D2 7 張圖的中心都落在同一個圓上（距圓心 = 半徑 ±2px）",
+                                  len(dists) == 7 and all(d is not None and abs(d - rp) <= 2
+                                                          for d in dists),
+                                  [round(d, 1) if d else d for d in dists]))
+            cur_i = m.get("handCur")
+            scales = [i.get("scale") for i in items]
+            failures.append(check("D3 current 那張 img scale=1、其餘 0.5",
+                                  cur_i is not None and scales[cur_i] == "1"
+                                  and all(s == "0.5" for k, s in enumerate(scales) if k != cur_i),
+                                  scales))
+            curc = (items[cur_i].get("imgCenter") or {}) if cur_i is not None else {}
+            ccx = (m.get("cellBox") or {}).get("x", 0) + (m.get("cellBox") or {}).get("w", 0) / 2
+            failures.append(check("D4 current 那張的水平中心 == 照片格中心（±2px）",
+                                  abs(curc.get("x", 0) - ccx) <= 2,
+                                  (curc.get("x"), round(ccx, 2))))
+            cap_box = m.get("captionBox")
+            area_box = m.get("area")
+            sec_box = m.get("section")
+            n_it = len(items)
+            cur_img = (items[cur_i].get("img") or {}) if cur_i is not None else {}
+            # D5：照片寬取「照片區高 ÷ 咖啡照比例 1.4286」⇒ current 那張上下剛好貼齊照片區，
+            #     底緣就落在文字列頂端（不再靠裁切，是尺寸本來就剛好）。
+            failures.append(check("D5 current 貼齊照片區：底緣 == 文字列頂端（±2px）⇒ 不壓文字",
+                                  bool(cap_box) and abs(cur_img.get("bottom", 0)
+                                                        - cap_box.get("y", 0)) <= 2,
+                                  (round(cur_img.get("bottom", 0), 2), (cap_box or {}).get("y"))))
+            # D6：整頁扇形 ⇒ 實質可見 2–3 張、且必為 current ± 1（循環；索引在端點時只有一側
+            #     鄰居落在畫面內）。「實質可見」＝圖 rect 落在頁面裁切框（#bc-bg-footer）內的
+            #     面積 ≥25%（用 viewport 座標比較，結果與捲動位置無關）。
+            vis = [k for k, i in enumerate(items)
+                   if cover_ratio(i.get("img"), sec_box) >= 0.25]
+            near = cur_i is not None and all(
+                min((k - cur_i) % n_it, (cur_i - k) % n_it) <= 1 for k in vis)
+            failures.append(check("D6 畫面內實質可見 2–3 張、且必為 current ± 1（循環）",
+                                  2 <= len(vis) <= 3 and bool(near),
+                                  [(k, round(cover_ratio(items[k].get("img"), sec_box), 2))
+                                   for k in range(n_it)]))
+            iw = (items[cur_i].get("img") or {}).get("w", 0) if cur_i is not None else 0
+            failures.append(check(f"D7 current 那張 img 寬 = {exp_img_w(w):.1f}px ±1"
+                                  f"（＝照片區高 ÷ 1.4286）",
+                                  abs(iw - exp_img_w(w)) <= 1, round(iw, 2)))
+            # D8：扇形橫跨整個頁面 —— 鄰居的水平中心距圓心（＝current 那張的中心）≈ 0.4226R
+            #     （25° 步進的弦長）、且必須落在頁面兩緣（≤20% / ≥80% 頁寬）；鄰居 rect 也已
+            #     離開照片格（＝證明不是「縮在格子裡」）。
+            cx_cell = (m.get("cellBox") or {}).get("x", 0)
+            cx_cell_r = cx_cell + (m.get("cellBox") or {}).get("w", 0)
+            nb = [k for k in vis if cur_i is not None and k != cur_i]
+            nb_bad = []
+            for k in nb:
+                c = items[k].get("imgCenter") or {}
+                off = abs(c.get("x", 0) - (curc.get("x") or 0))
+                if abs(off - 0.4226 * rp) > 0.02 * rp:
+                    nb_bad.append((k, "dist", round(off, 1), round(0.4226 * rp, 1)))
+                if sec_box:
+                    if not (c.get("x", 0) <= sec_box.get("x", 0) + 0.2 * sec_box.get("w", 0)
+                            or c.get("x", 0) >= sec_box.get("x", 0) + 0.8 * sec_box.get("w", 0)):
+                        nb_bad.append((k, "edge", round(c.get("x", 0), 1)))
+                r = items[k].get("img") or {}
+                if r.get("x", 0) > cx_cell - 10 and r.get("right", 0) < cx_cell_r + 10:
+                    nb_bad.append((k, "inside-cell", (r.get("x"), r.get("right"))))
+            failures.append(check("D8 鄰居在 ±0.4226R 且落在頁面兩緣、rect 已離開照片格（整頁扇形）",
+                                  bool(nb) and not nb_bad, nb_bad or nb))
+            # D9：7 張 rect 都不得與文字列相交（照片變大，但橫向距離更遠 ⇒ 名稱/highlight 不被壓）
+            fail_over = [(k, items[k].get("img")) for k in range(n_it)
+                         if overlaps(items[k].get("img"), cap_box, eps=1.0)]
+            failures.append(check("D9 7 張照片的 rect 皆不與文字列交集",
+                                  not fail_over, fail_over[:2]))
+            # D10：扇形超出頁面的部分由 #bc-bg-footer 的 overflow:hidden 裁掉 ⇒ 無水平捲軸
+            failures.append(check("D10 無水平溢出（頁面層級裁切生效）",
+                                  (m.get("docScrollW") or 0) <= (m.get("innerW") or 0) + 1,
+                                  (m.get("docScrollW"), m.get("innerW"))))
+            # D11：環形照片列到 #bc-bg-footer 之間不得有任何「裁切框」——
+            #      overflow 已由 A7 驗過（照片格／照片區 visible）；這裡驗另一條容易漏的路：
+            #      .footer-logo-cell 的 data-reveal="clip-down" 會被 GSAP 留下 clip-path:inset(0%)，
+            #      那會把側邊鄰居整張切掉（bc-bg-footer.js 已在揭示跑完後釋放）。
+            clip_chain = m.get("clipChain") or []
+            failures.append(check("D11 揭示後照片格無殘留 clip-path（側邊鄰居不被格子切掉）",
+                                  m.get("cellClip") == "none" and not clip_chain,
+                                  (m.get("cellClip"), clip_chain)))
+
+            # ---------- E 零回歸／桌機改動範圍 ----------
+            failures.append(check("E1 首頁不再有 5 秒輪播（__footerLogoInterval 為 null）",
+                                  m.get("interval") is False, m.get("interval")))
+            cb = m.get("cellBox") or {}
+            ab = m.get("area") or {}
+            cp = cap_box or {}
+            cr = m.get("clockRow") or {}
+            scope = "改動後（≥992px 照片放大）" if w >= 992 else "改動前逐值不變（≤991px 未動）"
+            failures.append(check(f"E2 .footer-logo-cell 寬 {bfw}px ±1（{scope}）",
+                                  abs(cb.get("w", 0) - bfw) <= 1, cb.get("w")))
+            failures.append(check(f"E3 .footer-logo-cell 高 {bfh}px ±1（時鐘列高度；{scope}）",
+                                  abs(cb.get("h", 0) - bfh) <= 1, cb.get("h")))
+            failures.append(check(f"E4 .footer-logo-list 高 {bfl}px ±1（＝照片區高；{scope}）",
+                                  abs(ab.get("h", 0) - bfl) <= 1, ab.get("h")))
+            failures.append(check(f"E5 .footer-logo-caption 高 {bfc}px ±1（文字區高度；{scope}）",
+                                  abs(cp.get("h", 0) - bfc) <= 1, cp.get("h")))
+            failures.append(check(f"E6 .footer-time 高 {bfr}px ±1（整條時鐘列；{scope}）",
+                                  abs(cr.get("h", 0) - bfr) <= 1, cr.get("h")))
+            # E7：2026-10-15 的改動「只限 ≥992px」—— 桌機把 cell 的上下內距歸零（留白吸收進
+            #     照片區、照片頂緣上移到列的頂端），≤991px 必須仍是 u-24 + 14px / u-24
+            #     （＝逐值與改動前相同）。這是本批改動最容易外溢到平板的破口。
+            if w >= 992:
+                e7_pt, e7_pb, e7_why = 0.0, 0.0, "≥992px 歸零＝留白吸收進照片區"
             else:
-                failures.append(check("F2 點照片導覽到該筆 /coffee/<id>/", False, "no target"))
-                failures.append(check("F3 導覽後為該筆商品頁（200、非 404、標題正確）",
-                                      False, "no target"))
+                e7_pb = (24.0 * w / 100.0) / 3.93
+                e7_pt, e7_why = e7_pb + 14.0, "≤991px 未動（u-24 + 14px / u-24）"
+            pt_got, pb_got = pxnum(m.get("cellPadTop")), pxnum(m.get("cellPadBottom"))
+            failures.append(check(
+                f"E7 .footer-logo-cell 內距 = {e7_pt:.2f}/{e7_pb:.2f}px ±1（{e7_why}）",
+                pt_got is not None and pb_got is not None
+                and abs(pt_got - e7_pt) <= 1 and abs(pb_got - e7_pb) <= 1,
+                (m.get("cellPadTop"), m.get("cellPadBottom"))))
+            # E8：照片寬永遠＝照片區高 ÷ 1.4286（放大／縮小的連動關係；改動前後、全斷點皆成立）
+            ratio = (ab.get("h", 0) / iw) if iw else 0
+            failures.append(check("E8 照片區高 ÷ current 照片寬 = 1.4286 ±0.002（兩者同步）",
+                                  abs(ratio - 1.42857) <= 0.002, round(ratio, 5)))
 
-        # ================= /about/：反向守門 =================
+            # ---------- F 圖片 HTTP ----------
+            bad_src = []
+            for i in items:
+                st, ct = fetch_image(i.get("src") or "")
+                if st != 200 or not ct.startswith("image/"):
+                    bad_src.append((i.get("href"), i.get("src"), st, ct))
+            failures.append(check("F1 7 個 src 皆 HTTP 200 且 Content-Type image/*",
+                                  not bad_src, bad_src[:2]))
+
+            # ---------- H 互動（僅第一個 viewport） ----------
+            if idx == 0:
+                print(f"\n=== {w}x{h} 互動：點 #hero_nav ===")
+                await evaljs(NAV_CLICK_JS % (4, 4))
+                await asyncio.sleep(0.6)
+                m2 = await measure()
+                failures.append(check("H1 點 nav[4] 後 hero index == 4",
+                                      m2.get("heroCur") == 4, m2.get("heroCur")))
+                failures.append(check("H2 照片格 / 文字列 / 圓盤 都跟到 4",
+                                      m2.get("handCur") == 4 and m2.get("capCur") == 4
+                                      and m2.get("listInline") == "rotate(-100deg)",
+                                      (m2.get("handCur"), m2.get("capCur"), m2.get("listInline"))))
+                failures.append(check("H3 文字列顯示第 5 筆咖啡（name/highlight 非空）",
+                                      bool((m2.get("capText") or "").strip()),
+                                      m2.get("capText")))
+                await evaljs(NAV_CLICK_JS % (0, 0))
+                await asyncio.sleep(0.6)
+                m3 = await measure()
+                failures.append(check("H4 點 nav[0]（rewind 回第一張）→ 三方都跟到 0",
+                                      m3.get("heroCur") == 0 and m3.get("handCur") == 0
+                                      and m3.get("capCur") == 0
+                                      and m3.get("listInline") == "rotate(0deg)",
+                                      (m3.get("heroCur"), m3.get("handCur"), m3.get("capCur"),
+                                       m3.get("listInline"))))
+
+        # ================= G /about/ 反向守門 =================
         await set_viewport(1280, 800)
         await goto(f"{BASE}/about/")
-        await evaljs("window.scrollTo(0, document.body.scrollHeight)")
-        await asyncio.sleep(1.2)
-        a = await evaljs(ABOUT_JS) or {}
-        print("\n=== /about/ 真頁尾反向守門 (1280x800) ===")
-        failures.append(check("G1 /about/ 仍有 #bc-bg-footer", a.get("found") is True))
-        failures.append(check("G2 /about/ 頁尾仍為 5 格 deco 標誌", a.get("item_count") == 5,
-                              a.get("item_count")))
-        failures.append(check("G3 /about/ 頁尾仍有 5 張 deco_* 圖片", a.get("deco_imgs") == 5,
-                              a.get("deco_imgs")))
-        failures.append(check("G4 /about/ 頁尾無 /coffee/ 連結（改動未波及）",
-                              a.get("coffee_links") == 0, a.get("coffee_links")))
+        await asyncio.sleep(0.5)
+        a = await evaljs(ABOUT_JS)
+        print("\n=== /about/ 反向守門 ===")
+        failures.append(check("G1 /about/ 真頁尾仍為 5 格 deco 輪播",
+                              bool(a) and a.get("items") == 5 and a.get("list") is True,
+                              (a or {}).get("items")))
+        failures.append(check("G2 /about/ 沒有環形照片列（.hero_hand / #bc-clock-hand-list）",
+                              bool(a) and a.get("hand") == 0 and a.get("ringList") == 0,
+                              (a or {}).get("hand")))
+        failures.append(check("G3 /about/ 的 5 秒輪播仍在跑（__footerLogoInterval 有值）",
+                              bool(a) and a.get("interval") is True, (a or {}).get("interval")))
+        failures.append(check("G4 /about/ #bc-bg-footer 內仍是 <footer>（標籤不同、樣式相同）",
+                              bool(a) and a.get("isFooter") is True, (a or {}).get("isFooter")))
 
         await send(msg("Page.close"))
 
     total = len(failures)
-    bad = sum(1 for f in failures if not f)
-    print(f"\n===== 合計 {total} 項，PASS {total - bad}，FAIL {bad} =====")
-    return bad
+    bad_n = len([f for f in failures if not f])
+    print(f"\n===== 小結：PASS {total - bad_n} / {total}，FAIL {bad_n} =====")
+    return 1 if bad_n else 0
 
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(main()))
-

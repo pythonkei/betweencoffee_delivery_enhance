@@ -350,62 +350,21 @@
   display: none;
 }
 
-/* ---- 手套圓 ---- */
+/* ---- 手套圓（環形照片列）----
+   2026-10-14（使用者指示）：環的「結構與動畫」已抽到共用模組 static/css/bc-hand-ring.css
+   （`.hero_hand` / `.hero_hand_list` / `.hero_hand_item`；首頁 hero 與其下方 BC 動態 hero 的
+   照片格 #bc-clock-photos 共用）。本檔只留 hero 專屬的三件事：
+     ① 進場（見上方 `.-load .hero_hand`：opacity 0→1、rotate -35deg→0）
+     ② 圓心位置（top / left；照片格另有自己的定位與半徑）
+     ③ 逐斷點的照片寬度（--bc-hand-img-w，原本直接寫在 .hero_hand_item img 上）
+   [載入順序] index.html 先 bc-hand-ring.css 再本檔；本檔選擇器多一層 .bc-gunte-hero
+   ⇒ 同名變數/屬性一律以本檔為準（維持與抽出前逐值相同）。 */
 .bc-gunte-hero .hero_hand {
+  --bc-hand-img-w: calc(420px * var(--bc-gunte-scale));
   opacity: 0;
-  position: absolute;
   top: 91%;
   left: 50%;
-  pointer-events: none;
   transform: rotate(-35deg);
-  will-change: transform, opacity;
-  --circle-radius: 100vw;
-}
-
-.bc-gunte-hero:has(.is-initialized) .hero_hand_list {
-  transition: transform 1.2s;
-}
-
-.bc-gunte-hero .hero_hand_list {
-  width: calc(var(--circle-radius) * 2);
-  margin-left: calc(var(--circle-radius) * -1);
-  aspect-ratio: 1;
-}
-
-.bc-gunte-hero .hero_hand_item {
-  position: absolute;
-  pointer-events: auto;
-  translate: calc(cos(var(--angle) * 1deg) * var(--circle-radius) - 50%)
-    calc(sin(var(--angle) * 1deg) * var(--circle-radius) * 1 - 50%);
-  rotate: calc((var(--angle) - 270) * 1deg);
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-}
-
-.bc-gunte-hero .hero_hand_item.-current {
-  /* 2026-09-07：改為咖啡頁連結後，current 也保持可點擊 */
-  pointer-events: auto;
-}
-
-.bc-gunte-hero .hero_hand_item a {
-  display: block;
-}
-
-/* 2026-09-07：img 已被 <a> 包住 → 用後代選擇器（否則參考網站尺寸/scale 失效、圖過大） */
-.bc-gunte-hero .hero_hand_item img {
-  /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 420px→336px；手機 200px 不變） */
-  width: calc(420px * var(--bc-gunte-scale));
-  scale: 0.5;
-  -webkit-user-drag: none;
-  -webkit-touch-callout: none;
-}
-
-.bc-gunte-hero:has(.is-initialized) .hero_hand_item img {
-  transition: scale 1.2s;
-}
-
-.bc-gunte-hero .hero_hand_item.-current img {
-  scale: 1;
 }
 
 /* ---- 頁籤點 ---- */
@@ -522,11 +481,8 @@
 
   .bc-gunte-hero .hero_hand {
     top: 88%;
-  }
-
-  .bc-gunte-hero .hero_hand_item img {
     /* 2026-09-15：隨 --bc-gunte-scale 縮放（0.8 → 340px→272px） */
-    width: calc(340px * var(--bc-gunte-scale));
+    --bc-hand-img-w: calc(340px * var(--bc-gunte-scale));
   }
 
   .bc-gunte-hero .hero_nav {
@@ -604,8 +560,8 @@
     top: 87%;
   }
 
-  .bc-gunte-hero .hero_hand_item img {
-    width: 200px;
+  .bc-gunte-hero .hero_hand {
+    --bc-hand-img-w: 200px;
   }
 
   .bc-gunte-hero .hero_nav {

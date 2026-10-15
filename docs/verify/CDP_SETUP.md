@@ -4,7 +4,66 @@
 > （`fetch /json/new?about:blank` 開分頁 → WebSocket `Input.dispatchMouseEvent` /
 > `Emulation.setDeviceMetricsOverride` / `Runtime.evaluate`）。**跑腳本前必須先有這個瀏覽器**。
 >
-> **最後更新**：2026-10-14（首頁 hero `#bc-clock` 加入 about 頁的天氣/時鐘元件（在左側 `{` 之上、
+> **最後更新**：2026-10-15（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片放大 —— 1440 時
+> 336×480**；使用者指示「桌機的咖啡照片放大到 1440 時 336×480，與 GUNTE hero 視覺同級」）：
+> 三處宣告全部落在 `templates/betweencoffee_delivery/index.html` 的 extra_css，**未動任何 .css／.js
+> ⇒ 無版號變更**：① `.bc-bg-hero … .footer-logo-cell` 於 `@media (min-width:992px)` 內
+> `padding-top／padding-bottom: 0`（原 `u-40 + 14px`／`u-40`；這段留白「吸收」進照片區 ⇒ 照片頂緣
+> 上移到時鐘列頂端）② `.footer-logo-list` 高 `276vw/ratio` → `480vw/ratio` ③ `--bc-hand-img-w`
+> `193vw/ratio` → `336vw/ratio`（＝480 ÷ 1.4286）。⚠ **①的 media query 必須排在「+14px」那條規則
+> 之後**：兩者特異度相同（1,2,0）⇒ CSS 以來源順序決勝，寫在前面會被蓋掉（第一版實測 padding-top 仍是
+> 66.92／54／49.56px 而非 0，padding-bottom 因來源檔只有 (1,1,0) 故已生效）。逐斷點照片尺寸：
+> 1905 = 444.5×635.0、1440 = 336.0×480.0、1280 = 298.7×426.7、992 = 231.5×330.7；**≤991px
+> （991／768／390）逐值不變**（cell 寬高／list 高／caption 高／row 高／cell 內距／docHeight 全等於
+> 改動前）。列高 @1440 419.6 → 529.6（+110）：`.footer-logo-cell` 頂端、`#bc-bg-footer`、
+> `.grid.is-footer` 的**文件座標完全不動（實測 Δ0）**，只有列向下長、下方內容（`.footer-socials` 等）
+> 等量下移、頁面總高 +110（3826 → 3936）；時鐘數字／`{ }` 隨列高置中 ⇒ 下移 55px（代價：左鄰居咖啡
+> 「不透明內容 bbox」上緣與 `{` 在 x 85–107 帶內重疊約 22px，改動前該處留 +24px；截圖
+> `_verify_clock_photos_1440_after.png` 目視 `{` 完整可讀、白線稿尖端距字緣約 10px、不互相遮蔽）。
+> 驗證：`cdp_verify_hero_coffee_photos.py` **193/193**（E 段新增 **E7**「≥992px cell 內距 = 0／
+> ≤991px = u-24 + 14px / u-24」與 **E8**「照片寬 ＝ 照片區高 ÷ 1.4286」×5 斷點；基準表改為
+> `BEFORE`（≤991px 用）＋`AFTER`（≥992px 用）合成的 `EXPECT`；`exp_img_w()` 的 193→336）＋回歸
+> `cdp_verify_hero_weather.py`／`cdp_verify_bg_footer.py`／`cdp_verify_clock_braces.py`／
+> `cdp_verify_footer_scroller.py` ＋ `manage.py check` 0 issue；截圖
+> `_verify_clock_photos_{1905,1440,1280,992,991,390}_{before,after}.png`（`after` 為現況、`before`
+> 由 CDP 注入舊值產生對照）。**尚未提交、未 push、未部署**。
+> 原：2026-10-14 稍後（第二次）（**首頁照片格 `#bc-clock-photos` 的環形照片列改為「與 hero
+> 同一顆大圓」＝整頁扇形** —— 使用者指正「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，
+> 動畫展示是使用整個頁面的。參考 hero_hand」。① `--circle-radius` 由縮小版（`227vw/14.4`／
+> `86.5vw/3.93`）改回 **100vw**（與 hero 同值）⇒ 25° 步進下左右鄰居落在 ±0.4226R ≈ ±42vw、扇形
+> 橫跨整個頁面寬（±50° 以後落在畫面外）；② `--bc-hand-img-w` 改取「既有照片區高 ÷ 咖啡照實際比例
+> 1.4286（840×1200）」＝ `193vw/14.4`（≤991px `126vw/3.93`）⇒ current 那張上下剛好貼齊照片區、
+> 不壓文字列；③ 照片格／照片區的 `overflow: clip` 移除（唯一的裁切框＝`#bc-bg-footer{overflow:hidden}`，
+> 與 hero 由 `.bc-gunte-hero{overflow:hidden}` 裁切同義）；④ **必須修的隱形裁切**：
+> `.footer-logo-cell` 的 `data-reveal="clip-down"` 會被 GSAP 在揭示後留下 `clip-path: inset(0%)`
+> （＝永久把內容框在格子內）→ 側邊鄰居整張被切掉（rect 存在、圖片已載入，但 `elementFromPoint`
+> 命中的是 `#bc-clock`）⇒ `bc-bg-footer.js` 的 clip 揭示改為「揭示跑完即釋放內含
+> `[data-bc-hand-ring]` 容器的 clip-path」（`/about/` 沒有該標記 ⇒ 進場與裁切行為完全不變）；
+> ⑤ 照片格 7 張 `<img>` 由 `loading="lazy"` 改 eager（環上多數落在畫面外，lazy 會讓輪到置中的那張
+> 空窗；這 7 張與 hero 同 src、已在快取）。
+> 驗證：`cdp_verify_hero_coffee_photos.py` 擴充為 **179 項**（A 結構（含 overflow 與 eager）／B 與 hero
+> 同源／C 索引同步（含 radius＝100vw）／D1 半徑＝100vw、D6 可見 2–3 張且必為 current±1、D8 鄰居在
+> ±0.4226R 且落在頁面兩緣、D9 不壓文字列、D10 無水平溢出、D11 揭示後無殘留 clip-path／E 零回歸／
+> F 圖片 HTTP／G `/about/` 反向守門／H 互動），且 **量測前先捲到照片格讓揭示真的跑完**（不捲就驗不到
+> D11 那條路）；另回歸 `cdp_verify_hero_weather.py`／`cdp_verify_bg_footer.py`／
+> `cdp_verify_clock_braces.py`／`cdp_verify_footer_scroller.py`。版號：`bc-hand-ring.css` →
+> `20261014b`、`bc-bg-footer.js` → `20261014b`（index ＋ about）。
+> 原：2026-10-14 稍後（**首頁照片格 `#bc-clock-photos` 改為 GUNTE hero 的「環形照片列」
+> 縮小版** —— 使用者指示「改用 hero 的 `hero_hand` 環形模組 ＋ 旋轉動畫、半徑縮進格子裡、
+> 超出裁切、由 hero 的 Splide index 驅動」。新增共用模組 `static/css/bc-hand-ring.css` ＋
+> `static/js/bc-hand-ring.js`（`BC_HAND_RING.register(root, caption?)` / `goAll(i)` / `index()`；
+> 唯一索引來源＝hero 的 Splide，`register()` 會讓晚註冊者會合 ⇒ 載入順序無關、沒有輪詢或事件橋接），
+> hero 的 `updateSlideStates()` 改呼叫 `goAll()`（原 `rotateHeroHand()` 內容移入模組）；
+> 照片格 markup 改為 7 × `.hero_hand_item`（與 `#hero_hand_list` 同源）＋ 一組 7 筆
+> 「名稱/highlight」（只有 `-current` 顯示；`bc-bg-footer.js` 只負責註冊）；
+> 照片格幾何（半徑/照片寬/圓心）在 `index.html` extra_css 逐斷點覆寫（本版為縮小版）、
+> `.footer-logo-cell` 與 `.footer-logo-list` 加 `overflow: clip`（本版已移除）。
+> 首頁不再有 5 秒輪播（`window.__footerLogoInterval` 首頁為 null；`/about/` 的 deco 輪播不變）。
+> `cdp_verify_hero_coffee_photos.py` 當時為 **158/158**；`cdp_verify_hero_weather.py` 的 F 段改驗環形
+> ＋單一文字。版號：`bc-gunte-hero.css`／`bc-gunte-hero.js` → `20261014a`、`bc-bg-footer.js` →
+> `20261014a`（index ＋ about）；`static/css/bc-hand-ring.css`／`static/js/bc-hand-ring.js` →
+> `20261014a`（首次）。）
+> 原：2026-10-14（首頁 hero `#bc-clock` 加入 about 頁的天氣/時鐘元件（在左側 `{` 之上、
 > +30%，`--wc-scale:1.3`）＋ 照片列每張照片下方加「名稱 + highlight」。新增本清單第一支腳本
 > `cdp_verify_hero_weather.py`（**208 項**：A 結構／B 幾何（與 7 個時鐘子項 0 重疊、在 `{` 之上、
 > 欄位與改動前逐值相同）／C `--wc-scale` 與 ×1.3 逐值／D 內容填充／E 首頁 navbar 那顆仍隱藏且未縮放／
@@ -105,6 +164,7 @@ curl -s --max-time 5 http://127.0.0.1:9222/json/version
 
 ```bash
 python3 docs/verify/cdp_verify_hero_weather.py     # 首頁 hero #bc-clock 的天氣/時鐘元件（{ 之上、+30%）＋照片列名稱/highlight（7 斷點 × A–F ＋ /about/ 反向守門 G，208 項）
+python3 docs/verify/cdp_verify_clock_clash.py      # 照片列 vs { }／數字／山大黃球的「像素級遮蔽」（prod/clobber/clash 三階段；1440/1280/992/991/768/390）
 python3 docs/verify/cdp_verify_top_art.py          # 關於頁 /about/ 的 .top_art 模組（367 項）
 python3 docs/verify/cdp_verify_floating_cart.py    # 浮動購物車（5 斷點 × 4 頁，25 項）
 python3 docs/verify/cdp_verify_footer_scroller.py  # 首頁 hero 順序（GUNTE 第一屏）＋ 環形字尺寸／載入可見性（K1–K7）＋ /coffee_menu/ 頁尾跑馬燈（3 斷點，127 項）
@@ -136,6 +196,59 @@ python3 docs/verify/cdp_shot_index_hero_viewport.py # 首頁新 hero 外觀截�
 setsid nohup python3 docs/verify/cdp_verify_top_art.py > /tmp/verify_top_art.log 2>&1 < /dev/null &
 sleep 60; grep -c PASS /tmp/verify_top_art.log; grep FAIL /tmp/verify_top_art.log
 ```
+
+## 像素級遮蔽（clash）量測：cdp_verify_clock_clash.py
+
+2026-10-15 新增。量的是「**不同元素的可見像素是否落在同一點**」——`cdp_verify_clock_braces.py` 的 E1
+是 rect 兩兩不重疊；但桌機照片放大（1440 時 336×480）後，環形照片列（`#bc-clock-hand-list`）本來就會
+離開 `.footer-logo-cell`（`bc-bg-footer.js` 的 `releaseRingClip` 設計：揭示跑完即釋放裁切框）
+⇒ **rect 重疊是設計必然、不是 bug**，所以要看像素。三階段：`prod`（生產未被干擾 ＋ 探針零副作用）、
+`clobber`（重現舊探針的破壞性還原 ＋ 安全法對照）、`clash`（六斷點遮蔽表，整體 ＋ 逐張照片＝current 與左右鄰居）。
+
+量法：把某一層用「只插一條 `!important` 的 stylesheet 規則」隱藏（`visibility:hidden` 不影響 layout）
+→ 與基準截圖相減 = 該層真正畫到的像素遮罩；兩層遮罩的交集 = 兩層互相遮蔽的像素數。
+
+⚠ **四個都踩過、而且都不會報錯的坑**（任何一支做「隱藏圖層再相減」的探針都適用）：
+
+1. **絕不可用 `element.style.visibility=''` 當「還原」**：`[data-reveal]` 的可見性 ＝ CSS
+   `#bc-bg-footer [data-reveal]{visibility:hidden}`（`static/css/bc-bg-footer.css:73`）＋
+   `bc-bg-footer.js:267` 於 `whenFontsReady` 寫入的 inline `visibility:visible`。設成 `''` 是
+   **刪掉 inline 宣告、不是還原** ⇒ 退回 CSS 的 hidden ⇒ `.footer-logo-cell` 內整個環形照片列
+   （visibility 繼承）永久隱形 ⇒ 之後所有像素差 = 0（實測：照片貢獻像素 54047 → 0）。
+   正解＝加一條 stylesheet 規則、還原＝清空該規則內容，永不碰 inline style。
+2. **揭示必須先真的跑完**：不捲到照片格 ⇒ `data-reveal="clip-down"` 永不觸發；本機 rAF 被節流 ⇒
+   1.2s 的揭示實測要 16–36s ⇒ 必須 `SPEED_GSAP_JS`（`timeScale(100)`）＋輪詢 `clip-path == 'none'`。
+   少這步會量到「揭示前」的狀態（幾乎全被 clip 裁掉）＝假的 0。
+3. **凍結用 `finish()`、不要用 `pause()`**：`pause()` 把 `CSSTransition` 凍在半途，之後插入 `<style>`
+   觸發 style recalc 時被丟棄的 transition 會直接跳到終值 ⇒ 基準圖與之後每張圖都差一塊「會動的區域」
+   ⇒ 每個圖層遮罩都含同一塊假區域、兩兩交集全變成同一個 bbox（實測 992/768 的環形列 `scale` 過渡，
+   假遮蔽 2000–3500 px）。只有無限次動畫（品牌 `noise_animation`）才用 `pause()`（`finish()` 會丟
+   `InvalidStateError`）。
+4. **每個 viewport 都要驗「還原殘留 = 0 px」**（`Sess.layer()` 回傳 `resid`）：殘留 ≠ 0 代表量測期間
+   有東西在動 ⇒ 該 viewport 數字不可信，直接判 FAIL。這條就是第 3、5 點的守門
+   （沒有它，假數據會靜靜地變成「24 組嚴重遮蔽」）。
+5. **要停掉會改 DOM 文字的計時器**：`bc-bg-footer.js:36` 的 `__footerTimeInterval` 每秒 tick，
+   每分鐘把 `[data-footer-time]` 的「分」進位 ⇒ 基準圖與之後每張圖差那一小塊數字區域
+   （實測殘留 177 px @390、647 px @1280、1452–1958 px @992；而且**每一個圖層的遮罩都含那塊**
+   ⇒ 假的「照片×數字 1081 px 遮蔽」、`bbox` 還全部一模一樣）。計時器只寫文字、不影響任何幾何
+   ⇒ 量測前 `clearInterval` 即可（本腳本也順手清 `__footerLogoInterval`）。未具名的計時器
+   （如 `bc-weather.js:219` 的 1 秒時鐘）則交給第 4 條守門。
+
+本腳本對第 4 條的處理方式：某個 viewport 只要出現非 0 殘留，就**整輪重測**（最多 2 次；重試時第一輪
+不計分）—— 因為同一輪的所有遮罩必須共用同一張基準圖，交集才有意義；只重測單層會讓交集變成
+「不同基準的遮罩互比」。重測仍失敗才判 FAIL（寧可誠實說「這個 viewport 不可信」）。
+
+本腳本跑完（含例外路徑）一定用 HTTP `/json/close/<id>` 關掉自己開的分頁 —— 殘留分頁會讓 compositor
+不再為新分頁產 frame（本輪就因為早期版本在 `except` 時漏關、累積 3 個殘留分頁，讓「偶發瞬態」變成
+「每次重測都失敗」的常態；清掉殘留分頁後即恢復）。
+
+實測結果（2026-10-15，`P1 6/0 ＋ P2 8/0 ＋ P4 36/0`＝**總計 50 PASS / 0 FAIL**，耗時 159s；六斷點
+1440/1280/992/991/768/390，每個 viewport 的「還原殘留」皆 0 px；6 個 viewport 中有 1 個觸發一次
+自動重測後通過）：**明顯遮蔽（互相遮蔽 ≥2000 px）0 組**；「照片 × 數字」六斷點**全部 0 px**；
+「照片 × `{ }`」最多 83 px（991；其餘 44 / 27 / 7 / 0 / 0）；唯一持續出現的是 **山大黃球 × 照片
+723–777 px（1440，佔黃球可見像素 2.6–2.7%，bbox 約 80×50＝黃球圓形上方那支塗鴉的尖端與右鄰居
+杯身相接；1280 僅 42 px）**。⇒ 照片放大後並沒有遮蔽時鐘的 `{ }`／數字，唯一可考慮微調的是
+黃球塗鴉與右鄰居照片那一條細邊。
 
 ## 關閉
 

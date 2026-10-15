@@ -48,7 +48,11 @@ MEASURE_JS = r"""
   out.no_h_overflow = out.doc_scroll_w <= out.inner_w + 1;
   if (!root) return out;
 
-  var cell = root.querySelector('[data-footer-logo="wrap"]');
+  // 2026-10-14：首頁照片格（#bc-clock-photos）已改為環形照片列 —— 不再有
+  // [data-footer-logo="wrap"/"item"]（該 hook 僅剩 /about/ 真頁尾的 5 格 deco 輪播在用），
+  // 故釘牌改用 .footer-logo-cell（兩頁都有；/about/ 仍靠 wrap、語意不變）。
+  var cell = root.querySelector('[data-footer-logo="wrap"]')
+      || root.querySelector('.footer-logo-cell');
   out.cell_found = !!cell;
   if (cell) {
     var r = cell.getBoundingClientRect();
@@ -73,8 +77,14 @@ MEASURE_JS = r"""
     out.active_img_filter = img ? getComputedStyle(img).filter : null;
     out.active_img_filter_none = img ? (getComputedStyle(img).filter === 'none') : null;
   }
-  out.item_bg_first = getComputedStyle(items[0]).backgroundColor;
-  out.item_bg_first_transparent = getComputedStyle(items[0]).backgroundColor === 'rgba(0, 0, 0, 0)';
+  // ⚠ 首頁（環形照片列）的 items 為 0 → 不可再無條件 getComputedStyle(items[0])
+  //   （原寫法會拋錯，讓整支腳本在 scoping 段崩潰）；/about/ 仍是 5 格 deco 輪播。
+  out.item_bg_first = items.length ? getComputedStyle(items[0]).backgroundColor : null;
+  out.item_bg_first_transparent = items.length
+      ? getComputedStyle(items[0]).backgroundColor === 'rgba(0, 0, 0, 0)' : null;
+  /* 2026-10-14：首頁的環形照片列（筆數；幾何/同步細節由
+     docs/verify/cdp_verify_hero_coffee_photos.py 專責驗） */
+  out.ring_count = root.querySelectorAll('#bc-clock-photos .hero_hand_item').length;
   return out;
 })()
 """

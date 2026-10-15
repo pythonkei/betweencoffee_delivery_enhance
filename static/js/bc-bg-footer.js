@@ -42,6 +42,9 @@
     if (!list) return;
     var wrap = scope.querySelector('[data-footer-logo="wrap"]') || list;
     var items = Array.prototype.slice.call(list.querySelectorAll('[data-footer-logo="item"]'));
+    // 2026-10-14（使用者指示）：首頁照片格已改為「環形照片列」（見下方 initClockHandRing），
+    // 不再有 [data-footer-logo="item"] → 這裡提前結束：首頁不會起 5 秒輪播、
+    // window.__footerLogoInterval 也不會被設起來（該計時器僅剩 /about/ 真頁尾使用）。
     if (!items.length) return;
 
     var show = function (el) { el.style.position = 'relative'; el.style.display = 'block'; };
@@ -64,6 +67,20 @@
     wrap._footerLogoClick = function () { next(); start(); };
     wrap.addEventListener('click', wrap._footerLogoClick);
     start();
+  }
+
+  /* ---------------- 首頁照片格的環形照片列（2026-10-14 使用者指示） ----------------
+     標的＝partials/bc_hero.html 內 #bc-clock-photos 的 .footer-logo-cell：一格 .hero_hand
+     （7 筆咖啡照的圓弧）＋ 一組「當前那支咖啡」的名稱/highlight（[data-bc-ring-caption]）。
+     [同步] 本檔只「註冊」；索引一律由 GUNTE hero 的 Splide 推播
+       （bc-gunte-hero.js 的 updateSlideStates → BC_HAND_RING.goAll），模組會讓晚註冊的環
+       直接會合到 hero 當下的索引 ⇒ 本檔（defer）與 hero 腳本（非 defer）誰先執行都對，
+       不需要任何互推/輪詢（見 static/js/bc-hand-ring.js 的說明）。
+     [範圍] /about/ 沒有 [data-bc-hand-ring] → 直接結束（該頁真頁尾的 deco 輪播不受影響）。 */
+  function initClockHandRing(scope) {
+    var ringRoot = scope.querySelector('[data-bc-hand-ring]');
+    if (!ringRoot || !window.BC_HAND_RING) return;
+    window.BC_HAND_RING.register(ringRoot, scope.querySelector('[data-bc-ring-caption]'));
   }
 
   /* ====================== GSAP reveal engine (原 Slater) ====================== */
@@ -176,8 +193,31 @@
       }[dir];
       if (!map) return;
       if (mode === 'initial') gsap.set(els, { clipPath: map.hidden, webkitClipPath: map.hidden });
-      else if (mode === 'reveal') gsap.to(els, { clipPath: map.visible, webkitClipPath: map.visible, duration: DUR_L, delay: delay == null ? DELAY_REVEAL : delay, stagger: STAGGER, ease: 'power2.out', overwrite: true });
+      else if (mode === 'reveal') gsap.to(els, {
+        clipPath: map.visible, webkitClipPath: map.visible, duration: DUR_L,
+        delay: delay == null ? DELAY_REVEAL : delay, stagger: STAGGER, ease: 'power2.out',
+        overwrite: true, onComplete: function () { releaseRingClip(els); }
+      });
       else if (mode === 'hide') gsap.to(els, { clipPath: map.hidden, webkitClipPath: map.hidden, duration: DUR_S, delay: delay == null ? 0 : delay, stagger: .5 * STAGGER, ease: 'power2.in', overwrite: true });
+    }
+
+    /* 2026-10-14（使用者指示「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，動畫展示是
+       使用整個頁面的。參考 hero_hand」）：進場裁切（animateClipReveal）只是一次性的揭示效果，
+       但 GSAP 會把 clip-path 留在 `inset(0%)` —— 那等於一個「永久把內容框在元素邊界內」的裁切框。
+       首頁照片格的環形照片列是**整頁扇形**：側邊鄰居本來就會跑到 .footer-logo-cell 之外
+       （照片格不裁、由 #bc-bg-footer 的 overflow:hidden 裁），留著這個裁切框會把左右鄰居整張
+       切掉（實測：鄰居 rect 存在、圖片 complete、但 elementFromPoint 命中的是 #bc-clock ⇒
+       被 clip 切到 0 可見）。
+       故揭示跑完就釋放「內含環形照片列（[data-bc-hand-ring]）」容器的 clip-path：
+       視覺上 inset(0%) 與 none 完全相同，只有「允許內容超出格子」這件事會生效。
+       其餘 data-reveal="clip-*" 的容器（/about/ 的 deco 釘牌、hero 的天氣元件）一律不動，
+       進場動畫與裁切行為完全不變。 */
+    function releaseRingClip(els) {
+      els.forEach(function (el) {
+        if (el.querySelector && el.querySelector('[data-bc-hand-ring]')) {
+          gsap.set(el, { clipPath: 'none', webkitClipPath: 'none' });
+        }
+      });
     }
 
     /* -- 逐字 hover 連結（原 animateLink / initLinks） -- */
@@ -271,6 +311,7 @@
   function boot() {
     initFooterTime(root);
     initFooterLogo(root);
+    initClockHandRing(root);
     initGsap(root);
   }
 
