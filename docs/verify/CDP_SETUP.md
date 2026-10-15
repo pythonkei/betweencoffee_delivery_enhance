@@ -26,7 +26,8 @@
 > `cdp_verify_hero_weather.py`／`cdp_verify_bg_footer.py`／`cdp_verify_clock_braces.py`／
 > `cdp_verify_footer_scroller.py` ＋ `manage.py check` 0 issue；截圖
 > `_verify_clock_photos_{1905,1440,1280,992,991,390}_{before,after}.png`（`after` 為現況、`before`
-> 由 CDP 注入舊值產生對照）。**尚未提交、未 push、未部署**。
+> 由 CDP 注入舊值產生對照）。**已隨本輪批次提交 `aaf7c2aa`（16 檔／1985 insertions／713 deletions）、
+> 未 push、未部署**（正式站仍為 `ec8fcadb`）。
 > 原：2026-10-14 稍後（第二次）（**首頁照片格 `#bc-clock-photos` 的環形照片列改為「與 hero
 > 同一顆大圓」＝整頁扇形** —— 使用者指正「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，
 > 動畫展示是使用整個頁面的。參考 hero_hand」。① `--circle-radius` 由縮小版（`227vw/14.4`／
