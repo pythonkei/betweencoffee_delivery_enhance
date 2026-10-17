@@ -4,7 +4,31 @@
 > （`fetch /json/new?about:blank` 開分頁 → WebSocket `Input.dispatchMouseEvent` /
 > `Emulation.setDeviceMetricsOverride` / `Runtime.evaluate`）。**跑腳本前必須先有這個瀏覽器**。
 >
-> **最後更新**：2026-10-15 稍後（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片縮小 ＋
+> **最後更新**：2026-10-16（**首頁照片格 `#bc-clock-photos` 桌機（≥992px）名稱／highlight 字級再次加大
+> ＝24/18px（`--bc-hero-caption-h` 68.38）＋ 文字出現時機修正＝「圓盤旋轉過渡跑完、相關咖啡到中心才顯示」**；
+> 使用者指示「咖啡名稱和 Highlight 文本文字尺寸再次加大」＋「時間點不正確 —— 當相關咖啡旋轉到中心時，才
+> 顯示相關名稱和 Highlight 文本」）：
+> ① 字級（只有 `templates/betweencoffee_delivery/index.html` 的 extra_css，≥992px）：`.bc-series-caption-name`
+> 20 → **24px**、`.bc-series-caption-highlight` 16 → **18px** ⇒ `--bc-hero-caption-h` 60.39 → **68.38**
+> （+8px ⇒ 時鐘列／cell 等高 ＋8、時鐘數字與 `{ }` 隨列內置中再下移 4px、下方內容下移 8px；
+> **照片區高／照片寬／cell 內距／`--circle-radius` 完全未動 ⇒ 咖啡照片尺寸與位置不變**）。
+> 最窄桌機斷點 992 的文字區可用寬仍 190.0px、最寬行（highlight 18px）171.73px ⇒ 7 筆文字全部單行（E10 守門）。
+> ② 時序（`static/js/bc-hand-ring.js` ＋ index.html 一條 `.-hidden` 規則）：原本文字在 Splide `move`
+> （＝圓盤「開始」移動）就切換 ⇒ 比咖啡真正到中心早 **1.2 秒**（實測 1260ms）。改為 `go()` 當下先對文字容器
+> 加 `.-hidden`（用 `visibility:hidden` ⇒ 仍佔滿文字高度、列高不變、換張不抽動），並以 `transitionend`
+> （或 `easeMs()` 從 computed `--bc-hand-ease` 讀到的 1200ms ＋ 60ms 保險計時器）為準，過渡跑完才切
+> `-current` 並解除 `.-hidden`。版號 `bc-hand-ring.js?v=20261014a → 20261016a`。
+> 驗證（同一輪、headful Chrome@9222 ＋ Django@8081）：`cdp_verify_hero_coffee_photos.py` **213/213**
+> （新增 **H5–H9**：H6 圓盤一動文字整組隱藏、H7 旋轉期間不提前切索引、**H8 隱藏→顯示 1206ms ≈
+> `--bc-hand-ease` 1200ms（容差 1000–1800ms）**、H9 顯示當下 `cur` == 置中那杯；E9 字級 24/18、E10 單行）
+> ／`cdp_verify_hero_weather.py` **208/208**／`cdp_verify_clock_braces.py` **112/112**／
+> `cdp_verify_bg_footer.py` **41/41**／`cdp_verify_footer_scroller.py` **127/127**／
+> `cdp_verify_clock_clash.py` **50 PASS / 0 FAIL**（213.7s；明顯遮蔽 ≥2000px＝0 組、「照片×數字」六斷點全 0px）
+> ＋ `cdp_shot_index_hero_viewport.py` 6 張截圖（`_verify_index_hero_{top,bg}_{desktop,tablet,mobile}.png`）。
+> ⚠ **本輪修好兩個「驗證環境」的坑（不修的話整批數字不可信）**：(a) clash 的還原殘留在 1280 每次都 328px
+> ⇒ 見下方「像素級遮蔽」第 5、6 點；(b) 驅動中的分頁被 Chrome 凍結／節流而整個不回應 ⇒ 見下方
+> 「Chrome 凍結／節流（背景分頁）」段。
+> 原：2026-10-15 稍後（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片縮小 ＋
 > 名稱／highlight 字級放大 —— 1440 時 280×400、字級 20/16px**；使用者指示「桌機的咖啡照片太大、
 > 名稱與 highlight 太小」）：四處宣告全部落在 `templates/betweencoffee_delivery/index.html` 的
 > extra_css，**未動任何 .css／.js ⇒ 無版號變更**：① `.footer-logo-list` 高 `480vw/ratio` →
@@ -183,6 +207,41 @@ curl -s --max-time 5 http://127.0.0.1:9222/json/version
 # → {"Browser":"Chrome/151.0.7922.34", …, "webSocketDebuggerUrl":"ws://127.0.0.1:9222/devtools/browser/…"}
 ```
 
+## Chrome 凍結／節流（背景分頁）：2026-10-16 起必要旗標
+
+⚠ 症狀：**腳本跑到一半整個卡住** —— `Page.captureScreenshot` 不回應、連另一條 ws 的
+`Runtime.evaluate` 也逾時（renderer CPU 僅 0.7%＝不是 JS 無限迴圈），log 停在某個 viewport 之後不動。
+根因＝這台 Chrome 是 **headful 但視窗不在前景**（背景／被遮擋）⇒ Chrome 對「不可見分頁」做凍結與
+計時器節流 ⇒ 驅動中的那個分頁整個不回應。
+
+正解＝啟動時補上停用節流／凍結的旗標：
+
+```bash
+mkdir -p ~/bc_verify_logs/bc_cdp_profile
+systemd-run --user --unit=bc-chrome-cdp --collect \
+  -E DISPLAY=:0 -E XAUTHORITY=$HOME/.Xauthority \
+  -p StandardOutput=append:$HOME/bc_verify_logs/chrome_cdp.log \
+  -p StandardError=append:$HOME/bc_verify_logs/chrome_cdp.log \
+  $HOME/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome \
+  --remote-debugging-port=9222 --user-data-dir=$HOME/bc_verify_logs/bc_cdp_profile \
+  --no-sandbox --no-first-run --no-default-browser-check --disable-gpu --disable-dev-shm-usage \
+  --disable-background-timer-throttling --disable-backgrounding-occluded-windows \
+  --disable-renderer-backgrounding \
+  --disable-features=CalculateNativeWinOcclusion,IntensiveWakeUpThrottling \
+  about:blank
+```
+
+效果（實測）：`cdp_verify_clock_braces.py` 由「卡死在某個斷點」變成 **38 秒跑完 112 項**。
+
+- ⚠ **`systemd-run --user`（transient unit）比 `setsid nohup … &` 可靠**：本工具 shell 指令逾時（30s）
+  會連帶收掉「該次指令啟動的子程序」—— 現象＝log 有前面幾行、`pgrep` 卻找不到程序，跨指令的背景程序
+  會消失（Django 8081 與 Chrome 9222 都中過）。改用 `systemd-run --user --unit=…` 後程序歸 user
+  systemd 管、跨指令存活（`systemctl --user is-active …` 可查；`--collect` 讓失敗的 unit 自動回收）。
+- ⚠ 這條路徑下 `--no-sandbox` 是必要的：少了它會以 `No usable sandbox!`（AppArmor 禁用 unprivileged
+  user namespaces）直接結束、9222 根本不會開起來（現象＝`curl /json/version` 連線被拒、log 只有一行 FATAL）。
+- ⚠ 跑驗證腳本時**不要並行**：兩支同時開分頁會互搶 compositor、數字會抖；本輪作法是串成一輪 shell
+  script（`for s in …; do python3 -u docs/verify/$s.py; done > log`）依序跑完再一起看。
+
 ## 執行驗證
 
 ```bash
@@ -254,8 +313,27 @@ sleep 60; grep -c PASS /tmp/verify_top_art.log; grep FAIL /tmp/verify_top_art.lo
    每分鐘把 `[data-footer-time]` 的「分」進位 ⇒ 基準圖與之後每張圖差那一小塊數字區域
    （實測殘留 177 px @390、647 px @1280、1452–1958 px @992；而且**每一個圖層的遮罩都含那塊**
    ⇒ 假的「照片×數字 1081 px 遮蔽」、`bbox` 還全部一模一樣）。計時器只寫文字、不影響任何幾何
-   ⇒ 量測前 `clearInterval` 即可（本腳本也順手清 `__footerLogoInterval`）。未具名的計時器
-   （如 `bc-weather.js:219` 的 1 秒時鐘）則交給第 4 條守門。
+   ⇒ 量測前 `clearInterval` 即可（本腳本也順手清 `__footerLogoInterval`）。
+   ⚠ 2026-10-16 修正：原本寫「未具名的計時器（如 `bc-weather.js:219` 的 1 秒時鐘）交給第 4 條守門」
+   —— 這句是錯的，實測會被第 4 條判 FAIL（見第 6 點）。
+6. **未具名的文字計時器：鎖「文字節點」，不要動計時器也不要動 `Date`**（2026-10-16 新增）：
+   hero 時鐘的 `bc-weather.js:219 setInterval(updateClock, 1000)` **沒有把 id 存到 `window.*`**
+   ⇒ 第 5 點的 `names` 抓不到；`updateClock()` 每秒都無條件 `textContent = 'HH:MM'`，跨「分」時
+   （圖層遮罩＝`#bc-clock-hours/-minutes/…`）就會改寫文字 ⇒ 1280 這一輪**每次重測都殘留 328 px**
+   （每個圖層遮罩都含那塊 ⇒ 假的「照片×數字 328 px」；上一輪 2026-10-15 的 46/4 也是同一個原因）。
+   ⚠ **兩條看似合理的修法都會把整支腳本弄壞**（都實測過）：
+   - **把計時器全清掉**（init script 包裹 `setInterval` 記 id、凍結時一次清完）：頁面完全靜止 ⇒
+     compositor 不再產 frame ⇒ `Page.captureScreenshot` 永遠不回應（另一條 ws 的 `Runtime.evaluate`
+     也逾時、renderer CPU 0.7%）⇒ 掛在 1280 不動。
+   - **init script 凍結 `Date`**：GSAP 3 的 ticker 時間源就是 `Date.now`（不是 `performance.now`）
+     ⇒ 時間不前進 ⇒ 揭時（GSAP 的 `clip-down`）永遠跑不完 ⇒ P1-1「clip-path 已釋放」直接 FAIL。
+   ⇒ 正解＝`LOCK_CLOCK_JS`：只把「會被 tick 覆寫的那幾個文字節點」鎖住（在該元素上
+   `Object.defineProperty(el,'textContent',{get,set(){}})` = no-op setter，用 `__bcProbeLocked` 記號
+   可重複呼叫）；計時器照跑、`Date` 不動、GSAP 不受影響，而畫面上的字固定不變 ⇒ 跨分界不再產生假殘留。
+   涵蓋選擇器：`#bc-clock-hours,#bc-clock-minutes,#bc-clock-colon-before-minutes,
+   #bc-clock-colon-after-minutes,.weather .clock .value,[data-footer-time]`；`settle()` 與每次
+   `stable()`（＝每次截圖前）都呼叫一次（連量測中途才建立的節點也會被鎖上）。
+   效果實測：1280 由「每次都殘留 328 px」變成 **0 px**，全支 46/4 → **50 PASS / 0 FAIL**。
 
 本腳本對第 4 條的處理方式：某個 viewport 只要出現非 0 殘留，就**整輪重測**（最多 2 次；重試時第一輪
 不計分）—— 因為同一輪的所有遮罩必須共用同一張基準圖，交集才有意義；只重測單層會讓交集變成
@@ -264,6 +342,16 @@ sleep 60; grep -c PASS /tmp/verify_top_art.log; grep FAIL /tmp/verify_top_art.lo
 本腳本跑完（含例外路徑）一定用 HTTP `/json/close/<id>` 關掉自己開的分頁 —— 殘留分頁會讓 compositor
 不再為新分頁產 frame（本輪就因為早期版本在 `except` 時漏關、累積 3 個殘留分頁，讓「偶發瞬態」變成
 「每次重測都失敗」的常態；清掉殘留分頁後即恢復）。
+
+實測結果（2026-10-16，本輪 #56，加上第 6 點的文字節點鎖 ＋ 停用 Chrome 背景凍結／節流旗標後）：
+`P1 6/0 ＋ P2 8/0 ＋ P4 36/0`＝**總計 50 PASS / 0 FAIL**，耗時 213.7s；六斷點 1440/1280/992/991/768/390
+的「還原殘留」**皆 0 px**（1440 與 1280 各觸發一次自動重測後通過，其餘一次過）；明顯遮蔽（≥2000 px）
+**0 組**、「照片 × 數字」六斷點**全部 0 px**、`照片 × { }` 最多 83 px（991；其餘 44/27/7/0/0）、
+唯一較大的是「照片 × 山大黃球」295 px @1440（佔黃球可見像素 1.06%，bbox 約 48×39＝黃球塗鴉尖端與
+右鄰居杯身相接；1280 為 0）。同一輪其餘腳本：
+`cdp_verify_hero_coffee_photos.py` **213/213**、`cdp_verify_hero_weather.py` **208/208**、
+`cdp_verify_clock_braces.py` **112/112**、`cdp_verify_bg_footer.py` **41/41**、
+`cdp_verify_footer_scroller.py` **127/127**（一律 `exit=0`）。
 
 實測結果（2026-10-15，`P1 6/0 ＋ P2 8/0 ＋ P4 36/0`＝**總計 50 PASS / 0 FAIL**，耗時 159s；六斷點
 1440/1280/992/991/768/390，每個 viewport 的「還原殘留」皆 0 px；6 個 viewport 中有 1 個觸發一次

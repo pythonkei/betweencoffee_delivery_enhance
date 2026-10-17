@@ -863,7 +863,18 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
            1440 529.6 → 460.4、1280 476.3 → 415.9、992 380.3 → 335.9。
          ⇒ 時鐘列頂端與 #bc-bg-footer 的文件座標仍然 Δ0；列變矮 ⇒ 時鐘數字／`{ }` 隨列內置中
            上移 34.6px（@1440 document y 1280.69 → 1246.09），上一輪「左鄰居與 `{` 重疊」的
-           副作用也同步變小（見下方 B1 的 [與時鐘列子項的關係]）。 */
+           副作用也同步變小（見下方 B1 的 [與時鐘列子項的關係]）。
+       2026-10-16（使用者指示）：「咖啡名稱和 Highlight 文本文字尺寸再次加大」
+         ＋「時間點不正確 —— 當相關咖啡旋轉到中心時，才顯示相關名稱和 Highlight 文本」
+         → 仍只影響 ≥992px（≤991px 逐值不動）：
+         · 文字再放大一級：名稱 20 → 24px、highlight 16 → 18px
+           （--bc-hero-caption-h 60.4 → 68.4）；
+         · 時序：文字的切換改由 bc-hand-ring.js 綁圓盤旋轉的過渡結束（見該檔檔頭），
+           旋轉期間整組文字加 .-hidden 以 visibility 隱藏（規則見下方 B2 前的註解）；
+         · 照片區高／照片寬／cell 內距／--circle-radius 完全未動（照片尺寸與位置不變）；
+         · 唯一連帶：文字區高 +8px ⇒ 時鐘列（＝cell）高等量變高（時鐘數字／`{ }` 隨列內置中
+           再下移 4px）、下方內容下移 8px（逐斷點值見 docs/verify/cdp_verify_hero_coffee_photos.py
+           的 EXPECT）。 */
 .bc-bg-hero #bc-bg-footer .footer-logo-cell {
   width: calc(288vw / var(--_special-units---global--scale-ratio));
 }
@@ -1035,11 +1046,19 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 .bc-bg-hero #bc-bg-footer #bc-clock-photos .hero_hand_list {
   margin-left: calc(var(--circle-radius) * -1);
 }
+/* [文字只在置中的那杯上出現] 2026-10-16（使用者指示）：「當相關咖啡旋轉到中心時，才顯示相關
+   名稱和 Highlight 文本」。圓盤開始旋轉時 bc-hand-ring.js 會對容器加 .-hidden（規則見下），
+   等旋轉過渡跑完、該杯真的到中心才切換 -current（＝文字與置中的照片同一個時間點）。 */
 .bc-bg-hero #bc-bg-footer .bc-ring-caption-item {
   display: none;
 }
 .bc-bg-hero #bc-bg-footer .bc-ring-caption-item.-current {
   display: block;
+}
+/* 旋轉期間（bc-hand-ring.js 的 holdCaptions）：整組文字隱形 —— 用 visibility 而非 display，
+   -current 那筆仍留在流內 ⇒ 文字區高度不變、換張時下方的時鐘列與整頁內容不會被抽動。 */
+.bc-bg-hero #bc-bg-footer .bc-ring-caption.-hidden .bc-ring-caption-item {
+  visibility: hidden;
 }
 /* ---- B2. 文字樣式（名稱 ＋ highlight） ----
    [文字高度] 逐斷點的字級不同（見下方三段），故用 --bc-hero-caption-h 表達
@@ -1047,7 +1066,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      2026-10-14 稍後：文字區改為 .footer-logo-list（照片區）之後的自然流區塊
      ⇒ 兩者相加＝改動前的 .footer-logo-item 高度（照片區與時鐘列高度皆不變）。 */
 .bc-bg-hero #bc-bg-footer {
-  --bc-hero-caption-h: calc(8px + 20px * 1.3 + 4px + 16px * 1.4);
+  --bc-hero-caption-h: calc(8px + 24px * 1.3 + 4px + 18px * 1.4);
 }
 /* [2026-10-14 稍後移除] 原本這裡的兩條規則（`.footer-logo-item a.footer-logo-link`
    由 block 改 flex column、讓 img 撐滿「格子高 − 文字高」）隨照片格改為環形照片列而失效：
@@ -1062,13 +1081,15 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
    [與 bc-series.css 逐值相同] font-family / font-weight / text-transform /
      letter-spacing / color（highlight 的 var(--bc-gold,#c49b63) 由全站載入的
      bc-components.css :root 提供）。
-   [刻意不同] 字級（SERIES 為 26/16px；本頁 ≥992px 為 20/16px、≤991px 13/10、≤767px 11/9 ——
-     名稱刻意比 SERIES 小，highlight 於 ≥992px 與 SERIES 同值 16px）與
+   [刻意不同] 字級（SERIES 為 26/16px；本頁 ≥992px 為 24/18px、≤991px 13/10、≤767px 11/9）與
      padding-top（8px；SERIES 為 16/12px）——後者須與 --bc-hero-caption-h 一致。
      ⚠ 2026-10-15 稍後（使用者指示「名稱與 highlight 太小」）：≥992px 由 16/12 → 20/16
        （≤991px 未動）⇒ --bc-hero-caption-h ≥992px 由 49.6 → 60.4（實測 60.39）。
-       實測 992（本頁最窄的桌機斷點、文字區可用寬 190px）：highlight 16px 的文字寬 152.6px、
-       name 20px 的文字寬 134.2px，兩者皆單行未折行（行高 22.4／26），仍有餘裕。
+     ⚠ 2026-10-16（使用者指示「文字尺寸再次加大」）：≥992px 再一級 20/16 → 24/18
+       （≤991px 仍未動）⇒ --bc-hero-caption-h ≥992px 由 60.4 → 68.4（實測 68.38）。
+       [單行檢查] 最窄桌機斷點 992 的文字區可用寬 190.0px（cell 198.39 − 左右各 4px）：
+       highlight 18px 的最長文字寬 171.73px、name 24px 的最長文字寬 133.56px
+       （行高 31.2／25.2）⇒ 皆單行未折行、仍有 18.3px 餘裕（驗證腳本 E10 逐斷點守門）。
    [reset] margin/padding 必須一併改寫：bc-bg-footer.css 的
      `#bc-bg-footer p{margin:0;padding:0}`（1,0,1）會蓋掉 class 規則（0,1,0），
      用 #bc-bg-footer 前綴（1,1,0）才贏得了 reset。 */
@@ -1079,7 +1100,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
   margin: 0;
   font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 400;
   line-height: 1.3;
   letter-spacing: normal;
@@ -1089,7 +1110,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
   margin: 4px 0 0;
   font-family: "Noto Sans TC", sans-serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0.06em;
@@ -1138,9 +1159,11 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      → 版號 ?v=20260907b 升為 ?v=20261013a
      2026-10-14（使用者指示）：環形照片列的驅動抽成共用模組 → 先載入 bc-hand-ring.js
      （BC_HAND_RING），本檔改為 register + goAll(hero index)；照片格那一側由 defer 的
-     bc-bg-footer.js 自行註冊（模組會讓晚註冊者會合）→ 版號升為 ?v=20261014a -->
+     bc-bg-footer.js 自行註冊（模組會讓晚註冊者會合）→ 版號升為 ?v=20261014a
+     2026-10-16（使用者指示「名稱與 Highlight 的時間點不正確」）：文字的切換時機改為
+     「圓盤旋轉過渡跑完才切」→ bc-hand-ring.js 有改 → 版號再升為 ?v=20261016a。 -->
 <script src="{% static 'library/splide-4.1.3/dist/js/splide.min.js' %}"></script>
-<script src="{% static 'js/bc-hand-ring.js' %}?v=20261014a"></script>
+<script src="{% static 'js/bc-hand-ring.js' %}?v=20261016a"></script>
 <script src="{% static 'js/bc-gunte-hero.js' %}?v=20261014a"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>

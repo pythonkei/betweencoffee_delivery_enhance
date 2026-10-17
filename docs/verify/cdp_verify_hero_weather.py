@@ -33,6 +33,11 @@
        名稱 16 → 20px、highlight 12 → 16px）⇒ 本檔 F4 期望值 4.80 → **4.00** * w / 14.4、
        F5 文字區 49.59 → **60.39px**（＝8 + 20×1.3 + 4 + 16×1.4）、F7 字級 16/12 → **20/16**；
        ≤991px（991／768／480／390）逐值不變。
+       ⚠ 2026-10-16（使用者指示「文字尺寸再次加大」＋「時間點不正確 —— 咖啡旋轉到中心時才顯示」）：
+       ≥992px 字級再一級 20/16 → **24/18** ⇒ F5 文字區 60.39 → **68.38px**（＝8 + 24×1.3 +
+       4 + 18×1.4）、F7 字級 **24/18**；≤991px 逐值不變。時序改由 static/js/bc-hand-ring.js
+       綁「圓盤旋轉過渡結束」⇒ 本檔量測前先 `settle_ring()`（暫停 autoplay ＋ 等文字收斂），
+       否則 F2/F3 會落在 1.2s 的換張窗口內（見 PAUSE_HERO_JS 的註解）。
 
 改動前基準（同腳本量的「before」，2026-10-14，改動前原始碼；供下方斷言對照）
   viewport      clock 高   { 的 y  欄數/照片位置            照片 img 高
@@ -96,6 +101,7 @@ import asyncio
 import base64
 import json
 import re
+import time
 import urllib.request
 
 import websockets
@@ -103,6 +109,18 @@ import websockets
 BASE = "http://localhost:8081"
 ROOT = "/home/kei/Desktop/betweencoffee_delivery_enhance"
 CDP = "http://localhost:9222"
+
+# 2026-10-16（使用者指示「名稱與 Highlight 的時間點不正確」）：文字改為「圓盤旋轉過渡跑完才切」
+#   （static/js/bc-hand-ring.js）——旋轉期間文字容器帶 .-hidden（整組隱藏），而「環形照片列」
+#   的 -current 仍是立刻切換 ⇒ 若不協調，量測落在 1.2s 的換張窗口內時，F2/F3（恰 1 筆 -current、
+#   顯示的 name == 環形 -current 那筆的 alt）會隨機失敗。故量測前先暫停 hero autoplay
+#   （Splide pauseOnHover）並等文字收斂（＝容器沒有 .-hidden）。
+PAUSE_HERO_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');"
+                 "if(!s) return false;"
+                 "['mouseenter','mouseover'].forEach(function(t){"
+                 "s.dispatchEvent(new MouseEvent(t,{bubbles:true}));});return true;})()")
+CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .bc-ring-caption');"
+                  "return c ? !c.classList.contains('-hidden') : true;})()")
 
 # 照片高度基準（= bc-bg-footer.css 的 `180vw / scale-ratio`，僅剩 ≤991px 在用的值）
 SCALE_DESKTOP, SCALE_SHARED = 14.4, 3.93
@@ -376,6 +394,17 @@ async def main():
                 print(f"   shot -> {path}")
 
 
+        async def settle_ring(timeout=4.0):
+            """2026-10-16：暫停 hero autoplay → 等文字收斂（＝圓盤旋轉過渡跑完、容器沒有
+               .-hidden）。文字與環形照片列的 -current 之間有 1.2s 的換張窗口（見上方常量註解）。"""
+            await evaljs(PAUSE_HERO_JS)
+            t0 = time.time()
+            while time.time() - t0 < timeout:
+                if await evaljs(CAP_SETTLED_JS):
+                    return True
+                await asyncio.sleep(0.2)
+            return False
+
         for w, h, mobile, name in ((1440, 900, False, "1440"), (1280, 800, False, "1280"),
                                    (992, 900, False, "992"), (991, 900, False, "991"),
                                    (768, 1024, False, "768"), (480, 900, True, "480"),
@@ -385,6 +414,7 @@ async def main():
             await evaljs("(function(){var c=document.getElementById('bc-clock');"
                          "if(c)c.scrollIntoView({block:'center'});})()")
             await asyncio.sleep(1.4)
+            await settle_ring()          # 2026-10-16：暫停 autoplay ＋ 等文字收斂（見上方註解）
             m = await evaljs(MEASURE_JS) or {}
             print(f"\n=== 首頁 hero #bc-clock 天氣元件 {w}x{h} ({name}) ===")
             if not m.get("clock_found"):
@@ -560,14 +590,14 @@ async def main():
                 f"F4 照片區高度 = {exp_h:.2f}px ±1（≥992px = 400vw/ratio；≤991px = 改動前 180vw/ratio）",
                 abs((m.get("photo_h") or 0) - exp_h) <= 1,
                 m.get("photo_h")))
-            exp_cap = (8 + 20 * 1.3 + 4 + 16 * 1.4) if w >= 992 else (
+            exp_cap = (8 + 24 * 1.3 + 4 + 18 * 1.4) if w >= 992 else (
                 (8 + 13 * 1.3 + 4 + 10 * 1.4) if w >= 768 else (8 + 11 * 1.3 + 4 + 9 * 1.4))
             failures.append(check(f"F5 文字區高度 = --bc-hero-caption-h（{exp_cap:.2f}px ±1）",
                                   abs((m.get("cap_h") or 0) - exp_cap) <= 1,
                                   (m.get("cap_h"), m.get("cap_h_var"))))
             failures.append(check("F6 首頁照片格已無舊輪播 hook（data-footer-logo=item）",
                                   m.get("legacy_items") == 0, m.get("legacy_items")))
-            exp_fs = (20.0, 16.0) if w >= 992 else ((13.0, 10.0) if w >= 768 else (11.0, 9.0))
+            exp_fs = (24.0, 18.0) if w >= 992 else ((13.0, 10.0) if w >= 768 else (11.0, 9.0))
             failures.append(check(f"F7 字級 {exp_fs[0]:.0f}/{exp_fs[1]:.0f}px（7 筆文字皆同）",
                                   len(caps) == 7
                                   and all(abs(c.get("name_fs", 0) - exp_fs[0]) <= 0.01

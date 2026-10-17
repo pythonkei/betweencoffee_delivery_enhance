@@ -30,6 +30,12 @@
                        （品牌 noise_animation）仍用 pause（finish() 會丟 InvalidStateError）。
   5. 每個 viewport 都做「還原殘留 = 0 px」自我驗證（sess.layer 回傳 resid）；
      殘留 != 0 即宣告該 viewport 數字不可信（這條就是上述假數據的守門）。
+     ⚠ 2026-10-16（#56）：殘留的另一個來源＝「會改 DOM 文字」的計時器 —— hero 時鐘
+       （bc-weather.js:219）的 setInterval **沒掛在 window.\***，只依名稱 clearInterval 抓不到
+       ⇒ 跨分界時改「HH:MM」文字 ⇒ 1280 重試 3 次都殘留 328 px。**兩條看似合理的路都會壞**：
+       全清計時器 ⇒ 頁面靜止、compositor 不產 frame ⇒ captureScreenshot 永久卡住；
+       凍結 `Date` ⇒ GSAP ticker 的時間源就是 Date.now ⇒ 揭時跑不完（P1-1 FAIL）。
+       ⇒ 改用 LOCK_CLOCK_JS：只把會被覆寫的文字節點鎖住（no-op setter），計時器與 Date 全不動。
 
 [階段]
   prod     : P1 生產環境（DOM 完全未被探針碰過）是否揭示完成、照片是否真的有畫出像素、
@@ -75,10 +81,30 @@ PAUSE_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');
             "if(!s) return false;['mouseenter','mouseover'].forEach(function(t){"
             "s.dispatchEvent(new MouseEvent(t,{bubbles:true}));});return true;})()")
 
+# 2026-10-16（使用者指示「名稱與 Highlight 的時間點不正確」）：文字改為「圓盤旋轉過渡跑完才切」
+#   （bc-hand-ring.js）——旋轉期間文字容器帶 .-hidden，settle 時才切 -current 並移除。
+#   若量測時剛好卡在這個 1.2s 的窗口內，文字會在量測期間出現 ⇒ 基準圖與之後每張圖差一塊
+#   （假的殘留）。⇒ 暫停 autoplay 後先等「不再有 pending」（容器沒有 .-hidden）再進凍結流程。
+CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .bc-ring-caption');"
+                  "return c ? !c.classList.contains('-hidden') : true;})()")
+
 # 停掉會「改動 DOM 文字」的計時器：bc-bg-footer.js:36 的 __footerTimeInterval 每秒 tick，每分鐘
 # 會把 [data-footer-time] 的「分」進位 ⇒ 基準圖與之後每張圖差那一小塊數字區域（實測殘留
 # 177 px @390、647 px @1280、1452-1958 px @992，且每個圖層遮罩都含那塊 ⇒ 假的「照片×數字 1081 px」）。
 # 計時器只寫文字、不影響任何幾何 ⇒ 量測前 clearInterval 即可。
+#
+# ⚠ 2026-10-16（本輪 #56）：**只依名稱 clearInterval 不夠**。hero 時鐘的
+#   `static/js/bc-weather.js:219 setInterval(updateClock, 1000)` **沒有存到 `window.*`**
+#   ⇒ 上面的 names 抓不到 ⇒ 每分鐘跨分界時改一次「HH:MM」文字 ⇒ 1280 殘留 328 px（同一輪
+#   重試 3 次全中，且每個圖層遮罩都含那塊 ⇒ 假的「照片×數字 328 px」）。
+#
+# ⚠ 兩條走不通的路（2026-10-16 同日各實測一輪）：
+#   ① **把計時器全清掉**（init script 包裹 setInterval 記 id、凍結時全清）：頁面完全靜止 ⇒
+#      compositor 不再產 frame ⇒ `Page.captureScreenshot` 永遠不回應（連另一條 ws 的
+#      `Runtime.evaluate` 也逾時；renderer CPU 0.7%＝不是 JS 迴圈，是在等 frame）⇒ 掛在 1280。
+#   ② **init script 凍結 `Date`**：GSAP 3 的 ticker 時間源就是 `Date.now`（不是 performance.now）
+#      ⇒ 時間不前進 ⇒ 揭時（GSAP 的 clip-down）永遠跑不完 ⇒ P1-1「clip-path 已釋放」直接 FAIL。
+#   ⇒ 正解＝**不碰計時器、不碰 Date**，只把「會被 tick 改寫的那幾個文字節點」鎖住（LOCK_CLOCK_JS）。
 FREEZE_CLOCK_JS = r"""
 (function(){
   var names=['__footerTimeInterval','__footerLogoInterval','__weatherClockInterval',
@@ -88,6 +114,33 @@ FREEZE_CLOCK_JS = r"""
     if(window[k]){ try{ clearInterval(window[k]); }catch(e){} window[k]=null; out.push(k); }
   });
   return out;
+})()
+"""
+
+# 鎖住「計時器會改寫的文字節點」＝把該元素的 textContent 改成 no-op setter（element 上的 own
+# property，蓋掉 prototype 的 accessor）。tick 照跑（DOM 寫入變成空操作）⇒ 不會有 frame 枯竭、
+# GSAP/Date 完全不受影響，而畫面上的字固定不變 ⇒ 跨分界不再產生假殘留。
+#   · 涵蓋 hero/頁尾時鐘（#bc-clock-hours/-minutes/-colon-*、[data-footer-time]）與 navbar／hero
+#     天氣元件的 .weather .clock .value（bc-weather.js 的 updateClock 每秒無條件覆寫）。
+#   · 可重複呼叫（已鎖過的用 __bcProbeLocked 記號跳過）；settle 與每次 stable 前都叫一次，
+#     連「量測中途才被建立的節點」也一併鎖上。
+LOCK_CLOCK_JS = r"""
+(function(){
+  var sel='#bc-clock-hours,#bc-clock-minutes,#bc-clock-colon-before-minutes,'
+        + '#bc-clock-colon-after-minutes,.weather .clock .value,[data-footer-time]';
+  var els=document.querySelectorAll(sel), out=[];
+  for(var i=0;i<els.length;i++){
+    var el=els[i];
+    if(el.__bcProbeLocked){ out.push(el.textContent); continue; }
+    var v=el.textContent;
+    try{
+      Object.defineProperty(el,'textContent',
+        {configurable:true, get:function(){ return v; }, set:function(){}});
+      el.__bcProbeLocked=true;
+    }catch(e){}
+    out.push(v);
+  }
+  return out.join('|');
 })()
 """
 
@@ -306,7 +359,15 @@ class Sess:
                     break
         await self.ev(PAUSE_JS)
         clock = await self.ev(FREEZE_CLOCK_JS)   # 停掉 1 秒時鐘 tick（每分鐘會改「分」的文字）
-        await asyncio.sleep(1.4)          # > 1.2s：讓環形列 rotate/scale 的過渡先自然跑完
+        lock = await self.ev(LOCK_CLOCK_JS)      # 並鎖住文字節點（沒掛 window.* 的 tick 也改不動）
+        # 2026-10-16：先等文字收斂（最多 4s）—— 文字改為「圓盤轉完才切」，卡在 1.2s 窗口內的話
+        #   量測期間會切換文字 ⇒ 假的殘留（見 CAP_SETTLED_JS 的註解）
+        t0 = time.time()
+        while time.time() - t0 < 4.0:
+            if await self.ev(CAP_SETTLED_JS):
+                break
+            await asyncio.sleep(0.2)
+        await asyncio.sleep(1.6)          # > 1.2s（--bc-hand-ease）＋保險計時器 60ms
         await self.frame()
         await asyncio.sleep(0.3)
         frozen = await self.ev(FREEZE_JS)  # 剩下的（含仍在半途者）一律推到終點
@@ -326,7 +387,8 @@ class Sess:
         await self.hide(SEL_PHOTOS, False)
         await self.stable()
         await self.shot()
-        return {"clip_released": ok, "frozen": frozen, "frozen2": frozen2, "clock": clock}
+        return {"clip_released": ok, "frozen": frozen, "frozen2": frozen2, "clock": clock,
+                "lock": lock}
 
     async def hide(self, sel, on):
         return await self.ev(HIDE_JS % (jn(sel), "true" if on else "false"))
@@ -338,8 +400,9 @@ class Sess:
         return await self.ev(CTX_JS)
 
     async def stable(self):
-        """截圖前把有限次動畫推到終點 ＋ 停掉會改文字內容的時鐘 tick。"""
+        """截圖前把有限次動畫推到終點 ＋ 停掉會改文字內容的時鐘 tick（並鎖住文字節點）。"""
         await self.ev(FREEZE_CLOCK_JS)
+        await self.ev(LOCK_CLOCK_JS)
         r = await self.ev(STABLE_JS)
         await self.frame()
         await asyncio.sleep(0.2)

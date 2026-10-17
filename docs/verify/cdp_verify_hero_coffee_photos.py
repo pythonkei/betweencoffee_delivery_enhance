@@ -35,6 +35,19 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
   `{ }` 隨置中上移 34.6px（@1440 y 1280.69 → 1246.09）= 副作用方向與上一輪相反，故上一輪
   「左鄰居與 `{` 重疊 22px」這條代價同步縮小（見 cdp_verify_clock_clash.py 的重測值）。
 
+2026-10-16（使用者指示）：「咖啡名稱和 Highlight 文本文字尺寸再次加大」＋「關於咖啡名稱和
+  Highlight 文本，時間點不正確 —— 當相關咖啡旋轉到中心時，才顯示相關名稱和 Highlight 文本」：
+  ① 字級再一級（仍只 ≥992px）：名稱 20 → 24px、highlight 16 → 18px
+     ⇒ --bc-hero-caption-h 60.4 → 68.4（實測 68.38）⇒ 四列 cell／時鐘列高等量 +8
+     （1905 597.53／1440 468.38／1280 423.92／992 343.92），照片區與照片尺寸完全不動、
+     ≤991px 逐值不變；頁面總高 @1440 3867 → 3875。
+  ② 時序：文字的切換改由 `static/js/bc-hand-ring.js` 綁「圓盤旋轉過渡結束」——go() 當下先對
+     文字容器加 .-hidden（visibility 隱藏，仍佔滿文字高度、列高不變），等 transitionend
+     （或 --bc-hand-ease + 60ms 的保險計時器）才切新的 -current 並移除 .-hidden。
+     改動前文字是在 Splide `move`（＝開始移動）就切 ⇒ 比照片早 1.2 秒（實測 1260ms 左右）。
+     對應斷言：E9–E11（字級／單行／穩態收斂）、H6–H9（隱藏當下可見 0 筆、索引不提前切、
+     隱藏→顯示 ≈1200ms、顯示當下 cur == 置中那杯）。
+
 檢查項目（A–F 每個 viewport 各一輪；G＝/about/ 反向守門；H＝互動）
   A 結構：`#bc-clock-photos` 內有 .hero_hand > #bc-clock-hand-list > 恰 7 個 .hero_hand_item；
     --angle 依序 -90/-65/-40/-15/10/35/60；每個含 <a href="/coffee/N/"> ＋ <img>（非 lazy）；
@@ -62,12 +75,17 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
     時鐘列（.footer-time）高 逐值比對（基準表 EXPECT，±1px；≥992px 用「改動後」值、
     ≤991px 用「改動前」值 ⇒ 同時守住兩件事）；E7 專門守「改動只限 ≥992px」——桌機 cell
     上下內距必須是 0，≤991px 必須仍是 u-24 + 14px / u-24（逐值與改動前相同）；
-    E8 守連動關係「照片寬 ＝ 照片區高 ÷ 1.4286」（放大／縮小後仍必須成立）。
+    E8 守連動關係「照片寬 ＝ 照片區高 ÷ 1.4286」（放大／縮小後仍必須成立）；
+    E9–E11（2026-10-16 文字）＝ 字級（≥992px 24/18；≤991px 13/10、≤767px 11/9 逐值不變）、
+    7 筆文字皆單行（用 off-flow 暫存節點 ＋ Range 的 client rects 數行數；最寬行 < 文字區
+    可用寬）、以及「量測當下文字已收斂」（容器無 .-hidden、可見 1 筆、cur == hero index）。
   F 圖片：7 個 src 皆 HTTP 200 且 Content-Type 為 image/*（環形圖不看 img.complete）。
   G /about/ 反向守門：真頁尾仍為 5 格 deco 的 5 秒輪播（[data-footer-logo="item"] == 5、
     __footerLogoInterval 有值）、該頁沒有 #bc-clock-hand-list / .hero_hand。
   H 互動（僅第一個 viewport）：點 #hero_nav 第 k 顆 → hero、照片格、文字列三者都跟到 k，
-    且圓盤 inline transform == rotate(−25k deg)。
+    且圓盤 inline transform == rotate(−25k deg)；H5–H9（2026-10-16）＝ 文字切換時序：
+    觀察器掛載、圓盤一轉文字就整組隱藏（可見 0 筆）、旋轉期間索引不提前切、隱藏→顯示的
+    時間差 ≈ --bc-hand-ease（1200ms，容差 1000–1800ms）、顯示當下 cur == 置中那杯。
 
 用法：站台須在 http://localhost:8081 跑、CDP 瀏覽器須在 9222（見 CDP_SETUP.md）。
 """
@@ -108,13 +126,16 @@ BEFORE = {
 #   （1440/992 未列入 VIEWPORTS，僅供手動量測對照）。
 #   上一輪（照片放大）的同一組值＝ @1905 684.59／635.00／444.5、@1440 529.59／480.00／336.0、
 #   @1280 476.26／426.66／298.7、@992 380.25／330.66／231.5（文字區一律 49.59）。
-# ≤991px 三列沿用 BEFORE（＝與改動前逐值相同）；E7 另驗 cell 內距與斷點歸屬。
+# ⚠ 2026-10-16（文字再加大 24/18）：文字區 60.39 → 68.38 ⇒ 四列的 cell 高／時鐘列高等量 +8
+#   （照片區高與照片尺寸完全不動）。列值＝ cell 內距 0 ＋ 照片區 400vw/ratio ＋ 文字區 68.38。
+# ≤991px 三列沿用 BEFORE（＝與改動前逐值相同；實測 2026-10-16 逐值不變）；E7 另驗 cell 內距
+# 與斷點歸屬。
 EXPECT = dict(BEFORE)
 EXPECT.update({
-    1905: (381.00, 589.55, 529.16, 60.39, 589.55),
-    1440: (288.00, 460.39, 400.00, 60.39, 460.39),
-    1280: (256.00, 415.94, 355.55, 60.39, 415.94),
-    992: (198.39, 335.94, 275.55, 60.39, 335.94),
+    1905: (381.00, 597.53, 529.16, 68.38, 597.53),
+    1440: (288.00, 468.38, 400.00, 68.38, 468.38),
+    1280: (256.00, 423.92, 355.55, 68.38, 423.92),
+    992: (198.39, 343.92, 275.55, 68.38, 343.92),
 })
 
 # ---------------------------------------------------------------------------
@@ -164,6 +185,44 @@ PROBE_JS = r"""
             src:im?im.getAttribute('src'):null};
   });
 
+  /* 2026-10-16（使用者指示「文字尺寸再次加大」＋「旋轉到中心才顯示」）：
+     · capHidden ＝ 文字容器帶 .-hidden（＝圓盤旋轉中，整組文字以 visibility 隱藏）
+     · capVis    ＝ 實際可見的文字筆數（正常穩態 = 1；旋轉中 = 0）
+     · capNameFs / capHlFs ＝ 名稱／highlight 的 computed 字級（7 筆同值）
+     · capLines / capWid   ＝ 逐筆行數與最寬行（單行守門）：把每一筆複製成 off-flow 的暫存節點
+       （inline display:block ＋ absolute ＋ 明確寬度＝文字區可用寬），用 Range 的 client rects
+       數行數（>1 ＝折行、文字區高度會超出 --bc-hero-caption-h）。 */
+  var capHidden=caption?caption.classList.contains('-hidden'):null;
+  var capVis=caps.filter(function(e){ var s=getComputedStyle(e);
+    return s.display!=='none'&&s.visibility!=='hidden'; }).length;
+  var capInner=null, capLines=[], capWid=[], capNameFs=null, capHlFs=null;
+  if(caption&&caps.length){
+    var capCS=getComputedStyle(caption);
+    capInner=+(caption.clientWidth-parseFloat(capCS.paddingLeft)
+               -parseFloat(capCS.paddingRight)).toFixed(2);
+    var nm0=caps[0].querySelector('.bc-series-caption-name');
+    var hl0=caps[0].querySelector('.bc-series-caption-highlight');
+    capNameFs=nm0?parseFloat(getComputedStyle(nm0).fontSize):null;
+    capHlFs=hl0?parseFloat(getComputedStyle(hl0).fontSize):null;
+    caps.forEach(function(el){
+      var tmp=document.createElement('div');
+      tmp.className=el.className;
+      tmp.style.cssText='display:block;position:absolute;left:-9999px;top:0;visibility:hidden;'
+        +'width:'+capInner+'px';
+      tmp.innerHTML=el.innerHTML;
+      caption.appendChild(tmp);
+      var mx=0, mw=0;
+      Array.prototype.forEach.call(tmp.querySelectorAll('p'),function(pp){
+        var r=document.createRange(); r.selectNodeContents(pp);
+        var rects=Array.prototype.slice.call(r.getClientRects());
+        mx=Math.max(mx,rects.length);
+        rects.forEach(function(q){ mw=Math.max(mw,q.width); });
+      });
+      capLines.push(mx); capWid.push(+mw.toFixed(2));
+      caption.removeChild(tmp);
+    });
+  }
+
   var section=document.getElementById('bc-bg-footer');
   var clipChain=[];
   (function(){
@@ -186,6 +245,8 @@ PROBE_JS = r"""
     cellPadTop:v(cellBox,'padding-top'), cellPadBottom:v(cellBox,'padding-bottom'),
     itemCount:items.length, items:itemsOut,
     capCount:caps.length, capCur:cur(caps),
+    capHidden:capHidden, capVis:capVis, capInner:capInner, capLines:capLines,
+    capWid:capWid, capNameFs:capNameFs, capHlFs:capHlFs,
     capText:(caps.length&&cur(caps)>=0)?caps[cur(caps)].textContent.replace(/\s+/g,' ').trim():null,
     handCount:document.querySelectorAll('#bc-clock-photos .hero_hand').length,
     handCur:cur(items), ready:hand?hand.classList.contains('is-ready'):null,
@@ -208,6 +269,49 @@ PAUSE_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');
             "if(!s) return false;"
             "['mouseenter','mouseover'].forEach(function(t){"
             "s.dispatchEvent(new MouseEvent(t,{bubbles:true}));});return true;})()")
+
+# 2026-10-16：文字是否已收斂（＝圓盤不在旋轉中：容器沒有 .-hidden）。文字改為「旋轉過渡跑完
+# 才切」（bc-hand-ring.js）⇒ 量測／斷言前必須先等它收斂，否則會量到中間態（capVis = 0、
+# capCur 還是上一筆）。
+CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .bc-ring-caption');"
+                  "return c ? !c.classList.contains('-hidden') : true;})()")
+
+# 2026-10-16：文字切換時序的觀察器（H5–H8 用）。三個 MutationObserver／listener：
+#   rotate      ＝圓盤 inline transform 改變（＝那一格「開始」移動）
+#   caption     ＝文字容器的 class 改變（加 .-hidden ＝文字先隱藏；移除 ＝新文字顯示）
+#   transitionend＝圓盤的 transform 過渡結束
+# 每筆都附當下的 {cur, vis, hidden}，故「有沒有提前切索引」「隱藏期間可見幾筆」都可回溯。
+ARM_CAP_JS = r"""
+(function(){
+  window.__capLog=[];
+  var list=document.getElementById('bc-clock-hand-list');
+  var cap=document.querySelector('#bc-clock-photos .footer-logo-caption');
+  if(!list||!cap) return false;
+  var caps=Array.prototype.slice.call(
+      document.querySelectorAll('#bc-clock-photos [data-bc-ring-caption-item]'));
+  function st(){
+    var k=-1;
+    caps.forEach(function(e,i){ if(e.classList.contains('-current')) k=i; });
+    var vis=caps.filter(function(e){ var s=getComputedStyle(e);
+      return s.display!=='none'&&s.visibility!=='hidden'; }).length;
+    return {cur:k, vis:vis, hidden:cap.classList.contains('-hidden')};
+  }
+  function log(what){
+    var s=st();
+    window.__capLog.push({what:what, t:+performance.now().toFixed(1),
+                          cur:s.cur, vis:s.vis, hidden:s.hidden});
+  }
+  new MutationObserver(function(){ log('rotate'); })
+    .observe(list,{attributes:true,attributeFilter:['style']});
+  new MutationObserver(function(){ log('caption'); })
+    .observe(cap,{attributes:true,attributeFilter:['class'],subtree:true});
+  list.addEventListener('transitionend',function(e){
+    if(e.propertyName==='transform') log('transitionend');
+  });
+  log('armed');
+  return true;
+})()
+"""
 
 READY_JS = ("(function(){return !!(document.getElementById('bc-clock-hand-list')"
             "&&document.querySelector('#bc-clock-photos .hero_hand.is-ready')"
@@ -371,15 +475,27 @@ async def main():
                     return True
             return False
 
+        async def wait_caption_settled(timeout=4.0):
+            """2026-10-16：等到文字收斂（＝圓盤不在旋轉中、容器沒有 .-hidden）。
+               文字改為「旋轉過渡跑完才切」（bc-hand-ring.js）：旋轉期間文字整組隱藏、
+               capCur 仍是上一筆 ⇒ 不等它收斂就量，會量到中間態（capVis = 0）而誤判。"""
+            t0 = time.time()
+            while time.time() - t0 < timeout:
+                if await evaljs(CAP_SETTLED_JS):
+                    return True
+                await asyncio.sleep(0.2)
+            return False
+
         async def measure():
             """捲到照片格（讓 GSAP 的進場揭示真的跑完 → .footer-logo-cell 的 clip-path 被釋放）
-               → 暫停 hero autoplay → 等圓盤過渡（1.2s）跑完 → 原子讀取。
+               → 暫停 hero autoplay → 等文字收斂（＝圓盤旋轉過渡跑完）→ 原子讀取。
                ⚠ 不捲的話揭示永不觸發（該 cell 在首屏之外），就會驗到「揭示前」的狀態
                  —— 那正是「側邊鄰居被 clip-path:inset(0%) 切掉」這個 bug 藏身之處。"""
             await evaljs(SCROLL_CELL_JS)
             await asyncio.sleep(0.6)
             await wait_reveal()
             await evaljs(PAUSE_JS)
+            await wait_caption_settled()      # 2026-10-16：文字等圓盤轉完才切（見上）
             await asyncio.sleep(1.5)
             await frame()
             await asyncio.sleep(0.2)
@@ -563,7 +679,8 @@ async def main():
             ab = m.get("area") or {}
             cp = cap_box or {}
             cr = m.get("clockRow") or {}
-            scope = "改動後（≥992px 照片放大）" if w >= 992 else "改動前逐值不變（≤991px 未動）"
+            scope = ("≥992px：cell 內距 0 ＋ 照片區 400vw/ratio ＋ 文字區 68.38"
+                     if w >= 992 else "≤991px：逐值與改動前相同（未動）")
             failures.append(check(f"E2 .footer-logo-cell 寬 {bfw}px ±1（{scope}）",
                                   abs(cb.get("w", 0) - bfw) <= 1, cb.get("w")))
             failures.append(check(f"E3 .footer-logo-cell 高 {bfh}px ±1（時鐘列高度；{scope}）",
@@ -592,6 +709,25 @@ async def main():
             ratio = (ab.get("h", 0) / iw) if iw else 0
             failures.append(check("E8 照片區高 ÷ current 照片寬 = 1.4286 ±0.002（兩者同步）",
                                   abs(ratio - 1.42857) <= 0.002, round(ratio, 5)))
+            # E9–E11（2026-10-16）：文字再加大（≥992px 24/18）＋「旋轉到中心才顯示」
+            cap_lines = m.get("capLines") or []
+            cap_wid = m.get("capWid") or []
+            cap_inner = m.get("capInner") or 0
+            exp_fs = (24.0, 18.0) if w >= 992 else ((13.0, 10.0) if w >= 768 else (11.0, 9.0))
+            failures.append(check(
+                f"E9 字級 {exp_fs[0]:.0f}/{exp_fs[1]:.0f}px（≥992px 再加大；≤991px 逐值不變）",
+                m.get("capNameFs") == exp_fs[0] and m.get("capHlFs") == exp_fs[1],
+                (m.get("capNameFs"), m.get("capHlFs"))))
+            failures.append(check(
+                "E10 7 筆文字皆單行（未折行）且最寬行 < 文字區可用寬",
+                len(cap_lines) == 7 and all(x == 1 for x in cap_lines)
+                and len(cap_wid) == 7 and max(cap_wid) < cap_inner,
+                (cap_lines, max(cap_wid) if cap_wid else None, cap_inner)))
+            failures.append(check(
+                "E11 量測時文字已收斂（容器無 .-hidden、可見 1 筆、cur == hero index）",
+                m.get("capHidden") is False and m.get("capVis") == 1
+                and m.get("capCur") == m.get("heroCur"),
+                (m.get("capHidden"), m.get("capVis"), m.get("capCur"), m.get("heroCur"))))
 
             # ---------- F 圖片 HTTP ----------
             bad_src = []
@@ -606,7 +742,7 @@ async def main():
             if idx == 0:
                 print(f"\n=== {w}x{h} 互動：點 #hero_nav ===")
                 await evaljs(NAV_CLICK_JS % (4, 4))
-                await asyncio.sleep(0.6)
+                await asyncio.sleep(0.4)
                 m2 = await measure()
                 failures.append(check("H1 點 nav[4] 後 hero index == 4",
                                       m2.get("heroCur") == 4, m2.get("heroCur")))
@@ -618,7 +754,7 @@ async def main():
                                       bool((m2.get("capText") or "").strip()),
                                       m2.get("capText")))
                 await evaljs(NAV_CLICK_JS % (0, 0))
-                await asyncio.sleep(0.6)
+                await asyncio.sleep(0.4)
                 m3 = await measure()
                 failures.append(check("H4 點 nav[0]（rewind 回第一張）→ 三方都跟到 0",
                                       m3.get("heroCur") == 0 and m3.get("handCur") == 0
@@ -626,6 +762,41 @@ async def main():
                                       and m3.get("listInline") == "rotate(0deg)",
                                       (m3.get("heroCur"), m3.get("handCur"), m3.get("capCur"),
                                        m3.get("listInline"))))
+
+                # ---------- H5–H9 文字的切換時序（2026-10-16 使用者指示） ----------
+                #   [背景] 文字的索引來源是 Splide 的 'move'（＝那一格「開始」移動的瞬間），
+                #     而圓盤的旋轉是 CSS 過渡（--bc-hand-ease 1.2s）⇒ 改動前文字比照片早
+                #     1.2 秒出現。現在文字改為「等旋轉過渡跑完才切」（bc-hand-ring.js）。
+                #   [量法] 先掛觀察器（圓盤 inline style／文字容器 class／transitionend），
+                #     點 nav[1] 後回溯：隱藏時刻「可見 0 筆、索引仍是舊的」、顯示時刻與隱藏
+                #     時刻的差 ≈ 過渡長度、顯示當下 cur == 1。
+                print("--- 時序：點 #hero_nav[1] ---")
+                failures.append(check("H5 時序觀察器掛載成功（圓盤／文字容器皆在）",
+                                      await evaljs(ARM_CAP_JS) is True))
+                await evaljs(NAV_CLICK_JS % (1, 1))
+                await asyncio.sleep(0.4)
+                m4 = await measure()
+                log = await evaljs("window.__capLog") or []
+                seen = [x for x in log if x.get("what") in ("rotate", "caption")]
+                hid = [x for x in seen if x.get("hidden")]
+                sho = [x for x in seen if not x.get("hidden")]
+                t_hide = hid[0]["t"] if hid else None
+                t_show = sho[0]["t"] if sho else None
+                dt = (t_show - t_hide) if (t_hide is not None and t_show is not None) else None
+                failures.append(check("H6 圓盤一開始轉、文字就整組隱藏（隱藏當下可見 0 筆）",
+                                      bool(hid) and hid[0].get("vis") == 0,
+                                      [(x.get("what"), x.get("vis")) for x in seen[:3]]))
+                failures.append(check("H7 旋轉期間文字不提前切索引（仍停在點之前的第 1 杯）",
+                                      bool(hid) and hid[0].get("cur") == 0,
+                                      hid[0].get("cur") if hid else None))
+                failures.append(check(
+                    f"H8 文字在咖啡置中時才出現（隱藏 → 顯示 {round(dt) if dt else '?'}ms"
+                    f" ≈ --bc-hand-ease 1200ms）",
+                    dt is not None and 1000.0 <= dt <= 1800.0, dt))
+                failures.append(check("H9 顯示當下 cur == 1（＝此刻置中的那杯）",
+                                      bool(sho) and sho[0].get("cur") == 1
+                                      and m4.get("capCur") == 1 and m4.get("capHidden") is False,
+                                      (sho[0].get("cur") if sho else None, m4.get("capCur"))))
 
         # ================= G /about/ 反向守門 =================
         await set_viewport(1280, 800)
