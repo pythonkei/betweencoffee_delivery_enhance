@@ -28,6 +28,8 @@
 > ⚠ **本輪修好兩個「驗證環境」的坑（不修的話整批數字不可信）**：(a) clash 的還原殘留在 1280 每次都 328px
 > ⇒ 見下方「像素級遮蔽」第 5、6 點；(b) 驅動中的分頁被 Chrome 凍結／節流而整個不回應 ⇒ 見下方
 > 「Chrome 凍結／節流（背景分頁）」段。
+> **僅本機：已提交 `71018e97`（9 檔／494 insertions／35 deletions，2026-10-16）、未 push、未部署**
+> （`main` 領先 `origin/main` 8 筆；正式站仍為 `ec8fcadb`）。
 > 原：2026-10-15 稍後（**首頁照片格 `#bc-clock-photos` 的桌機（≥992px）咖啡照片縮小 ＋
 > 名稱／highlight 字級放大 —— 1440 時 280×400、字級 20/16px**；使用者指示「桌機的咖啡照片太大、
 > 名稱與 highlight 太小」）：四處宣告全部落在 `templates/betweencoffee_delivery/index.html` 的
