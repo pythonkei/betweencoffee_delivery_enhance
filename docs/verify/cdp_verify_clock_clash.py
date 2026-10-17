@@ -120,14 +120,15 @@ FREEZE_CLOCK_JS = r"""
 # 鎖住「計時器會改寫的文字節點」＝把該元素的 textContent 改成 no-op setter（element 上的 own
 # property，蓋掉 prototype 的 accessor）。tick 照跑（DOM 寫入變成空操作）⇒ 不會有 frame 枯竭、
 # GSAP/Date 完全不受影響，而畫面上的字固定不變 ⇒ 跨分界不再產生假殘留。
-#   · 涵蓋 hero/頁尾時鐘（#bc-clock-hours/-minutes/-colon-*、[data-footer-time]）與 navbar／hero
-#     天氣元件的 .weather .clock .value（bc-weather.js 的 updateClock 每秒無條件覆寫）。
+#   · 涵蓋 hero/頁尾時鐘（#bc-clock-hours/-minutes/-colon-*、[data-footer-time]）。
+#     2026-10-17（使用者指示：「bc-clock-weather 移除時鐘，只保留天氣與溫度」）：天氣元件的
+#     .weather .clock .value 已不存在（bc-weather.js 的 updateClock 已移除）→ 選擇器一併移除。
 #   · 可重複呼叫（已鎖過的用 __bcProbeLocked 記號跳過）；settle 與每次 stable 前都叫一次，
 #     連「量測中途才被建立的節點」也一併鎖上。
 LOCK_CLOCK_JS = r"""
 (function(){
   var sel='#bc-clock-hours,#bc-clock-minutes,#bc-clock-colon-before-minutes,'
-        + '#bc-clock-colon-after-minutes,.weather .clock .value,[data-footer-time]';
+        + '#bc-clock-colon-after-minutes,[data-footer-time]';
   var els=document.querySelectorAll(sel), out=[];
   for(var i=0;i<els.length;i++){
     var el=els[i];
@@ -180,6 +181,18 @@ HIDE_JS = r"""
   s.textContent = on ? (sel + '{visibility:hidden !important}') : '';
   return {applied:s.textContent, matched: on ? document.querySelectorAll(sel).length : 0};
 })(%s,%s)
+"""
+
+# 2026-10-17（使用者指示：bc-clock-weather 移除時鐘）：量測期間「永久」隱藏單一 selector。
+#   與 HIDE_JS 的差別＝獨立 style id、不會被其他圖層的 hide/restore 覆寫（HIDE_JS 只維護一條規則）。
+PIN_HIDE_JS = r"""
+(function(sel){
+  var id='__bc_probe_pin', s=document.getElementById(id);
+  if(!s){ s=document.createElement('style'); s.id=id;
+          (document.head||document.documentElement).appendChild(s); }
+  s.textContent = sel + '{visibility:hidden !important}';
+  return {applied:s.textContent, matched:document.querySelectorAll(sel).length};
+})(%s)
 """
 
 # 舊探針的破壞性寫法（P2 重現用）
@@ -637,6 +650,17 @@ async def measure_viewport(sess, name, w, h, mob):
     st = await sess.settle()
     checks.append(("[%s] 揭示完成（clip-path none）" % name,
                    st["clip_released"] is True, await sess.ev(CELL_CLIP_JS)))
+    # 2026-10-17（使用者指示：bc-clock-weather 移除時鐘、只剩 icon ⇄ 溫度）：天氣元件每 5 秒
+    #   以 rAF 呼叫 toggle()，而 GSAP 時間軸已被 FREEZE_JS 暫停 ⇒ gsap.to 不再推進，但
+    #   gsap.fromTo(..., {x:d}) 預設 immediateRender **會立刻套用 from 值** ⇒ 每 5 秒把元素瞬移一次，
+    #   量測超過 ~10 秒後整個元件被推離 .view（實測 1440 殘留 917 px、1280 835 px、992 出現
+    #   多輪瞬態殘留；每個圖層遮罩都含同一塊 ⇒ 假的「還原殘留／照片 #n」）。
+    #   它與本腳本要驗的圖層（照片 / { } / 數字 / 黃球）零重疊（hero_weather 的 B2 逐斷點守門）
+    #   ⇒ 量測期間以非破壞性 stylesheet 永久隱藏（PIN_HIDE_JS，獨立 style id；不可用 hide()
+    #     因為它只維護單一條規則，會被後續圖層的 hide/restore 覆寫），
+    #   讓基準圖與之後每一張圖完全一致。
+    await sess.ev(PIN_HIDE_JS % jn(SEL_WEATHER))
+    await sess.stable()
     c = await sess.ctx()
     base = await sess.shot()
     d = npx(mask(base, await sess.shot()))

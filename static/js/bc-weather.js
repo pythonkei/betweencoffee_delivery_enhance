@@ -9,14 +9,22 @@
        · index  那顆    : 104px（--wc-scale:1.3，slideDist() 逐實例量測）
      另抽出 fillLocalDate() 在 main() 一開始先填本地日期（該顆不在 nav.html
      inline script 的覆蓋範圍內）。
+   2026-10-17（使用者指示）：「bc-clock-weather 移除時鐘，只保留天氣與溫度」
+     → 循環由 3 態（時鐘 → icon → 溫度）改為 2 態（icon ⇄ 溫度）：
+       · ORDER 只剩 icon / temperature；updateClock() 與每秒的 setInterval 整段移除
+         （hero 的時間由 #bc-clock 的 { HH : MM } 負責，本元件不再有第二個時鐘）；
+       · 兩態時「上上個」＝自己（ORDER[(i+2)%2] === ORDER[i]）→ startLoop 不再對它
+         做歸位（否則與「當前滑出」的 tween 打對台），下一輪由 fromTo 重新從右側滑入。
+     markup 的 .clock 已同步移除（templates/layouts/nav.html、partials/bc_hero.html），
+     CSS 的 .weather .clock 規則亦已刪除（static/css/bc-weather.css）。
    完整複製 yokohama-timberwharf.com/wp-content/themes/ytw/assets/js/main.js
    的 weather 邏輯（minified 反推還原，行為一致）：
    1. XMLHttpRequest → OpenWeatherMap API（原站 URL + 公開 key，完全一致）
    2. icon 對映：weather[0].icon → header_weather_*.svg，建立 <img width=80 height=40>
    3. 日期填充：month(Jan..Dec) / day(補零) / year(4位)，溫度 Math.round + °C
-   4. 動畫：3 元素循環 時鐘 → icon → 溫度，每 5 秒滑動切換
+   4. 動畫：2 元素循環 icon ⇄ 溫度，每 5 秒滑動切換
       （GSAP，duration .8, easeInOut；原站 rAF 計時）
-   5. 時鐘：每秒刷新 HH:MM（24 小時制）
+   5. （原站的時鐘已於 2026-10-17 移除，見上）
    依賴：GSAP（base.html 已全域載入 3.12.5）。
    圖示路徑：/static/images/（STATIC_URL=/static/）。
    ============================================================ */
@@ -26,8 +34,8 @@
   /* 原站快取（避免重複 API 呼叫，行為與原站一致） */
   var cachedData = null;
   var hasCached = false;
-  /* 動畫循環順序（2026-08-26 新增時鐘）：時鐘 → 天氣 icon → 溫度 */
-  var ORDER = ['clock', 'icon', 'temperature'];
+  /* 動畫循環順序（2026-10-17 移除時鐘後）＝天氣 icon ⇄ 溫度（兩態循環） */
+  var ORDER = ['icon', 'temperature'];
   var currentIndex = 0;
 
   /* 圖示對映（原站三元鏈完整對應） */
@@ -85,8 +93,8 @@
   function fillDate(data, nodes) {
     fillLocalDate(nodes);
     nodes.forEach(function (c) {
-      /* 注意：時鐘加入後 DOM 有兩個 .value（.clock .value / .temperature .value），
-         必須用精確 selector，否則會選中時鐘 */
+      /* 精確 selector：只填溫度的 .value
+         （2026-10-17 移除時鐘後 .view 內只剩 .icon 與 .temperature） */
       var t = c.querySelector('.temperature');
       var v = c.querySelector('.temperature .value');
       var u = c.querySelector('.temperature .unit');
@@ -101,7 +109,7 @@
      2026-10-14：抽出並在 main() 一開始就呼叫一次。
      nav.html 的 inline script 只會填 DOM 第一個 .weather（navbar 那顆），
      首頁 hero 內新增的這顆在 API（或 sessionStorage 快取）回應前會是空日期；
-     與 updateClock() 同時先填本地日期，首訪（無快取）也不會出現空日期區塊。 */
+     故在 main() 一開始先填一次（不依賴 API），首訪（無快取）也不會出現空日期區塊。 */
   function fillLocalDate(nodes) {
     var now = new Date();
     var monthNum = (now.getMonth() + 1).toString();
@@ -148,9 +156,11 @@
     });
   }
 
-  /* 動畫循環（API 回應後啟動）：3 元素 時鐘 → icon → 溫度，每 5 秒滑動切換
-     當前滑出左側（x:-80）、下一個從右側滑入（x:80→0）、
-     上上個（在左側）悄悄回右側待命（不可見時調整，無視覺跳動） */
+  /* 動畫循環（API 回應後啟動）：2 元素 icon ⇄ 溫度，每 5 秒滑動切換
+     當前滑出左側（x:-d）、下一個從右側滑入（x:d→0）。
+     2026-10-17（移除時鐘）：只剩兩態時「上上個」＝自己（ORDER[(i+2)%2] === ORDER[i]），
+     不能再對它做歸位，否則會與「當前滑出」的 tween 打對台 → otherName 只在 >2 態時才有值；
+     下一輪由 next 的 fromTo({x:d}) 重新放回右側（該元素當時在左側外、位移不可見）。 */
   function startLoop() {
     var last = 0;
     var EASE = 'power2.inOut';
@@ -158,7 +168,7 @@
     function toggle() {
       var curName = ORDER[currentIndex];
       var nextName = ORDER[(currentIndex + 1) % ORDER.length];
-      var otherName = ORDER[(currentIndex + 2) % ORDER.length];
+      var otherName = ORDER.length > 2 ? ORDER[(currentIndex + 2) % ORDER.length] : null;
       document.querySelectorAll('.weather').forEach(function (c) {
         var cur = c.querySelector('.' + curName);
         var next = c.querySelector('.' + nextName);
@@ -196,17 +206,6 @@
     setTimeout(startLoop, 5000);
   }
 
-  /* 時鐘：每秒刷新 HH:MM（24 小時制，原站 -font_en 數字風格） */
-  function updateClock() {
-    var now = new Date();
-    var h = now.getHours().toString().padStart(2, '0');
-    var m = now.getMinutes().toString().padStart(2, '0');
-    document.querySelectorAll('.weather').forEach(function (c) {
-      var v = c.querySelector('.clock .value');
-      if (v) v.textContent = h + ':' + m;
-    });
-  }
-
   /* 主邏輯：script 在 body 尾、首 paint 前同步執行——立即定位與填充，
      首幀即依 sessionStorage 的上次狀態顯示，weather 全程可見（無消失彈出）。
      註：weather 元素位於 navbar（body 開頭），執行時已存在。 */
@@ -214,13 +213,10 @@
     var nodes = document.querySelectorAll('.weather');
     if (!nodes || nodes.length === 0) return;
 
-    /* 時鐘：立即填入一次 + 每秒更新（與天氣/溫度動畫獨立） */
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    /* 2026-10-14：本地日期也立即填入（month/day/year/weekday 不依賴 API）。
+    /* 2026-10-14：本地日期立即填入（month/day/year/weekday 不依賴 API）。
        hero 內的 .weather 不在 nav.html inline script 的範圍（那裡只填第一個 .weather），
-       沒有這行的話首訪（無 sessionStorage 快取）時日期會空白到 OpenWeatherMap 回應為止。 */
+       沒有這行的話首訪（無 sessionStorage 快取）時日期會空白到 OpenWeatherMap 回應為止。
+       （2026-10-17：原本這裡還有一行 updateClock() ＋ setInterval(...,1000)，時鐘移除後已刪） */
     fillLocalDate(nodes);
 
     /* 立即定位：恢復上次動畫狀態（sessionStorage），首 paint 即正確狀態 */

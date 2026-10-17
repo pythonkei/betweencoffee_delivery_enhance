@@ -209,7 +209,18 @@ PROBE_JS = r"""
       tmp.className=el.className;
       tmp.style.cssText='display:block;position:absolute;left:-9999px;top:0;visibility:hidden;'
         +'width:'+capInner+'px';
-      tmp.innerHTML=el.innerHTML;
+      /* 2026-10-17（使用者指示：名稱/Highlight 換張時跑 data-reveal 文字揭示）：
+         不能直接 tmp.innerHTML = el.innerHTML —— 已經跑過揭示的那一筆，它的 <p> 內
+         被 SplitText 包成 <div class="split-line" style="…filter:url(#goo-…)">，
+         Range 只取到純元素節點時 getClientRects() 會回 0 行（實測 E10 的 index 1 → 0）。
+         改為只複製 class ＋ textContent：量的是「文字本身在該字級下的折行」，
+         與它是否正顯示、是否已跑過揭示動畫完全無關（結果與改動前逐值相同）。 */
+      Array.prototype.forEach.call(el.querySelectorAll('p'),function(pp){
+        var c=document.createElement('p');
+        c.className=pp.className;
+        c.textContent=pp.textContent;
+        tmp.appendChild(c);
+      });
       caption.appendChild(tmp);
       var mx=0, mw=0;
       Array.prototype.forEach.call(tmp.querySelectorAll('p'),function(pp){

@@ -29,10 +29,11 @@
              2026-08-27 應用於全域（nav.html 無條件顯示，全站右上角）
              2026-09-21（使用者指示）：**改為全站隱藏、只有 about 頁顯示** →
                加 .weather--visible（bc-weather.css 預設 visibility: hidden——保留 navbar 排版空間、
-               不造成 navbar 位移；bc-weather.js 亦僅在 about 頁載入，見 base.html） -->
+               不造成 navbar 位移；bc-weather.js 亦僅在 about 頁載入，見 base.html）
+             2026-10-17（使用者指示）：「移除時鐘，只保留天氣與溫度」→ 刪掉 .clock 節點，
+               循環改為 icon ⇄ 溫度（本頁 inline script 的 ORDER 亦同步） -->
         <div class="weather -font_en -color_white{% if request.resolver_match.url_name == 'about' %} weather--visible{% endif %}" data-bc-weather>
             <div class="view">
-                <div class="clock"><span class="value">--:--</span></div>
                 <div class="icon"></div>
                 <span class="temperature">
                     <span class="value"></span>
@@ -47,18 +48,18 @@
             <span class="border"></span>
         </div>
         <script>
-        /* 2026-08-26：立即同步填入時鐘 + 日期，避免載入時不同步（時間先、日期後）。
+        /* 2026-08-26：立即同步填入日期，避免載入時不同步。
            2026-08-27：加 weekday（香港真實星期）。
            2026-08-28：依 sessionStorage 恢復動畫狀態與溫度——在首 paint 前執行
-           （weather 元素後、body 尾 bc-weather.js 之前），避免轉跳後先顯示時鐘
-           再切換到天氣/溫度的閃現抖動；weather 全程可見（無 opacity 隱藏）。 */
+           （weather 元素後、body 尾 bc-weather.js 之前），避免轉跳後先顯示別的天氣狀態
+           再切換的閃現抖動；weather 全程可見（無 opacity 隱藏）。
+           2026-10-17（使用者指示：移除時鐘）：不再填 .clock、ORDER 改為 icon ⇄ 溫度；
+           sessionStorage 的 bcWeatherIndex 仍沿用（舊值 2 超出範圍 → 回落 0）。 */
         (function () {
             var w = document.querySelector('.weather');
             if (!w) return;
             var d = new Date();
             var pad = function (n) { return ('0' + n).slice(-2); };
-            var v = w.querySelector('.clock .value');
-            if (v) v.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
             var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             var m = w.querySelector('.month');
             if (m) m.textContent = MONTHS[d.getMonth()];
@@ -71,8 +72,10 @@
             if (wd) wd.textContent = WEEKDAYS[d.getDay()];
 
             /* 2026-08-28：恢復上次動畫狀態（sessionStorage bcWeatherIndex）。
-               直接設 transform，首 paint 即顯示上次狀態（無時鐘閃現）。 */
-            var ORDER = ['clock', 'icon', 'temperature'];
+               直接設 transform，首 paint 即顯示上次狀態（無第一態閃現）。
+               2026-10-17：狀態由 3 態改為 2 態（icon / temperature），位移量沿用 80px
+               （navbar 那顆的 --wc-scale 未設＝1；hero 那顆由 bc-weather.js 另行定位）。 */
+            var ORDER = ['icon', 'temperature'];
             var idx = parseInt(sessionStorage.getItem('bcWeatherIndex') || '-1', 10);
             if (!(idx >= 0 && idx < ORDER.length)) idx = 0;
             ORDER.forEach(function (n, i) {

@@ -23,6 +23,10 @@
      [範圍] navbar 專屬規則（visibility 開關、與 Order 按鈕對齊的 translateX、
        ≤991px 的 height:100%）只保留 #ftco-navbar 前綴；
        hero 專屬（height:auto）只保留 #bc-bg-footer 前綴——理由見各自註解。
+   2026-10-17（使用者指示）：「bc-clock-weather 移除時鐘，只保留天氣與溫度」
+     → 刪除全部 `.weather .clock / .clock .value` 規則（含 ≤991.98px 的縮小那條）；
+       初始狀態改為第一態＝icon（translateX(0)）、.temperature 藏右側。
+       循環只剩兩態，見 static/js/bc-weather.js 的 ORDER。
    ============================================================ */
 
 /* ---- 容器（原站 header .main .weather）---- */
@@ -110,14 +114,14 @@
 }
 
 /* ---- 初始動畫狀態（2026-08-26 修復初始跳動）
-   CSS 生效即正確初始布局：時鐘顯示、icon/溫度藏右側，
-   不需等待 JS/API 回應（避免三元素疊中央 → 溫度先顯示再跳動到時鐘）
+   CSS 生效即正確初始布局：icon 顯示、溫度藏右側，
+   不需等待 JS/API 回應（避免兩元素疊中央 → 溫度先顯示再跳動到 icon）
    2026-10-14：位移量改為 calc(80px * var(--wc-scale,1)) —— 與 JS 的滑動距離
-   （bc-weather.js slideDist() 讀 .view 實際寬度）逐值相同，hero 版為 104px。 */
-#ftco-navbar .weather .view .clock,
-#bc-bg-footer .weather .view .clock { transform: translateX(0); }
+   （bc-weather.js slideDist() 讀 .view 實際寬度）逐值相同，hero 版為 104px。
+   2026-10-17（使用者指示：bc-clock-weather 移除時鐘）：循環順序改為 icon ⇄ 溫度
+   ⇒ 第一態是 .icon，故 .icon 歸零、.temperature 藏右側（原 .clock 那條已刪）。 */
 #ftco-navbar .weather .view .icon,
-#bc-bg-footer .weather .view .icon { transform: translateX(calc(80px * var(--wc-scale, 1))); }
+#bc-bg-footer .weather .view .icon { transform: translateX(0); }
 #ftco-navbar .weather .view .temperature,
 #bc-bg-footer .weather .view .temperature { transform: translateX(calc(80px * var(--wc-scale, 1))); }
 
@@ -132,20 +136,6 @@
   display: block;
   width: 100%;
   height: auto;
-}
-
-/* ---- 時鐘（2026-08-26 新增：動畫循環 時鐘 → icon → 溫度；與 temperature 同風格 -font_en 數字）---- */
-#ftco-navbar .weather .clock,
-#bc-bg-footer .weather .clock {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-}
-#ftco-navbar .weather .clock .value,
-#bc-bg-footer .weather .clock .value {
-  display: block;
-  margin: calc(0px + var(--leading-trim-en-top, 0px)) 0 calc(0px + var(--leading-trim-en-bottom, 0px));
-  font-size: calc(28px * var(--wc-scale, 1));
 }
 
 /* ---- 溫度 ---- */
@@ -250,7 +240,8 @@
     border: none;
   }
   /* 2026-08-28：.view 與 .date 整體再縮小
-     view 44x22→38x19、clock/temp 16→14px、unit 10→9px、date 9→8px */
+     view 44x22→38x19、temp 16→14px、unit 10→9px、date 9→8px
+     （2026-10-17：原時鐘的 16→14px 那條已隨時鐘移除） */
   #ftco-navbar .weather .view,
   #bc-bg-footer .weather .view {
     width: calc(38px * var(--wc-scale, 1));
@@ -263,10 +254,6 @@
   }
   #ftco-navbar .weather .temperature .value,
   #bc-bg-footer .weather .temperature .value {
-    font-size: calc(14px * var(--wc-scale, 1));
-  }
-  #ftco-navbar .weather .clock .value,
-  #bc-bg-footer .weather .clock .value {
     font-size: calc(14px * var(--wc-scale, 1));
   }
   #ftco-navbar .weather .temperature .unit,

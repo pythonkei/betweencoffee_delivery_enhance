@@ -38,6 +38,18 @@
        4 + 18×1.4）、F7 字級 **24/18**；≤991px 逐值不變。時序改由 static/js/bc-hand-ring.js
        綁「圓盤旋轉過渡結束」⇒ 本檔量測前先 `settle_ring()`（暫停 autoplay ＋ 等文字收斂），
        否則 F2/F3 會落在 1.2s 的換張窗口內（見 PAUSE_HERO_JS 的註解）。
+       ⚠ 2026-10-17（使用者指示「bc-clock-weather 移除時鐘，只保留天氣與溫度」）：
+       時鐘節點與 CSS/JS 全數移除、循環改為 icon ⇄ 溫度 ⇒
+         · A 的六件組 → **五件組**（另加 A3b 反向驗 .clock 不存在）；
+         · C 的「1.3 倍」比較去掉 clock（只剩 temp/unit/date）；
+         · D1 由「時鐘 HH:MM」改為「hero 與 navbar 都已無 .clock」；
+         · E3 / G3 由「時鐘/日期」改為「日期/溫度/icon 仍被填充」。
+       幾何（B）與字級完全不變 —— .view 的子項都是 position:absolute，
+       時鐘本來就不佔流內高度 ⇒ 時鐘列高度、`{` 的 y、照片位置逐值不動。
+       2026-10-17 稍後（同批改動）：名稱 / Highlight 換張時改跑 Fresh / Beans 的
+       data-reveal 文字揭示（bc-hand-ring.js 的 revealCaption → window.BC_TEXT_REVEAL）
+       ⇒ 量測前仍需 settle_ring()（文字收斂後才會出現 SplitText 的行區塊；
+       文字區高度仍為 --bc-hero-caption-h，F5 不受影響）。
 
 改動前基準（同腳本量的「before」，2026-10-14，改動前原始碼；供下方斷言對照）
   viewport      clock 高   { 的 y  欄數/照片位置            照片 img 高
@@ -60,8 +72,8 @@
 
 檢查項目（A–F 每個 viewport 各一輪；G 為 /about/ 反向守門）
   A. 結構：#bc-clock 的第一個子項是 #bc-clock-weather，其內恰 1 顆 .weather（含
-     .weather--visible / -font_en / -color_white），且 .view / .clock / .icon /
-     .temperature / .date / .border 六件齊全（與 navbar 那顆同構）。
+     .weather--visible / -font_en / -color_white），且 .view / .icon / .temperature /
+     .date / .border 五件齊全（與 navbar 那顆同構，且兩顆都已無 .clock）。
   B. 幾何：
      B1 grid-area 1/1/2/2、align-self start、justify-self center。
      B2 與另外 7 個時鐘子項「0 重疊」（矩形相交檢查）。
@@ -75,12 +87,12 @@
         minmax(0,1fr) 的欄寬（991px 的「15」寬 106px、欄寬 72.6px）而置中溢出，
         這是改動前就有的設計；照片列則驗整塊落在該欄區間內。
   C. +30%：--wc-scale == 1.3；.view 寬 = navbar .view 寬 × 1.3（±0.1）且等於
-     104（≥992）/ 49.4（≤991，±0.06）；clock .value / temperature .value / unit /
-     date 的 font-size 亦為 navbar 對應值的 1.3 倍（±1%）。
-  D. 內容填充：時鐘為 HH:MM（與 navbar 那顆一致）、month/day/weekday 非空、
+     104（≥992）/ 49.4（≤991，±0.06）；temperature .value / unit / date 的 font-size
+     亦為 navbar 對應值的 1.3 倍（±1%）。
+  D. 內容填充：已無時鐘（hero 與 navbar 皆無 .clock）、month/day/weekday 非空、
      year 有值但 computed display:none、溫度為數字、icon <img> 存在且 naturalWidth > 0。
   E. 首頁 navbar 那顆不受影響：visibility hidden、.view 寬 80（≥992）/38（≤991，
-     皆未縮放）、仍被填充。
+     皆未縮放）、仍被填充（日期/溫度/icon）。
   F. 照片格（2026-10-14 改版：GUNTE hero 環形照片列縮小版 ＋ 單一「當前咖啡」文字）：
      7 個 .hero_hand_item（每筆 alt 非空）＋ [data-bc-ring-caption] 內 7 筆
      [data-bc-ring-caption-item]，恰 1 筆 -current、name/highlight 非空、且與環的 -current
@@ -89,9 +101,9 @@
      ≤991px 180vw/ratio（＝改動前值，未動）（皆 ±1px）；
      首頁已無舊輪播 hook（data-footer-logo=item）；font-size 為 20/16（≥992）、13/10（768–991）、
      11/9（≤767）；highlight 為品牌金 rgb(196, 155, 99)；name 為 Josefin Sans ＋ uppercase ＋ 白字。
-  G. /about/ 反向守門：navbar 那顆仍 visible、未縮放（--wc-scale 1、view 80、仍被填充）；
-     about 的真頁尾 #bc-bg-footer 內 0 顆 .weather、無 #bc-clock-weather；
-     時鐘列仍為 8 欄、`{` 的 x/寬與改動前一致。
+  G. /about/ 反向守門：navbar 那顆仍 visible、未縮放（--wc-scale 1、view 80、仍被填充
+     日期/溫度）、已無 .clock；about 的真頁尾 #bc-bg-footer 內 0 顆 .weather、
+     無 #bc-clock-weather；時鐘列仍為 8 欄、`{` 的 x/寬與改動前一致。
 
 多個 viewport：1440x900 / 1280x800 / 992x900 / 991x900 / 768x1024 / 480x900 / 390x844，
 各存一張「時鐘區」視窗截圖（viewport-only）。
@@ -168,13 +180,14 @@ MEASURE_JS = r"""
     if (we) {
       var cwe = getComputedStyle(we);
       var q = function(sel){ return we.querySelector(sel); };
+      /* 2026-10-17（使用者指示「移除時鐘，只保留天氣與溫度」）：parts 只剩五件，
+         並記錄 has_clock 供反向守門（.clock 節點不得存在）。 */
       out.w = { rect: r(we), scale: cwe.getPropertyValue('--wc-scale').trim(),
                 height: cwe.height, cls: we.className, vis: cwe.visibility,
-                parts: ['view', 'clock', 'icon', 'temperature', 'date', 'border']
+                has_clock: !!q('.clock'),
+                parts: ['view', 'icon', 'temperature', 'date', 'border']
                   .map(function(k){ return we.querySelector('.' + k) ? 1 : 0; }),
                 view_w: +q('.view').getBoundingClientRect().width.toFixed(2),
-                clock_val: q('.clock .value').textContent,
-                clock_val_fs: parseFloat(getComputedStyle(q('.clock .value')).fontSize),
                 temp_val: q('.temperature .value').textContent,
                 temp_fs: parseFloat(getComputedStyle(q('.temperature .value')).fontSize),
                 unit_fs: parseFloat(getComputedStyle(q('.temperature .unit')).fontSize),
@@ -213,12 +226,11 @@ MEASURE_JS = r"""
     out.nav = { rect: r(nw), vis: cn.visibility,
                 scale: cn.getPropertyValue('--wc-scale').trim(),
                 view_w: +nq('.view').getBoundingClientRect().width.toFixed(2),
-                clock_val: nq('.clock .value').textContent,
+                has_clock: !!nq('.clock'),
                 month: nq('.month').textContent, day: nq('.day').textContent,
                 weekday: nq('.weekday').textContent,
                 year_disp: getComputedStyle(nq('.year')).display,
                 temp_val: nq('.temperature .value').textContent,
-                clock_val_fs: parseFloat(getComputedStyle(nq('.clock .value')).fontSize),
                 temp_fs: parseFloat(getComputedStyle(nq('.temperature .value')).fontSize),
                 unit_fs: parseFloat(getComputedStyle(nq('.temperature .unit')).fontSize),
                 date_fs: parseFloat(getComputedStyle(nq('.date')).fontSize),
@@ -292,7 +304,7 @@ ABOUT_JS = r"""
     var cn = getComputedStyle(nw);
     out.nav = { vis: cn.visibility, scale: cn.getPropertyValue('--wc-scale').trim(),
                 view_w: +nw.querySelector('.view').getBoundingClientRect().width.toFixed(2),
-                clock_val: nw.querySelector('.clock .value').textContent,
+                has_clock: !!nw.querySelector('.clock'),
                 temp_val: nw.querySelector('.temperature .value').textContent,
                 month: nw.querySelector('.month').textContent,
                 weekday: nw.querySelector('.weekday').textContent };
@@ -430,8 +442,10 @@ async def main():
                                   f"{m.get('wrap_count')}/{m.get('w_count')}"))
             wrap = m.get("wrap") or {}
             wm = m.get("w") or {}
-            failures.append(check("A3 天氣元件六件組齊全（view/clock/icon/temperature/date/border）",
-                                  wm.get("parts") == [1, 1, 1, 1, 1, 1], wm.get("parts")))
+            failures.append(check("A3 天氣元件五件組齊全（view/icon/temperature/date/border）",
+                                  wm.get("parts") == [1, 1, 1, 1, 1], wm.get("parts")))
+            failures.append(check("A3b 時鐘節點已移除（.clock 不存在）",
+                                  wm.get("has_clock") is False, wm.get("has_clock")))
             failures.append(check("A4 三個原站修飾類別齊全（-font_en / -color_white / --visible）",
                                   all(k in (wm.get("cls") or "")
                                       for k in ("-font_en", "-color_white", "weather--visible")),
@@ -517,19 +531,18 @@ async def main():
                                   and abs((wm.get("view_w") or 0)
                                           - (nav.get("view_w") or 0) * 1.3) <= 0.1,
                                   f"hero {wm.get('view_w')} / nav {nav.get('view_w')}"))
-            ratios = [("clock .value", wm.get("clock_val_fs"), nav.get("clock_val_fs")),
-                      ("temperature .value", wm.get("temp_fs"), nav.get("temp_fs")),
+            ratios = [("temperature .value", wm.get("temp_fs"), nav.get("temp_fs")),
                       ("unit", wm.get("unit_fs"), nav.get("unit_fs")),
                       ("date", wm.get("date_fs"), nav.get("date_fs"))]
             bad = [f"{k} {a}/{b}" for k, a, b in ratios if not b or abs(a / b - 1.3) > 0.01]
-            failures.append(check("C3 字級皆為 navbar 的 1.3 倍（clock/temp/unit/date）",
+            failures.append(check("C3 字級皆為 navbar 的 1.3 倍（temp/unit/date）",
                                   not bad, bad))
 
             # ---------- D 內容 ----------
-            cv = wm.get("clock_val") or ""
-            failures.append(check("D1 時鐘為 HH:MM 且與 navbar 那顆一致",
-                                  bool(re.fullmatch(r"\d{2}:\d{2}", cv))
-                                  and cv == nav.get("clock_val"), cv))
+            failures.append(check("D1 已無時鐘（hero 與 navbar 都沒有 .clock）",
+                                  wm.get("has_clock") is False
+                                  and nav.get("has_clock") is False,
+                                  (wm.get("has_clock"), nav.get("has_clock"))))
             failures.append(check("D2 日期已填（month/day/weekday 非空）",
                                   bool((wm.get("month") or "").strip())
                                   and (wm.get("day") or "").isdigit()
@@ -553,11 +566,11 @@ async def main():
                                   (nav.get("scale") or "1") in ("1", "")
                                   and abs((nav.get("view_w") or 0) - exp_nav_view) <= 0.01,
                                   (nav.get("scale"), nav.get("view_w"))))
-            failures.append(check("E3 navbar 那顆仍有被填充（時鐘/日期/icon）",
-                                  bool(re.fullmatch(r"\d{2}:\d{2}", nav.get("clock_val") or ""))
-                                  and bool((nav.get("month") or "").strip())
+            failures.append(check("E3 navbar 那顆仍有被填充（日期/溫度/icon）",
+                                  bool((nav.get("month") or "").strip())
+                                  and bool(re.fullmatch(r"-?\d+", str(nav.get("temp_val") or "")))
                                   and (nav.get("img_nw") or 0) > 0,
-                                  (nav.get("clock_val"), nav.get("month"), nav.get("img_nw"))))
+                                  (nav.get("month"), nav.get("temp_val"), nav.get("img_nw"))))
 
 
             # ---------- F 照片列文字 ----------
@@ -630,11 +643,11 @@ async def main():
                               (an.get("scale") or "1") in ("1", "")
                               and abs((an.get("view_w") or 0) - 80) <= 0.01,
                               (an.get("scale"), an.get("view_w"))))
-        failures.append(check("G3 /about/ navbar 天氣仍被填充（時鐘/日期/溫度）",
-                              bool(re.fullmatch(r"\d{2}:\d{2}", an.get("clock_val") or ""))
+        failures.append(check("G3 /about/ navbar 天氣仍被填充（日期/溫度）、且已無時鐘",
+                              an.get("has_clock") is False
                               and bool((an.get("month") or "").strip())
                               and bool(an.get("temp_val")),
-                              (an.get("clock_val"), an.get("month"), an.get("temp_val"))))
+                              (an.get("has_clock"), an.get("month"), an.get("temp_val"))))
         failures.append(check("G4 /about/ 真頁尾 #bc-bg-footer 內 0 顆 .weather、無 #bc-clock-weather",
                               a.get("footer_found") is True
                               and a.get("footer_weather") == 0 and a.get("footer_wrap") == 0,

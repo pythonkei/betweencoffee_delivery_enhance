@@ -141,6 +141,9 @@
             line.style.filter = 'url(#' + line.dataset.filterId + ')';
           });
         } else if (mode === 'reveal') {
+          /* 2026-10-17：同一元素可能被重複 reveal（首頁咖啡名稱每次換張都跑一次）→
+             先殺掉前一次的時間軸，避免兩個 tween 同時寫同一組 SVG 濾鏡屬性而抖動。 */
+          if (el._revealTl) el._revealTl.kill();
           gsap.set(el, { autoAlpha: 1 });
           var tl = gsap.timeline();
           el._split.lines.forEach(function (line, i) {
@@ -157,6 +160,7 @@
               onComplete: function () { m.setAttribute('values', mat(1, 0)); line.style.filter = ''; }
             }, '>-' + .35 * DUR_L);
           });
+          el._revealTl = tl;
         } else if (mode === 'hide') {
           var tl2 = gsap.timeline({ onComplete: function () { gsap.set(el, { autoAlpha: 0 }); el.style.display = 'none'; } });
           el._split.lines.forEach(function (line, i) {
@@ -173,6 +177,19 @@
         }
       });
     }
+
+    /* 2026-10-17（使用者指示）：首頁 hero 的「咖啡名稱 / Highlight」換張時，也要跑同一套
+       data-reveal 文字揭示（與右側的 Fresh / Beans 完全相同 —— 同一支 animateTextReveal）。
+       [為何掛到 window] 換張的判斷在 static/js/bc-hand-ring.js（本檔之外）：
+       環轉到定位、切完 -current 後呼叫 window.BC_TEXT_REVEAL(...) 即可，本檔不需反向依賴它。
+       [參數] target 可為 Element 或 NodeList／陣列；多個元素依序 k * STAGGER 錯開
+       （＝原引擎對多元素的行為：名稱 0.1s、highlight 0.2s）。
+       [降級] GSAP／SplitText 缺失時 initGsap 直接 return ⇒ 這個 API 不存在，
+       bc-hand-ring.js 就只是「文字直接出現」（與改動前相同）。 */
+    window.BC_TEXT_REVEAL = function (target, delay) {
+      if (!target) return;
+      animateTextReveal(target, 'reveal', delay == null ? DELAY_REVEAL : delay);
+    };
 
     /* -- div / clip 揭示（原 animateDivReveal / animateClipReveal） -- */
     function animateDivReveal(target, mode, delay) {

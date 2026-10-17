@@ -333,9 +333,21 @@ sleep 60; grep -c PASS /tmp/verify_top_art.log; grep FAIL /tmp/verify_top_art.lo
    `Object.defineProperty(el,'textContent',{get,set(){}})` = no-op setter，用 `__bcProbeLocked` 記號
    可重複呼叫）；計時器照跑、`Date` 不動、GSAP 不受影響，而畫面上的字固定不變 ⇒ 跨分界不再產生假殘留。
    涵蓋選擇器：`#bc-clock-hours,#bc-clock-minutes,#bc-clock-colon-before-minutes,
-   #bc-clock-colon-after-minutes,.weather .clock .value,[data-footer-time]`；`settle()` 與每次
+   #bc-clock-colon-after-minutes,[data-footer-time]`（2026-10-17：`.weather .clock .value` 已隨時鐘
+   移除一併刪掉）；`settle()` 與每次
    `stable()`（＝每次截圖前）都呼叫一次（連量測中途才建立的節點也會被鎖上）。
    效果實測：1280 由「每次都殘留 328 px」變成 **0 px**，全支 46/4 → **50 PASS / 0 FAIL**。
+7. **`gsap.fromTo` 的 `immediateRender` 會無視「時間軸已暫停」**（2026-10-17 新增）：
+   `bc-weather.js` 的天氣循環每 5 秒跑一次 `toggle()`，其中 `gsap.fromTo(next, {x:d}, {x:0})`
+   **預設 `immediateRender: true`** ⇒ 即使 `FREEZE_JS` 已 `globalTimeline.pause()`，新 tween 建立的
+   瞬間仍會把 from 值套上去 ⇒ 每 5 秒元素被瞬移一次；量測超過 ~10 秒後整個 `.weather` 被推離
+   `.view`（實測 1440 殘留 **917 px**、1280 **835 px**、992 多輪瞬態重測；每個圖層遮罩都含同一塊
+   ⇒ 假的「還原殘留／照片 #n」，31 PASS / 19 FAIL）。三態時「上上個」是隱形的那個、瞬移不可見，
+   兩態（icon ⇄ 溫度）時就會現形。
+   ⇒ 正解＝量測期間用**獨立 style id** 的 stylesheet 永久隱藏該元件（`PIN_HIDE_JS`；
+   不能用 `HIDE_JS`，它只維護單一條規則、會被後續圖層的 hide/restore 覆寫）。
+   天氣元件與本腳本要驗的圖層（照片／`{ }`／數字／黃球）零重疊（`cdp_verify_hero_weather.py`
+   的 B2 逐斷點守門）⇒ 隱藏它不影響任何遮蔽斷言。
 
 本腳本對第 4 條的處理方式：某個 viewport 只要出現非 0 殘留，就**整輪重測**（最多 2 次；重試時第一輪
 不計分）—— 因為同一輪的所有遮罩必須共用同一張基準圖，交集才有意義；只重測單層會讓交集變成

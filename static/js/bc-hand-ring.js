@@ -32,6 +32,12 @@
    ⇒ 文字永遠與「此刻真正在圓弧頂點（＝畫面中心）的那杯」一致，不會提前也不會落後。
      （--bc-hand-ease 是 computed 讀值，日後調過渡長度文字會自動跟上；計時器只是 transitionend
       的保險，例如分頁被節流／元素不可見而收不到事件時。）
+   [2026-10-17 使用者指示]：名稱 / Highlight 換張時要有「進場動畫」。
+   [作法] settle() 切完 -current 後呼叫 revealCaption()：直接沿用 hero 右側
+     Fresh / Beans 的同一支 data-reveal 文字揭示（SplitText ＋ goo 濾鏡），
+     引擎在 bc-bg-footer.js，透過 window.BC_TEXT_REVEAL(el, delay) 取得
+     ⇒ 兩處的視覺完全一致（模糊→清晰的 goo 揭示、1.2s、名稱與 highlight 錯開 0.1s）。
+     引擎不存在時（GSAP 未載入）＝文字直接出現，與改動前相同。
    ============================================================ */
 (function () {
   'use strict';
@@ -88,6 +94,24 @@
     }
   };
 
+  /* 2026-10-17（使用者指示）：名稱 / Highlight 換張時加上與 hero 右側「Fresh / Beans」
+     **完全相同**的 data-reveal 文字揭示（SplitText ＋ goo 濾鏡；引擎在
+     static/js/bc-bg-footer.js，透過 window.BC_TEXT_REVEAL 呼叫）。
+     [時機] 一定要在 setCaptions() 之後 —— 那時新的一筆已是 display:block，
+       SplitText 才量得到真正的排版（對 display:none 的元素分行會量成 0 寬）。
+     [高度] SplitText 只是把原本的文字包成行內區塊，行高不變 ⇒ 文字區高度仍等於
+       --bc-hero-caption-h，下方時鐘列不會被抽動。
+     [降級] 取不到引擎（GSAP/SplitText 未載入、或 /about/ 沒有本檔的 captions）
+       → 什麼都不做，文字照常直接出現（與改動前相同）。 */
+  Ring.prototype.revealCaption = function (i) {
+    if (!window.BC_TEXT_REVEAL || !this.captionBox) return;
+    var item = this.captionBox.querySelectorAll('[data-bc-ring-caption-item]')[i];
+    if (!item) return;
+    var els = item.querySelectorAll('.bc-series-caption-name, .bc-series-caption-highlight');
+    if (!els.length) return;
+    window.BC_TEXT_REVEAL(els, 0.1);
+  };
+
   /* 圓盤到定位了：把待顯示的那筆文字切上去（transitionend 與保險計時器都呼叫這裡；
      重複呼叫是安全的 —— pending 為 null 就什麼都不做）。 */
   Ring.prototype.settle = function () {
@@ -97,6 +121,7 @@
     this.pending = null;
     if (this.captionBox) this.captionBox.classList.remove('-hidden');
     this.setCaptions(i);
+    this.revealCaption(i);   // 2026-10-17：新那筆用與 Fresh / Beans 相同的文字揭示進場
   };
 
   /* 旋轉期間：先把整組文字隱形（.-hidden 用 visibility ⇒ 仍佔滿原本的文字高度、不跳版），
@@ -125,6 +150,7 @@
         this.holdCaptions(idx);            // 有過渡 ⇒ 文字等它轉完（見檔頭：只顯示置中的那杯）
       } else if (this.pending === null && this.cur !== idx) {
         this.setCaptions(idx);             // 沒有過渡（首次定位到第 1 張）⇒ 立即對齊
+        this.revealCaption(idx);           // 2026-10-17：同一套進場揭示（見 revealCaption）
       }
       // 其餘情況（索引沒變、且文字還在等前一輪的過渡）＝維持 pending，不動它。
     }

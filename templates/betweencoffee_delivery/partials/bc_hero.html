@@ -49,7 +49,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
       <div id="bc-clock" class="footer-time">
         <!-- 2026-10-14（使用者指示）：把 about 頁 navbar 右上角的天氣/時鐘元件搬進本模組，
              放在時鐘列左側 { 之上（尺寸 +30%，--wc-scale 見 index.html 的 <style>）。
-             [結構] 與 nav.html:33-48 的天氣元件逐字相同（同一份 markup），差別只有兩處：
+             [結構] 與 nav.html 的天氣元件逐字相同（同一份 markup），差別只有兩處：
                · 外層多一層 #bc-clock-weather（負責 grid 定位 ＋ data-reveal="clip-down"）
                · 自帶 .weather--visible —— navbar 那顆是「全站隱藏、只有 about 頁顯示」，
                  本顆位於首頁 hero，直接標記可見（bc-weather.css 的 visibility 開關維持
@@ -59,11 +59,13 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                ≥992px 必須同時把 #bc-clock-brace-open 明確釘在同一格，否則自動置位
                會把 { 擠到欄 2，並連帶把照片列推到隱式欄位（見 index.html 註解）。
              [資料] 由 bc-weather.js 填充（base.html 的天氣腳本已改為 about ＋ index 都載入；
-               該檔已支援多實例，滑動距離逐實例量測）。 -->
+               該檔已支援多實例，滑動距離逐實例量測）。
+             [2026-10-17 使用者指示：移除時鐘] .clock 節點已刪、循環只剩 icon ⇄ 溫度
+               （CSS/JS 同步移除）。本顆高度不變 —— .view 的子項全是 position:absolute、
+               時鐘本來就不佔流內高度 ⇒ 時鐘列與 { 的幾何逐值不動。 -->
         <div id="bc-clock-weather" class="bc-clock-weather" data-reveal="clip-down">
           <div class="weather -font_en -color_white weather--visible" data-bc-weather>
             <div class="view">
-              <div class="clock"><span class="value">--:--</span></div>
               <div class="icon"></div>
               <span class="temperature">
                 <span class="value"></span>

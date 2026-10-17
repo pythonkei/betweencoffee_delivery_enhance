@@ -901,7 +901,10 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
       「區域太小了，動畫展示是使用整個頁面的，參考 hero_hand」⇒ 半徑改回 hero 的 100vw
       （整頁扇形）、照片格不再裁切（改由 #bc-bg-footer 裁）。詳見下方 B1。
    ============================================================ */
-/* ---- A. 天氣/時鐘元件（markup 見 partials/bc_hero.html 的 #bc-clock-weather） ----
+/* ---- A. 天氣元件（markup 見 partials/bc_hero.html 的 #bc-clock-weather） ----
+   2026-10-17（使用者指示）：「移除時鐘，只保留天氣與溫度」→ 本顆的 .clock 節點已刪、
+     循環只剩 icon ⇄ 溫度（bc-weather.js 的 ORDER）。高度與定位完全不變：
+     .view 的子項全是 position:absolute，時鐘本來就不佔流內高度。
    [縮放] --wc-scale:1.3。bc-weather.css 的所有尺寸都是 calc(原值 * var(--wc-scale,1))
      （先例＝bc-reviews.css 的 --rv-scale）；只在 hero 內宣告 → about 頁 navbar 那顆
      不繼承（×1）→ about 外觀零變動。
@@ -1048,7 +1051,11 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 }
 /* [文字只在置中的那杯上出現] 2026-10-16（使用者指示）：「當相關咖啡旋轉到中心時，才顯示相關
    名稱和 Highlight 文本」。圓盤開始旋轉時 bc-hand-ring.js 會對容器加 .-hidden（規則見下），
-   等旋轉過渡跑完、該杯真的到中心才切換 -current（＝文字與置中的照片同一個時間點）。 */
+   等旋轉過渡跑完、該杯真的到中心才切換 -current（＝文字與置中的照片同一個時間點）。
+   2026-10-17（使用者指示）：切換 -current 後立刻跑一次與 hero 右側 Fresh / Beans 相同的
+   data-reveal 文字揭示（SplitText ＋ goo 濾鏡）。動畫完全由 bc-hand-ring.js →
+   bc-bg-footer.js 的 window.BC_TEXT_REVEAL 執行，本檔不需新增 CSS：
+   SplitText 只把 <p> 的文字包成行區塊（行高不變）⇒ 文字區高度仍等於 --bc-hero-caption-h。 */
 .bc-bg-hero #bc-bg-footer .bc-ring-caption-item {
   display: none;
 }
@@ -1161,9 +1168,12 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      （BC_HAND_RING），本檔改為 register + goAll(hero index)；照片格那一側由 defer 的
      bc-bg-footer.js 自行註冊（模組會讓晚註冊者會合）→ 版號升為 ?v=20261014a
      2026-10-16（使用者指示「名稱與 Highlight 的時間點不正確」）：文字的切換時機改為
-     「圓盤旋轉過渡跑完才切」→ bc-hand-ring.js 有改 → 版號再升為 ?v=20261016a。 -->
+     「圓盤旋轉過渡跑完才切」→ bc-hand-ring.js 有改 → 版號再升為 ?v=20261016a。
+     2026-10-17（使用者指示「咖啡名稱與 Highlight 加上顯示動畫」）：換張時沿用 hero 右側
+     Fresh / Beans 的 data-reveal 文字揭示（bc-hand-ring.js 的 revealCaption）→
+     版號再升為 ?v=20261017a。 -->
 <script src="{% static 'library/splide-4.1.3/dist/js/splide.min.js' %}"></script>
-<script src="{% static 'js/bc-hand-ring.js' %}?v=20261016a"></script>
+<script src="{% static 'js/bc-hand-ring.js' %}?v=20261017a"></script>
 <script src="{% static 'js/bc-gunte-hero.js' %}?v=20261014a"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
@@ -1177,10 +1187,13 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可。
      2026-10-14 稍後：本檔新增「clip-down 揭示跑完後釋放含環形照片列容器的 clip-path」
      （整頁扇形必須離開 .footer-logo-cell）→ 版號 ?v=20261014a 升為 ?v=20261014b
-     （/about/ 沒有 [data-bc-hand-ring]，行為完全不變，僅同步版號）。 -->
+     （/about/ 沒有 [data-bc-hand-ring]，行為完全不變，僅同步版號）。
+     2026-10-17（使用者指示）：新增 window.BC_TEXT_REVEAL（把同一支 goo 文字揭示開放給
+     bc-hand-ring.js，供首頁咖啡名稱 / Highlight 換張時使用）＋ reveal 前先 kill 舊時間軸
+     → 版號 ?v=20261014b 升為 ?v=20261017a。 -->
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261014b"></script>
+<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261017a"></script>
 {% endblock %}
 
 {% block bcc_footer %}
