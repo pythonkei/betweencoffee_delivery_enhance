@@ -346,6 +346,15 @@ class OrderStatusCardsManager {
                 setTimeout(() => this.initWebSocket(), 500);
                 return;
             }
+
+            // v3.0.1：即時連線為 opt-in，未啟用的頁面（如訪客訂單）不建立連線，
+            // 也不訂閱訂單，避免 /ws/queue/ 握手失敗後持續重試與 fallback 404。
+            // 此類頁面由下方 HTTP 輪詢維持狀態更新。
+            if (core.enabled === false) {
+                console.debug("本頁未啟用 WebSocket 即時連線，改用 HTTP 輪詢");
+                this.setWebSocketStatus(false, "即時更新未啟用，使用輪詢");
+                return;
+            }
             
             console.log("使用 WebSocketCore v3.0.0 訂閱訂單:", this.orderId);
             

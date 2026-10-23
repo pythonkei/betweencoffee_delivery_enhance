@@ -2,6 +2,9 @@
 {% extends 'layouts/blank.html' %}
 {% load static %}
 
+{# 訂單狀態卡片的初始化資料來源：order_status_cards.js 會讀取 body.dataset 判斷是否初始化 #}
+{% block body_attrs %}{% if order and payment_status == 'paid' %} data-order-id="{{ order.id }}" data-order-status="{{ order.status }}" data-payment-status="{{ payment_status }}" data-is-beans-only="{% if order_type.is_beans_only %}true{% else %}false{% endif %}" data-ordered-time="{{ order.created_at|date:'H:i' }}" data-preparing-time="{% if order.preparation_started_at %}{{ order.preparation_started_at|date:'H:i' }}{% else %}等待開始{% endif %}" data-ready-time="{% if order.ready_at %}{{ order.ready_at|date:'H:i' }}{% else %}等待完成{% endif %}" data-completed-time="{% if order.picked_up_at %}{{ order.picked_up_at|date:'H:i' }}{% else %}等待完成{% endif %}"{% endif %}{% endblock %}
+
 {% block content %}
 <style>
 /* 訂單完成頁：隱藏全站懸浮按鈕（右側 Buy & Order + 浮動購物車）與右側虛線——結帳流程中不需顯示 */
@@ -11,6 +14,28 @@
   display: none !important;
 }
 </style>
+{% comment %}
+WebSocket 設定（必須早於 base.html 載入 websocket-core.js）
+websocket-core.js v3.0.1 起改為 opt-in：只有在此注入 autoConnect: true 才會連線。
+本頁即時狀態走訂單通道 /ws/order/<id>/（OrderConsumer 會驗證訂單所有權）；
+訪客訂單（OrderConsumer 拒絕訪客）不建立連線，改用頁面下方 30 秒 HTTP 輪詢。
+{% endcomment %}
+{% if order %}
+{% if user.is_authenticated %}
+{% if user.is_staff or order.user_id == user.id %}
+<script>
+    window.BC_WS_CONFIG = {
+        autoConnect: true,
+        url: (window.location.protocol === 'https:' ? 'wss:' : 'ws:')
+            + '//' + window.location.host + '/ws/order/{{ order.id }}/',
+        showIndicator: false,
+        enableFallback: false,
+        maxReconnectAttempts: 3
+    };
+</script>
+{% endif %}
+{% endif %}
+{% endif %}
 {% with order_type=order.get_order_type_summary %}
 
 <!-- Header Banner-->

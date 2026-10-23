@@ -3,10 +3,10 @@
    ----------------------------------------------------------------------------
    來源：static/css/bc-gunte-hero.css 的 .hero_hand 系列（GUNTE Lab. 首頁 hero 移植）。
    2026-10-14（使用者指示）：抽成獨立模組，讓首頁 GUNTE hero 與其下方 BC 動態 hero 的
-   照片格（#bc-clock-photos）共用同一組環形結構與旋轉動畫，並由「同一個索引」
+   照片格（#bc-stage-photo-ring）共用同一組環形結構與旋轉動畫，並由「同一個索引」
    （GUNTE hero 的 Splide index）驅動 —— 兩邊都是同一顆「整頁大圓」（--circle-radius
    預設 100vw），差別只在圓心位置與照片寬度（hero 由 .bc-gunte-hero 覆寫；照片格由
-   index.html 以 #bc-clock-photos 覆寫），兩邊永遠指著同一支咖啡。
+   index.html 以 #bc-stage-photo-ring 覆寫），兩邊永遠指著同一支咖啡。
    （2026-10-14 稍後：使用者指正照片格不該是「縮小版、裁在格子裡」（區域太小），
     指定「動畫展示是使用整個頁面的，參考 hero_hand」⇒ 照片格回歸 100vw。）
 

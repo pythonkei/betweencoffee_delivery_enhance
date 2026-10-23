@@ -2,10 +2,10 @@
    bc-hand-ring.js — 「手套圓」環形照片列的共用驅動（BC_HAND_RING）
    ------------------------------------------------------------
    2026-10-14（使用者指示）：把 GUNTE hero 的環形照片（.hero_hand）抽成可註冊的模組，
-   讓首頁 hero 與下方 BC 動態 hero 的照片格（#bc-clock-photos）共用同一個索引。
+   讓首頁 hero 與下方 BC 動態 hero 的照片格（#bc-stage-photo-ring）共用同一個索引。
    [為何是「模組 + 註冊」而不是「同步層」]
      hero 的腳本是非 defer（index.html extra_scripts 內、緊接 Splide 之後），照片格所在的
-     bc-bg-footer.js 是 defer → 兩者誰先執行不保證。與其互相監聽、互推狀態，改成：
+     bc-brand-stage.js 是 defer → 兩者誰先執行不保證。與其互相監聽、互推狀態，改成：
      唯一的索引來源＝hero 的 Splide（updateSlideStates → goAll(index)），模組只記住最後一次
      的索引（lastIndex），晚註冊的環在 register() 當下直接會合到該索引 ⇒ 載入順序無關、
      狀態只有一個數字。沒有任何輪詢、計時器或事件橋接。
@@ -26,27 +26,67 @@
      · go() 當下：先在文字容器加 .-hidden（以 visibility 隱藏 → 仍佔滿原本文字高度，列的總高
        不變、下方時鐘列與整頁內容不會被抽動），並記下 pending 索引；
      · 圓盤過渡結束（.hero_hand_list 的 transitionend 且 propertyName === 'transform'）
-       或保險計時器（--bc-hand-ease + 60ms）先到者 → 切新的 -current 並移除 .-hidden。
+       或計時器（--bc-hand-ease - 80ms；見 SETTLE_LEAD）先到者 → 切新的 -current 並移除 .-hidden。
      · 索引沒變（cur === 目標）時不經動畫、維持現狀；第一次定位且目標是第 1 張（圓盤本來就是
        rotate(0deg)、沒有過渡）→ 立即對齊。
-   ⇒ 文字永遠與「此刻真正在圓弧頂點（＝畫面中心）的那杯」一致，不會提前也不會落後。
-     （--bc-hand-ease 是 computed 讀值，日後調過渡長度文字會自動跟上；計時器只是 transitionend
-      的保險，例如分頁被節流／元素不可見而收不到事件時。）
+   ⇒ 文字永遠與「此刻真正在圓弧頂點（＝畫面中心）的那杯」一致（切換點提前 80ms，最後這段位移肉眼不可見）。
+     （--bc-hand-ease 是 computed 讀值，日後調過渡長度文字會自動跟上；計時器同時是 transitionend
+      的保險 —— 例如分頁被節流／元素不可見而收不到事件時。）
    [2026-10-17 使用者指示]：名稱 / Highlight 換張時要有「進場動畫」。
    [作法] settle() 切完 -current 後呼叫 revealCaption()：直接沿用 hero 右側
      Fresh / Beans 的同一支 data-reveal 文字揭示（SplitText ＋ goo 濾鏡），
-     引擎在 bc-bg-footer.js，透過 window.BC_TEXT_REVEAL(el, delay) 取得
-     ⇒ 兩處的視覺完全一致（模糊→清晰的 goo 揭示、1.2s、名稱與 highlight 錯開 0.1s）。
+     引擎在 bc-brand-stage.js，透過 window.BC_TEXT_REVEAL(el, delay, duration, stagger) 取得
+     ⇒ 兩處的視覺一致（模糊→清晰的 goo 揭示；首頁 caption 現在名稱與 highlight 完全同步）。
+     [2026-10-18 使用者指示]「咖啡名稱和 Highlight 文本，動畫顯示時間點略慢，加快一點點」：
+       只加速這組呼叫（引擎的預設值不動，Fresh / Beans 與時鐘數字仍是 1.2s）：
+         起始延遲 0.1s → 0.04s（圓盤一到位幾乎立刻開始）、時長 1.2s → 0.9s（快 25%）。
+       文字仍然只在「圓盤轉完、那一杯在中心」時才切換（時機不變，只是揭示更俐落）。
+     [2026-10-19 使用者指示]「咖啡已經轉到中心，名稱 / Highlight 的揭示仍略慢，再加快一點點」：
+       首度收緊為延遲 0.02s、時長 0.65s、兩筆錯開 0.06s；稍後依同一指示再收緊（見下）：
+       延遲 0s、時長 0.45s、stagger 0s（名稱與 highlight 同步），切換點再提前 80ms（SETTLE_LEAD）
+       ⇒ 圓盤視覺到位後 0.45s 內收斂（前版 0.67～0.73s，且兩筆相差 0.06s）。時機仍以「那一杯在中心」為準。
      引擎不存在時（GSAP 未載入）＝文字直接出現，與改動前相同。
+   [2026-10-20 回歸修正（使用者回報「bc-stage-photo-ring 整個模組包括旋轉動畫都無法運作」）]
+     [原因] 本模組自己不會換張 —— 唯一的索引來源是 GUNTE hero 的 Splide
+       （bc-gunte-hero.js 的 updateSlideStates → BC_HAND_RING.goAll）。2026-10-19 首頁效能 P0
+       移除了 splide.min.js 與 bc-gunte-hero.js（GUNTE hero 仍 hidden）⇒ 沒有任何東西再呼叫
+       goAll()：環形照片列 register() 時被定位到第 1 張後就永遠靜止（不旋轉、名稱/Highlight
+       也不再換）。markup、CSS、GSAP 揭示與 caption 全都正常，缺的只是「換張的節拍」。
+     [解法] 本模組新增一組「自帶節拍」的 API（仍然只有一個索引來源，不新增第二套狀態）：
+       BC_HAND_RING.startAuto(ms) → 沒有其他環（＝沒有 hero 在推播）時，每 ms 毫秒
+                                     goAll(index + 1)；回傳是否真的啟動。
+       BC_HAND_RING.stopAuto()    → 停掉自帶節拍（hero 回來推播時會自動停，見 register）。
+     [為何不會與 hero 打架] startAuto() 在 instances.length > 1（hero 的環已註冊）時直接拒絕；
+       而 register() 一旦收到第 2 個環（＝bc-gunte-hero.js 有載入）就 stopAuto()。
+       ⇒ 之後恢復 GUNTE hero（拿掉 hidden ＋ 加回 splide／bc-gunte-hero.js）時，
+         hero 的 Splide 自動接手，本檔不需再改。
+     [範圍] 只有「沒有 hero 驅動」的頁面／情境才會啟動（目前＝首頁第一屏的品牌舞台）；
+       尊重 prefers-reduced-motion: reduce（純靜態，使用者已要求減少動態時不自動轉）。
    ============================================================ */
 (function () {
   'use strict';
 
   var STEP = -25;      // 每格旋轉角度（與 markup 的 --angle 步進 25 一致）
-  var SETTLE_CUSHION = 60;     // 保險計時器比過渡長度多等的毫秒（讓 transitionend 先到）
+  /* 2026-10-19：文字的切換點提前 80ms —— 1.2s 過渡（預設 ease）的最後 80ms 只剩不到 0.15°
+     （圓半徑 100vw 時約 2～3px）的位移，肉眼看已完全靜止；提早切換可消除「圓盤已到中心、
+     文字還沒開始」的空窗。transitionend 仍會呼叫 settle()（pending 已清空時直接 return）。 */
+  var SETTLE_LEAD = 80;
   var FALLBACK_EASE_MS = 1200; // --bc-hand-ease 讀不到時的預設值（＝bc-hand-ring.css 的 1.2s）
+  /* 2026-10-19（使用者指示「咖啡已經轉到中心，名稱 / Highlight 的揭示仍略慢 → 再加快一點點」）：
+     這三個值只給「換張時的 caption 揭示」用（引擎 bc-brand-stage.js 的預設 1.2s / 0.1s 不動，
+     Fresh / Beans 與時鐘數字不受影響）：
+       CAPTION_REVEAL_DELAY   0s（圓盤一到就開始；前版 0.02s）
+       CAPTION_REVEAL_DUR     0.45s（比 0.65s 再快 31%、比最初 1.2s 快 63%）
+       CAPTION_REVEAL_STAGGER 0s（名稱與 highlight 完全同步；引擎預設 0.1s）
+     ⇒ 兩筆同在 0.45s 收斂（前版 0.67／0.73s），不再有名稱先、highlight 後的 0.06s 落差。 */
+  var CAPTION_REVEAL_DELAY = 0;
+  var CAPTION_REVEAL_DUR = 0.45;
+  var CAPTION_REVEAL_STAGGER = 0;
   var instances = [];  // 已註冊的環
   var lastIndex = null; // 最後一次 goAll() 的索引（晚註冊者的會合依據）
+  /* 2026-10-20：沒有 hero（Splide）推播時的自帶節拍（見檔頭「2026-10-20 回歸修正」）。 */
+  var autoTimer = null;          // setTimeout id；null ＝沒在跑
+  var autoInterval = 5000;       // 與 GUNTE hero Splide 的 interval 相同
 
   /* 圓盤旋轉過渡的長度（ms）：直接讀 computed 的 --bc-hand-ease（'1.2s'／'800ms' 皆可解析），
      讀不到就回預設值 —— 不寫死，改 bc-hand-ring.css 的過渡長度時文字的時機會自動跟上。 */
@@ -96,9 +136,17 @@
 
   /* 2026-10-17（使用者指示）：名稱 / Highlight 換張時加上與 hero 右側「Fresh / Beans」
      **完全相同**的 data-reveal 文字揭示（SplitText ＋ goo 濾鏡；引擎在
-     static/js/bc-bg-footer.js，透過 window.BC_TEXT_REVEAL 呼叫）。
+     static/js/bc-brand-stage.js，透過 window.BC_TEXT_REVEAL 呼叫）。
      [時機] 一定要在 setCaptions() 之後 —— 那時新的一筆已是 display:block，
        SplitText 才量得到真正的排版（對 display:none 的元素分行會量成 0 寬）。
+     [速度] 2026-10-18（使用者指示「動畫顯示時間點略慢，加快一點點」）：
+       起始延遲 0.1 → 0.04s、時長 1.2 → 0.9s（引擎的第三個參數；預設值仍是 1.2s，
+       故 hero 右側 Fresh / Beans 與時鐘數字不受影響）。
+     2026-10-19（使用者指示「咖啡已經轉到中心，文字揭示仍略慢，再加快一點點」）：
+       首度收緊：延遲 0.04 → 0.02s、時長 0.9 → 0.65s、元素錯開 0.1 → 0.06s（引擎第 4 個參數）；
+       稍後二度收緊：延遲 0.02 → 0s、時長 0.65 → 0.45s、錯開 0.06 → 0s
+       ⇒ 名稱與 highlight 同步、0.45s 收斂（前版 0.67／0.73s）。時機完全不變：
+       仍然只在圓盤到位、那一杯在中心時才切換與揭示（切換點提前 80ms，見 SETTLE_LEAD）。
      [高度] SplitText 只是把原本的文字包成行內區塊，行高不變 ⇒ 文字區高度仍等於
        --bc-hero-caption-h，下方時鐘列不會被抽動。
      [降級] 取不到引擎（GSAP/SplitText 未載入、或 /about/ 沒有本檔的 captions）
@@ -109,7 +157,7 @@
     if (!item) return;
     var els = item.querySelectorAll('.bc-series-caption-name, .bc-series-caption-highlight');
     if (!els.length) return;
-    window.BC_TEXT_REVEAL(els, 0.1);
+    window.BC_TEXT_REVEAL(els, CAPTION_REVEAL_DELAY, CAPTION_REVEAL_DUR, CAPTION_REVEAL_STAGGER);
   };
 
   /* 圓盤到定位了：把待顯示的那筆文字切上去（transitionend 與保險計時器都呼叫這裡；
@@ -131,7 +179,7 @@
     this.pending = i;
     if (this.timer) clearTimeout(this.timer);
     var self = this;
-    this.timer = setTimeout(function () { self.settle(); }, this.easeMs + SETTLE_CUSHION);
+    this.timer = setTimeout(function () { self.settle(); }, Math.max(0, this.easeMs - SETTLE_LEAD));
   };
 
   /* 把索引正規化到 [0, n) 後套用：旋轉轉盤、切換 -current（照片立即、文字等置中） */
@@ -162,6 +210,9 @@
     if (!root) return null;
     var ring = new Ring(root, caption || null);
     instances.push(ring);
+    // 2026-10-20：有第 2 個環＝GUNTE hero 的腳本已載入（它會用 Splide 推播索引）
+    // → 停掉自帶節拍，索引改回單一來源（見檔頭「2026-10-20 回歸修正」）。
+    if (instances.length > 1) stopAuto();
     // 會合：goAll() 若已跑過（hero 較早註冊/換張），這裡直接套上同一索引
     ring.go(lastIndex === null ? 0 : lastIndex);
     return ring;
@@ -173,9 +224,41 @@
     for (var k = 0; k < instances.length; k++) instances[k].go(i);
   }
 
+  /* ---------- 2026-10-20：自帶節拍（沒有 hero Splide 時的換張來源） ----------
+     用 setTimeout 鏈（不是 setInterval）：每次等「換張 + 圓盤轉完」後才排下一次，
+     不會因為主執行緒卡住而補跑好幾張。分頁隱藏時只重新排隊、不推進索引。 */
+  function autoTick() {
+    autoTimer = null;
+    if (!instances.length) return;                 // 環被移掉 → 自然停掉
+    if (document.hidden) { autoTimer = setTimeout(autoTick, autoInterval); return; }
+    var n = instances[0].count();
+    if (!n) return;
+    goAll((lastIndex === null ? 0 : lastIndex + 1) % n);
+    autoTimer = setTimeout(autoTick, autoInterval);
+  }
+
+  /* 啟動自帶節拍：只有「已註冊且僅有一個環」時才成立（有 hero 的環就交給 Splide）；
+     使用者若要求減少動態（prefers-reduced-motion: reduce）則不自動轉。 */
+  function startAuto(ms) {
+    if (autoTimer) return true;                    // 已在跑
+    if (instances.length !== 1) return false;      // 0＝沒有環；>1＝hero 的 Splide 正在推播
+    if (ms > 0) autoInterval = ms;
+    try {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    } catch (e) { /* ignore */ }
+    autoTimer = setTimeout(autoTick, autoInterval);
+    return true;
+  }
+
+  function stopAuto() {
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  }
+
   window.BC_HAND_RING = {
     register: register,
     goAll: goAll,
+    startAuto: startAuto,
+    stopAuto: stopAuto,
     index: function () { return lastIndex; },
     count: function () { return instances.length; },
     instances: function () { return instances.slice(); }

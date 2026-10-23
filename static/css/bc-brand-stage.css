@@ -1,0 +1,330 @@
+/* ============================================================================
+   BC brand footer - ported from bleibtgleich.dev (Webflow) footer
+   ----------------------------------------------------------------------------
+   2026-10-07 port:
+   - Every selector prefixed with `#bc-brand-stage ` (incl. #w-node-*, renamed to
+     semantic ids on 2026-10-12 — see below)
+     to avoid Webflow generic classes (.grid/.img/.h1/.footer...) colliding with
+     BC Bootstrap + bc-* styles.
+   - Source defined html{font-size:1vw} so 1rem == 1vw; literal rem -> vw here to
+     keep the exact fluid scaling (desktop ratio 14.4, <=991px 3.93) w/o touching
+     the global html font-size.
+   - @font-face Akzidenz Grotesk Pro is self-hosted at static/fonts.
+
+   2026-10-12（使用者指示）語意化命名：Webflow 匯出的 `#w-node-<uuid>-032bc8db`
+   選取器全部改為「元件＋屬性」命名。同一組 id 由兩頁共用（index 的
+   partials/bc_brand_stage_hero.html、about 的 partials/bc_brand_stage.html）→ 改名必須 3 檔同步，
+   否則 hero 會失去 grid 定位。對照表（舊 → 新；下表「新」＝ 10-12 當下的名稱，
+   10-18 已再改一輪 → 見下方 2026-10-18 區塊）：
+     _2e3db1fa… → bc-heading-hug-in-a-cup    _7dac5ba3… → bc-heading-perfect-to-go
+     _213460a0… → bc-clock                   _157a5a4e… → bc-clock-brace-open
+     _7ca5700c… → bc-clock-hours             be8336b7… → bc-clock-brace-close
+     f72de753… → bc-clock-photos             _48f40b3e… → bc-clock-colon-before-minutes
+     _420f084b… → bc-clock-minutes           a3109718… → bc-clock-colon-after-minutes
+     _6861e4a1… → bc-heading-fresh-beans     _1a97522f… → bc-heading-roasted-daily
+     a204f672…8de → bc-footer-socials        a204f672…8ea → bc-footer-mail
+     a204f672…8db → bc-footer-mail-inner（已無對應元素：email CTA 已改跑馬燈）
+   同批：時鐘的 { } 由 `h1.is-desktop` 改為 `.h1.bc-clock-brace`（≤991px 原本被
+   `.is-desktop{display:none}` 隱藏），手機／平板改為 9 欄顯示 → 見檔尾區塊。
+   （`.is-desktop` / `.is-mobile` 工具類規則保留：`.is-mobile` 原本只給 .m-footer-inner
+   使用，2026-10-19 起該區塊所有斷點都隱藏（見檔尾），故兩者目前皆無可見元素，
+   保留以維持 Webflow 移植原樣。）
+
+   2026-10-18（使用者指示）：模組改名（footer → 功能語意；本模組在首頁是第一屏 hero、
+   about 頁是真頁尾，故取中性名稱「品牌舞台」）：
+     · 檔案 bc-bg-footer.css → bc-brand-stage.css；根節點 #bc-bg-footer → #bc-brand-stage。
+     · 子模組（id / data 屬性）同步改名（本檔所有選擇器已同步）：
+         #bc-clock（時鐘列）                    → #bc-stage-clock
+         #bc-clock-brace-open / -close          → #bc-stage-clock-brace-open / -close
+         #bc-clock-hours / -minutes             → #bc-stage-clock-hours / -minutes
+         #bc-clock-colon-before/after-minutes   → #bc-stage-clock-colon-before/after-minutes
+         #bc-clock-photos（照片格）              → #bc-stage-photo-ring
+         #bc-clock-hand-list（環形清單）          → #bc-stage-photo-ring-list
+         #bc-clock-weather（天氣）               → #bc-stage-weather
+         #bc-heading-*（四組標語）               → #bc-stage-headline-*
+         #bc-footer-socials（社群）              → #bc-stage-socials
+         #bc-footer-mail（跑馬燈）               → #bc-stage-marquee
+         data-footer-time / data-footer-logo     → data-stage-clock / data-stage-logo
+       首頁 wrapper `.bc-bg-hero` → `.bc-brand-stage-hero`（index.html）。
+     · Webflow 匯出的 class 層（.footer / .footer-time / .footer-logo-* / .foooter-mail…）
+       維持原名：與移植來源逐字對應，且本檔所有規則仍 scoped 在 #bc-brand-stage 之下，
+       不會與其他模組互相影響。
+   ============================================================================ */
+
+@font-face{
+  font-family:"Akzidenz Grotesk Pro";
+  src:url("../fonts/AkzidenzGroteskPro-Md.woff2") format("woff2");
+  font-weight:500;font-style:normal;font-display:swap;
+}
+
+#bc-brand-stage{--_fonts---font-body:"Akzidenz Grotesk Pro",Arial,sans-serif;--_colors---content--primary:var(--_global-colors---black--100);--_fonts---font-display:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---h1--size:calc(90vw/var(--_special-units---global--scale-ratio));--_fonts---h1--line-height:88%;--_fonts---h1--letter-spacing:-.30938vw;--_fonts---h2--size:calc(40vw/var(--_special-units---global--scale-ratio));--_fonts---h2--line-height:80%;--_fonts---h2--letter-spacing:-.1vw;--_fonts---h3--size:0vw;--_fonts---h3--line-height:0%;--_fonts---h3--letter-spacing:0em;--_fonts---h4--size:0vw;--_fonts---h4--line-height:0%;--_fonts---h4--letter-spacing:0em;--_fonts---h5--size:0vw;--_fonts---h5--line-height:0%;--_fonts---h5--letter-spacing:0em;--_fonts---h6--size:0vw;--_fonts---h6--line-height:0%;--_fonts---h6--letter-spacing:0em;--_fonts---p1--size:calc(14vw/var(--_special-units---global--scale-ratio));--_fonts---p1--line-height:107.143%;--_fonts---p1--letter-spacing:-.02625vw;--_units---u-0:var(--0px);--_special-units---global--100vh:100vh;--_units---u-120:var(--120px);--_units---u-104:var(--104px);--_special-units---1-cell:calc(162vw/var(--_special-units---global--scale-ratio));--_special-units---grid-gap:var(--16px);--_special-units---global--scale-ratio:14.4;--_units---u-240:var(--240px);--_colors---content--secondary:var(--_global-colors---black--50);--_special-units---stroke:calc(.25vw/var(--_special-units---global--scale-ratio));--_colors---border--100:var(--_global-colors---black--100);--_units---u-72:var(--72px);--_units---u-4:var(--4px);--_units---u-8:var(--8px);--_units---u-12:var(--12px);--_units---u-16:var(--16px);--_units---u-24:var(--24px);--_units---u-32:var(--32px);--_units---u-48:var(--48px);--_units---u-64:var(--64px);--_units---u-96:var(--96px);--_units---u-144:var(--144px);--_colors---additional--success:#1ba64b;--_colors---additional--alert:#ffa800;--_colors---additional--error:#e23d3d;--_units---u-192:var(--192px);--_fonts---l1--size:1vw;--_fonts---l1--line-height:100%;--_fonts---l1--letter-spacing:-.016em;--_colors---background--transparent:transparent;--_colors---background--bg:var(--_global-colors---white--100);--_special-units---global--padding:var(--_units---u-16);--_global-colors---black--5:#0000000d;--_global-colors---black--10:#0000001a;--_colors--nav---indicator--fill:var(--_global-colors---black--100);--_colors--nav---indicator--content-active:var(--_global-colors---white--100);--_colors---fill--tertiary:var(--_global-colors---black--5);--_colors--nav---background--bg-1:var(--_global-colors---gray--base-200);--_colors--nav---background--bg-3:var(--_global-colors---gray--base-075);--_colors--nav---background--bg-2:var(--_global-colors---gray--base-150);--_colors--nav---indicator--border:var(--_colors---border--100);--_colors--nav---indicator--content:var(--_global-colors---black--100);--104px:calc(104vw/var(--_special-units---global--scale-ratio));--72px:calc(72vw/var(--_special-units---global--scale-ratio));--_units---u-20:var(--20px);--_units---u-80:var(--80px);--_units---u-6:var(--6px);--64px:calc(64vw/var(--_special-units---global--scale-ratio));--_colors---fill--primary:var(--_global-colors---black--100);--_colors---border--10:var(--_global-colors---black--10);--_units---u-200:var(--200px);--_colors---background--bg-2:#f2f2f2;--_units---u-128:var(--128px);--96px:calc(96vw/var(--_special-units---global--scale-ratio));--_colors---content-diff--primary:var(--_global-colors---white--100);--_global-colors---white--100:white;--_units---u-10:var(--10px);--_colors---content--tertiary:var(--_global-colors---black--30);--_units---u-2:var(--2px);--_global-colors---black--100:#000;--_units---u-40:var(--40px);--0px:calc(0vw/var(--_special-units---global--scale-ratio));--1px:calc(1vw/var(--_special-units---global--scale-ratio));--2px:calc(2vw/var(--_special-units---global--scale-ratio));--4px:calc(4vw/var(--_special-units---global--scale-ratio));--6px:calc(6vw/var(--_special-units---global--scale-ratio));--8px:calc(8vw/var(--_special-units---global--scale-ratio));--10px:calc(10vw/var(--_special-units---global--scale-ratio));--12px:calc(12vw/var(--_special-units---global--scale-ratio));--16px:calc(16vw/var(--_special-units---global--scale-ratio));--20px:calc(20vw/var(--_special-units---global--scale-ratio));--24px:calc(24vw/var(--_special-units---global--scale-ratio));--28px:calc(28vw/var(--_special-units---global--scale-ratio));--32px:calc(32vw/var(--_special-units---global--scale-ratio));--36px:calc(36vw/var(--_special-units---global--scale-ratio));--40px:calc(40vw/var(--_special-units---global--scale-ratio));--44px:calc(44vw/var(--_special-units---global--scale-ratio));--48px:calc(48vw/var(--_special-units---global--scale-ratio));--52px:calc(52vw/var(--_special-units---global--scale-ratio));--56px:calc(56vw/var(--_special-units---global--scale-ratio));--60px:calc(60vw/var(--_special-units---global--scale-ratio));--68px:calc(68vw/var(--_special-units---global--scale-ratio));--80px:calc(80vw/var(--_special-units---global--scale-ratio));--88px:calc(88vw/var(--_special-units---global--scale-ratio));--112px:calc(112vw/var(--_special-units---global--scale-ratio));--120px:calc(120vw/var(--_special-units---global--scale-ratio));--128px:calc(128vw/var(--_special-units---global--scale-ratio));--144px:calc(144vw/var(--_special-units---global--scale-ratio));--168px:calc(168vw/var(--_special-units---global--scale-ratio));--192px:calc(192vw/var(--_special-units---global--scale-ratio));--200px:calc(200vw/var(--_special-units---global--scale-ratio));--240px:calc(240vw/var(--_special-units---global--scale-ratio));--_units---u-36:var(--36px);--_global-colors---black--50:#00000080;--_global-colors---black--30:#0000004d;--_global-colors---white--50:#ffffff80;--_global-colors---white--30:#ffffff4d;--_global-colors---white--10:#ffffff1a;--_global-colors---white--5:#ffffff0d;--_global-colors---limestone--100:#cebdb2;--_global-colors---limestone--50:#cebdb280;--_global-colors---limestone--30:#cebdb24d;--_global-colors---limestone--10:#cebdb21a;--_global-colors---limestone--5:#cebdb20d;--_global-colors---gray--base-200:#cbcccd;--_global-colors---gray--base-150:#d8d9da;--_global-colors---gray--base-075:#e6e6e6;--_global-colors---сoncrete--base:#bec1ca;--_global-colors---сoncrete--base-200:#989aa2;--_global-colors---сoncrete--base-150:#a2a4ac;--_global-colors---сoncrete--base-075:#b0b3bb;--_global-colors---rust--base:#ff633d;--_global-colors---rust--base-200:#cc4f31;--_global-colors---rust--base-150:#d95434;--_global-colors---rust--base-075:#ec5c38;--_global-colors---verdigris--base:#919e44;--_global-colors---verdigris--base-200:#747e36;--_global-colors---verdigris--base-150:#7b863a;--_global-colors---verdigris--base-075:#86923f;--_global-colors---blood--base:#c31f26;--_global-colors---blood--base-200:#9c191e;--_global-colors---blood--base-150:#a61a20;--_global-colors---blood--base-075:#b41d23;
+  /* ---- BC palette override (source was white bg / black text -> brand black bg / gold) ---- */
+  --_colors---background--bg:#0e0e0e;
+  --_colors---content--primary:rgba(255,255,255,.9);
+  --_colors---content--secondary:rgba(255,255,255,.5);
+  --_colors---content--tertiary:rgba(255,255,255,.5);
+  --_colors---border--100:rgba(255,255,255,.08);
+  --_colors---fill--primary:#c49b63;
+  --_colors---fill--tertiary:rgba(255,255,255,.06);
+  --_colors---base-1000--primary:#0e0e0e;
+  --_colors---content-diff--primary:#0e0e0e;
+  --_global-colors---black--100:#0e0e0e;
+  --_global-colors---black--50:rgba(255,255,255,.5);
+  --_global-colors---black--30:rgba(255,255,255,.4);
+  /* ---- motion curves (source inline :root) ---- */
+  --dur-s:.4s;--dur-m:.8s;--dur-l:1.2s;
+  --ease-in-out:cubic-bezier(.76,0,.24,1);
+  /* ---- inherited base text (source body rule) ---- */
+  font-family:var(--_fonts---font-body);
+  color:var(--_colors---content--primary);
+  font-weight:400;
+  line-height:1;
+  background-color:var(--_colors---background--bg);
+  position:relative;
+  overflow:hidden;
+}
+
+/* ---- element reset (source global reset, scoped to footer; class rules win by specificity) ---- */
+#bc-brand-stage,#bc-brand-stage div,#bc-brand-stage span,#bc-brand-stage h1,#bc-brand-stage h2,#bc-brand-stage h3,#bc-brand-stage h4,#bc-brand-stage h5,#bc-brand-stage h6,#bc-brand-stage p,#bc-brand-stage blockquote,#bc-brand-stage pre,#bc-brand-stage a,#bc-brand-stage img,#bc-brand-stage ol,#bc-brand-stage ul,#bc-brand-stage li,#bc-brand-stage figure,#bc-brand-stage figcaption,#bc-brand-stage footer,#bc-brand-stage header,#bc-brand-stage nav,#bc-brand-stage section,#bc-brand-stage svg,#bc-brand-stage path,#bc-brand-stage button,#bc-brand-stage input{margin:0;padding:0;border:0;vertical-align:baseline;box-sizing:border-box}
+#bc-brand-stage article,#bc-brand-stage aside,#bc-brand-stage details,#bc-brand-stage figcaption,#bc-brand-stage figure,#bc-brand-stage footer,#bc-brand-stage header,#bc-brand-stage hgroup,#bc-brand-stage menu,#bc-brand-stage nav,#bc-brand-stage section{display:block}
+#bc-brand-stage ol,#bc-brand-stage ul{list-style:none}
+#bc-brand-stage img{max-width:none}
+/* ---- 文字色固定為品牌值（避免 BC 全域 h1/p 顏色蓋過 footer 設計） ---- */
+#bc-brand-stage .h1,#bc-brand-stage .p1{color:var(--_colors---content--primary)}
+/* ---- reveal initial state (GSAP sets visible; footer JS restores immediately if libs missing) ----
+   2026-10-19（首頁效能 P0）：加上「無 JS 保險」。
+   [問題] 原本只有 visibility:hidden，visibility 完全依賴 bc-brand-stage.js 在
+     document.fonts.ready（含 3s 逾時）後才用 inline style 還原；只要 GSAP／SplitText CDN
+     失敗、腳本被阻擋或瀏覽器很慢，首屏文案就會永久隱形（LCP 量到的是空白）。
+   [解法] 用 0s、延遲 1.5s 的 keyframe 當保險：時間到自動 visibility:visible。
+     GSAP 正常時會在字型就緒後（通常 <1.5s）以 inline style 設定 visible，
+     inline 優先於 keyframe ⇒ 進場動畫完全不受影響；只有「JS 沒跑」時才會看到這段保險。 */
+#bc-brand-stage [data-reveal] {
+  visibility: hidden;
+  animation: bc-reveal-guard 0s linear 1.5s forwards;
+}
+@keyframes bc-reveal-guard {
+  to { visibility: visible; }
+}
+/* ---- social icon uses currentColor; turns dark on gold hover ---- */
+#bc-brand-stage .social-item svg{color:currentColor}
+#bc-brand-stage .social-item:hover svg{color:#0e0e0e}
+
+#bc-brand-stage a{background-color:#0000;}
+#bc-brand-stage h1{margin:.67em 0;font-size:2em;}
+#bc-brand-stage img{border:0;}
+#bc-brand-stage svg:not(:root){overflow:hidden;}
+#bc-brand-stage img{vertical-align:middle;max-width:100%;display:inline-block;}
+#bc-brand-stage .w-inline-block{max-width:100%;display:inline-block;}
+#bc-brand-stage h1,#bc-brand-stage h2,#bc-brand-stage h3,#bc-brand-stage h4,#bc-brand-stage h5,#bc-brand-stage h6{margin-bottom:10px;font-weight:700;}
+#bc-brand-stage h1{margin-top:20px;font-size:38px;line-height:44px;}
+#bc-brand-stage h2{margin-top:20px;font-size:32px;line-height:36px;}
+#bc-brand-stage h3{margin-top:20px;font-size:24px;line-height:30px;}
+#bc-brand-stage h4{margin-top:10px;font-size:18px;line-height:24px;}
+#bc-brand-stage h5{margin-top:10px;font-size:14px;line-height:20px;}
+#bc-brand-stage h6{margin-top:10px;font-size:12px;line-height:18px;}
+#bc-brand-stage p{margin-top:0;margin-bottom:10px;}
+#bc-brand-stage blockquote{border-left:5px solid #e2e2e2;margin:0 0 10px;padding:10px 20px;font-size:18px;line-height:22px;}
+#bc-brand-stage figure{margin:0 0 10px;}
+#bc-brand-stage ul,#bc-brand-stage ol{margin-top:0;margin-bottom:10px;padding-left:40px;}
+@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}
+#bc-brand-stage .w-dyn-empty{background-color:#ddd;padding:10px;}
+#bc-brand-stage .w-dyn-hide,#bc-brand-stage .w-dyn-bind-empty,#bc-brand-stage .w-condition-invisible{display:none!important;}
+#bc-brand-stage .w-layout-grid{grid-row-gap:16px;grid-column-gap:16px;grid-template-rows:auto auto;grid-template-columns:1fr 1fr;grid-auto-columns:1fr;display:grid;}
+#bc-brand-stage h1{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h1--size);line-height:var(--_fonts---h1--line-height);letter-spacing:var(--_fonts---h1--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-brand-stage h2{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h2--size);line-height:var(--_fonts---h2--line-height);letter-spacing:var(--_fonts---h2--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-brand-stage h3{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h3--size);line-height:var(--_fonts---h3--line-height);letter-spacing:var(--_fonts---h3--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-brand-stage h4{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h4--size);line-height:var(--_fonts---h4--line-height);letter-spacing:var(--_fonts---h4--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-brand-stage h5{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h5--size);line-height:var(--_fonts---h5--line-height);letter-spacing:var(--_fonts---h5--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-brand-stage h6{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h6--size);line-height:var(--_fonts---h6--line-height);letter-spacing:var(--_fonts---h6--letter-spacing);margin-top:0;margin-bottom:0;}
+#bc-brand-stage p{font-family:var(--_fonts---font-body);font-size:var(--_fonts---p1--size);line-height:var(--_fonts---p1--line-height);letter-spacing:var(--_fonts---p1--letter-spacing);margin-bottom:0;}
+#bc-brand-stage a{color:var(--_colors---content--primary);text-decoration:none;}
+#bc-brand-stage ul,#bc-brand-stage ol{margin-top:var(--_units---u-0);margin-bottom:var(--_units---u-0);padding-left:var(--_units---u-0);}
+#bc-brand-stage img{object-fit:cover;max-width:none;}
+#bc-brand-stage blockquote{margin-bottom:var(--_units---u-0);padding:var(--_units---u-0);border:1px #000;font-size:1em;line-height:1;}
+#bc-brand-stage figure{margin-bottom:10px;}
+#bc-brand-stage .h1{font-family:var(--_fonts---font-display);font-size:var(--_fonts---h1--size);line-height:var(--_fonts---h1--line-height);letter-spacing:var(--_fonts---h1--letter-spacing);font-weight:500;}
+#bc-brand-stage .h1.left-offset-120{padding-left:var(--_units---u-120);}
+#bc-brand-stage .h1.left-offset-120.mb-104{margin-bottom:var(--_units---u-104);}
+#bc-brand-stage .h1._1-cell-offset{margin-left:calc(var(--_special-units---1-cell) + var(--_special-units---grid-gap));}
+#bc-brand-stage .h1.is-modified{transform-origin:0 100%;transform:rotate(5.5deg);}
+#bc-brand-stage .h2.is-2{position:absolute;inset:auto auto 0% 0%;}
+#bc-brand-stage .p1{font-family:var(--_fonts---font-body);font-size:var(--_fonts---p1--size);line-height:var(--_fonts---p1--line-height);letter-spacing:var(--_fonts---p1--letter-spacing);font-weight:500;}
+#bc-brand-stage .p1.blend-diff{color:var(--_colors---content--primary);mix-blend-mode:difference;}
+#bc-brand-stage .p1.mb-104{margin-bottom:var(--_units---u-104);}
+#bc-brand-stage .p1.mt-240{margin-top:var(--_units---u-240);}
+#bc-brand-stage .p1.is-award-year:where(.w-variant-78805aba-8548-3c69-5f2a-f5eb89ffd343),#bc-brand-stage .p1.is-award-year:where(.w-variant-fab919ce-b69e-785b-a31d-f18aa1d876f1),#bc-brand-stage .p1.is-award-project:where(.w-variant-78805aba-8548-3c69-5f2a-f5eb89ffd343),#bc-brand-stage .p1.is-award-project:where(.w-variant-fab919ce-b69e-785b-a31d-f18aa1d876f1){display:none;}
+#bc-brand-stage .p1.is-secondary{color:var(--_colors---content--secondary);}
+#bc-brand-stage .p1.is-2{position:absolute;inset:auto auto 0% 0%;}
+#bc-brand-stage .p1.is-cut-counter{display:none;}
+#bc-brand-stage .p1.events-auto{pointer-events:auto;}
+#bc-brand-stage .p1.demo-item-2{width:max-content;position:absolute;}
+#bc-brand-stage .grid{grid-column-gap:var(--_special-units---grid-gap);grid-row-gap:var(--_special-units---grid-gap);grid-template-rows:auto;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;grid-auto-columns:1fr;display:grid;}
+#bc-brand-stage .grid.fill{flex:1;}
+#bc-brand-stage .grid.row-0{grid-row-gap:var(--_units---u-0);}
+#bc-brand-stage .grid._6-cols{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}
+#bc-brand-stage .grid.is-footer{padding-top:var(--_units---u-120);border-top:var(--_special-units---stroke)solid var(--_colors---border--100);}
+#bc-brand-stage .img{flex:none;width:100%;height:100%;}
+#bc-brand-stage .img.contain{object-fit:contain;}
+/* 2026-10-07：移除 .img.is-invert（filter:invert(1)）—改由 deco_*.svg 檔案內白色 fill 於黑底呈現。 */
+#bc-brand-stage .img.is-cover-works{width:auto;}
+#bc-brand-stage .btn_label_text.is-2{position:absolute;inset:0% auto auto 0%;}
+#bc-brand-stage .heading-group-wrap{flex-flow:column;justify-content:flex-start;align-items:flex-start;margin-left:0;display:flex;}
+#bc-brand-stage .heading-group-wrap.offset-16{margin-top:calc(var(--_units---u-16)*-1);}
+#bc-brand-stage .heading-group-wrap.is-right{justify-content:flex-start;align-items:flex-end;}
+#bc-brand-stage .mt-8{margin-top:var(--_units---u-8);}
+#bc-brand-stage .svg{grid-column-gap:16px;grid-row-gap:16px;grid-template-rows:auto auto;grid-template-columns:1fr 1fr;grid-auto-columns:1fr;display:block;}
+#bc-brand-stage .path{display:block;}
+#bc-brand-stage .icon-wrap.is-logo{top:var(--_units---u-16);width:calc(95vw/var(--_special-units---global--scale-ratio));height:calc(160vw/var(--_special-units---global--scale-ratio));position:absolute;}
+#bc-brand-stage .icon-wrap.is-15{width:calc(15vw/var(--_special-units---global--scale-ratio));height:calc(15vw/var(--_special-units---global--scale-ratio));justify-content:center;align-items:center;display:flex;}
+#bc-brand-stage .icon-wrap.is-20{width:var(--_units---u-20);height:var(--_units---u-20);}
+#bc-brand-stage .icon-wrap.is-contact{width:calc(80vw/var(--_special-units---global--scale-ratio));}
+#bc-brand-stage .footer{background-color:var(--_colors---background--bg);}
+#bc-brand-stage .footer-inner{padding:var(--_units---u-16)var(--_units---u-16)var(--_units---u-120);}
+#bc-brand-stage .link-button{padding:var(--_units---u-4)var(--_units---u-8);border-radius:var(--_units---u-32);justify-content:center;align-items:center;display:flex;}
+#bc-brand-stage .link-button.left-offset{margin-left:calc(var(--_units---u-6)*-1);min-width:max-content;}
+#bc-brand-stage .social-list{grid-column-gap:var(--_units---u-8);grid-row-gap:var(--_units---u-8);flex-flow:row;display:flex;}
+#bc-brand-stage .socials-list-wrap{grid-column-gap:var(--_units---u-8);justify-content:center;align-items:center;display:flex;}
+#bc-brand-stage .social-item.is-deco{background:none;border:0;cursor:default;}
+#bc-brand-stage .social-item.is-deco:hover{background:none;}
+#bc-brand-stage .social-item.is-deco picture{width:100%;height:100%;display:block;}
+#bc-brand-stage .social-item.is-deco img{width:100%;height:100%;display:block;object-fit:contain;}
+#bc-brand-stage .social-item{width:var(--_units---u-64);height:var(--64px);border:var(--_special-units---stroke)solid var(--_colors---border--100);cursor:pointer;border-radius:50%;flex:none;justify-content:center;align-items:center;display:flex;}
+#bc-brand-stage .social-item:hover{background-color:var(--_colors---fill--primary);}
+#bc-brand-stage .link-inner{flex:none;display:block;position:relative;}
+#bc-brand-stage .link-inner.events-auto.pointer{cursor:pointer;}
+#bc-brand-stage .is-desktop{display:block;}
+#bc-brand-stage .name-part-wrap.is-right{justify-content:flex-end;align-items:center;}
+#bc-brand-stage .is-mobile{display:none;}
+#bc-brand-stage .opacity-0-5{opacity:.5;}
+#bc-brand-stage .text-404.is-2{color:var(--_colors---background--bg);mix-blend-mode:difference;left:calc(389vw/var(--_special-units---global--scale-ratio));position:absolute;}
+#bc-brand-stage .code-embed-2.is-2{transform-style:preserve-3d;position:absolute;left:31.6vw;transform:rotateX(-180deg)rotateY(0)rotate(0);}
+#bc-brand-stage .code-embed-2.is-2{position:absolute;left:31.6vw;transform:none;}
+#bc-brand-stage .text-link.is-2{position:absolute;inset:auto auto 0% 0%;}
+#bc-brand-stage .foooter-mail{grid-column-gap:var(--_units---u-40);grid-row-gap:var(--_units---u-40);flex-flow:column;justify-content:flex-end;align-items:stretch;display:flex;}
+#bc-brand-stage .foooter-mail.flex-align-left{justify-content:center;align-items:center;}
+#bc-brand-stage .foooter-mail.flex-align-right{justify-content:flex-end;align-items:center;}
+#bc-brand-stage .footer-socials{padding-top:var(--_units---u-104);justify-content:center;align-items:center;display:flex;}
+#bc-brand-stage .footer-socials.flex-align-left{justify-content:center;align-items:center;}
+#bc-brand-stage .footer-socials.flex-align-right{justify-content:flex-end;align-items:center;}
+#bc-brand-stage .footer-time{margin-top:var(--_units---u-104);margin-bottom:var(--_units---u-104);grid-column-gap:var(--_special-units---grid-gap);grid-row-gap:var(--_special-units---grid-gap);grid-template-rows:auto;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;grid-auto-columns:1fr;display:grid;}
+#bc-brand-stage .footer-time-inner{justify-content:center;align-items:center;display:flex;}
+/* 2026-10-07：移除品牌金釘牌底色（--_colors---fill--primary），改與 footer 同底色，
+   由 deco_*.svg 白色 fill 於黑底呈現（不再需要反相）。 */
+#bc-brand-stage .footer-logo-cell{padding-top:var(--_units---u-40);padding-bottom:var(--_units---u-40);cursor:pointer;width:calc(192vw/var(--_special-units---global--scale-ratio));}
+#bc-brand-stage .footer-logo-item{height:calc(184vw/var(--_special-units---global--scale-ratio));display:none;position:absolute;inset:0%;}
+#bc-brand-stage .footer-logo-item:first-child{display:block;position:relative;}
+#bc-brand-stage .footer-logo-list{position:relative;}
+/* 2026-10-09（使用者指示）：首頁 hero 的照片列改為「咖啡照＋連結」後（照片與連結比照
+   index.html #hero_hand_list 的 hero_coffees.0~6；see partials/bc_brand_stage_hero.html），
+   每個 .footer-logo-item 內多包一層 <a>。因 reset（L48）不會讓 a 撐開，且 `.img` 的
+   width/height:100% 需有 block 父層才能解析（inline 高度塌陷），故讓 <a> 填滿整個格子；
+   其餘輪播用的絕對定位 / display 切換仍由上面兩條 .footer-logo-item 規則決定，不受影響。
+   （about 頁尾的 bc_brand_stage.html 仍為 deco 標誌，此規則對它無作用、無副作用。） */
+#bc-brand-stage .footer-logo-item a{display:block;width:100%;height:100%;}
+/* 2026-10-08：about footer 的 .footer-mail-inner（email CTA）改用 index footer 的 .scroller-box 跑馬燈。
+   樣式來源：static/css/style-utilities.css（.scroller-box / .scroller / .tag-list）
+   捲動來源：static/js/main.js querySelectorAll('.scroller')（設 data-animated + 複製 li 無縫循環）
+   [補償] 上方 reset `#bc-brand-stage div,ul,li{margin:0;padding:0}`（ID 特異度 1,0,1）會蓋掉
+   `.scroller__inner{padding-block:2rem}`(0,1,0) 與 `.tag-list li{padding:.1rem}`(0,1,1)，導致跑馬燈
+   上下留白歸零、高度塌陷；故以同樣的 #bc-brand-stage 前綴提升特異度補回，數值與 index footer 完全一致
+   （維持 rem 不改用 vw：index footer 未受 --scale-ratio 影響，2rem == 32px 在所有斷點相同）。
+   [行動端鏡射] bc-components.css 的 @media (max-width:767.98px) 會縮小 index footer 跑馬燈，但 ID 前綴
+   規則特異度更高會蓋掉它 → 於下方同一斷點鏡射同樣數值，維持 about / index 兩處一致。
+   [防護] .scroller 恆設 overflow:hidden：prefers-reduced-motion 時 main.js 不設 data-animated，
+   此時 li{width:1108px} 會把 flex 格子撐爆，加此規則至少被裁切而不產生水平溢出。
+   .scroller-box 加 min-width:0/max-width:100% 確保 run-time 收縮不溢出（flex item 預設 min-width:auto）。 */
+#bc-brand-stage .scroller-box{min-width:0;max-width:100%;}
+#bc-brand-stage .scroller{overflow:hidden;}
+#bc-brand-stage .scroller__inner{padding-block:2rem;}
+#bc-brand-stage .tag-list li{padding:.1rem;}
+/* 行動端鏡射（2026-10-08）：bc-components.css:2916-2917 的 @media (max-width:767.98px) 會把跑馬燈縮小成
+   .tag-list li{padding:.05rem} / .scroller__inner{padding-block:.75rem}（index footer 用這組值），
+   但上方 ID 前綴規則（1,1,1）／（1,1,0）特異度較高，會蓋掉那組響應式值 → about footer 在行動端會比
+   index footer 高出約 20px。故在同一斷點鏡射同樣數值，確保 ≤767.98px 時兩處完全一致。
+   （font-size / width 未被上方 reset 影響，仍由 bc-components.css 的響應式規則決定，不需鏡射。） */
+@media all and (max-width:767.98px){
+  #bc-brand-stage .scroller__inner{padding-block:.75rem;}
+  #bc-brand-stage .tag-list li{padding:.05rem;}
+}
+/* 2026-10-08：修掉 ≤991px 跑馬燈衝出欄位（量到 2000px）的缺陷。
+   [成因] 下方 Webflow 原樣規則 `#bc-brand-stage #bc-stage-marquee{grid-area:5/1/6/4;justify-self:start}`
+   （平板欄寬僅 341px）讓 .foooter-mail 走 shrink-to-fit：item 寬 = fit-content = min(max-content, …)，
+   而 max-content 由跑馬燈決定 —— main.js 設 data-animated=true 後 .scroller__inner{flex-wrap:nowrap}，
+   2 個 li 各 1108px（.tag-list li{width:1108px}）＋ .scroller{max-width:2000px} → item 量到 2000px
+   （行動 2000px、平板 1108px→2000px，desktop 因 justify-self:auto 本來就拉伸到欄寬 336px）。
+   超出欄位的部分只能靠 #bc-brand-stage{overflow:hidden} 裁掉，視覺上跑馬燈橫貫整個 footer、
+   壓到相鄰裝飾字。
+   [修法] width:100%（＝自己的 grid area 寬）＋ min-width:0：.foooter-mail 不再 shrink-to-fit，
+   跑馬燈恆被限制在欄寬內（平板 341px／行動 173px），再由 .scroller 自身的 overflow:hidden 裁切、
+   捲動動畫照常；min-width:0 用來擋 min-width:auto 以 min-content(min=2000px) 反過來把格子撐開。
+   [影響] ≥992px 走 `justify-self:auto`（stretch）＋ grid-area:5/3/6/5，實測 336px 完全不變；
+   全站只有 about.html 使用 #bc-brand-stage/.foooter-mail。 */
+#bc-brand-stage .foooter-mail{min-width:0;width:100%;}
+@media screen and (max-width:991px){#bc-brand-stage{--_fonts---font-body:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---font-display:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---h1--size:calc(45vw/var(--_special-units---global--scale-ratio));--_fonts---h1--line-height:90%;--_fonts---h1--letter-spacing:-.6vw;--_fonts---h2--size:calc(40vw/var(--_special-units---global--scale-ratio));--_fonts---h2--line-height:80%;--_fonts---h2--letter-spacing:-.1vw;--_fonts---h3--size:0vw;--_fonts---h3--line-height:0%;--_fonts---h3--letter-spacing:0em;--_fonts---h4--size:0vw;--_fonts---h4--line-height:0%;--_fonts---h4--letter-spacing:0em;--_fonts---h5--size:0vw;--_fonts---h5--line-height:0%;--_fonts---h5--letter-spacing:0em;--_fonts---h6--size:0vw;--_fonts---h6--line-height:0%;--_fonts---h6--letter-spacing:0em;--_fonts---p1--size:calc(12vw/var(--_special-units---global--scale-ratio));--_fonts---p1--line-height:100%;--_fonts---p1--letter-spacing:-.02625vw;--_fonts---l1--size:1vw;--_fonts---l1--line-height:100%;--_fonts---l1--letter-spacing:-.016em;--104px:calc(104vw/var(--_special-units---global--scale-ratio));--72px:calc(72vw/var(--_special-units---global--scale-ratio));--64px:calc(64vw/var(--_special-units---global--scale-ratio));--96px:calc(96vw/var(--_special-units---global--scale-ratio));--0px:calc(0vw/var(--_special-units---global--scale-ratio));--1px:calc(1vw/var(--_special-units---global--scale-ratio));--2px:calc(2vw/var(--_special-units---global--scale-ratio));--4px:calc(4vw/var(--_special-units---global--scale-ratio));--6px:calc(6vw/var(--_special-units---global--scale-ratio));--8px:calc(8vw/var(--_special-units---global--scale-ratio));--10px:calc(10vw/var(--_special-units---global--scale-ratio));--12px:calc(12vw/var(--_special-units---global--scale-ratio));--16px:calc(16vw/var(--_special-units---global--scale-ratio));--20px:calc(20vw/var(--_special-units---global--scale-ratio));--24px:calc(24vw/var(--_special-units---global--scale-ratio));--28px:calc(28vw/var(--_special-units---global--scale-ratio));--32px:calc(32vw/var(--_special-units---global--scale-ratio));--36px:calc(36vw/var(--_special-units---global--scale-ratio));--40px:calc(40vw/var(--_special-units---global--scale-ratio));--44px:calc(44vw/var(--_special-units---global--scale-ratio));--48px:calc(48vw/var(--_special-units---global--scale-ratio));--52px:calc(52vw/var(--_special-units---global--scale-ratio));--56px:calc(56vw/var(--_special-units---global--scale-ratio));--60px:calc(60vw/var(--_special-units---global--scale-ratio));--68px:calc(68vw/var(--_special-units---global--scale-ratio));--80px:calc(80vw/var(--_special-units---global--scale-ratio));--88px:calc(88vw/var(--_special-units---global--scale-ratio));--112px:calc(112vw/var(--_special-units---global--scale-ratio));--120px:calc(120vw/var(--_special-units---global--scale-ratio));--128px:calc(128vw/var(--_special-units---global--scale-ratio));--144px:calc(144vw/var(--_special-units---global--scale-ratio));--168px:calc(168vw/var(--_special-units---global--scale-ratio));--192px:calc(192vw/var(--_special-units---global--scale-ratio));--200px:calc(200vw/var(--_special-units---global--scale-ratio));--240px:calc(240vw/var(--_special-units---global--scale-ratio));--_special-units---global--100vh:100vh;--_special-units---1-cell:calc(162vw/var(--_special-units---global--scale-ratio));--_special-units---grid-gap:var(--12px);--_special-units---global--scale-ratio:3.93;--_special-units---stroke:calc(.25vw/var(--_special-units---global--scale-ratio));--_special-units---global--padding:var(--_units---u-16);--_units---u-0:var(--0px);--_units---u-120:var(--120px);--_units---u-104:var(--104px);--_units---u-240:var(--240px);--_units---u-72:var(--72px);--_units---u-4:var(--4px);--_units---u-8:var(--8px);--_units---u-12:var(--12px);--_units---u-16:var(--16px);--_units---u-24:var(--24px);--_units---u-32:var(--32px);--_units---u-48:var(--48px);--_units---u-64:var(--64px);--_units---u-96:var(--96px);--_units---u-144:var(--144px);--_units---u-192:var(--192px);--_units---u-20:var(--20px);--_units---u-80:var(--80px);--_units---u-6:var(--6px);--_units---u-200:var(--200px);--_units---u-128:var(--128px);--_units---u-10:var(--10px);--_units---u-2:var(--2px);--_units---u-40:var(--40px);--_units---u-36:var(--36px);}#bc-brand-stage .h1._1-cell-offset{margin-left:calc(66vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .h1.is-display{font-size:calc(75vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .h1.is-modified{transform:rotate(10deg);}#bc-brand-stage .p1.mt-240{margin-top:var(--_units---u-120);}#bc-brand-stage .grid{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-brand-stage .grid.is-footer{padding-top:var(--_units---u-72);}#bc-brand-stage .img.width-auto{width:auto;}#bc-brand-stage .heading-group-wrap.mt-8,#bc-brand-stage .heading-group-wrap.is-right.mt-8{margin-top:var(--_units---u-0);}#bc-brand-stage .icon-wrap.is-contact{width:calc(56vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .footer-inner{padding-top:var(--_units---u-0);padding-bottom:var(--_units---u-72);}#bc-brand-stage .footer-inner:where(.w-variant-27776d25-5053-5aa6-2108-a99a2e23347b){display:none;}#bc-brand-stage .link-button{background-color:var(--_colors---fill--tertiary);}#bc-brand-stage .social-item:hover{background-color:var(--_colors---background--transparent);}#bc-brand-stage .is-desktop{display:none;}#bc-brand-stage .m-footer-name{padding-right:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:center;align-items:center;display:flex;}#bc-brand-stage .m-footer-meta{padding-right:var(--_units---u-16);padding-bottom:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:space-between;align-items:center;display:flex;}#bc-brand-stage .is-mobile{display:block;}#bc-brand-stage .m-footer-inner-wrap{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);flex-flow:column;display:flex;}#bc-brand-stage ._404-description.grid{padding-right:var(--_units---u-48);padding-left:var(--_units---u-48);text-align:center;}#bc-brand-stage .foooter-mail{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);}#bc-brand-stage .foooter-mail.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-brand-stage .footer-socials{padding-top:var(--_units---u-72);}#bc-brand-stage .footer-socials.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-brand-stage .footer-time{margin-top:var(--_units---u-48);margin-bottom:var(--_units---u-48);grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-brand-stage .footer-logo-cell{padding-top:var(--_units---u-24);padding-bottom:var(--_units---u-24);}#bc-brand-stage .footer-logo-item{height:calc(120vw/var(--_special-units---global--scale-ratio));}}
+@media screen and (max-width:479px){#bc-brand-stage .grid{width:100%;}}
+#bc-brand-stage #bc-stage-headline-hug-in-a-cup{grid-area:1/3/2/7;}
+#bc-brand-stage #bc-stage-headline-perfect-to-go{grid-area:2/4/3/7;}
+#bc-brand-stage #bc-stage-clock{grid-area:3/1/4/9;}
+/* 2026-10-08：桌面時鐘 { 15 : … : 41 } 的 { 15 41 } 四項改為「置中對齊」——
+   原本 { place-self:center end + 15 center start 會讓 {15 貼在一起、15 與 : 之間空 163px；
+   改為各列置中後 { ↔ 15 ↔ : 間距約 123/125px，左右對稱。
+   2026-10-12 起 ≤991px 也顯示 { }，改為 9 欄並同樣置中各欄 → 見檔尾區塊。 */
+#bc-brand-stage #bc-stage-clock-brace-open{place-self:center;}
+#bc-brand-stage #bc-stage-clock-hours{place-self:center;}
+#bc-brand-stage #bc-stage-clock-brace-close{grid-area:1/8/2/9;place-self:center;}
+#bc-brand-stage #bc-stage-photo-ring{grid-area:span 1/span 2/span 1/span 2;}
+#bc-brand-stage #bc-stage-clock-colon-before-minutes{grid-area:1/3/2/4;place-self:center;}
+#bc-brand-stage #bc-stage-clock-minutes{grid-area:1/7/2/8;place-self:center;}
+#bc-brand-stage #bc-stage-clock-colon-after-minutes{grid-area:1/6/2/7;place-self:center;}
+#bc-brand-stage #bc-stage-headline-fresh-beans{grid-area:4/3/5/6;}
+#bc-brand-stage #bc-stage-headline-roasted-daily{grid-area:5/4/6/7;}
+#bc-brand-stage #bc-stage-socials{grid-area:6/3/7/7;}
+#bc-brand-stage #bc-stage-marquee{grid-area:5/3/6/5;}
+/* 2026-10-12（使用者指示）：「手機和平板時鐘中的 { } 消失了」→ 改為顯示。
+   [原狀] { } 沿用 Webflow 原生的 h1.is-desktop，被上方 Webflow 區塊
+          `#bc-brand-stage .is-desktop{display:none}` 於 ≤991px 隱藏；此時時鐘列為 6 欄，
+          該列已被 `15 : 照片 : 19` 佔滿（欄 1..6 全滿），且 `}` 的原 grid-area:1/8/2/9
+          在 6 欄格中會產生隱式欄 → 直接顯示會撐爆版面，故原設計隱藏。
+   [修法] ① { } 改語意 class/id（.h1.bc-stage-clock-brace ＋ bc-stage-clock-brace-open/close），
+             不再依賴 .is-desktop。
+          ② 時鐘列改 9 欄：`{ 15 : 照片(跨 3 欄) : 19 }`。
+             照片佔 3/9 = 33.3%，與原 6 欄的 2/6 完全相同 → 照片尺寸零變動
+             （實測 768px 220px、390px 111px，與改動前逐值相同）。
+          ③ 必須用 minmax(0,1fr)：用純 1fr 時數字（min-content 85px）會把欄位撐大，
+             照片被壓成 196px（768px 實測）。
+          ④ 數字改為各欄置中（原 ≤991px 為靠邊對齊），與 ≥992px 的置中對齊一致。
+   [驗證] ≤991px：390/480/768/991 皆 0 重疊、0 橫向溢出、照片寬度＝改動前；
+          ≥992px 走上方 8 欄規則完全不受影響（見 docs/verify/cdp_verify_clock_braces.py）。 */
+@media screen and (max-width:991px){
+  /* 時鐘 9 欄（覆寫上方 Webflow 區塊的 1fr 1fr 1fr 1fr 1fr 1fr） */
+  #bc-brand-stage .footer-time{grid-template-columns:repeat(9,minmax(0,1fr));}
+  /* 由外而內：{ 15 : 照片 : 19 } → 欄 1..9 */
+  #bc-brand-stage #bc-stage-clock-brace-open{grid-area:1/1/2/2;}
+  #bc-brand-stage #bc-stage-clock-hours{grid-area:1/2/2/3;justify-self:center;}
+  #bc-brand-stage #bc-stage-clock-colon-before-minutes{grid-area:1/3/2/4;}
+  #bc-brand-stage #bc-stage-photo-ring{grid-area:1/4/2/7;}
+  #bc-brand-stage #bc-stage-clock-colon-after-minutes{grid-area:1/7/2/8;}
+  #bc-brand-stage #bc-stage-clock-minutes{grid-area:1/8/2/9;justify-self:center;}
+  #bc-brand-stage #bc-stage-clock-brace-close{grid-area:1/9/2/10;}
+  /* 以下為 2026-10-08 原樣規則，本次僅 id 改名（值未動） */
+  #bc-brand-stage #bc-stage-marquee-inner{grid-column-end:5;}
+  #bc-brand-stage #bc-stage-headline-hug-in-a-cup{grid-column:1/7;}
+  #bc-brand-stage #bc-stage-headline-perfect-to-go{grid-column:3/7;}
+  #bc-brand-stage #bc-stage-clock{grid-column-end:7;}
+  #bc-brand-stage #bc-stage-headline-fresh-beans{grid-column:1/5;}
+  #bc-brand-stage #bc-stage-headline-roasted-daily{grid-column:4/7;}
+  #bc-brand-stage #bc-stage-socials{grid-column:1/7;justify-self:center;}
+  #bc-brand-stage #bc-stage-marquee{grid-area:5/1/6/4;justify-self:start;}
+}
+
+/* ── 2026-10-19（使用者指示）：所有斷點都隱藏 .m-footer-inner ──────────────────
+   .m-footer-inner 是 Webflow 移植的行動版頁尾（「Between Coffee／© 版權」那塊）：
+   桌機已由 `#bc-brand-stage .is-mobile{display:none}` 隱藏，但 ≤991px 的區塊會把
+   `.is-mobile` 改回 display:block（原本要讓它在手機／平板顯示）。使用者要求
+   「所有端都隱藏」⇒ 這裡補一條同特異度、但排在檔尾最後的規則覆蓋掉它，
+   首頁 hero partial 與 about 頁頁尾 partial 都不再出現此區塊。
+   刻意保留 markup 與 `.is-mobile` 工具類：日後若要恢復，只需刪掉這條規則，
+   不必動兩份 partial（`.is-mobile` 在模板中僅此一處使用，隱藏後等同無作用）。 */
+#bc-brand-stage .m-footer-inner{display:none;}
+

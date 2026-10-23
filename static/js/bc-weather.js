@@ -2,20 +2,20 @@
    bc-weather.js — 橫濱 Timber Wharf 天氣元件
    2026-08-26 整合（about 頁 navbar 右上角）
    ------------------------------------------------------------------
-   2026-10-14（使用者指示）：首頁 hero 的 #bc-clock 模組也加入同一顆天氣元件
+   2026-10-14（使用者指示）：首頁 hero 的 #bc-stage-clock 模組也加入同一顆天氣元件
      （在左側 { 之上、放大 30%）→ 本檔改為「about ＋ index」兩頁都載入
      （見 base.html），並掃描頁面上所有 .weather：
        · about  navbar  : 80px 滑動距離（--wc-scale 未設 → 1）
        · index  那顆    : 104px（--wc-scale:1.3，slideDist() 逐實例量測）
      另抽出 fillLocalDate() 在 main() 一開始先填本地日期（該顆不在 nav.html
      inline script 的覆蓋範圍內）。
-   2026-10-17（使用者指示）：「bc-clock-weather 移除時鐘，只保留天氣與溫度」
+   2026-10-17（使用者指示）：「bc-stage-weather 移除時鐘，只保留天氣與溫度」
      → 循環由 3 態（時鐘 → icon → 溫度）改為 2 態（icon ⇄ 溫度）：
        · ORDER 只剩 icon / temperature；updateClock() 與每秒的 setInterval 整段移除
-         （hero 的時間由 #bc-clock 的 { HH : MM } 負責，本元件不再有第二個時鐘）；
+         （hero 的時間由 #bc-stage-clock 的 { HH : MM } 負責，本元件不再有第二個時鐘）；
        · 兩態時「上上個」＝自己（ORDER[(i+2)%2] === ORDER[i]）→ startLoop 不再對它
          做歸位（否則與「當前滑出」的 tween 打對台），下一輪由 fromTo 重新從右側滑入。
-     markup 的 .clock 已同步移除（templates/layouts/nav.html、partials/bc_hero.html），
+     markup 的 .clock 已同步移除（templates/layouts/nav.html、partials/bc_brand_stage_hero.html），
      CSS 的 .weather .clock 規則亦已刪除（static/css/bc-weather.css）。
    完整複製 yokohama-timberwharf.com/wp-content/themes/ytw/assets/js/main.js
    的 weather 邏輯（minified 反推還原，行為一致）：

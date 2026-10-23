@@ -1,6 +1,6 @@
 {% load static %}
 {% comment %}
-BC 品牌動態 hero（#bc-bg-footer 首頁置頂版）＝ partials/bc_bg_footer.html 的 hero 變體。
+BC 品牌動態 hero（#bc-brand-stage 首頁置頂版）＝ partials/bc_brand_stage.html 的 hero 變體。
 2026-10-09（使用者指示）：首頁把 BC 動態模組（Hug in a Cup 時鐘）由頁尾移到最上方當第一個
 hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩處：
   1. <footer class="footer"> → <div class="footer">（收尾標籤同理）
@@ -9,61 +9,67 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
         IntersectionObserver 立刻回呼：tax-nav 被移除 init、header-bot 加上 is-hide
         （右下角元件一開站就消失）。改成 <div> 後 querySelector('footer') 為 null，
         交會邏輯自然 no-op（頁尾已無 <footer>，不需再遮擋）。
-        （bc-bg-footer.css 只用 .footer 類別選取，與標籤無關 → 改標籤不動任何樣式。）
+        （bc-brand-stage.css 只用 .footer 類別選取，與標籤無關 → 改標籤不動任何樣式。）
   2. 本註解。
-  3. 照片格（#bc-clock-photos 內的 .footer-logo-list）內容不同：本檔為「GUNTE hero 的環形
+  3. 照片格（#bc-stage-photo-ring 內的 .footer-logo-list）內容不同：本檔為「GUNTE hero 的環形
      照片列」——2026-10-14 稍後起與 hero 同一顆**整頁大圓**（--circle-radius:100vw，7 筆
      hero_coffees.0~6，與 index.html #hero_hand_list 同源、共用 static/css/bc-hand-ring.css
      與 static/js/bc-hand-ring.js，索引由 hero 的 Splide 推播）；
-     footer 版（bc_bg_footer.html）仍為 5 張 deco 標誌的 5 秒輪播。詳見本檔 L84 起的註解。
- 保留 id="bc-bg-footer"：bc-bg-footer.css 的選擇器全以此 id 為前綴、
- bc-bg-footer.js 以 getElementById('bc-bg-footer') 綁定 → 與 about 頁共用同一份 CSS/JS。
+     footer 版（bc_brand_stage.html）仍為 5 張 deco 標誌的 5 秒輪播。詳見本檔 L84 起的註解。
+ 保留 id="bc-brand-stage"：bc-brand-stage.css 的選擇器全以此 id 為前綴、
+ bc-brand-stage.js 以 getElementById('bc-brand-stage') 綁定 → 與 about 頁共用同一份 CSS/JS。
 （index 與 about 是不同頁面，同 id 不衝突。）
-依賴：static/css/bc-bg-footer.css、static/js/bc-bg-footer.js、
+依賴：static/css/bc-brand-stage.css、static/js/bc-brand-stage.js、
       static/css/bc-hand-ring.css、static/js/bc-hand-ring.js（環形照片列，見 2026-10-14 註解）、
       gsap 3.13 + SplitText + CustomEase（index.html extra_scripts 以 defer 依序載入）。
-用法：index.html 內包在 <section class="hero bc-bg-hero"> 再 include 本檔。
+用法：index.html 內包在 <section class="hero bc-brand-stage-hero"> 再 include 本檔。
+
+2026-10-18（使用者指示）：模組改名 ＋ 首頁第一屏——
+ · 檔案 bc_hero.html → bc_brand_stage_hero.html；根節點 #bc-bg-footer → #bc-brand-stage；
+   子模組 id / data 屬性同步改為 bc-stage-* / data-stage-*（對照見 bc-brand-stage.css 檔頭）。
+ · index.html 的 GUNTE hero 暫時 hidden，本檔回到 .bc-page-content 第一個可見 section
+   （<section class="hero bc-brand-stage-hero">；margin-top:0 由該頁 extra_css 的 class 規則提供）。
 
   2026-10-12（使用者指示）：
    · Webflow 匯出的 w-node-<uuid>-032bc8db id 全數改為語意化命名（元件＋屬性，
-     如 bc-clock-hours / bc-heading-hug-in-a-cup）；同一組 id 與 about 的
-     bc_bg_footer.html 共用 → 改名須「本檔＋bc_bg_footer.html＋bc-bg-footer.css」三檔同步，
+     如 bc-stage-clock-hours / bc-stage-headline-hug-in-a-cup）；同一組 id 與 about 的
+     bc_brand_stage.html 共用 → 改名須「本檔＋bc_brand_stage.html＋bc-brand-stage.css」三檔同步，
      否則 hero 會失去 grid 定位。
-   · 時鐘 { } 移除 h1.is-desktop（≤991px 原本被 CSS `#bc-bg-footer .is-desktop{display:none}`
-     隱藏 → 手機／平板看不到），改為 `.h1.bc-clock-brace`；≤991px 時鐘列改 9 欄
+   · 時鐘 { } 移除 h1.is-desktop（≤991px 原本被 CSS `#bc-brand-stage .is-desktop{display:none}`
+     隱藏 → 手機／平板看不到），改為 `.h1.bc-stage-clock-brace`；≤991px 時鐘列改 9 欄
      `{ 15 : 照片(跨 3 欄) : 19 }`（照片佔 3/9＝原 2/6，尺寸不變）。
 
 {% endcomment %}
-<div id="bc-bg-footer">
+<div id="bc-brand-stage">
 <div class="footer">
   <div class="footer-inner">
     <div class="w-layout-grid grid is-footer">
-      <div hidden id="bc-heading-hug-in-a-cup" class="heading-group-wrap">
+      <div hidden id="bc-stage-headline-hug-in-a-cup" class="heading-group-wrap">
         <h1 data-reveal="text" class="h1">Hug in</h1>
         <h1 data-reveal="text" class="h1">a Cup</h1>
       </div>
-      <div hidden id="bc-heading-perfect-to-go" class="heading-group-wrap mt-8">
+      <div hidden id="bc-stage-headline-perfect-to-go" class="heading-group-wrap mt-8">
         <h1 data-reveal="text" class="h1">Perfect</h1>
         <h1 data-reveal="text" class="h1">to Go</h1>
       </div>
-      <div id="bc-clock" class="footer-time">
+      <div id="bc-stage-clock" class="footer-time">
         <!-- 2026-10-14（使用者指示）：把 about 頁 navbar 右上角的天氣/時鐘元件搬進本模組，
              放在時鐘列左側 { 之上（尺寸 +30%，--wc-scale 見 index.html 的 <style>）。
              [結構] 與 nav.html 的天氣元件逐字相同（同一份 markup），差別只有兩處：
-               · 外層多一層 #bc-clock-weather（負責 grid 定位 ＋ data-reveal="clip-down"）
+               · 外層多一層 #bc-stage-weather（負責 grid 定位 ＋ data-reveal="clip-down"）
                · 自帶 .weather--visible —— navbar 那顆是「全站隱藏、只有 about 頁顯示」，
                  本顆位於首頁 hero，直接標記可見（bc-weather.css 的 visibility 開關維持
                  #ftco-navbar 專用，不影響本顆）。
-             [定位] 放進 .footer-time（#bc-clock）這個 grid 的「欄 1、列 1」＝與 { 同一格；
+             [定位] 放進 .footer-time（#bc-stage-clock）這個 grid 的「欄 1、列 1」＝與 { 同一格；
                index.html 對它設 align-self:start → 貼齊該格頂端，恆在垂直置中的 { 之上。
-               ≥992px 必須同時把 #bc-clock-brace-open 明確釘在同一格，否則自動置位
+               ≥992px 必須同時把 #bc-stage-clock-brace-open 明確釘在同一格，否則自動置位
                會把 { 擠到欄 2，並連帶把照片列推到隱式欄位（見 index.html 註解）。
              [資料] 由 bc-weather.js 填充（base.html 的天氣腳本已改為 about ＋ index 都載入；
                該檔已支援多實例，滑動距離逐實例量測）。
              [2026-10-17 使用者指示：移除時鐘] .clock 節點已刪、循環只剩 icon ⇄ 溫度
                （CSS/JS 同步移除）。本顆高度不變 —— .view 的子項全是 position:absolute、
                時鐘本來就不佔流內高度 ⇒ 時鐘列與 { 的幾何逐值不動。 -->
-        <div id="bc-clock-weather" class="bc-clock-weather" data-reveal="clip-down">
+        <div id="bc-stage-weather" class="bc-stage-weather" data-reveal="clip-down">
           <div class="weather -font_en -color_white weather--visible" data-bc-weather>
             <div class="view">
               <div class="icon"></div>
@@ -80,17 +86,17 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
           </div>
         </div>
         <!-- 2026-10-08：時間括號由 ( ) 改為 { }，與兩側冒號同一組標點視覺 -->
-        <h1 data-reveal="text" id="bc-clock-brace-open" class="h1 bc-clock-brace">{</h1>
-        <h1 data-footer-time="hours" data-reveal="text" id="bc-clock-hours" class="h1">00</h1>
-        <h1 data-reveal="text" id="bc-clock-brace-close" class="h1 bc-clock-brace">}</h1>
-        <div id="bc-clock-photos" class="footer-time-inner">
+        <h1 data-reveal="text" id="bc-stage-clock-brace-open" class="h1 bc-stage-clock-brace">{</h1>
+        <h1 data-stage-clock="hours" data-reveal="text" id="bc-stage-clock-hours" class="h1">00</h1>
+        <h1 data-reveal="text" id="bc-stage-clock-brace-close" class="h1 bc-stage-clock-brace">}</h1>
+        <div id="bc-stage-photo-ring" class="footer-time-inner">
           <div data-reveal="clip-down" class="footer-logo-cell">
             <div class="footer-logo-list-wrap w-dyn-list">
               <!-- 2026-10-14（使用者指示）：本格由「一次顯示一張的輪播照片」改為 GUNTE hero 的
                    環形照片列（.hero_hand）——**與 hero 同一顆整頁大圓**（--circle-radius:100vw）：
                    換張時整片扇形旋轉、current 置中、左右鄰居落在頁面兩緣（scale 0.5、低約 9.4vw），
-                   ±50° 以後的項目落在畫面外（由 #bc-bg-footer 的 overflow:hidden 裁掉；
-                   另外 .footer-logo-cell 的 clip-down 進場裁切由 bc-bg-footer.js 在跑完後釋放，
+                   ±50° 以後的項目落在畫面外（由 #bc-brand-stage 的 overflow:hidden 裁掉；
+                   另外 .footer-logo-cell 的 clip-down 進場裁切由 bc-brand-stage.js 在跑完後釋放，
                    否則側邊鄰居會被 GSAP 留下的 clip-path:inset(0%) 整張切掉）。
                    （2026-10-14 稍後：使用者指正「區域太小了，動畫展示是使用整個頁面的，
                      參考 hero_hand」→ 原「半徑縮進格子、超出由 overflow:clip 裁掉」已改為此版。）
@@ -98,7 +104,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                      hero_coffees.0~6、--angle 同樣 -90/-65/…/60 步進 25°），因此可直接用
                      共用模組 static/js/bc-hand-ring.js（BC_HAND_RING）註冊，
                      樣式來自 static/css/bc-hand-ring.css。
-                   [不再有 data-footer-logo="item"] 本格已不是 bc-bg-footer.js 的 5 秒輪播
+                   [不再有 data-stage-logo="item"] 本格已不是 bc-brand-stage.js 的 5 秒輪播
                      （該輪播僅剩 /about/ 真頁尾的 deco 標誌在用）；索引改由 GUNTE hero 的
                      Splide index 推播（bc-gunte-hero.js 的 updateSlideStates →
                      BC_HAND_RING.goAll）⇒ 環形字與本格永遠同一支咖啡。
@@ -108,11 +114,11 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                      （與 index.html #hero_hand_list 的寫法一致）。
                    [尺寸] 半徑＝hero 的 100vw；照片寬（--bc-hand-img-w）＝「既有照片區高 ÷
                      咖啡照比例 1.429」＝ 193vw/ratio（≤991px 126vw/ratio）；圓心＝照片區的
-                     水平中心＋垂直中心。以上全在 index.html 的 <style> 內以 #bc-clock-photos
+                     水平中心＋垂直中心。以上全在 index.html 的 <style> 內以 #bc-stage-photo-ring
                      前綴設定（詳見該處 B1 註解）。 -->
               <div class="footer-logo-list">
                 <div class="hero_hand" data-bc-hand-ring>
-                  <div id="bc-clock-hand-list" class="hero_hand_list">
+                  <div id="bc-stage-photo-ring-list" class="hero_hand_list">
                     <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}" aria-label="{{ hero_coffees.0.name }}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"/></a></div>
                     <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}" aria-label="{{ hero_coffees.1.name }}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"/></a></div>
                     <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}" aria-label="{{ hero_coffees.2.name }}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"/></a></div>
@@ -127,7 +133,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                    一格是 -current，故 7 筆文字收攏成一組、由 bc-hand-ring.js 跟著環同步
                    （[data-bc-ring-caption-item] 逐筆切換 -current；未載入 JS 時顯示第 1 筆）。
                    等級/顏色沿用既有元件 .bc-series-caption / -name / -highlight，
-                   字級等尺寸仍在 index.html 的 <style> 內以 #bc-bg-footer 前綴設定。
+                   字級等尺寸仍在 index.html 的 <style> 內以 #bc-brand-stage 前綴設定。
                    [高度] 只顯示一筆 ⇒ 佔位與原本 7 格各一組時相同（--bc-hero-caption-h），
                    照片格與整條時鐘列的高度因此不變。 -->
               <div class="bc-series-caption footer-logo-caption bc-ring-caption" data-bc-ring-caption>
@@ -163,19 +169,19 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
             </div>
           </div>
         </div>
-        <h1 data-reveal="text" id="bc-clock-colon-before-minutes" class="h1">:</h1>
-        <h1 data-footer-time="minutes" data-reveal="text" id="bc-clock-minutes" class="h1">00</h1>
-        <h1 data-reveal="text" id="bc-clock-colon-after-minutes" class="h1">:</h1>
+        <h1 data-reveal="text" id="bc-stage-clock-colon-before-minutes" class="h1">:</h1>
+        <h1 data-stage-clock="minutes" data-reveal="text" id="bc-stage-clock-minutes" class="h1">00</h1>
+        <h1 data-reveal="text" id="bc-stage-clock-colon-after-minutes" class="h1">:</h1>
       </div>
-      <div id="bc-heading-fresh-beans" class="heading-group-wrap is-right">
-        <h1 data-reveal="text" class="h1">Fresh</h1>
-        <h1 data-reveal="text" class="h1">Beans</h1>
+      <div id="bc-stage-headline-fresh-beans" class="heading-group-wrap is-right">
+        <h1 data-reveal="text" class="h1">Follow</h1>
+        <h1 data-reveal="text" class="h1">Your Rhythm</h1>
       </div>
-      <div id="bc-heading-roasted-daily" class="heading-group-wrap is-right mt-8">
-        <h1 data-reveal="text" class="h1">Roasted</h1>
-        <h1 data-reveal="text" class="h1">Daily</h1>
+      <div id="bc-stage-headline-roasted-daily" class="heading-group-wrap is-right mt-8">
+        <h1 data-reveal="text" class="h1">No</h1>
+        <h1 data-reveal="text" class="h1">bullsh*t ...</h1>
       </div>
-      <div id="bc-footer-socials" class="footer-socials">
+      <div id="bc-stage-socials" class="footer-socials">
         <div class="socials-list-wrap w-dyn-list">
           <div data-reveal="w" role="list" class="social-list w-dyn-items">
             <div data-reveal="div" role="listitem" class="social-item w-dyn-item">
@@ -206,9 +212,28 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
               </a>
             </div>
           </div>
+          <!-- 2026-10-20（使用者指示）：社群列尾端加一顆「會動的 PNG」裝飾（與 footer 版 bc_brand_stage.html 逐字相同）。
+               檔案是 APNG（Animated PNG：PNG 內含 acTL/fcTL 區塊，<img> 會自動播放、自動循環，
+               不需要 JS，副檔名仍是 .png）。
+               2026-10-23 更新：使用者換了新版母檔 static/images/deco_hospitality_static.png
+               （1320×1320 / 90 幀 / 4.5 MB）。母檔只當「來源」，不要直接掛在頁面上——
+               頁面用的小檔由 `python3 scripts/make_deco_hospitality_assets.py` 產生：
+                 deco_hospitality_apng.png     96×96 / 90 幀 / 33ms（≈3.0s）/ 361KB
+                 _deco_hospitality_static.png  96×96 單張（reduced-motion 用，4KB）
+               顯示 64px（與 .social-item 同尺寸），96px 檔供視網膜螢幕；
+               prefers-reduced-motion 時改用單張靜態 PNG（<picture> 只會下載被選中的那一個）。
+               純裝飾 → aria-hidden，不進無障礙樹、不影響 role="list" 的子項結構。 -->
+          <div class="social-item is-deco" data-reveal="div" aria-hidden="true">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)"
+                      srcset="{% static 'images/_deco_hospitality_static.png' %}?v=20261023b" />
+              <img src="{% static 'images/deco_hospitality_apng.png' %}?v=20261023b"
+                   width="96" height="96" alt="" loading="lazy" decoding="async" />
+            </picture>
+          </div>
         </div>
       </div>
-      <div id="bc-footer-mail" class="foooter-mail">
+      <div id="bc-stage-marquee" class="foooter-mail">
         <div data-reveal="text" class="p1">
           Available for
           <br/>

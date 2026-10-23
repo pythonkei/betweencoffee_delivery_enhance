@@ -1,15 +1,27 @@
 /* ============================================================================
    BC brand footer — animation ported from bleibtgleich.dev (Slater / slater615.js)
    ----------------------------------------------------------------------------
-   2026-10-07: 只移植 footer 需要的部分（reveal / goo 文字揭示 / 時間 / logo / 連結 hover），
-   範圍限縮於 #bc-bg-footer，且不依賴 Barba / Lenis / 站內轉場。
+   2026-10-07: 只移植本模組需要的部分（reveal / goo 文字揭示 / 時間 / logo / 連結 hover），
+   範圍限縮於 #bc-brand-stage，且不依賴 Barba / Lenis / 站內轉場。
    需要全域：gsap + ScrollTrigger + SplitText + CustomEase（由 about.html extra_scripts 載入）。
    若動畫庫缺失，會立即還原 [data-reveal] 可見狀態，並照常啟動時間 / logo。
+   2026-10-18（使用者指示）：模組改名 —— 檔案 bc-bg-footer.js → bc-brand-stage.js、
+   根節點 #bc-bg-footer → #bc-brand-stage；子模組的 data 屬性改為 data-stage-clock /
+   data-stage-logo，計時器全域改為 window.__bcStageClockInterval /
+   window.__bcStageLogoInterval（完整命名對照見 static/css/bc-brand-stage.css 檔頭）。
+   2026-10-18 稍後（使用者指示「咖啡名稱和 Highlight 動畫顯示時間點略慢，加快一點點」）：
+   animateTextReveal() / window.BC_TEXT_REVEAL() 新增選填的 duration 參數（預設不變＝1.2s），
+   bc-hand-ring.js 以 0.9s ＋ 0.04s 起始延遲呼叫 → 只影響換張時的咖啡名稱 / Highlight，
+   其餘 data-reveal 文字（Fresh / Beans、時鐘數字…）與 /about/ 頁時長完全不變。
+   2026-10-19（使用者指示「圓盤已到中心，文字揭示仍略慢，再加快一點點」）：
+   再新增選填的 stagger 參數（預設不變＝0.1s），bc-hand-ring.js 改以 0.45s／0s／0s 呼叫
+   （稍後二度收緊：名稱與 highlight 同步、0.45s 收斂）→ 仍只影響咖啡名稱 / Highlight；
+   其餘呼叫端未傳新參數，行為與時長完全不變。
    ============================================================================ */
 (function () {
   'use strict';
 
-  var root = document.getElementById('bc-bg-footer');
+  var root = document.getElementById('bc-brand-stage');
   if (!root) return;
 
   var DUR_XS = 0.2, DUR_S = 0.4, DUR_M = 0.8, DUR_L = 1.2;
@@ -22,10 +34,10 @@
 
   /* ---------------- 動態時間（原 initFooterTime） ---------------- */
   function initFooterTime(scope) {
-    var h = scope.querySelector('[data-footer-time="hours"]');
-    var m = scope.querySelector('[data-footer-time="minutes"]');
+    var h = scope.querySelector('[data-stage-clock="hours"]');
+    var m = scope.querySelector('[data-stage-clock="minutes"]');
     if (!h && !m) return;
-    if (window.__footerTimeInterval) { clearInterval(window.__footerTimeInterval); window.__footerTimeInterval = null; }
+    if (window.__bcStageClockInterval) { clearInterval(window.__bcStageClockInterval); window.__bcStageClockInterval = null; }
     var pad = function (n) { return String(n).padStart(2, '0'); };
     var tick = function () {
       var d = new Date(), hh = pad(d.getHours()), mm = pad(d.getMinutes());
@@ -33,24 +45,24 @@
       if (m && m.textContent !== mm) m.textContent = mm;
     };
     tick();
-    window.__footerTimeInterval = setInterval(tick, 1000);
+    window.__bcStageClockInterval = setInterval(tick, 1000);
   }
 
   /* ---------------- Logo 輪播（原 initFooterLogo；BC 5 張 deco 自動輪播） ---------------- */
   function initFooterLogo(scope) {
-    var list = scope.querySelector('[data-footer-logo="list"]');
+    var list = scope.querySelector('[data-stage-logo="list"]');
     if (!list) return;
-    var wrap = scope.querySelector('[data-footer-logo="wrap"]') || list;
-    var items = Array.prototype.slice.call(list.querySelectorAll('[data-footer-logo="item"]'));
+    var wrap = scope.querySelector('[data-stage-logo="wrap"]') || list;
+    var items = Array.prototype.slice.call(list.querySelectorAll('[data-stage-logo="item"]'));
     // 2026-10-14（使用者指示）：首頁照片格已改為「環形照片列」（見下方 initClockHandRing），
-    // 不再有 [data-footer-logo="item"] → 這裡提前結束：首頁不會起 5 秒輪播、
-    // window.__footerLogoInterval 也不會被設起來（該計時器僅剩 /about/ 真頁尾使用）。
+    // 不再有 [data-stage-logo="item"] → 這裡提前結束：首頁不會起 5 秒輪播、
+    // window.__bcStageLogoInterval 也不會被設起來（該計時器僅剩 /about/ 真頁尾使用）。
     if (!items.length) return;
 
     var show = function (el) { el.style.position = 'relative'; el.style.display = 'block'; };
     var hide = function (el) { el.style.position = 'absolute'; el.style.display = 'none'; };
 
-    if (window.__footerLogoInterval) { clearInterval(window.__footerLogoInterval); window.__footerLogoInterval = null; }
+    if (window.__bcStageLogoInterval) { clearInterval(window.__bcStageLogoInterval); window.__bcStageLogoInterval = null; }
     if (wrap._footerLogoClick) { wrap.removeEventListener('click', wrap._footerLogoClick); wrap._footerLogoClick = null; }
 
     // 保險：不足 2 張時不輪播，只顯示第一張
@@ -61,8 +73,8 @@
     var setActive = function (next) { if (next !== cur) { hide(items[cur]); show(items[next]); cur = next; } };
     var next = function () { setActive((cur + 1) % items.length); };
     var start = function () {
-      if (window.__footerLogoInterval) clearInterval(window.__footerLogoInterval);
-      window.__footerLogoInterval = setInterval(next, 5000);
+      if (window.__bcStageLogoInterval) clearInterval(window.__bcStageLogoInterval);
+      window.__bcStageLogoInterval = setInterval(next, 5000);
     };
     wrap._footerLogoClick = function () { next(); start(); };
     wrap.addEventListener('click', wrap._footerLogoClick);
@@ -70,17 +82,27 @@
   }
 
   /* ---------------- 首頁照片格的環形照片列（2026-10-14 使用者指示） ----------------
-     標的＝partials/bc_hero.html 內 #bc-clock-photos 的 .footer-logo-cell：一格 .hero_hand
+     標的＝partials/bc_brand_stage_hero.html 內 #bc-stage-photo-ring 的 .footer-logo-cell：一格 .hero_hand
      （7 筆咖啡照的圓弧）＋ 一組「當前那支咖啡」的名稱/highlight（[data-bc-ring-caption]）。
-     [同步] 本檔只「註冊」；索引一律由 GUNTE hero 的 Splide 推播
-       （bc-gunte-hero.js 的 updateSlideStates → BC_HAND_RING.goAll），模組會讓晚註冊的環
-       直接會合到 hero 當下的索引 ⇒ 本檔（defer）與 hero 腳本（非 defer）誰先執行都對，
-       不需要任何互推/輪詢（見 static/js/bc-hand-ring.js 的說明）。
+     [同步] 索引來源只有一個：GUNTE hero 的 Splide 推播（bc-gunte-hero.js 的
+       updateSlideStates → BC_HAND_RING.goAll），模組會讓晚註冊的環直接會合到 hero 當下的
+       索引 ⇒ 本檔（defer）與 hero 腳本（非 defer）誰先執行都對。
+       2026-10-20：hero 目前 hidden 且不再載入 splide／bc-gunte-hero.js ⇒ 改用模組的自帶
+       節拍（下方 startAuto），hero 恢復時它會自動讓位（見 bc-hand-ring.js 檔頭）。
+       本檔仍然只負責「註冊」（＋必要時啟動節拍），不自己持有索引。
      [範圍] /about/ 沒有 [data-bc-hand-ring] → 直接結束（該頁真頁尾的 deco 輪播不受影響）。 */
   function initClockHandRing(scope) {
     var ringRoot = scope.querySelector('[data-bc-hand-ring]');
     if (!ringRoot || !window.BC_HAND_RING) return;
     window.BC_HAND_RING.register(ringRoot, scope.querySelector('[data-bc-ring-caption]'));
+    /* 2026-10-20（首頁效能 P0 回歸修正）：GUNTE hero 目前 hidden 且不再載入
+       splide.min.js／bc-gunte-hero.js ⇒ 沒有東西會呼叫 BC_HAND_RING.goAll()，
+       環形照片列會停在 register() 定位的第 1 張（不旋轉、名稱/Highlight 不換）。
+       這裡補上「沒有 hero 推播時的自帶節拍」：間隔 5000ms ＝原 Splide 的 interval。
+       startAuto() 會自行判斷 —— hero 的環已註冊（instances > 1）時直接拒絕，
+       且 register() 收到第 2 個環時也會 stopAuto() ⇒ 日後恢復 GUNTE hero 不需再改本檔。
+       （/about/ 沒有 [data-bc-hand-ring]，上面已 return，不受影響。） */
+    window.BC_HAND_RING.startAuto(5000);
   }
 
   /* ====================== GSAP reveal engine (原 Slater) ====================== */
@@ -125,14 +147,24 @@
     var blurOf = function (line) { return document.querySelector('#' + line.dataset.filterId + ' feGaussianBlur'); };
     var matOf = function (line) { return document.querySelector('#' + line.dataset.filterId + ' feColorMatrix'); };
 
-    function animateTextReveal(target, mode, delay) {
+    function animateTextReveal(target, mode, delay, duration, stagger) {
       var els = gsap.utils.toArray(target);
       if (!els.length) return;
+      /* 2026-10-18（使用者指示「咖啡名稱和 Highlight 動畫顯示時間點略慢，加快一點點」）：
+         揭示時長改為可傳入（未傳＝原本的 DUR_L 1.2s，其餘 data-reveal 文字完全不受影響）。
+         首頁咖啡名稱 / Highlight 由 bc-hand-ring.js 以 0.9s 呼叫 → 比原本快 25%。
+         2026-10-19 稍後再收緊：改傳 0.45s／0s／0s（名稱與 highlight 同步，0.45s 收斂）。
+         2026-10-19（使用者指示「圓盤到中心後，文字揭示仍略慢，再加快一點點」）：
+         再開放第 4 個選填參數 stagger（元素間錯開秒數；未傳＝原本的 STAGGER 0.1s）——
+         名稱與 highlight 這兩筆只在「換張」時使用，讓 highlight 不必等滿 0.1s 才起步；
+         其餘 data-reveal 文字（Fresh / Beans、時鐘數字…）不傳此參數 ⇒ 行為完全不變。 */
+      var dur = duration == null ? DUR_L : duration;
+      var stg = stagger == null ? STAGGER : stagger;
       els.forEach(function (el, k) {
         if (mode === 'reveal' || mode === 'initial') el.style.display = '';
         if (!el._split) el._split = new SplitText(el, { type: 'lines' });
         el._split.lines.forEach(addFilter);
-        var dly = k * STAGGER;
+        var dly = k * stg;
         if (mode === 'initial') {
           el._split.lines.forEach(function (line) {
             var b = blurOf(line), m = matOf(line);
@@ -153,12 +185,12 @@
             m.setAttribute('values', mat(AMP, OFF));
             line.style.filter = 'url(#' + line.dataset.filterId + ')';
             var d = i === 0 ? (delay == null ? DELAY_REVEAL : delay) + dly : 0;
-            tl.to(b, { attr: { stdDeviation: 0 }, duration: DUR_L, delay: d, ease: 'Out' }, i * STAGGER);
+            tl.to(b, { attr: { stdDeviation: 0 }, duration: dur, delay: d, ease: 'Out' }, i * stg);
             var g = { amp: AMP, off: OFF };
-            tl.to(g, { amp: 1, off: 0, duration: .35 * DUR_L, ease: 'none',
+            tl.to(g, { amp: 1, off: 0, duration: .35 * dur, ease: 'none',
               onUpdate: function () { m.setAttribute('values', mat(g.amp, g.off)); },
               onComplete: function () { m.setAttribute('values', mat(1, 0)); line.style.filter = ''; }
-            }, '>-' + .35 * DUR_L);
+            }, '>-' + .35 * dur);
           });
           el._revealTl = tl;
         } else if (mode === 'hide') {
@@ -184,11 +216,16 @@
        環轉到定位、切完 -current 後呼叫 window.BC_TEXT_REVEAL(...) 即可，本檔不需反向依賴它。
        [參數] target 可為 Element 或 NodeList／陣列；多個元素依序 k * STAGGER 錯開
        （＝原引擎對多元素的行為：名稱 0.1s、highlight 0.2s）。
+         delay    選填，第一個元素的起始延遲（預設 DELAY_REVEAL 0.2s）。
+         duration 選填（2026-10-18），揭示時長（預設 DUR_L 1.2s）。
+                  bc-hand-ring.js 傳 0.45s → 咖啡名稱 / Highlight 換張時比原本快 63%。
+         stagger  選填（2026-10-19），元素間錯開秒數（預設 STAGGER 0.1s）。
+                  bc-hand-ring.js 傳 0 → 名稱與 highlight 完全同步起步。
        [降級] GSAP／SplitText 缺失時 initGsap 直接 return ⇒ 這個 API 不存在，
        bc-hand-ring.js 就只是「文字直接出現」（與改動前相同）。 */
-    window.BC_TEXT_REVEAL = function (target, delay) {
+    window.BC_TEXT_REVEAL = function (target, delay, duration, stagger) {
       if (!target) return;
-      animateTextReveal(target, 'reveal', delay == null ? DELAY_REVEAL : delay);
+      animateTextReveal(target, 'reveal', delay == null ? DELAY_REVEAL : delay, duration, stagger);
     };
 
     /* -- div / clip 揭示（原 animateDivReveal / animateClipReveal） -- */
@@ -222,8 +259,8 @@
        使用整個頁面的。參考 hero_hand」）：進場裁切（animateClipReveal）只是一次性的揭示效果，
        但 GSAP 會把 clip-path 留在 `inset(0%)` —— 那等於一個「永久把內容框在元素邊界內」的裁切框。
        首頁照片格的環形照片列是**整頁扇形**：側邊鄰居本來就會跑到 .footer-logo-cell 之外
-       （照片格不裁、由 #bc-bg-footer 的 overflow:hidden 裁），留著這個裁切框會把左右鄰居整張
-       切掉（實測：鄰居 rect 存在、圖片 complete、但 elementFromPoint 命中的是 #bc-clock ⇒
+       （照片格不裁、由 #bc-brand-stage 的 overflow:hidden 裁），留著這個裁切框會把左右鄰居整張
+       切掉（實測：鄰居 rect 存在、圖片 complete、但 elementFromPoint 命中的是 #bc-stage-clock ⇒
        被 clip 切到 0 可見）。
        故揭示跑完就釋放「內含環形照片列（[data-bc-hand-ring]）」容器的 clip-path：
        視覺上 inset(0%) 與 none 完全相同，只有「允許內容超出格子」這件事會生效。
@@ -304,7 +341,8 @@
     }
 
     // 等字型載入後再 SplitText 分行（避免字型未就緒造成行高量測錯誤 / 警示）；
-    // 逾時 3s 保險啟動，避免字型載入異常時內容永久隱藏。
+    // 逾時由 3s 收緊為 1.5s 保險啟動（2026-10-19 首頁效能 P0：縮短首屏文案隱形時間；
+    // CSS 另有 1.5s 的 bc-reveal-guard keyframe 作為「JS 完全沒跑」時的最後保險）。
     whenFontsReady(function () {
       initElementsReveal(scope);
       initLinks(scope);
@@ -321,7 +359,7 @@
         document.fonts.ready.then(run);
       }
     } catch (e) { /* ignore */ }
-    setTimeout(run, 3000);
+    setTimeout(run, 1500);
   }
 
   /* ====================== bootstrap ====================== */

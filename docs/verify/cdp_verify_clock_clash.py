@@ -3,17 +3,17 @@
 
 [為什麼需要這支（與 cdp_verify_clock_braces.py 的 E1 不同）]
   cdp_verify_clock_braces.py 的 E1 是「時鐘可見子項的 rect 兩兩不重疊」；但 2026-10-15 桌機照片
-  放大（1440 時 336x480）後，環形照片列（#bc-clock-hand-list）本來就會離開 .footer-logo-cell
-  （bc-bg-footer.js 的 releaseRingClip 設計：揭示跑完即釋放裁切）⇒ rect 重疊是設計必然、不是 bug。
+  放大（1440 時 336x480）後，環形照片列（#bc-stage-photo-ring-list）本來就會離開 .footer-logo-cell
+  （bc-brand-stage.js 的 releaseRingClip 設計：揭示跑完即釋放裁切）⇒ rect 重疊是設計必然、不是 bug。
   真正該問的是「不同元素的可見像素是否落在同一點」＝像素級遮蔽，本腳本量這個。
 
 [量法：非破壞性圖層隔離]
   把某一層用「只插一條 !important 的 stylesheet 規則」隱藏（visibility:hidden 不影響 layout），
   與基準截圖相減 → 得到「該層真正畫到的像素」遮罩；兩層遮罩的交集 = 兩層互相遮蔽的像素數。
   ⚠ 絕不可用 element.style.visibility='hidden' 再「還原」成 element.style.visibility=''：
-    [data-reveal] 的可見性 = CSS `#bc-bg-footer [data-reveal]{visibility:hidden}`
-    （static/css/bc-bg-footer.css:73）＋ JS 於 whenFontsReady 寫入的 inline visibility:visible
-    （static/js/bc-bg-footer.js:267）。把 inline 設成 '' 不是還原、而是「刪掉 inline 宣告」
+    [data-reveal] 的可見性 = CSS `#bc-brand-stage [data-reveal]{visibility:hidden}`
+    （static/css/bc-brand-stage.css:94）＋ JS 於 whenFontsReady 寫入的 inline visibility:visible
+    （static/js/bc-brand-stage.js:288）。把 inline 設成 '' 不是還原、而是「刪掉 inline 宣告」
     ⇒ 退回 CSS 的 hidden ⇒ .footer-logo-cell 內整個環形照片列（visibility 繼承）永久隱形
     ⇒ 之後所有像素差 = 0（實測：照片貢獻像素 54047 px → 0 px）。
 
@@ -63,10 +63,10 @@ OUTDIR = os.environ.get("BC_OUT", "/tmp/bc_clash")
 THR = 12  # 每像素亮度差 > THR 才算「這一層有畫到這裡」
 
 # ---------------------------------------------------------------- JS 片段
-READY_JS = ("(function(){return !!(document.querySelector('#bc-clock-photos .hero_hand.is-ready')"
-            "&&document.getElementById('bc-clock-hand-list'));})()")
+READY_JS = ("(function(){return !!(document.querySelector('#bc-stage-photo-ring .hero_hand.is-ready')"
+            "&&document.getElementById('bc-stage-photo-ring-list'));})()")
 
-SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-clock-photos');"
+SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-stage-photo-ring');"
                   "if(!e) return null;var r=e.getBoundingClientRect();"
                   "window.scrollTo(0, Math.round(window.scrollY + r.top - "
                   "(window.innerHeight - r.height)/2));return Math.round(window.scrollY);})()")
@@ -74,7 +74,7 @@ SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-clock-photos');
 SPEED_GSAP_JS = ("(function(){if(window.gsap&&window.gsap.globalTimeline){"
                  "window.gsap.globalTimeline.timeScale(100);return true;}return false;})()")
 
-CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-clock-photos .footer-logo-cell');"
+CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-stage-photo-ring .footer-logo-cell');"
                 "return e?getComputedStyle(e).clipPath:null;})()")
 
 PAUSE_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');"
@@ -85,11 +85,11 @@ PAUSE_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');
 #   （bc-hand-ring.js）——旋轉期間文字容器帶 .-hidden，settle 時才切 -current 並移除。
 #   若量測時剛好卡在這個 1.2s 的窗口內，文字會在量測期間出現 ⇒ 基準圖與之後每張圖差一塊
 #   （假的殘留）。⇒ 暫停 autoplay 後先等「不再有 pending」（容器沒有 .-hidden）再進凍結流程。
-CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .bc-ring-caption');"
+CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-stage-photo-ring .bc-ring-caption');"
                   "return c ? !c.classList.contains('-hidden') : true;})()")
 
-# 停掉會「改動 DOM 文字」的計時器：bc-bg-footer.js:36 的 __footerTimeInterval 每秒 tick，每分鐘
-# 會把 [data-footer-time] 的「分」進位 ⇒ 基準圖與之後每張圖差那一小塊數字區域（實測殘留
+# 停掉會「改動 DOM 文字」的計時器：bc-brand-stage.js:40 的 __bcStageClockInterval 每秒 tick，每分鐘
+# 會把 [data-stage-clock] 的「分」進位 ⇒ 基準圖與之後每張圖差那一小塊數字區域（實測殘留
 # 177 px @390、647 px @1280、1452-1958 px @992，且每個圖層遮罩都含那塊 ⇒ 假的「照片×數字 1081 px」）。
 # 計時器只寫文字、不影響任何幾何 ⇒ 量測前 clearInterval 即可。
 #
@@ -107,7 +107,7 @@ CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .b
 #   ⇒ 正解＝**不碰計時器、不碰 Date**，只把「會被 tick 改寫的那幾個文字節點」鎖住（LOCK_CLOCK_JS）。
 FREEZE_CLOCK_JS = r"""
 (function(){
-  var names=['__footerTimeInterval','__footerLogoInterval','__weatherClockInterval',
+  var names=['__bcStageClockInterval','__bcStageLogoInterval','__weatherClockInterval',
              '__heroClockInterval'];
   var out=[];
   names.forEach(function(k){
@@ -120,15 +120,15 @@ FREEZE_CLOCK_JS = r"""
 # 鎖住「計時器會改寫的文字節點」＝把該元素的 textContent 改成 no-op setter（element 上的 own
 # property，蓋掉 prototype 的 accessor）。tick 照跑（DOM 寫入變成空操作）⇒ 不會有 frame 枯竭、
 # GSAP/Date 完全不受影響，而畫面上的字固定不變 ⇒ 跨分界不再產生假殘留。
-#   · 涵蓋 hero/頁尾時鐘（#bc-clock-hours/-minutes/-colon-*、[data-footer-time]）。
-#     2026-10-17（使用者指示：「bc-clock-weather 移除時鐘，只保留天氣與溫度」）：天氣元件的
+#   · 涵蓋 hero/頁尾時鐘（#bc-stage-clock-hours/-minutes/-colon-*、[data-stage-clock]）。
+#     2026-10-17（使用者指示：「bc-stage-weather 移除時鐘，只保留天氣與溫度」）：天氣元件的
 #     .weather .clock .value 已不存在（bc-weather.js 的 updateClock 已移除）→ 選擇器一併移除。
 #   · 可重複呼叫（已鎖過的用 __bcProbeLocked 記號跳過）；settle 與每次 stable 前都叫一次，
 #     連「量測中途才被建立的節點」也一併鎖上。
 LOCK_CLOCK_JS = r"""
 (function(){
-  var sel='#bc-clock-hours,#bc-clock-minutes,#bc-clock-colon-before-minutes,'
-        + '#bc-clock-colon-after-minutes,[data-footer-time]';
+  var sel='#bc-stage-clock-hours,#bc-stage-clock-minutes,#bc-stage-clock-colon-before-minutes,'
+        + '#bc-stage-clock-colon-after-minutes,[data-stage-clock]';
   var els=document.querySelectorAll(sel), out=[];
   for(var i=0;i<els.length;i++){
     var el=els[i];
@@ -183,7 +183,7 @@ HIDE_JS = r"""
 })(%s,%s)
 """
 
-# 2026-10-17（使用者指示：bc-clock-weather 移除時鐘）：量測期間「永久」隱藏單一 selector。
+# 2026-10-17（使用者指示：bc-stage-weather 移除時鐘）：量測期間「永久」隱藏單一 selector。
 #   與 HIDE_JS 的差別＝獨立 style id、不會被其他圖層的 hide/restore 覆寫（HIDE_JS 只維護一條規則）。
 PIN_HIDE_JS = r"""
 (function(sel){
@@ -217,15 +217,15 @@ CTX_JS = r"""
   function inl(el){ return el?el.getAttribute('style')||'':null; }
   var out={sy:Math.round(window.scrollY), iw:innerWidth, ih:innerHeight,
            docH:document.documentElement.scrollHeight};
-  var IDS=['bc-clock','bc-clock-brace-open','bc-clock-hours','bc-clock-colon-before-minutes',
-           'bc-clock-photos','bc-clock-colon-after-minutes','bc-clock-minutes',
-           'bc-clock-brace-close','bc-clock-weather'];
+  var IDS=['bc-stage-clock','bc-stage-clock-brace-open','bc-stage-clock-hours','bc-stage-clock-colon-before-minutes',
+           'bc-stage-photo-ring','bc-stage-clock-colon-after-minutes','bc-stage-clock-minutes',
+           'bc-stage-clock-brace-close','bc-stage-weather'];
   out.clock={}; IDS.forEach(function(id){ var e=document.getElementById(id);
     out.clock[id]={box:box(e), vis:st(e,'visibility'), display:st(e,'display'),
                    op:st(e,'opacity'), z:st(e,'zIndex')}; });
-  var cell=document.querySelector('#bc-clock-photos .footer-logo-cell');
-  var hand=document.querySelector('#bc-clock-photos .hero_hand');
-  var list=document.getElementById('bc-clock-hand-list');
+  var cell=document.querySelector('#bc-stage-photo-ring .footer-logo-cell');
+  var hand=document.querySelector('#bc-stage-photo-ring .hero_hand');
+  var list=document.getElementById('bc-stage-photo-ring-list');
   out.cell={box:box(cell), vis:st(cell,'visibility'), clip:st(cell,'clipPath'),
             op:st(cell,'opacity'), inline:inl(cell),
             reveal:cell?cell.getAttribute('data-reveal'):null};
@@ -251,7 +251,7 @@ CTX_JS = r"""
             display:st(nav,'display'), z:st(nav,'zIndex'), pos:st(nav,'position'),
             cls:nav?nav.className:null, aVis:st(navA,'visibility'), aOp:st(navA,'opacity')};
   out.animations=document.getAnimations().length;
-  var rev=document.querySelectorAll('#bc-bg-footer [data-reveal]');
+  var rev=document.querySelectorAll('#bc-brand-stage [data-reveal]');
   var visN=0, hidN=0, noInline=0;
   for(var k=0;k<rev.length;k++){
     if(getComputedStyle(rev[k]).visibility==='visible') visN++; else hidN++;
@@ -263,14 +263,14 @@ CTX_JS = r"""
 """
 
 # ---------------------------------------------------------------- 圖層選擇器
-SEL_PHOTOS = "#bc-clock-hand-list"
-SEL_CELL = "#bc-clock-photos .footer-logo-cell"
-SEL_BRACES = "#bc-clock-brace-open,#bc-clock-brace-close"
-SEL_DIGITS = ("#bc-clock-hours,#bc-clock-minutes,"
-              "#bc-clock-colon-before-minutes,#bc-clock-colon-after-minutes")
+SEL_PHOTOS = "#bc-stage-photo-ring-list"
+SEL_CELL = "#bc-stage-photo-ring .footer-logo-cell"
+SEL_BRACES = "#bc-stage-clock-brace-open,#bc-stage-clock-brace-close"
+SEL_DIGITS = ("#bc-stage-clock-hours,#bc-stage-clock-minutes,"
+              "#bc-stage-clock-colon-before-minutes,#bc-stage-clock-colon-after-minutes")
 SEL_BALL = ".tax-nav"
-SEL_WEATHER = "#bc-clock-weather"
-SEL_ITEM = "#bc-clock-hand-list .hero_hand_item:nth-child(%d)"
+SEL_WEATHER = "#bc-stage-weather"
+SEL_ITEM = "#bc-stage-photo-ring-list .hero_hand_item:nth-child(%d)"
 
 
 # ---------------------------------------------------------------- 像素工具（無 numpy，純 PIL）
@@ -650,7 +650,7 @@ async def measure_viewport(sess, name, w, h, mob):
     st = await sess.settle()
     checks.append(("[%s] 揭示完成（clip-path none）" % name,
                    st["clip_released"] is True, await sess.ev(CELL_CLIP_JS)))
-    # 2026-10-17（使用者指示：bc-clock-weather 移除時鐘、只剩 icon ⇄ 溫度）：天氣元件每 5 秒
+    # 2026-10-17（使用者指示：bc-stage-weather 移除時鐘、只剩 icon ⇄ 溫度）：天氣元件每 5 秒
     #   以 rAF 呼叫 toggle()，而 GSAP 時間軸已被 FREEZE_JS 暫停 ⇒ gsap.to 不再推進，但
     #   gsap.fromTo(..., {x:d}) 預設 immediateRender **會立刻套用 from 值** ⇒ 每 5 秒把元素瞬移一次，
     #   量測超過 ~10 秒後整個元件被推離 .view（實測 1440 殘留 917 px、1280 835 px、992 出現

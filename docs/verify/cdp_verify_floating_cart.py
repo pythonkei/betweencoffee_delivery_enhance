@@ -21,7 +21,7 @@ PAGES = [("index", "/"), ("about", "/about/"), ("coffee4", "/coffee/4/"),
 #   · 浮動購物車「所有模板位置和 index 一樣」→ 全站（含本清單每頁）浮動鈕盒上緣
 #     都對齊 navbar-brand 頂邊；下方另做「跨頁位置一致性」與「對齊基準」檢查。
 #   · .weather 全站隱藏、僅 about 頁顯示（bc-weather.js 於 about ＋ index 載入；
-#     2026-10-14 起因首頁 hero 的 #bc-clock 也用同一顆天氣元件）。
+#     2026-10-14 起因首頁 hero 的 #bc-stage-clock 也用同一顆天氣元件）。
 #   · /coffee/4/、/bean/1/、/coffee_menu/：.bc-attract-nav 被 display:none →
 #     浮動鈕單獨對齊 navbar-brand 頂邊（不再退回 CSS 的垂直置中退化值）。
 #   （註：舊版含 /cart/，但購物車為空時該網址 302 → /coffee_menu/，故改測 /coffee_menu/ 本身）
@@ -333,7 +333,7 @@ async def main():
                 #   · .weather 全站隱藏、僅 about 頁顯示
                 #   · 浮動購物車全站位置與 index 相同（盒上緣對齊 navbar-brand 頂邊）
                 # 2026-10-14：bc-weather.js 改為 about ＋ index 都載入（首頁 hero 的
-                #   #bc-clock 也要同一顆天氣元件）→ 下方斷言由「非 about 一律未載入」
+                #   #bc-stage-clock 也要同一顆天氣元件）→ 下方斷言由「非 about 一律未載入」
                 #   改為「index/about 需載入、其餘頁面未載入」。
                 wx = v.get("weather") or {}
                 if name == "about":
@@ -349,7 +349,7 @@ async def main():
                     if wx.get("has_visible_class"):
                         fails.append(f"{tag}: 非 about 頁卻有 .weather--visible")
                     if name == "index":
-                        # 2026-10-14：首頁 hero 的 #bc-clock 內也有天氣元件 → 需載入
+                        # 2026-10-14：首頁 hero 的 #bc-stage-clock 內也有天氣元件 → 需載入
                         if not wx.get("script_loaded"):
                             fails.append(f"{tag}: index 頁未載入 bc-weather.js")
                     elif wx.get("script_loaded"):

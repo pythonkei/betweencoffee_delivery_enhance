@@ -48,6 +48,10 @@
 
 // owl-carousel slider control & transitions > config file: animate.css
 	var carousel = function() {
+		// 2026-10-19（首頁效能 P0）：owl 引擎改為條件載入（首頁不再載入 owl.carousel.min.js）。
+		// 缺少 $.fn.owlCarousel 時直接跳過整個輪播初始化，避免 TypeError 中斷 main.js 後續
+		// 的 dropdown／scroll／counter 等初始化。
+		if (!$.fn.owlCarousel) return;
 		// 影片延遲載入共用函式（初始化後立即執行 + 每次切換時執行）
 		var loadActiveVideo = function() {
 			var $el = $('.home-slider');

@@ -43,8 +43,12 @@
 <link rel="stylesheet" href="{% static 'css/bc-top-art.css' %}?v=20261006a">
 <!-- florporto 產品模組樣式（自 index 移入；wrapper 封裝 .bc-flor-menu） -->
 <link rel="stylesheet" href="{% static 'css/bc-flor-menu.css' %}?v=20260907h">
-<!-- 2026-10-07: BC 動態 footer（移植自 bleibtgleich.dev Webflow footer；全樣式 scoped 於 #bc-bg-footer） -->
-<link rel="stylesheet" href="{% static 'css/bc-bg-footer.css' %}?v=20261012a" />
+<!-- 2026-10-07: BC 動態模組（移植自 bleibtgleich.dev Webflow footer；全樣式 scoped 於 #bc-brand-stage）
+     2026-10-18（使用者指示）：模組更名（bc-bg-footer → bc-brand-stage）、檔名同步更改
+     → css ?v=20261018a（about 頁仍以本模組作真頁尾；首頁則用它當第一屏 hero）。
+     2026-10-19（使用者指示）：所有斷點都隱藏 .m-footer-inner（行動版頁尾區塊）
+     → css ?v=20261019a。 -->
+<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261020b" />
 <!-- 2026-10-12: bkkdw26.greydientlab.com .hero-description-wrapper 模組（含 @font-face 自架
      BDO Grotesk / Geist Mono、Tailwind utility 1:1 scoped 重建 + 768/1024 斷點） -->
 <link rel="stylesheet" href="{% static 'css/bc-hero-description.css' %}?v=20261012a" />
@@ -1370,14 +1374,21 @@
 <script src="{% static 'js/bc-top-art.js' %}?v=20261004a"></script>
 <!-- florporto 產品模組捲動 crossfade / rail（自 index 移入） -->
 <script src="{% static 'js/bc-flor-menu.js' %}?v=20260907b"></script>
-<!-- 2026-10-07: BC 動態 footer 所需的 GSAP 外掛（SplitText / CustomEase 於 gsap 3.13 起免費；
+<!-- 2026-10-07: BC 動態模組所需的 GSAP 外掛（SplitText / CustomEase 於 gsap 3.13 起免費；
      gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可）
-     2026-10-14 稍後：bc-bg-footer.js 新增「clip-down 揭示跑完後釋放含環形照片列容器的
+     2026-10-14 稍後：bc-brand-stage.js 新增「clip-down 揭示跑完後釋放含環形照片列容器的
      clip-path」（首頁整頁扇形用）→ 版號同步升為 20261014b；本頁無 [data-bc-hand-ring]，
-     該分支不會命中 ⇒ /about/ 的進場與裁切行為完全不變。 -->
+     該分支不會命中 ⇒ /about/ 的進場與裁切行為完全不變。
+     2026-10-18（使用者指示）：模組更名、檔名同步更改 → 版號改為 20261018a。
+     2026-10-18 稍後：BC_TEXT_REVEAL 新增選填的 duration 參數（僅首頁咖啡名稱 /
+     Highlight 傳 0.9s；本頁所有 data-reveal 仍走預設 1.2s，行為不變）
+     → 版號同步升為 ?v=20261018b。
+     2026-10-19：BC_TEXT_REVEAL 新增選填的 stagger 參數，首頁咖啡名稱 / Highlight 由 0.65s／
+     0.02s／0.06s 再收緊為 0.45s／0s／0s（同步）；本頁仍走預設 1.2s／0.1s，行為不變
+     → 版號同步升為 ?v=20261019b。 -->
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261014b"></script>
+<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261020a"></script>
 <!-- 2026-10-12: hero-description-wrapper 逐字變色動畫所需函式庫（SplitType 0.3.3，與原站同版；
      以 defer 於本檔前載入 → 執行順序 gsap → ScrollTrigger → SplitText → CustomEase → SplitType → 本模組） -->
 <script defer src="{% static 'js/vendor/split-type.min.js' %}"></script>
@@ -1386,8 +1397,10 @@
 
 {% block bcc_footer %}
 <!-- 2026-10-09（使用者指示）：本頁 footer markup 抽出為共享 partial
-     templates/betweencoffee_delivery/partials/bc_bg_footer.html，
-     與首頁 index.html 共用同一份（單一來源）；依賴 css/bc-bg-footer.css + js/bc-bg-footer.js。 -->
-{% include 'betweencoffee_delivery/partials/bc_bg_footer.html' %}
+     templates/betweencoffee_delivery/partials/bc_brand_stage.html
+     （與首頁用的 hero 變體 bc_brand_stage_hero.html 同源、僅外層標籤不同）；
+     about 頁用它當真頁尾、index 頁用 hero 變體當第一屏。
+     依賴 css/bc-brand-stage.css + js/bc-brand-stage.js。 -->
+{% include 'betweencoffee_delivery/partials/bc_brand_stage.html' %}
 
 {% endblock %}

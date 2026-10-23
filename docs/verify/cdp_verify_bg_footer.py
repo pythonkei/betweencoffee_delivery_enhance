@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""CDP 驗證：#bc-bg-footer（品牌 footer）的釘牌 logo 與頁面範圍。
+"""CDP 驗證：#bc-brand-stage（品牌 footer）的釘牌 logo 與頁面範圍。
 
 2026-10-09（使用者指示）：首頁 / 的 footer 由 base.html 靜態 ftco 頁尾改為
-與 /about/ 共用的 #bc-bg-footer（同一 partials/bc_bg_footer.html）。
+與 /about/ 共用的 #bc-brand-stage（同一 partials/bc_brand_stage.html）。
 本腳本因此把 / 一併納入斷言（文字層 + 瀏覽器層）。
 
-2026-10-09（同日稍後，使用者指示）：首頁的 #bc-bg-footer 再由頁尾移到**最上方**當第一個 hero
-（GUNTE hero 移到它下方）。置頂版 markup ＝ partials/bc_hero.html，與 footer 版逐字相同，
+2026-10-09（同日稍後，使用者指示）：首頁的 #bc-brand-stage 再由頁尾移到**最上方**當第一個 hero
+（GUNTE hero 移到它下方）。置頂版 markup ＝ partials/bc_brand_stage_hero.html，與 footer 版逐字相同，
 只把最外層 <footer class="footer"> 換成 <div class="footer">：bc-yama-header.js 用
 document.querySelector('footer')（DOM 第一個 footer 元素）當「footer 交會」觀察目標，
 置頂模組若仍用 footer 標籤，一載入就把 tax-nav／header-bot 藏起來。
@@ -15,12 +15,12 @@ DOM footer 元素數改由 J 系列（cdp_verify_footer_scroller.py）與本檔 
 
 檢查項目
   0. markup（文字層，不經瀏覽器）：/ 與 /about/ 的 HTML 內
-     id="bc-bg-footer" 恰好 1 個、無 ftco 頁尾字樣、
-     且引用 bc-bg-footer.css / bc-bg-footer.js；</footer> 個數 / = 0、/about/ = 1；
+     id="bc-brand-stage" 恰好 1 個、無 ftco 頁尾字樣、
+     且引用 bc-brand-stage.css / bc-brand-stage.js；</footer> 個數 / = 0、/about/ = 1；
      /coffee_menu/ 反向（仍用 ftco 頁尾，</footer> = 1）。
-  1. 頁面範圍：/ 與 /about/ 有 #bc-bg-footer 且不重複；
+  1. 頁面範圍：/ 與 /about/ 有 #bc-brand-stage 且不重複；
      DOM footer 元素數 = 0（/）、1（/about/）、1（/coffee_menu/）；
-     /coffee_menu/ 沒有 #bc-bg-footer（且仍用 .ftco-footer）。
+     /coffee_menu/ 沒有 #bc-brand-stage（且仍用 .ftco-footer）。
   2. 釘牌（.footer-logo-cell）：無品牌金底色（background 透明）、幾何尺寸。
   3. 白色線稿：deco 一律白（deco_*.svg 檔案內 root fill:#ffffff），
      <img> 不再套用 .is-invert（filter 為 none）。
@@ -37,10 +37,10 @@ ROOT = "/home/kei/Desktop/betweencoffee_delivery_enhance"
 MEASURE_JS = r"""
 (function(){
   var out = {};
-  var root = document.getElementById('bc-bg-footer');
+  var root = document.getElementById('bc-brand-stage');
   out.has_bg_footer = !!root;
   out.has_ftco_footer = !!document.querySelector('.ftco-footer');
-  out.bg_footer_count = document.querySelectorAll('#bc-bg-footer').length;
+  out.bg_footer_count = document.querySelectorAll('#bc-brand-stage').length;
   out.ftco_count = document.querySelectorAll('.ftco-footer').length;
   out.footer_tag_count = document.querySelectorAll('footer').length;
   out.doc_scroll_w = document.documentElement.scrollWidth;
@@ -48,10 +48,10 @@ MEASURE_JS = r"""
   out.no_h_overflow = out.doc_scroll_w <= out.inner_w + 1;
   if (!root) return out;
 
-  // 2026-10-14：首頁照片格（#bc-clock-photos）已改為環形照片列 —— 不再有
-  // [data-footer-logo="wrap"/"item"]（該 hook 僅剩 /about/ 真頁尾的 5 格 deco 輪播在用），
+  // 2026-10-14：首頁照片格（#bc-stage-photo-ring）已改為環形照片列 —— 不再有
+  // [data-stage-logo="wrap"/"item"]（該 hook 僅剩 /about/ 真頁尾的 5 格 deco 輪播在用），
   // 故釘牌改用 .footer-logo-cell（兩頁都有；/about/ 仍靠 wrap、語意不變）。
-  var cell = root.querySelector('[data-footer-logo="wrap"]')
+  var cell = root.querySelector('[data-stage-logo="wrap"]')
       || root.querySelector('.footer-logo-cell');
   out.cell_found = !!cell;
   if (cell) {
@@ -62,7 +62,7 @@ MEASURE_JS = r"""
     out.cell_bg_transparent = cs.backgroundColor === 'rgba(0, 0, 0, 0)';
     out.cell_cursor = cs.cursor;
   }
-  var items = root.querySelectorAll('[data-footer-logo="item"]');
+  var items = root.querySelectorAll('[data-stage-logo="item"]');
   out.item_count = items.length;
   var activeIdx = -1;
   for (var i = 0; i < items.length; i++) {
@@ -84,7 +84,7 @@ MEASURE_JS = r"""
       ? getComputedStyle(items[0]).backgroundColor === 'rgba(0, 0, 0, 0)' : null;
   /* 2026-10-14：首頁的環形照片列（筆數；幾何/同步細節由
      docs/verify/cdp_verify_hero_coffee_photos.py 專責驗） */
-  out.ring_count = root.querySelectorAll('#bc-clock-photos .hero_hand_item').length;
+  out.ring_count = root.querySelectorAll('#bc-stage-photo-ring .hero_hand_item').length;
   return out;
 })()
 """
@@ -103,10 +103,10 @@ def markup_checks():
     否則這裡看到的是開機當時的舊渲染。
     """
     print("=== markup (文字層) ===")
-    # path, 期望 id="bc-bg-footer" 次數, 期望 ftco 頁尾次數比較式, 期望 </footer> 次數
+    # path, 期望 id="bc-brand-stage" 次數, 期望 ftco 頁尾次數比較式, 期望 </footer> 次數
     spec = [
-        # 2026-10-09：/ 的 #bc-bg-footer 已由頁尾移到最上方當 hero，最外層標籤由 footer 改為 div
-        # （見 partials/bc_hero.html）→ / 不再有 </footer>；/about/ 仍是頁尾版 = 1；
+        # 2026-10-09：/ 的 #bc-brand-stage 已由頁尾移到最上方當 hero，最外層標籤由 footer 改為 div
+        # （見 partials/bc_brand_stage_hero.html）→ / 不再有 </footer>；/about/ 仍是頁尾版 = 1；
         # /coffee_menu/ 走 base.html 的 .ftco-footer = 1。
         ("/", 1, "==0", 0),
         ("/about/", 1, "==0", 1),
@@ -115,19 +115,19 @@ def markup_checks():
     all_ok = True
     for path, want_bg, ftco_mode, want_footer in spec:
         html = fetch(path)
-        got_bg = html.count('id="bc-bg-footer"')
+        got_bg = html.count('id="bc-brand-stage"')
         got_ftco = html.count("ftco-footer")
         got_footer = html.count("</footer>")
         ok_bg = got_bg == want_bg
         ok_ftco = (got_ftco == 0) if ftco_mode == "==0" else (got_ftco >= 1)
-        print(f"  {path}: id=\"bc-bg-footer\"={got_bg} ftco-footer={got_ftco} </footer>={got_footer}")
+        print(f"  {path}: id=\"bc-brand-stage\"={got_bg} ftco-footer={got_ftco} </footer>={got_footer}")
         results = {
-            f"{path} id=\"bc-bg-footer\" 次數 == {want_bg}": ok_bg,
+            f"{path} id=\"bc-brand-stage\" 次數 == {want_bg}": ok_bg,
             f"{path} ftco-footer 次數 {ftco_mode}（got {got_ftco}）": ok_ftco,
             f"{path} </footer> 個數 == {want_footer}（got {got_footer}）": got_footer == want_footer,
         }
         if want_bg:
-            for asset in ("css/bc-bg-footer.css", "js/bc-bg-footer.js"):
+            for asset in ("css/bc-brand-stage.css", "js/bc-brand-stage.js"):
                 results[f"{path} 引用 {asset}"] = asset in html
         for k, v in results.items():
             all_ok = all_ok and v
@@ -163,7 +163,7 @@ async def main():
             return r.get("result", {}).get("value")
 
         async def shot(name):
-            rr = await evaljs("(function(){var e=document.getElementById('bc-bg-footer');"
+            rr = await evaljs("(function(){var e=document.getElementById('bc-brand-stage');"
                               "if(!e)return null;var r=e.getBoundingClientRect();"
                               "return {x:r.left+window.scrollX,y:r.top+window.scrollY,w:r.width,h:r.height};})()")
             if not rr:
@@ -197,9 +197,9 @@ async def main():
                   f"bg_id_count={r.get('bg_footer_count')} ftco_dom_count={r.get('ftco_count')} "
                   f"footer_tags={r.get('footer_tag_count')}")
             checks = {
-                f"{path} #bc-bg-footer 存在 == {want_bg}": bool(r.get("has_bg_footer")) is want_bg,
+                f"{path} #bc-brand-stage 存在 == {want_bg}": bool(r.get("has_bg_footer")) is want_bg,
                 f"{path} .ftco-footer 存在 == {want_ftco}": bool(r.get("has_ftco_footer")) is want_ftco,
-                f"{path} #bc-bg-footer 不重複（<= {1 if want_bg else 0}）":
+                f"{path} #bc-brand-stage 不重複（<= {1 if want_bg else 0}）":
                     (r.get("bg_footer_count") or 0) <= (1 if want_bg else 0),
             }
             checks[f"{path} DOM footer 元素數 == {want_footer}"
@@ -235,10 +235,10 @@ async def main():
                        {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True}))
         await send(msg("Page.navigate", {"url": BASE + "/about/"}))
         await asyncio.sleep(4)
-        idx_js = ("(function(){var items=document.querySelectorAll('[data-footer-logo=\"item\"]');"
+        idx_js = ("(function(){var items=document.querySelectorAll('[data-stage-logo=\"item\"]');"
                   "for(var i=0;i<items.length;i++){if(getComputedStyle(items[i]).display!=='none')return i;}return -1;})()")
-        click_js = ("(function(){var w=document.querySelector('[data-footer-logo=\"wrap\"]');w.click();"
-                    "var items=document.querySelectorAll('[data-footer-logo=\"item\"]');"
+        click_js = ("(function(){var w=document.querySelector('[data-stage-logo=\"wrap\"]');w.click();"
+                    "var items=document.querySelectorAll('[data-stage-logo=\"item\"]');"
                     "for(var i=0;i<items.length;i++){if(getComputedStyle(items[i]).display!=='none')return i;}return -1;})()")
         seq = [await evaljs(idx_js)]
         for _ in range(5):

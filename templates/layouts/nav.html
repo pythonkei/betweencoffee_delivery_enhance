@@ -1,7 +1,18 @@
 <!-- nav.html -->
 <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'index' %}">&#65371; Between &#65373; </a>
+        <!-- 2026-10-17（使用者指示）：BETWEEN logo 改為「捲動時固定左上角」＋「自動變色」。
+             原本的 <a class="navbar-brand">…</a> 拆成兩個角色（樣式見 bc-components.css
+             的「navbar-brand 固定左上角 + 自動變色」區塊）：
+               · 這裡保留同 size／同 class 的排版佔位（span，aria-hidden、visibility:hidden）
+                 → navbar 右側（weather／選單）的水平排版完全不變；
+                   bc-attract-place.js 仍以 `#ftco-navbar .navbar-brand` 的 rect 當對齊基準。
+               · 真正的連結移到 </nav> 之後、body 直接子層（.bc-navbar-brand-fixed）。
+             為何要移出 nav：mix-blend-mode 只會與「同一個 stacking context 的 backdrop」
+             混合；#ftco-navbar 為 position:absolute + z-index（bc-components.css 設 100）
+             會建立 stacking context，logo 留在 nav 內就永遠吃不到頁面內容的顏色
+             → 遇到白色／淺色區塊會直接消失。 -->
+        <span class="navbar-brand bc-navbar-brand-spacer" aria-hidden="true">&#65371; Between &#65373;</span>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <!-- 2026-08-10: 漢堡選單套用 c-attract 動畫（三條線，參考 cheesetart.com） -->
             <div class="bc-attract-menu">
@@ -18,7 +29,8 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item d-lg-none">
                     <a class="nav-link" href="#" id="bc-cart-toggle" aria-label="購物車">
-                        <span class="icon material-icons">shopping_cart</span>
+                        <!-- 2026-10-19（首頁效能 P0）：Material Icons → icomoon（首頁不再載入 Material 字型） -->
+                        <span class="icon icon-shopping-cart" aria-hidden="true"></span>
                         <span class="cart-count cart-amount-label cart-amount-label-pill bc-cart-badge bc-cart-count">{{ cart_count }}</span>
                     </a>
                 </li>
@@ -92,6 +104,12 @@
         </script>
     </div>
 </nav>
+<!-- 2026-10-17（使用者指示）：BETWEEN logo 本體 —— 固定於左上角（position: fixed）、
+     白色文字 + mix-blend-mode: difference 自動變色（黑底→白、白底→黑、照片/任何色塊→自動反相）。
+     必須是 body 直接子層（不可放回 #ftco-navbar 內），否則 blend 只會吃到 navbar 的透明背景，
+     遇到白色區塊會消失——原因詳見上方 nav 內註解。
+     座標與各斷點字級＝原本 navbar 內 logo 的實測值（載入瞬間不會位移）。 -->
+<a class="bc-navbar-brand-fixed" href="{% url 'index' %}" aria-label="Between Coffee 首頁">&#65371; Between &#65373;</a>
 <!-- 2026-08-10: Buy & Order 流動按鈕（c-attract，參考 cheesetart.com）
      移至 <nav> 外、body 直接子層（z-index 修復）：
      #ftco-navbar 為 position:absolute + z-index:3，會建立 stacking context，
@@ -117,7 +135,8 @@
                         9 takeout_dining       外帶餐盒
                        10 shopping_cart        購物車
                      換圖示＝只改下面那一行的文字。 -->
-                <span class="icon material-icons c-icon">coffee</span>
+                <!-- 2026-10-19（首頁效能 P0）：material-icons coffee → icomoon icon-coffee -->
+                <span class="icon icon-coffee c-icon" aria-hidden="true"></span>
                 <span lang="en">Order</span>
             </a>
         </div>
@@ -131,7 +150,8 @@
                 {% if user_avatar %}
                 <img src="{{ user_avatar }}" class="bc-attract-profile__avatar" alt="avatar">
                 {% else %}
-                <span class="icon material-icons c-icon">person</span>
+                <!-- 2026-10-19（首頁效能 P0）：material-icons person → icomoon icon-person -->
+                <span class="icon icon-person c-icon" aria-hidden="true"></span>
                 {% endif %}
             </a>
         </div>

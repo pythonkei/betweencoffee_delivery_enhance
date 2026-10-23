@@ -8,22 +8,22 @@
    黑底適配沿用原站既有 -color_white 機制（filter 反白圖示），
    不引入原站以外的任何樣式/UI。
 
-   2026-10-14（使用者指示）：首頁 hero 的 #bc-clock 模組也要同一顆天氣元件
+   2026-10-14（使用者指示）：首頁 hero 的 #bc-stage-clock 模組也要同一顆天氣元件
      （位置＝左側 { 之上；尺寸＝+30%）。
      [幾何規則] `#ftco-navbar .weather` 逐條擴為
-       `#ftco-navbar .weather, #bc-bg-footer .weather`（同一組值，逐值不改），
+       `#ftco-navbar .weather, #bc-brand-stage .weather`（同一組值，逐值不改），
        並全部改寫成 `calc(<原值> * var(--wc-scale, 1))`：
          · navbar（about 頁）：沒有任何容器設 --wc-scale → ×1
            ⇒ 與改動前逐像素相同（about 頁外觀零變動）。
-         · hero（首頁 #bc-bg-footer 內）：index.html 的 <style> 設 --wc-scale:1.3
+         · hero（首頁 #bc-brand-stage 內）：index.html 的 <style> 設 --wc-scale:1.3
            ⇒ 整個元件（icon / 時鐘 / 溫度 / 日期 / weekday）等比放大 30%。
        寫法沿用本專案既有先例 bc-reviews.css 的 --rv-scale（模組內宣告 scale 變數、
        規則一律乘上它），而非 transform:scale —— transform 會影響
        bc-weather.js 以 getBoundingClientRect 量測的滑動距離。
      [範圍] navbar 專屬規則（visibility 開關、與 Order 按鈕對齊的 translateX、
        ≤991px 的 height:100%）只保留 #ftco-navbar 前綴；
-       hero 專屬（height:auto）只保留 #bc-bg-footer 前綴——理由見各自註解。
-   2026-10-17（使用者指示）：「bc-clock-weather 移除時鐘，只保留天氣與溫度」
+       hero 專屬（height:auto）只保留 #bc-brand-stage 前綴——理由見各自註解。
+   2026-10-17（使用者指示）：「bc-stage-weather 移除時鐘，只保留天氣與溫度」
      → 刪除全部 `.weather .clock / .clock .value` 規則（含 ≤991.98px 的縮小那條）；
        初始狀態改為第一態＝icon（translateX(0)）、.temperature 藏右側。
        循環只剩兩態，見 static/js/bc-weather.js 的 ORDER。
@@ -31,7 +31,7 @@
 
 /* ---- 容器（原站 header .main .weather）---- */
 #ftco-navbar .weather,
-#bc-bg-footer .weather {
+#bc-brand-stage .weather {
   display: flex;
   position: relative;
   flex-direction: column;
@@ -42,12 +42,12 @@
   transition: color .5s cubic-bezier(.23, 1, .32, 1);
 }
 
-/* ---- hero 版（首頁 #bc-bg-footer 內）高度改為內容決定 ----
+/* ---- hero 版（首頁 #bc-brand-stage 內）高度改為內容決定 ----
    navbar 的 80px（≤991px 為 height:100%）是為了對齊 navbar 的 flex 容器高度；
-   放進 #bc-clock 的 grid 格時 height:100% 會撐滿整個時鐘列（約 226–356px），
+   放進 #bc-stage-clock 的 grid 格時 height:100% 會撐滿整個時鐘列（約 226–356px），
    內容置中後就會與 grid 同一格的 { 重疊。改 auto 後高度＝內容（桌面約 83px），
    配合 index.html 的 align-self:start 恆貼齊該格頂端 → 恆在 { 之上。 */
-#bc-bg-footer .weather {
+#bc-brand-stage .weather {
   height: auto;
 }
 
@@ -94,14 +94,14 @@
 
 /* ---- view：icon 與溫度重疊裁切窗口（滑動切換動畫的關鍵）---- */
 #ftco-navbar .weather .view,
-#bc-bg-footer .weather .view {
+#bc-brand-stage .weather .view {
   position: relative;
   width: calc(80px * var(--wc-scale, 1));
   height: calc(40px * var(--wc-scale, 1));
   overflow: hidden;
 }
 #ftco-navbar .weather .view > *,
-#bc-bg-footer .weather .view > * {
+#bc-brand-stage .weather .view > * {
   position: absolute;
   width: max-content;
   height: max-content;
@@ -118,21 +118,21 @@
    不需等待 JS/API 回應（避免兩元素疊中央 → 溫度先顯示再跳動到 icon）
    2026-10-14：位移量改為 calc(80px * var(--wc-scale,1)) —— 與 JS 的滑動距離
    （bc-weather.js slideDist() 讀 .view 實際寬度）逐值相同，hero 版為 104px。
-   2026-10-17（使用者指示：bc-clock-weather 移除時鐘）：循環順序改為 icon ⇄ 溫度
+   2026-10-17（使用者指示：bc-stage-weather 移除時鐘）：循環順序改為 icon ⇄ 溫度
    ⇒ 第一態是 .icon，故 .icon 歸零、.temperature 藏右側（原 .clock 那條已刪）。 */
 #ftco-navbar .weather .view .icon,
-#bc-bg-footer .weather .view .icon { transform: translateX(0); }
+#bc-brand-stage .weather .view .icon { transform: translateX(0); }
 #ftco-navbar .weather .view .temperature,
-#bc-bg-footer .weather .view .temperature { transform: translateX(calc(80px * var(--wc-scale, 1))); }
+#bc-brand-stage .weather .view .temperature { transform: translateX(calc(80px * var(--wc-scale, 1))); }
 
 /* ---- icon ---- */
 #ftco-navbar .weather .view .icon,
-#bc-bg-footer .weather .view .icon {
+#bc-brand-stage .weather .view .icon {
   width: calc(80px * var(--wc-scale, 1));
   height: calc(40px * var(--wc-scale, 1));
 }
 #ftco-navbar .weather .view .icon img,
-#bc-bg-footer .weather .view .icon img {
+#bc-brand-stage .weather .view .icon img {
   display: block;
   width: 100%;
   height: auto;
@@ -140,18 +140,18 @@
 
 /* ---- 溫度 ---- */
 #ftco-navbar .weather .temperature,
-#bc-bg-footer .weather .temperature {
+#bc-brand-stage .weather .temperature {
   display: flex;
   align-items: baseline;
 }
 #ftco-navbar .weather .temperature .value,
-#bc-bg-footer .weather .temperature .value {
+#bc-brand-stage .weather .temperature .value {
   display: block;
   margin: calc(0px + var(--leading-trim-en-top, 0px)) 0 calc(0px + var(--leading-trim-en-bottom, 0px));
   font-size: calc(32px * var(--wc-scale, 1));
 }
 #ftco-navbar .weather .temperature .unit,
-#bc-bg-footer .weather .temperature .unit {
+#bc-brand-stage .weather .temperature .unit {
   display: block;
   margin: calc(0px + var(--leading-trim-en-top, 0px)) 0 calc(0px + var(--leading-trim-en-bottom, 0px));
   font-size: calc(16px * var(--wc-scale, 1));
@@ -159,7 +159,7 @@
 
 /* ---- 日期（2026-08-26 需求：隱藏年份後字體增大 10px→12px）---- */
 #ftco-navbar .weather .date,
-#bc-bg-footer .weather .date {
+#bc-brand-stage .weather .date {
   display: block;
   margin: calc(6px * var(--wc-scale, 1) + var(--leading-trim-ja-top, 0px)) 0 calc(0px + var(--leading-trim-ja-bottom, 0px));
   font-size: calc(12px * var(--wc-scale, 1));
@@ -167,11 +167,11 @@
 /* 隱藏年份（2026-08-26 需求：顯示年份邏輯不變——JS 仍填充 year，僅 CSS 隱藏；
    桌面與移動端統一） */
 #ftco-navbar .weather .date .year,
-#bc-bg-footer .weather .date .year {
+#bc-brand-stage .weather .date .year {
   display: none;
 }
 #ftco-navbar .weather .date .year:before,
-#bc-bg-footer .weather .date .year:before {
+#bc-brand-stage .weather .date .year:before {
   content: ". ";
 }
 /* ---- weekday 徽章（2026-08-27 整合：yokohama-timberwharf event/1125 的 .weekday 膠囊徽章）
@@ -179,7 +179,7 @@
    需求變更：與日期**水平對齊**（inline-block + vertical-align:middle）
    黑底適配：原站 #0000001a 黑底不可見 → rgba(255,255,255,.12)（同 -color_white 機制）---- */
 #ftco-navbar .weather .date .weekday,
-#bc-bg-footer .weather .date .weekday {
+#bc-brand-stage .weather .date .weekday {
   display: inline-block;
   vertical-align: middle;
   margin-left: calc(6px * var(--wc-scale, 1));
@@ -193,7 +193,7 @@
    此規則須放在 weekday 樣式之後，否則被上方 inline-block 覆蓋（相同特異性、後者優先） */
 @media screen and (max-width: 767.98px) {
   #ftco-navbar .weather .date .weekday,
-  #bc-bg-footer .weather .date .weekday {
+  #bc-brand-stage .weather .date .weekday {
     display: block;
     width: fit-content;
     margin: calc(3px * var(--wc-scale, 1)) auto 0;
@@ -204,13 +204,13 @@
 
 /* ---- 底部邊線（原站 border 分隔線；2026-08-26 需求：移除）---- */
 #ftco-navbar .weather .border,
-#bc-bg-footer .weather .border {
+#bc-brand-stage .weather .border {
   display: none;
 }
 
 /* ---- -font_en（原站字型宣告；SaansSemiBold 為原站自訂字型，本地 fallback Helvetica Neue）---- */
 #ftco-navbar .weather.-font_en,
-#bc-bg-footer .weather.-font_en {
+#bc-brand-stage .weather.-font_en {
   font-weight: 600;
   line-height: 1;
   font-family: SaansSemiBold, "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -219,15 +219,15 @@
 
 /* ---- 黑底適配：原站 -color_white 機制（白字 + filter 反白圖示）---- */
 #ftco-navbar .weather.-color_white,
-#bc-bg-footer .weather.-color_white {
+#bc-brand-stage .weather.-color_white {
   color: #fff;
 }
 #ftco-navbar .weather.-color_white .view .icon,
-#bc-bg-footer .weather.-color_white .view .icon {
+#bc-brand-stage .weather.-color_white .view .icon {
   filter: brightness(0) invert(1);
 }
 #ftco-navbar .weather.-color_white .border,
-#bc-bg-footer .weather.-color_white .border {
+#bc-brand-stage .weather.-color_white .border {
   background-color: rgba(255, 255, 255, .3);
 }
 
@@ -243,25 +243,25 @@
      view 44x22→38x19、temp 16→14px、unit 10→9px、date 9→8px
      （2026-10-17：原時鐘的 16→14px 那條已隨時鐘移除） */
   #ftco-navbar .weather .view,
-  #bc-bg-footer .weather .view {
+  #bc-brand-stage .weather .view {
     width: calc(38px * var(--wc-scale, 1));
     height: calc(19px * var(--wc-scale, 1));
   }
   #ftco-navbar .weather .view .icon,
-  #bc-bg-footer .weather .view .icon {
+  #bc-brand-stage .weather .view .icon {
     width: calc(38px * var(--wc-scale, 1));
     height: calc(19px * var(--wc-scale, 1));
   }
   #ftco-navbar .weather .temperature .value,
-  #bc-bg-footer .weather .temperature .value {
+  #bc-brand-stage .weather .temperature .value {
     font-size: calc(14px * var(--wc-scale, 1));
   }
   #ftco-navbar .weather .temperature .unit,
-  #bc-bg-footer .weather .temperature .unit {
+  #bc-brand-stage .weather .temperature .unit {
     font-size: calc(9px * var(--wc-scale, 1));
   }
   #ftco-navbar .weather .date,
-  #bc-bg-footer .weather .date {
+  #bc-brand-stage .weather .date {
     margin: calc(8px * var(--wc-scale, 1) + var(--leading-trim-ja-top, 0px)) 0 calc(0px + var(--leading-trim-ja-bottom, 0px));
     font-size: calc(8px * var(--wc-scale, 1));
   }

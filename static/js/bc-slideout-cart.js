@@ -437,12 +437,17 @@ class SlideoutCart {
     // 原因：購物車為空時浮動鈕是 display:none，瀏覽器不會為它載入 Material Icons，
     // 之後加入商品才顯示時會先渲染成文字（例如 "shopping_bag"，實測寬 346px）→ 文字閃現。
     // 這裡在頁面載入時就要求該字型（依目前使用的圖示字型家族）。
+    // 2026-10-19（首頁效能 P0）：首頁的浮動鈕圖示已改為 icomoon（.icon-shopping-bag，
+    // 首頁不再載入 Material 字型）→ 選擇器與字型家族改為依實際 computed font-family 判斷，
+    // 兩種字型都能正確預載。
     if (document.fonts && document.fonts.load) {
-      const icon = this.floatingCart.querySelector('.material-icons, .material-symbols-outlined');
+      const icon = this.floatingCart.querySelector('.material-icons, .material-symbols-outlined, .icon');
       if (icon) {
         const fs = getComputedStyle(icon).fontSize || '52px';
+        const familyCss = getComputedStyle(icon).fontFamily || '';
         const family = icon.classList.contains('material-symbols-outlined')
-          ? 'Material Symbols Outlined' : 'Material Icons';
+          ? 'Material Symbols Outlined'
+          : (familyCss.indexOf('icomoon') !== -1 ? 'icomoon' : 'Material Icons');
         document.fonts.load(fs + ' "' + family + '"').catch(() => {});
       }
     }

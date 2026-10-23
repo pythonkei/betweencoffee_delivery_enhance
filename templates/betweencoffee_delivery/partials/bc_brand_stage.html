@@ -1,75 +1,83 @@
 {% load static %}
 {% comment %}
-BC 品牌動態 footer（#bc-bg-footer）共享片段。
+BC 品牌舞台（#bc-brand-stage）共享片段 —— about 頁的「真頁尾」版本。
 2026-10-09：由 about.html 的 bcc_footer block 抽出為單一來源，about / index 兩頁共用
 （index.html 原本使用 base.html 的 .ftco-footer 靜態圖 footer）。
-依賴：static/css/bc-bg-footer.css、static/js/bc-bg-footer.js、
+依賴：static/css/bc-brand-stage.css、static/js/bc-brand-stage.js、
       gsap 3.13 + SplitText + CustomEase（各頁自備 extra_css / extra_scripts）。
-用法：block bcc_footer + include 'betweencoffee_delivery/partials/bc_bg_footer.html'
+用法：block bcc_footer + include 'betweencoffee_delivery/partials/bc_brand_stage.html'
+
+2026-10-18（使用者指示）：模組改名（footer → 功能語意）——
+ · 檔案 bc_bg_footer.html → bc_brand_stage.html；根節點 #bc-bg-footer → #bc-brand-stage。
+ · 子模組 id / data 屬性同步改為 bc-stage-* / data-stage-*（完整對照見
+   static/css/bc-brand-stage.css 檔頭）。
+ · 本檔仍是 about 頁的真頁尾；首頁第一屏改用 hero 變體
+   partials/bc_brand_stage_hero.html（只差外層 <footer> → <div> 與照片格內容）。
+
 
 2026-10-12（使用者指示）：
- · Webflow 匯出的 w-node-<uuid>-032bc8db id 全數改為語意化命名（元件＋屬性，如 bc-clock-hours）；
-   同一組 id 與首頁 hero 的 bc_hero.html 共用 → 改名須「bc_hero.html＋本檔＋bc-bg-footer.css」
+ · Webflow 匯出的 w-node-<uuid>-032bc8db id 全數改為語意化命名（元件＋屬性，如 bc-stage-clock-hours）；
+   同一組 id 與首頁 hero 的 bc_brand_stage_hero.html 共用 → 改名須「bc_brand_stage_hero.html＋本檔＋bc-brand-stage.css」
    三檔同步，否則任一方會失去 grid 定位。
- · 時鐘 { } 移除 h1.is-desktop（≤991px 原本被 CSS `#bc-bg-footer .is-desktop{display:none}` 隱藏
-   → 手機／平板看不到），改為 `.h1.bc-clock-brace`；≤991px 時鐘列與首頁同步改 9 欄
+ · 時鐘 { } 移除 h1.is-desktop（≤991px 原本被 CSS `#bc-brand-stage .is-desktop{display:none}` 隱藏
+   → 手機／平板看不到），改為 `.h1.bc-stage-clock-brace`；≤991px 時鐘列與首頁同步改 9 欄
    `{ 15 : 照片 : 19 }`（共用同一份 CSS，兩頁外觀一致）。
 
 {% endcomment %}
-<div id="bc-bg-footer">
+<div id="bc-brand-stage">
 <footer class="footer">
   <div class="footer-inner">
     <div class="w-layout-grid grid is-footer">
-      <div id="bc-heading-hug-in-a-cup" class="heading-group-wrap">
+      <div id="bc-stage-headline-hug-in-a-cup" class="heading-group-wrap">
         <h1 data-reveal="text" class="h1">Hug in</h1>
         <h1 data-reveal="text" class="h1">a Cup</h1>
       </div>
-      <div id="bc-heading-perfect-to-go" class="heading-group-wrap mt-8">
+      <div id="bc-stage-headline-perfect-to-go" class="heading-group-wrap mt-8">
         <h1 data-reveal="text" class="h1">Perfect</h1>
         <h1 data-reveal="text" class="h1">to Go</h1>
       </div>
-      <div id="bc-clock" class="footer-time">
+      <div id="bc-stage-clock" class="footer-time">
         <!-- 2026-10-08：時間括號由 ( ) 改為 { }，與兩側冒號同一組標點視覺 -->
-        <h1 data-reveal="text" id="bc-clock-brace-open" class="h1 bc-clock-brace">{</h1>
-        <h1 data-footer-time="hours" data-reveal="text" id="bc-clock-hours" class="h1">00</h1>
-        <h1 data-reveal="text" id="bc-clock-brace-close" class="h1 bc-clock-brace">}</h1>
-        <div id="bc-clock-photos" class="footer-time-inner">
-          <div data-footer-logo="wrap" data-reveal="clip-down" class="footer-logo-cell">
+        <h1 data-reveal="text" id="bc-stage-clock-brace-open" class="h1 bc-stage-clock-brace">{</h1>
+        <h1 data-stage-clock="hours" data-reveal="text" id="bc-stage-clock-hours" class="h1">00</h1>
+        <h1 data-reveal="text" id="bc-stage-clock-brace-close" class="h1 bc-stage-clock-brace">}</h1>
+        <div id="bc-stage-photo-ring" class="footer-time-inner">
+          <div data-stage-logo="wrap" data-reveal="clip-down" class="footer-logo-cell">
             <div class="footer-logo-list-wrap w-dyn-list">
-              <div data-footer-logo="list" role="list" class="footer-logo-list w-dyn-items">
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+              <div data-stage-logo="list" role="list" class="footer-logo-list w-dyn-items">
+                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
                   <!-- 2026-10-08：加版本查詢字串，避免瀏覽器續用快取中的舊黑色 deco SVG（白 fill 版本才會生效） -->
                   <img src="{% static 'images/deco_01.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
                   <img src="{% static 'images/deco_02.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
                   <img src="{% static 'images/deco_05.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
                   <img src="{% static 'images/deco_06.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-footer-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
                   <img src="{% static 'images/deco_07.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <h1 data-reveal="text" id="bc-clock-colon-before-minutes" class="h1">:</h1>
-        <h1 data-footer-time="minutes" data-reveal="text" id="bc-clock-minutes" class="h1">00</h1>
-        <h1 data-reveal="text" id="bc-clock-colon-after-minutes" class="h1">:</h1>
+        <h1 data-reveal="text" id="bc-stage-clock-colon-before-minutes" class="h1">:</h1>
+        <h1 data-stage-clock="minutes" data-reveal="text" id="bc-stage-clock-minutes" class="h1">00</h1>
+        <h1 data-reveal="text" id="bc-stage-clock-colon-after-minutes" class="h1">:</h1>
       </div>
-      <div id="bc-heading-fresh-beans" class="heading-group-wrap is-right">
+      <div id="bc-stage-headline-fresh-beans" class="heading-group-wrap is-right">
         <h1 data-reveal="text" class="h1">Fresh</h1>
         <h1 data-reveal="text" class="h1">beans</h1>
       </div>
-      <div id="bc-heading-roasted-daily" class="heading-group-wrap is-right mt-8">
+      <div id="bc-stage-headline-roasted-daily" class="heading-group-wrap is-right mt-8">
         <h1 data-reveal="text" class="h1">roasted</h1>
         <h1 data-reveal="text" class="h1">daily</h1>
       </div>
-      <div id="bc-footer-socials" class="footer-socials">
+      <div id="bc-stage-socials" class="footer-socials">
         <div class="socials-list-wrap w-dyn-list">
           <div data-reveal="w" role="list" class="social-list w-dyn-items">
             <div data-reveal="div" role="listitem" class="social-item w-dyn-item">
@@ -100,9 +108,28 @@ BC 品牌動態 footer（#bc-bg-footer）共享片段。
               </a>
             </div>
           </div>
+          <!-- 2026-10-20（使用者指示）：社群列尾端加一顆「會動的 PNG」裝飾。
+               檔案是 APNG（Animated PNG：PNG 內含 acTL/fcTL 區塊，<img> 會自動播放、自動循環，
+               不需要 JS，副檔名仍是 .png）。
+               2026-10-23 更新：使用者換了新版母檔 static/images/deco_hospitality_static.png
+               （1320×1320 / 90 幀 / 4.5 MB）。母檔只當「來源」，不要直接掛在頁面上——
+               頁面用的小檔由 `python3 scripts/make_deco_hospitality_assets.py` 產生：
+                 deco_hospitality_apng.png     96×96 / 90 幀 / 33ms（≈3.0s）/ 361KB
+                 _deco_hospitality_static.png  96×96 單張（reduced-motion 用，4KB）
+               顯示 64px（與 .social-item 同尺寸），96px 檔供視網膜螢幕；
+               prefers-reduced-motion 時改用單張靜態 PNG（<picture> 只會下載被選中的那一個）。
+               純裝飾 → aria-hidden，不進無障礙樹、不影響 role="list" 的子項結構。 -->
+          <div class="social-item is-deco" data-reveal="div" aria-hidden="true">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)"
+                      srcset="{% static 'images/_deco_hospitality_static.png' %}?v=20261023b" />
+              <img src="{% static 'images/deco_hospitality_apng.png' %}?v=20261023b"
+                   width="96" height="96" alt="" loading="lazy" decoding="async" />
+            </picture>
+          </div>
         </div>
       </div>
-      <div id="bc-footer-mail" class="foooter-mail">
+      <div id="bc-stage-marquee" class="foooter-mail">
         <div data-reveal="text" class="p1">
           Available for
           <br/>

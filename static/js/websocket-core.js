@@ -12,11 +12,28 @@
  * - 統一 UI 連接狀態指示器
  * - Service Worker 背景監控（可選）
  * 
- * 版本: 3.0.0
- * 最後更新: 2026-07-03
+ * 版本: 3.0.1
+ * 最後更新: 2026-10-17
+ *
+ * 3.0.1（2026-10-17）：
+ * - 全站預設「不自動連線」（opt-in）：僅需要即時更新的頁面（員工訂單管理）
+ *   在模板注入 window.BC_WS_CONFIG = { autoConnect: true } 才建立連線，
+ *   避免訪客在一般頁面連 /ws/queue/（員工通道）造成握手失敗 → 重連風暴。
+ * - fallback URL 預設改為後端實際路由 /eshop/api/ws-fallback/
+ *   （修正原本硬編碼 /api/ws-fallback/ 造成永久 404 輪詢）。
+ * - 新增 maxReconnectAttempts（預設 5，0 = 無限），達上限停止重連。
+ * - fallback 連續失敗 2 次即停止輪詢，避免 404 無限重試。
  */
 (function() {
     'use strict';
+
+    /**
+     * 讀取頁面級設定（由 Django 模板於 websocket-core.js 之前注入）
+     * @returns {Object}
+     */
+    function getPageConfig() {
+        return (typeof window !== 'undefined' && window.BC_WS_CONFIG) ? window.BC_WS_CONFIG : {};
+    }
 
     class WebSocketCore {
         /**
@@ -28,7 +45,8 @@
          * @param {number} options.maxDelay - 最大重連延遲（毫秒，預設 300000 = 5分鐘）
          * @param {boolean} options.enableJitter - 是否啟用抖動（預設 true）
          * @param {number} options.jitterFactor - 抖動因子（預設 0.2）
-         * @param {boolean} options.autoConnect - 是否自動連接（預設 true）
+         * @param {boolean} options.autoConnect - 是否自動連接（預設 false，需頁面明確開啟）
+         * @param {number} options.maxReconnectAttempts - 最大重連次數（預設 5，0 = 無限）
          * @param {boolean} options.showIndicator - 是否顯示連接指示器（預設 true）
          * @param {boolean} options.enableFallback - 是否啟用 HTTP fallback（預設 true）
          * @param {string} options.fallbackUrl - HTTP fallback URL（預設自動生成）
@@ -45,6 +63,7 @@
 
             // 配置
             this.options = {
+                ...options,
                 url: options.url || this._getDefaultUrl(),
                 heartbeatInterval: options.heartbeatInterval || 30000,
                 heartbeatTimeout: options.heartbeatTimeout || 10000,
@@ -52,14 +71,20 @@
                 maxDelay: options.maxDelay || 300000, // 5分鐘
                 enableJitter: options.enableJitter !== false,
                 jitterFactor: options.jitterFactor || 0.2,
-                autoConnect: options.autoConnect !== false,
+                // 3.0.1：預設不自動連線（opt-in），由頁面設定 window.BC_WS_CONFIG.autoConnect 開啟
+                autoConnect: options.autoConnect !== undefined
+                    ? options.autoConnect === true
+                    : getPageConfig().autoConnect === true,
+                // 3.0.1：重連上限（0 = 無限），避免失敗時無限重試
+                maxReconnectAttempts: options.maxReconnectAttempts !== undefined
+                    ? options.maxReconnectAttempts
+                    : (getPageConfig().maxReconnectAttempts !== undefined ? getPageConfig().maxReconnectAttempts : 5),
                 showIndicator: options.showIndicator !== false,
                 enableFallback: options.enableFallback !== false,
                 fallbackUrl: options.fallbackUrl || this._getDefaultFallbackUrl(),
                 fallbackInterval: options.fallbackInterval || 30000,
                 enablePersistence: options.enablePersistence !== false,
-                storageKey: options.storageKey || 'ws_core_',
-                ...options
+                storageKey: options.storageKey || 'ws_core_'
             };
 
             // WebSocket 實例
@@ -103,7 +128,8 @@
                 timer: null,
                 lastPollTime: null,
                 pollData: null,
-                active: false
+                active: false,
+                consecutiveFailures: 0 // 連續失敗次數（達上限即停止輪詢，避免 404 無限重試）
             };
 
             // 連接品質
@@ -135,7 +161,10 @@
             // 設定為單例
             WebSocketCore._instance = this;
 
-            console.log(`🔧 WebSocketCore v3.0.0 初始化: ${this.options.url}`);
+            // 本頁是否啟用即時連線（未啟用時 connect() 直接略過）
+            this.enabled = this.options.autoConnect === true;
+
+            console.log(`🔧 WebSocketCore v3.0.1 初始化: ${this.options.url}${this.enabled ? '' : '（本頁未啟用即時連線）'}`);
 
             // 從 localStorage 恢復狀態
             if (this.options.enablePersistence) {
@@ -186,6 +215,11 @@
          */
         connect() {
             if (this.state.isDestroyed) return;
+            // 3.0.1：本頁未啟用即時連線時不建立連線（訪客頁面不應連員工通道）
+            if (!this.enabled) {
+                console.debug('ℹ️ 本頁未啟用 WebSocket，略過連線');
+                return;
+            }
             if (this.state.isConnected) {
                 console.log('ℹ️ 已連接，跳過');
                 return;
@@ -238,6 +272,16 @@
             this.state.isConnected = false;
             this.state.isConnecting = false;
             this._updateIndicator();
+        }
+
+        /**
+         * 啟用即時連線（頁面預設關閉時，可在需要時手動開啟）
+         */
+        enable() {
+            if (this.enabled) return;
+            this.enabled = true;
+            console.log('▶️ 本頁已啟用 WebSocket');
+            this.connect();
         }
 
         /**
@@ -446,15 +490,20 @@
          * 獲取預設 WebSocket URL
          */
         _getDefaultUrl() {
+            const cfg = getPageConfig();
+            if (cfg.url) return cfg.url;
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             return `${protocol}//${window.location.host}/ws/queue/`;
         }
 
         /**
          * 獲取預設 Fallback URL
+         * 後端實際路由：eshop/urls_api.py → path("ws-fallback/")，掛在 /eshop/ 之下
          */
         _getDefaultFallbackUrl() {
-            return `${window.location.protocol}//${window.location.host}/api/ws-fallback/`;
+            const cfg = getPageConfig();
+            if (cfg.fallbackUrl) return cfg.fallbackUrl;
+            return `${window.location.origin}/eshop/api/ws-fallback/`;
         }
 
         /**
@@ -543,14 +592,19 @@
          * 處理連接關閉
          */
         _handleClose(event) {
-            console.log(`🔌 WebSocket 關閉: code=${event.code}, reason=${event.reason || '未知'}`);
+            // 3.0.1：非預期關閉只留 debug 記錄，避免訪客頁面 console 噪音
+            console.debug(`🔌 WebSocket 關閉: code=${event.code}, reason=${event.reason || '未知'}`);
             this.state.isConnected = false;
             this.state.isConnecting = false;
             this.socket = null;
 
-            // 更新品質
+            const isNormalClose = event.code === 1000;
+
+            // 更新品質（正常關閉不計入失敗）
             this.quality.disconnects++;
-            this.state.consecutiveFailures++;
+            if (!isNormalClose) {
+                this.state.consecutiveFailures++;
+            }
             this._updateQualityScore();
 
             // 停止心跳
@@ -570,7 +624,7 @@
             this._checkFallbackTrigger();
 
             // 非正常關閉才重連（code 1000 = 正常關閉）
-            if (event.code !== 1000) {
+            if (!isNormalClose) {
                 this._scheduleReconnect();
             }
         }
@@ -579,11 +633,12 @@
          * 處理錯誤
          */
         _handleError(error) {
-            console.error('❌ WebSocket 錯誤:', error);
+            // 3.0.1：握手失敗等預期內錯誤以 debug 記錄（瀏覽器本身已印出連線失敗）
+            console.debug('⚠️ WebSocket 錯誤:', error && error.message ? error.message : error);
             this.state.lastError = error;
             this.state.consecutiveFailures++;
             this._checkFallbackTrigger();
-            this._emit('error', { error: error.toString() });
+            this._emit('error', { error: error ? error.toString() : 'unknown' });
         }
 
         /**
@@ -669,10 +724,22 @@
         // ==================== 重連機制（增強版：無限重連 + 動態退避）====================
 
         /**
-         * 安排重連（增強版：無限重連 + 動態退避）
+         * 安排重連（增強版：動態退避 + 上限控制）
          */
         _scheduleReconnect() {
             if (this.state.isDestroyed) return;
+            if (!this.enabled) return; // 3.0.1：未啟用的頁面不重連
+
+            // 3.0.1：達到重連上限即停止（0 = 無限）
+            const maxAttempts = this.options.maxReconnectAttempts;
+            if (maxAttempts > 0 && this.state.reconnectAttempts >= maxAttempts) {
+                console.warn(`⛔ 已達重連上限（${maxAttempts} 次），停止重連；改由 fallback / 手動重連處理`);
+                this._emit('reconnect_exhausted', { attempts: this.state.reconnectAttempts });
+                return;
+            }
+
+            // 已有排程中的重連，避免疊加多個 timer
+            if (this.reconnectTimer) return;
 
             this.state.reconnectAttempts++;
 
@@ -695,7 +762,10 @@
 
             this._updateIndicator();
 
-            this.reconnectTimer = setTimeout(() => this.connect(), delay);
+            this.reconnectTimer = setTimeout(() => {
+                this.reconnectTimer = null;
+                this.connect();
+            }, delay);
         }
 
         /**
@@ -716,6 +786,7 @@
          */
         _checkFallbackTrigger() {
             if (!this.options.enableFallback) return;
+            if (!this.enabled) return; // 3.0.1：未啟用的頁面不做 fallback 輪詢
             if (this.state.isFallbackMode) return;
             if (this.state.consecutiveFailures >= 3) {
                 console.log('⚠️ 連續失敗 3 次，啟用 HTTP fallback 模式');
@@ -731,6 +802,7 @@
 
             this.state.isFallbackMode = true;
             this.fallback.active = true;
+            this.fallback.consecutiveFailures = 0;
             this.quality.fallbackActivations++;
 
             console.log(`🌐 啟動 HTTP fallback 輪詢: ${this.options.fallbackUrl}`);
@@ -780,6 +852,7 @@
 
                 const data = await response.json();
                 this.fallback.lastPollTime = new Date().toISOString();
+                this.fallback.consecutiveFailures = 0; // 成功即歸零
 
                 // 處理返回的更新
                 if (data.updates && Array.isArray(data.updates)) {
@@ -816,7 +889,18 @@
                 if (error.name === 'AbortError') {
                     console.debug('⏱️ Fallback 輪詢超時（正常）');
                 } else {
-                    console.warn('⚠️ Fallback 輪詢失敗:', error.message);
+                    // 3.0.1：連續失敗 2 次即停止輪詢，避免 404／路由錯誤造成無限重試
+                    this.fallback.consecutiveFailures++;
+                    console.debug(`⚠️ Fallback 輪詢失敗（第 ${this.fallback.consecutiveFailures} 次）: ${error.message}`);
+
+                    if (this.fallback.consecutiveFailures >= 2) {
+                        console.warn(`⛔ Fallback 端點不可用，停止輪詢: ${this.options.fallbackUrl}`);
+                        this._emit('fallback_failed', {
+                            url: this.options.fallbackUrl,
+                            reason: error.message
+                        });
+                        this._stopFallback();
+                    }
                 }
             }
         }
@@ -1070,16 +1154,20 @@
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     this._pageHidden = true;
-                    // 頁面隱藏時延長心跳間隔
-                    this._stopHeartbeat();
-                    this.heartbeat.timer = setInterval(() => this._sendPing(), 60000);
+                    // 頁面隱藏時延長心跳間隔（僅已連線時才需要）
+                    if (this.state.isConnected) {
+                        this._stopHeartbeat();
+                        this.heartbeat.timer = setInterval(() => this._sendPing(), 60000);
+                    }
                 } else {
                     this._pageHidden = false;
-                    // 恢復正常心跳
-                    this._stopHeartbeat();
-                    this._startHeartbeat();
-                    // 如果斷線了，嘗試重連
-                    if (!this.state.isConnected && !this.state.isConnecting) {
+                    // 恢復正常心跳（僅已連線時）
+                    if (this.state.isConnected) {
+                        this._stopHeartbeat();
+                        this._startHeartbeat();
+                    }
+                    // 3.0.1：僅本頁啟用即時連線時才嘗試重連
+                    if (this.enabled && !this.state.isConnected && !this.state.isConnecting) {
                         console.log('👁️ 頁面恢復，重新連接');
                         this.state.reconnectAttempts = 0;
                         this.state.consecutiveFailures = 0;
@@ -1097,6 +1185,8 @@
          */
         _setupNetworkHandler() {
             window.addEventListener('online', () => {
+                // 3.0.1：僅本頁啟用即時連線時才嘗試重連
+                if (!this.enabled) return;
                 console.log('🌐 網絡恢復');
                 if (!this.state.isConnected && !this.state.isConnecting) {
                     this.state.reconnectAttempts = 0;
@@ -1232,17 +1322,20 @@
         // 立即初始化
         setTimeout(() => {
             if (!WebSocketCore.getInstance()) {
+                const pageConfig = getPageConfig();
                 const core = new WebSocketCore({
-                    autoConnect: true,
-                    showIndicator: false,
-                    enableFallback: true,
+                    // 3.0.1：不再硬編碼 autoConnect: true（否則 opt-in 失效）
+                    // 僅當頁面注入 window.BC_WS_CONFIG.autoConnect === true 才連線
+                    autoConnect: pageConfig.autoConnect === true,
+                    showIndicator: pageConfig.showIndicator === true,
+                    enableFallback: pageConfig.enableFallback !== false,
                     enablePersistence: true
                 });
                 window.wsCore = core;
-                console.log('🌍 WebSocketCore v3.0.0 已註冊到 window.wsCore');
+                console.log('🌍 WebSocketCore v3.0.1 已註冊到 window.wsCore');
             }
         }, 0);
     }
 
-    console.log('✅ websocket-core.js v3.0.0 加載完成');
+    console.log('✅ websocket-core.js v3.0.1 加載完成');
 })();

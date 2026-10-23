@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""CDP 驗證：首頁 hero 的 #bc-clock 內新增「about 頁 navbar 天氣/時鐘元件」（在 { 之上、+30%），
+"""CDP 驗證：首頁 hero 的 #bc-stage-clock 內新增「about 頁 navbar 天氣/時鐘元件」（在 { 之上、+30%），
 以及照片列每張照片下方的「咖啡名稱 ＋ highlight」。
 
 改動背景（2026-10-14，使用者指示）
-  1. templates/.../partials/bc_hero.html
-     · #bc-clock 內、{ 之前新增 <div id="bc-clock-weather" class="bc-clock-weather"
+  1. templates/.../partials/bc_brand_stage_hero.html
+     · #bc-stage-clock 內、{ 之前新增 <div id="bc-stage-weather" class="bc-stage-weather"
        data-reveal="clip-down"> ＋ 與 nav.html:33-48 逐字相同的 .weather（自帶 .weather--visible）。
      · 照片格 7 筆（2026-10-14 稍後再改為 GUNTE hero 的環形照片列縮小版 ——
        .hero_hand / .hero_hand_item ＋ 一組 7 筆「名稱/highlight」，只有 -current 顯示）。
   2. static/css/bc-weather.css
-     · 幾何規則由 `#ftco-navbar .weather` 擴為 `#ftco-navbar .weather, #bc-bg-footer .weather`，
+     · 幾何規則由 `#ftco-navbar .weather` 擴為 `#ftco-navbar .weather, #bc-brand-stage .weather`，
        所有尺寸改為 calc(原值 * var(--wc-scale, 1))（先例＝bc-reviews.css 的 --rv-scale）；
        navbar 專屬（visibility 開關、Order 按鈕對齊的 translateX、≤991px height:100%）
        與 hero 專屬（height:auto）維持各自前綴。
@@ -17,8 +17,8 @@
      · 滑動距離由硬寫 80px 改為逐實例量 .view 寬（slideDist）；抽出 fillLocalDate 於 main() 立即填日期。
   4. static/js/bc-weather.js 的載入條件（base.html）about → about ＋ index。
   5. templates/.../index.html <style>
-     · #bc-clock-weather{grid-area:1/1/2/2;align-self:start;justify-self:center}、
-       ≥992px 把 #bc-clock-brace-open 釘回 1/1/2/2（否則自動置位會整列跑版）、
+     · #bc-stage-weather{grid-area:1/1/2/2;align-self:start;justify-self:center}、
+       ≥992px 把 #bc-stage-clock-brace-open 釘回 1/1/2/2（否則自動置位會整列跑版）、
        .weather{--wc-scale:1.3}；
      · .footer-logo-caption 字級與顏色（bc-series.css 只載入 about 頁，故本頁自帶同值宣告）；
        2026-10-14 稍後：照片格改為環形照片列（見 docs/verify/cdp_verify_hero_coffee_photos.py），
@@ -38,7 +38,7 @@
        4 + 18×1.4）、F7 字級 **24/18**；≤991px 逐值不變。時序改由 static/js/bc-hand-ring.js
        綁「圓盤旋轉過渡結束」⇒ 本檔量測前先 `settle_ring()`（暫停 autoplay ＋ 等文字收斂），
        否則 F2/F3 會落在 1.2s 的換張窗口內（見 PAUSE_HERO_JS 的註解）。
-       ⚠ 2026-10-17（使用者指示「bc-clock-weather 移除時鐘，只保留天氣與溫度」）：
+       ⚠ 2026-10-17（使用者指示「bc-stage-weather 移除時鐘，只保留天氣與溫度」）：
        時鐘節點與 CSS/JS 全數移除、循環改為 icon ⇄ 溫度 ⇒
          · A 的六件組 → **五件組**（另加 A3b 反向驗 .clock 不存在）；
          · C 的「1.3 倍」比較去掉 clock（只剩 temp/unit/date）；
@@ -71,7 +71,7 @@
     F4 的期望值已改為 4.00 * w / 14.4（見 expected_img_h()）。
 
 檢查項目（A–F 每個 viewport 各一輪；G 為 /about/ 反向守門）
-  A. 結構：#bc-clock 的第一個子項是 #bc-clock-weather，其內恰 1 顆 .weather（含
+  A. 結構：#bc-stage-clock 的第一個子項是 #bc-stage-weather，其內恰 1 顆 .weather（含
      .weather--visible / -font_en / -color_white），且 .view / .icon / .temperature /
      .date / .border 五件齊全（與 navbar 那顆同構，且兩顆都已無 .clock）。
   B. 幾何：
@@ -99,11 +99,11 @@
      同索引（顯示中的 name == 該筆 img alt）；文字區高度 = --bc-hero-caption-h（±1px）；
      照片區（.footer-logo-list）高度 = ≥992px 400vw/ratio（@1440 = 400.00）／
      ≤991px 180vw/ratio（＝改動前值，未動）（皆 ±1px）；
-     首頁已無舊輪播 hook（data-footer-logo=item）；font-size 為 20/16（≥992）、13/10（768–991）、
+     首頁已無舊輪播 hook（data-stage-logo=item）；font-size 為 20/16（≥992）、13/10（768–991）、
      11/9（≤767）；highlight 為品牌金 rgb(196, 155, 99)；name 為 Josefin Sans ＋ uppercase ＋ 白字。
   G. /about/ 反向守門：navbar 那顆仍 visible、未縮放（--wc-scale 1、view 80、仍被填充
-     日期/溫度）、已無 .clock；about 的真頁尾 #bc-bg-footer 內 0 顆 .weather、
-     無 #bc-clock-weather；時鐘列仍為 8 欄、`{` 的 x/寬與改動前一致。
+     日期/溫度）、已無 .clock；about 的真頁尾 #bc-brand-stage 內 0 顆 .weather、
+     無 #bc-stage-weather；時鐘列仍為 8 欄、`{` 的 x/寬與改動前一致。
 
 多個 viewport：1440x900 / 1280x800 / 992x900 / 991x900 / 768x1024 / 480x900 / 390x844，
 各存一張「時鐘區」視窗截圖（viewport-only）。
@@ -131,10 +131,10 @@ PAUSE_HERO_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .spli
                  "if(!s) return false;"
                  "['mouseenter','mouseover'].forEach(function(t){"
                  "s.dispatchEvent(new MouseEvent(t,{bubbles:true}));});return true;})()")
-CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .bc-ring-caption');"
+CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-stage-photo-ring .bc-ring-caption');"
                   "return c ? !c.classList.contains('-hidden') : true;})()")
 
-# 照片高度基準（= bc-bg-footer.css 的 `180vw / scale-ratio`，僅剩 ≤991px 在用的值）
+# 照片高度基準（= bc-brand-stage.css 的 `180vw / scale-ratio`，僅剩 ≤991px 在用的值）
 SCALE_DESKTOP, SCALE_SHARED = 14.4, 3.93
 
 
@@ -156,7 +156,7 @@ MEASURE_JS = r"""
              right: Math.round(b.right * 100) / 100,
              bottom: Math.round(b.bottom * 100) / 100 };
   };
-  var clock = document.getElementById('bc-clock');
+  var clock = document.getElementById('bc-stage-clock');
   out.clock_found = !!clock;
   if (!clock) return out;
   var cs = getComputedStyle(clock);
@@ -165,10 +165,10 @@ MEASURE_JS = r"""
   out.gap = parseFloat(cs.columnGap) || 0;
 
   /* ---- A 結構：天氣元件 ---- */
-  var wrap = document.getElementById('bc-clock-weather');
+  var wrap = document.getElementById('bc-stage-weather');
   out.wrap_found = !!wrap;
   out.wrap_is_first = !!wrap && clock.children[0] === wrap;
-  out.wrap_count = clock.querySelectorAll('#bc-clock-weather').length;
+  out.wrap_count = clock.querySelectorAll('#bc-stage-weather').length;
   if (wrap) {
     var cw = getComputedStyle(wrap);
     out.wrap = { rect: r(wrap), area: cw.gridArea, align: cw.alignSelf,
@@ -215,7 +215,7 @@ MEASURE_JS = r"""
           && b.top < wr.bottom && b.bottom > wr.top;
     }).map(function(k){ return k.id || k.tagName; });
   }
-  var bo = document.getElementById('bc-clock-brace-open');
+  var bo = document.getElementById('bc-stage-clock-brace-open');
   out.brace = r(bo);
 
   /* ---- E navbar 那顆 ---- */
@@ -243,7 +243,7 @@ MEASURE_JS = r"""
      故 F 改驗：環形筆數/alt、文字 7 筆且恰 1 筆顯示、該筆與環的 -current 同索引、
      文字高度＝--bc-hero-caption-h、照片區高度＝改動前照片高度、字級/顏色斷點。 */
   var ringItems = Array.prototype.slice.call(
-      document.querySelectorAll('#bc-clock-photos .hero_hand_item'));
+      document.querySelectorAll('#bc-stage-photo-ring .hero_hand_item'));
   out.ring_count = ringItems.length;
   out.ring_alts = ringItems.map(function(el){
     var im = el.querySelector('img');
@@ -255,7 +255,7 @@ MEASURE_JS = r"""
     return k;
   })();
   var caps = Array.prototype.slice.call(
-      document.querySelectorAll('#bc-clock-photos [data-bc-ring-caption-item]'));
+      document.querySelectorAll('#bc-stage-photo-ring [data-bc-ring-caption-item]'));
   out.caps = caps.map(function(el){
     var nm = el.querySelector('.bc-series-caption-name');
     var hl = el.querySelector('.bc-series-caption-highlight');
@@ -276,16 +276,16 @@ MEASURE_JS = r"""
   })();
   out.cap_vis = caps.filter(function(el){ return el.classList.contains('-current'); }).length;
   out.cap_h = (function(){
-    var c = document.querySelector('#bc-clock-photos .footer-logo-caption');
+    var c = document.querySelector('#bc-stage-photo-ring .footer-logo-caption');
     return c ? +c.getBoundingClientRect().height.toFixed(2) : 0;
   })();
   out.photo_h = (function(){
-    var a = document.querySelector('#bc-clock-photos .footer-logo-list');
+    var a = document.querySelector('#bc-stage-photo-ring .footer-logo-list');
     return a ? +a.getBoundingClientRect().height.toFixed(2) : 0;
   })();
   out.legacy_items = document.querySelectorAll(
-      '#bc-clock-photos [data-footer-logo="item"]').length;
-  var root = document.getElementById('bc-bg-footer');
+      '#bc-stage-photo-ring [data-stage-logo="item"]').length;
+  var root = document.getElementById('bc-brand-stage');
   out.cap_h_var = root
       ? getComputedStyle(root).getPropertyValue('--bc-hero-caption-h').trim() : '';
   out.doc_scroll_w = document.documentElement.scrollWidth;
@@ -309,14 +309,14 @@ ABOUT_JS = r"""
                 month: nw.querySelector('.month').textContent,
                 weekday: nw.querySelector('.weekday').textContent };
   }
-  var root = document.getElementById('bc-bg-footer');
+  var root = document.getElementById('bc-brand-stage');
   out.footer_found = !!root;
   out.footer_weather = root ? root.querySelectorAll('.weather').length : -1;
-  out.footer_wrap = document.getElementById('bc-clock-weather') ? 1 : 0;
-  var clock = document.getElementById('bc-clock');
+  out.footer_wrap = document.getElementById('bc-stage-weather') ? 1 : 0;
+  var clock = document.getElementById('bc-stage-clock');
   if (clock) {
     out.cols = getComputedStyle(clock).gridTemplateColumns.split(/\s+/).length;
-    var bo = document.getElementById('bc-clock-brace-open');
+    var bo = document.getElementById('bc-stage-clock-brace-open');
     var b = bo.getBoundingClientRect();
     out.brace = { x: Math.round(b.left * 100) / 100, w: Math.round(b.width * 100) / 100 };
   }
@@ -423,21 +423,21 @@ async def main():
                                    (390, 844, True, "390")):
             await set_viewport(w, h, mobile)
             await goto(f"{BASE}/")
-            await evaljs("(function(){var c=document.getElementById('bc-clock');"
+            await evaljs("(function(){var c=document.getElementById('bc-stage-clock');"
                          "if(c)c.scrollIntoView({block:'center'});})()")
             await asyncio.sleep(1.4)
             await settle_ring()          # 2026-10-16：暫停 autoplay ＋ 等文字收斂（見上方註解）
             m = await evaljs(MEASURE_JS) or {}
-            print(f"\n=== 首頁 hero #bc-clock 天氣元件 {w}x{h} ({name}) ===")
+            print(f"\n=== 首頁 hero #bc-stage-clock 天氣元件 {w}x{h} ({name}) ===")
             if not m.get("clock_found"):
-                failures.append(check("A0 #bc-clock 存在", False))
+                failures.append(check("A0 #bc-stage-clock 存在", False))
                 continue
 
             # ---------- A 結構 ----------
-            failures.append(check("A1 #bc-clock-weather 存在且為 #bc-clock 第一個子項",
+            failures.append(check("A1 #bc-stage-weather 存在且為 #bc-stage-clock 第一個子項",
                                   m.get("wrap_found") is True and m.get("wrap_is_first") is True,
                                   f"found={m.get('wrap_found')} first={m.get('wrap_is_first')}"))
-            failures.append(check("A2 #bc-clock 內恰 1 個 #bc-clock-weather / 1 顆 .weather",
+            failures.append(check("A2 #bc-stage-clock 內恰 1 個 #bc-stage-weather / 1 顆 .weather",
                                   m.get("wrap_count") == 1 and m.get("w_count") == 1,
                                   f"{m.get('wrap_count')}/{m.get('w_count')}"))
             wrap = m.get("wrap") or {}
@@ -483,16 +483,16 @@ async def main():
             cols, gap = m.get("cols") or [], m.get("gap") or 0
             kids = {k["id"]: k["rect"] for k in (m.get("kids") or [])}
             if w >= 992:
-                spans = {"bc-clock-brace-open": (1, 1), "bc-clock-hours": (2, 2),
-                         "bc-clock-colon-before-minutes": (3, 3), "bc-clock-photos": (4, 5),
-                         "bc-clock-colon-after-minutes": (6, 6), "bc-clock-minutes": (7, 7),
-                         "bc-clock-brace-close": (8, 8)}
+                spans = {"bc-stage-clock-brace-open": (1, 1), "bc-stage-clock-hours": (2, 2),
+                         "bc-stage-clock-colon-before-minutes": (3, 3), "bc-stage-photo-ring": (4, 5),
+                         "bc-stage-clock-colon-after-minutes": (6, 6), "bc-stage-clock-minutes": (7, 7),
+                         "bc-stage-clock-brace-close": (8, 8)}
                 ncols = 8
             else:
-                spans = {"bc-clock-brace-open": (1, 1), "bc-clock-hours": (2, 2),
-                         "bc-clock-colon-before-minutes": (3, 3), "bc-clock-photos": (4, 6),
-                         "bc-clock-colon-after-minutes": (7, 7), "bc-clock-minutes": (8, 8),
-                         "bc-clock-brace-close": (9, 9)}
+                spans = {"bc-stage-clock-brace-open": (1, 1), "bc-stage-clock-hours": (2, 2),
+                         "bc-stage-clock-colon-before-minutes": (3, 3), "bc-stage-photo-ring": (4, 6),
+                         "bc-stage-clock-colon-after-minutes": (7, 7), "bc-stage-clock-minutes": (8, 8),
+                         "bc-stage-clock-brace-close": (9, 9)}
                 ncols = 9
             bad = []
             if len(cols) != ncols:
@@ -509,7 +509,7 @@ async def main():
                     # 寬 106px、欄寬 72.6px，靠 justify-self:center 置中溢出）——
                     # 這是改動前就有的設計，故文字項只驗「中心落在該欄」；
                     # 照片列（有實際寬度的區塊）仍驗「整塊落在該欄區間內」。
-                    if kid == "bc-clock-photos":
+                    if kid == "bc-stage-photo-ring":
                         ok_col = k["x"] >= lo - 1.5 and k["right"] <= hi + 1.5
                     else:
                         ok_col = lo - 1.5 <= (k["x"] + k["right"]) / 2 <= hi + 1.5
@@ -608,7 +608,7 @@ async def main():
             failures.append(check(f"F5 文字區高度 = --bc-hero-caption-h（{exp_cap:.2f}px ±1）",
                                   abs((m.get("cap_h") or 0) - exp_cap) <= 1,
                                   (m.get("cap_h"), m.get("cap_h_var"))))
-            failures.append(check("F6 首頁照片格已無舊輪播 hook（data-footer-logo=item）",
+            failures.append(check("F6 首頁照片格已無舊輪播 hook（data-stage-logo=item）",
                                   m.get("legacy_items") == 0, m.get("legacy_items")))
             exp_fs = (24.0, 18.0) if w >= 992 else ((13.0, 10.0) if w >= 768 else (11.0, 9.0))
             failures.append(check(f"F7 字級 {exp_fs[0]:.0f}/{exp_fs[1]:.0f}px（7 筆文字皆同）",
@@ -631,7 +631,7 @@ async def main():
         # ================= /about/ 反向守門 =================
         await set_viewport(1280, 800)
         await goto(f"{BASE}/about/")
-        await evaljs("(function(){var c=document.getElementById('bc-clock');"
+        await evaljs("(function(){var c=document.getElementById('bc-stage-clock');"
                      "if(c)c.scrollIntoView({block:'center'});})()")
         await asyncio.sleep(1.6)
         a = await evaljs(ABOUT_JS) or {}
@@ -648,7 +648,7 @@ async def main():
                               and bool((an.get("month") or "").strip())
                               and bool(an.get("temp_val")),
                               (an.get("has_clock"), an.get("month"), an.get("temp_val"))))
-        failures.append(check("G4 /about/ 真頁尾 #bc-bg-footer 內 0 顆 .weather、無 #bc-clock-weather",
+        failures.append(check("G4 /about/ 真頁尾 #bc-brand-stage 內 0 顆 .weather、無 #bc-stage-weather",
                               a.get("footer_found") is True
                               and a.get("footer_weather") == 0 and a.get("footer_wrap") == 0,
                               (a.get("footer_weather"), a.get("footer_wrap"))))

@@ -188,6 +188,17 @@
 {% endblock %}
 
 {% block content %}
+{# ===== WebSocket 設定（此 block 於 base.html 的 scripts block 之前渲染，確保早於 websocket-core.js 載入）=====
+   websocket-core.js v3.0.1 起即時連線為 opt-in，未設定 autoConnect 的頁面不會連線。
+   本頁為員工監控儀表板（僅 staff 可進入），需要監聽隊列通道 /ws/queue/。 #}
+<script>
+    window.BC_WS_CONFIG = {
+        autoConnect: true,
+        url: (window.location.protocol === 'https:' ? 'wss:' : 'ws:')
+            + '//' + window.location.host + '/ws/queue/',
+        maxReconnectAttempts: 5
+    };
+</script>
 <!-- ===== Header Banner（簡潔版） ===== -->
 <section class="subpage-banner-h500 py-lg-4">
     <div class="ftco-subpage-banner">

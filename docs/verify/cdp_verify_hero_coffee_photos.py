@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CDP 驗證：首頁照片格（#bc-clock-photos）＝ GUNTE hero 的「環形照片列」（與 hero 同一顆大圓）。
+"""CDP 驗證：首頁照片格（#bc-stage-photo-ring）＝ GUNTE hero 的「環形照片列」（與 hero 同一顆大圓）。
 
 2026-10-14（使用者指示）：照片格由「7 格輪播（一次只顯示一張）」改為與 GUNTE hero 共用的
 環形照片列 —— 同一組 class（.hero_hand / .hero_hand_list / .hero_hand_item）、同一份
@@ -9,7 +9,7 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
 2026-10-14 稍後（使用者指正「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，動畫展示是
 使用整個頁面的。參考 hero_hand」）：照片格的 --circle-radius 改回 **hero 的 100vw** —— 同一個
 25° 步進下左右鄰居落在 ±0.423R ＝ ±42vw ⇒ 扇形橫跨整個頁面寬、鄰居落在頁面兩緣；照片格與
-照片區不再裁切（唯一的裁切框是頁面層級的 `#bc-bg-footer{overflow:hidden}`，與 hero 由
+照片區不再裁切（唯一的裁切框是頁面層級的 `#bc-brand-stage{overflow:hidden}`，與 hero 由
 .bc-gunte-hero{overflow:hidden} 裁切是同一件事）；照片寬改取「照片區高 ÷ 咖啡照比例
 1.429」＝ 280vw/ratio（≤991px 126vw/ratio）⇒ current 那張上下剛好貼齊照片區、不壓到文字列
 （沿革：2026-10-15 之前為 276 ÷ 1.429 ＝ 193vw/ratio；同日一度放大到 336、再縮回 280 —— 見下方
@@ -20,7 +20,7 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
   .footer-logo-cell 上下內距歸零（留白吸收進照片區）＋ .footer-logo-list 高 276vw/ratio →
   480vw/ratio ＋ --bc-hand-img-w 193vw/ratio → 336vw/ratio（＝480 ÷ 1.4286）。
   逐斷點照片尺寸：1905 = 444.5×635.0、1440 = 336.0×480.0、1280 = 298.7×426.7、
-  992 = 231.5×330.7；≤991px 全部逐值不變（含 cell 內距，E7）。時鐘列的頂端、#bc-bg-footer、
+  992 = 231.5×330.7；≤991px 全部逐值不變（含 cell 內距，E7）。時鐘列的頂端、#bc-brand-stage、
   .grid.is-footer 的文件座標完全不動，只有列高向下長（@1440 419.6 → 529.6），下方內容等量下移。
 
 2026-10-15 稍後（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」——同一組三處宣告再改
@@ -31,7 +31,7 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
   逐斷點照片尺寸：1905 = 370.41×529.14、1440 = 280×400、1280 = 248.88×355.53、
   992 = 192.88×275.53；列高（＝cell 高）：1905 684.59 → 589.55、1440 529.59 → 460.39、
   1280 476.25 → 415.94、992 380.25 → 335.94；文件總高 @1440 3936 → 3867。
-  時鐘列頂端／#bc-bg-footer／.grid.is-footer 的文件座標仍然 Δ0（實測）；列變矮 ⇒ 時鐘數字與
+  時鐘列頂端／#bc-brand-stage／.grid.is-footer 的文件座標仍然 Δ0（實測）；列變矮 ⇒ 時鐘數字與
   `{ }` 隨置中上移 34.6px（@1440 y 1280.69 → 1246.09）= 副作用方向與上一輪相反，故上一輪
   「左鄰居與 `{` 重疊 22px」這條代價同步縮小（見 cdp_verify_clock_clash.py 的重測值）。
 
@@ -49,12 +49,12 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
      隱藏→顯示 ≈1200ms、顯示當下 cur == 置中那杯）。
 
 檢查項目（A–F 每個 viewport 各一輪；G＝/about/ 反向守門；H＝互動）
-  A 結構：`#bc-clock-photos` 內有 .hero_hand > #bc-clock-hand-list > 恰 7 個 .hero_hand_item；
+  A 結構：`#bc-stage-photo-ring` 內有 .hero_hand > #bc-stage-photo-ring-list > 恰 7 個 .hero_hand_item；
     --angle 依序 -90/-65/-40/-15/10/35/60；每個含 <a href="/coffee/N/"> ＋ <img>（非 lazy）；
     文字列 [data-bc-ring-caption] 內恰 7 筆 [data-bc-ring-caption-item]；
-    首頁已無舊輪播 hook（[data-footer-logo="item"] / "wrap"）；
+    首頁已無舊輪播 hook（[data-stage-logo="item"] / "wrap"）；
     照片格與照片區 overflow = visible（扇形必須離開格子才能「用整個頁面」）、
-    #bc-bg-footer overflow = hidden（頁面層級的裁切框）。
+    #bc-brand-stage overflow = hidden（頁面層級的裁切框）。
   B 與 hero 同源：7 筆 href / src / --angle 與 #hero_hand_list 逐筆相同。
   C 索引同步：-current 索引 == hero 的 Splide index（以 #hero_nav 的 -current 與
     .state-active 的 aria-label「k of 7」雙重換算）== BC_HAND_RING.index() == 文字列 -current；
@@ -66,11 +66,11 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
     current 上下剛好填滿照片區（img 底緣 == 文字列頂端 ±2px ⇒ 不壓文字）；
     實質可見 2–3 張且必為 current ± 1（循環，端點索引時只有一側鄰居）；
     左右鄰居的水平中心在圓心 ±0.423R（±2%）且落在頁面兩緣（≤20% / ≥80% 頁寬）＝整頁扇形；
-    鄰居 rect 與文字列 rect 無交集；無水平溢出（＝扇形被 #bc-bg-footer 的 overflow:hidden 裁掉）；
+    鄰居 rect 與文字列 rect 無交集；無水平溢出（＝扇形被 #bc-brand-stage 的 overflow:hidden 裁掉）；
     揭示跑完後照片格無殘留 clip-path（＝側邊鄰居不被 .footer-logo-cell 的 inset(0%) 切掉）。
     ⚠ 量測前會先「捲到照片格」——該 cell 在首屏之外，不捲的話 data-reveal="clip-down" 永不觸發，
       就會驗到揭示前的狀態（那正是上述 clip-path 裁切問題的藏身處）。
-  E 零回歸：首頁不再有 5 秒輪播（window.__footerLogoInterval 為 null）；
+  E 零回歸：首頁不再有 5 秒輪播（window.__bcStageLogoInterval 為 null）；
     .footer-logo-cell 寬/高、.footer-logo-list 高、.footer-logo-caption 高、
     時鐘列（.footer-time）高 逐值比對（基準表 EXPECT，±1px；≥992px 用「改動後」值、
     ≤991px 用「改動前」值 ⇒ 同時守住兩件事）；E7 專門守「改動只限 ≥992px」——桌機 cell
@@ -80,8 +80,8 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
     7 筆文字皆單行（用 off-flow 暫存節點 ＋ Range 的 client rects 數行數；最寬行 < 文字區
     可用寬）、以及「量測當下文字已收斂」（容器無 .-hidden、可見 1 筆、cur == hero index）。
   F 圖片：7 個 src 皆 HTTP 200 且 Content-Type 為 image/*（環形圖不看 img.complete）。
-  G /about/ 反向守門：真頁尾仍為 5 格 deco 的 5 秒輪播（[data-footer-logo="item"] == 5、
-    __footerLogoInterval 有值）、該頁沒有 #bc-clock-hand-list / .hero_hand。
+  G /about/ 反向守門：真頁尾仍為 5 格 deco 的 5 秒輪播（[data-stage-logo="item"] == 5、
+    __bcStageLogoInterval 有值）、該頁沒有 #bc-stage-photo-ring-list / .hero_hand。
   H 互動（僅第一個 viewport）：點 #hero_nav 第 k 顆 → hero、照片格、文字列三者都跟到 k，
     且圓盤 inline transform == rotate(−25k deg)；H5–H9（2026-10-16）＝ 文字切換時序：
     觀察器掛載、圓盤一轉文字就整組隱藏（可見 0 筆）、旋轉期間索引不提前切、隱藏→顯示的
@@ -152,15 +152,15 @@ PROBE_JS = r"""
   function v(e,n){ return e?getComputedStyle(e).getPropertyValue(n).trim():null; }
   function p(e,k){ return e?getComputedStyle(e)[k]:null; }
 
-  var cell=document.getElementById('bc-clock-photos');
+  var cell=document.getElementById('bc-stage-photo-ring');
   var cellBox=cell?cell.querySelector('.footer-logo-cell'):null;
   var area=cell?cell.querySelector('.footer-logo-list'):null;
   var hand=cell?cell.querySelector('.hero_hand'):null;
-  var list=document.getElementById('bc-clock-hand-list');
+  var list=document.getElementById('bc-stage-photo-ring-list');
   var items=list?Array.prototype.slice.call(list.querySelectorAll('.hero_hand_item')):[];
   var caption=cell?cell.querySelector('.footer-logo-caption'):null;
   var caps=Array.prototype.slice.call(
-      document.querySelectorAll('#bc-clock-photos [data-bc-ring-caption-item]'));
+      document.querySelectorAll('#bc-stage-photo-ring [data-bc-ring-caption-item]'));
   var heroList=document.getElementById('hero_hand_list');
   var heroItems=heroList?Array.prototype.slice.call(heroList.querySelectorAll('.hero_hand_item')):[];
   var slides=document.querySelectorAll('.bc-gunte-hero .splide__slide');
@@ -234,7 +234,7 @@ PROBE_JS = r"""
     });
   }
 
-  var section=document.getElementById('bc-bg-footer');
+  var section=document.getElementById('bc-brand-stage');
   var clipChain=[];
   (function(){
     var el=hand, stop=section;
@@ -259,7 +259,7 @@ PROBE_JS = r"""
     capHidden:capHidden, capVis:capVis, capInner:capInner, capLines:capLines,
     capWid:capWid, capNameFs:capNameFs, capHlFs:capHlFs,
     capText:(caps.length&&cur(caps)>=0)?caps[cur(caps)].textContent.replace(/\s+/g,' ').trim():null,
-    handCount:document.querySelectorAll('#bc-clock-photos .hero_hand').length,
+    handCount:document.querySelectorAll('#bc-stage-photo-ring .hero_hand').length,
     handCur:cur(items), ready:hand?hand.classList.contains('is-ready'):null,
     listInline:list?list.style.transform:null, listComputed:p(list,'transform'),
     radiusVar:v(hand,'--circle-radius'), imgWVar:v(hand,'--bc-hand-img-w'), radiusPx:radiusPx,
@@ -268,9 +268,9 @@ PROBE_JS = r"""
     ariaLabel:active?active.getAttribute('aria-label'):null,
     ringIndex:(window.BC_HAND_RING&&window.BC_HAND_RING.index)?window.BC_HAND_RING.index():null,
     ringCount:(window.BC_HAND_RING&&window.BC_HAND_RING.count)?window.BC_HAND_RING.count():null,
-    interval:window.__footerLogoInterval?true:false,
-    legacyItems:document.querySelectorAll('#bc-clock-photos [data-footer-logo="item"]').length,
-    legacyWrap:!!document.querySelector('#bc-clock-photos [data-footer-logo="wrap"]')
+    interval:window.__bcStageLogoInterval?true:false,
+    legacyItems:document.querySelectorAll('#bc-stage-photo-ring [data-stage-logo="item"]').length,
+    legacyWrap:!!document.querySelector('#bc-stage-photo-ring [data-stage-logo="wrap"]')
   };
 })()
 """
@@ -284,7 +284,7 @@ PAUSE_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');
 # 2026-10-16：文字是否已收斂（＝圓盤不在旋轉中：容器沒有 .-hidden）。文字改為「旋轉過渡跑完
 # 才切」（bc-hand-ring.js）⇒ 量測／斷言前必須先等它收斂，否則會量到中間態（capVis = 0、
 # capCur 還是上一筆）。
-CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .bc-ring-caption');"
+CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-stage-photo-ring .bc-ring-caption');"
                   "return c ? !c.classList.contains('-hidden') : true;})()")
 
 # 2026-10-16：文字切換時序的觀察器（H5–H8 用）。三個 MutationObserver／listener：
@@ -295,11 +295,11 @@ CAP_SETTLED_JS = ("(function(){var c=document.querySelector('#bc-clock-photos .b
 ARM_CAP_JS = r"""
 (function(){
   window.__capLog=[];
-  var list=document.getElementById('bc-clock-hand-list');
-  var cap=document.querySelector('#bc-clock-photos .footer-logo-caption');
+  var list=document.getElementById('bc-stage-photo-ring-list');
+  var cap=document.querySelector('#bc-stage-photo-ring .footer-logo-caption');
   if(!list||!cap) return false;
   var caps=Array.prototype.slice.call(
-      document.querySelectorAll('#bc-clock-photos [data-bc-ring-caption-item]'));
+      document.querySelectorAll('#bc-stage-photo-ring [data-bc-ring-caption-item]'));
   function st(){
     var k=-1;
     caps.forEach(function(e,i){ if(e.classList.contains('-current')) k=i; });
@@ -324,12 +324,12 @@ ARM_CAP_JS = r"""
 })()
 """
 
-READY_JS = ("(function(){return !!(document.getElementById('bc-clock-hand-list')"
-            "&&document.querySelector('#bc-clock-photos .hero_hand.is-ready')"
+READY_JS = ("(function(){return !!(document.getElementById('bc-stage-photo-ring-list')"
+            "&&document.querySelector('#bc-stage-photo-ring .hero_hand.is-ready')"
             "&&document.querySelector('.bc-gunte-hero .splide__slide.state-active'));})()")
 
 # 捲到照片格正中（讓 GSAP 的進場揭示（data-reveal="clip-down"）真的觸發）
-SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-clock-photos');"
+SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-stage-photo-ring');"
                   "if(!e) return null;var r=e.getBoundingClientRect();"
                   "window.scrollTo(0, Math.round(window.scrollY + r.top - "
                   "(window.innerHeight - r.height)/2));return Math.round(window.scrollY);})()")
@@ -342,7 +342,7 @@ SPEED_GSAP_JS = ("(function(){if(window.gsap&&window.gsap.globalTimeline){"
                  "window.gsap.globalTimeline.timeScale(100);return true;}return false;})()")
 
 # .footer-logo-cell（data-reveal="clip-down"）目前的 clip-path；揭示跑完且被釋放時為 'none'
-CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-clock-photos .footer-logo-cell');"
+CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-stage-photo-ring .footer-logo-cell');"
                 "return e?getComputedStyle(e).clipPath:null;})()")
 
 NAV_CLICK_JS = ("(function(){var b=document.querySelectorAll('#hero_nav button');"
@@ -350,13 +350,13 @@ NAV_CLICK_JS = ("(function(){var b=document.querySelectorAll('#hero_nav button')
 
 ABOUT_JS = r"""
 (function(){
-  var root=document.getElementById('bc-bg-footer');
+  var root=document.getElementById('bc-brand-stage');
   return {
-    items: document.querySelectorAll('#bc-bg-footer [data-footer-logo="item"]').length,
-    list: !!document.querySelector('#bc-bg-footer [data-footer-logo="list"]'),
-    hand: document.querySelectorAll('#bc-bg-footer .hero_hand').length,
-    ringList: document.querySelectorAll('#bc-clock-hand-list, #bc-bg-footer .hero_hand_list').length,
-    interval: window.__footerLogoInterval?true:false,
+    items: document.querySelectorAll('#bc-brand-stage [data-stage-logo="item"]').length,
+    list: !!document.querySelector('#bc-brand-stage [data-stage-logo="list"]'),
+    hand: document.querySelectorAll('#bc-brand-stage .hero_hand').length,
+    ringList: document.querySelectorAll('#bc-stage-photo-ring-list, #bc-brand-stage .hero_hand_list').length,
+    interval: window.__bcStageLogoInterval?true:false,
     isFooter: !!root&&root.querySelectorAll('footer').length>0
   };
 })()
@@ -530,7 +530,7 @@ async def main():
             bfw, bfh, bfl, bfc, bfr = EXPECT.get(w, (0, 0, 0, 0, 0))
 
             # ---------- A 結構 ----------
-            failures.append(check("A1 #bc-clock-hand-list 內恰 7 個 .hero_hand_item",
+            failures.append(check("A1 #bc-stage-photo-ring-list 內恰 7 個 .hero_hand_item",
                                   m.get("itemCount") == 7, m.get("itemCount")))
             failures.append(check("A2 --angle 依序 -90/-65/-40/-15/10/35/60",
                                   [i.get("angle") for i in items] == ANGLES,
@@ -549,12 +549,12 @@ async def main():
                                   m.get("capCount") == 7 and (m.get("capCur") or -1) >= 0
                                   and bool((m.get("capText") or "").strip()),
                                   (m.get("capCount"), m.get("capCur"), m.get("capText"))))
-            failures.append(check("A6 首頁已無舊輪播 hook（data-footer-logo item/wrap）",
+            failures.append(check("A6 首頁已無舊輪播 hook（data-stage-logo item/wrap）",
                                   m.get("legacyItems") == 0 and m.get("legacyWrap") is False,
                                   (m.get("legacyItems"), m.get("legacyWrap"))))
             # A7：整頁扇形的關鍵 —— 照片格／照片區必須讓照片離開格子，唯一的裁切框是頁面層級的
-            #     #bc-bg-footer{overflow:hidden}（與 hero 由 .bc-gunte-hero 裁切是同一件事）。
-            failures.append(check("A7 照片格／照片區 overflow = visible、#bc-bg-footer = hidden",
+            #     #bc-brand-stage{overflow:hidden}（與 hero 由 .bc-gunte-hero 裁切是同一件事）。
+            failures.append(check("A7 照片格／照片區 overflow = visible、#bc-brand-stage = hidden",
                                   m.get("cellOverflow") == "visible"
                                   and m.get("areaOverflow") == "visible"
                                   and m.get("sectionOverflow") == "hidden",
@@ -630,7 +630,7 @@ async def main():
                                                         - cap_box.get("y", 0)) <= 2,
                                   (round(cur_img.get("bottom", 0), 2), (cap_box or {}).get("y"))))
             # D6：整頁扇形 ⇒ 實質可見 2–3 張、且必為 current ± 1（循環；索引在端點時只有一側
-            #     鄰居落在畫面內）。「實質可見」＝圖 rect 落在頁面裁切框（#bc-bg-footer）內的
+            #     鄰居落在畫面內）。「實質可見」＝圖 rect 落在頁面裁切框（#bc-brand-stage）內的
             #     面積 ≥25%（用 viewport 座標比較，結果與捲動位置無關）。
             vis = [k for k, i in enumerate(items)
                    if cover_ratio(i.get("img"), sec_box) >= 0.25]
@@ -670,21 +670,21 @@ async def main():
                          if overlaps(items[k].get("img"), cap_box, eps=1.0)]
             failures.append(check("D9 7 張照片的 rect 皆不與文字列交集",
                                   not fail_over, fail_over[:2]))
-            # D10：扇形超出頁面的部分由 #bc-bg-footer 的 overflow:hidden 裁掉 ⇒ 無水平捲軸
+            # D10：扇形超出頁面的部分由 #bc-brand-stage 的 overflow:hidden 裁掉 ⇒ 無水平捲軸
             failures.append(check("D10 無水平溢出（頁面層級裁切生效）",
                                   (m.get("docScrollW") or 0) <= (m.get("innerW") or 0) + 1,
                                   (m.get("docScrollW"), m.get("innerW"))))
-            # D11：環形照片列到 #bc-bg-footer 之間不得有任何「裁切框」——
+            # D11：環形照片列到 #bc-brand-stage 之間不得有任何「裁切框」——
             #      overflow 已由 A7 驗過（照片格／照片區 visible）；這裡驗另一條容易漏的路：
             #      .footer-logo-cell 的 data-reveal="clip-down" 會被 GSAP 留下 clip-path:inset(0%)，
-            #      那會把側邊鄰居整張切掉（bc-bg-footer.js 已在揭示跑完後釋放）。
+            #      那會把側邊鄰居整張切掉（bc-brand-stage.js 已在揭示跑完後釋放）。
             clip_chain = m.get("clipChain") or []
             failures.append(check("D11 揭示後照片格無殘留 clip-path（側邊鄰居不被格子切掉）",
                                   m.get("cellClip") == "none" and not clip_chain,
                                   (m.get("cellClip"), clip_chain)))
 
             # ---------- E 零回歸／桌機改動範圍 ----------
-            failures.append(check("E1 首頁不再有 5 秒輪播（__footerLogoInterval 為 null）",
+            failures.append(check("E1 首頁不再有 5 秒輪播（__bcStageLogoInterval 為 null）",
                                   m.get("interval") is False, m.get("interval")))
             cb = m.get("cellBox") or {}
             ab = m.get("area") or {}
@@ -818,12 +818,12 @@ async def main():
         failures.append(check("G1 /about/ 真頁尾仍為 5 格 deco 輪播",
                               bool(a) and a.get("items") == 5 and a.get("list") is True,
                               (a or {}).get("items")))
-        failures.append(check("G2 /about/ 沒有環形照片列（.hero_hand / #bc-clock-hand-list）",
+        failures.append(check("G2 /about/ 沒有環形照片列（.hero_hand / #bc-stage-photo-ring-list）",
                               bool(a) and a.get("hand") == 0 and a.get("ringList") == 0,
                               (a or {}).get("hand")))
-        failures.append(check("G3 /about/ 的 5 秒輪播仍在跑（__footerLogoInterval 有值）",
+        failures.append(check("G3 /about/ 的 5 秒輪播仍在跑（__bcStageLogoInterval 有值）",
                               bool(a) and a.get("interval") is True, (a or {}).get("interval")))
-        failures.append(check("G4 /about/ #bc-bg-footer 內仍是 <footer>（標籤不同、樣式相同）",
+        failures.append(check("G4 /about/ #bc-brand-stage 內仍是 <footer>（標籤不同、樣式相同）",
                               bool(a) and a.get("isFooter") is True, (a or {}).get("isFooter")))
 
         await send(msg("Page.close"))

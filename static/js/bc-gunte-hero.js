@@ -49,7 +49,7 @@
 
     /* 2026-10-14（使用者指示）：環形照片列的驅動改由共用模組 BC_HAND_RING
        （static/js/bc-hand-ring.js）負責 —— 本 hero 與其下方 BC 動態 hero 的照片格
-       （#bc-clock-photos）註冊在同一個模組上，索引一律由本 hero 的 Splide 推播
+       （#bc-stage-photo-ring）註冊在同一個模組上，索引一律由本 hero 的 Splide 推播
        （見 updateSlideStates → goAll），兩邊因此永遠同一支咖啡。
        [為何註冊在 mount 之前] 'mounted' 事件就會呼叫 updateSlideStates → 屆時環必須已註冊，
          第一次的索引（start: 1）才會一起套上去。

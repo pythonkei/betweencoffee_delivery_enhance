@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""以「viewport-only」截圖補驗 #bc-bg-footer 在桌面/平板的實際外觀。
+"""以「viewport-only」截圖補驗 #bc-brand-stage 在桌面/平板的實際外觀。
 （captureBeyondViewport 對 GSAP 釘住區段會渲染成空白，故改用視窗截圖。）"""
 import asyncio, base64, json, urllib.request
 import websockets
@@ -33,13 +33,13 @@ async def main():
 
         # 將釘牌（.footer-logo-cell）置中於視窗，確保白色線稿（黑底，無金底）完整入鏡
         CENTER_JS = (
-            "(function(){var e=document.querySelector('#bc-bg-footer .footer-logo-cell');"
+            "(function(){var e=document.querySelector('#bc-brand-stage .footer-logo-cell');"
             "if(!e)return null;var r=e.getBoundingClientRect();"
             "window.scrollTo(0, Math.round(window.scrollY + r.top + r.height/2 - innerHeight/2));"
             "return Math.round(window.scrollY);})()"
         )
         INFO_JS = (
-            "(function(){var e=document.querySelector('#bc-bg-footer .footer-logo-cell');"
+            "(function(){var e=document.querySelector('#bc-brand-stage .footer-logo-cell');"
             "var c=e?e.getBoundingClientRect():null;return {y:Math.round(window.scrollY),"
             "sh:document.body.scrollHeight,ih:innerHeight,"
             "cell:c?{top:Math.round(c.top),h:Math.round(c.height),"

@@ -2,20 +2,30 @@
 {% load static %}
 {% block title %}Between Coffee - Index{% endblock %}
 
+{% comment %}
+2026-10-19（首頁效能 P0）：首頁不再載入的三類全域資源 —— 以空區塊覆寫 base.html 的預設載入。
+  1. fontawesome_css：首頁渲染的 DOM 已無 fa-* 圖示（966KB）。
+  2. material_icon_fonts：首頁僅 5 處 Material 圖示，已全部改為 icomoon（Google 字型 CSS 約 400KB+）。
+  3. owl_js：首頁已無 .home-slider／.carousel-work（舊首屏輪播已隱藏／移除）。
+其他頁面未覆寫 → 行為完全不變。main.js 已加 $.fn.owlCarousel 防護（見該檔 carousel()）。
+{% endcomment %}
+{% block fontawesome_css %}{% endblock %}
+{% block material_icon_fonts %}{% endblock %}
+{% block owl_js %}{% endblock %}
+
 {% block extra_head %}
 {% comment %}
-Phase 3（2026-08-07）：首屏關鍵資源 preload
-在 <body> 解析前優先下載第一個 slider 的三個資產，
-避免被 footer/其他非關鍵資源搶頻寬，縮短空窗期。
-- section_bg_01.svg 第一格背景（17KB）
-- _cup_360.gif 第一格 GIF 動畫（494KB）
-- coffee_04.png 第一格咖啡杯圖（704KB）
+2026-10-19（首頁效能 P0）：移除三筆首屏 preload。
+原用途＝舊首屏 home-slider 第一格（section_bg_01.svg 17KB、_cup_360.gif 494KB、
+coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏覽器在 HTML 解析階段
+就搶頻寬下載 ~1.2MB 無用資產（實測是 LCP 延遲主因之一）。
+※ section_bg_01.svg 仍以 hidden <img> 出現在下方 feed 區塊（17KB），需要時再由該處載入即可。
+※ GUNTE hero 目前 hidden（見 content 段），其 Google Fonts（Alfa Slab One／Noto Sans JP／
+   Inter）不再於首頁載入；日後恢復 GUNTE hero 時，把下方註解內的字型 link 一併還原。
 {% endcomment %}
-<link rel="preload" as="image" href="{% static 'images/section_bg_01.svg' %}">
-<link rel="preload" as="image" href="{% static 'images/_cup_360.gif' %}">
-<link rel="preload" as="image" href="{% static 'images/coffee_04.png' %}">
-<!-- 2026-09-07：GUNTE Lab. hero 字型（Alfa Slab One / Noto Sans JP / Inter） -->
+{% comment %}
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+{% endcomment %}
 {% endblock %}
 
 {% block content %}
@@ -87,35 +97,34 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 </div>
 
 
-<!-- 2026-10-13（使用者指示）：首頁順序反轉 —— GUNTE hero 回到「第一眼看到的第一屏」，
-     BC 動態模組（<section class="hero bc-bg-hero">，內含 #bc-bg-footer）下移到它之後。
-     本檔 DOM 順序 ＝ 畫面順序：
-       [1] <section hidden class="bc-reviews-section">（reviews 跑馬燈；本輪加 hidden → 不顯示）
-       [2] <section class="hero bc-gunte-hero">（第一屏。margin-top 由 bc-gunte-hero.css 的
-           `.bc-page-content > section.bc-gunte-hero.hero{margin-top:0 !important}` 壓為 0，
-           是 class 規則、不依賴 first-of-type 序位 → 與 navbar 之間不會多出 100px 空隙）
-       [3] <section class="ftco-section-blank-small">（兩塊 hero 之間的留白）
-       [4] <section class="hero bc-bg-hero">（＝下方 10-09 註解的模組，現為第二塊 hero）
-     註：extra_css 的 `.bc-page-content > section:first-of-type.bc-bg-hero{margin-top:0 !important}`
-     在 10-13 已不是命中該 hero 的那一條（first-of-type 現為 [1] 的 reviews section）
-     —— 保留作為「若日後把 BC hero 移回最上方」的保險；目前真正生效的是 bc-gunte-hero.css 的 class 規則。
-     ～～ 以下為 2026-10-09 舊註解（其順序已被 10-13 反轉），保留供追查歷史 ～～
-
-2026-10-09（使用者指示）：BC 動態模組（#bc-bg-footer，Hug in a Cup 時鐘）由頁尾移到
-     首頁最上方，成為第一個 hero；原本的 GUNTE hero 緊接在它下方（順序＝本檔 DOM 順序）。
-     1. markup 取自 partials/bc_hero.html（＝ partials/bc_bg_footer.html 的 hero 變體：
-        兩者逐字相同，僅把最外層的 footer 標籤（class="footer"）改為 div 標籤，
-        原因見該檔註解 —— bc-yama-header.js 會用 document.querySelector('footer')
-        （取 DOM 第一個 footer 元素）當「footer 交會」觀察目標；置頂模組若仍用 footer 標籤，
-        頁面一載入它就在視口內 → tax-nav 被移除 init、header-bot 加 is-hide，右下角元件開站即消失）。
-     2. 外層 <section class="hero bc-bg-hero">：讓它成為 .bc-page-content 的第一個 section，
-        與 GUNTE hero 同為「置頂 hero」語意（.hero 這個類別在其他 CSS 沒有任何裸規則，
-        僅 bc-gunte-hero.css 的 .bc-page-content > section.bc-gunte-hero.hero 一條，
-        且必須同時有 .bc-gunte-hero → 不會影響本 wrapper，已全庫 grep 確認）。
-        附帶效果：GUNTE hero 不再是 first-of-type，其 margin-top 由 bc-gunte-hero.css 的
-        class 規則壓為 0（不依賴 section 序位），兩塊 hero 之間不會多出 100px 空隙。
-     3. 本 section 的 margin-top 由下方 extra_css 覆寫為 0
-        （蓋掉 bc-components.css 首 section 的 100px 預留）。 -->
+<!-- 2026-10-18（使用者指示）：首頁第一屏改為「品牌舞台」（原 bc-bg-footer，2026-10-18 更名
+     bc-brand-stage；見 partials/bc_brand_stage_hero.html），GUNTE hero 暫時 hidden（markup 與
+     JS 保留，未刪除）。本檔 DOM 順序 ＝ 畫面順序：
+       [1] <section hidden class="bc-reviews-section">（reviews 跑馬燈；不顯示）
+       [2] <section class="hero bc-brand-stage-hero">（第一屏＝品牌舞台，內含 #bc-brand-stage）
+       [3] <section hidden class="hero bc-gunte-hero">（暫時隱藏）
+       [4] <section hidden class="feed overflow-hidden">（其餘首頁內容，維持原狀）
+     版位：
+       · 品牌舞台的 margin-top 由 extra_css 的
+         `.bc-page-content > section.bc-brand-stage-hero{margin-top:0 !important}` 壓為 0
+         —— class 規則、不依賴 first-of-type（文件第一個 section 是 [1] 的 reviews）。
+       · GUNTE hero 的 hidden 由 extra_css 的
+         `.bc-page-content > section.bc-gunte-hero[hidden]{display:none !important}` 保證。
+       · 原「兩塊 hero 之間的留白」<section class="ftco-section-blank-small"> 已移除
+         （GUNTE 隱藏後它會變成頁首的一段空白）。
+     ～～ 以下保留 2026-10-13 / 10-09 的歷史註解，供追查（順序已於 10-18 再次調整）～～
+     2026-10-13（使用者指示）：首頁順序反轉 —— GUNTE hero 回到「第一眼看到的第一屏」，
+       BC 動態模組（#bc-brand-stage）下移到它之後；兩塊 hero 之間加 .ftco-section-blank-small。
+       1. markup 取自 partials/bc_brand_stage_hero.html（＝ partials/bc_brand_stage.html 的 hero 變體：
+          兩者逐字相同，僅把最外層的 footer 標籤（class="footer"）改為 div 標籤，
+          原因見該檔註解 —— bc-yama-header.js 會用 document.querySelector('footer')
+          （取 DOM 第一個 footer 元素）當「footer 交會」觀察目標；置頂模組若仍用 footer 標籤，
+          頁面一載入它就在視口內 → tax-nav 被移除 init、header-bot 加 is-hide，右下角元件開站即消失）。
+       2. 外層 <section class="hero bc-brand-stage-hero">：與 GUNTE hero 同為「置頂 hero」語意
+          （.hero 這個類別在其他 CSS 沒有任何裸規則，僅 bc-gunte-hero.css 的
+          .bc-page-content > section.bc-gunte-hero.hero 一條，且必須同時有 .bc-gunte-hero
+          → 不會影響本 wrapper）。
+       3. 2026-10-09：本模組由頁尾移到首頁最上方，成為第一個 hero。 -->
 
 <section hidden class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
     <div class="bc-reviews">
@@ -349,18 +358,35 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 </section>
 
 
+<!-- 2026-10-18（使用者指示）：品牌舞台（原 bc-bg-footer，現名 bc-brand-stage）回到首頁第一屏；
+     本段與下方 GUNTE hero 都保留，GUNTE 僅加 hidden（見檔頭 10-18 註解）。
+     partials/bc_brand_stage_hero.html 與 about 頁的 partials/bc_brand_stage.html 同源：
+     僅改用 <div class="footer"> 包裝（避免 bc-yama-header.js 把置頂模組當頁尾觀察目標）
+     ＋照片格改為環形咖啡照列。 -->
+<section class="hero bc-brand-stage-hero">
+{% include 'betweencoffee_delivery/partials/bc_brand_stage_hero.html' %}
+</section>
+
+
 <!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
-     2026-10-09：位置調整為 BC 動態 hero（.bc-bg-hero）之下。
+     2026-10-09：位置調整為 BC 動態 hero（.bc-brand-stage-hero）之下。
      2026-10-13（使用者指示）：順序反轉 —— 本段回到 .bc-page-content 最前（第一眼看到的第一屏），
      BC 動態 hero 下移到本段之後（完整說明見檔頭 10-13 註解）。
+     2026-10-18（使用者指示）：本段暫時隱藏（section 加 hidden；markup 與 bc-gunte-hero.js
+     全部保留，日後移除 hidden 即可恢復）。品牌舞台同時移回第一屏。
      環形字（<text>）只有第 2 張（BUTTER KING，path bc-gunte-06-path）顯示，
      其餘 6 張加 .bc-ring-hide → 由 bc-gunte-hero.css 的 display:none 隱藏（文案保留在 markup 內）。
      2026-10-13 稍後（使用者指示）：① Splide start 3 → **1**（Splide 的 start 是 0-based 索引；
      實測 start: 2 置中的是 aria-label「3 of 7」＝第 3 張「果香浅煎」→ 環形字仍被隱藏）→
      載入當下置中的是第 2 張 BUTTER KING，環形字第一眼可見；② 環形字字級改由 viewBox 單位表達
      （calc(24px*540/432)＝30 ＝432 參考圖寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準，
-     描邊同步 ×1.25）。 -->
-<section class="hero bc-gunte-hero">
+     描邊同步 ×1.25）。
+     2026-10-19（首頁效能 P0）：本段 14 張投影片圖片（hide-sp／vis-sp）的 src 改為 **data-src**
+     —— hidden 只讓元素不渲染，瀏覽器仍會下載 <img src>（合計約 1.2MB）。
+     改成 data-src 後首頁完全不發出這些請求；檔案全部保留。
+     恢復 GUNTE hero 時：① 移除 <section> 的 hidden；② 把 data-src 改回 src；
+     ③ 還原 extra_css 的 splide／bc-gunte-hero.css 與 extra_scripts 的 splide／bc-gunte-hero.js。 -->
+<section hidden class="hero bc-gunte-hero">
             <div class="hero_wrap">
                 <h2 class="hero_catch">
                     <span class="hero_catch_txt" aria-hidden="true">Please relax and become stimulated. <br>Feel vibrant flow in you.</span>
@@ -373,8 +399,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                 <li class="splide__slide">
                                     <a class="hero_slide_item" href="#">
                                         <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/01_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/01_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                            <img class="hide-sp" data-src="{% static 'images/01_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/01_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
                                         <h3 class="hero_slide_item_cap">BLACK BLEND ｜Coffee</h3>
                                         <p class="hero_slide_item_en">BLACK BLEND ｜Coffee</p>
@@ -389,8 +415,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                 <li class="splide__slide">
                                     <a class="hero_slide_item" href="#">
                                         <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/02_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/02_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                            <img class="hide-sp" data-src="{% static 'images/02_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/02_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
                                         <h3 class="hero_slide_item_cap">BUTTER KING｜Coffee</h3>
                                         <p class="hero_slide_item_en">BUTTER KING｜Coffee</p>
@@ -405,8 +431,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                 <li class="splide__slide">
                                     <a class="hero_slide_item" href="#">
                                         <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/03_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/03_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                            <img class="hide-sp" data-src="{% static 'images/03_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/03_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
                                         <h3 class="hero_slide_item_cap -black">果香浅煎｜Coffee</h3>
                                         <p class="hero_slide_item_en">果香浅煎｜Coffee</p>
@@ -421,8 +447,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                 <li class="splide__slide">
                                     <a class="hero_slide_item" href="#">
                                         <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/04_660.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/04_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                            <img class="hide-sp" data-src="{% static 'images/04_660.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/04_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
                                         <h3 class="hero_slide_item_cap -black">抹茉｜Coffee</h3>
                                         <p class="hero_slide_item_en">抹茉｜Coffee </p>
@@ -437,8 +463,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                 <li class="splide__slide">
                                     <a class="hero_slide_item" href="#">
                                         <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/05_630.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/05_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                            <img class="hide-sp" data-src="{% static 'images/05_630.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/05_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
                                         <h3 class="hero_slide_item_cap -black">FLAT WHITE｜Bean</h3>
                                         <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
@@ -453,8 +479,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                 <li class="splide__slide">
                                     <a class="hero_slide_item" href="#">
                                         <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/06_720.jpg' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/06_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                            <img class="hide-sp" data-src="{% static 'images/06_720.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/06_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
                                         <h3 class="hero_slide_item_cap">SUNSHINE｜Coffee</h3>
                                         <p class="hero_slide_item_en">SUNSHINE｜Coffeee</p>
@@ -469,8 +495,8 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
                                 <li class="splide__slide">
                                     <a class="hero_slide_item" href="#">
                                         <div class="hero_slide_item_img">
-                                            <img class="hide-sp" src="{% static 'images/07_1080.jpg' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" src="{% static 'images/07_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                            <img class="hide-sp" data-src="{% static 'images/07_1080.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/07_sp_510x680.webp' %}" alt="" width="255" height="340">
                                         </div>
                                         <h3 class="hero_slide_item_cap">WAKEMEUP｜Coffee</h3>
                                         <p class="hero_slide_item_en">WAKEMEUP｜Coffee</p>
@@ -511,15 +537,9 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
         </section>
 
 
-<!-- 2026-10-13（使用者指示）：BC 動態 hero 由頁首下移到 GUNTE hero 之後（見檔頭 10-13 註解）；
-     上方 .ftco-section-blank-small 是兩塊 hero 之間的留白（10-09 版本兩者相鄰、無留白）。
+<!-- 2026-10-18（使用者指示）：品牌舞台已回到檔首第一屏（見上方 10-18 註解與檔頭說明）；
+     原本夾在兩塊 hero 之間的留白 section（.ftco-section-blank-small）與此處的重複舞台一併移除。
      （2026-09-06 註解所述、加了 data-bc-reviews-reverse 的首頁反向跑馬燈 section 即檔頭 [1]） -->
-
-<section class="ftco-section-blank-small"></section>
-
-<section class="hero bc-bg-hero">
-{% include 'betweencoffee_delivery/partials/bc_hero.html' %}
-</section>
 
 
 <section hidden class="feed overflow-hidden">
@@ -568,6 +588,23 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
             <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
         </clipPath>
         </svg>
+    </div>
+</section>
+
+<!-- 2026-10-22（使用者指示）：四步咖啡旅程 Rive 圖示列 —— 緊接在 .feed--video 之後，
+     單列 4 個 canvas（產地 origens → 烘焙 torra → 拼配 blend → 品飲 consumo）。
+     素材：static/animations/rive/ciclo-*.riv（每個含 intro / off / hover 三條線性時間軸）；
+     runtime 自架於 static/library/rive-canvas-2.35.2/（rive.js + rive.wasm，v2.35.2），
+     由 bc-steps-rive.js 在接近視口時動態注入，並先 RuntimeLoader.setWasmUrl()
+     指向自架 wasm → 不連 unpkg／jsDelivr。樣式：bc-steps.css。 -->
+<section class="bc-steps" data-bc-steps
+         data-rive-runtime="{% static 'library/rive-canvas-2.35.2/rive.js' %}"
+         data-rive-wasm="{% static 'library/rive-canvas-2.35.2/rive.wasm' %}">
+    <div class="bc-steps__inner">
+        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-origens.riv' %}" role="img" aria-label="產地"></canvas>
+        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-torra.riv' %}" role="img" aria-label="烘焙"></canvas>
+        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-blend.riv' %}" role="img" aria-label="拼配"></canvas>
+        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-consumo.riv' %}" role="img" aria-label="品飲"></canvas>
     </div>
 </section>
 
@@ -733,11 +770,19 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 {% endblock %}
 
 {% block extra_css %}
-<!-- 2026-08-11：首頁輪播 owl-carousel 樣式（僅首頁需，從 base 移出條件載入） -->
-<link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
-<link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+<!-- 2026-10-19（首頁效能 P0）：移除 owl.carousel／owl.theme 樣式（首頁已無輪播）、
+     splide 樣式與 bc-gunte-hero.css（GUNTE hero 目前 hidden，見下方註解）。
+     需要恢復 GUNTE hero 時，把下列三行一併還原（檔案皆保留，未刪除）：
+     <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+     <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+     <link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
+     <link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20261014a">
+     2026-10-19 說明：bc-hand-ring.css 仍保留 —— 品牌舞台（第一屏）的環形咖啡照列共用此模組。 -->
 <!-- 2026-08-13：首頁 .feed 水平移動 SVG 蒙版動畫樣式（landing.css；7dad800 條件載入時僅加到 landing_v3 漏了首頁，修正） -->
 <link rel="stylesheet" href="{% static 'css/landing.css' %}?v=20260916b">
+<!-- 2026-10-22（使用者指示）：首頁四步咖啡旅程 Rive 圖示列（.feed--video 正下方，四格 canvas） -->
+<!-- 2026-10-22c：JS 改為「靜止姿勢＝intro 自然播完的完整圖示，離開 hover 不發指令」 -->
+<link rel="stylesheet" href="{% static 'css/bc-steps.css' %}?v=20261023a">
 <!-- 2026-08-10：首頁 SALON/STORE SEARCH 區塊樣式（demido aside 品牌化） -->
 <link rel="stylesheet" href="{% static 'css/bc-search.css' %}?v=20260918a">
 <!-- 2026-08-11：首頁輪播 morph 影片動畫樣式（僅首頁需，從 base 移出條件載入） -->
@@ -749,24 +794,22 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 <!-- 2026-10-07：首頁 section 追加 .bc-reviews-section--lg（--rv-scale:1.15）→ 整個模組全端放大 15% -->
 <link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20261007a">
 <link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20261008e">
-<!-- 2026-09-07：GUNTE Lab. hero（Splide 4.1.3 vendor + hero 樣式，全站僅此處使用 splide class）
-     2026-10-13：bc-gunte-hero.css 新增環形字隱藏規則（.hero_slide_item_ttl text.bc-ring-hide）
-                 → 版號 ?v=20261008e 升為 ?v=20261013a（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
-     2026-10-13 稍後（使用者指示「尺寸改動」）：環形字字級 24px → calc(24px * 540/432)
-                 （＝viewBox 單位 30＝432 參考寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準）、
-                 描邊同步 ×1.25 → 版號再升為 ?v=20261013b。 -->
-<link rel="stylesheet" href="{% static 'library/splide-4.1.3/dist/css/splide.min.css' %}">
 <!-- 2026-10-14（使用者指示）：環形照片列共用模組（GUNTE hero 的手套圓抽出）——
-     首頁 hero 與其下方 BC 動態 hero 的照片格（#bc-clock-photos）共用；
+     首頁 hero 與其下方 BC 動態 hero 的照片格（#bc-stage-photo-ring）共用；
      必須排在 bc-gunte-hero.css 之前（同名變數/屬性以 hero 的規則為準）。
      2026-10-14 稍後：照片格改為與 hero 同一顆整頁大圓（100vw，不再縮進格子）→ 檔頭註解更新
      ⇒ 版號 ?v=20261014a 升為 ?v=20261014b（WhiteNoise MAX_AGE=1 年，必須升版才會重載） -->
 <link rel="stylesheet" href="{% static 'css/bc-hand-ring.css' %}?v=20261014b">
-<link rel="stylesheet" href="{% static 'css/bc-gunte-hero.css' %}?v=20261014a">
 <!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
-     BC 動態 footer（#bc-bg-footer）——markup 共用 partials/bc_bg_footer.html（單一來源）；
-     全樣式 scoped 於 #bc-bg-footer，故與 about 頁共用同一份 CSS 不會互相影響。 -->
-<link rel="stylesheet" href="{% static 'css/bc-bg-footer.css' %}?v=20261012a" />
+     BC 動態模組（原 #bc-bg-footer，2026-10-18 更名 #bc-brand-stage）——單一來源；
+     全樣式 scoped 於 #bc-brand-stage，故與 about 頁共用同一份 CSS 不會互相影響。
+     2026-10-18（使用者指示）：本模組回到首頁第一屏當 hero（markup 用 hero 變體
+     partials/bc_brand_stage_hero.html；about 頁仍用 partials/bc_brand_stage.html 當真頁尾）。
+     2026-10-19（使用者指示）：所有斷點都隱藏 .m-footer-inner（行動版頁尾區塊）
+     ⇒ 版號 ?v=20261018a 升為 ?v=20261019a（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
+     2026-10-19 稍後（首頁效能 P0）：新增 [data-reveal] 的 1.5s bc-reveal-guard 保險
+     ⇒ 版號再升為 ?v=20261019b。 -->
+<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261020b" />
 <style>
 /* 2026-09-04：首頁 feed 為頂部首屏（home-slider 已 hidden）→ 比照 home-slider：
    feed 照片/形狀由視口頂部開始、穿入 navbar 後方透出，navbar（z-index:100、
@@ -783,53 +826,169 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
 .bc-page-content > section:first-of-type.feed::before {
   height: 0;
 }
-/* 2026-10-09：首頁第一個 section 現為 BC 動態 hero（.bc-bg-hero，內含 #bc-bg-footer）→
-   比照 .feed / .bc-gunte-hero 的處理：不被 bc-components.css 的
+/* 2026-10-18（使用者指示）：品牌舞台（.bc-brand-stage-hero）為首頁第一屏 →
+   不被 bc-components.css 的
    `.bc-page-content > section:first-of-type:not(.home-slider){margin-top:100px}`
    （及其 768/576 斷點的 72px、60px）推擠，模組才能由視口頂部開始。
+   [為何不用 first-of-type] 文件第一個 section 是 hidden 的 reviews 跑馬燈（見檔頭），
+   舞台不是 first-of-type → 改成 class 規則（與 bc-gunte-hero.css 的寫法一致）。
    用 !important 是必要的：該全域規則在各斷點以媒體查詢重複宣告，
    本頁 <style> 只覆寫一次即可全斷點生效（與 .feed 同一寫法）。 */
-.bc-page-content > section:first-of-type.bc-bg-hero {
+.bc-page-content > section.bc-brand-stage-hero {
   margin-top: 0 !important;
 }
+/* 2026-10-18（使用者指示）：GUNTE hero 暫時隱藏（markup 與 JS 保留，只加 hidden）。
+   [為何還要這條] hidden 只依賴 UA 的 [hidden]{display:none}；若日後任何作者樣式對
+   .bc-gunte-hero 宣告 display（目前沒有），hidden 就會失效 → 用 !important 明確保證。 */
+.bc-page-content > section.bc-gunte-hero[hidden] {
+  display: none !important;
+}
 /* 2026-10-09（使用者指示）：置頂 hero 去掉「頁尾感」——移除頂部分隔線與自帶黑底。
-   [來源] 該模組（#bc-bg-footer，Hug in a Cup 時鐘）原本是頁尾，樣式沿用 Webflow 來源：
-     · 線 = bc-bg-footer.css:113 `#bc-bg-footer .grid.is-footer{border-top:1px solid
+   [來源] 該模組（#bc-brand-stage，Hug in a Cup 時鐘）原本是頁尾，樣式沿用 Webflow 來源：
+     · 線 = bc-brand-stage.css:152 `#bc-brand-stage .grid.is-footer{border-top:1px solid
        var(--_colors---border--100)}`，--_colors---border--100 = rgba(255,255,255,.08)
        → 實測繪出 y=14、x=14–1250、rgb(32,32,32) 的 1px 線（頁面底色為 rgb(14,14,14)）。
        這條線在原設計是「與頁尾上方內容分隔」用；置頂當 hero 時就會在畫面頂端
        出現一條突兀的細線，故移除。
-     · 黑底 = bc-bg-footer.css:42 `#bc-bg-footer{background-color:var(--_colors---background--bg)}`
-       與 :129 `#bc-bg-footer .footer{background-color:…}`（兩者皆 #0e0e0e）→ 讓模組成為
+     · 黑底 = bc-brand-stage.css:81 `#bc-brand-stage{background-color:var(--_colors---background--bg)}`
+       與 :168 `#bc-brand-stage .footer{background-color:…}`（兩者皆 #0e0e0e）→ 讓模組成為
        一塊自帶黑底的方塊。移除後由頁面自身的底色穿透（body 的固定背景照片，
        style-bootstrap.css:3118 `background:url(../images/bg_4.jpg) no-repeat fixed`），
        與首頁其餘區塊（.feed--video / ftco-section-blank-* 等，實測已露出同一張照片）一致。
-   [範圍] 只覆寫本頁：about 頁的 #bc-bg-footer 是「真正的頁尾」，仍保留分隔線與黑底。
-   [特異度] 加上 .bc-bg-hero（多一個 class）即高於原始 `#bc-bg-footer …` 規則；
+   [範圍] 只覆寫本頁：about 頁的 #bc-brand-stage 是「真正的頁尾」，仍保留分隔線與黑底。
+   [特異度] 加上 .bc-brand-stage-hero（多一個 class）即高於原始 `#bc-brand-stage …` 規則；
      border-top 全檔只在 :113 宣告一次（≤991px 的媒體查詢只改 padding-top、未重新宣告邊框）
      → 本覆寫在各斷點皆生效，不需 !important，也不必逐斷點鏡射。
-   [不動] .grid.is-footer 的 padding-top（桌面 120px／≤991px 72px）保持不變 →
-     文字與時鐘位置零位移（僅少掉 1px 線）。 */
-.bc-bg-hero #bc-bg-footer {
+   [padding-top] 2026-10-18 起桌面（≥992px）改由下方媒體查詢設定（見該段推導）；≤991px 不動。
+     上方三條（背景 ×2、分隔線）不動任何尺寸。 */
+.bc-brand-stage-hero #bc-brand-stage {
   background-color: transparent;
 }
-.bc-bg-hero #bc-bg-footer .footer {
+.bc-brand-stage-hero #bc-brand-stage .footer {
   background-color: transparent;
 }
-.bc-bg-hero #bc-bg-footer .grid.is-footer {
+.bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
   border-top: 0 none;
 }
-/* 2026-10-12（使用者指示）：「bc-bg-footer 內的咖啡照片列尺寸增加 50%」。
-   [標的] 首頁 hero 內 #bc-bg-footer 的 7 張咖啡照列 —— .footer-logo-cell（寬）
+/* 2026-10-20 稍後（使用者指示）：「上方留白還是太多，再減少一些」
+   （已同意「時鐘列可以高於視口中心」＝不要求畫面正中）。
+   [作法] 把「時鐘列中心要落在視高的百分之幾」抽成一個可調參數，桌面與平板共用：
+            --bc-hero-center-n: 43   ← 舊值是 50（＝畫面正中，得靠大量上方留白才做得到）
+          改成 43 ⇒ 內容整體上提 7% 視高（900px 高 → 63px、1080px → 75.6px）。
+          之後要再調，只改這一個數字，下方兩段算式（≥992、768–991）會同時跟上。
+   [為何是無單位數字] 算式必須「先 1vh 再 1svh」各宣告一次（舊瀏覽器沒有 svh）。
+          若把 43svh 直接放進 var()，不支援 svh 的瀏覽器會在「計算階段」判定整條宣告
+          無效 → padding-top 退回 initial（0），而不是回退到上一條宣告 ⇒ 版面會爆掉；
+          所以變數只存數字，單位留在各條 calc() 內。
+   [另一個關鍵：時鐘列 margin-top 歸零] 它原本是 u-104（桌機 7.22vw、平板 u-48＝12.21vw），
+          會隨視寬放大 —— 這是「視窗越寬、上方留白越多」的主因，也是大螢幕上算式
+          提早撞到 max(24px, …) 下限的原因（1920×1080 的 u-104 已是 138.7px）。
+          歸零後那段空間改由 padding-top 一次決定：視覺上是同一塊空白，
+          但不再和 padding 搶預算 ⇒ 目標中心在任何視寬都真的算得出來。
+   [範圍] 只作用首頁 hero；about 頁的真頁尾仍走 bc-brand-stage.css 的 u-104／u-48。
+   [逐段推導與實測] 見下方 ≥992 與 768–991 兩段。 */
+.bc-brand-stage-hero #bc-brand-stage {
+  --bc-hero-center-n: 43;
+}
+@media screen and (min-width: 768px) {
+  .bc-brand-stage-hero #bc-brand-stage .footer-time {
+    margin-top: 0;
+  }
+}
+/* 2026-10-18（使用者指示）：「bc-brand-stage 距離頂部太多了，稍微減少一些，保持主要內容頁面正中」。
+   2026-10-20 稍後：目標中心 50% → var(--bc-hero-center-n)（43%），時鐘列 margin-top 歸零。
+   [改前量測（2026-10-20 稍早版本，目標中心＝50% 視高）]
+     1440×900：時鐘列 top 272、高 468、中心 450.0（＝視口中心，誤差 0）；上方空白帶
+       ＝ .footer-inner padding-top 16 ＋ grid padding-top 63.8 ＋ 2 個空列 row-gap 32
+       ＋ 時鐘列 margin-top u-104 104 ＝ 215.8px。
+     1280×800、1536×864、1920×1080 也都維持 0 誤差；但 1536×864 的 padding 已被
+       max(24px) 下限夾住、1920×1080 的 u-104 又膨脹到 138.7px
+       ⇒ 空白帶反而隨視寬變厚（1536 → 186.1、1920 → 226.7）。這就是「還是太多」的來源。
+   [本次解法] (1) 目標中心 50% → var(--bc-hero-center-n)＝43%（見上一段）；
+     (2) 時鐘列 margin-top 歸零（見上一段的 margin-top 覆寫），把那段空間整併進 padding。
+     兩者合起來 ⇒ 空白帶在任何視寬都只剩「算式求出來的那一份」，不再被 u-104 加碼。
+   [為何用算式而不是寫死 64px] 內容中心與各段留白全部隨「視寬」縮放，目標位置卻綁視高
+     ⇒ 固定值只在某一種長寬比剛好命中（64px 在 1440×900 精準，換個長寬比就偏掉）。
+     直接把「時鐘列中心 ＝ 43% 視高」解出來，逐段扣掉它上方的既有間距：
+       時鐘列中心 ＝ 0
+                  ＋ .footer-inner padding-top      var(--_units---u-16)
+                  ＋ 本條 padding-top              ← 求解的值
+                  ＋ 空列造成的 2 個 row-gap        2 × var(--_special-units---grid-gap)
+                  ＋ #bc-stage-clock margin-top    0（2026-10-20 稍後歸零，原 u-104）
+                  ＋ 時鐘列高的一半                 (照片區 400vw/ratio ＋ 文字區) ÷ 2
+     （u-16、2×grid-gap、照片區在 ≥992px 都以 vw 縮放：1.111 ＋ 2.222 ＋ 13.889 ＝ 17.222vw；
+       文字區 68.4px 是固定值 ⇒ 寫成 var(--bc-hero-caption-h)/2，日後改字級自動跟上。）
+   [算得 vs 實測] 算式：1440×900 → 104.8（中心 387.0）；1280×800 → 89.4（344.0）；
+     1536×864 → 72.8（371.5）；1920×1080 → 99.5（464.4）；1024×768 → 119.7（330.2）。
+     空白帶 215.8 → 152.8（@1440）、226.7 → 163.5（@1920）＝時鐘列上移 63～75.6px。
+     每個尺寸都遠高於 max(24px) 下限，不再有「大螢幕撞到下限」的情況。
+   [下限] max(…, 24px)：視口太矮時（例：1440×700）算式為負；此時時鐘列本身就比視口高、
+           不可能置中，仍保留一點上緣呼吸空間。
+   [svh] 先宣告 1vh 的版本給不支援 svh 的瀏覽器，下一行再以 1svh 覆寫（行動瀏覽器網址列
+           收起／展開時不跳動；≥992px 本頁兩者量測結果相同）。
+   [斷點] 只作用 ≥992px；768–991 見下方獨立算式（同一組目標中心 ＋ margin-top 歸零）。
+           ≤767（手機）不動：390×844 的時鐘列中心 282 本來就偏上（視口中心 422）、
+           距頂端也只剩 143px，再上移只會更偏離中心。
+   [範圍] 只作用於首頁（.bc-brand-stage-hero）；about 頁的真頁尾仍走 bc-brand-stage.css
+           的 120／72，不受影響。 */
+@media screen and (min-width: 992px) {
+  .bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
+    padding-top: max(24px, calc(var(--bc-hero-center-n) * 1vh - var(--_units---u-16) - 2 * var(--_special-units---grid-gap) - (200vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2)));
+    padding-top: max(24px, calc(var(--bc-hero-center-n) * 1svh - var(--_units---u-16) - 2 * var(--_special-units---grid-gap) - (200vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2)));
+  }
+}
+
+/* 2026-10-20（使用者指示）：「在平板端，bc-brand-stage 距離頂部太多了，稍微減少一些，
+   保持主要內容頁面正中」。
+   [斷點範圍] 只作用 768–991px（平板）。≥992 由上方算式處理；≤767 手機不動
+     —— 390×844 的時鐘列中心 282 本來就偏上（視口中心 422）、距頂端只剩 143px，
+     再上移只會更偏離中心。
+   [本次調整（2026-10-20 稍後）] 目標中心與桌機共用 var(--bc-hero-center-n)＝43%，
+     且 .footer-time 的 margin-top（u-48＝12.21vw）已在 ≥768px 統一歸零（見上方覆寫），
+     故本段算式不再扣 u-48 —— 那段空間現在由 padding-top 一次決定。
+   [為何不能寫成固定值] ≤991 的所有間距都隨「視寬」縮放（u-72＝18.32vw、空列 gap、
+     照片區 180vw/ratio），目標位置卻綁視高 ⇒ 固定值只在某一種長寬比剛好命中。
+     因此比照 ≥992 的作法，直接把「時鐘列中心 ＝ 43% 視高」解出來：
+       時鐘列中心 ＝ padding-top
+                   ＋ 2 × grid-gap（.grid 內空列造成的 2 個 row-gap）
+                   ＋ .footer-time 的 margin-top（0，見上方覆寫）
+                   ＋ 時鐘列高 ÷ 2
+       時鐘列高   ＝ 2 × u-24 ＋ 14px（.footer-logo-cell 上下內距，見上方 ≤991 覆寫）
+                   ＋ 180vw/ratio（.footer-logo-list，見上方 ≤991 覆寫）
+                   ＋ --bc-hero-caption-h（名稱＋highlight，見下方 B2）
+       （≤991 的 .footer-inner padding-top 為 0，故不列入。）
+       時鐘列高 ÷ 2 ＝ u-24 ＋ 7px ＋ 90vw/ratio ＋ caption/2 ← 即算式中的四項。
+   [預期] 768×1024：改前 padding 140.7、時鐘列 top 281.4（含 margin-top 93.8；中心 532.6
+     ＝比視口中心低 20.6px）→ 改後頂端空白帶 187.6（少 93.8px）。
+     820×1180：改前 top 300.5 → 改後 200.3（少 100.2px）。
+     兩者時鐘列中心都會落在 43% 視高之上方（使用者已同意不要求正中）。
+   [min() 上限＝只減不增] 上限 var(--_units---u-72)：算式若大於現值（視口很矮／很窄時）
+     就取現值，不把留白變得更多（使用者要求「減少」而非「調整到任何位置」）。
+   [下限] max(24px, …)：視口太矮時（例：768×700，或 991×768 這類「寬而矮」的橫向平板）
+     算式為負 —— 此時時鐘列本身就比視口高，不可能置中，仍保留一點上緣呼吸空間
+     （與 ≥992 同一值；991×768 實測 padding 24 ⇒ 時鐘列 top 84.5，改前約 333，
+     內容比視口高、往下捲即可）。
+   [svh] 先宣告 1vh 的版本給不支援 svh 的瀏覽器，下一行再以 1svh 覆寫。
+   [範圍] 只作用首頁（.bc-brand-stage-hero）；about 頁的真頁尾仍走 bc-brand-stage.css
+     的 u-72，不受影響。 */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+  .bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
+    padding-top: min(var(--_units---u-72), max(24px, calc(var(--bc-hero-center-n) * 1vh - 2 * var(--_special-units---grid-gap) - var(--_units---u-24) - 7px - (90vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2))));
+    padding-top: min(var(--_units---u-72), max(24px, calc(var(--bc-hero-center-n) * 1svh - 2 * var(--_special-units---grid-gap) - var(--_units---u-24) - 7px - (90vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2))));
+  }
+}
+
+/* 2026-10-12（使用者指示）：「bc-brand-stage 內的咖啡照片列尺寸增加 50%」。
+   [標的] 首頁 hero 內 #bc-brand-stage 的 7 張咖啡照列 —— .footer-logo-cell（寬）
      與 .footer-logo-item（高）；照片本身是 .img{width:100%;height:100%}＋
      .img.contain（object-fit:contain），故放大格子即放大照片。
-   [原始值] bc-bg-footer.css:156 寬 calc(192vw/scale-ratio)、:157 高 calc(184vw/scale-ratio)；
-     同檔 :206 的 @media (max-width:991px) 再把高改為 calc(120vw/scale-ratio)。
+   [原始值] bc-brand-stage.css:195 寬 calc(192vw/scale-ratio)、:196 高 calc(184vw/scale-ratio)；
+     同檔 :245 的 @media (max-width:991px) 再把高改為 calc(120vw/scale-ratio)。
      ⇒ 桌機 192×184（@1440 實測 cell 192×264＝上下 padding 40＋184）、
         ≤991px 高 30.53vw。×1.5 後＝寬 288／高 276，≤991px 高 180。
    [範圍] 只覆寫本頁：about 頁的真頁尾共用同一組 class（.footer-logo-*）與同一份 CSS，
      仍維持原尺寸（deco 標誌釘牌不變）。
-   [特異度] 多一個 .bc-bg-hero class ⇒ 高於 bc-bg-footer.css 的原規則，不需 !important
+   [特異度] 多一個 .bc-brand-stage-hero class ⇒ 高於 bc-brand-stage.css 的原規則，不需 !important
      （與上方三條覆寫同一寫法）。高度必須逐斷點鏡射，因為該檔在 ≤991px 用的是
      不同的基準值（120 而非 184），單一條 calc(276vw/scale-ratio) 在 ≤991px 會變成
      70.23vw（＝+130%，非 +50%）。
@@ -861,7 +1020,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
          ⇒ 逐斷點照片尺寸（寬×高）：1905 = 370.4×529.1、1440 = 280×400、
            1280 = 248.9×355.6、992 = 192.9×275.6；時鐘列（＝cell）高：1905 684.6 → 589.6、
            1440 529.6 → 460.4、1280 476.3 → 415.9、992 380.3 → 335.9。
-         ⇒ 時鐘列頂端與 #bc-bg-footer 的文件座標仍然 Δ0；列變矮 ⇒ 時鐘數字／`{ }` 隨列內置中
+         ⇒ 時鐘列頂端與 #bc-brand-stage 的文件座標仍然 Δ0；列變矮 ⇒ 時鐘數字／`{ }` 隨列內置中
            上移 34.6px（@1440 document y 1280.69 → 1246.09），上一輪「左鄰居與 `{` 重疊」的
            副作用也同步變小（見下方 B1 的 [與時鐘列子項的關係]）。
        2026-10-16（使用者指示）：「咖啡名稱和 Highlight 文本文字尺寸再次加大」
@@ -875,7 +1034,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
          · 唯一連帶：文字區高 +8px ⇒ 時鐘列（＝cell）高等量變高（時鐘數字／`{ }` 隨列內置中
            再下移 4px）、下方內容下移 8px（逐斷點值見 docs/verify/cdp_verify_hero_coffee_photos.py
            的 EXPECT）。 */
-.bc-bg-hero #bc-bg-footer .footer-logo-cell {
+.bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
   width: calc(288vw / var(--_special-units---global--scale-ratio));
 }
 @media screen and (min-width: 992px) {
@@ -883,32 +1042,32 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      （必須排在該規則之後才蓋得掉 —— 兩者特異度相同，CSS 以來源順序決勝）
      2026-10-15（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」
      → 480vw/ratio → 400vw/ratio（@1440 = 480 → 400px、@1905 = 635 → 529.17px）。 */
-  .bc-bg-hero #bc-bg-footer .footer-logo-list {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-list {
     height: calc(400vw / var(--_special-units---global--scale-ratio));
   }
 }
 @media screen and (max-width: 991px) {
-  .bc-bg-hero #bc-bg-footer .footer-logo-list {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-list {
     height: calc(180vw / var(--_special-units---global--scale-ratio));
   }
 }
 /* ============================================================
    2026-10-14（使用者指示）
-   A. about 頁的天氣/時鐘元件搬進 #bc-clock（位於左側 { 之上、尺寸 +30%）
-   B. 照片格（#bc-clock-photos）＝GUNTE hero 的環形照片列
+   A. about 頁的天氣/時鐘元件搬進 #bc-stage-clock（位於左側 { 之上、尺寸 +30%）
+   B. 照片格（#bc-stage-photo-ring）＝GUNTE hero 的環形照片列
       ＋「當前那支咖啡」的名稱/highlight（原「每張照片下方各一組」）
    2026-10-14 稍後（使用者指示）：「用 hero 的 hero_hand＋旋轉動畫、半徑縮進格子」→ 改為
       「區域太小了，動畫展示是使用整個頁面的，參考 hero_hand」⇒ 半徑改回 hero 的 100vw
-      （整頁扇形）、照片格不再裁切（改由 #bc-bg-footer 裁）。詳見下方 B1。
+      （整頁扇形）、照片格不再裁切（改由 #bc-brand-stage 裁）。詳見下方 B1。
    ============================================================ */
-/* ---- A. 天氣元件（markup 見 partials/bc_hero.html 的 #bc-clock-weather） ----
+/* ---- A. 天氣元件（markup 見 partials/bc_brand_stage_hero.html 的 #bc-stage-weather） ----
    2026-10-17（使用者指示）：「移除時鐘，只保留天氣與溫度」→ 本顆的 .clock 節點已刪、
      循環只剩 icon ⇄ 溫度（bc-weather.js 的 ORDER）。高度與定位完全不變：
      .view 的子項全是 position:absolute，時鐘本來就不佔流內高度。
    [縮放] --wc-scale:1.3。bc-weather.css 的所有尺寸都是 calc(原值 * var(--wc-scale,1))
      （先例＝bc-reviews.css 的 --rv-scale）；只在 hero 內宣告 → about 頁 navbar 那顆
      不繼承（×1）→ about 外觀零變動。
-   [定位] 放進 #bc-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格：
+   [定位] 放進 #bc-stage-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格：
      · align-self:start：貼齊該格頂端。該格高度＝整條時鐘列高（由照片格撐出；2026-10-15
        原始 419.6px → 照片放大 529.6px → 當日稍後照片縮小 460.4px），若用預設的 stretch
        會撐滿整列並讓內容垂直置中而與 { 重疊；center 更是直接疊上去。start 讓它恆在垂直
@@ -918,25 +1077,25 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      · justify-self:center：與同格的 { 水平同中心（兩者都置中於欄 1）。
    [高度] .weather 在 hero 內改為 height:auto（見 bc-weather.css）：navbar 的
      height:100%／80px 是為 flex 容器設計，照搬到 grid 格會與 { 重疊。 */
-.bc-bg-hero #bc-bg-footer #bc-clock-weather {
+.bc-brand-stage-hero #bc-brand-stage #bc-stage-weather {
   grid-area: 1 / 1 / 2 / 2;
   align-self: start;
   justify-self: center;
 }
 /* ≥992px 必須把 { 明確釘回「欄 1、列 1」。
    [原因] 本頁 .footer-time 8 欄配置的排列靠 grid 自動置位：`{` 與 `15` 只宣告了
-     place-self:center、沒有 grid-area（≤991px 才有明確值，見 bc-bg-footer.css）。
+     place-self:center、沒有 grid-area（≤991px 才有明確值，見 bc-brand-stage.css）。
      新增的天氣格先佔走欄 1 後，自動置位會把 `{` 放到欄 2、`15` 往後找空格
      （撞上明確定位的冒號／照片再退），照片列（span 2）最終落點也會偏移
      —— 實測會出現隱式欄、整列跑版。
    [作法] 把 `{` 釘在欄 1（＝天氣所在的同一格，兩者上下不重疊，理由見上），
      自動置位序列即完全不變：欄 1={(+天氣) 2=15 3=: 4-5=照片 6=: 7=19 8=}。 */
 @media screen and (min-width: 992px) {
-  .bc-bg-hero #bc-bg-footer #bc-clock-brace-open {
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-brace-open {
     grid-area: 1 / 1 / 2 / 2;
   }
 }
-.bc-bg-hero #bc-bg-footer #bc-clock-weather .weather {
+.bc-brand-stage-hero #bc-brand-stage #bc-stage-weather .weather {
   --wc-scale: 1.3;
 }
 
@@ -960,17 +1119,17 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
    [圓心位置] .hero_hand 的定位點＝圓弧頂點（＝current 那張的中心）→ 水平放 50%
      （＝照片格中心＝時鐘列中心＝頁面中心）、垂直放照片區的垂直中心（top:50%）。
    [裁切] 扇形不再由照片格裁（否則就回到「區域太小」）→ 改由頁面層級的
-     `#bc-bg-footer{overflow:hidden}` 裁（＝hero 由 .bc-gunte-hero{overflow:hidden} 裁，
+     `#bc-brand-stage{overflow:hidden}` 裁（＝hero 由 .bc-gunte-hero{overflow:hidden} 裁，
      同一件事）：±50° 以後的項目落在畫面外、連同超出頁面的部分一起被裁掉
      ⇒ 不會產生水平捲軸（實測 documentElement.scrollWidth ≤ innerWidth）。
      ⚠ 有第二層裁切，不是 overflow：`.footer-logo-cell` 的 `data-reveal="clip-down"`
        會被 GSAP 在進場後留下 `clip-path: inset(0%)`（＝永久把內容框在格子邊界內）——
        實測側邊鄰居的 rect 存在、圖片也已載入，卻被它整張切掉（elementFromPoint 命中的是
-       #bc-clock）。故 bc-bg-footer.js 的 clip 揭示改為「跑完即釋放含 [data-bc-hand-ring]
+       #bc-stage-clock）。故 bc-brand-stage.js 的 clip 揭示改為「跑完即釋放含 [data-bc-hand-ring]
        容器的 clip-path」（2026-10-14 稍後；/about/ 沒有該標記 ⇒ 行為不變）。
    [與時鐘列子項的關係] 實測 @1440（2026-10-15 照片縮小後；文件座標。時鐘數字／`{ }` 隨列高置中
      ⇒ 比上一輪（照片放大）上移 34.6px、比原始（276vw/ratio）只下移 20.4px；列的頂端與
-     #bc-bg-footer／.grid 全程完全不動，見下）：
+     #bc-brand-stage／.grid 全程完全不動，見下）：
      · 時鐘數字 `00`/`46` 在 x 229–315／1110–1196 ⇒ 與鄰居照片框（x −2–210／1215–1427）
        的水平範圍不交集 ⇒ 不重疊（距離 19px／20px）。
      · `{`（x 85–107）與左鄰居的**不透明內容**（依原圖 alpha 推得 bbox：x 18.8–80.6%、
@@ -983,11 +1142,11 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
        cdp_verify_hero_coffee_photos.py 的 C5 斷言）。
      · 文字列：鄰居 bbox 與它零交集（橫向距離更遠）；current 那張底緣仍精準貼齊文字列頂端。
    [版面影響] 列高＝cell 高：@1440 419.6（原始）→ 529.6（2026-10-15 照片放大）→ 460.4（同日稍後
-     照片縮小）。cell 頂端、#bc-bg-footer、.grid.is-footer 三者文件座標全程完全不動（實測 Δ0）；
+     照片縮小）。cell 頂端、#bc-brand-stage、.grid.is-footer 三者文件座標全程完全不動（實測 Δ0）；
      列變高／變矮時下方內容（.footer-socials 等）等量移動，頁面總高 @1440 3826 → 3936 → 3867
      （實測 docHeight）。≤991px 全部逐值不變（docHeight 亦相同）。 */
 
-.bc-bg-hero #bc-bg-footer .footer-logo-cell {
+.bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
   /* [為什麼要 +14px] 原結構（7 個 .footer-logo-item，其中 :first-child 為 position:relative）
      實測在「cell 內距底」與「.footer-logo-list 頂」之間有一個**固定 14px** 的間隙
      （1905/1280/991/390 四斷點皆為 14.0px，與 vw 無關）。改為環形照片列後該間隙消失，
@@ -1005,15 +1164,15 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      （會量到 padding-top 仍是 u-40 + 14px）。
    [≤991px] 不動：該斷點仍用上方這條（u-40 → u-24，見檔尾的 ≤991px 段），逐值與改動前相同。 */
 @media screen and (min-width: 992px) {
-  .bc-bg-hero #bc-bg-footer .footer-logo-cell {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
     padding-top: 0;
     padding-bottom: 0;
   }
 }
 /* [2026-10-14 稍後移除] 原本這裡還有一條 `.footer-logo-list { overflow: clip }`（把扇形裁在
    照片區內）。改為整頁扇形後照片必須離開格子 → 移除；唯一的裁切框是頁面層級的
-   `#bc-bg-footer { overflow: hidden }`（見上方 B1 的 [裁切]）。 */
-.bc-bg-hero #bc-bg-footer #bc-clock-photos .hero_hand {
+   `#bc-brand-stage { overflow: hidden }`（見上方 B1 的 [裁切]）。 */
+.bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring .hero_hand {
   /* 與 hero 逐值相同的大圓（bc-hand-ring.css 的預設值就是 100vw；這裡明寫，讓
      「照片格也是同一顆整頁大圓」在原始碼裡看得見，日後改動時不會被誤當成筆誤刪掉）。 */
   --circle-radius: 100vw;
@@ -1029,24 +1188,24 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
   width: 0;
 }
 @media screen and (max-width: 991px) {
-  /* ≤991px：照片區高度換成 180vw/ratio（bc-bg-footer.css 的既有值）⇒ 照片寬同步換成
+  /* ≤991px：照片區高度換成 180vw/ratio（bc-brand-stage.css 的既有值）⇒ 照片寬同步換成
      126vw/ratio（180 ÷ 1.429）；半徑仍是 hero 的 100vw（整頁扇形，不隨斷點縮小）。 */
-  .bc-bg-hero #bc-bg-footer #bc-clock-photos .hero_hand {
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring .hero_hand {
     --bc-hand-img-w: calc(126vw / var(--_special-units---global--scale-ratio));
   }
   /* 該斷點照片格的內距來源改為 --_units---u-24（見上方 +14px 說明） */
-  .bc-bg-hero #bc-bg-footer .footer-logo-cell {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
     padding-top: calc(var(--_units---u-24) + 14px);
   }
 }
 /* [為什麼要在這裡重宣告 margin-left]
-   bc-bg-footer.css 開頭有一段 id 級的 element reset：
-     `#bc-bg-footer div,#bc-bg-footer span,…,#bc-bg-footer a,#bc-bg-footer img,…{margin:0;padding:0;border:0;…}`
+   bc-brand-stage.css 開頭有一段 id 級的 element reset：
+     `#bc-brand-stage div,#bc-brand-stage span,…,#bc-brand-stage a,#bc-brand-stage img,…{margin:0;padding:0;border:0;…}`
    （特異度 1,0,1）會蓋掉共用模組 .hero_hand_list 的 `margin-left: calc(R * -1)`（0,1,0）
-   → 實測圓盤不會被推左 R，整片扇形會偏右 R（hero 不在 #bc-bg-footer 內、不受該 reset 影響）。
-   因此在本頁以 #bc-clock-photos 前綴（> 1,0,1）把值補回；其餘模組屬性（width / aspect-ratio /
+   → 實測圓盤不會被推左 R，整片扇形會偏右 R（hero 不在 #bc-brand-stage 內、不受該 reset 影響）。
+   因此在本頁以 #bc-stage-photo-ring 前綴（> 1,0,1）把值補回；其餘模組屬性（width / aspect-ratio /
    inset-inline-start / translate / rotate / scale）都已實測生效，不需重宣告。 */
-.bc-bg-hero #bc-bg-footer #bc-clock-photos .hero_hand_list {
+.bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring .hero_hand_list {
   margin-left: calc(var(--circle-radius) * -1);
 }
 /* [文字只在置中的那杯上出現] 2026-10-16（使用者指示）：「當相關咖啡旋轉到中心時，才顯示相關
@@ -1054,17 +1213,17 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
    等旋轉過渡跑完、該杯真的到中心才切換 -current（＝文字與置中的照片同一個時間點）。
    2026-10-17（使用者指示）：切換 -current 後立刻跑一次與 hero 右側 Fresh / Beans 相同的
    data-reveal 文字揭示（SplitText ＋ goo 濾鏡）。動畫完全由 bc-hand-ring.js →
-   bc-bg-footer.js 的 window.BC_TEXT_REVEAL 執行，本檔不需新增 CSS：
+   bc-brand-stage.js 的 window.BC_TEXT_REVEAL 執行，本檔不需新增 CSS：
    SplitText 只把 <p> 的文字包成行區塊（行高不變）⇒ 文字區高度仍等於 --bc-hero-caption-h。 */
-.bc-bg-hero #bc-bg-footer .bc-ring-caption-item {
+.bc-brand-stage-hero #bc-brand-stage .bc-ring-caption-item {
   display: none;
 }
-.bc-bg-hero #bc-bg-footer .bc-ring-caption-item.-current {
+.bc-brand-stage-hero #bc-brand-stage .bc-ring-caption-item.-current {
   display: block;
 }
 /* 旋轉期間（bc-hand-ring.js 的 holdCaptions）：整組文字隱形 —— 用 visibility 而非 display，
    -current 那筆仍留在流內 ⇒ 文字區高度不變、換張時下方的時鐘列與整頁內容不會被抽動。 */
-.bc-bg-hero #bc-bg-footer .bc-ring-caption.-hidden .bc-ring-caption-item {
+.bc-brand-stage-hero #bc-brand-stage .bc-ring-caption.-hidden .bc-ring-caption-item {
   visibility: hidden;
 }
 /* ---- B2. 文字樣式（名稱 ＋ highlight） ----
@@ -1072,7 +1231,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      「文字區總高 = padding-top 8 + 名稱行高 1.3 + highlight 上緣 4 + 行高 1.4」。
      2026-10-14 稍後：文字區改為 .footer-logo-list（照片區）之後的自然流區塊
      ⇒ 兩者相加＝改動前的 .footer-logo-item 高度（照片區與時鐘列高度皆不變）。 */
-.bc-bg-hero #bc-bg-footer {
+.bc-brand-stage-hero #bc-brand-stage {
   --bc-hero-caption-h: calc(8px + 24px * 1.3 + 4px + 18px * 1.4);
 }
 /* [2026-10-14 稍後移除] 原本這裡的兩條規則（`.footer-logo-item a.footer-logo-link`
@@ -1084,7 +1243,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
    （bc-series.css；about 頁的咖啡/咖啡豆卡片已在用）。
    ⚠ bc-series.css 只載入 about 頁（本頁 extra_css 未載）→ 本頁必須自帶同值宣告，
      否則名稱沒有 Josefin Sans／大寫／白字，highlight 也不會是品牌金
-     （實測會繼承 #bc-bg-footer 的 rgba(255,255,255,.9)，與設計不符）。
+     （實測會繼承 #bc-brand-stage 的 rgba(255,255,255,.9)，與設計不符）。
    [與 bc-series.css 逐值相同] font-family / font-weight / text-transform /
      letter-spacing / color（highlight 的 var(--bc-gold,#c49b63) 由全站載入的
      bc-components.css :root 提供）。
@@ -1097,14 +1256,14 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
        [單行檢查] 最窄桌機斷點 992 的文字區可用寬 190.0px（cell 198.39 − 左右各 4px）：
        highlight 18px 的最長文字寬 171.73px、name 24px 的最長文字寬 133.56px
        （行高 31.2／25.2）⇒ 皆單行未折行、仍有 18.3px 餘裕（驗證腳本 E10 逐斷點守門）。
-   [reset] margin/padding 必須一併改寫：bc-bg-footer.css 的
-     `#bc-bg-footer p{margin:0;padding:0}`（1,0,1）會蓋掉 class 規則（0,1,0），
-     用 #bc-bg-footer 前綴（1,1,0）才贏得了 reset。 */
-.bc-bg-hero #bc-bg-footer .footer-logo-caption.bc-series-caption {
+   [reset] margin/padding 必須一併改寫：bc-brand-stage.css 的
+     `#bc-brand-stage p{margin:0;padding:0}`（1,0,1）會蓋掉 class 規則（0,1,0），
+     用 #bc-brand-stage 前綴（1,1,0）才贏得了 reset。 */
+.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption.bc-series-caption {
   padding: 8px 4px 0;
   text-align: center;
 }
-.bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
+.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
   margin: 0;
   font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
   font-size: 24px;
@@ -1114,7 +1273,7 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
   color: #fff;
   text-transform: uppercase;
 }
-.bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
+.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
   margin: 4px 0 0;
   font-family: "Noto Sans TC", sans-serif;
   font-size: 18px;
@@ -1124,24 +1283,24 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
   color: var(--bc-gold, #c49b63);
 }
 @media screen and (max-width: 991px) {
-  .bc-bg-hero #bc-bg-footer {
+  .bc-brand-stage-hero #bc-brand-stage {
     --bc-hero-caption-h: calc(8px + 13px * 1.3 + 4px + 10px * 1.4);
   }
-  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
     font-size: 13px;
   }
-  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
     font-size: 10px;
   }
 }
 @media screen and (max-width: 767px) {
-  .bc-bg-hero #bc-bg-footer {
+  .bc-brand-stage-hero #bc-brand-stage {
     --bc-hero-caption-h: calc(8px + 11px * 1.3 + 4px + 9px * 1.4);
   }
-  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-name {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
     font-size: 11px;
   }
-  .bc-bg-hero #bc-bg-footer .footer-logo-caption .bc-series-caption-highlight {
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
     font-size: 9px;
   }
 }
@@ -1166,48 +1325,77 @@ Phase 3（2026-08-07）：首屏關鍵資源 preload
      → 版號 ?v=20260907b 升為 ?v=20261013a
      2026-10-14（使用者指示）：環形照片列的驅動抽成共用模組 → 先載入 bc-hand-ring.js
      （BC_HAND_RING），本檔改為 register + goAll(hero index)；照片格那一側由 defer 的
-     bc-bg-footer.js 自行註冊（模組會讓晚註冊者會合）→ 版號升為 ?v=20261014a
+     bc-brand-stage.js 自行註冊（模組會讓晚註冊者會合）→ 版號升為 ?v=20261014a
      2026-10-16（使用者指示「名稱與 Highlight 的時間點不正確」）：文字的切換時機改為
      「圓盤旋轉過渡跑完才切」→ bc-hand-ring.js 有改 → 版號再升為 ?v=20261016a。
      2026-10-17（使用者指示「咖啡名稱與 Highlight 加上顯示動畫」）：換張時沿用 hero 右側
      Fresh / Beans 的 data-reveal 文字揭示（bc-hand-ring.js 的 revealCaption）→
-     版號再升為 ?v=20261017a。 -->
-<script src="{% static 'library/splide-4.1.3/dist/js/splide.min.js' %}"></script>
-<script src="{% static 'js/bc-hand-ring.js' %}?v=20261017a"></script>
-<script src="{% static 'js/bc-gunte-hero.js' %}?v=20261014a"></script>
+     版號再升為 ?v=20261017a。
+     2026-10-18（使用者指示「顯示時間點略慢，加快一點點」）：revealCaption 改為
+     window.BC_TEXT_REVEAL(els, 0.04, 0.9)（起始延遲 0.1→0.04s、時長 1.2→0.9s）
+     → 版號 ?v=20261017a 升為 ?v=20261018b。
+     2026-10-19（使用者指示「圓盤已到中心，文字揭示仍略慢，再加快一點點」）：
+     revealCaption 首度改為 (els, 0.02, 0.65, 0.06)（延遲 0.04→0.02s、時長 0.9→0.65s、
+     兩筆錯開 0.1→0.06s）；稍後依同一指示二度收緊為 (els, 0, 0.45, 0)（名稱與 highlight
+     同步、0.45s 收斂），切換點再提前 80ms（SETTLE_LEAD）→ 版號升至 ?v=20261019b。 -->
+<!-- 2026-10-19（首頁效能 P0）：移除 GUNTE hero 專屬腳本（splide.min.js / bc-gunte-hero.js）。
+     兩檔皆保留在 static/，恢復 hidden 的 GUNTE hero 時再加回即可（順序：splide → bc-hand-ring → bc-gunte-hero）。
+     bc-hand-ring.js 必須保留：品牌舞台第一屏的環形咖啡照列（#bc-stage-photo-ring）也用它。
+     2026-10-20（使用者回報「#bc-stage-photo-ring 整個模組包括旋轉動畫都無法運作」）：
+       上述兩檔同時也是環形照片列的「唯一換張來源」（bc-gunte-hero.js 的 Splide → goAll），
+       移除後環只會停在第一張。已於 bc-hand-ring.js 新增 startAuto()／stopAuto()，
+       由 bc-brand-stage.js 在「沒有 hero 推播」時啟動 5s 自帶節拍（恢復 hero 時會自動讓位），
+       本頁不需再加回任何腳本。版號：bc-hand-ring.js ?v=20261020a、bc-brand-stage.js ?v=20261020a。 -->
+<script src="{% static 'js/bc-hand-ring.js' %}?v=20261020a"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
+<!-- 2026-10-22（使用者指示）：首頁四步咖啡旅程 Rive 圖示（intro / off / hover 時間軸）；
+     runtime 與 .riv 皆自架，接近視口才載入（IntersectionObserver，rootMargin 600px）。
+     2026-10-22c：靜止姿勢＝intro 自然播完留下的完整圖示；離開 hover 不發任何指令
+     （stop/scrub 會讓圖示凍結在缺角的中間格，實測結論見 bc-steps-rive.js 檔頭）
+     2026-10-23a（使用者指示）：intro 自動循環（靜止 4 秒重播）＋圖示改純白
+     （白色由 bc-steps.css 的 filter 處理，勿在此加顏色） -->
+<script src="{% static 'js/bc-steps-rive.js' %}?v=20261023b"></script>
 <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
      已抽成全站共用檔 static/js/bc-attract-place.js（base.html 全域載入）——
      使用者指示「所有模板浮動購物車修改位置和 index 一樣」→ 全站（含首頁）共用同一套定位，
      並新增『Buy 按鈕不存在時，浮動鈕單獨對齊 navbar-brand 頂邊』的分支。
      首頁不再需要個別腳本。 -->
-<!-- 2026-10-09（使用者指示）：首頁 footer 改為 about 頁的 BC 動態 footer（#bc-bg-footer），
-     需要的 GSAP 外掛：SplitText / CustomEase（gsap 3.13 起免費）；
+<!-- 2026-10-09（使用者指示）：首頁 footer 改為 about 頁的 BC 動態模組（原 #bc-bg-footer，
+     2026-10-18 更名 #bc-brand-stage 並回到第一屏當 hero），需要的 GSAP 外掛：
+     SplitText / CustomEase（gsap 3.13 起免費）；
      gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可。
      2026-10-14 稍後：本檔新增「clip-down 揭示跑完後釋放含環形照片列容器的 clip-path」
      （整頁扇形必須離開 .footer-logo-cell）→ 版號 ?v=20261014a 升為 ?v=20261014b
      （/about/ 沒有 [data-bc-hand-ring]，行為完全不變，僅同步版號）。
      2026-10-17（使用者指示）：新增 window.BC_TEXT_REVEAL（把同一支 goo 文字揭示開放給
      bc-hand-ring.js，供首頁咖啡名稱 / Highlight 換張時使用）＋ reveal 前先 kill 舊時間軸
-     → 版號 ?v=20261014b 升為 ?v=20261017a。 -->
+     → 版號 ?v=20261014b 升為 ?v=20261017a。
+     2026-10-18（使用者指示）：模組更名（bc-bg-footer → bc-brand-stage）、檔名同步更改
+     → 版號改為 ?v=20261018a（檔名已變，版號僅作統一標記）。
+     2026-10-18 稍後（使用者指示「咖啡名稱和 Highlight 動畫顯示時間點略慢，加快一點點」）：
+     window.BC_TEXT_REVEAL 新增選填的 duration 參數（bc-hand-ring.js 傳 0.9s／0.04s，
+     其餘 data-reveal 文字仍走預設 1.2s）→ 版號 ?v=20261018a 升為 ?v=20261018b。
+     2026-10-19（使用者指示「圓盤已到中心，文字揭示仍略慢，再加快一點點」）：
+     window.BC_TEXT_REVEAL 再新增選填的 stagger 參數（bc-hand-ring.js 傳 0.45s／0s／0s；
+     其餘 data-reveal 文字仍走預設 1.2s／0.1s）→ 版號升為 ?v=20261019b。 -->
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-<script defer src="{% static 'js/bc-bg-footer.js' %}?v=20261017a"></script>
+<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261020a"></script>
 {% endblock %}
 
 {% block bcc_footer %}
 {% comment %}
-2026-10-09（使用者指示）：本頁不再需要「頁尾的」BC 動態模組 —— 該模組（#bc-bg-footer，
+2026-10-09（使用者指示）：本頁不再需要「頁尾的」BC 動態模組 —— 該模組（#bc-brand-stage，
 Hug in a Cup 時鐘）已移到本頁最上方當第一個 hero（見上方 <!-- 2026-10-09 ... -->
-註解與 partials/bc_hero.html）。此處刻意覆寫為空，避免同一模組在頁面出現兩次
-（#bc-bg-footer 這個 id 重複時，bc-bg-footer.js 的 getElementById 只會綁到第一個，
+註解與 partials/bc_brand_stage_hero.html）。此處刻意覆寫為空，避免同一模組在頁面出現兩次
+（#bc-brand-stage 這個 id 重複時，bc-brand-stage.js 的 getElementById 只會綁到第一個，
  第二個會停在未初始化的 [data-reveal] 隱藏狀態）。
-2026-10-13（使用者指示）：該模組現為「第二塊 hero」（GUNTE hero 之後，見檔頭 10-13 註解）；
-本 block 的處置不變（仍覆寫為空）。
-也刻意「不」回退 base.html 的 .ftco-footer 靜態頁尾：#bc-bg-footer 已承接本頁
+2026-10-13：曾調整為「第二塊 hero」（GUNTE hero 之後）；2026-10-18（使用者指示）已移回
+第一屏（GUNTE hero 改為 hidden）。本 block 的處置不變（仍覆寫為空）。
+也刻意「不」回退 base.html 的 .ftco-footer 靜態頁尾：#bc-brand-stage 已承接本頁
 全部的頁尾內容（社群、跑馬燈、© 版權），再放回 ftco 會變成兩套 footer 視覺並存。
-（若日後要恢復頁尾，把本 block 內容換回 include 'betweencoffee_delivery/partials/bc_bg_footer.html'
+（若日後要恢復頁尾，把本 block 內容換回 include 'betweencoffee_delivery/partials/bc_brand_stage.html'
  即可，但需同步處理 id 重複問題。）
 {% endcomment %}
 {% endblock %}

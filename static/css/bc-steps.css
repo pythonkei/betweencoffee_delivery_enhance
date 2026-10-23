@@ -1,0 +1,98 @@
+/* ============================================================
+   bc-steps.css — 首頁「四步咖啡旅程」Rive 動畫圖示列
+   2026-10-22 建立
+   ------------------------------------------------------------------
+   來源：deltacafes.com 首頁的四個 .riv 圖示（ciclo_café-picto_*），
+        語意順序為 產地(origens) → 烘焙(torra) → 拼配(blend) → 品飲(consumo)。
+        每個 .riv 內含三條線性時間軸：intro / off / hover
+        （由 static/js/bc-steps-rive.js 手動 play，不使用 State Machine）。
+
+   版面：緊接在 .feed--video（第二組蒙版影片）之後的單列四格。
+        - 桌機：4 欄，gap 32px，最大寬 1040px（單格約 236px）
+        - 1024px 以下：gap 縮為 24px
+        - 768px 以下：gap 16px、左右留白 16px
+        - 480px 以下：改 2 × 2（390px 視窗若維持 4 欄，單格僅約 74px，圖示細節看不清）
+
+   畫布尺寸：原始 .riv artboard 為直式（300 × 620），但圖示本體在中央，
+       故改用 aspect-ratio: 1 / 1 + Fit.Contain（見 JS 的 Layout 設定）置中，
+       避免出現 600px 高的空欄。
+
+   顏色：.riv 內建暖白（cream）線稿；2026-10-23 使用者指示改為純白 →
+        canvas 一律套 filter: brightness(0) invert(1)
+        （非透明像素轉白、保留 alpha 與抗鋸齒，線稿形狀不變；
+        勿改用 hue-rotate / sepia 之類會偏色的濾鏡）。
+        背景色沿用全站 --bc-bg（bc-components.css），符合品牌黑 theme。
+   ============================================================ */
+
+.bc-steps {
+  position: relative;
+  background-color: var(--bc-bg, #0e0e0e);
+  padding: 72px 24px;
+}
+
+.bc-steps__inner {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  gap: 32px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* 單一格 canvas：寬度由 grid 決定，高度以 1:1 鎖定；
+   fit / alignment 由 JS 的 Rive Layout（Contain / Center）負責，
+   所以圖示會自動在方格內等比置中，不會變形。 */
+.bc-steps__icon {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  /* 觸控裝置上避免點擊時出現藍色高亮方塊 */
+  -webkit-tap-highlight-color: transparent;
+  /* 2026-10-23 使用者指示：圖示改為純白。
+     brightness(0) 把非透明像素壓成黑（保留 alpha），invert(1) 再翻成白 →
+     等於「用 alpha 當遮罩塗白」，線稿粗細與抗鋸齒都不變。 */
+  filter: brightness(0) invert(1);
+}
+
+/* 尚未載入完成前不顯示（畫布本身透明，此處僅是保險） */
+.bc-steps__icon:not([data-riv-ready="1"]) {
+  visibility: hidden;
+}
+
+/* ---- 斷點 ---- */
+@media (max-width: 1024px) {
+  .bc-steps {
+    padding: 56px 24px;
+  }
+
+  .bc-steps__inner {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bc-steps {
+    padding: 48px 16px;
+  }
+
+  .bc-steps__inner {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bc-steps__inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 16px;
+  }
+
+  .bc-steps__icon {
+    max-width: 160px;
+  }
+}
+
+/* 減少動態偏好由 JS 處理：不播 hover；intro 改在畫布尚未顯示時播完，
+   使用者只會看到完整圖示，看不到任何動態。 */

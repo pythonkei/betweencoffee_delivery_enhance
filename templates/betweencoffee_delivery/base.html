@@ -23,13 +23,20 @@
     <link rel="stylesheet" href={% static "css/magnific-popup.css" %} />
     <link rel="stylesheet" href={% static "css/jquery.timepicker.min.css" %} />
     <link rel="stylesheet" href={% static "css/select2.min.css" %} />
-    <link rel="stylesheet" href={% static "css/fontawesome/css/all.css" %} />
+    {% comment %}
+    2026-10-19（首頁效能 P0）：Font Awesome 改為可覆寫區塊。
+    首頁（index.html）覆寫為空 —— 首頁實際渲染的 DOM（index＋nav＋購物車抽屜＋品牌舞台）
+    已無任何 fa-* 圖示（實測 0 處），all.css 約 966KB 屬純浪費。
+    其他頁面未覆寫此區塊 → 行為與原本完全相同（仍載入本地 all.css）。
+    {% endcomment %}
+    {% block fontawesome_css %}<link rel="stylesheet" href={% static "css/fontawesome/css/all.css" %} />{% endblock %}
     <link rel="stylesheet" href={% static "css/icomoon.css" %} />
     <!-- Between Coffee 品牌元件庫（含 toast、payment-methods、member-nav）
          2026-08-07: 加 ?v= 版本參數，因 WHITENOISE_MAX_AGE=31536000（1 年）長快取，
          改檔後不需手動清除瀏覽器快取即可生效 -->
-    <!-- 2026-10-08：浮動購物車數字圓圈（.bc-floating-cart-badge）改回第一主題色（品牌金 #c49b63）→ 升版號 -->
-    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20261008e />
+    <!-- 2026-10-08：浮動購物車數字圓圈（.bc-floating-cart-badge）改回第一主題色（品牌金 #c49b63）→ 升版號
+         2026-10-17：navbar-brand 改為固定左上角 ＋ mix-blend-mode 自動變色（.bc-navbar-brand-fixed）→ 升版號 -->
+    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20261019a />
 
     <!-- 2026-08-09: 全域響應式設計尺度系統（最後載入，覆蓋既有固定尺寸） -->
     <link rel="stylesheet" href={% static "css/responsive-system.css" %}?v=20260809l />
@@ -64,19 +71,31 @@
 
     <!-- 2026-08-27: Timber Wharf 天氣/時鐘元件（2026-09-21：全站隱藏、僅 about 頁顯示；
          樣式仍全域載入以保留 navbar 內排版空間，避免 navbar 位移）
-          2026-10-14（使用者指示）：首頁 hero 的 #bc-clock 模組也用同一顆天氣元件
-          （見 partials/bc_hero.html）→ 本檔改為兩處共用（新增 #bc-bg-footer .weather 規則與 --wc-scale 縮放支援），升版號
+          2026-10-14（使用者指示）：首頁 hero 的 #bc-stage-clock 模組也用同一顆天氣元件
+          （見 partials/bc_brand_stage_hero.html）→ 本檔改為兩處共用（新增 #bc-brand-stage .weather 規則與 --wc-scale 縮放支援），升版號
           2026-10-17（使用者指示）：「移除時鐘，只保留天氣與溫度」→ 刪除全部 .clock 規則、
-          初始狀態改為 icon 顯示（第一態）→ 升版號 ?v=20261014a → ?v=20261017a -->
-    <link rel="stylesheet" href={% static "css/bc-weather.css" %}?v=20261017a />
+          初始狀態改為 icon 顯示（第一態）→ 升版號 ?v=20261014a → ?v=20261017a
+          2026-10-18（使用者指示）：模組更名（bc-bg-footer → bc-brand-stage）→ 本檔內所有
+          `#bc-bg-footer .weather` 選擇器同步改為 `#bc-brand-stage .weather`，
+          升版號 ?v=20261017a → ?v=20261018a。 -->
+    <link rel="stylesheet" href={% static "css/bc-weather.css" %}?v=20261018a />
 
     <!-- 2026-08-10: GSAP 動畫引擎（全域載入，供 SALON SEARCH + 流動選單使用）
          2026-10-07: 3.12.5 → 3.13.0（SplitText/CustomEase 已於 3.13 全面免費，供 about 頁 BC 動態 footer 使用） -->
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
 
+    {% comment %}
+    2026-10-19（首頁效能 P0）：Material Icons（Google 字型 CSS 約 400KB+）＋ Material Symbols 改為可覆寫區塊。
+    首頁（index.html）覆寫為空 —— 首頁會渲染到的 Material 圖示只有 5 處
+    （nav 3 處、浮動購物車 1 處、購物車抽屜 2 處），已全部改為 icomoon
+    （.icon-shopping-cart／-coffee／-person／-shopping-bag／-delete_sweep／-close）。
+    其他頁面未覆寫此區塊 → 仍載入兩種字型，既有 material-* 圖示不受影響。
+    {% endcomment %}
+    {% block material_icon_fonts %}
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    {% endblock %}
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     {% comment %} Font Awesome 由本地 fontawesome/css/all.css 提供（2026-08-11 移除重複 CDN） {% endcomment %}
     <!-- enable django htmx -->
@@ -94,7 +113,8 @@
 
 
 <!-- body -->
-<body>
+{# body_attrs：子模板可注入 data-* 屬性（例如訂單頁的 data-order-id / data-payment-status） #}
+<body{% block body_attrs %}{% endblock %}>
 {% include 'layouts/nav.html' %}
 
 
@@ -157,7 +177,8 @@
           http://127.0.0.1:8081/static/preview/bc-floating-cart-icons.html -->
 <div id="bc-floating-cart" class="bc-floating-cart">
   <button id="bc-floating-cart-btn" class="bc-floating-cart-btn" aria-label="購物車">
-    <span class="icon material-icons">shopping_bag</span>
+    <!-- 2026-10-19（首頁效能 P0）：material-symbols-outlined → icomoon（首頁不再載入 Material 字型） -->
+    <span class="icon icon-shopping-bag" aria-hidden="true"></span>
     <!-- 2026-09-21（使用者指示）：圖示常駐顯示——空車也看得到；數量為 0 時只隱藏數字圓圈
          （伺服器端先判斷，之後由 bc-slideout-cart.js 的 _updateBadge 同步） -->
     <span class="bc-floating-cart-badge bc-cart-count"{% if not cart_count %} style="display:none;"{% endif %}>{{ cart_count }}</span>
@@ -296,7 +317,14 @@
     <script src={% static "js/jquery.easing.1.3.js" %}></script>
     <script src={% static "js/jquery.waypoints.min.js" %}></script>
     <script src={% static "js/jquery.stellar.min.js" %}></script>
-    <script src={% static "js/owl.carousel.min.js" %}></script>
+    {% comment %}
+    2026-10-19（首頁效能 P0）：owl-carousel 引擎改為可覆寫區塊。
+    首頁已無任何 .home-slider／.carousel-work（舊首屏輪播已 hidden／移除），
+    故 index.html 覆寫為空、不再下載 owl.carousel.min.js；main.js 亦加了
+    `if (!$.fn.owlCarousel) return;` 防護，缺少引擎時不會中斷後續初始化。
+    其他頁面未覆寫此區塊 → 行為不變。
+    {% endcomment %}
+    {% block owl_js %}<script src={% static "js/owl.carousel.min.js" %}></script>{% endblock %}
     <script src={% static "js/jquery.magnific-popup.min.js" %}></script>
     <script src={% static "js/aos.js" %}></script>
     <script src={% static "js/pro.js" %}></script>
@@ -315,12 +343,12 @@
          必須早於 bc-slideout-cart.js（後者會呼叫 window.bcAttractPlace.anchorTop()） -->
     <script src={% static "js/bc-attract-place.js" %}?v=20261002a></script>
     <!-- 滑出購物車 -->
-    <script src={% static "js/bc-slideout-cart.js" %}?v=20261006a></script>
+    <script src={% static "js/bc-slideout-cart.js" %}?v=20261019a></script>
 
     <!-- delivery tut -->
 
     {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script> {% endcomment %}
-    <script src={% static "js/main.js" %}?v=20260813e></script>
+    <script src={% static "js/main.js" %}?v=20261019a></script>
 
     <!-- 2026-08-10: 流動選單（c-attract）動畫（依賴 GSAP，head 已載入；defer 確保 GSAP 先就緒） -->
     <script defer src={% static "js/bc-attract.js" %}?v=20260918a></script>
@@ -328,11 +356,11 @@
     <!-- 2026-08-27: Timber Wharf 天氣/時鐘元件（OpenWeatherMap 香港葵涌 + 時鐘/日期/weekday + GSAP 3 元素循環動畫）
          2026-09-21（使用者指示）：weather 全站隱藏、僅 about 頁顯示 → 只有 about 需要這段腳本
          （其他頁面不必再發 OpenWeatherMap 請求、也不需保留隱藏的動畫計時器）
-         2026-10-14（使用者指示）：首頁 hero 的 #bc-clock 模組也加入同一顆天氣元件
+         2026-10-14（使用者指示）：首頁 hero 的 #bc-stage-clock 模組也加入同一顆天氣元件
          → 條件改為 about ＋ index（首頁需要它填 hero 那顆的日期/溫度/循環動畫）；
             升版號 bc-weather.js ?v=20260828i → ?v=20261014a（新增 slideDist 逐實例滑動距離
             ＋ fillLocalDate 立即填日期）
-         2026-10-17（使用者指示）：「bc-clock-weather 移除時鐘，只保留天氣與溫度」
+         2026-10-17（使用者指示）：「bc-stage-weather 移除時鐘，只保留天氣與溫度」
          → 循環 3 態 → 2 態（icon ⇄ 溫度）、移除 updateClock 與每秒 setInterval；
             升版號 ?v=20261014a → ?v=20261017a -->
     {% if request.resolver_match.url_name == 'about' or request.resolver_match.url_name == 'index' %}

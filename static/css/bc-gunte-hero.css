@@ -353,7 +353,7 @@
 /* ---- 手套圓（環形照片列）----
    2026-10-14（使用者指示）：環的「結構與動畫」已抽到共用模組 static/css/bc-hand-ring.css
    （`.hero_hand` / `.hero_hand_list` / `.hero_hand_item`；首頁 hero 與其下方 BC 動態 hero 的
-   照片格 #bc-clock-photos 共用）。本檔只留 hero 專屬的三件事：
+   照片格 #bc-stage-photo-ring 共用）。本檔只留 hero 專屬的三件事：
      ① 進場（見上方 `.-load .hero_hand`：opacity 0→1、rotate -35deg→0）
      ② 圓心位置（top / left；照片格另有自己的定位與半徑）
      ③ 逐斷點的照片寬度（--bc-hand-img-w，原本直接寫在 .hero_hand_item img 上）

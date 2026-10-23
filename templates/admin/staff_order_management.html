@@ -4,6 +4,11 @@
 {% load static %}
 
 {% block content %}
+<!-- 2026-10-17: 本頁需要即時隊列更新 → 明確啟用 WebSocketCore（全站預設不自動連線）
+     必須在 base.html 載入 websocket-core.js 之前執行（content block 早於 scripts block） -->
+<script>
+    window.BC_WS_CONFIG = { autoConnect: true };
+</script>
 <style>
 /* 員工訂單管理頁：隱藏全站懸浮按鈕（右側 Buy & Order + 浮動購物車）——管理介面不需顯示
    （右側虛線 #borders 已於 2026-09-16 全站移除） */

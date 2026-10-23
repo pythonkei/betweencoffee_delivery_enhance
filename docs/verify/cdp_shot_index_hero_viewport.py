@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """以「viewport-only」截圖驗首頁最上方 GUNTE hero（.bc-gunte-hero）與其下方的 BC 動態 hero
-（.bc-bg-hero，內含 #bc-bg-footer）。本腳本產出 3 斷點 × 2 張視窗截圖作視覺證據，並印出幾何資訊
+（.bc-brand-stage-hero，內含 #bc-brand-stage）。本腳本產出 3 斷點 × 2 張視窗截圖作視覺證據，並印出幾何資訊
 （首 section 類別、第一個可見 section、margin-top、footer 元素數、兩個 hero 的 rect）。
 （captureBeyondViewport 對 GSAP 釘住／reveal 區段會渲染成空白，故一律用視窗截圖。）
 用法：站台須在 http://127.0.0.1:8081 跑、CDP 瀏覽器須在 9222（見 CDP_SETUP.md）。
@@ -32,8 +32,8 @@ ROOT = "/home/kei/Desktop/betweencoffee_delivery_enhance"
 INFO_JS = (
     "(function(){"
     "var secs=document.querySelectorAll('.bc-page-content > section');"
-    "var hero=document.querySelector('.bc-bg-hero');"
-    "var bg=document.getElementById('bc-bg-footer');"
+    "var hero=document.querySelector('.bc-brand-stage-hero');"
+    "var bg=document.getElementById('bc-brand-stage');"
     "var g=document.querySelector('.bc-gunte-hero');"
     "var r=function(e){if(!e)return null;var b=e.getBoundingClientRect();"
     "return {top:Math.round(b.top),h:Math.round(b.height)};};"
@@ -60,7 +60,7 @@ INFO_JS = (
     "heroMT:hero?getComputedStyle(hero).marginTop:null,"
     "gunteMT:g?getComputedStyle(g).marginTop:null,"
     "footerCount:document.querySelectorAll('footer').length,"
-    "bgIdCount:document.querySelectorAll('#bc-bg-footer').length,"
+    "bgIdCount:document.querySelectorAll('#bc-brand-stage').length,"
     "bg:r(bg),gunte:r(g),"
     "bgAfterGunte:!!(g&&bg)&&"
     "(g.compareDocumentPosition(bg)&Node.DOCUMENT_POSITION_FOLLOWING)>0,"
@@ -176,7 +176,7 @@ async def main():
             print(f"   shot -> _verify_index_hero_top_{name}.png")
 
             # 捲到 BC 動態 hero 頂端，證明 GUNTE hero（第一屏）在它上方、兩者不重疊
-            await evaljs("(function(){var b=document.querySelector('.bc-bg-hero');"
+            await evaljs("(function(){var b=document.querySelector('.bc-brand-stage-hero');"
                          "if(b)window.scrollTo(0, Math.round(window.scrollY +"
                          " b.getBoundingClientRect().top));})()")
             await asyncio.sleep(2)

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """CDP 驗證：/about/ footer 的 .footer-mail-inner（email CTA）已改為共用 partial 的 .scroller-box 跑馬燈
-（與 base.html ftco 頁尾逐字相同；2026-10-09 起首頁 / 亦改用同一 partial 的 #bc-bg-footer 版本）。
+（與 base.html ftco 頁尾逐字相同；2026-10-09 起首頁 / 亦改用同一 partial 的 #bc-brand-stage 版本）。
 
 改動背景（2026-10-08）
   templates/.../about.html：刪 <div class="footer-mail-inner">（"Write directly to:" + mailto hello@betweencoffee.hk），
   同層插入與 base.html footer 逐字相同的 .scroller-box（2 個 BETWEEN <li>）。
-  static/css/bc-bg-footer.css：移除 .footer-mail-inner 規則，新增 scoped 補償
-  （#bc-bg-footer .scroller-box/.scroller/.scroller__inner/.tag-list li），
-  因為 `#bc-bg-footer div,ul,li{margin:0;padding:0}`（ID 特異度）會蓋掉
+  static/css/bc-brand-stage.css：移除 .footer-mail-inner 規則，新增 scoped 補償
+  （#bc-brand-stage .scroller-box/.scroller/.scroller__inner/.tag-list li），
+  因為 `#bc-brand-stage div,ul,li{margin:0;padding:0}`（ID 特異度）會蓋掉
   .scroller__inner{padding-block:2rem} 與 .tag-list li{padding:.1rem}。
 
 檢查項目
@@ -25,7 +25,7 @@
      逐項比對 .scroller__inner padding-block、.tag-list li padding、li font-size/width、flex-wrap、
      animation（name / duration / timing-function）必須完全一致；
      桌面額外驗絕對值 32px / 1.6px / 1108px / 22px。
-     （2026-10-09：首頁 / 的頁尾已改為共用 partial 的 #bc-bg-footer，基準頁因此由 / 移往 /coffee_menu/；
+     （2026-10-09：首頁 / 的頁尾已改為共用 partial 的 #bc-brand-stage，基準頁因此由 / 移往 /coffee_menu/；
        首頁自身的保真度改由 J 項驗。）
   F. 幾何：.scroller 寬 <= .foooter-mail 寬 + 1；.scroller overflow == hidden；無水平溢出；
      F5/F6（2026-10-08 新增）「.foooter-mail 未撐破所屬 grid」＋「寬 <= viewport 寬」——
@@ -34,25 +34,24 @@
   G. 相鄰文字仍在：.foooter-mail 內 .p1 仍含 "Available for" / "takeaway & Relaxing"
   H. base.html ftco 頁尾無回歸（/coffee_menu/）：.ftco-footer .scroller-box 仍 data-animated + 4 子節點
      + padding-block 32px + li 桌面值 1108px / 22px + 動畫 scroll / 60s / linear（H1–H7）
-  J. 首頁 / 的 #bc-bg-footer 跑馬燈保真（2026-10-09 新增，配合首頁頁尾置換）：與 H 的 base.html 基準
+  J. 首頁 / 的 #bc-brand-stage 跑馬燈保真（2026-10-09 新增，配合首頁頁尾置換）：與 H 的 base.html 基準
      在同一 viewport 逐項一致（data-animated / 4 子節點 / padding-block / li 尺寸字級 / overflow /
      animation），且 / 已無 .ftco-footer（置換未留殘骸）。
-  J11–J15（2026-10-09 新增；2026-10-13 隨首頁順序反轉改寫）：首頁 hero 的順序與位置 ——
-     2026-10-13（使用者指示）：GUNTE hero 回到「第一眼看到的第一屏」，BC 動態模組下移到它之後。
-     本檔 DOM 順序：① <section hidden class="bc-reviews-section">（10-13 加 hidden）
-     ② <section class="hero bc-gunte-hero"> ③ <section class="ftco-section-blank-small">
-     ④ <section class="hero bc-bg-hero">（內含 #bc-bg-footer，＝ 10-09 的置頂模組）。
-     J11 第一個「可見」section（以 computed display／visibility 判定）＝ .bc-gunte-hero，
+  J11–J15（2026-10-09 新增；2026-10-13 首頁順序反轉；2026-10-18 再次改回品牌舞台第一屏）：
+     2026-10-18（使用者指示）：品牌舞台（原 bc-bg-footer，現名 .bc-brand-stage-hero）回到第一屏、
+     GUNTE hero 暫時 hidden（markup 與 JS 保留）。
+     本檔 DOM 順序：① <section hidden class="bc-reviews-section">
+     ② <section class="hero bc-brand-stage-hero">（內含 #bc-brand-stage）
+     ③ <section hidden class="hero bc-gunte-hero">。
+     J11 第一個「可見」section（以 computed display／visibility 判定）＝ .bc-brand-stage-hero，
          且 DOM 第一個 section 是 .bc-reviews-section 且 display:none；
-     J12 .bc-gunte-hero 在文件順序上位於 .bc-bg-hero（內含 #bc-bg-footer）之前；
-     J13 載入時（未捲動）GUNTE hero 由視口頂端開始（scrollY 0 且 0 <= rect.top <= 8
-         → 與 navbar 之間沒有 100px 空隙），且 #bc-bg-footer 已不在首屏
-         （rect.top >= innerHeight）＝舊順序無殘留；
-     J14 .bc-gunte-hero 與 .bc-bg-hero 的 computed margin-top 皆 0px
-         （GUNTE 由 bc-gunte-hero.css 的 class 規則壓為 0、不依賴 first-of-type 序位；
-          BC hero 已非 first-of-type → bc-components.css:4438 的 100px 不再命中）；
+     J12 .bc-brand-stage-hero 在文件順序上位於 .bc-gunte-hero 之前，且前者內仍含 #bc-brand-stage；
+     J13 載入時（未捲動）品牌舞台由視口頂端開始（scrollY 0 且 0 <= rect.top <= 8
+         → 與 navbar 之間沒有 100px 空隙），且 GUNTE hero computed display == none；
+     J14 兩塊 hero 的 computed margin-top 皆 0px（品牌舞台由 index extra_css 的 class 規則壓為 0、
+         GUNTE 由 bc-gunte-hero.css 的 class 規則壓為 0，皆不依賴 first-of-type 序位）；
      J15 / 已無 footer 元素（querySelectorAll('footer').length == 0）——置頂模組最外層改用 div
-         （partials/bc_hero.html），bc-yama-header.js 的 document.querySelector('footer')
+         （partials/bc_brand_stage_hero.html），bc-yama-header.js 的 document.querySelector('footer')
           因此為 null、footer 交會邏輯 no-op（否則一載入就把 tax-nav／header-bot 藏起來）。
   K1–K4（2026-10-13 新增）：GUNTE hero 的環形字（曲線標題）markup 修正 —— 使用者原先把 6 張
      不顯示的環形字開啟標籤手寫成不存在的 <hidden>（而且以 </text> 收尾，開／閉不成對）
@@ -87,16 +86,19 @@
         currentTime=0，computed opacity 一直停在過渡起點 0，等 15 秒也不動；逼 frame 後
         實測 0 → 0.30 → 1，約 1 秒），等「記錄的那張」opacity 為 1 才讀值。
   J16–J19（2026-10-09，配合「置頂 hero 去掉頁尾感」）：index.html extra_css 新增
-     `.bc-bg-hero #bc-bg-footer{background:transparent}` / `.bc-bg-hero #bc-bg-footer .footer{同上}` /
-     `.bc-bg-hero #bc-bg-footer .grid.is-footer{border-top:0 none}`（只覆寫首頁、不動
-     bc-bg-footer.css，故 about 真頁尾不受影響）——
+     `.bc-brand-stage-hero #bc-brand-stage{background:transparent}` / `.bc-brand-stage-hero #bc-brand-stage .footer{同上}` /
+     `.bc-brand-stage-hero #bc-brand-stage .grid.is-footer{border-top:0 none}`（只覆寫首頁、不動
+     bc-brand-stage.css，故 about 真頁尾不受影響）——
      J16 置頂 hero 的頂部分隔線已移除：.grid.is-footer computed border-top-width 0px / style none
-         （原本 bc-bg-footer.css:113 的 1px solid rgba(255,255,255,.08)，實測繪出 y=14 的
-         rgb(32,32,32) 線），且 padding-top 仍非 0（桌面 106.667px＝calc(120vw/14.4)）→ 文字零位移；
-     J17 自帶黑底已移除：#bc-bg-footer 與 .footer computed background-color 皆 rgba(0,0,0,0)
+         （原本 bc-brand-stage.css:152 的 1px solid rgba(255,255,255,.08)，實測繪出 y=14 的
+         rgb(32,32,32) 線），且 padding-top 仍非 0；
+         2026-10-18（使用者指示「距離頂部太多、主要內容要置中」）：首頁 ≥992px 的
+         padding-top 改由 index.html extra_css 的置中算式提供（1440×900 → 63.8px、
+         1280×800 → 52.91px；≤991px 仍是 bc-brand-stage.css 的 u-72）→ 本項只守門「非 0」；
+     J17 自帶黑底已移除：#bc-brand-stage 與 .footer computed background-color 皆 rgba(0,0,0,0)
          → 由頁面自身底色穿透（body 的固定背景照片 bg_4.jpg，style-bootstrap.css:3118，
          與首頁其餘區塊一致）；
-     J18 作用域錨點正確：首頁 #bc-bg-footer 的父層是 SECTION.hero.bc-bg-hero（about 頁為 BODY）
+     J18 作用域錨點正確：首頁 #bc-brand-stage 的父層是 SECTION.hero.bc-brand-stage-hero（about 頁為 BODY）
          → 覆寫只命中首頁；
      J19 反向守門：同一腳本 goto /about/ 量 about 的真頁尾仍保有 1px solid 分隔線 +
          #0e0e0e 黑底、父層為 BODY（首頁覆寫未波及 about）。
@@ -202,7 +204,7 @@ MEASURE_JS = r"""
   // F5/F6（2026-10-08 新增）：跑馬燈必須被限制在自己的 grid 欄位內。
   // 背景：F2/F3 只驗「scroller <= .foooter-mail」，當 .foooter-mail 因 justify-self:start 走
   // shrink-to-fit、被 .scroller{max-width:2000px} 撐到 2000px 時，兩邊同時變大 → 舊檢查照樣 PASS
-  // （實測：平板 1108 / 行動 2000，全靠 #bc-bg-footer{overflow:hidden} 裁掉 → 視覺越欄）。
+  // （實測：平板 1108 / 行動 2000，全靠 #bc-brand-stage{overflow:hidden} 裁掉 → 視覺越欄）。
   // 故改驗「所屬 grid 不溢出」＋「不寬於 viewport」，直接抓越欄這個症狀。
   if (mail) {
     var gp = mail.parentElement;
@@ -248,9 +250,9 @@ MEASURE_JS = r"""
       out.ftco_li_text_align = flcs.textAlign;
     }
   }
-  // J. 首頁 / 的 #bc-bg-footer 跑馬燈（2026-10-09：首頁頁尾改用共用 partial，保真度與 base.html 比對）
-  var bg = document.querySelector('#bc-bg-footer .foooter-mail .scroller')
-        || document.querySelector('#bc-bg-footer .scroller');
+  // J. 首頁 / 的 #bc-brand-stage 跑馬燈（2026-10-09：首頁頁尾改用共用 partial，保真度與 base.html 比對）
+  var bg = document.querySelector('#bc-brand-stage .foooter-mail .scroller')
+        || document.querySelector('#bc-brand-stage .scroller');
   out.bg_found = !!bg;
   out.index_ftco_count = document.querySelectorAll('.ftco-footer').length;
   if (bg) {
@@ -280,9 +282,8 @@ MEASURE_JS = r"""
 })()
 """
 
-# 首頁 hero 順序／位置（2026-10-09 建立；2026-10-13 順序反轉後改寫）
-# 2026-10-13（使用者指示）：GUNTE hero 回到第一屏、BC 動態 hero（#bc-bg-footer）下移到它之後；
-# 同日另修 GUNTE hero 的環形字 markup（原本不合法 <hidden text> → <text class="bc-ring-hide">）。
+# 首頁 hero 順序／位置（2026-10-09 建立；2026-10-13 順序反轉；2026-10-18 改回品牌舞台第一屏）
+# 2026-10-18（使用者指示）：品牌舞台（#bc-brand-stage）回到第一屏、GUNTE hero 加 hidden。
 INDEX_HERO_JS = r"""
 (function(){
   var out = {};
@@ -296,24 +297,31 @@ INDEX_HERO_JS = r"""
   out.section_count = secs.length;
   out.section_classes = secs.map(function(s){ return s.className || s.tagName.toLowerCase(); });
   out.first_visible_classes = vis.length ? vis[0].className : null;
+  out.first_visible_is_stage = !!(vis.length && vis[0].classList.contains('bc-brand-stage-hero'));
   out.first_visible_is_gunte = !!(vis.length && vis[0].classList.contains('bc-gunte-hero'));
   out.first_dom_classes = secs.length
       ? (secs[0].className || secs[0].tagName.toLowerCase()) : null;
   out.first_dom_display = secs.length ? getComputedStyle(secs[0]).display : null;
 
   var gunte = document.querySelector('.bc-gunte-hero');
-  var wrap = document.querySelector('.bc-bg-hero');
-  var root = document.getElementById('bc-bg-footer');
+  var wrap = document.querySelector('.bc-brand-stage-hero');
+  var root = document.getElementById('bc-brand-stage');
   out.gunte_found = !!gunte;
   out.bg_hero_found = !!wrap;
   out.hero_has_root = !!(root && wrap && wrap.contains(root));
   if (gunte && wrap) {
-    // wrap 在 gunte 之後 → gunte.compareDocumentPosition(wrap) 會帶 FOLLOWING
+    // 2026-10-18：品牌舞台在 GUNTE 之前 → wrap.compareDocumentPosition(gunte) 會帶 FOLLOWING
+    out.stage_before_gunte =
+      (wrap.compareDocumentPosition(gunte) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+    // 舊欄位（2026-10-13 的順序）保留作診斷：GUNTE 在舞台之前時為 true
     out.gunte_before_wrap =
       (gunte.compareDocumentPosition(wrap) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
   } else {
+    out.stage_before_gunte = null;
     out.gunte_before_wrap = null;
   }
+  out.gunte_display = gunte ? getComputedStyle(gunte).display : null;
+  out.gunte_hidden_attr = gunte ? gunte.hasAttribute('hidden') : null;
   if (gunte) {
     var gr = gunte.getBoundingClientRect();
     out.gunte_top = Math.round(gr.top);
@@ -407,7 +415,7 @@ INDEX_HERO_JS = r"""
       ? getComputedStyle(activeTtlText).display : null;
 
   // 2026-10-09（使用者指示）：置頂 hero 去掉「頁尾感」——移除頂部 1px 分隔線與自帶黑底。
-  // 這三組值由 index.html extra_css 的 .bc-bg-hero #bc-bg-footer … 覆寫提供；
+  // 這三組值由 index.html extra_css 的 .bc-brand-stage-hero #bc-brand-stage … 覆寫提供；
   // about 頁（真頁尾）不受影響，由下方 ABOUT_GUARD_JS 反向確認。
   if (root) {
     var grid = root.querySelector('.grid.is-footer');
@@ -455,12 +463,12 @@ HERO_LOAD_JS = r"""
 })()
 """
 
-# /about/ 反向守門（2026-10-09）：本頁覆寫只加 .bc-bg-hero 前綴 → about 的真頁尾必須「仍有」
-# 1px 分隔線與 #0e0e0e 黑底；且其 #bc-bg-footer 的父層是 BODY（不是 SECTION.bc-bg-hero），
+# /about/ 反向守門（2026-10-09）：本頁覆寫只加 .bc-brand-stage-hero 前綴 → about 的真頁尾必須「仍有」
+# 1px 分隔線與 #0e0e0e 黑底；且其 #bc-brand-stage 的父層是 BODY（不是 SECTION.bc-brand-stage-hero），
 # 證明作用域錨點正確、沒有誤傷 about。
 ABOUT_GUARD_JS = r"""
 (function(){
-  var root = document.getElementById('bc-bg-footer');
+  var root = document.getElementById('bc-brand-stage');
   if (!root) return {found: false};
   var grid = root.querySelector('.grid.is-footer');
   var fdiv = root.querySelector('.footer');
@@ -543,7 +551,7 @@ async def main():
 
         await send(msg("Page.enable"))
         await send(msg("Runtime.enable"))
-        # 避免讀到舊版 bc-bg-footer.css（本次改了補償規則，需確保量到的是最新 CSS）
+        # 避免讀到舊版 bc-brand-stage.css（本次改了補償規則，需確保量到的是最新 CSS）
         await send(msg("Network.enable"))
         await send(msg("Page.setCacheDisabled", {"cacheDisabled": True}))
         await send(msg("Network.setCacheDisabled", {"cacheDisabled": True}))
@@ -796,7 +804,7 @@ async def main():
                               f"{m2.get('ftco_anim_timing_function')}"))
         await shot("coffee_menu_ftco_footer", ".ftco-footer .scroller-box")
 
-        # ================= / ：#bc-bg-footer 保真（與上方 H 基準逐項比對） =================
+        # ================= / ：#bc-brand-stage 保真（與上方 H 基準逐項比對） =================
         await set_viewport(1280, 800)
         # 2026-10-13 稍後（K7 用）：**不用 goto()** —— 它會等到 readyState complete 再 +1.2s，
         # 暖機狀態下（compositor 正在產 frame）Splide autoplay（interval 5000ms）可能已經換張，
@@ -812,10 +820,10 @@ async def main():
             await asyncio.sleep(0.1)
         print("   [hero] 載入時置中: " + json.dumps(hero_load, ensure_ascii=False))
         mj = await evaljs(MEASURE_JS) or {}
-        print("\n=== / (#bc-bg-footer 保真) 1280x800 ===")
-        failures.append(check("J1 首頁 #bc-bg-footer .scroller 存在（已改用共用 partial）",
+        print("\n=== / (#bc-brand-stage 保真) 1280x800 ===")
+        failures.append(check("J1 首頁 #bc-brand-stage .scroller 存在（已改用共用 partial）",
                               mj.get("bg_found") is True))
-        failures.append(check("J2 首頁已無 .ftco-footer（頁尾只剩 #bc-bg-footer）",
+        failures.append(check("J2 首頁已無 .ftco-footer（頁尾只剩 #bc-brand-stage）",
                               mj.get("index_ftco_count") == 0, mj.get("index_ftco_count")))
         failures.append(check("J3 data-animated=true", mj.get("bg_data_animated") == "true",
                               mj.get("bg_data_animated")))
@@ -881,8 +889,9 @@ async def main():
         print("   [hero] " + json.dumps(
             {k: hero.get(k) for k in
              ("section_count", "first_dom_classes", "first_dom_display", "first_visible_classes",
-              "first_visible_is_gunte", "gunte_found", "bg_hero_found", "hero_has_root",
-              "gunte_before_wrap", "gunte_top", "gunte_h", "gunte_margin_top",
+              "first_visible_is_stage", "first_visible_is_gunte", "gunte_found", "bg_hero_found",
+              "hero_has_root", "stage_before_gunte", "gunte_before_wrap",
+              "gunte_display", "gunte_hidden_attr", "gunte_top", "gunte_h", "gunte_margin_top",
               "hero_top", "hero_h", "hero_margin_top", "footer_root_top",
               "inner_h", "scroll_y", "footer_tag_count",
               "hidden_tag_count", "ttl_svg_count", "ttl_text_count",
@@ -901,32 +910,34 @@ async def main():
               "grid_border_top_color", "grid_padding_top",
               "root_bg", "footer_bg", "root_parent_tag", "root_parent_classes")},
             ensure_ascii=False))
-        failures.append(check("J11 第一個「可見」section 是 .hero.bc-gunte-hero，"
+        failures.append(check("J11 第一個「可見」section 是 .hero.bc-brand-stage-hero，"
                               "且 DOM 第一個 section 是 .bc-reviews-section（display:none）",
-                              hero.get("first_visible_is_gunte") is True
+                              hero.get("first_visible_is_stage") is True
                               and hero.get("first_dom_display") == "none"
                               and "bc-reviews-section" in (hero.get("first_dom_classes") or ""),
                               f"firstVisible={hero.get('first_visible_classes')} / "
                               f"firstDom={hero.get('first_dom_classes')} "
                               f"display={hero.get('first_dom_display')}"))
-        failures.append(check("J12 GUNTE hero 在文件順序上位於 BC hero（.bc-bg-hero）之前，"
-                              "且該 BC hero 內仍含 #bc-bg-footer",
-                              hero.get("gunte_before_wrap") is True
+        failures.append(check("J12 品牌舞台（.bc-brand-stage-hero）在文件順序上位於 GUNTE hero 之前、"
+                              "內仍含 #bc-brand-stage，且 GUNTE hero 已 hidden（display:none）",
+                              hero.get("stage_before_gunte") is True
                               and hero.get("bg_hero_found") is True
-                              and hero.get("hero_has_root") is True,
-                              f"gunte={hero.get('gunte_found')} wrap={hero.get('bg_hero_found')} "
-                              f"wrapHasRoot={hero.get('hero_has_root')}"))
-        failures.append(check("J13 載入時（未捲動）GUNTE hero 由視口頂端開始（scrollY 0 且 0 <= top <= 8）"
-                              "→ 與 navbar 間無 100px 空隙；且 BC hero（#bc-bg-footer）接在它之後"
-                              "（top >= GUNTE hero 底緣 → 兩塊 hero 不重疊）",
+                              and hero.get("hero_has_root") is True
+                              and hero.get("gunte_hidden_attr") is True
+                              and hero.get("gunte_display") == "none",
+                              f"stageBeforeGunte={hero.get('stage_before_gunte')} "
+                              f"wrap={hero.get('bg_hero_found')} "
+                              f"wrapHasRoot={hero.get('hero_has_root')} "
+                              f"gunteHidden={hero.get('gunte_hidden_attr')} "
+                              f"gunteDisplay={hero.get('gunte_display')}"))
+        failures.append(check("J13 載入時（未捲動）品牌舞台由視口頂端開始（scrollY 0 且 0 <= top <= 8）"
+                              "→ 與 navbar 間無 100px 空隙；#bc-brand-stage 位於舞台內（root.top >= hero.top）",
                               hero.get("scroll_y") == 0
-                              and isinstance(hero.get("gunte_top"), int)
-                              and 0 <= hero.get("gunte_top") <= 8
+                              and isinstance(hero.get("hero_top"), int)
+                              and 0 <= hero.get("hero_top") <= 8
                               and isinstance(hero.get("footer_root_top"), int)
-                              and isinstance(hero.get("gunte_h"), int)
-                              and hero.get("footer_root_top")
-                              >= hero.get("gunte_top") + hero.get("gunte_h"),
-                              f"gunteTop={hero.get('gunte_top')} gunteH={hero.get('gunte_h')} "
+                              and hero.get("footer_root_top") >= hero.get("hero_top"),
+                              f"heroTop={hero.get('hero_top')} "
                               f"scrollY={hero.get('scroll_y')} "
                               f"rootTop={hero.get('footer_root_top')} innerH={hero.get('inner_h')}"))
         failures.append(check("J14 兩塊 hero computed margin-top 皆 0px（GUNTE 由 bc-gunte-hero.css 的 "
@@ -996,19 +1007,20 @@ async def main():
                               f"aria={hero.get('active_slide_aria_label')} "
                               f"opacity={hero.get('active_ttl_opacity')}]"))
         failures.append(check("J16 置頂 hero 的頂部分隔線已移除（.grid.is-footer border-top 0px/none，"
-                              "原本為 1px solid rgba(255,255,255,.08)）且 padding-top 未被動到",
+                              "原本為 1px solid rgba(255,255,255,.08)）且 padding-top 非 0"
+                              "（2026-10-18 起桌面為置中算式，≤991px 仍為 u-72）",
                               hero.get("grid_border_top_w") == "0px"
                               and hero.get("grid_border_top_style") == "none"
                               and hero.get("grid_padding_top") not in (None, "0px"),
                               f"border={hero.get('grid_border_top_w')}/{hero.get('grid_border_top_style')} "
                               f"padTop={hero.get('grid_padding_top')}"))
-        failures.append(check("J17 自帶黑底已移除（#bc-bg-footer 與 .footer 皆 transparent → 由頁面底色穿透）",
+        failures.append(check("J17 自帶黑底已移除（#bc-brand-stage 與 .footer 皆 transparent → 由頁面底色穿透）",
                               hero.get("root_bg") == "rgba(0, 0, 0, 0)"
                               and hero.get("footer_bg") == "rgba(0, 0, 0, 0)",
                               f"root={hero.get('root_bg')} footer={hero.get('footer_bg')}"))
-        failures.append(check("J18 覆寫作用域錨點正確（首頁 #bc-bg-footer 的父層是 SECTION.hero.bc-bg-hero）",
+        failures.append(check("J18 覆寫作用域錨點正確（首頁 #bc-brand-stage 的父層是 SECTION.hero.bc-brand-stage-hero）",
                               hero.get("root_parent_tag") == "SECTION"
-                              and "bc-bg-hero" in (hero.get("root_parent_classes") or ""),
+                              and "bc-brand-stage-hero" in (hero.get("root_parent_classes") or ""),
                               f"{hero.get('root_parent_tag')}.{hero.get('root_parent_classes')}"))
         # ---- J19：about 頁反向守門（同一腳本內以新分頁前的同頁面 goto 量測，1280x800） ----
         await goto(f"{BASE}/about/")
@@ -1024,7 +1036,7 @@ async def main():
                               f"border={ag.get('border_w')}/{ag.get('border_style')} "
                               f"footer_bg={ag.get('footer_bg')} parent={ag.get('parent_tag')}"))
         await goto(f"{BASE}/")  # 回到 / 續跑下方 index 截圖
-        await shot("index_bg_footer", "#bc-bg-footer .scroller-box")
+        await shot("index_bg_footer", "#bc-brand-stage .scroller-box")
 
         # ================= prefers-reduced-motion: reduce =================
         await send(msg("Emulation.setEmulatedMedia", {
