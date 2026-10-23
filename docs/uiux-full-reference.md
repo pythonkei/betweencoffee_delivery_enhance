@@ -819,11 +819,11 @@ Step 7: 響應式適配
 | 資源 | 位置 | 用途 |
 |------|------|------|
 | UI 元件庫 | `static/css/bc-components.css` | 品牌元件樣式 |
-| UI/UX 設計原則 | `.clinerules/uiux-principles.md` | 完整 UI/UX 規範（本文件） |
-| 品牌色系統 | `.clinerules/uiux-principles.md` 第三章 | 顏色定義 |
-| 字型系統 | `.clinerules/uiux-principles.md` 第四章 | 字型規範 |
-| 圖示系統 | `.clinerules/uiux-principles.md` 第九章 | icomoon 圖示列表 |
-| 系統報告 | `.clinerules/.clinerules` | 完整系統分析 |
+| UI/UX 設計原則 | `.clinerules/uiux-core.md`（精簡版，已注入） | 完整 UI/UX 規範（本文件） |
+| 品牌色系統 | `.clinerules/uiux-core.md` 第二章 | 顏色定義 |
+| 字型系統 | `.clinerules/uiux-core.md` 第三章 | 字型規範 |
+| 圖示系統 | `.clinerules/uiux-core.md` 第七章 | icomoon 圖示列表 |
+| 系統報告 | `.clinerules/project-core.md`（歷史：`docs/archive/clinerules_history_20261014.md`） | 完整系統分析 |
 | 競品分析 | `betweencoffee_memory_bank/07_COMPETITIVE_ANALYSIS.md` | 競品比較 |
 
 ## 附錄 B: 快速參考

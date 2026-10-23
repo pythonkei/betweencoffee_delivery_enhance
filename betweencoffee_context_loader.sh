@@ -39,10 +39,10 @@ check_project_dir() {
         return 1
     fi
     
-    if [ ! -f "$PROJECT_DIR/.clinerules" ]; then
-        log_warning ".clinerules 文件不存在"
+    if [ ! -d "$PROJECT_DIR/.clinerules" ] || [ ! -f "$PROJECT_DIR/.clinerules/project-core.md" ]; then
+        log_warning ".clinerules/project-core.md 不存在"
     else
-        log_info "找到 .clinerules 文件"
+        log_info "找到 .clinerules/project-core.md"
     fi
     
     if [ ! -d "$PROJECT_DIR/betweencoffee_memory_bank" ]; then

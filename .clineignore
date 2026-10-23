@@ -1,0 +1,23 @@
+# Cline 忽略清單（2026-10-23）
+# 目的：跳過產生檔／快取／大型二進位，加快檔案搜尋與列檔，避免誤讀。
+# 註：這裡只放「不需要給 AI 看的」，活文件與 docs/archive（要 grep）都不排除。
+
+# 依賴與快取
+node_modules/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+package-lock.json
+
+# 大型資產（產品圖、影音；要看圖請直接指定路徑或由截圖工具產生）
+media/
+_herocmp/
+js_analysis_report/
+localhost:8081/
+betweencoffee_delivery/localhost:8081/
+
+# 日誌與一次性診斷輸出
+*.log
+_diag*.png
+_verify_shot_*.png

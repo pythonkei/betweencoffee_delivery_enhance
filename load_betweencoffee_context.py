@@ -28,8 +28,16 @@ def load_task_progress():
             with open(task_progress_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # 只取第一個「今日任務總覽」section（即最新任務）
-            first_marker = content.find("# 今日任務總覽")
+            # 只取第一個「任務進度」section（即最新任務）
+            # 2026-10-23：task_progress.md 已改為精簡版（標題「# 任務進度（現況）」），
+            # 仍相容舊標題「# 今日任務總覽」。
+            first_marker = -1
+            for marker in ("# 任務進度", "# 今日任務總覽"):
+                pos = content.find(marker)
+                if pos != -1:
+                    first_marker = pos
+                    break
+
             if first_marker != -1:
                 # 找下一個頂級標題（# ...），停在歷史任務之前
                 second_marker = content.find("\n# ", first_marker + 1)
@@ -40,6 +48,15 @@ def load_task_progress():
                 print(f"✅ 已加載 task_progress.md 最新任務 ({len(content)} 字符)")
             else:
                 print(f"✅ 已加載 task_progress.md ({len(content)} 字符)")
+
+            # 安全上限：避免未來又長成巨型檔案而爆上下文（約 3K tokens）
+            max_chars = 12000
+            if len(content) > max_chars:
+                content = (
+                    content[:max_chars]
+                    + "\n\n> ⚠️ 內容超過 12000 字符已截斷；完整內容見 task_progress.md。\n"
+                )
+                print(f"⚠️  task_progress.md 已截斷至 {max_chars} 字符")
 
             return content
         except Exception as e:
@@ -195,9 +212,11 @@ def generate_context():
 
 ### 完整信息
 如需完整信息，請查看：
-- `.clinerules/.clinerules` — 項目規範（Cline 已自動載入）
-- `.clinerules/uiux-principles.md` — UI/UX 設計原則（Cline 已自動載入）
-- `betweencoffee_memory_bank/` 目錄下的詳細文件
+- `.clinerules/project-core.md` — 專案核心規範（Cline 已自動載入）
+- `.clinerules/uiux-core.md` — UI/UX 規範精簡版（Cline 已自動載入）
+- `docs/uiux-full-reference.md` — UI/UX 完整參考（需要時才讀）
+- `docs/INDEX.md` — 文件索引（先看這頁再決定讀哪個檔）
+- `docs/archive/` — 歷史紀錄（僅 grep 關鍵字，不要整檔讀）
 """
 
     full_context += usage_note

@@ -1,7 +1,7 @@
 # Between Coffee 系統 - 技術架構（精簡版）
 
 > **注意**: 此文件僅包含 `.clinerules` 中未涵蓋的獨特技術資訊。
-> 通用架構概覽請參閱 `.clinerules/.clinerules`。
+> 通用架構概覽請參閱 `.clinerules/project-core.md`（原 `.clinerules/.clinerules` 已封存至 `docs/archive/clinerules_history_20261014.md`）。
 >
 > **⚠️ 資料庫結構過時警告**: 此文件中的 SQL DDL 與索引定義為早期版本（migration 0001 ~ 0010），
 > 經過從 **0045 到 0053** 共 9 次結構性遷移（包含字段增減、關聯調整、預設值修正等）後，
@@ -115,4 +115,4 @@ def _calculate_price(self, product, product_type, weight=None):
 
 ---
 **最後更新**: 2026-07-25（從 508 行精簡為當前版本）  
-**注意**: 原始版本包含已過時的 Railway/Redis/jQuery 參考，已移除。通用技術架構請參閱 `.clinerules/.clinerules`。
+**注意**: 原始版本包含已過時的 Railway/Redis/jQuery 參考，已移除。通用技術架構請參閱 `.clinerules/project-core.md`。
