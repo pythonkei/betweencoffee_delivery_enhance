@@ -62,6 +62,15 @@
          hero 的 Splide 自動接手，本檔不需再改。
      [範圍] 只有「沒有 hero 驅動」的頁面／情境才會啟動（目前＝首頁第一屏的品牌舞台）；
        尊重 prefers-reduced-motion: reduce（純靜態，使用者已要求減少動態時不自動轉）。
+   [2026-10-24 使用者指示]「bc-stage-photo-ring-list 第一個咖啡現在初始是從小到放大動畫，
+     修改為 bc-stage-headline-fresh-beans 'Follow Your Rhythm' 文字相同的動畫」。
+     · 原因：register() → go() 的第一次定位是在 .is-ready 已加上的狀態下做的 ⇒ 第 1 張
+       從 .hero_hand_item img 的預設 scale 0.5 過渡到 -current 的 scale 1（＝那段「放大」）。
+     · 修法：第一次定位期間改為同時加上 .is-snap（bc-hand-ring.css：把圓盤旋轉與 img 的
+       scale 過渡關掉）⇒ 第 1 張直接以最終尺寸就位；定位完成後由 revealPhoto() 播放
+       「與 Fresh / Beans 相同」的 goo 揭示（引擎＝bc-brand-stage.js 的 window.BC_MEDIA_REVEAL，
+       同一組 STD／AMP／OFF 濾鏡與同樣的 1.2s / 'Out' 時間軸）。
+     · 之後換張完全不變：仍是圓盤旋轉 ＋ scale 0.5 ⇄ 1 過渡；.is-snap 只在第一次定位時存在。
    ============================================================ */
 (function () {
   'use strict';
@@ -112,7 +121,11 @@
     this.timer = null;    // 保險計時器
     this.easeMs = easeMs(root);
     // 2026-10-14：加上 .is-ready → 才啟用 transform/scale 過渡（見 bc-hand-ring.css）
+    // 2026-10-24（使用者指示「第一張咖啡不要從小放大」）：第一次定位另外加上 .is-snap
+    //   把過渡關掉 ⇒ 第 1 張直接以 scale 1 就位，進場改由 revealPhoto() 的 goo 揭示負責
+    //   （見檔頭 2026-10-24 與 releaseSnap()；go() 以 cur === -1 判斷「這是第一次」）。
     root.classList.add('is-ready');
+    root.classList.add('is-snap');
     // 2026-10-16：文字的切換時機改綁圓盤旋轉的過渡結束（見檔頭註解）
     if (this.captions.length && this.list) {
       var self = this;
@@ -160,6 +173,32 @@
     window.BC_TEXT_REVEAL(els, CAPTION_REVEAL_DELAY, CAPTION_REVEAL_DUR, CAPTION_REVEAL_STAGGER);
   };
 
+  /* 2026-10-24（使用者指示）：第一張照片的進場改為與 bc-stage-headline-fresh-beans
+     「Follow Your Rhythm」相同的 goo 文字揭示（引擎＝bc-brand-stage.js 的
+     window.BC_MEDIA_REVEAL，同一組 STD／AMP／OFF 濾鏡與同樣的 1.2s／'Out' 時間軸）。
+     [時機] 只在第一次 go()（register 當下的定位）呼叫一次，且此時 .is-snap 仍生效
+       ⇒ 照片先以最終尺寸就位（不再從 scale 0.5 放大），緊接著從 STD 的模糊收斂成清晰。
+     [之後] 換張仍是圓盤既有的 scale 0.5 ⇄ 1 過渡，不受影響。
+     [降級] 取不到引擎（GSAP 未載入）→ 不做事，照片直接以最終尺寸出現。 */
+  Ring.prototype.revealPhoto = function (i) {
+    if (!window.BC_MEDIA_REVEAL) return;
+    var item = this.items[i];
+    var media = item ? item.querySelector('img') : null;
+    if (media) window.BC_MEDIA_REVEAL(media);
+  };
+
+  /* 移除 .is-snap：等兩個 frame 再移除 —— 要讓瀏覽器先把「無過渡」的 scale 1／rotate 算完並上色，
+     否則同一個 frame 內移除會讓這些值又被當成「剛發生的變化」而補播一段過渡（＝放大動畫復活）。 */
+  Ring.prototype.releaseSnap = function () {
+    var root = this.root;
+    var off = function () { root.classList.remove('is-snap'); };
+    if (window.requestAnimationFrame) {
+      window.requestAnimationFrame(function () { window.requestAnimationFrame(off); });
+    } else {
+      setTimeout(off, 32);
+    }
+  };
+
   /* 圓盤到定位了：把待顯示的那筆文字切上去（transitionend 與保險計時器都呼叫這裡；
      重複呼叫是安全的 —— pending 為 null 就什麼都不做）。 */
   Ring.prototype.settle = function () {
@@ -187,9 +226,11 @@
     var n = this.items.length;
     if (!n || typeof i !== 'number' || isNaN(i)) return this.cur;
     var idx = ((Math.round(i) % n) + n) % n;
-    // 圓盤這次是否真的會轉：第一次定位時 markup 的 transform 就是 rotate(0deg)，故只有目標不是
-    // 第 1 張才有過渡；之後只要索引變了就會轉。
-    var rotates = (this.cur === -1) ? (idx !== 0) : (idx !== this.cur);
+    // 第一次定位（register 當下的 go）：決定是否要用 .is-snap 的「無過渡」定位 ＋ 照片揭示。
+    var first = (this.cur === -1);
+    // 圓盤這次是否真的會轉：第一次定位時 .is-snap 把過渡關掉（直接跳到定位點），不會有旋轉動畫，
+    // 文字也不必等過渡結束；之後只要索引變了就會轉。
+    var rotates = first ? false : (idx !== this.cur);
     if (this.list) this.list.style.transform = 'rotate(' + (idx * STEP) + 'deg)';
     var k;
     for (k = 0; k < n; k++) this.items[k].classList.toggle('-current', k === idx);
@@ -198,11 +239,20 @@
         this.holdCaptions(idx);            // 有過渡 ⇒ 文字等它轉完（見檔頭：只顯示置中的那杯）
       } else if (this.pending === null && this.cur !== idx) {
         this.setCaptions(idx);             // 沒有過渡（首次定位到第 1 張）⇒ 立即對齊
-        this.revealCaption(idx);           // 2026-10-17：同一套進場揭示（見 revealCaption）
+        /* 2026-10-24：第一次定位（register 當下）不跑 caption 揭示 —— 那時 document.fonts
+           還沒就緒，SplitText 會發 "called before fonts loaded" 警告且分行量測用的是
+           fallback 字型。第一張照片的進場仍由下方 revealPhoto()（純濾鏡、不需字型）負責；
+           之後每次換張仍照舊揭示（字型早已載入）。 */
+        if (!first) this.revealCaption(idx);   // 2026-10-17：同一套進場揭示（見 revealCaption）
       }
       // 其餘情況（索引沒變、且文字還在等前一輪的過渡）＝維持 pending，不動它。
     }
     this.cur = idx;
+    // 2026-10-24：第一次定位完成（照片已在最終尺寸）→ 開回過渡，並用與標題文字相同的揭示進場。
+    if (first) {
+      this.releaseSnap();
+      this.revealPhoto(idx);
+    }
     return idx;
   };
 

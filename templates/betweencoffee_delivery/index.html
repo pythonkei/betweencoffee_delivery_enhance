@@ -799,7 +799,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      必須排在 bc-gunte-hero.css 之前（同名變數/屬性以 hero 的規則為準）。
      2026-10-14 稍後：照片格改為與 hero 同一顆整頁大圓（100vw，不再縮進格子）→ 檔頭註解更新
      ⇒ 版號 ?v=20261014a 升為 ?v=20261014b（WhiteNoise MAX_AGE=1 年，必須升版才會重載） -->
-<link rel="stylesheet" href="{% static 'css/bc-hand-ring.css' %}?v=20261014b">
+<link rel="stylesheet" href="{% static 'css/bc-hand-ring.css' %}?v=20261024a">
 <!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
      BC 動態模組（原 #bc-bg-footer，2026-10-18 更名 #bc-brand-stage）——單一來源；
      全樣式 scoped 於 #bc-brand-stage，故與 about 頁共用同一份 CSS 不會互相影響。
@@ -1345,8 +1345,14 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        上述兩檔同時也是環形照片列的「唯一換張來源」（bc-gunte-hero.js 的 Splide → goAll），
        移除後環只會停在第一張。已於 bc-hand-ring.js 新增 startAuto()／stopAuto()，
        由 bc-brand-stage.js 在「沒有 hero 推播」時啟動 5s 自帶節拍（恢復 hero 時會自動讓位），
-       本頁不需再加回任何腳本。版號：bc-hand-ring.js ?v=20261020a、bc-brand-stage.js ?v=20261020a。 -->
-<script src="{% static 'js/bc-hand-ring.js' %}?v=20261020a"></script>
+       本頁不需再加回任何腳本。版號：bc-hand-ring.js ?v=20261020a、bc-brand-stage.js ?v=20261020a。
+     2026-10-24（使用者指示「bc-stage-photo-ring-list 第一個咖啡初始是從小到放大，改成與
+       bc-stage-headline-fresh-beans 'Follow Your Rhythm' 文字相同的動畫」）：
+       bc-hand-ring.js 第一次定位改為 .is-snap（關掉 scale 0.5→1 的過渡）＋ revealPhoto()
+       呼叫 bc-brand-stage.js 新增的 window.BC_MEDIA_REVEAL（與文字同一套 goo 濾鏡）；
+       bc-brand-stage.js 的 boot() 調換為 initGsap → initClockHandRing（API 先就位）。
+       ⇒ 版號：bc-hand-ring.css／bc-hand-ring.js／bc-brand-stage.js 均升為 ?v=20261024a。 -->
+<script src="{% static 'js/bc-hand-ring.js' %}?v=20261024a"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
 <!-- 2026-10-22（使用者指示）：首頁四步咖啡旅程 Rive 圖示（intro / off / hover 時間軸）；
@@ -1381,7 +1387,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      其餘 data-reveal 文字仍走預設 1.2s／0.1s）→ 版號升為 ?v=20261019b。 -->
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261020a"></script>
+<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261024a"></script>
 {% endblock %}
 
 {% block bcc_footer %}

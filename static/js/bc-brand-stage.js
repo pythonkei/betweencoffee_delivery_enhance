@@ -228,6 +228,43 @@
       animateTextReveal(target, 'reveal', delay == null ? DELAY_REVEAL : delay, duration, stagger);
     };
 
+    /* 2026-10-24（使用者指示「bc-stage-photo-ring-list 第一個咖啡現在初始是從放大動畫，
+       修改為 bc-stage-headline-fresh-beans 'Follow Your Rhythm' 文字相同的動畫」）：
+       照片沒有「行」可以交給 SplitText 拆，故另開一支「媒體專用」的揭示 —— 但濾鏡與時間軸
+       完全沿用上面的 goo 文字揭示（同一組 STD／AMP／OFF、同樣的 duration、同樣的 'Out' 緩動、
+       最後 .35 × duration 把 alpha 對比收掉），畫面語彙因此與標題文字完全一致：
+       一團模糊的形狀 → 收斂成清晰的照片（文字則是模糊的字形 → 清晰的字）。
+       [參數] 與 BC_TEXT_REVEAL 同序：target、delay（預設 DELAY_REVEAL 0.2s）、
+              duration（預設 DUR_L 1.2s）；不支援 stagger（照片只有一張）。
+       [呼叫端] bc-hand-ring.js 的 revealPhoto()：只在「第一張照片定位完成」時呼叫一次，
+              之後換張仍是圓盤既有的 scale 0.5 ⇄ 1 過渡。
+       [降級] GSAP／自訂緩動缺失 ⇒ initGsap 直接 return ⇒ 本 API 不存在 ⇒ 呼叫端不做事，
+              照片直接以最終尺寸出現（與改動前的終態相同，只是少了進場動畫）。 */
+    window.BC_MEDIA_REVEAL = function (target, delay, duration) {
+      var els = gsap.utils.toArray(target);
+      if (!els.length) return;
+      var dur = duration == null ? DUR_L : duration;
+      var dly = delay == null ? DELAY_REVEAL : delay;
+      els.forEach(function (el) {
+        addFilter(el);
+        var b = blurOf(el), m = matOf(el);
+        if (!b || !m) return;
+        // 同一元素可能被重複呼叫 → 先殺掉前一次的時間軸（同 animateTextReveal 的 reveal 分支）
+        if (el._mediaTl) el._mediaTl.kill();
+        b.setAttribute('stdDeviation', STD);
+        m.setAttribute('values', mat(AMP, OFF));
+        el.style.filter = 'url(#' + el.dataset.filterId + ')';
+        var tl = gsap.timeline();
+        tl.to(b, { attr: { stdDeviation: 0 }, duration: dur, delay: dly, ease: 'Out' });
+        var g = { amp: AMP, off: OFF };
+        tl.to(g, { amp: 1, off: 0, duration: .35 * dur, ease: 'none',
+          onUpdate: function () { m.setAttribute('values', mat(g.amp, g.off)); },
+          onComplete: function () { m.setAttribute('values', mat(1, 0)); el.style.filter = ''; }
+        }, '>-' + .35 * dur);
+        el._mediaTl = tl;
+      });
+    };
+
     /* -- div / clip 揭示（原 animateDivReveal / animateClipReveal） -- */
     function animateDivReveal(target, mode, delay) {
       var els = gsap.utils.toArray(target);
@@ -366,8 +403,14 @@
   function boot() {
     initFooterTime(root);
     initFooterLogo(root);
-    initClockHandRing(root);
+    /* 2026-10-24（使用者指示「第一個咖啡的進場改成與標題文字相同的動畫」）：
+       initGsap() 必須排在 initClockHandRing() **之前** —— window.BC_TEXT_REVEAL／
+       BC_MEDIA_REVEAL 是在 initGsap 內同步定義的，而環形照片列的 register() → go()
+       會在 initClockHandRing 進行第一次定位並立刻呼叫揭示 API；順序顛倒的話
+       （改動前是 register 先跑）API 還不存在，第一張照片／第一組名稱就只能「直接出現」。
+       initGsap 內部的元素揭示仍包在 whenFontsReady() 裡（非同步），不受此次調換影響。 */
     initGsap(root);
+    initClockHandRing(root);
   }
 
   if (document.readyState === 'loading') {

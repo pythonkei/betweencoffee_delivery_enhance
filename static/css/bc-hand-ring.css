@@ -82,6 +82,18 @@
   transition: scale var(--bc-hand-ease);
 }
 
+/* 2026-10-24（使用者指示「bc-stage-photo-ring-list 第一個咖啡初始是從小到放大，
+   要改成與 bc-stage-headline-fresh-beans 'Follow Your Rhythm' 文字相同的動畫」）：
+   第一次定位（bc-hand-ring.js 的 register → go()）期間 JS 會加上 .is-snap 把圓盤旋轉與
+   照片 scale 的過渡關掉 ⇒ 第 1 張直接以最終尺寸（scale 1）就位，不會再從 0.5 放大；
+   它的進場改由 goo 揭示負責（bc-hand-ring.js 的 revealPhoto → bc-brand-stage.js 的
+   window.BC_MEDIA_REVEAL，與標題文字同一套濾鏡）。
+   定位完成後 JS 在兩個 frame 內移除 .is-snap，之後換張的旋轉／縮放過渡完全不受影響。 */
+.hero_hand.is-ready.is-snap .hero_hand_list,
+.hero_hand.is-ready.is-snap .hero_hand_item img {
+  transition: none;
+}
+
 .hero_hand_item.-current img {
   scale: 1;
 }
