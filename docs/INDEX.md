@@ -7,11 +7,11 @@
 | 檔案 | 內容 | 大小 |
 |---|---|---|
 | `.clinerules/uiux-core.md` | UI/UX 規範精簡版（**已自動注入**，通常不需再讀） | 3.6K |
-| `.clinerules/project-core.md` | 專案核心規則（**已自動注入**） | 6K |
+| `.clinerules/project-core.md` | 專案核心規則（**已自動注入**） | 8.4K |
 | `docs/uiux-full-reference.md` | UI/UX 完整參考（設計流程、四角色分析、審查清單、SVG 範例）→ 只在做新 UI 元件時讀 | 34K |
-| `betweencoffee_memory_bank/04_SYSTEM_STATE.md` | 系統現況、DB 現況、部署版本 | ≤3K |
-| `betweencoffee_memory_bank/05_PRIORITY_TASKS.md` | 未完成事項與優先序 | ≤3K |
-| `task_progress.md` | 當前任務進度（只留現況；歷史已封存） | ≤4K |
+| `betweencoffee_memory_bank/04_SYSTEM_STATE.md` | 系統現況、DB 現況、部署版本 | 5.0K |
+| `betweencoffee_memory_bank/05_PRIORITY_TASKS.md` | 未完成事項與優先序 | 4.4K |
+| `task_progress.md` | 當前任務進度（只留現況；歷史已封存） | 10.3K |
 | `docs/guides/RENDER_DEPLOY_GUIDE.md` | Render 部署步驟（Docker、env、migration） | 11K |
 | `docs/guides/WEBSOCKET_MIGRATION_GUIDE.md` | WebSocket 三層架構與遷移 | 8K |
 | `docs/security/git-history-cleanup.md` | 金鑰清除與 repo 安全待辦 | — |

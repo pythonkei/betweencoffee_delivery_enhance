@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態請即時複驗**：`git status` / `git log --oneline -3` / Render API；本檔只記到 2026-10-17（正式站 live＝`ec8fcadb`、本機有多個未 push commit）。
+- **版本狀態（2026-10-25 複驗）**：`origin/main`＝`d27f7c90`（#59 `edf3e87c`／#60 `7a073263`／#61 `d27f7c90` 已推齊，工作區乾淨）；正式站 live 仍＝`ec8fcadb`（2026-10-23 手動部署因 Supabase pooler `ENOTFOUND` 失敗、尚未重試）。即時複驗：`git log --oneline -3`＋Render API，不要寫死版本。
 
 ## 2. 核心業務
 
@@ -44,6 +44,8 @@
 | `static/js/websocket-core.js` | 前端 WS 三層架構底層 |
 | `static/js/staff-order-management/base-order-renderer-v2.js` | 員工端渲染器基底 |
 | `static/css/bc-components.css` | 品牌元件庫（`.bc-btn` / `.bc-input` / `.bc-card` / `.bc-order-collapse`） |
+| `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
+| `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
 ## 4. 開發規範
 
@@ -57,6 +59,9 @@
 - **新增商品選項顯示**（如濃度／烘焙／茶種）：① `eshop/serializers.py` 的 `serialize_order()` items mapping → ② `base-order-renderer-v2.js` 的 `_renderItemOptions()` → ③ 子渲染器若硬編碼選項 HTML 也要改 → ④ `common-utils.js` 的 `renderOrderItems()`（若有）。
 - **選項行樣式**：`.bc-options-row`（flex/wrap/gap 8、`--bc-text-muted`）+ `.option-item`（nowrap）+ `.ov`（白字）。
 - **自訂選項組**：資料驅動（Admin 勾選啟用＋排序），新增選項只需 3 檔＋一支 migration。
+- **首頁區塊順序**：看 `templates/betweencoffee_delivery/index.html` 檔頭註解 `[1]…[2b]`（＝實際 DOM 順序）。`[2b]` 推薦雙卡必須**緊接** `<section class="hero bc-brand-stage-hero">`，中間不插留白 section（模組自帶 `#0e0e0e` 底）。
+- **首頁隱藏品牌舞台社群列**：只靠 extra_css 的 `.bc-brand-stage-hero #bc-stage-socials{display:none}`；不要改 `partials/bc_brand_stage_hero.html`（about 頁真頁尾要保留社群列）。
+- **詳情頁氣泡（咖啡／咖啡豆）**：資料在 `CoffeeItem` / `BeanItem` 的 `staff_comment_1~3`＋`bubble_pos_1~3`（`tl/ml/bl/tr/mr/br`）；幾何 `bubble_safe_left/right`、`bubble_photo_ratio`、`bubble_scale` 存檔時由 `measure_bubble_geometry()` 自動量測，換照片會重算。
 
 ## 6. 除錯速查
 
@@ -71,6 +76,9 @@
 - **`.bc-attract` 負 margin** 會讓「外層盒」與「可見長條」差 24px，量測一律量可見元素。
 - **Render free plan** 無 Redis：不要引入需要 Redis 的功能；Celery 任務同步執行。
 - **Migration 編號**：`python3 manage.py makemigrations --check` 必須乾淨；資料搬移用 data migration，不在 view 裡寫死。
+- **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:207` `#bc-brand-stage .footer-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。
+- **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方內容自動整齊上移，不要再補留白。
+- **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。
 
 ## 8. 文件導覽
 
