@@ -126,3 +126,7 @@ yarn-error.log*
 # 本機診斷截圖（手動診斷產出）
 /_diag*.png
 /_diag*.jpg
+
+# 使用者提供的原始 APNG 素材（僅供重新產圖；頁面實際使用 static/images/recommended-pages/title-*.png）
+/static/images/ani_coffee_apng.png
+/static/images/ani_bean_apng.png

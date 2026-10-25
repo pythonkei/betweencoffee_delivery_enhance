@@ -1,0 +1,274 @@
+/* ============================================================
+   bc-recommended-pages.css — 首頁「推薦頁面」雙卡模組
+   2026-10-24 建立
+   ------------------------------------------------------------------
+   來源：union-tec.jp/capability 的
+         <aside x-data="recommendedPages" class="recommended-pages">，
+         使用者指示整組（含動畫／互動／響應式）移植到首頁
+         .feed--video 下方；左卡 Service → 咖啡、右卡 Company → 咖啡豆。
+
+   數值來源（2026-10-24 以 Chrome 1440×900 / 375×812 實測原站
+   computed style，非憑印象）：
+     · --spacing 是「流體等比單位」：
+         pc（≥64rem）＝ 100vw / 1440、mobile ＝ 100vw / 400
+       原站 --spacing-unit: layout-width / screen-width，
+       所以 1440px 視窗時 1 單位＝1px；手機以 400 設計寬等比縮放。
+     · aside padding（× spacing）：pc 上240/左右24/下80；
+                                    mobile 上200/左右16/下64。
+     · 卡片：pc 高 540、圓角 24、內距 32 40 40；
+             mobile 高 240、圓角 16、內距 20 24 22。
+     · 卡片間距：gap 8（× spacing）。
+     · 桌機 hover 寬度：active ＝ (100% - gap) × 2/3、
+                         inactive ＝ (100% - gap) / 3；
+       mobile 不套寬度規則（卡片維持 100%，原站規則只在 ≥64rem 生效）。
+     · 背景圖：opacity 0 → 1（.5s）、scale 1.2 → 1（2s ease-1）；
+       ::after 黑色 40% 遮罩 opacity 0 → 1（1s ease-3）。
+     · 標題 inactive scale(.666)（僅 pc）；label 的 spacer flex-grow 0 → 1。
+     · 標題結尾另加裝飾 APNG（2026-10-24 使用者指示，非常駐原站元素）：
+       來源 static/images/ani_{coffee,bean}_apng.png（1320×1320 / 90 frames，
+       bean 版是 Adam7 交錯且 IDAT/fdAT 分 32KB 小塊，Pillow 無法直接逐幀讀），
+       已離線縮成 176×176 的 static/images/recommended-pages/title-*-ani.png
+       （原 4.6MB＋8.8MB → 0.78MB＋0.93MB，避免 90 幀 1320² 解碼吃記憶體）。
+     · clip 圖：固定 507×166 的 stadium，預設可見寬 240（居中），
+       hover 展開為全寬 507。
+
+   clip-path 實作差異（刻意）：
+     原站用 GSAP MorphSVG 對 <clipPath><path> 做形狀補間
+     （圓形 → 全寬膠囊）。本專案不引入 GSAP MorphSVG（付費外掛），
+     但三條路徑其實都是「同一 stadium 只差寬度」，故改用等價 CSS：
+       預設 inset(0 26.3314% 0 26.3314% round 16.3708% / 50%)
+         → 可見寬 240/507 = 47.3372%，左右各留 (507-240)/2 = 133.5
+         → 水平半徑 83/507、垂直半徑 83/166 = 50%（＝高度一半）
+       hover inset(0 0 0 0 round …) → 全寬 507 的 stadium。
+     幾何與原站路徑終點完全相同，且可被 CSS 原生插值，
+     曲線用 power3.inOut 的 CSS 對照值 cubic-bezier(.76, 0, .24, 1)。
+   ============================================================ */
+
+.bc-recommended-pages {
+  /* 流體等比單位（原站 spacing-unit） */
+  --spacing: calc(100vw / 400);
+  --gap: calc(var(--spacing) * 8);
+  --cols: 2;
+  /* 原站 --ease-1 / --ease-2 / --ease-3 */
+  --rp-ease-1: cubic-bezier(0.18, 0.06, 0.23, 1);
+  --rp-ease-2: cubic-bezier(0.43, 0.05, 0.17, 1);
+  --rp-ease-3: cubic-bezier(0.47, 0.16, 0.24, 1);
+
+  position: relative;
+  width: 100%;
+  padding: calc(var(--spacing) * 200) calc(var(--spacing) * 16)
+    calc(var(--spacing) * 64);
+  color: #fff;
+  background-color: var(--bc-bg, #0e0e0e);
+}
+
+.bc-recommended-pages__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+/* ---------- 卡片 ---------- */
+.recommended-pages__link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(var(--spacing) * 240);
+  padding: calc(var(--spacing) * 20) calc(var(--spacing) * 24)
+    calc(var(--spacing) * 22);
+  overflow: hidden;
+  /* 原站 border-color 未指定 → 繼承 currentColor（白） */
+  border: 1px dashed currentColor;
+  border-radius: calc(var(--spacing) * 16);
+  color: inherit;
+  text-decoration: none;
+  /* z-index:-1 的背景圖層需相對於卡片堆疊，避免跑到祖先背景之下 */
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- 背景圖（hover 才淡入） ---------- */
+.recommended-page__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transform: scale(1.2);
+  transition: opacity 0.5s var(--rp-ease-2), transform 0.8s ease-in-out;
+}
+
+.recommended-page__bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.8s var(--rp-ease-2);
+}
+
+.recommended-page__bg img,
+.recommended-page__clip img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recommended-pages__link.is-hover-active .recommended-page__bg {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.5s ease-in-out, transform 2s var(--rp-ease-1);
+}
+
+.recommended-pages__link.is-hover-active .recommended-page__bg::after {
+  opacity: 1;
+  transition: opacity 1s var(--rp-ease-3);
+}
+
+/* ---------- 標題 ---------- */
+.recommended-page__title {
+  display: flex;
+  align-items: center;
+  gap: 0.22em;
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: calc(var(--spacing) * 32);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+  transition: color 0.5s var(--rp-ease-2);
+}
+
+/* 標題結尾的裝飾動畫（APNG，2026-10-24 使用者指示）
+   高度取 1em（= 標題字級；仍小於 line-height 1.2em，不會撐高標題行），
+   用 flex/align-items:center 讓它與標題文字同一水平線對齊；
+   inactive 時隨整個 .recommended-page__title 一起 scale(.666)。 */
+.recommended-page__title-ani {
+  flex: 0 0 auto;
+  width: auto;
+  height: 1em;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- 中央 clip 圖 ---------- */
+.recommended-page__clip {
+  position: absolute;
+  top: calc(var(--spacing) * 79);
+  left: 50%;
+  height: calc(var(--spacing) * 89);
+  aspect-ratio: 507 / 166;
+  background-color: #fff;
+  transform: translateX(-50%);
+  /* 240/507 可見寬 → 左右各 133.5/507；半徑 83/507 與 83/166 */
+  clip-path: inset(0 26.3314% 0 26.3314% round 16.3708% / 50%);
+  transition: clip-path 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.recommended-pages__link.is-hover-active .recommended-page__clip {
+  clip-path: inset(0 0 0 0 round 16.3708% / 50%);
+}
+
+/* ---------- 底部標籤 ---------- */
+.recommended-page__label {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 8);
+  width: 100%;
+  margin: 0;
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: calc(var(--spacing) * 13);
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  transition: color 0.5s var(--rp-ease-2);
+}
+
+.recommended-page__label-icon {
+  flex-shrink: 0;
+  width: calc(var(--spacing) * 6);
+  height: auto;
+  fill: currentColor;
+}
+
+.recommended-pages__link.is-hover-active .recommended-page__title,
+.recommended-pages__link.is-hover-active .recommended-page__label {
+  color: #fff;
+}
+
+/* ============================================================
+   pc（≥64rem）—— 原站 pc: 變體
+   ============================================================ */
+@media (min-width: 64rem) {
+  .bc-recommended-pages {
+    --spacing: calc(100vw / 1440);
+    padding: calc(var(--spacing) * 240) calc(var(--spacing) * 24)
+      calc(var(--spacing) * 80);
+  }
+
+  .bc-recommended-pages__list {
+    flex-direction: row;
+  }
+
+  .recommended-pages__link {
+    flex-shrink: 0;
+    width: calc((100% - var(--gap) * (var(--cols) - 1)) / var(--cols));
+    height: calc(var(--spacing) * 540);
+    padding: calc(var(--spacing) * 32) calc(var(--spacing) * 40)
+      calc(var(--spacing) * 40);
+    border-radius: calc(var(--spacing) * 24);
+    transition: width 0.6s var(--rp-ease-2);
+  }
+
+  .bc-recommended-pages[data-cols="2"]
+    .recommended-pages__link.is-hover-active {
+    width: calc((100% - var(--gap) * (var(--cols) - 1)) * 2 / 3);
+  }
+
+  .bc-recommended-pages[data-cols="2"]
+    .recommended-pages__link.is-hover-inactive {
+    width: calc((100% - var(--gap) * (var(--cols) - 1)) / 3);
+  }
+
+  .recommended-pages__link.is-hover-active,
+  .recommended-pages__link.is-hover-inactive {
+    transition: width 0.8s var(--rp-ease-3);
+  }
+
+  .recommended-page__title {
+    font-size: calc(var(--spacing) * 64);
+    white-space: nowrap;
+    transform-origin: 0 0;
+    transition: transform 0.6s var(--rp-ease-1), color 0.5s var(--rp-ease-2);
+  }
+
+  .recommended-pages__link.is-hover-inactive .recommended-page__title {
+    transform: scale(0.666);
+  }
+
+  .recommended-page__clip {
+    top: calc(var(--spacing) * 201);
+    height: calc(var(--spacing) * 166);
+  }
+
+  .recommended-page__label {
+    gap: calc(var(--spacing) * 12);
+    font-size: calc(var(--spacing) * 18);
+  }
+
+  .recommended-page__label-icon {
+    width: calc(var(--spacing) * 9);
+  }
+
+  .recommended-page__label-spacer {
+    flex: 0;
+    min-width: 0;
+    transition: flex-grow 0.8s var(--rp-ease-3);
+  }
+
+  .recommended-pages__link.is-hover-active .recommended-page__label-spacer {
+    flex-grow: 1;
+    transition: flex-grow 0.8s var(--rp-ease-1);
+  }
+}

@@ -102,6 +102,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      JS 保留，未刪除）。本檔 DOM 順序 ＝ 畫面順序：
        [1] <section hidden class="bc-reviews-section">（reviews 跑馬燈；不顯示）
        [2] <section class="hero bc-brand-stage-hero">（第一屏＝品牌舞台，內含 #bc-brand-stage）
+       [2b] <aside class="bc-recommended-pages">（推薦雙卡；2026-10-24 由 .feed--video 下方搬到
+            品牌舞台正下方，中間不插留白 section）
        [3] <section hidden class="hero bc-gunte-hero">（暫時隱藏）
        [4] <section hidden class="feed overflow-hidden">（其餘首頁內容，維持原狀）
      版位：
@@ -110,6 +112,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
          —— class 規則、不依賴 first-of-type（文件第一個 section 是 [1] 的 reviews）。
        · GUNTE hero 的 hidden 由 extra_css 的
          `.bc-page-content > section.bc-gunte-hero[hidden]{display:none !important}` 保證。
+       · 品牌舞台的社群列（#bc-stage-socials）自 2026-10-24 起隱藏，由 extra_css 的
+         `.bc-brand-stage-hero #bc-stage-socials{display:none}` 處理（about 頁真頁尾仍保留）。
        · 原「兩塊 hero 之間的留白」<section class="ftco-section-blank-small"> 已移除
          （GUNTE 隱藏後它會變成頁首的一段空白）。
      ～～ 以下保留 2026-10-13 / 10-09 的歷史註解，供追查（順序已於 10-18 再次調整）～～
@@ -367,6 +371,75 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 {% include 'betweencoffee_delivery/partials/bc_brand_stage_hero.html' %}
 </section>
 
+<!-- 2026-10-24（使用者指示）：移植 union-tec.jp/capability 的 recommendedPages 模組
+     （<aside x-data="recommendedPages" class="recommended-pages">）。
+     [位置] 初版放在 .feed--video 下方（四步 Rive 圖示列之後）；同日稍後使用者指示
+            「移動到 bc-brand-stage 下方」⇒ 改為緊接第一屏品牌舞台
+            （<section class="hero bc-brand-stage-hero">／#bc-brand-stage）之後，
+            中間不插任何留白 section（模組自帶 #0e0e0e 底，接 hero 的透明背景無縫）。
+     - 左卡 Service → 咖啡（連 /coffee_menu/）、右卡 Company → 咖啡豆（連 /bean_menu/）
+     - 互動／動畫與原站相同：hover 卡片寬 2/3、另一張 1/3（僅 ≥64rem）；
+       背景圖 opacity 0→1 + scale 1.2→1（黑 40% 遮罩）；標題 inactive scale(.666)；
+       label 的 spacer flex-grow 0→1；中央 clip 圖由圓形展開為全寬膠囊
+     - 原站＝Alpine（切 class）＋ GSAP MorphSVG（clip 形狀補間）；
+       本專案改由 bc-recommended-pages.js 切同樣的 class，
+       clip-path 以等價 CSS inset 過渡 → 不引入 Alpine／MorphSVG
+       （幾何與原站路徑終點相同，說明見 bc-recommended-pages.css 檔頭）
+     - 素材：static/images/recommended-pages/*.webp（專案既有照片裁切）
+     - 標題結尾的裝飾動畫（2026-10-24 追加）：title-coffee-ani.png／
+       title-bean-ani.png（由 static/images/ani_{coffee,bean}_apng.png 離線
+       縮成 176×176 APNG，原因見 bc-recommended-pages.css 檔頭） -->
+<aside class="bc-recommended-pages" data-bc-recommended-pages data-cols="2">
+    <div class="bc-recommended-pages__list">
+        <a href="{% url 'coffee_menu' %}" class="recommended-pages__link">
+            <div class="recommended-page__bg" aria-hidden="true">
+                <img src="{% static 'images/recommended-pages/coffee-bg.webp' %}" alt=""
+                     decoding="async" loading="lazy" fetchpriority="low">
+            </div>
+            <p class="recommended-page__title"><span class="recommended-page__title-text">Coffee</span><img
+                    class="recommended-page__title-ani"
+                    src="{% static 'images/recommended-pages/title-coffee-ani.png' %}"
+                    alt="" aria-hidden="true" width="176" height="176"
+                    decoding="async" loading="lazy"></p>
+            <div class="recommended-page__clip">
+                <img src="{% static 'images/recommended-pages/coffee-clip.webp' %}" alt=""
+                     decoding="async" loading="lazy" fetchpriority="low">
+            </div>
+            <p class="recommended-page__label">
+                <svg class="recommended-page__label-icon" width="3" height="2"
+                     viewBox="0 0 3 2" aria-hidden="true" focusable="false">
+                    <path d="M2.5476 0.189675C2.23431 0.0185048 1.80099 0 1.5 0C1.19901 0 0.765693 0.0185048 0.452396 0.189675C0.168348 0.344905 0 0.658749 0 1C0 1.34125 0.168348 1.65513 0.452396 1.81033C0.765693 1.9815 1.19901 2 1.5 2C1.80099 2 2.23431 1.9815 2.5476 1.81033C2.83165 1.65513 3 1.34125 3 1C3 0.658749 2.83165 0.344866 2.5476 0.189675Z"/>
+                </svg>
+                <span class="recommended-page__label-spacer" aria-hidden="true"></span>
+                <span>咖啡</span>
+            </p>
+        </a>
+        <a href="{% url 'bean_menu' %}" class="recommended-pages__link">
+            <div class="recommended-page__bg" aria-hidden="true">
+                <img src="{% static 'images/recommended-pages/bean-bg.webp' %}" alt=""
+                     decoding="async" loading="lazy" fetchpriority="low">
+            </div>
+            <p class="recommended-page__title"><span class="recommended-page__title-text">Beans</span><img
+                    class="recommended-page__title-ani"
+                    src="{% static 'images/recommended-pages/title-bean-ani.png' %}"
+                    alt="" aria-hidden="true" width="176" height="176"
+                    decoding="async" loading="lazy"></p>
+            <div class="recommended-page__clip">
+                <img src="{% static 'images/recommended-pages/bean-clip.webp' %}" alt=""
+                     decoding="async" loading="lazy" fetchpriority="low">
+            </div>
+            <p class="recommended-page__label">
+                <svg class="recommended-page__label-icon" width="3" height="2"
+                     viewBox="0 0 3 2" aria-hidden="true" focusable="false">
+                    <path d="M2.5476 0.189675C2.23431 0.0185048 1.80099 0 1.5 0C1.19901 0 0.765693 0.0185048 0.452396 0.189675C0.168348 0.344905 0 0.658749 0 1C0 1.34125 0.168348 1.65513 0.452396 1.81033C0.765693 1.9815 1.19901 2 1.5 2C1.80099 2 2.23431 1.9815 2.5476 1.81033C2.83165 1.65513 3 1.34125 3 1C3 0.658749 2.83165 0.344866 2.5476 0.189675Z"/>
+                </svg>
+                <span class="recommended-page__label-spacer" aria-hidden="true"></span>
+                <span>咖啡豆</span>
+            </p>
+        </a>
+    </div>
+</aside>
+
 
 <!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
      2026-10-09：位置調整為 BC 動態 hero（.bc-brand-stage-hero）之下。
@@ -610,7 +683,6 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 
 <section class="ftco-section-blank-small"></section>
 
-
 <aside class="bc-search" data-section="inversion">
     <a href="{% url 'coffee_menu' %}" class="bc-search-link">
         <div class="bc-search-bg">
@@ -701,7 +773,6 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
     </div>
 </section>
 
-
 <section class="ftco-section-blank-small"></section>
 
 
@@ -783,6 +854,10 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-10-22（使用者指示）：首頁四步咖啡旅程 Rive 圖示列（.feed--video 正下方，四格 canvas） -->
 <!-- 2026-10-22c：JS 改為「靜止姿勢＝intro 自然播完的完整圖示，離開 hover 不發指令」 -->
 <link rel="stylesheet" href="{% static 'css/bc-steps.css' %}?v=20261023a">
+<!-- 2026-10-24（使用者指示）：首頁「推薦頁面」雙卡（移植 union-tec recommendedPages），
+     位置：2026-10-24 稍後改為品牌舞台（.bc-brand-stage-hero）下方（原為 .feed--video 下方）。
+     互動 JS：bc-recommended-pages.js。 -->
+<link rel="stylesheet" href="{% static 'css/bc-recommended-pages.css' %}?v=20261024b">
 <!-- 2026-08-10：首頁 SALON/STORE SEARCH 區塊樣式（demido aside 品牌化） -->
 <link rel="stylesheet" href="{% static 'css/bc-search.css' %}?v=20260918a">
 <!-- 2026-08-11：首頁輪播 morph 影片動畫樣式（僅首頁需，從 base 移出條件載入） -->
@@ -869,6 +944,21 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 }
 .bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
   border-top: 0 none;
+}
+/* 2026-10-24（使用者指示）：首頁品牌舞台的社群列（#bc-stage-socials）隱藏。
+   [作法] 只加樣式、不動 markup（partials/bc_brand_stage_hero.html 原樣保留）
+          ⇒ 日後要恢復，刪掉這條規則即可（與檔尾 .m-footer-inner 的處理同一慣例）。
+   [為何不用 hidden 屬性] bc-brand-stage.css:207 有
+          `#bc-brand-stage .footer-socials{display:flex}`（特異度 1,1,0），
+          會蓋過 UA 的 `[hidden]{display:none}`（0,1,0）⇒ 對這塊加 hidden 不會生效，
+          只能用同（更）高特異度的作者樣式覆寫。
+   [連帶效果] 它原本佔 .grid.is-footer 的 grid-area:6/3/7/7（≥992px）／grid-column:1/7（≤991px）；
+          display:none 後第 6 列不再產生（連同 .footer-socials 的 padding-top u-104 一起消失），
+          其餘格子因全部是明確 grid-area，座標不動 ⇒ 舞台高度變矮、下方內容等量上移。
+   [範圍] 只作用首頁 hero；about 頁的真頁尾（partials/bc_brand_stage.html）仍保留社群列，
+          若日後要一併隱藏，把選擇器改成 `#bc-stage-socials` 即可。 */
+.bc-brand-stage-hero #bc-stage-socials {
+  display: none;
 }
 /* 2026-10-20 稍後（使用者指示）：「上方留白還是太多，再減少一些」
    （已同意「時鐘列可以高於視口中心」＝不要求畫面正中）。
@@ -1362,6 +1452,9 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      2026-10-23a（使用者指示）：intro 自動循環（靜止 4 秒重播）＋圖示改純白
      （白色由 bc-steps.css 的 filter 處理，勿在此加顏色） -->
 <script src="{% static 'js/bc-steps-rive.js' %}?v=20261023b"></script>
+<!-- 2026-10-24（使用者指示）：首頁「推薦頁面」雙卡互動（hover 切換 is-hover-active /
+     is-hover-inactive，對應原站 Alpine recommendedPages；寬度與 clip-path 過渡交給 CSS） -->
+<script src="{% static 'js/bc-recommended-pages.js' %}?v=20261024a"></script>
 <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
      已抽成全站共用檔 static/js/bc-attract-place.js（base.html 全域載入）——
      使用者指示「所有模板浮動購物車修改位置和 index 一樣」→ 全站（含首頁）共用同一套定位，
