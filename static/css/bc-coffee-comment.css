@@ -1,7 +1,14 @@
 /* ============================================================
-   bc-coffee-comment.css — 咖啡詳情頁照片上的 staff-comment 氣泡
+   bc-coffee-comment.css — 詳情頁照片上的 staff-comment 氣泡
    2026-09-11 建立（v1）／2026-09-11 修訂（v2：文字放大 + 長方形氣泡）
    2026-09-13 修訂（v3：氣泡移出咖啡杯＝改放在照片去背透明留白區）
+   ── v6（2026-10-24）：咖啡豆詳情頁共用 ──────────────────────
+   咖啡／咖啡豆詳情頁共用同一套氣泡（DOM、6 個落點、彈出動畫皆相同），
+   宿主選擇器由 .bc-coffee-photo 改為中性的 .bc-photo-comment：
+     咖啡：<div class="img-box bc-coffee-photo bc-photo-comment">
+     咖啡豆：<div class="img-box bc-photo-comment">
+   （.bc-coffee-photo 仍保留給咖啡頁照片尺寸規則使用，與本檔無關）
+   各咖啡豆幾何以 BeanItem.save() 自動量測，前端算式完全未改。
    ── 來源 ────────────────────────────────────────────────
    複製 about 頁 .bc-sake-mv（sake-shirakiku.jp products/vibran）的
    staff-comment p-1 / p-3 效果（頭部圖章 + 氣泡 + 彈出動畫）到咖啡詳情頁：
@@ -47,7 +54,7 @@
 
    ── 覆蓋層定位（2026-09-14：改為每款咖啡可設定）────────────────
    .bc-coffee-comment 以 height:100% + aspect-ratio 貼齊照片本體
-   （咖啡頁 .img-box 高度恆等於照片高、照片水平置中）→ 氣泡的百分比定位
+   （咖啡／咖啡豆詳情頁的 .img-box 高度皆等恆照片高、照片水平置中）→ 氣泡的百分比定位
    直接對應照片。三個值由模板以行內樣式傳入（CoffeeItem 欄位，
    留空時由模型存檔自動量測；見 eshop/models/shop_items.py）：
      --bc-cb-photo-ratio  照片寬高比（860×1100 → 0.782；Black Blend 1200×840 → 1.429）
@@ -55,11 +62,11 @@
      --bc-cb-scale        氣泡尺寸倍率（直式 1；橫式 ≈ 1/寬高比，避免氣泡相對照片過大）
    未傳值時用下方 CSS 預設（= Butter King 860×1100 的幾何）。
    ============================================================ */
-.bc-coffee-photo {
+.bc-photo-comment {
   position: relative;
 }
 
-.bc-coffee-photo .bc-coffee-comment {
+.bc-photo-comment .bc-coffee-comment {
   --bc-cb-rem: calc(46px * var(--bc-cb-scale, 1)); /* 頭部圖章 / 位移基準（原站 100px 配 1440px 照片） */
   --bc-cb-fs: calc(13px * var(--bc-cb-scale, 1)); /* 氣泡文字級距（v2 放大） */
   position: absolute;
@@ -72,14 +79,14 @@
   z-index: 3;
 }
 @media (min-width: 768px) {
-  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: calc(64px * var(--bc-cb-scale, 1)); --bc-cb-fs: calc(15px * var(--bc-cb-scale, 1)); }
+  .bc-photo-comment .bc-coffee-comment { --bc-cb-rem: calc(64px * var(--bc-cb-scale, 1)); --bc-cb-fs: calc(15px * var(--bc-cb-scale, 1)); }
 }
 @media (min-width: 1080px) {
-  .bc-coffee-photo .bc-coffee-comment { --bc-cb-rem: calc(72px * var(--bc-cb-scale, 1)); --bc-cb-fs: calc(17px * var(--bc-cb-scale, 1)); }
+  .bc-photo-comment .bc-coffee-comment { --bc-cb-rem: calc(72px * var(--bc-cb-scale, 1)); --bc-cb-fs: calc(17px * var(--bc-cb-scale, 1)); }
 }
 
 /* ---- 氣泡項目定位 ---- */
-.bc-coffee-photo .bc-coffee-comment .staff-comment {
+.bc-photo-comment .bc-coffee-comment .staff-comment {
   position: absolute;
   display: inline-block;
   font-weight: 600;
@@ -102,51 +109,51 @@
    → 單一算式通吃所有斷點；換照片重測幾何後位置仍正確。
    預設：氣泡 1 左中間、氣泡 2 右下、氣泡 3 右上。
    -------------------------------------------------------------------- */
-.bc-coffee-photo .bc-coffee-comment .staff-comment {
+.bc-photo-comment .bc-coffee-comment .staff-comment {
   --cb-gap: calc(1.5 * var(--bc-cb-fs)); /* 氣泡邊緣與杯內容的留白（原 0.5fs） */
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.p-1 {
+.bc-photo-comment .bc-coffee-comment .staff-comment.p-1 {
   --cb-half: calc(2.145 * var(--bc-cb-fs));
   --cb-nudge: calc(0.2145 * var(--bc-cb-fs));
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.p-2 {
+.bc-photo-comment .bc-coffee-comment .staff-comment.p-2 {
   --cb-half: calc(2.445 * var(--bc-cb-fs));
   --cb-nudge: 0px;
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.p-3 {
+.bc-photo-comment .bc-coffee-comment .staff-comment.p-3 {
   --cb-half: calc(1.9195 * var(--bc-cb-fs));
   --cb-nudge: calc(0.19195 * var(--bc-cb-fs));
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment {
+.bc-photo-comment .bc-coffee-comment .staff-comment {
   --cb-k: calc(var(--cb-gap) + var(--cb-half) + var(--cb-nudge));
 }
 
 /* 左半邊（tl / ml / bl）與右半邊（tr / mr / br）：貼在杯外留白，再加該落點的 --cb-out */
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos$="l"] {
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos$="l"] {
   left: calc(var(--bc-cb-safe-l, 9.3%) - 0.6 * var(--bc-cb-rem) - var(--cb-k) - var(--cb-out, 0%));
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos$="r"] {
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos$="r"] {
   left: calc(var(--bc-cb-safe-r, 89.53%) - 0.6 * var(--bc-cb-rem) + var(--cb-k) + var(--cb-out, 0%));
 }
 /* 6 個落點各自的垂直位置（2026-09-15；左右刻意錯開讓排列有落差、不呆板）
    ※ 上列（tl/tr）接近照片頂端（氣泡高約 31~37% 照片高）：tl 取最高可用值、tr 往下製造落差；
      若把較高的氣泡（p-1）放到上列，頂端會略微凸出照片。 */
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 34%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 55%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 70.5%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 30%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 64%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { top: 76.5%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 34%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 55%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 70.5%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 30%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 64%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="br"] { top: 76.5%; }
 
 /* 6 個落點各自「再往杯外推」的距離 --cb-out（2026-09-15；% 為照片寬，左側往左、右側往右；
    負值＝往杯內收）※ 這組值決定各落點的水平位置：互相差距太小（< 2%）會看起來
    「排在同一條垂直線上」，故右側刻意做成 tr -3% / mr 5% / br 2%（水平錯開 -10.8 / 17.9 / 7.2px）。
    左側（tl / ml / bl）＝ 4% / 2% / 0%。要再靠外或收回只改這裡的值。 */
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { --cb-out: 4%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { --cb-out: 2%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { --cb-out: -3%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { --cb-out: 5%; }
-.bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { --cb-out: 2%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tl"] { --cb-out: 4%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="ml"] { --cb-out: 2%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tr"] { --cb-out: -3%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="mr"] { --cb-out: 5%; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="br"] { --cb-out: 2%; }
 /* v3（2026-09-13）幾何基準與各斷點實測（保留紀錄）：
    氣泡水平置中於錨點框（寬 1.2rem）→ 氣泡左緣 = left + 0.6rem − 半個氣泡寬；
    對齊目標為杯外留白 0.5fs（≈6.5~8.5px）。因 fs / rem 隨斷點變化，
@@ -160,8 +167,8 @@
    2026-09-15：原本寫死的 .p-1 / .p-2 / .p-3 落點，改為上方 6 個 data-pos 選擇。 */
 /* 覆蓋 Bootstrap spacing utilities：.p-1/.p-3 在原站是 staff-comment 的
    定位 class，但 Bootstrap 視為 padding（.p-1=.25rem、.p-3=1rem !important） */
-.bc-coffee-photo .bc-coffee-comment .p-1,
-.bc-coffee-photo .bc-coffee-comment .p-3 {
+.bc-photo-comment .bc-coffee-comment .p-1,
+.bc-photo-comment .bc-coffee-comment .p-3 {
   padding: 0 !important;
 }
 @media (max-width: 767.98px) {
@@ -173,23 +180,23 @@
      下列（原 p-2，氣泡高 9.78fs＝127px、佔手機照片 68%）取 84% 讓氣泡與圖章都在框內
      2026-09-15：改為 6 落點後，手機只覆寫垂直位置（水平算式與桌機相同）；
        6 個落點同樣左右錯開（比例與桌機一致，見上方 data-pos 段）*/
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 60.5%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 70%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 75%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 58%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 76%; }
-  .bc-coffee-photo .bc-coffee-comment .staff-comment[data-pos="br"] { top: 80%; }
+  .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tl"] { top: 60.5%; }
+  .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="ml"] { top: 70%; }
+  .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="bl"] { top: 75%; }
+  .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tr"] { top: 58%; }
+  .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="mr"] { top: 76%; }
+  .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="br"] { top: 80%; }
 }
 
 /* ---- 錨點框：氣泡固定尺寸後，pattern 框只作為定位錨點 ---- */
-.bc-coffee-photo .bc-coffee-comment .blowing {
+.bc-photo-comment .bc-coffee-comment .blowing {
   position: relative;
   font-weight: 600;
   width: calc(1.2 * var(--bc-cb-rem));
   height: calc(0.3 * var(--bc-cb-rem));
 }
 /* 頭部圖章（水平置中於氣泡下方；動畫只改 scale/rotate，translate 固定 -50%） */
-.bc-coffee-photo .bc-coffee-comment .blowing::after {
+.bc-photo-comment .bc-coffee-comment .blowing::after {
   content: "";
   display: block;
   position: absolute;
@@ -198,25 +205,25 @@
   translate: -50% 0;
   background: center center / contain no-repeat;
 }
-.bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-1::after {
+.bc-photo-comment .bc-coffee-comment .blowing.staff-comment-1::after {
   background-image: url("../images/staff01.png");
   width: calc(0.8 * var(--bc-cb-rem));
   height: calc(0.95 * var(--bc-cb-rem));
 }
-.bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-2::after {
+.bc-photo-comment .bc-coffee-comment .blowing.staff-comment-2::after {
   background-image: url("../images/staff02.png");
   width: calc(0.69 * var(--bc-cb-rem));
   height: calc(0.95 * var(--bc-cb-rem));
 }
 /* 2026-09-14 新增：p-2 的頭部圖章（staff03.png，比例 403×523 → 0.95rem 高、寬 0.73rem） */
-.bc-coffee-photo .bc-coffee-comment .blowing.staff-comment-3::after {
+.bc-photo-comment .bc-coffee-comment .blowing.staff-comment-3::after {
   background-image: url("../images/staff03.png");
   width: calc(0.73 * var(--bc-cb-rem));
   height: calc(0.95 * var(--bc-cb-rem));
 }
 
 /* ---- 氣泡本體（長方形；尺寸依字數：p-1 7 字、p-3 6 字） ---- */
-.bc-coffee-photo .bc-coffee-comment .blowing .img {
+.bc-photo-comment .bc-coffee-comment .blowing .img {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -244,13 +251,13 @@
      pattern-1：繪圖 3.7455fs ×1.1 = 4.1201fs ÷ 0.960386 = 4.290fs → 高 4.290 / 0.4303 = 9.970fs
      pattern-5：繪圖 3.3459fs ×1.1 = 3.6805fs ÷ 0.958696 = 3.839fs → 高 3.839 / 0.4544 = 8.449fs
    ※ viewBox 為使用者以 SVGMaker 匯出的緊貼繪圖版（邊距 1.5，路徑未改動） */
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .img {
+.bc-photo-comment .bc-coffee-comment .blowing.pattern-1 .img {
   left: calc(50% - 2.145 * var(--bc-cb-fs)); /* 4.290 / 2 */
   width: calc(4.29 * var(--bc-cb-fs));
   height: calc(9.97 * var(--bc-cb-fs)); /* 4.290 / 0.4303（01a viewBox 比例） */
   background-image: url("../images/blowing-pattern01a.svg?v=20260911j");
 }
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .img {
+.bc-photo-comment .bc-coffee-comment .blowing.pattern-5 .img {
   left: calc(50% - 1.9195 * var(--bc-cb-fs)); /* 3.839 / 2 */
   width: calc(3.839 * var(--bc-cb-fs));
   /* 2026-09-14：02a 由使用者重新匯出（viewBox 3.61/-1.54/72.67/159.94 →
@@ -266,7 +273,7 @@
    肉眼不可見）→ 填入比 ≈ 1.0
    框尺寸：比照 pattern-1 的「繪圖高 ÷ 文字高 = 1.370（7 字）」→ 框高 = 1.370 × 7.14
    = 9.78fs、框寬 = 9.78 × 0.5 = 4.89fs（可容納 7 字；5~6 字由模板的 --bc-cb-n 自動置中） */
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-2 .img {
+.bc-photo-comment .bc-coffee-comment .blowing.pattern-2 .img {
   left: calc(50% - 2.445 * var(--bc-cb-fs)); /* 4.89 / 2 */
   width: calc(4.89 * var(--bc-cb-fs));
   height: calc(9.78 * var(--bc-cb-fs)); /* 4.89 / 0.5（03a viewBox 比例） */
@@ -307,7 +314,7 @@
      ※ 踩雷紀錄：① 用「氣泡白像素範圍內找暗像素」量字形 → 尾巴的暗邊被誤判為
        文字，一度誤判方向；② 截圖 DPR 誤設（實際 4、誤以 6 換算）→ 位移量少算
        0.67 倍。兩者皆已修正並改用上述量測法。 */
-.bc-coffee-photo .bc-coffee-comment .blowing .text {
+.bc-photo-comment .bc-coffee-comment .blowing .text {
   position: relative;
   z-index: 20;
   margin: 0;
@@ -318,7 +325,7 @@
   text-orientation: upright;
   white-space: nowrap;
 }
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-1 .text {
+.bc-photo-comment .bc-coffee-comment .blowing.pattern-1 .text {
   padding: calc((9.97 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) - 0.2347 * var(--bc-cb-fs))
            calc(0.605 * var(--bc-cb-fs))
            calc((9.97 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) + 0.2347 * var(--bc-cb-fs))
@@ -327,13 +334,13 @@
 /* 2026-09-14 新增：pattern-2（p-2）— 框高 9.78fs（7 字滿版）
    offset 由實測反推：原用 −0.2327fs 時文字比質心低 0.96~1.75px（375/768/1280）
    → 再上移 0.0901fs（取三斷點平均）＝ −0.3228fs，修正後殘差 ≤0.22px */
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-2 .text {
+.bc-photo-comment .bc-coffee-comment .blowing.pattern-2 .text {
   padding: calc((9.78 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) - 0.3228 * var(--bc-cb-fs))
            calc(0.605 * var(--bc-cb-fs))
            calc((9.78 - 1.02 * var(--bc-cb-n, 7)) / 2 * var(--bc-cb-fs) + 0.3228 * var(--bc-cb-fs))
            calc(0.605 * var(--bc-cb-fs));
 }
-.bc-coffee-photo .bc-coffee-comment .blowing.pattern-5 .text {
+.bc-photo-comment .bc-coffee-comment .blowing.pattern-5 .text {
   padding: calc((8.449 - 1.02 * var(--bc-cb-n, 6)) / 2 * var(--bc-cb-fs) - 0.2327 * var(--bc-cb-fs))
            calc(0.605 * var(--bc-cb-fs))
            calc((8.449 - 1.02 * var(--bc-cb-n, 6)) / 2 * var(--bc-cb-fs) + 0.2327 * var(--bc-cb-fs))
@@ -355,7 +362,7 @@
      --cb-in-stamp-r        頭部圖章起始旋轉（原：−90deg＝轉入）
    氣泡起點與靜止位置都在咖啡杯圖片外圍（照片去背透明留白），動畫不會壓到杯子。
    ------------------------------------------------------------ */
-.bc-coffee-photo .bc-coffee-comment .staff-comment {
+.bc-photo-comment .bc-coffee-comment .staff-comment {
   --cb-in-x: 0px;
   --cb-in-y: -40px;
   --cb-in-s: 0;
@@ -367,21 +374,21 @@
   --cb-in-stamp-r: -90deg;
 }
 
-.bc-coffee-photo .bc-coffee-comment .staff-comment .img {
+.bc-photo-comment .bc-coffee-comment .staff-comment .img {
   transition: scale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center bottom;
   scale: var(--cb-in-s);
   rotate: var(--cb-in-r);
   translate: var(--cb-in-x) var(--cb-in-y);
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment .blowing::after {
+.bc-photo-comment .bc-coffee-comment .staff-comment .blowing::after {
   transition: scale 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, rotate 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
   transform-origin: center bottom;
   scale: var(--cb-in-s);
   rotate: var(--cb-in-stamp-r);
   translate: calc(-50% + var(--cb-in-x)) var(--cb-in-y);
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.is-show .img {
+.bc-photo-comment .bc-coffee-comment .staff-comment.is-show .img {
   transition: scale var(--cb-in-dur) var(--cb-in-ease) var(--cb-in-delay),
               rotate var(--cb-in-dur) var(--cb-in-ease) var(--cb-in-delay),
               translate var(--cb-in-tdur) var(--cb-in-ease) var(--cb-in-delay);
@@ -389,7 +396,7 @@
   rotate: 0deg;
   translate: 0 0;
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.is-show .blowing::after {
+.bc-photo-comment .bc-coffee-comment .staff-comment.is-show .blowing::after {
   transition: scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   scale: 1;
   rotate: 0deg;
@@ -407,14 +414,14 @@
      中心點完全不動（真正「在原地消失」）。
    ※ 本段必須排在 .is-show 之後（同權重時後者勝出）。
    ------------------------------------------------------------------- */
-.bc-coffee-photo .bc-coffee-comment .staff-comment.is-hiding .img {
+.bc-photo-comment .bc-coffee-comment .staff-comment.is-hiding .img {
   transition: scale 0.3s cubic-bezier(0.4, 0, 1, 1);
   transform-origin: center center;
   scale: 0;
   rotate: 0deg;
   translate: 0 0;
 }
-.bc-coffee-photo .bc-coffee-comment .staff-comment.is-hiding .blowing::after {
+.bc-photo-comment .bc-coffee-comment .staff-comment.is-hiding .blowing::after {
   transition: scale 0.3s cubic-bezier(0.4, 0, 1, 1);
   transform-origin: center center;
   scale: 0;
