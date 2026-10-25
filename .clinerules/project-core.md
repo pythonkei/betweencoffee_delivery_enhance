@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-10-25 複驗）**：`origin/main`＝`d27f7c90`（#59 `edf3e87c`／#60 `7a073263`／#61 `d27f7c90` 已推齊，工作區乾淨）；正式站 live 仍＝`ec8fcadb`（2026-10-23 手動部署因 Supabase pooler `ENOTFOUND` 失敗、尚未重試）。即時複驗：`git log --oneline -3`＋Render API，不要寫死版本。
+- **版本狀態（2026-10-25 複驗）**：`origin/main`＝`7230896b`（`#59 edf3e87c`／`#60 7a073263`／`#61 d27f7c90` 已推齊，工作區乾淨）；正式站 live＝`a732cc28`（`dep-dbed2vm7bikc73825md0`，2026-10-24 15:43Z 手動部署成功；10-23 的 Supabase `ENOTFOUND` 已排除）⇒ **待手動部署 3 個 code commit**。即時複驗：`git log --oneline -3`＋Render API，不要寫死版本。
 
 ## 2. 核心業務
 

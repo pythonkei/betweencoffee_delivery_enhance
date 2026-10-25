@@ -5,16 +5,16 @@
 
 ## 當前版本控制狀態（2026-10-25 複驗）
 
-- ✅ `origin/main`＝`d27f7c90`；2026-10-25 推 `a732cc28..d27f7c90`（`#59 edf3e87c`、`#60 7a073263`、`#61 d27f7c90`），本機 `main`＝`origin/main`、工作區乾淨
+- ✅ `origin/main`＝`7230896b`；2026-10-25 推 `a732cc28..d27f7c90`（`#59 edf3e87c`、`#60 7a073263`、`#61 d27f7c90`）＋文件提交，本機 `main`＝`origin/main`、工作區乾淨
 - ℹ️ `#55 aaf7c2aa`／`#56 71018e97`／`#57 28b1c322`／`#58 a732cc28`／`#51 bf495475` 均已在遠端
 - ℹ️ 原始 APNG 素材 `static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）列入 `.gitignore`，頁面用的是 `static/images/recommended-pages/title-*.png`
-- ⚠ 正式站仍為 `ec8fcadb`；2026-10-23 12:26 手動部署 `56c1bcc9` 失敗（`dep-dbde3rpsrm7s73beap6g`／Supabase pooler tenant ENOTFOUND），尚未重試；autoDeploy＝off → **push 不會上線**
+- ⚠ 正式站 live＝`a732cc28`（`dep-dbed2vm7bikc73825md0`，2026-10-24 15:43Z 手動部署成功；10-23 的 Supabase ENOTFOUND 已排除）⇒ **待部署 `#59`／`#60`／`#61` 三個 code commit**；autoDeploy＝off → push 不會上線
 
 ## 近期優先（未完成）
 
 | # | 任務 | 類型 | 備註 |
 |---|---|---|---|
-| 1 | **手動部署** | 維運 | 先確認 Supabase 未 paused／`DATABASE_URL` 可用，再到 Render dashboard 按 Manual Deploy；上線後複驗首頁推薦雙卡位置、社群列隱藏、`/about/` 頁尾社群列、`/bean/<id>/` 氣泡 |
+| 1 | **手動部署 #59／#60／#61** | 維運 | 到 Render dashboard 按 Manual Deploy（DB 已可連）；上線後複驗首頁推薦雙卡位置、首頁社群列隱藏、`/about/` 頁尾社群列、`/bean/<id>/` 氣泡、migration `0081`–`0083` 已套用 |
 | 2 | 咖啡／咖啡豆氣泡文案校稿 | 內容（Admin） | 咖啡：`CoffeeItem.staff_comment_1/2/3`（留空＝不顯示，目前僅 Butter King 有第 1、3 句）；咖啡豆：`0083` 已預填 6 款草稿待改寫 |
 | 3 | 行動端 `.bc-reviews-section` 縮放 | 前端 | 新增 ≤768 媒體查詢；純 CSS、可逆 |
 | 4 | `bean_menu` REAL 模組驗收 | 前端 | 響應式檢查後收尾 |
