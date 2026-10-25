@@ -18,7 +18,7 @@
 | 測試 | ⚠️ 不足 | 覆蓋率低（以 `docs/verify/` CDP 腳本補前端驗證） |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
 | 部署（Render） | ⚠️ 部署落後 3 筆 | 現行 `live`＝deploy `dep-dbed2vm7bikc73825md0`／commit `a732cc28`／trigger `manual`／finished 2026-10-24 15:43Z（2026-10-25 Render API 複驗）。2026-10-23 的 `56c1bcc9` 失敗（`dep-dbde3rpsrm7s73beap6g`／Supabase pooler ENOTFOUND）已由 10-24 成功部署排除 ⇒ **DB 可連**（該次資料庫狀態現為 `deactivated`）。仍落後 3 個 code commit：`edf3e87c`（#59）、`7a073263`（#60）、`d27f7c90`（#61）＋文件提交。**autoDeploy＝off，push 不會觸發部署** |
-| 版本控制 | ✅ 已推齊 | `origin/main`＝`7230896b`（code 尖端 `d27f7c90`＋文件 `f597e259`／`7230896b`；2026-10-25 推 `a732cc28..d27f7c90`、`d27f7c90..7230896b`），本機 `main`＝`origin/main`、工作區乾淨 |
+| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`d27f7c90`＋其後文件提交（不寫死文件 hash，一律 `git log -1`／Render API 複驗；2026-10-25 推 `a732cc28..d27f7c90`＋docs），本機 `main`＝`origin/main`、工作區乾淨 |
 
 ## 資料庫現狀
 
