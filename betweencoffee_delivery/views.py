@@ -457,6 +457,12 @@ class About(View):
             # （置於 .bc-fujiya-photo 區塊正下方）。內容與動畫參數不變，
             # 與 landing context 共用同一個 builder。
             "top_art_cards": _build_top_art_cards(),
+            # 2026-10-25（使用者指示）：.bc-search 大區塊自 index.html 移至本頁
+            # （插在兩段 SERIES 滑桿之後）。背景浮動圖沿用首頁同一組咖啡豆
+            # （BeanItem id 7／6，見 _build_landing_context），取不到時模板會
+            # fallback 成 static/images/search_img01/02.png。
+            "search_bean_01": BeanItem.objects.filter(pk=7).first(),
+            "search_bean_02": BeanItem.objects.filter(pk=6).first(),
         }
         return render(request, "betweencoffee_delivery/about.html", context)
 

@@ -37,6 +37,7 @@
 | `docs/archive/memory_bank_04_full_20261017.md` | 舊 `04_SYSTEM_STATE.md` 全文（181K，逐筆變更日誌） | 追查某次變更內容 |
 | `docs/archive/memory_bank_05_full_20261017.md` | 舊 `05_PRIORITY_TASKS.md` 全文（100K，已完成項目明細） | 追查舊任務 |
 | `docs/archive/04_SYSTEM_STATE_history_202607-202609.md` | 2026-07~09 系統狀態歷史（195K） | 同上 |
+| `docs/archive/task_progress_20261024_issue59_bean_bubbles.md` | #59 咖啡豆詳情頁氣泡文字完整記錄（2026-10-25 從 `task_progress.md` 移出） | 追查氣泡欄位／migration `0081`–`0083` 細節 |
 | `docs/reports/**`（47 份） | 2026 年一次性「完成報告／遷移報告／優化方案」 | 只 `grep` 關鍵字 |
 | `docs/*.md`（頂層 20+ 份：`*完成報告`、`*修復報告`、`*清理總結`、`MCP-*`、`Memory-Bank-*`） | 一次性報告與 MCP 安裝紀錄 | 只 `grep` 關鍵字 |
 

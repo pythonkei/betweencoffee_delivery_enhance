@@ -104,8 +104,13 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        [2] <section class="hero bc-brand-stage-hero">（第一屏＝品牌舞台，內含 #bc-brand-stage）
        [2b] <aside class="bc-recommended-pages">（推薦雙卡；2026-10-24 由 .feed--video 下方搬到
             品牌舞台正下方，中間不插留白 section）
+       [2c] <section class="capabilities bc-capabilities">（sukima capabilities-gallery；
+            2026-10-27 由 about 頁整組移入，位置＝推薦雙卡正下方）
        [3] <section hidden class="hero bc-gunte-hero">（暫時隱藏）
        [4] <section hidden class="feed overflow-hidden">（其餘首頁內容，維持原狀）
+       2026-10-25（使用者指示）：四步咖啡旅程 Rive 圖示列（.bc-steps）與 SALON/STORE SEARCH
+         大區塊（.bc-search）整組移至 about 頁（markup／CSS／JS 一併移轉），首頁不再輸出；
+         原本夾在兩者之間與其後的 .ftco-section-blank-small 留白一併移除（避免孤立空白）。
      版位：
        · 品牌舞台的 margin-top 由 extra_css 的
          `.bc-page-content > section.bc-brand-stage-hero{margin-top:0 !important}` 壓為 0
@@ -130,7 +135,340 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
           → 不會影響本 wrapper）。
        3. 2026-10-09：本模組由頁尾移到首頁最上方，成為第一個 hero。 -->
 
-<section hidden class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
+
+
+
+<!-- 2026-10-18（使用者指示）：品牌舞台（原 bc-bg-footer，現名 bc-brand-stage）回到首頁第一屏；
+     本段與下方 GUNTE hero 都保留，GUNTE 僅加 hidden（見檔頭 10-18 註解）。
+     partials/bc_brand_stage_hero.html 與 about 頁的 partials/bc_brand_stage.html 同源：
+     僅改用 <div class="footer"> 包裝（避免 bc-yama-header.js 把置頂模組當頁尾觀察目標）
+     ＋照片格改為環形咖啡照列。 -->
+<section class="hero bc-brand-stage-hero">
+{% include 'betweencoffee_delivery/partials/bc_brand_stage_hero.html' %}
+</section>
+
+<!-- 2026-10-24（使用者指示）：移植 union-tec.jp/capability 的 recommendedPages 模組
+     （<aside x-data="recommendedPages" class="recommended-pages">）。
+     [位置] 初版放在 .feed--video 下方（四步 Rive 圖示列之後）；同日稍後使用者指示
+            「移動到 bc-brand-stage 下方」⇒ 改為緊接第一屏品牌舞台
+            （<section class="hero bc-brand-stage-hero">／#bc-brand-stage）之後，
+            中間不插任何留白 section。2026-10-25 起模組底色改為 transparent
+            （原本自帶 #0e0e0e 會蓋住 body 的 bg_4.jpg 而成一條黑帶）。
+     - 左卡 Service → 咖啡（連 /coffee_menu/）、右卡 Company → 咖啡豆（連 /bean_menu/）
+     - 互動／動畫與原站相同：hover 卡片寬 2/3、另一張 1/3（僅 ≥64rem）；
+       背景（2026-10-25 起為 <video>）opacity 0→1 + scale 1.2→1（黑 40% 遮罩）；
+       hover 才 play、離開 pause（見 bc-recommended-pages.js）；標題 inactive scale(.666)；
+       label 的 spacer flex-grow 0→1；中央 clip 圖由圓形展開為全寬膠囊
+     - 原站＝Alpine（切 class）＋ GSAP MorphSVG（clip 形狀補間）；
+       本專案改由 bc-recommended-pages.js 切同樣的 class，
+       clip-path 以等價 CSS inset 過渡 → 不引入 Alpine／MorphSVG
+       （幾何與原站路徑終點相同，說明見 bc-recommended-pages.css 檔頭）
+     - 素材：static/images/recommended-pages/
+         · 卡片背景＝coffee_bg.webm／bean_bg.webm（WebM，muted+loop+playsinline，preload=none）
+         · 中央 clip＝clip-coffee-ani.png／clip-bean-ani.png（APNG，332×332；
+           2026-10-25 依使用者指示由 ani_coffee_apng.png／ani_bean_apng.png 離線縮成，
+           正方形黑圓底＋白線稿，故 CSS 用 object-fit: contain ＋黑底）
+         · 舊的 coffee/bean-{bg,clip}.webp 已於 2026-10-25 被上述檔案取代並刪除；
+           過渡期的 coffee-clip.jpg／bean_clip.jpg 同批改為 APNG 後移除
+     - 標題結尾的裝飾 APNG（2026-10-24 追加的 title-coffee-ani.png／
+       title-bean-ani.png）已於 2026-10-25 依使用者指示移除：檔案刪除、
+       CSS .recommended-page__title-ani 移除，標題只剩
+       .recommended-page__title-text 文字 -->
+<aside class="bc-recommended-pages" data-bc-recommended-pages data-cols="2">
+    <div class="bc-recommended-pages__list">
+        <a href="{% url 'coffee_menu' %}" class="recommended-pages__link">
+            <div class="recommended-page__bg" aria-hidden="true">
+                <video class="recommended-page__bg-video"
+                       src="{% static 'images/recommended-pages/coffee_bg.webm' %}"
+                       muted loop playsinline preload="none"
+                       aria-hidden="true" tabindex="-1"></video>
+            </div>
+            <p class="recommended-page__title"><span class="recommended-page__title-text">Coffee</span></p>
+            <div class="recommended-page__clip">
+                <img src="{% static 'images/recommended-pages/clip-coffee-ani.png' %}" alt=""
+                     width="332" height="332"
+                     decoding="async" loading="lazy" fetchpriority="low">
+            </div>
+            <p class="recommended-page__label">
+                <svg class="recommended-page__label-icon" width="3" height="2"
+                     viewBox="0 0 3 2" aria-hidden="true" focusable="false">
+                    <path d="M2.5476 0.189675C2.23431 0.0185048 1.80099 0 1.5 0C1.19901 0 0.765693 0.0185048 0.452396 0.189675C0.168348 0.344905 0 0.658749 0 1C0 1.34125 0.168348 1.65513 0.452396 1.81033C0.765693 1.9815 1.19901 2 1.5 2C1.80099 2 2.23431 1.9815 2.5476 1.81033C2.83165 1.65513 3 1.34125 3 1C3 0.658749 2.83165 0.344866 2.5476 0.189675Z"/>
+                </svg>
+                <span class="recommended-page__label-spacer" aria-hidden="true"></span>
+                <span>擁抱餘韻悠長的咖啡</span>
+            </p>
+        </a>
+        <a href="{% url 'bean_menu' %}" class="recommended-pages__link">
+            <div class="recommended-page__bg" aria-hidden="true">
+                <video class="recommended-page__bg-video"
+                       src="{% static 'images/recommended-pages/bean_bg.webm' %}"
+                       muted loop playsinline preload="none"
+                       aria-hidden="true" tabindex="-1"></video>
+            </div>
+            <p class="recommended-page__title"><span class="recommended-page__title-text">Beans</span></p>
+            <div class="recommended-page__clip">
+                <img src="{% static 'images/recommended-pages/clip-bean-ani.png' %}" alt=""
+                     width="332" height="332"
+                     decoding="async" loading="lazy" fetchpriority="low">
+            </div>
+            <p class="recommended-page__label">
+                <svg class="recommended-page__label-icon" width="3" height="2"
+                     viewBox="0 0 3 2" aria-hidden="true" focusable="false">
+                    <path d="M2.5476 0.189675C2.23431 0.0185048 1.80099 0 1.5 0C1.19901 0 0.765693 0.0185048 0.452396 0.189675C0.168348 0.344905 0 0.658749 0 1C0 1.34125 0.168348 1.65513 0.452396 1.81033C0.765693 1.9815 1.19901 2 1.5 2C1.80099 2 2.23431 1.9815 2.5476 1.81033C2.83165 1.65513 3 1.34125 3 1C3 0.658749 2.83165 0.344866 2.5476 0.189675Z"/>
+                </svg>
+                <span class="recommended-page__label-spacer" aria-hidden="true"></span>
+                <span>用五感烘焙出具立體感咖啡豆</span>
+            </p>
+        </a>
+    </div>
+</aside>
+
+
+<!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 自 about.html 整組移入本頁，
+     位置＝推薦雙卡（<aside class="bc-recommended-pages">）正下方。
+     - markup：原 about.html 區塊整段搬移（.capabilities-gallery ＝ cgi-left／cgi-right 團隊照
+       ＋36 幀 .capabilities-anim-char ＋ .surprise-anim-svg 閃電畫線）
+     - 樣式：static/css/bc-capabilities.css（本頁 extra_css 載入；about 已移除，勿重複載入）
+     - 動畫：static/js/bc-capabilities.js（原生 scroll + rAF，非 GSAP → 不依賴載入順序）
+       分段：cgi 照片左右歸位 0.10-0.32 → 36 幀逐幀 0.32-0.44 →「！」畫線 0.44-0.60；
+       反向滾動會重置回 frame-1／dashoffset 305 初始狀態
+     - 版面：.capabilities-gallery 為 align-self:flex-end ＋ max-width 606px（≥1920 為 880px）
+       → 貼齊區塊右緣（與 about 頁原位置一致）；.bc-capabilities 上下 padding 96px
+     - 素材：static/images/capabilities-left.webp／capabilities-right.webp、
+       static/animations/wwcd/1-36.webp -->
+<section class="capabilities bc-capabilities">
+    <div class="capabilities-gallery flx"> <div class="cgi cgi-left"> <img src="{% static 'images/capabilities-left.webp' %}" alt="働いているSukimaチーム" loading="lazy" sizes="(min-width: 1900px) 416px, (min-width: 834px) 300px, 210px" decoding="async" fetchpriority="auto" width="606" height="1140" class="cgil-visual"> </div> <div class="cgi cgi-right"> <img src="{% static 'images/capabilities-right.webp' %}" alt="働いている他のSukimaチームメンバー" loading="lazy" sizes="(min-width: 1900px) 416px, (min-width: 834px) 300px, 210px" decoding="async" fetchpriority="auto" width="606" height="1140" class="cgir-visual"> </div> <div class="capabilities-anim-char"> <picture class="anim-frame frame-1" data-frame="1"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/1.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-2" data-frame="2"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/2.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-3" data-frame="3"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/3.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-4" data-frame="4"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/4.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-5" data-frame="5"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/5.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-6" data-frame="6"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/6.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-7" data-frame="7"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/7.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-8" data-frame="8"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/8.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-9" data-frame="9"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/9.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-10" data-frame="10"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/10.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-11" data-frame="11"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/11.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-12" data-frame="12"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/12.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-13" data-frame="13"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/13.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-14" data-frame="14"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/14.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-15" data-frame="15"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/15.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-16" data-frame="16"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/16.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-17" data-frame="17"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/17.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-18" data-frame="18"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/18.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-19" data-frame="19"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/19.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-20" data-frame="20"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/20.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-21" data-frame="21"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/21.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-22" data-frame="22"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/22.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-23" data-frame="23"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/23.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-24" data-frame="24"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/24.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-25" data-frame="25"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/25.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-26" data-frame="26"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/26.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-27" data-frame="27"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/27.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-28" data-frame="28"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/28.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-29" data-frame="29"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/29.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-30" data-frame="30"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/30.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-31" data-frame="31"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/31.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-32" data-frame="32"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/32.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-33" data-frame="33"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/33.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-34" data-frame="34"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/34.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-35" data-frame="35"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/35.webp' %}" alt="" loading="lazy"> </picture><picture class="anim-frame frame-36" data-frame="36"> <source media="(max-width: 768px)"> <source media="(min-width: 769px)"> <img src="{% static 'animations/wwcd/36.webp' %}" alt="" loading="lazy"> </picture> <svg width="61" height="78" viewBox="0 0 61 78" fill="none" xmlns="http://www.w3.org/2000/svg" class="surprise-anim-svg"> <defs> <mask id="animatedRevealMask2"> <rect width="61" height="78" fill="black"></rect> <path class="reveal-brush" d="M3.50049 78L6.50049 71.5L-2.99951 57L17.0005 68.5V52.5L24.0005 44L31.0005 35L38.0005 26L46.5005 14.5L57.0005 1.5" stroke="white" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="300" stroke-dashoffset="305"></path> </mask> <clipPath id="mainClip2"> <rect width="61" height="78" fill="white"></rect> </clipPath> </defs> <g opacity="0.75" clip-path="url(#mainClip2)" mask="url(#animatedRevealMask2)"> <path d="M40.0509 31.2326C38.0938 34.7411 35.6306 37.529 33.3126 40.4262C31.4184 42.7847 29.6197 45.2286 27.9805 47.7541C27.1854 48.9795 26.3393 49.9738 24.8782 50.318C22.6051 50.8517 21.2686 52.3132 20.2756 54.2203C19.154 56.3655 18.1465 56.633 15.797 55.5366C15.1263 55.2236 14.4085 54.9716 13.8095 54.5603C12.0807 53.384 11.7427 51.8296 13.0684 50.299C15.7709 47.1788 18.1669 43.8914 20.4009 40.4374C22.6901 36.8969 25.7147 33.8039 28.2981 30.4345C30.2059 27.9498 31.8877 25.3021 33.7395 22.7757C35.1699 20.8233 36.6831 18.9305 38.2088 17.0437C39.2982 15.6994 40.6447 14.5181 41.5561 13.0782C44.1084 9.04967 47.3429 5.53147 50.3058 1.80875C51.1208 0.784711 53.2787 0.313617 54.4812 0.848137C56.255 1.63793 57.7874 2.76396 58.7287 4.42185C59.6303 6.00655 59.2236 7.29101 57.8596 8.636C56.071 10.3913 54.6146 12.4639 53.0502 14.4255C51.5964 16.2436 50.1757 18.0875 48.7633 19.9354C47.226 21.9444 45.8506 24.0805 44.1556 25.9547C42.7106 27.5459 42.1094 29.7351 40.0529 31.2287L40.0509 31.2326Z" fill="#bfff00"></path> <path d="M11.26 73.0348C10.3624 75.3468 8.49712 76.4013 6.72402 77.3478C5.05993 78.2336 0.555249 75.7556 0.485415 73.8533C0.371695 70.8873 0.0861779 67.8436 2.95876 65.5035C5.82313 63.1693 10.1798 63.786 11.755 67.1062C12.1043 67.8399 12.3342 68.6243 12.5724 69.4028C13.0001 70.784 12.7475 71.9607 11.2621 73.0407L11.26 73.0348Z" fill="#bfff00"></path> </g> </svg> </div>
+</section>
+
+
+<!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
+     2026-10-09：位置調整為 BC 動態 hero（.bc-brand-stage-hero）之下。
+     2026-10-13（使用者指示）：順序反轉 —— 本段回到 .bc-page-content 最前（第一眼看到的第一屏），
+     BC 動態 hero 下移到本段之後（完整說明見檔頭 10-13 註解）。
+     2026-10-18（使用者指示）：本段暫時隱藏（section 加 hidden；markup 與 bc-gunte-hero.js
+     全部保留，日後移除 hidden 即可恢復）。品牌舞台同時移回第一屏。
+     環形字（<text>）只有第 2 張（BUTTER KING，path bc-gunte-06-path）顯示，
+     其餘 6 張加 .bc-ring-hide → 由 bc-gunte-hero.css 的 display:none 隱藏（文案保留在 markup 內）。
+     2026-10-13 稍後（使用者指示）：① Splide start 3 → **1**（Splide 的 start 是 0-based 索引；
+     實測 start: 2 置中的是 aria-label「3 of 7」＝第 3 張「果香浅煎」→ 環形字仍被隱藏）→
+     載入當下置中的是第 2 張 BUTTER KING，環形字第一眼可見；② 環形字字級改由 viewBox 單位表達
+     （calc(24px*540/432)＝30 ＝432 參考圖寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準，
+     描邊同步 ×1.25）。
+     2026-10-19（首頁效能 P0）：本段 14 張投影片圖片（hide-sp／vis-sp）的 src 改為 **data-src**
+     —— hidden 只讓元素不渲染，瀏覽器仍會下載 <img src>（合計約 1.2MB）。
+     改成 data-src 後首頁完全不發出這些請求；檔案全部保留。
+     恢復 GUNTE hero 時：① 移除 <section> 的 hidden；② 把 data-src 改回 src；
+     ③ 還原 extra_css 的 splide／bc-gunte-hero.css 與 extra_scripts 的 splide／bc-gunte-hero.js。 -->
+<section hidden class="hero bc-gunte-hero">
+            <div class="hero_wrap">
+                <h2 class="hero_catch">
+                    <span class="hero_catch_txt" aria-hidden="true">Please relax and become stimulated. <br>Feel vibrant flow in you.</span>
+                    <span class="vis-hide">NO WHERE NOW HERE... WE ALSO ARE PLACES</span>
+                </h2>
+                <div class="hero_slide">
+                    <div class="splide">
+                        <div class="splide__track">
+                            <ul class="splide__list">
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" data-src="{% static 'images/01_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/01_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">BLACK BLEND ｜Coffee</h3>
+                                        <p class="hero_slide_item_en">BLACK BLEND ｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-05-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text class="bc-ring-hide">
+                                                <textPath startOffset="320" href="#bc-gunte-05-path">充分展現苦澀濃鬱, 不失柔和。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" data-src="{% static 'images/02_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/02_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">BUTTER KING｜Coffee</h3>
+                                        <p class="hero_slide_item_en">BUTTER KING｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-06-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text>
+                                                <textPath startOffset="350" href="#bc-gunte-06-path">BUTTER KING 極致豐厚焦糖黃油定番。放大</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" data-src="{% static 'images/03_1080.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/03_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">果香浅煎｜Coffee</h3>
+                                        <p class="hero_slide_item_en">果香浅煎｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-07-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text class="bc-ring-hide">
+                                                <textPath startOffset="220" href="#bc-gunte-07-path">富山縣產西柚檸檬, 柑橘季節限定, 配碧螺春/白芽奇蘭, 深具有明亮的漿果風味</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" data-src="{% static 'images/04_660.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/04_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">抹茉｜Coffee</h3>
+                                        <p class="hero_slide_item_en">抹茉｜Coffee </p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-01-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text class="bc-ring-hide">
+                                                <textPath startOffset="290" href="#bc-gunte-01-path">靜岡縣笹間町的茶葉, 採用JAS有機咖啡豆。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" data-src="{% static 'images/05_630.webp' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/05_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap -black">FLAT WHITE｜Bean</h3>
+                                        <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text class="bc-ring-hide">
+                                                <textPath startOffset="320" href="#bc-gunte-02-path">採用天然烘焙特有的濃鬱醇厚風味, 放大。</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" data-src="{% static 'images/06_720.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/06_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">SUNSHINE｜Coffee</h3>
+                                        <p class="hero_slide_item_en">SUNSHINE｜Coffeee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-03-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text class="bc-ring-hide">
+                                                <textPath startOffset="370" href="#bc-gunte-03-path">餘味完全覆蓋在味蕾上, 採用JAS有機咖啡豆, </textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="splide__slide">
+                                    <a class="hero_slide_item" href="#">
+                                        <div class="hero_slide_item_img">
+                                            <img class="hide-sp" data-src="{% static 'images/07_1080.jpg' %}" alt="" width="540" height="540">
+                                            <img class="vis-sp" data-src="{% static 'images/07_sp_510x680.webp' %}" alt="" width="255" height="340">
+                                        </div>
+                                        <h3 class="hero_slide_item_cap">WAKEMEUP｜Coffee</h3>
+                                        <p class="hero_slide_item_en">WAKEMEUP｜Coffee</p>
+                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path id="bc-gunte-04-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
+                                            <text class="bc-ring-hide">
+                                                <textPath startOffset="330" href="#bc-gunte-04-path">專屬早晨配方, 驅動您最佳狀態釋放能量!</textPath>
+                                            </text>
+                                        </svg>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero_hand">
+                    <div id="hero_hand_list" class="hero_hand_list">
+
+                        <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"></a></div>
+                        <div class="hero_hand_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"></a></div>
+                    </div>
+                </div>
+            </div>
+            <ol id="hero_nav" class="hero_nav">
+                <li><button type="button">1</button></li>
+                <li><button type="button">2</button></li>
+                <li><button type="button">3</button></li>
+                <li><button type="button">4</button></li>
+                <li><button type="button">5</button></li>
+                <li><button type="button">6</button></li>
+                <li><button type="button">7</button></li>
+            </ol>
+        </section>
+
+
+<!-- 2026-10-18（使用者指示）：品牌舞台已回到檔首第一屏（見上方 10-18 註解與檔頭說明）；
+     原本夾在兩塊 hero 之間的留白 section（.ftco-section-blank-small）與此處的重複舞台一併移除。
+     （2026-09-06 註解所述、加了 data-bc-reviews-reverse 的首頁反向跑馬燈 section 即檔頭 [1]） -->
+
+
+<section hidden class="feed overflow-hidden">
+    <div class="feed__layer">
+        <div class="feed__layer-parts feed__layer-parts--01"></div>
+        <div class="feed__layer-parts feed__layer-parts--02"></div>
+    </div>
+    <div class="feed__mask_middle">
+        <svg id="_レイヤー_1" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
+            <clipPath id="mask" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
+            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
+            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
+            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
+            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
+        </clipPath>
+        </svg>
+    </div>
+</section>
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="ftco-section-blank-small"></section>
+
+<!-- 2026-09-11：複製一組 .feed（第二組，加 .feed--video）；底層「背景圖片」
+     index_feed_image.png 改為影片容器（.feed__video > video roasting.webm）→
+     蒙版形狀輪廓內顯示的內容由靜態照片改為烘焙影片；蒙版幾何與 feedScroll 動畫
+     與第一組 .feed 完全相同（mask id 改為 feedMaskVideo/ExcludeFeedVideo，
+     避免同文件重複 id）。 -->
+<section class="feed feed--video overflow-hidden">
+    <div class="feed__video">
+        <video class="video" muted playsinline loop preload="none" aria-hidden="true"
+               data-feed-video>
+            <source src="{% static 'roasting.webm' %}" type="video/webm">
+            <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
+        </video>
+    </div>
+    <div class="feed__layer">
+        <div class="feed__layer-parts feed__layer-parts--01"></div>
+        <div class="feed__layer-parts feed__layer-parts--02"></div>
+    </div>
+    <div class="feed__mask_middle">
+        <svg id="_レイヤー_1_feedVideo" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
+            <clipPath id="feedMaskVideo" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
+            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
+            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
+            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
+            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
+        </clipPath>
+        </svg>
+    </div>
+</section>
+
+
+<section class="ftco-section-blank-small"></section>
+
+<section class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
     <div class="bc-reviews">
         <div class="reviews">
             <div class="reviewsInner">
@@ -362,353 +700,6 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 </section>
 
 
-<!-- 2026-10-18（使用者指示）：品牌舞台（原 bc-bg-footer，現名 bc-brand-stage）回到首頁第一屏；
-     本段與下方 GUNTE hero 都保留，GUNTE 僅加 hidden（見檔頭 10-18 註解）。
-     partials/bc_brand_stage_hero.html 與 about 頁的 partials/bc_brand_stage.html 同源：
-     僅改用 <div class="footer"> 包裝（避免 bc-yama-header.js 把置頂模組當頁尾觀察目標）
-     ＋照片格改為環形咖啡照列。 -->
-<section class="hero bc-brand-stage-hero">
-{% include 'betweencoffee_delivery/partials/bc_brand_stage_hero.html' %}
-</section>
-
-<!-- 2026-10-24（使用者指示）：移植 union-tec.jp/capability 的 recommendedPages 模組
-     （<aside x-data="recommendedPages" class="recommended-pages">）。
-     [位置] 初版放在 .feed--video 下方（四步 Rive 圖示列之後）；同日稍後使用者指示
-            「移動到 bc-brand-stage 下方」⇒ 改為緊接第一屏品牌舞台
-            （<section class="hero bc-brand-stage-hero">／#bc-brand-stage）之後，
-            中間不插任何留白 section（模組自帶 #0e0e0e 底，接 hero 的透明背景無縫）。
-     - 左卡 Service → 咖啡（連 /coffee_menu/）、右卡 Company → 咖啡豆（連 /bean_menu/）
-     - 互動／動畫與原站相同：hover 卡片寬 2/3、另一張 1/3（僅 ≥64rem）；
-       背景圖 opacity 0→1 + scale 1.2→1（黑 40% 遮罩）；標題 inactive scale(.666)；
-       label 的 spacer flex-grow 0→1；中央 clip 圖由圓形展開為全寬膠囊
-     - 原站＝Alpine（切 class）＋ GSAP MorphSVG（clip 形狀補間）；
-       本專案改由 bc-recommended-pages.js 切同樣的 class，
-       clip-path 以等價 CSS inset 過渡 → 不引入 Alpine／MorphSVG
-       （幾何與原站路徑終點相同，說明見 bc-recommended-pages.css 檔頭）
-     - 素材：static/images/recommended-pages/*.webp（專案既有照片裁切）
-     - 標題結尾的裝飾動畫（2026-10-24 追加）：title-coffee-ani.png／
-       title-bean-ani.png（由 static/images/ani_{coffee,bean}_apng.png 離線
-       縮成 176×176 APNG，原因見 bc-recommended-pages.css 檔頭） -->
-<aside class="bc-recommended-pages" data-bc-recommended-pages data-cols="2">
-    <div class="bc-recommended-pages__list">
-        <a href="{% url 'coffee_menu' %}" class="recommended-pages__link">
-            <div class="recommended-page__bg" aria-hidden="true">
-                <img src="{% static 'images/recommended-pages/coffee-bg.webp' %}" alt=""
-                     decoding="async" loading="lazy" fetchpriority="low">
-            </div>
-            <p class="recommended-page__title"><span class="recommended-page__title-text">Coffee</span><img
-                    class="recommended-page__title-ani"
-                    src="{% static 'images/recommended-pages/title-coffee-ani.png' %}"
-                    alt="" aria-hidden="true" width="176" height="176"
-                    decoding="async" loading="lazy"></p>
-            <div class="recommended-page__clip">
-                <img src="{% static 'images/recommended-pages/coffee-clip.webp' %}" alt=""
-                     decoding="async" loading="lazy" fetchpriority="low">
-            </div>
-            <p class="recommended-page__label">
-                <svg class="recommended-page__label-icon" width="3" height="2"
-                     viewBox="0 0 3 2" aria-hidden="true" focusable="false">
-                    <path d="M2.5476 0.189675C2.23431 0.0185048 1.80099 0 1.5 0C1.19901 0 0.765693 0.0185048 0.452396 0.189675C0.168348 0.344905 0 0.658749 0 1C0 1.34125 0.168348 1.65513 0.452396 1.81033C0.765693 1.9815 1.19901 2 1.5 2C1.80099 2 2.23431 1.9815 2.5476 1.81033C2.83165 1.65513 3 1.34125 3 1C3 0.658749 2.83165 0.344866 2.5476 0.189675Z"/>
-                </svg>
-                <span class="recommended-page__label-spacer" aria-hidden="true"></span>
-                <span>咖啡</span>
-            </p>
-        </a>
-        <a href="{% url 'bean_menu' %}" class="recommended-pages__link">
-            <div class="recommended-page__bg" aria-hidden="true">
-                <img src="{% static 'images/recommended-pages/bean-bg.webp' %}" alt=""
-                     decoding="async" loading="lazy" fetchpriority="low">
-            </div>
-            <p class="recommended-page__title"><span class="recommended-page__title-text">Beans</span><img
-                    class="recommended-page__title-ani"
-                    src="{% static 'images/recommended-pages/title-bean-ani.png' %}"
-                    alt="" aria-hidden="true" width="176" height="176"
-                    decoding="async" loading="lazy"></p>
-            <div class="recommended-page__clip">
-                <img src="{% static 'images/recommended-pages/bean-clip.webp' %}" alt=""
-                     decoding="async" loading="lazy" fetchpriority="low">
-            </div>
-            <p class="recommended-page__label">
-                <svg class="recommended-page__label-icon" width="3" height="2"
-                     viewBox="0 0 3 2" aria-hidden="true" focusable="false">
-                    <path d="M2.5476 0.189675C2.23431 0.0185048 1.80099 0 1.5 0C1.19901 0 0.765693 0.0185048 0.452396 0.189675C0.168348 0.344905 0 0.658749 0 1C0 1.34125 0.168348 1.65513 0.452396 1.81033C0.765693 1.9815 1.19901 2 1.5 2C1.80099 2 2.23431 1.9815 2.5476 1.81033C2.83165 1.65513 3 1.34125 3 1C3 0.658749 2.83165 0.344866 2.5476 0.189675Z"/>
-                </svg>
-                <span class="recommended-page__label-spacer" aria-hidden="true"></span>
-                <span>咖啡豆</span>
-            </p>
-        </a>
-    </div>
-</aside>
-
-
-<!-- GUNTE Lab. hero 首屏移植（白底、Splide 輪播+手套圓；來源 gunte-lab.kachiboshi.co.jp）
-     2026-10-09：位置調整為 BC 動態 hero（.bc-brand-stage-hero）之下。
-     2026-10-13（使用者指示）：順序反轉 —— 本段回到 .bc-page-content 最前（第一眼看到的第一屏），
-     BC 動態 hero 下移到本段之後（完整說明見檔頭 10-13 註解）。
-     2026-10-18（使用者指示）：本段暫時隱藏（section 加 hidden；markup 與 bc-gunte-hero.js
-     全部保留，日後移除 hidden 即可恢復）。品牌舞台同時移回第一屏。
-     環形字（<text>）只有第 2 張（BUTTER KING，path bc-gunte-06-path）顯示，
-     其餘 6 張加 .bc-ring-hide → 由 bc-gunte-hero.css 的 display:none 隱藏（文案保留在 markup 內）。
-     2026-10-13 稍後（使用者指示）：① Splide start 3 → **1**（Splide 的 start 是 0-based 索引；
-     實測 start: 2 置中的是 aria-label「3 of 7」＝第 3 張「果香浅煎」→ 環形字仍被隱藏）→
-     載入當下置中的是第 2 張 BUTTER KING，環形字第一眼可見；② 環形字字級改由 viewBox 單位表達
-     （calc(24px*540/432)＝30 ＝432 參考圖寬下渲染 24px，與 cap／en 的 --bc-item-k 同基準，
-     描邊同步 ×1.25）。
-     2026-10-19（首頁效能 P0）：本段 14 張投影片圖片（hide-sp／vis-sp）的 src 改為 **data-src**
-     —— hidden 只讓元素不渲染，瀏覽器仍會下載 <img src>（合計約 1.2MB）。
-     改成 data-src 後首頁完全不發出這些請求；檔案全部保留。
-     恢復 GUNTE hero 時：① 移除 <section> 的 hidden；② 把 data-src 改回 src；
-     ③ 還原 extra_css 的 splide／bc-gunte-hero.css 與 extra_scripts 的 splide／bc-gunte-hero.js。 -->
-<section hidden class="hero bc-gunte-hero">
-            <div class="hero_wrap">
-                <h2 class="hero_catch">
-                    <span class="hero_catch_txt" aria-hidden="true">Please relax and become stimulated. <br>Feel vibrant flow in you.</span>
-                    <span class="vis-hide">NO WHERE NOW HERE... WE ALSO ARE PLACES</span>
-                </h2>
-                <div class="hero_slide">
-                    <div class="splide">
-                        <div class="splide__track">
-                            <ul class="splide__list">
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" data-src="{% static 'images/01_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" data-src="{% static 'images/01_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">BLACK BLEND ｜Coffee</h3>
-                                        <p class="hero_slide_item_en">BLACK BLEND ｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-05-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text class="bc-ring-hide">
-                                                <textPath startOffset="320" href="#bc-gunte-05-path">充分展現苦澀濃鬱, 不失柔和。</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" data-src="{% static 'images/02_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" data-src="{% static 'images/02_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">BUTTER KING｜Coffee</h3>
-                                        <p class="hero_slide_item_en">BUTTER KING｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-06-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text>
-                                                <textPath startOffset="350" href="#bc-gunte-06-path">BUTTER KING 極致豐厚焦糖黃油定番。放大</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" data-src="{% static 'images/03_1080.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" data-src="{% static 'images/03_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap -black">果香浅煎｜Coffee</h3>
-                                        <p class="hero_slide_item_en">果香浅煎｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-07-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text class="bc-ring-hide">
-                                                <textPath startOffset="220" href="#bc-gunte-07-path">富山縣產西柚檸檬, 柑橘季節限定, 配碧螺春/白芽奇蘭, 深具有明亮的漿果風味</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" data-src="{% static 'images/04_660.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" data-src="{% static 'images/04_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap -black">抹茉｜Coffee</h3>
-                                        <p class="hero_slide_item_en">抹茉｜Coffee </p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-01-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text class="bc-ring-hide">
-                                                <textPath startOffset="290" href="#bc-gunte-01-path">靜岡縣笹間町的茶葉, 採用JAS有機咖啡豆。</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" data-src="{% static 'images/05_630.webp' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" data-src="{% static 'images/05_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap -black">FLAT WHITE｜Bean</h3>
-                                        <p class="hero_slide_item_en">FLAT WHITE｜Bean</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-02-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text class="bc-ring-hide">
-                                                <textPath startOffset="320" href="#bc-gunte-02-path">採用天然烘焙特有的濃鬱醇厚風味, 放大。</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" data-src="{% static 'images/06_720.jpg' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" data-src="{% static 'images/06_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">SUNSHINE｜Coffee</h3>
-                                        <p class="hero_slide_item_en">SUNSHINE｜Coffeee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-03-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text class="bc-ring-hide">
-                                                <textPath startOffset="370" href="#bc-gunte-03-path">餘味完全覆蓋在味蕾上, 採用JAS有機咖啡豆, </textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li class="splide__slide">
-                                    <a class="hero_slide_item" href="#">
-                                        <div class="hero_slide_item_img">
-                                            <img class="hide-sp" data-src="{% static 'images/07_1080.jpg' %}" alt="" width="540" height="540">
-                                            <img class="vis-sp" data-src="{% static 'images/07_sp_510x680.webp' %}" alt="" width="255" height="340">
-                                        </div>
-                                        <h3 class="hero_slide_item_cap">WAKEMEUP｜Coffee</h3>
-                                        <p class="hero_slide_item_en">WAKEMEUP｜Coffee</p>
-                                        <svg class="hero_slide_item_ttl" width="540" height="540" viewBox="0 0 540 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path id="bc-gunte-04-path" d="M24 541V54C24 37.4315 37.4315 24 54 24L541 24" />
-                                            <text class="bc-ring-hide">
-                                                <textPath startOffset="330" href="#bc-gunte-04-path">專屬早晨配方, 驅動您最佳狀態釋放能量!</textPath>
-                                            </text>
-                                        </svg>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="hero_hand">
-                    <div id="hero_hand_list" class="hero_hand_list">
-
-                        <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"></a></div>
-                    </div>
-                </div>
-            </div>
-            <ol id="hero_nav" class="hero_nav">
-                <li><button type="button">1</button></li>
-                <li><button type="button">2</button></li>
-                <li><button type="button">3</button></li>
-                <li><button type="button">4</button></li>
-                <li><button type="button">5</button></li>
-                <li><button type="button">6</button></li>
-                <li><button type="button">7</button></li>
-            </ol>
-        </section>
-
-
-<!-- 2026-10-18（使用者指示）：品牌舞台已回到檔首第一屏（見上方 10-18 註解與檔頭說明）；
-     原本夾在兩塊 hero 之間的留白 section（.ftco-section-blank-small）與此處的重複舞台一併移除。
-     （2026-09-06 註解所述、加了 data-bc-reviews-reverse 的首頁反向跑馬燈 section 即檔頭 [1]） -->
-
-
-<section hidden class="feed overflow-hidden">
-    <div class="feed__layer">
-        <div class="feed__layer-parts feed__layer-parts--01"></div>
-        <div class="feed__layer-parts feed__layer-parts--02"></div>
-    </div>
-    <div class="feed__mask_middle">
-        <svg id="_レイヤー_1" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
-            <clipPath id="mask" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
-            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
-            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
-            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
-            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
-        </clipPath>
-        </svg>
-    </div>
-</section>
-
-<section class="ftco-section-blank-small"></section>
-<section class="ftco-section-blank-small"></section>
-
-<!-- 2026-09-11：複製一組 .feed（第二組，加 .feed--video）；底層「背景圖片」
-     index_feed_image.png 改為影片容器（.feed__video > video roasting.webm）→
-     蒙版形狀輪廓內顯示的內容由靜態照片改為烘焙影片；蒙版幾何與 feedScroll 動畫
-     與第一組 .feed 完全相同（mask id 改為 feedMaskVideo/ExcludeFeedVideo，
-     避免同文件重複 id）。 -->
-<section class="feed feed--video overflow-hidden">
-    <div class="feed__video">
-        <video class="video" muted playsinline loop preload="none" aria-hidden="true"
-               data-feed-video>
-            <source src="{% static 'roasting.webm' %}" type="video/webm">
-            <source src="{% static 'media/roasting.mp4' %}" type="video/mp4">
-        </video>
-    </div>
-    <div class="feed__layer">
-        <div class="feed__layer-parts feed__layer-parts--01"></div>
-        <div class="feed__layer-parts feed__layer-parts--02"></div>
-    </div>
-    <div class="feed__mask_middle">
-        <svg id="_レイヤー_1_feedVideo" data-name="レイヤー 1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2430 570" fill="none">
-            <clipPath id="feedMaskVideo" clipPathUnits="objectBoundingBox" style="transform: scale(calc(1/2430), calc(1/570));">
-            <path d="m714.68,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-5.2c-1.98,0-3.6,1.37-4.83,4.08-1.24,2.73-1.86,5.82-1.86,9.28v344.44h5.2c1.97,0,3.58-1.36,4.83-4.08Z"/>
-            <path d="m2245.72,342.16V106.1h-11.88v246.46h5.2c4.45,0,6.68-3.46,6.68-10.39Z"/>
-            <path d="m1479.27,459.82c1.23-2.71,1.86-5.81,1.86-9.28V106.1h-11.88v357.81h5.2c1.97,0,3.58-1.36,4.82-4.08Z"/>
-            <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
-        </clipPath>
-        </svg>
-    </div>
-</section>
-
-<!-- 2026-10-22（使用者指示）：四步咖啡旅程 Rive 圖示列 —— 緊接在 .feed--video 之後，
-     單列 4 個 canvas（產地 origens → 烘焙 torra → 拼配 blend → 品飲 consumo）。
-     素材：static/animations/rive/ciclo-*.riv（每個含 intro / off / hover 三條線性時間軸）；
-     runtime 自架於 static/library/rive-canvas-2.35.2/（rive.js + rive.wasm，v2.35.2），
-     由 bc-steps-rive.js 在接近視口時動態注入，並先 RuntimeLoader.setWasmUrl()
-     指向自架 wasm → 不連 unpkg／jsDelivr。樣式：bc-steps.css。 -->
-<section class="bc-steps" data-bc-steps
-         data-rive-runtime="{% static 'library/rive-canvas-2.35.2/rive.js' %}"
-         data-rive-wasm="{% static 'library/rive-canvas-2.35.2/rive.wasm' %}">
-    <div class="bc-steps__inner">
-        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-origens.riv' %}" role="img" aria-label="產地"></canvas>
-        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-torra.riv' %}" role="img" aria-label="烘焙"></canvas>
-        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-blend.riv' %}" role="img" aria-label="拼配"></canvas>
-        <canvas class="bc-steps__icon" data-riv="{% static 'animations/rive/ciclo-consumo.riv' %}" role="img" aria-label="品飲"></canvas>
-    </div>
-</section>
-
-<section class="ftco-section-blank-small"></section>
-
-<aside class="bc-search" data-section="inversion">
-    <a href="{% url 'coffee_menu' %}" class="bc-search-link">
-        <div class="bc-search-bg">
-            <figure class="bc-search-bg-img bc-search-bg-img-01"><img src="{% if search_bean_01 %}{{ search_bean_01.get_index_image }}{% else %}{% static 'images/search_img01.png' %}{% endif %}" alt="{{ search_bean_01.name|default:'' }}"></figure>
-            <figure class="bc-search-bg-img bc-search-bg-img-02"><img src="{% if search_bean_02 %}{{ search_bean_02.get_index_image }}{% else %}{% static 'images/search_img02.png' %}{% endif %}" alt="{{ search_bean_02.name|default:'' }}"></figure>
-            <figure class="bc-search-bg-img bc-search-bg-img-03"><img src="{% static 'images/search_img03.png' %}" width="262" height="276" alt=""></figure>
-        </div>
-        <div class="bc-search-inner bc-search-inner-top">
-                        <p class="bc-search-ttl">
-                <span class="bc-search-ttl-label">BETWEEN:</span>
-                <span class="bc-search-ttl-message">用五感烘焙出具有立體感<br>餘韻悠長的咖啡<br>No bullsh*t...</span>
-            </p>
-            <p class="bc-search-lead">
-                隱藏在工廠區只有百餘呎的咖啡店，每位員工必須先從自己開始了解咖啡，讓 <span class="bc-search-lead-brand">BETWEEN</span> 連接深愛著咖啡的人需求與喜好。
-            </p>
-        </div>
-        <div class="bc-search-inner bc-search-inner-bottom">
-            <p class="bc-search-txt">與生產者建立信任關係 - 我們奉行公平貿易，確保咖啡得到應有的價值評估，生產者獲得與其品質相符的公平價格。我們相信，這對於建立一個良性循環至關重要，它能讓生產者持續生產美味的咖啡，並創造一個讓所有參與者都感到滿意的環境。<br>查看我們的咖啡店舖與菜單。</p>
-            <i class="bc-search-icon">
-                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="m29.05.27h-24v6h16.43l-21.21 21.21 4.24 4.24 21.21-21.21v16.43h6v-24.01l-2.67-2.67z"></path></svg>
-            </i>
-        </div>
-    </a>
-</aside>
-
-
 
 <!-- sns account -->
 <!-- 2026-09-06：bc-welcome-panel 隱藏（其登入後邏輯已由 tax-nav 圓球縮影承接：頭像→全站 nav、上次訂單照片、按上次口味落單、當前積分） -->
@@ -851,15 +842,18 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      2026-10-19 說明：bc-hand-ring.css 仍保留 —— 品牌舞台（第一屏）的環形咖啡照列共用此模組。 -->
 <!-- 2026-08-13：首頁 .feed 水平移動 SVG 蒙版動畫樣式（landing.css；7dad800 條件載入時僅加到 landing_v3 漏了首頁，修正） -->
 <link rel="stylesheet" href="{% static 'css/landing.css' %}?v=20260916b">
-<!-- 2026-10-22（使用者指示）：首頁四步咖啡旅程 Rive 圖示列（.feed--video 正下方，四格 canvas） -->
-<!-- 2026-10-22c：JS 改為「靜止姿勢＝intro 自然播完的完整圖示，離開 hover 不發指令」 -->
-<link rel="stylesheet" href="{% static 'css/bc-steps.css' %}?v=20261023a">
+<!-- 2026-10-25（使用者指示）：四步咖啡旅程 Rive 圖示列（.bc-steps）整組移至 about 頁
+     （markup → about.html 的「SERIES 滑桿之後」；bc-steps.css／bc-steps-rive.js 改由
+     about.html 載入）。首頁不再輸出此區塊，故此處不載入樣式與腳本。 -->
 <!-- 2026-10-24（使用者指示）：首頁「推薦頁面」雙卡（移植 union-tec recommendedPages），
      位置：2026-10-24 稍後改為品牌舞台（.bc-brand-stage-hero）下方（原為 .feed--video 下方）。
      互動 JS：bc-recommended-pages.js。 -->
-<link rel="stylesheet" href="{% static 'css/bc-recommended-pages.css' %}?v=20261024b">
-<!-- 2026-08-10：首頁 SALON/STORE SEARCH 區塊樣式（demido aside 品牌化） -->
-<link rel="stylesheet" href="{% static 'css/bc-search.css' %}?v=20260918a">
+<link rel="stylesheet" href="{% static 'css/bc-recommended-pages.css' %}?v=20261027a">
+<!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 樣式隨模組自 about.html 移入本頁
+     （about 已不再載入；檔案內容未變，版號沿用）。為模組在首頁的唯一定義來源。 -->
+<link rel="stylesheet" href="{% static 'css/bc-capabilities.css' %}?v=20260825b">
+<!-- 2026-10-25（使用者指示）：SALON/STORE SEARCH 大區塊（.bc-search）整組移至 about 頁
+     （markup → about.html；bc-search.css／bc-search.js 改由 about.html 載入）。 -->
 <!-- 2026-08-11：首頁輪播 morph 影片動畫樣式（僅首頁需，從 base 移出條件載入） -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}">
 <!-- 2026-09-04：yama-beer header-bot(_pc) + tax-nav 整合樣式（僅首頁需；fixed 右下、PC 專用）
@@ -884,527 +878,17 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      ⇒ 版號 ?v=20261018a 升為 ?v=20261019a（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
      2026-10-19 稍後（首頁效能 P0）：新增 [data-reveal] 的 1.5s bc-reveal-guard 保險
      ⇒ 版號再升為 ?v=20261019b。 -->
-<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261020b" />
-<style>
-/* 2026-09-04：首頁 feed 為頂部首屏（home-slider 已 hidden）→ 比照 home-slider：
-   feed 照片/形狀由視口頂部開始、穿入 navbar 後方透出，navbar（z-index:100、
-   背景透明）與 logo 浮於照片之上。
-   - margin-top:0：不被 .bc-page-content 首 section 的 140px 推擠
-   - z-index:2：高於一般內容層、低於 navbar
-   - ::before height:0：移除 130px 深色帶，照片層上移進 navbar 區
-     （形狀層頂部出視口、由視口裁切，無漏光縫隙疑慮） */
-.bc-page-content > section:first-of-type.feed {
-  position: relative;
-  z-index: 2;
-  margin-top: 0 !important;
-}
-.bc-page-content > section:first-of-type.feed::before {
-  height: 0;
-}
-/* 2026-10-18（使用者指示）：品牌舞台（.bc-brand-stage-hero）為首頁第一屏 →
-   不被 bc-components.css 的
-   `.bc-page-content > section:first-of-type:not(.home-slider){margin-top:100px}`
-   （及其 768/576 斷點的 72px、60px）推擠，模組才能由視口頂部開始。
-   [為何不用 first-of-type] 文件第一個 section 是 hidden 的 reviews 跑馬燈（見檔頭），
-   舞台不是 first-of-type → 改成 class 規則（與 bc-gunte-hero.css 的寫法一致）。
-   用 !important 是必要的：該全域規則在各斷點以媒體查詢重複宣告，
-   本頁 <style> 只覆寫一次即可全斷點生效（與 .feed 同一寫法）。 */
-.bc-page-content > section.bc-brand-stage-hero {
-  margin-top: 0 !important;
-}
-/* 2026-10-18（使用者指示）：GUNTE hero 暫時隱藏（markup 與 JS 保留，只加 hidden）。
-   [為何還要這條] hidden 只依賴 UA 的 [hidden]{display:none}；若日後任何作者樣式對
-   .bc-gunte-hero 宣告 display（目前沒有），hidden 就會失效 → 用 !important 明確保證。 */
-.bc-page-content > section.bc-gunte-hero[hidden] {
-  display: none !important;
-}
-/* 2026-10-09（使用者指示）：置頂 hero 去掉「頁尾感」——移除頂部分隔線與自帶黑底。
-   [來源] 該模組（#bc-brand-stage，Hug in a Cup 時鐘）原本是頁尾，樣式沿用 Webflow 來源：
-     · 線 = bc-brand-stage.css:152 `#bc-brand-stage .grid.is-footer{border-top:1px solid
-       var(--_colors---border--100)}`，--_colors---border--100 = rgba(255,255,255,.08)
-       → 實測繪出 y=14、x=14–1250、rgb(32,32,32) 的 1px 線（頁面底色為 rgb(14,14,14)）。
-       這條線在原設計是「與頁尾上方內容分隔」用；置頂當 hero 時就會在畫面頂端
-       出現一條突兀的細線，故移除。
-     · 黑底 = bc-brand-stage.css:81 `#bc-brand-stage{background-color:var(--_colors---background--bg)}`
-       與 :168 `#bc-brand-stage .footer{background-color:…}`（兩者皆 #0e0e0e）→ 讓模組成為
-       一塊自帶黑底的方塊。移除後由頁面自身的底色穿透（body 的固定背景照片，
-       style-bootstrap.css:3118 `background:url(../images/bg_4.jpg) no-repeat fixed`），
-       與首頁其餘區塊（.feed--video / ftco-section-blank-* 等，實測已露出同一張照片）一致。
-   [範圍] 只覆寫本頁：about 頁的 #bc-brand-stage 是「真正的頁尾」，仍保留分隔線與黑底。
-   [特異度] 加上 .bc-brand-stage-hero（多一個 class）即高於原始 `#bc-brand-stage …` 規則；
-     border-top 全檔只在 :113 宣告一次（≤991px 的媒體查詢只改 padding-top、未重新宣告邊框）
-     → 本覆寫在各斷點皆生效，不需 !important，也不必逐斷點鏡射。
-   [padding-top] 2026-10-18 起桌面（≥992px）改由下方媒體查詢設定（見該段推導）；≤991px 不動。
-     上方三條（背景 ×2、分隔線）不動任何尺寸。 */
-.bc-brand-stage-hero #bc-brand-stage {
-  background-color: transparent;
-}
-.bc-brand-stage-hero #bc-brand-stage .footer {
-  background-color: transparent;
-}
-.bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
-  border-top: 0 none;
-}
-/* 2026-10-24（使用者指示）：首頁品牌舞台的社群列（#bc-stage-socials）隱藏。
-   [作法] 只加樣式、不動 markup（partials/bc_brand_stage_hero.html 原樣保留）
-          ⇒ 日後要恢復，刪掉這條規則即可（與檔尾 .m-footer-inner 的處理同一慣例）。
-   [為何不用 hidden 屬性] bc-brand-stage.css:207 有
-          `#bc-brand-stage .footer-socials{display:flex}`（特異度 1,1,0），
-          會蓋過 UA 的 `[hidden]{display:none}`（0,1,0）⇒ 對這塊加 hidden 不會生效，
-          只能用同（更）高特異度的作者樣式覆寫。
-   [連帶效果] 它原本佔 .grid.is-footer 的 grid-area:6/3/7/7（≥992px）／grid-column:1/7（≤991px）；
-          display:none 後第 6 列不再產生（連同 .footer-socials 的 padding-top u-104 一起消失），
-          其餘格子因全部是明確 grid-area，座標不動 ⇒ 舞台高度變矮、下方內容等量上移。
-   [範圍] 只作用首頁 hero；about 頁的真頁尾（partials/bc_brand_stage.html）仍保留社群列，
-          若日後要一併隱藏，把選擇器改成 `#bc-stage-socials` 即可。 */
-.bc-brand-stage-hero #bc-stage-socials {
-  display: none;
-}
-/* 2026-10-20 稍後（使用者指示）：「上方留白還是太多，再減少一些」
-   （已同意「時鐘列可以高於視口中心」＝不要求畫面正中）。
-   [作法] 把「時鐘列中心要落在視高的百分之幾」抽成一個可調參數，桌面與平板共用：
-            --bc-hero-center-n: 43   ← 舊值是 50（＝畫面正中，得靠大量上方留白才做得到）
-          改成 43 ⇒ 內容整體上提 7% 視高（900px 高 → 63px、1080px → 75.6px）。
-          之後要再調，只改這一個數字，下方兩段算式（≥992、768–991）會同時跟上。
-   [為何是無單位數字] 算式必須「先 1vh 再 1svh」各宣告一次（舊瀏覽器沒有 svh）。
-          若把 43svh 直接放進 var()，不支援 svh 的瀏覽器會在「計算階段」判定整條宣告
-          無效 → padding-top 退回 initial（0），而不是回退到上一條宣告 ⇒ 版面會爆掉；
-          所以變數只存數字，單位留在各條 calc() 內。
-   [另一個關鍵：時鐘列 margin-top 歸零] 它原本是 u-104（桌機 7.22vw、平板 u-48＝12.21vw），
-          會隨視寬放大 —— 這是「視窗越寬、上方留白越多」的主因，也是大螢幕上算式
-          提早撞到 max(24px, …) 下限的原因（1920×1080 的 u-104 已是 138.7px）。
-          歸零後那段空間改由 padding-top 一次決定：視覺上是同一塊空白，
-          但不再和 padding 搶預算 ⇒ 目標中心在任何視寬都真的算得出來。
-   [範圍] 只作用首頁 hero；about 頁的真頁尾仍走 bc-brand-stage.css 的 u-104／u-48。
-   [逐段推導與實測] 見下方 ≥992 與 768–991 兩段。 */
-.bc-brand-stage-hero #bc-brand-stage {
-  --bc-hero-center-n: 43;
-}
-@media screen and (min-width: 768px) {
-  .bc-brand-stage-hero #bc-brand-stage .footer-time {
-    margin-top: 0;
-  }
-}
-/* 2026-10-18（使用者指示）：「bc-brand-stage 距離頂部太多了，稍微減少一些，保持主要內容頁面正中」。
-   2026-10-20 稍後：目標中心 50% → var(--bc-hero-center-n)（43%），時鐘列 margin-top 歸零。
-   [改前量測（2026-10-20 稍早版本，目標中心＝50% 視高）]
-     1440×900：時鐘列 top 272、高 468、中心 450.0（＝視口中心，誤差 0）；上方空白帶
-       ＝ .footer-inner padding-top 16 ＋ grid padding-top 63.8 ＋ 2 個空列 row-gap 32
-       ＋ 時鐘列 margin-top u-104 104 ＝ 215.8px。
-     1280×800、1536×864、1920×1080 也都維持 0 誤差；但 1536×864 的 padding 已被
-       max(24px) 下限夾住、1920×1080 的 u-104 又膨脹到 138.7px
-       ⇒ 空白帶反而隨視寬變厚（1536 → 186.1、1920 → 226.7）。這就是「還是太多」的來源。
-   [本次解法] (1) 目標中心 50% → var(--bc-hero-center-n)＝43%（見上一段）；
-     (2) 時鐘列 margin-top 歸零（見上一段的 margin-top 覆寫），把那段空間整併進 padding。
-     兩者合起來 ⇒ 空白帶在任何視寬都只剩「算式求出來的那一份」，不再被 u-104 加碼。
-   [為何用算式而不是寫死 64px] 內容中心與各段留白全部隨「視寬」縮放，目標位置卻綁視高
-     ⇒ 固定值只在某一種長寬比剛好命中（64px 在 1440×900 精準，換個長寬比就偏掉）。
-     直接把「時鐘列中心 ＝ 43% 視高」解出來，逐段扣掉它上方的既有間距：
-       時鐘列中心 ＝ 0
-                  ＋ .footer-inner padding-top      var(--_units---u-16)
-                  ＋ 本條 padding-top              ← 求解的值
-                  ＋ 空列造成的 2 個 row-gap        2 × var(--_special-units---grid-gap)
-                  ＋ #bc-stage-clock margin-top    0（2026-10-20 稍後歸零，原 u-104）
-                  ＋ 時鐘列高的一半                 (照片區 400vw/ratio ＋ 文字區) ÷ 2
-     （u-16、2×grid-gap、照片區在 ≥992px 都以 vw 縮放：1.111 ＋ 2.222 ＋ 13.889 ＝ 17.222vw；
-       文字區 68.4px 是固定值 ⇒ 寫成 var(--bc-hero-caption-h)/2，日後改字級自動跟上。）
-   [算得 vs 實測] 算式：1440×900 → 104.8（中心 387.0）；1280×800 → 89.4（344.0）；
-     1536×864 → 72.8（371.5）；1920×1080 → 99.5（464.4）；1024×768 → 119.7（330.2）。
-     空白帶 215.8 → 152.8（@1440）、226.7 → 163.5（@1920）＝時鐘列上移 63～75.6px。
-     每個尺寸都遠高於 max(24px) 下限，不再有「大螢幕撞到下限」的情況。
-   [下限] max(…, 24px)：視口太矮時（例：1440×700）算式為負；此時時鐘列本身就比視口高、
-           不可能置中，仍保留一點上緣呼吸空間。
-   [svh] 先宣告 1vh 的版本給不支援 svh 的瀏覽器，下一行再以 1svh 覆寫（行動瀏覽器網址列
-           收起／展開時不跳動；≥992px 本頁兩者量測結果相同）。
-   [斷點] 只作用 ≥992px；768–991 見下方獨立算式（同一組目標中心 ＋ margin-top 歸零）。
-           ≤767（手機）不動：390×844 的時鐘列中心 282 本來就偏上（視口中心 422）、
-           距頂端也只剩 143px，再上移只會更偏離中心。
-   [範圍] 只作用於首頁（.bc-brand-stage-hero）；about 頁的真頁尾仍走 bc-brand-stage.css
-           的 120／72，不受影響。 */
-@media screen and (min-width: 992px) {
-  .bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
-    padding-top: max(24px, calc(var(--bc-hero-center-n) * 1vh - var(--_units---u-16) - 2 * var(--_special-units---grid-gap) - (200vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2)));
-    padding-top: max(24px, calc(var(--bc-hero-center-n) * 1svh - var(--_units---u-16) - 2 * var(--_special-units---grid-gap) - (200vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2)));
-  }
-}
-
-/* 2026-10-20（使用者指示）：「在平板端，bc-brand-stage 距離頂部太多了，稍微減少一些，
-   保持主要內容頁面正中」。
-   [斷點範圍] 只作用 768–991px（平板）。≥992 由上方算式處理；≤767 手機不動
-     —— 390×844 的時鐘列中心 282 本來就偏上（視口中心 422）、距頂端只剩 143px，
-     再上移只會更偏離中心。
-   [本次調整（2026-10-20 稍後）] 目標中心與桌機共用 var(--bc-hero-center-n)＝43%，
-     且 .footer-time 的 margin-top（u-48＝12.21vw）已在 ≥768px 統一歸零（見上方覆寫），
-     故本段算式不再扣 u-48 —— 那段空間現在由 padding-top 一次決定。
-   [為何不能寫成固定值] ≤991 的所有間距都隨「視寬」縮放（u-72＝18.32vw、空列 gap、
-     照片區 180vw/ratio），目標位置卻綁視高 ⇒ 固定值只在某一種長寬比剛好命中。
-     因此比照 ≥992 的作法，直接把「時鐘列中心 ＝ 43% 視高」解出來：
-       時鐘列中心 ＝ padding-top
-                   ＋ 2 × grid-gap（.grid 內空列造成的 2 個 row-gap）
-                   ＋ .footer-time 的 margin-top（0，見上方覆寫）
-                   ＋ 時鐘列高 ÷ 2
-       時鐘列高   ＝ 2 × u-24 ＋ 14px（.footer-logo-cell 上下內距，見上方 ≤991 覆寫）
-                   ＋ 180vw/ratio（.footer-logo-list，見上方 ≤991 覆寫）
-                   ＋ --bc-hero-caption-h（名稱＋highlight，見下方 B2）
-       （≤991 的 .footer-inner padding-top 為 0，故不列入。）
-       時鐘列高 ÷ 2 ＝ u-24 ＋ 7px ＋ 90vw/ratio ＋ caption/2 ← 即算式中的四項。
-   [預期] 768×1024：改前 padding 140.7、時鐘列 top 281.4（含 margin-top 93.8；中心 532.6
-     ＝比視口中心低 20.6px）→ 改後頂端空白帶 187.6（少 93.8px）。
-     820×1180：改前 top 300.5 → 改後 200.3（少 100.2px）。
-     兩者時鐘列中心都會落在 43% 視高之上方（使用者已同意不要求正中）。
-   [min() 上限＝只減不增] 上限 var(--_units---u-72)：算式若大於現值（視口很矮／很窄時）
-     就取現值，不把留白變得更多（使用者要求「減少」而非「調整到任何位置」）。
-   [下限] max(24px, …)：視口太矮時（例：768×700，或 991×768 這類「寬而矮」的橫向平板）
-     算式為負 —— 此時時鐘列本身就比視口高，不可能置中，仍保留一點上緣呼吸空間
-     （與 ≥992 同一值；991×768 實測 padding 24 ⇒ 時鐘列 top 84.5，改前約 333，
-     內容比視口高、往下捲即可）。
-   [svh] 先宣告 1vh 的版本給不支援 svh 的瀏覽器，下一行再以 1svh 覆寫。
-   [範圍] 只作用首頁（.bc-brand-stage-hero）；about 頁的真頁尾仍走 bc-brand-stage.css
-     的 u-72，不受影響。 */
-@media screen and (min-width: 768px) and (max-width: 991px) {
-  .bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
-    padding-top: min(var(--_units---u-72), max(24px, calc(var(--bc-hero-center-n) * 1vh - 2 * var(--_special-units---grid-gap) - var(--_units---u-24) - 7px - (90vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2))));
-    padding-top: min(var(--_units---u-72), max(24px, calc(var(--bc-hero-center-n) * 1svh - 2 * var(--_special-units---grid-gap) - var(--_units---u-24) - 7px - (90vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2))));
-  }
-}
-
-/* 2026-10-12（使用者指示）：「bc-brand-stage 內的咖啡照片列尺寸增加 50%」。
-   [標的] 首頁 hero 內 #bc-brand-stage 的 7 張咖啡照列 —— .footer-logo-cell（寬）
-     與 .footer-logo-item（高）；照片本身是 .img{width:100%;height:100%}＋
-     .img.contain（object-fit:contain），故放大格子即放大照片。
-   [原始值] bc-brand-stage.css:195 寬 calc(192vw/scale-ratio)、:196 高 calc(184vw/scale-ratio)；
-     同檔 :245 的 @media (max-width:991px) 再把高改為 calc(120vw/scale-ratio)。
-     ⇒ 桌機 192×184（@1440 實測 cell 192×264＝上下 padding 40＋184）、
-        ≤991px 高 30.53vw。×1.5 後＝寬 288／高 276，≤991px 高 180。
-   [範圍] 只覆寫本頁：about 頁的真頁尾共用同一組 class（.footer-logo-*）與同一份 CSS，
-     仍維持原尺寸（deco 標誌釘牌不變）。
-   [特異度] 多一個 .bc-brand-stage-hero class ⇒ 高於 bc-brand-stage.css 的原規則，不需 !important
-     （與上方三條覆寫同一寫法）。高度必須逐斷點鏡射，因為該檔在 ≤991px 用的是
-     不同的基準值（120 而非 184），單一條 calc(276vw/scale-ratio) 在 ≤991px 會變成
-     70.23vw（＝+130%，非 +50%）。
-   [≤991px 寬度] 刻意不鏡射：該斷點下 .footer-logo-cell 是 .footer-time-inner 內的
-     flex item（flex-shrink:1），而 .footer-time-inner 在 6 欄格中只佔 3/5 兩欄
-     ⇒ 宣告寬度本來就被容器壓到 28.58vw（原宣告 48.86vw 早就被壓縮），覆寫宣告寬度
-     不改變實際寬度；該斷點的有效尺寸來自高度，故只鏡射高度。
-     2026-10-14（使用者指示）：每張照片下方新增「名稱 ＋ highlight」，照片高度維持不變
-       → 高度再加 --bc-hero-caption-h（＝文字區總高，逐斷點值見本檔 <style> 的 B 段）。
-       .footer-logo-cell 的寬度不動（文字沿用同一格寬度、置中對齊）。
-     2026-10-14 稍後（使用者指示：照片格改為環形照片列）：高度改掛在 .footer-logo-list
-       （＝環形的定位框；環本身是 absolute、不佔流內高度），文字區（.bc-ring-caption）
-       在其後以自然流接續 ⇒ 兩者相加與改動前逐值相同（照片區 276vw/ratio、
-       ≤991px 180vw/ratio；文字區 --bc-hero-caption-h）。
-      2026-10-15（使用者指示）：「桌機（≥992px）的咖啡照片放大到 1440 時 336×480」
-        → **只改 ≥992px，≤991px 逐值不動**（下方第一段 media query；回歸斷言見 E7）：
-        · .footer-logo-cell 上下內距歸零（原 padding-top: u-40 + 14px、padding-bottom: u-40）——
-          這段留白「吸收」進照片區 ⇒ 照片頂緣上移到時鐘列（.footer-time）頂端；
-        · .footer-logo-list（＝照片區高）276vw/ratio → 480vw/ratio（@1440 = 480px）；
-        · --bc-hand-img-w（見下方 B1）193vw/ratio → 336vw/ratio（＝480 ÷ 1.4286）。
-        ⇒ 逐斷點照片尺寸（寬×高）：1905 = 444.5×635.0、1440 = 336.0×480.0、
-          1280 = 298.7×426.7、992 = 231.5×330.7；時鐘列（＝cell）高 @1440 419.6 → 529.6
-          （＝480 ＋ 文字區 49.6，內距已歸零）。
-       2026-10-15 稍後（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」
-         → 同一組三處宣告再改一次（仍然只影響 ≥992px、≤991px 逐值不動；回歸斷言見 E7/E8）：
-         · .footer-logo-list（照片區高）480vw/ratio → 400vw/ratio（@1440 = 400px）；
-         · --bc-hand-img-w 336vw/ratio → 280vw/ratio（＝400 ÷ 1.4286，仍精確整除）；
-         · 文字：名稱 16px → 20px、highlight 12px → 16px（--bc-hero-caption-h 49.6 → 60.4）。
-         ⇒ 逐斷點照片尺寸（寬×高）：1905 = 370.4×529.1、1440 = 280×400、
-           1280 = 248.9×355.6、992 = 192.9×275.6；時鐘列（＝cell）高：1905 684.6 → 589.6、
-           1440 529.6 → 460.4、1280 476.3 → 415.9、992 380.3 → 335.9。
-         ⇒ 時鐘列頂端與 #bc-brand-stage 的文件座標仍然 Δ0；列變矮 ⇒ 時鐘數字／`{ }` 隨列內置中
-           上移 34.6px（@1440 document y 1280.69 → 1246.09），上一輪「左鄰居與 `{` 重疊」的
-           副作用也同步變小（見下方 B1 的 [與時鐘列子項的關係]）。
-       2026-10-16（使用者指示）：「咖啡名稱和 Highlight 文本文字尺寸再次加大」
-         ＋「時間點不正確 —— 當相關咖啡旋轉到中心時，才顯示相關名稱和 Highlight 文本」
-         → 仍只影響 ≥992px（≤991px 逐值不動）：
-         · 文字再放大一級：名稱 20 → 24px、highlight 16 → 18px
-           （--bc-hero-caption-h 60.4 → 68.4）；
-         · 時序：文字的切換改由 bc-hand-ring.js 綁圓盤旋轉的過渡結束（見該檔檔頭），
-           旋轉期間整組文字加 .-hidden 以 visibility 隱藏（規則見下方 B2 前的註解）；
-         · 照片區高／照片寬／cell 內距／--circle-radius 完全未動（照片尺寸與位置不變）；
-         · 唯一連帶：文字區高 +8px ⇒ 時鐘列（＝cell）高等量變高（時鐘數字／`{ }` 隨列內置中
-           再下移 4px）、下方內容下移 8px（逐斷點值見 docs/verify/cdp_verify_hero_coffee_photos.py
-           的 EXPECT）。 */
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
-  width: calc(288vw / var(--_special-units---global--scale-ratio));
-}
-@media screen and (min-width: 992px) {
-  /* 桌機：照片區（＝照片高度）縮小；內距歸零見下方 B1「[為什麼要 +14px]」之後的那條
-     （必須排在該規則之後才蓋得掉 —— 兩者特異度相同，CSS 以來源順序決勝）
-     2026-10-15（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」
-     → 480vw/ratio → 400vw/ratio（@1440 = 480 → 400px、@1905 = 635 → 529.17px）。 */
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-list {
-    height: calc(400vw / var(--_special-units---global--scale-ratio));
-  }
-}
-@media screen and (max-width: 991px) {
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-list {
-    height: calc(180vw / var(--_special-units---global--scale-ratio));
-  }
-}
-/* ============================================================
-   2026-10-14（使用者指示）
-   A. about 頁的天氣/時鐘元件搬進 #bc-stage-clock（位於左側 { 之上、尺寸 +30%）
-   B. 照片格（#bc-stage-photo-ring）＝GUNTE hero 的環形照片列
-      ＋「當前那支咖啡」的名稱/highlight（原「每張照片下方各一組」）
-   2026-10-14 稍後（使用者指示）：「用 hero 的 hero_hand＋旋轉動畫、半徑縮進格子」→ 改為
-      「區域太小了，動畫展示是使用整個頁面的，參考 hero_hand」⇒ 半徑改回 hero 的 100vw
-      （整頁扇形）、照片格不再裁切（改由 #bc-brand-stage 裁）。詳見下方 B1。
-   ============================================================ */
-/* ---- A. 天氣元件（markup 見 partials/bc_brand_stage_hero.html 的 #bc-stage-weather） ----
-   2026-10-17（使用者指示）：「移除時鐘，只保留天氣與溫度」→ 本顆的 .clock 節點已刪、
-     循環只剩 icon ⇄ 溫度（bc-weather.js 的 ORDER）。高度與定位完全不變：
-     .view 的子項全是 position:absolute，時鐘本來就不佔流內高度。
-   [縮放] --wc-scale:1.3。bc-weather.css 的所有尺寸都是 calc(原值 * var(--wc-scale,1))
-     （先例＝bc-reviews.css 的 --rv-scale）；只在 hero 內宣告 → about 頁 navbar 那顆
-     不繼承（×1）→ about 外觀零變動。
-   [定位] 放進 #bc-stage-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格：
-     · align-self:start：貼齊該格頂端。該格高度＝整條時鐘列高（由照片格撐出；2026-10-15
-       原始 419.6px → 照片放大 529.6px → 當日稍後照片縮小 460.4px），若用預設的 stretch
-       會撐滿整列並讓內容垂直置中而與 { 重疊；center 更是直接疊上去。start 讓它恆在垂直
-       置中的 { 之上（實測 1440 間距 81.8 → 136.8 → 102.2px：天氣留在列頂、{ 隨列高置中
-       ⇒ 列高 +110 時 +55、列高 −69.2 時 −34.6；≥992px 其餘斷點 1905 = 154.0、1280 = 84.4、
-       992 = 52.3px，皆遠大於 0；≤991px 各斷點與改動前逐值相同、全斷點皆不重疊）。
-     · justify-self:center：與同格的 { 水平同中心（兩者都置中於欄 1）。
-   [高度] .weather 在 hero 內改為 height:auto（見 bc-weather.css）：navbar 的
-     height:100%／80px 是為 flex 容器設計，照搬到 grid 格會與 { 重疊。 */
-.bc-brand-stage-hero #bc-brand-stage #bc-stage-weather {
-  grid-area: 1 / 1 / 2 / 2;
-  align-self: start;
-  justify-self: center;
-}
-/* ≥992px 必須把 { 明確釘回「欄 1、列 1」。
-   [原因] 本頁 .footer-time 8 欄配置的排列靠 grid 自動置位：`{` 與 `15` 只宣告了
-     place-self:center、沒有 grid-area（≤991px 才有明確值，見 bc-brand-stage.css）。
-     新增的天氣格先佔走欄 1 後，自動置位會把 `{` 放到欄 2、`15` 往後找空格
-     （撞上明確定位的冒號／照片再退），照片列（span 2）最終落點也會偏移
-     —— 實測會出現隱式欄、整列跑版。
-   [作法] 把 `{` 釘在欄 1（＝天氣所在的同一格，兩者上下不重疊，理由見上），
-     自動置位序列即完全不變：欄 1={(+天氣) 2=15 3=: 4-5=照片 6=: 7=19 8=}。 */
-@media screen and (min-width: 992px) {
-  .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-brace-open {
-    grid-area: 1 / 1 / 2 / 2;
-  }
-}
-.bc-brand-stage-hero #bc-brand-stage #bc-stage-weather .weather {
-  --wc-scale: 1.3;
-}
-
-/* ---- B1. 環形照片列的尺寸與圓心（與 hero 同一顆大圓） ----
-   2026-10-14 稍後（使用者指示）：「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，
-     動畫展示是使用整個頁面的。參考 hero_hand」→ 原本的「縮小版圓弧」（半徑縮進格子裡、
-     超出格子由 overflow:clip 裁掉）改為**與 hero 逐值相同的整頁扇形**：
-     · --circle-radius: 100vw（＝bc-hand-ring.css 的預設值＝hero 的值，明寫出來讓「照片格
-       也是同一顆大圓」在原始碼裡看得見）。25° 步進下，左右鄰居落在 ±0.423R ＝ ±42vw
-       ⇒ 扇形橫跨整個頁面寬（hero 實測 1440：current 置中，左右各一張在頁面兩緣
-       cx = 104 / 1321、低 135px、scale 0.5，第 ±2 格起已在畫面外）。
-     · --bc-hand-img-w：hero 是 calc(420px * --bc-gunte-scale)（該旋鈕只存在 .bc-gunte-hero
-       內，照片格取用不到 ⇒ 兩邊實測皆 420px*0.55＝231×330）。照片寬一律取
-       「照片區高 ÷ 1.4286」（咖啡照實測 840×1200 ⇒ 比例 1.429）：
-         ≥992px：400vw/ratio ÷ 1.429 ≈ 280vw/ratio（@1440 = 280×400、@1905 = 370.4×529.1）
-         ≤991px：180vw/ratio ÷ 1.429 ≈ 126vw/ratio（@390 = 126×180；2026-10-15 未動）
-       （沿革：2026-10-15 之前為 276vw/ratio ÷ 1.429 ≈ 193vw/ratio ⇒ @1440 = 193×276、
-         @1905 = 255×365；同日稍早曾放大到 480 ÷ 1.429 ≈ 336vw/ratio ⇒ @1440 = 336×480。）
-       ⇒ current 那張上下剛好貼齊照片區＝照片區高；半徑與 hero 同級（100vw），
-         照片尺寸永遠由「照片區高」決定 ⇒ 改照片區高即等比改照片，兩者零落差。
-   [圓心位置] .hero_hand 的定位點＝圓弧頂點（＝current 那張的中心）→ 水平放 50%
-     （＝照片格中心＝時鐘列中心＝頁面中心）、垂直放照片區的垂直中心（top:50%）。
-   [裁切] 扇形不再由照片格裁（否則就回到「區域太小」）→ 改由頁面層級的
-     `#bc-brand-stage{overflow:hidden}` 裁（＝hero 由 .bc-gunte-hero{overflow:hidden} 裁，
-     同一件事）：±50° 以後的項目落在畫面外、連同超出頁面的部分一起被裁掉
-     ⇒ 不會產生水平捲軸（實測 documentElement.scrollWidth ≤ innerWidth）。
-     ⚠ 有第二層裁切，不是 overflow：`.footer-logo-cell` 的 `data-reveal="clip-down"`
-       會被 GSAP 在進場後留下 `clip-path: inset(0%)`（＝永久把內容框在格子邊界內）——
-       實測側邊鄰居的 rect 存在、圖片也已載入，卻被它整張切掉（elementFromPoint 命中的是
-       #bc-stage-clock）。故 bc-brand-stage.js 的 clip 揭示改為「跑完即釋放含 [data-bc-hand-ring]
-       容器的 clip-path」（2026-10-14 稍後；/about/ 沒有該標記 ⇒ 行為不變）。
-   [與時鐘列子項的關係] 實測 @1440（2026-10-15 照片縮小後；文件座標。時鐘數字／`{ }` 隨列高置中
-     ⇒ 比上一輪（照片放大）上移 34.6px、比原始（276vw/ratio）只下移 20.4px；列的頂端與
-     #bc-brand-stage／.grid 全程完全不動，見下）：
-     · 時鐘數字 `00`/`46` 在 x 229–315／1110–1196 ⇒ 與鄰居照片框（x −2–210／1215–1427）
-       的水平範圍不交集 ⇒ 不重疊（距離 19px／20px）。
-     · `{`（x 85–107）與左鄰居的**不透明內容**（依原圖 alpha 推得 bbox：x 18.8–80.6%、
-       y 17.5–95.3%，即 840×1200 中咖啡本體）：重疊帶高由上一輪的約 23px 縮到約 **13px**
-       （原始 276vw/ratio 時是「擦過、留 +24px 空隙」）。像素級量測（cdp_verify_clock_clash.py：
-       逐層隱藏後與基準相減取交集）@1440 為 **0 px**（照片真正畫到的像素與 `{` 不落在同一點）、
-       992 由 7 → 3 px、≤991px 逐值不變（991 仍 83px）；「明顯遮蔽 ≥2000px」六斷點 0 組。
-       截圖 `_verify_clock_photos_1440_after.png`：`{` 完整可讀、與咖啡白線稿分離。
-       要更寬鬆只能改照片尺寸（半徑須維持 100vw＝與 hero 同值，見
-       cdp_verify_hero_coffee_photos.py 的 C5 斷言）。
-     · 文字列：鄰居 bbox 與它零交集（橫向距離更遠）；current 那張底緣仍精準貼齊文字列頂端。
-   [版面影響] 列高＝cell 高：@1440 419.6（原始）→ 529.6（2026-10-15 照片放大）→ 460.4（同日稍後
-     照片縮小）。cell 頂端、#bc-brand-stage、.grid.is-footer 三者文件座標全程完全不動（實測 Δ0）；
-     列變高／變矮時下方內容（.footer-socials 等）等量移動，頁面總高 @1440 3826 → 3936 → 3867
-     （實測 docHeight）。≤991px 全部逐值不變（docHeight 亦相同）。 */
-
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
-  /* [為什麼要 +14px] 原結構（7 個 .footer-logo-item，其中 :first-child 為 position:relative）
-     實測在「cell 內距底」與「.footer-logo-list 頂」之間有一個**固定 14px** 的間隙
-     （1905/1280/991/390 四斷點皆為 14.0px，與 vw 無關）。改為環形照片列後該間隙消失，
-     時鐘列會矮 14px（內容再置中 ⇒ 整列下移 7px）。為維持照片區起點、時鐘列高度與
-     改動前逐值相同，這裡把 14px 明確補回（≥992px 的內距來源＝--_units---u-40）。
-     ⚠ 2026-10-15 起：≥992px 由下方那條 media query 覆寫為 0（照片放大後這段補償不再需要；
-       同日稍後照片改為縮小，仍維持 0），本條只剩 ≤991px 在用（該斷點見檔尾的 u-24 版本）
-       —— 逐值與改動前相同。 */
-  padding-top: calc(var(--_units---u-40) + 14px);
-}
-/* 2026-10-15（使用者指示）：≥992px 把這段內距歸零 —— 留白「吸收」進照片區
-   （照片區 276vw/ratio → 480vw/ratio（同日稍早放大）→ 400vw/ratio（同日稍後縮小），見上方 A/B 段），
-   照片頂緣因此上移到時鐘列頂端。
-   [為什麼放在這裡] 本條與上方那條同特異度（1,2,0）⇒ 只能靠來源順序取勝；寫在上方會失效
-     （會量到 padding-top 仍是 u-40 + 14px）。
-   [≤991px] 不動：該斷點仍用上方這條（u-40 → u-24，見檔尾的 ≤991px 段），逐值與改動前相同。 */
-@media screen and (min-width: 992px) {
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-}
-/* [2026-10-14 稍後移除] 原本這裡還有一條 `.footer-logo-list { overflow: clip }`（把扇形裁在
-   照片區內）。改為整頁扇形後照片必須離開格子 → 移除；唯一的裁切框是頁面層級的
-   `#bc-brand-stage { overflow: hidden }`（見上方 B1 的 [裁切]）。 */
-.bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring .hero_hand {
-  /* 與 hero 逐值相同的大圓（bc-hand-ring.css 的預設值就是 100vw；這裡明寫，讓
-     「照片格也是同一顆整頁大圓」在原始碼裡看得見，日後改動時不會被誤當成筆誤刪掉）。 */
-  --circle-radius: 100vw;
-  /* 照片區高（400vw/ratio）÷ 咖啡照比例 1.429 ＝ 剛好填滿照片區（見上方 B1）
-     2026-10-15（使用者指示）「照片太大」：336vw/ratio → 280vw/ratio（@1440 = 336×480 → 280×400） */
-  --bc-hand-img-w: calc(280vw / var(--_special-units---global--scale-ratio));
-  top: 50%;
-  left: 50%;
-  /* [為什麼要 width:0] .hero_hand 是 absolute + left:50%，寬度若交給 shrink-to-fit，
-     實測在照片格內會得到 2R（負 margin 未被計入）→ 整片扇形被推右 R（hero 內得到的是 R，
-     是它自己的偶然結果，不動它）。改成明確 width:0 ⇒ 定位點＝那一點（圓弧頂點／圓心正上方 R），
-     子層 .hero_hand_list 的 margin-left:-R 讓 2R×2R 的圓心正好落在該點上。 */
-  width: 0;
-}
-@media screen and (max-width: 991px) {
-  /* ≤991px：照片區高度換成 180vw/ratio（bc-brand-stage.css 的既有值）⇒ 照片寬同步換成
-     126vw/ratio（180 ÷ 1.429）；半徑仍是 hero 的 100vw（整頁扇形，不隨斷點縮小）。 */
-  .bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring .hero_hand {
-    --bc-hand-img-w: calc(126vw / var(--_special-units---global--scale-ratio));
-  }
-  /* 該斷點照片格的內距來源改為 --_units---u-24（見上方 +14px 說明） */
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
-    padding-top: calc(var(--_units---u-24) + 14px);
-  }
-}
-/* [為什麼要在這裡重宣告 margin-left]
-   bc-brand-stage.css 開頭有一段 id 級的 element reset：
-     `#bc-brand-stage div,#bc-brand-stage span,…,#bc-brand-stage a,#bc-brand-stage img,…{margin:0;padding:0;border:0;…}`
-   （特異度 1,0,1）會蓋掉共用模組 .hero_hand_list 的 `margin-left: calc(R * -1)`（0,1,0）
-   → 實測圓盤不會被推左 R，整片扇形會偏右 R（hero 不在 #bc-brand-stage 內、不受該 reset 影響）。
-   因此在本頁以 #bc-stage-photo-ring 前綴（> 1,0,1）把值補回；其餘模組屬性（width / aspect-ratio /
-   inset-inline-start / translate / rotate / scale）都已實測生效，不需重宣告。 */
-.bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring .hero_hand_list {
-  margin-left: calc(var(--circle-radius) * -1);
-}
-/* [文字只在置中的那杯上出現] 2026-10-16（使用者指示）：「當相關咖啡旋轉到中心時，才顯示相關
-   名稱和 Highlight 文本」。圓盤開始旋轉時 bc-hand-ring.js 會對容器加 .-hidden（規則見下），
-   等旋轉過渡跑完、該杯真的到中心才切換 -current（＝文字與置中的照片同一個時間點）。
-   2026-10-17（使用者指示）：切換 -current 後立刻跑一次與 hero 右側 Fresh / Beans 相同的
-   data-reveal 文字揭示（SplitText ＋ goo 濾鏡）。動畫完全由 bc-hand-ring.js →
-   bc-brand-stage.js 的 window.BC_TEXT_REVEAL 執行，本檔不需新增 CSS：
-   SplitText 只把 <p> 的文字包成行區塊（行高不變）⇒ 文字區高度仍等於 --bc-hero-caption-h。 */
-.bc-brand-stage-hero #bc-brand-stage .bc-ring-caption-item {
-  display: none;
-}
-.bc-brand-stage-hero #bc-brand-stage .bc-ring-caption-item.-current {
-  display: block;
-}
-/* 旋轉期間（bc-hand-ring.js 的 holdCaptions）：整組文字隱形 —— 用 visibility 而非 display，
-   -current 那筆仍留在流內 ⇒ 文字區高度不變、換張時下方的時鐘列與整頁內容不會被抽動。 */
-.bc-brand-stage-hero #bc-brand-stage .bc-ring-caption.-hidden .bc-ring-caption-item {
-  visibility: hidden;
-}
-/* ---- B2. 文字樣式（名稱 ＋ highlight） ----
-   [文字高度] 逐斷點的字級不同（見下方三段），故用 --bc-hero-caption-h 表達
-     「文字區總高 = padding-top 8 + 名稱行高 1.3 + highlight 上緣 4 + 行高 1.4」。
-     2026-10-14 稍後：文字區改為 .footer-logo-list（照片區）之後的自然流區塊
-     ⇒ 兩者相加＝改動前的 .footer-logo-item 高度（照片區與時鐘列高度皆不變）。 */
-.bc-brand-stage-hero #bc-brand-stage {
-  --bc-hero-caption-h: calc(8px + 24px * 1.3 + 4px + 18px * 1.4);
-}
-/* [2026-10-14 稍後移除] 原本這裡的兩條規則（`.footer-logo-item a.footer-logo-link`
-   由 block 改 flex column、讓 img 撐滿「格子高 − 文字高」）隨照片格改為環形照片列而失效：
-   格內已無 .footer-logo-link / .footer-logo-item，照片改由 .hero_hand_item a > img 呈現
-   （尺寸見上方 B1 與 bc-hand-ring.css）。
-   文字區（.bc-ring-caption）改為照片區之後的自然流區塊 → 不需要 flex 分配高度。 */
-/* [文字樣式] 沿用 SERIES 區塊的 .bc-series-caption 系列命名與其視覺定義
-   （bc-series.css；about 頁的咖啡/咖啡豆卡片已在用）。
-   ⚠ bc-series.css 只載入 about 頁（本頁 extra_css 未載）→ 本頁必須自帶同值宣告，
-     否則名稱沒有 Josefin Sans／大寫／白字，highlight 也不會是品牌金
-     （實測會繼承 #bc-brand-stage 的 rgba(255,255,255,.9)，與設計不符）。
-   [與 bc-series.css 逐值相同] font-family / font-weight / text-transform /
-     letter-spacing / color（highlight 的 var(--bc-gold,#c49b63) 由全站載入的
-     bc-components.css :root 提供）。
-   [刻意不同] 字級（SERIES 為 26/16px；本頁 ≥992px 為 24/18px、≤991px 13/10、≤767px 11/9）與
-     padding-top（8px；SERIES 為 16/12px）——後者須與 --bc-hero-caption-h 一致。
-     ⚠ 2026-10-15 稍後（使用者指示「名稱與 highlight 太小」）：≥992px 由 16/12 → 20/16
-       （≤991px 未動）⇒ --bc-hero-caption-h ≥992px 由 49.6 → 60.4（實測 60.39）。
-     ⚠ 2026-10-16（使用者指示「文字尺寸再次加大」）：≥992px 再一級 20/16 → 24/18
-       （≤991px 仍未動）⇒ --bc-hero-caption-h ≥992px 由 60.4 → 68.4（實測 68.38）。
-       [單行檢查] 最窄桌機斷點 992 的文字區可用寬 190.0px（cell 198.39 − 左右各 4px）：
-       highlight 18px 的最長文字寬 171.73px、name 24px 的最長文字寬 133.56px
-       （行高 31.2／25.2）⇒ 皆單行未折行、仍有 18.3px 餘裕（驗證腳本 E10 逐斷點守門）。
-   [reset] margin/padding 必須一併改寫：bc-brand-stage.css 的
-     `#bc-brand-stage p{margin:0;padding:0}`（1,0,1）會蓋掉 class 規則（0,1,0），
-     用 #bc-brand-stage 前綴（1,1,0）才贏得了 reset。 */
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption.bc-series-caption {
-  padding: 8px 4px 0;
-  text-align: center;
-}
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
-  margin: 0;
-  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: normal;
-  color: #fff;
-  text-transform: uppercase;
-}
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
-  margin: 4px 0 0;
-  font-family: "Noto Sans TC", sans-serif;
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
-  color: var(--bc-gold, #c49b63);
-}
-@media screen and (max-width: 991px) {
-  .bc-brand-stage-hero #bc-brand-stage {
-    --bc-hero-caption-h: calc(8px + 13px * 1.3 + 4px + 10px * 1.4);
-  }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
-    font-size: 13px;
-  }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
-    font-size: 10px;
-  }
-}
-@media screen and (max-width: 767px) {
-  .bc-brand-stage-hero #bc-brand-stage {
-    --bc-hero-caption-h: calc(8px + 11px * 1.3 + 4px + 9px * 1.4);
-  }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
-    font-size: 11px;
-  }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
-    font-size: 9px;
-  }
-}
-/* select2 樣式 */
-/* 2026-09-21：首頁原本在此覆寫兩件事，現已改為全站規則 →
-     · navbar weather：全站隱藏、僅 about 頁顯示（bc-weather.css + nav.html 的 .weather--visible）
-     · .bc-attract-nav：整組定位完成前先隱藏（bc-attract.css + base.html <head> 的 .bc-attract-pending）
-   首頁不再需要個別覆寫。 */
-</style>
+<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261025a" />
+<!-- 2026-10-25（使用者指示）：原本緊接在本行之後的 500+ 行內聯 <style>（品牌舞台 hero 的
+     逐斷點覆寫）已整段移入 static/css/bc-brand-stage.css 檔尾（「首頁專用覆寫」區段）。
+     該檔是 extra_css 的最後一支 <link>，串接位置與原本的內聯樣式相同（同特異度仍勝過
+     bc-hand-ring.css／bc-components.css）；所有選擇器都帶 .bc-brand-stage-hero 前綴，
+     about 頁不會受影響。要改首頁 hero 樣式請直接改該檔檔尾，不要再寫回本檔。 -->
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- 2026-08-10：首頁 SALON/STORE SEARCH 動畫（依賴 GSAP，已在 extra_head defer 載入） -->
-<script src="{% static 'js/bc-search.js' %}?v=20260813a"></script>
+<!-- 2026-10-25（使用者指示）：bc-search.js 隨 .bc-search 模組移至 about.html
+     （about 的 GSAP + ScrollTrigger 由 base.html 全域 defer 載入，相依不變）。 -->
 <!-- 2026-09-04：yama-beer header-bot(_pc) + tax-nav 動畫（tax init 延遲淡入 / is-view / footer 交會 / Cart 開抽屜） -->
 <script src="{% static 'js/bc-yama-header.js' %}?v=20260916b"></script>
 <!-- 2026-09-06：reviews 跑馬燈動畫（支援 data-bc-reviews-reverse 反向；GSAP base defer） -->
@@ -1445,16 +929,14 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <script src="{% static 'js/bc-hand-ring.js' %}?v=20261024a"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
-<!-- 2026-10-22（使用者指示）：首頁四步咖啡旅程 Rive 圖示（intro / off / hover 時間軸）；
-     runtime 與 .riv 皆自架，接近視口才載入（IntersectionObserver，rootMargin 600px）。
-     2026-10-22c：靜止姿勢＝intro 自然播完留下的完整圖示；離開 hover 不發任何指令
-     （stop/scrub 會讓圖示凍結在缺角的中間格，實測結論見 bc-steps-rive.js 檔頭）
-     2026-10-23a（使用者指示）：intro 自動循環（靜止 4 秒重播）＋圖示改純白
-     （白色由 bc-steps.css 的 filter 處理，勿在此加顏色） -->
-<script src="{% static 'js/bc-steps-rive.js' %}?v=20261023b"></script>
+<!-- 2026-10-25（使用者指示）：bc-steps-rive.js 隨四步 Rive 圖示列移至 about.html
+     （intro / off / hover 時間軸與版號說明一併移過去）。 -->
 <!-- 2026-10-24（使用者指示）：首頁「推薦頁面」雙卡互動（hover 切換 is-hover-active /
      is-hover-inactive，對應原站 Alpine recommendedPages；寬度與 clip-path 過渡交給 CSS） -->
-<script src="{% static 'js/bc-recommended-pages.js' %}?v=20261024a"></script>
+<script src="{% static 'js/bc-recommended-pages.js' %}?v=20261025a"></script>
+<!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 動畫隨模組自 about.html 移入本頁
+     （原生 scroll + requestAnimationFrame，不依賴 GSAP／ScrollTrigger；about 已不再載入）。 -->
+<script src="{% static 'js/bc-capabilities.js' %}?v=20260825k"></script>
 <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
      已抽成全站共用檔 static/js/bc-attract-place.js（base.html 全域載入）——
      使用者指示「所有模板浮動購物車修改位置和 index 一樣」→ 全站（含首頁）共用同一套定位，

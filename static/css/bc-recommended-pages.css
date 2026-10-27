@@ -21,16 +21,31 @@
      · 桌機 hover 寬度：active ＝ (100% - gap) × 2/3、
                          inactive ＝ (100% - gap) / 3；
        mobile 不套寬度規則（卡片維持 100%，原站規則只在 ≥64rem 生效）。
-     · 背景圖：opacity 0 → 1（.5s）、scale 1.2 → 1（2s ease-1）；
+     · 背景媒體（2026-10-25 起為 <video>，原為 webp）：opacity 0 → 1（.5s）、scale 1.2 → 1（2s ease-1）；
        ::after 黑色 40% 遮罩 opacity 0 → 1（1s ease-3）。
      · 標題 inactive scale(.666)（僅 pc）；label 的 spacer flex-grow 0 → 1。
-     · 標題結尾另加裝飾 APNG（2026-10-24 使用者指示，非常駐原站元素）：
-       來源 static/images/ani_{coffee,bean}_apng.png（1320×1320 / 90 frames，
-       bean 版是 Adam7 交錯且 IDAT/fdAT 分 32KB 小塊，Pillow 無法直接逐幀讀），
-       已離線縮成 176×176 的 static/images/recommended-pages/title-*-ani.png
-       （原 4.6MB＋8.8MB → 0.78MB＋0.93MB，避免 90 幀 1320² 解碼吃記憶體）。
+     · 2026-10-25（使用者指示）：文字稍微縮小 ——
+         .recommended-page__title 32 → 30（pc 64 → 60；@1440 由 64px → 60px）、
+         .recommended-page__label 13 → 12（pc 18 → 16；@1440 由 18px → 16px）。
+       兩者都是 --spacing 的倍數 → 各斷點等比縮小，clip 圖與卡片尺寸未動。
+     · 2026-10-27（使用者指示）：標題「Coffee / Beans」再稍微縮小 ——
+         .recommended-page__title 30 → 28（pc 60 → 56）：@1440 由 60px → 56px、
+         @375 由 28.125px → 26.25px。label 不動（維持 12／pc 16）。
+         標題仍是 --spacing 倍數 → 各斷點等比縮小；clip 圖與卡片尺寸未動。
+     · 標題結尾原本另加裝飾 APNG（2026-10-24 使用者指示，非常駐原站元素）：
+       來源 static/images/ani_{coffee,bean}_apng.png，離線縮成 176×176 的
+       static/images/recommended-pages/title-*-ani.png。
+       **2026-10-25 使用者指示移除**：markup 的 <img class="recommended-page__title-ani">
+       與對應 CSS 規則、兩個 PNG 檔全部刪除，標題只剩 .recommended-page__title-text。
      · clip 圖：固定 507×166 的 stadium，預設可見寬 240（居中），
        hover 展開為全寬 507。
+     · clip 圖內容（2026-10-25 使用者指示）：改用同一組 ani_{coffee,bean}_apng.png
+       的 APNG，離線縮成 332×332（= 桌面 clip 高 166 的 2 倍，Retina 夠用）的
+       static/images/recommended-pages/clip-{coffee,bean}-ani.png
+       （0.79MB＋0.49MB）。因素材是正方形（黑圓底＋白線稿、四角透明），
+       clip 用 object-fit: contain 完整放入、底色改黑 → 圓外留白與黑圓融為一體。
+       原始 1320×1320 檔仍在 .gitignore（僅供重新產圖），轉檔工具：
+       python3 scripts/apng_resize_20261025.py <來源> --size 332 --out <輸出> --check
 
    clip-path 實作差異（刻意）：
      原站用 GSAP MorphSVG 對 <clipPath><path> 做形狀補間
@@ -59,7 +74,10 @@
   padding: calc(var(--spacing) * 200) calc(var(--spacing) * 16)
     calc(var(--spacing) * 64);
   color: #fff;
-  background-color: var(--bc-bg, #0e0e0e);
+  /* 2026-10-25（使用者指示）：清除模組黑色背景。
+     原本是 var(--bc-bg, #0e0e0e) 實色，會在 body 的 bg_4.jpg 上蓋出一條黑帶；
+     改為透明後與上方 #bc-brand-stage（背景透明）連續。 */
+  background-color: transparent;
 }
 
 .bc-recommended-pages__list {
@@ -107,12 +125,27 @@
   transition: opacity 0.8s var(--rp-ease-2);
 }
 
+/* 背景媒體：2026-10-25 起咖啡／咖啡豆卡片背景改為 WebM 影片
+   （<video class="recommended-page__bg-video">，muted+loop+playsinline；
+   hover 才 play、mouseleave pause，由 bc-recommended-pages.js 控制）。
+   clip 圖：2026-10-25 追加改為 APNG（clip-coffee-ani.png／clip-bean-ani.png，
+   由 ani_{coffee,bean}_apng.png 離線縮成 332×332，原因見檔頭），
+   素材是「正方形、四角透明、黑色圓底＋白色線稿」，所以用 object-fit: contain
+   完整放入膠囊（圓形上下不會被切掉），圓外的留白由 .recommended-page__clip
+   的黑底補滿，看起來是一個連續的黑色膠囊。 */
 .recommended-page__bg img,
-.recommended-page__clip img {
+.recommended-page__bg video {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.recommended-page__clip img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .recommended-pages__link.is-hover-active .recommended-page__bg {
@@ -133,25 +166,17 @@
   gap: 0.22em;
   margin: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: calc(var(--spacing) * 32);
+  font-size: calc(var(--spacing) * 28);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0;
   transition: color 0.5s var(--rp-ease-2);
 }
 
-/* 標題結尾的裝飾動畫（APNG，2026-10-24 使用者指示）
-   高度取 1em（= 標題字級；仍小於 line-height 1.2em，不會撐高標題行），
-   用 flex/align-items:center 讓它與標題文字同一水平線對齊；
-   inactive 時隨整個 .recommended-page__title 一起 scale(.666)。 */
-.recommended-page__title-ani {
-  flex: 0 0 auto;
-  width: auto;
-  height: 1em;
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
+/* 標題結尾的裝飾 APNG（.recommended-page__title-ani）已於 2026-10-25
+   依使用者指示移除（檔案 title-{coffee,bean}-ani.png 同批刪除），標題只剩
+   .recommended-page__title-text 文字；上面的 flex + gap 對單一子元素等同
+   block，保留以便日後再加裝飾元素時直接對齊。 */
 
 /* ---------- 中央 clip 圖 ---------- */
 .recommended-page__clip {
@@ -160,7 +185,9 @@
   left: 50%;
   height: calc(var(--spacing) * 89);
   aspect-ratio: 507 / 166;
-  background-color: #fff;
+  /* 2026-10-25：白底 → #000（clip 內是黑色圓底＋白色線稿的 APNG，
+     圓外留白必須是黑的才不會出現白框） */
+  background-color: #000;
   transform: translateX(-50%);
   /* 240/507 可見寬 → 左右各 133.5/507；半徑 83/507 與 83/166 */
   clip-path: inset(0 26.3314% 0 26.3314% round 16.3708% / 50%);
@@ -179,7 +206,7 @@
   width: 100%;
   margin: 0;
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-  font-size: calc(var(--spacing) * 13);
+  font-size: calc(var(--spacing) * 12);
   line-height: 1.6;
   letter-spacing: 0.02em;
   transition: color 0.5s var(--rp-ease-2);
@@ -237,7 +264,7 @@
   }
 
   .recommended-page__title {
-    font-size: calc(var(--spacing) * 64);
+    font-size: calc(var(--spacing) * 56);
     white-space: nowrap;
     transform-origin: 0 0;
     transition: transform 0.6s var(--rp-ease-1), color 0.5s var(--rp-ease-2);
@@ -254,7 +281,7 @@
 
   .recommended-page__label {
     gap: calc(var(--spacing) * 12);
-    font-size: calc(var(--spacing) * 18);
+    font-size: calc(var(--spacing) * 16);
   }
 
   .recommended-page__label-icon {
