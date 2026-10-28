@@ -5,7 +5,7 @@
 
 ## 當前版本控制狀態（2026-10-25 複驗）
 
-- ✅ `origin/main`＝`d27f7c90`（code）＋其後文件提交（不寫死文件 hash）；2026-10-25 推 `a732cc28..d27f7c90`（`#59 edf3e87c`、`#60 7a073263`、`#61 d27f7c90`），本機 `main`＝`origin/main`、工作區乾淨
+- ✅ `origin/main`＝`b29ff324`（2026-10-28 推 `29eb67d1`／`f57eb768`／`f730abab`／`b29ff324`），本機 `main`＝`origin/main`（不寫死文件 hash，複驗用 `git log -1`）
 - ℹ️ `#55 aaf7c2aa`／`#56 71018e97`／`#57 28b1c322`／`#58 a732cc28`／`#51 bf495475` 均已在遠端
 - ℹ️ 原始 APNG 素材 `static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）列入 `.gitignore`，頁面用的是 `static/images/recommended-pages/title-*.png`
 - ⚠ 正式站 live＝`a732cc28`（`dep-dbed2vm7bikc73825md0`，2026-10-24 15:43Z 手動部署成功；10-23 的 Supabase ENOTFOUND 已排除）⇒ **待部署 `#59`／`#60`／`#61` 三個 code commit**；autoDeploy＝off → push 不會上線

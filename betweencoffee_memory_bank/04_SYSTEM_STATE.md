@@ -17,8 +17,8 @@
 | 員工端渲染器 v2 | ✅ 完成 | BaseOrderRendererV2 + 4 個 v2 渲染器 |
 | 測試 | ⚠️ 不足 | 覆蓋率低（以 `docs/verify/` CDP 腳本補前端驗證） |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
-| 部署（Render） | ⚠️ 部署落後 3 筆 | 現行 `live`＝deploy `dep-dbed2vm7bikc73825md0`／commit `a732cc28`／trigger `manual`／finished 2026-10-24 15:43Z（2026-10-25 Render API 複驗）。2026-10-23 的 `56c1bcc9` 失敗（`dep-dbde3rpsrm7s73beap6g`／Supabase pooler ENOTFOUND）已由 10-24 成功部署排除 ⇒ **DB 可連**（該次資料庫狀態現為 `deactivated`）。仍落後 3 個 code commit：`edf3e87c`（#59）、`7a073263`（#60）、`d27f7c90`（#61）＋文件提交。**autoDeploy＝off，push 不會觸發部署** |
-| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`d27f7c90`＋其後文件提交（不寫死文件 hash，一律 `git log -1`／Render API 複驗；2026-10-25 推 `a732cc28..d27f7c90`＋docs），本機 `main`＝`origin/main`、工作區乾淨 |
+| 部署（Render） | ⚠️ 部署落後多筆 | 現行 `live`＝deploy `dep-dbermb1srm7s73d4s13g`／commit `cc99a3a4`／trigger `manual`／finished 2026-10-25 08:20Z（2026-10-28 Render API 複驗；前一筆 `dep-dbed2vm7bikc73825md0`＝`a732cc28` 現為 `deactivated`）。2026-10-23 的 `56c1bcc9` 失敗（Supabase pooler ENOTFOUND）已排除 ⇒ **DB 可連**。`origin/main` 尖端＝`b29ff324`（2026-10-28）⇒ 待手動部署 `cc99a3a4..b29ff324`（#59／#60／#61、capabilities 搬家、bc-staff 字級、bc-series 全套）。**autoDeploy＝off，push 不會觸發部署** |
+| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`b29ff324`（2026-10-28 推 `738e8660..b29ff324` 共 4 筆；一律 `git log -1`／Render API 複驗，不寫死文件 hash），本機 `main`＝`origin/main`；工作區僅剩未提交的 bc-staff 字級／capabilities／首頁樣式微調 |
 
 ## 資料庫現狀
 
