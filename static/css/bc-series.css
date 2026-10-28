@@ -11,11 +11,12 @@
     font-family: var(--bc-font-trade-gothic);
     font-weight: 400; /* trade-gothic 只有單一字重 400（宣告 100-900 故不會被合成假粗體） */
     letter-spacing: -0.01em;
-    line-height: 1.2;
+    /* 2026-10-28（使用者指示「行距縮小＋文字加大」）：行距 1.2 → 0.95、50px → 60px */
+    line-height: 0.95;
     color: #fff;
     margin-bottom: 14px;
     padding: 0 25px;
-    font-size: 50px;
+    font-size: 60px;
 }
 .bc-series-heading-sub {
     /* 中文副標（咖啡豆，專屬風味／一種興奮感…）維持原本的 Noto Sans TC，不套 trade-gothic */
@@ -25,7 +26,10 @@
     font-weight: 200;
     letter-spacing: 0;
     line-height: 1.5;
-    margin-top: 14px;
+    /* 2026-10-28（使用者指示「行距縮小＋文字加大」）：標題行距壓到 <1 後，
+       大字的下伸部（y/g 尾巴）會超出該行 box，故副標間距 14px → 52px，
+       避免綠色手繪圈（inset -24px）壓到字母；bean 頁另有 44px 覆寫（字級較小） */
+    margin-top: 52px;
 }
 
 .bc-series-scrolling {
@@ -126,8 +130,9 @@
         left: 0;
         transform: translateY(-50%);
         z-index: 0; /* 標題在照片下方（照片拖動時覆蓋標題） */
-        font-size: 140px;
-        line-height: 1;
+        /* 2026-10-28（使用者指示「行距縮小＋文字加大」）：140px → 160px、line-height 1 → 0.9 */
+        font-size: 160px;
+        line-height: 0.9;
         margin-bottom: 0;
         -webkit-filter: blur(0);
         filter: blur(0);
@@ -269,11 +274,14 @@
    ============================================================ */
 @media (min-width: 768px) and (max-width: 1199px) {
     .bc-series-heading {
-        font-size: 52px;
+        /* 2026-10-28（使用者指示「行距縮小＋文字加大」）：52px → 62px、行距 0.95 */
+        font-size: 62px;
+        line-height: 0.95;
         padding: 10px 15px;
     }
     .bc-series-heading-sub {
         font-size: 15px;
+        margin-top: 36px; /* 2026-10-28：配合標題 62／48px 與行距 0.95／0.9 */
     }
     /* 照片與滑桿間距縮小（桌面 420/280px → 平板 300/200px） */
     .bc-series-scrolling {
@@ -308,13 +316,15 @@
    行動端（≤767.98）：名稱/Highlight 縮小避免溢出
    ============================================================ */
 @media (max-width: 767.98px) {
-    /* 2026-08-28：行動端 heading 內部文字相應縮小（50→30px、sub 18→12px） */
+    /* 2026-08-28：行動端 heading 內部文字相應縮小（50→30px、sub 18→12px）
+       2026-10-28（使用者指示「行距縮小＋文字加大」）：30px → 36px、行距 0.95 */
     .bc-series-heading {
-        font-size: 30px;
+        font-size: 36px;
+        line-height: 0.95;
     }
     .bc-series-heading-sub {
         font-size: 9px; /* 2026-08-28 縮小：12→9 */
-        margin-top: 8px;
+        margin-top: 22px; /* 2026-10-28：8px → 22px（標題 32／36px＋行距 0.9，避免手繪圈壓到字母） */
     }
     /* 2026-08-28：手繪圓圈動畫相應縮小（副標題縮小後外圈 inset 24→14px）
        提高特異性：基礎規則 (.bc-leaf-circle-wrap .hero-title-svg) 在此 media 之後定義 */
@@ -702,17 +712,26 @@
    - 覆寫基礎 50px／平板 52px／桌面 140px；行動 30px
    ============================================================ */
 .bc-series-beans .bc-series-heading {
-    font-size: 26px;
+    /* 2026-10-28（使用者指示「行距縮小＋文字加大」）：26px → 32px、行距 0.9 */
+    font-size: 32px;
+    line-height: 0.9;
 }
 @media (min-width: 768px) {
     .bc-series-beans .bc-series-heading {
-        font-size: 40px;
+        /* 2026-10-28（使用者指示「行距縮小＋文字加大」）：40px → 48px */
+        font-size: 48px;
+        line-height: 0.9;
     }
 }
 @media (min-width: 1200px) {
     .bc-series-beans .bc-series-heading {
-        font-size: 80px;
-        line-height: 1.05; /* 兩行更緊湊（基礎 1、桌面 1） */
+        /* 2026-10-28（使用者指示「行距縮小＋文字加大」）：80px → 96px、行距 1.05 → 0.85 */
+        font-size: 96px;
+        line-height: 0.85; /* 兩行更緊湊（基礎 0.95、桌面 0.9） */
+    }
+    /* bean 桌面字級 96px（about 為 160px），副標間距可比基礎 52px 小 */
+    .bc-series-beans .bc-series-heading-sub {
+        margin-top: 44px;
     }
 }
 
