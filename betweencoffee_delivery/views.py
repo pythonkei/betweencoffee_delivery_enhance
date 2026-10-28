@@ -396,12 +396,20 @@ class Bean(View):
         )
 
         origin_group = next((g for g in BEAN_OPTION_GROUPS if g["key"] == "origin"), None)
+        # 2026-10-28（使用者指示）：about.html 的「咖啡豆 SERIES 括號滑桿」移入本頁
+        # （位置＝商品主區 .ftco-subpage-section.ftco-section-single-product 正下方）
+        # → 需要同一組咖啡豆清單。原本 About 用固定 id 1,2,3,6,7,8（＝目前全部 6 支），
+        #   此處改為全部 BeanItem 依 id 排序，結果相同但新增咖啡豆時會自動納入。
+        series_beans = list(BeanItem.objects.all().order_by("id"))
+
         context = {
             "bean": bean,
             "cart": cart,  # keep cart count fn
             "option_groups": get_bean_option_groups(bean),
             # 產地沿用既有排版顯示；中文值在此解析（「其他（自填）」→ origin_custom）
             "origin_display": bean_option_display_value(bean, origin_group) if origin_group else "",
+            # 咖啡豆 SERIES 括號滑桿（頁面底部）
+            "series_beans": series_beans,
         }
         return render(request, "betweencoffee_delivery/bean.html", context)
 
@@ -444,15 +452,12 @@ class About(View):
         series_coffees = list(
             CoffeeItem.objects.filter(id__in=[1, 2, 3, 4, 7, 8]).order_by("id")
         )
-        # 2026-08-27：咖啡豆 SERIES 括號滑桿——6 種咖啡豆（id 1,2,3,6,7,8）
-        series_beans = list(
-            BeanItem.objects.filter(id__in=[1, 2, 3, 6, 7, 8]).order_by("id")
-        )
+        # 2026-10-28（使用者指示）：咖啡豆 SERIES 括號滑桿已移至咖啡豆詳情頁
+        # （bean.html，商品主區下方）→ 本頁不再需要 series_beans。
 
         context = {
             "cart": cart,  # keep cart count fn
             "series_coffees": series_coffees,
-            "series_beans": series_beans,
             # 2026-10-08：loogg.jp「.top_art」sticky 堆疊卡片模組自 index.html 移至本頁
             # （置於 .bc-fujiya-photo 區塊正下方）。內容與動畫參數不變，
             # 與 landing context 共用同一個 builder。

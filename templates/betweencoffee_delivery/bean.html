@@ -250,6 +250,69 @@
 <!-- end for loop int:bean_pk -->
 
 
+<!-- ============================================================
+     2026-10-28（使用者指示）：about.html 的「咖啡豆 SERIES 括號滑桿」整個模組移入本頁，
+     位置＝上方商品主區 .ftco-subpage-section.ftco-section-single-product 正下方。
+     - 資料：series_beans（Bean view context；BeanItem 全部，依 id）
+     - 樣式：static/css/bc-series.css（本頁 extra_css）
+     - 行為：static/js/bc-series.js（本頁 extra_scripts；拖曳／左右箭頭／進視口加 .show）
+     - 括號框：static/images/coffee_border_02.svg
+     - 迴圈變數用 item（不可用 bean，會覆蓋本頁目前商品）
+     ============================================================ -->
+<section class="bc-series-hero bc-series-bracket bc-series-beans show">
+    <h2 class="bc-series-heading">
+        Recommend<br />Roastery
+        <span class="bc-series-heading-sub">
+            <span class="bc-leaf-circle-wrap">咖啡豆，專屬風味
+                <!-- SVG mask/clipPath id 用 C 後綴（沿用 about 版，避免與既有 A/B 衝突） -->
+                <svg width="320" height="60" viewBox="0 0 320 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-title-svg" aria-hidden="true" preserveAspectRatio="none">
+                    <defs>
+                        <mask id="leafFlowRevealMaskC">
+                            <rect width="320" height="60" fill="black"></rect>
+                            <path class="leaf-flow-reveal-stream" d="M160 5 C240 5 317 16 317 30 C317 44 240 55 160 55 C80 55 3 44 3 30 C3 16 80 5 158 9 C225 13 280 20 283 30" stroke="white" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="776" stroke-dashoffset="776"></path>
+                        </mask>
+                        <clipPath id="leafFlowClipC">
+                            <rect width="320" height="60" fill="white"></rect>
+                        </clipPath>
+                    </defs>
+                    <g opacity="0.75" clip-path="url(#leafFlowClipC)" mask="url(#leafFlowRevealMaskC)">
+                        <path d="M160 5 C240 5 317 16 317 30 C317 44 240 55 160 55 C80 55 3 44 3 30 C3 16 80 5 158 9 C225 13 280 20 283 30" fill="none" stroke="#BFFF00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </g>
+                </svg>
+            </span>
+        </span>
+    </h2>
+    <div class="bc-series-list-container">
+        <div class="bc-series-scrolling">
+            <div class="bc-series-list">
+                {% for item in series_beans %}
+                <div class="bc-series-slide">
+                    <a class="bc-series-item">
+                        <picture class="bc-series-picture">
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" loading="lazy" decoding="async">
+                        </picture>
+                        <div class="bc-series-caption">
+                            <p class="bc-series-caption-name">{{ item.name }}</p>
+                            <p class="bc-series-caption-highlight">{{ item.highlight }}</p>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <!-- 括號框：居中固定，照片在其內部滑動（noise 效果同 about／index） -->
+    <div class="bc-bracket-frame noise-img">
+        <img src="{% static 'images/coffee_border_02.svg' %}" class="noise_animation" alt="">
+    </div>
+    <ul class="bc-series-pager">
+        <li><button type="button" data-direction="left" aria-label="Prev" class="bc-series-arrow icon-arrow-left"></button></li>
+        <li><button type="button" data-direction="right" aria-label="Next" class="bc-series-arrow icon-arrow-right"></button></li>
+    </ul>
+</section>
+
+
+
 <!-- Add to Cart Toast Popup - 重新設計（含商品資訊 + 懸停保持） -->
 <div id="cart-popup" class="cart-popup">
     <!-- 左側區塊：主題色背景 -->
@@ -571,9 +634,16 @@
      註：layouts/blank.html 用 extra_css 塞了 .blank-container{padding-top:24vh}，
      故必須保留 {{ block.super }}，否則整頁版面上移 -->
 <link rel="stylesheet" href="{% static 'css/bc-coffee-comment.css' %}?v=20261024a">
+<!-- 2026-10-28（使用者指示）：about.html 的「咖啡豆 SERIES 括號滑桿」整個模組移入本頁
+     （位置＝商品主區 .ftco-subpage-section.ftco-section-single-product 正下方），
+     故本頁需載入原本只在 about 載入的 bc-series.css。 -->
+<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261028b" />
 {% endblock %}
 
 {% block extra_scripts %}
 <!-- 2026-10-24：氣泡 is-show 輪播（每 3 秒隨機輪替）；三顆全空的咖啡豆不出現此區塊 -->
 <script src="{% static 'js/bc-coffee-comment.js' %}?v=20261024a"></script>
+<!-- 2026-10-28（使用者指示）：咖啡豆 SERIES 括號滑桿自 about.html 移入本頁
+     → 需載入同一支行爲腳本（拖曳／左右箭頭／進視口加 .show 觸發手繪圓圈動畫） -->
+<script src="{% static 'js/bc-series.js' %}?v=20261028a"></script>
 {% endblock %}

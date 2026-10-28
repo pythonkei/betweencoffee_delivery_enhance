@@ -7,7 +7,7 @@
 
 {% block extra_css %}
 <!-- About 頁面 SERIES 滑桿 -->
-<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20260828q" />
+<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261028b" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
 <link rel="stylesheet" href="{% static 'css/blobs.css' %}" />
 <!-- hakujuji csBlock__leader 逐字亮起） -->
@@ -120,58 +120,10 @@
     </ul>
 </section>
 
-<!-- 2026-08-27：咖啡豆 SERIES 括號滑桿（複製括號滑桿 UI；使用 BeanItem 資料：照片/名稱/highlight） -->
-<section class="bc-series-hero bc-series-bracket show">
-    <h2 class="bc-series-heading">
-        BEANS
-        <span class="bc-series-heading-sub">
-            <span class="bc-leaf-circle-wrap">咖啡豆，專屬風味
-                <!-- SVG mask/clipPath id 用 C 後綴避免與既有 A/B 衝突 -->
-                <svg width="320" height="60" viewBox="0 0 320 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-title-svg" aria-hidden="true" preserveAspectRatio="none">
-                    <defs>
-                        <mask id="leafFlowRevealMaskC">
-                            <rect width="320" height="60" fill="black"></rect>
-                            <path class="leaf-flow-reveal-stream" d="M160 5 C240 5 317 16 317 30 C317 44 240 55 160 55 C80 55 3 44 3 30 C3 16 80 5 158 9 C225 13 280 20 283 30" stroke="white" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="776" stroke-dashoffset="776"></path>
-                        </mask>
-                        <clipPath id="leafFlowClipC">
-                            <rect width="320" height="60" fill="white"></rect>
-                        </clipPath>
-                    </defs>
-                    <g opacity="0.75" clip-path="url(#leafFlowClipC)" mask="url(#leafFlowRevealMaskC)">
-                        <path d="M160 5 C240 5 317 16 317 30 C317 44 240 55 160 55 C80 55 3 44 3 30 C3 16 80 5 158 9 C225 13 280 20 283 30" fill="none" stroke="#BFFF00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </g>
-                </svg>
-            </span>
-        </span>
-    </h2>
-    <div class="bc-series-list-container">
-        <div class="bc-series-scrolling">
-            <div class="bc-series-list">
-                {% for bean in series_beans %}
-                <div class="bc-series-slide">
-                    <a class="bc-series-item">
-                        <picture class="bc-series-picture">
-                            <img src="{{ bean.image.url }}" alt="{{ bean.name }}" loading="lazy" decoding="async">
-                        </picture>
-                        <div class="bc-series-caption">
-                            <p class="bc-series-caption-name">{{ bean.name }}</p>
-                            <p class="bc-series-caption-highlight">{{ bean.highlight }}</p>
-                        </div>
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    <!-- 括號框：居中固定，照片在其內部滑動（noise 效果同 index.html） -->
-    <div class="bc-bracket-frame noise-img">
-        <img src="{% static 'images/coffee_border_02.svg' %}" class="noise_animation" alt="">
-    </div>
-    <ul class="bc-series-pager">
-        <li><button type="button" data-direction="left" aria-label="Prev" class="bc-series-arrow icon-arrow-left"></button></li>
-        <li><button type="button" data-direction="right" aria-label="Next" class="bc-series-arrow icon-arrow-right"></button></li>
-    </ul>
-</section>
+<!-- 2026-10-28（使用者指示）：本頁「咖啡豆 SERIES 括號滑桿」（BEANS 組，2026-08-27 加入）已整組
+     移至咖啡豆詳情頁 templates/betweencoffee_delivery/bean.html（位置＝商品主區
+     .ftco-subpage-section.ftco-section-single-product 正下方）。本頁只保留上方咖啡 SERIES 滑桿；
+     series_beans context 同步自 views.About 移除。 -->
 
 
 <!-- 2026-10-25（使用者指示）：以下兩個模組整組自 index.html 移入本頁，插在兩段 SERIES 滑桿之後、
@@ -1406,7 +1358,7 @@
 
 {% block extra_scripts %}
 <!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
-<script src="{% static 'js/bc-series.js' %}?v=20260824d"></script>
+<script src="{% static 'js/bc-series.js' %}?v=20261028a"></script>
 <!-- hakujuji csBlock__leader：逐字亮起動畫 -->
 <script src="{% static 'js/bc-top-concept.js' %}?v=20260821a"></script>
 <!-- sukima who section 滾動 scrub 逐字揭示（跟隨滾動進度） -->

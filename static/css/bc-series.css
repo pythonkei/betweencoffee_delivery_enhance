@@ -54,7 +54,8 @@
     transition: transform 0.15s linear;
 }
 .bc-series-slide:not(:last-child) {
-    margin-right: 48px;
+    /* 2026-10-28（使用者指示：「每組咖啡豆之間間隔再次稍微加大」）：48 → 60 → 70px */
+    margin-right: 70px;
 }
 
 .bc-series-item {
@@ -153,8 +154,11 @@
         width: 280px;
     }
     .bc-series-slide:not(:last-child) {
-        width: 420px;
-        padding-right: 140px;
+        /* 2026-10-28（間隔加大 2 次）：照片維持 280px 不變，slide 寬度＝照片＋間隔
+           420（280+140）→ 480（280+200）→ 520（280+240）
+           （JS stepSize 讀 offsetWidth，翻頁步進會自動變 520；padding-left 置中算式仍以 280 為基準） */
+        width: 520px;
+        padding-right: 240px;
         margin-right: 0;
     }
 
@@ -272,8 +276,10 @@
         padding-left: calc((100% - 200px) / 2);
     }
     .bc-series-slide:not(:last-child) {
-        width: 300px;
-        padding-right: 80px;
+        /* 2026-10-28（間隔加大 2 次）：照片維持 200px 不變，slide 寬度＝照片＋間隔
+           300（200+80）→ 320（200+120）→ 340（200+140） */
+        width: 340px;
+        padding-right: 140px;
     }
     .bc-series-slide:last-child {
         width: 200px;
@@ -681,6 +687,28 @@
         left: -44px;
         width: 216px;
         margin-top: 2px; /* 6px→2px */
+    }
+}
+
+/* ============================================================
+   咖啡豆詳情頁專用（2026-10-28，使用者指示）
+   - 標題改為兩行「Recommend / Roastery」→ 字級需比 about 的單行 SERIES 小
+   - 只在 bean.html 的 section 加上 .bc-series-beans，about 頁 SERIES 不受影響
+     （兩頁原本共用 .bc-series-hero.bc-series-bracket，無法用既有 class 區分）
+   - 覆寫基礎 50px／平板 52px／桌面 140px；行動 30px
+   ============================================================ */
+.bc-series-beans .bc-series-heading {
+    font-size: 26px;
+}
+@media (min-width: 768px) {
+    .bc-series-beans .bc-series-heading {
+        font-size: 40px;
+    }
+}
+@media (min-width: 1200px) {
+    .bc-series-beans .bc-series-heading {
+        font-size: 80px;
+        line-height: 1.05; /* 兩行更緊湊（基礎 1、桌面 1） */
     }
 }
 

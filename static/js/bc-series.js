@@ -60,7 +60,11 @@
         for (var i = 0; i < arrows.length; i++) {
             (function (btn) {
                 btn.addEventListener("click", function () {
-                    var dir = btn.getAttribute("data-direction") === "left" ? -1 : 1;
+                    // 2026-10-28 修正：方向改回一般輪播慣例（原本寫反，左鈕其實在往前推、右鈕在退回）
+                    //   左箭頭 data-direction="left"／aria-label="Prev" ＝ 上一張 → --js-x 往 0 增加
+                    //   右箭頭 data-direction="right"／aria-label="Next" ＝ 下一張 → --js-x 往負值減少
+                    //   （照片本身是往左推，所以「下一張」才對應負值；拖曳方向不受影響）
+                    var dir = btn.getAttribute("data-direction") === "left" ? 1 : -1;
                     var nx = Math.max(maxLeft(), Math.min(0, getJsX() + dir * stepSize()));
                     setJsX(nx);
                     syncBlur();
