@@ -1,0 +1,22 @@
+League Gothic / trade-gothic webfont
+====================================
+
+檔案
+----
+LeagueGothic-latin.woff2      主要字集（英文、數字、標點）
+LeagueGothic-latin-ext.woff2  歐洲延伸字元（é / ñ / ő …）
+
+字型
+----
+League Gothic（Tyler Finck / Caroline Hadilaksono / Micah Rich）
+授權：SIL Open Font License 1.1（可自架、可商業使用）
+來源：Google Fonts v13（https://fonts.google.com/specimen/League+Gothic）
+下載日：2026-10-28
+
+為什麼放在 trade-gothic 資料夾
+------------------------------
+專案設計指定的字型是「Trade Gothic」（Monotype 商業字型，Google Fonts 沒有）。
+依使用者 2026-10-28 的決定，改用免費的 League Gothic 作為替代，但 CSS 的 family
+名稱仍沿用 'trade-gothic'（見 static/css/bc-fonts.css）。
+若日後取得 Trade Gothic 授權檔，把同一路徑的檔案換成本授權字型、或修改
+bc-fonts.css 的 src 即可，全站引用寫法（var(--bc-font-trade-gothic)）不需更動。

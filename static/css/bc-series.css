@@ -6,9 +6,11 @@
 
 /* ---------- 行動端（<768px）：標題在上 + 滑桿在下 ---------- */
 .bc-series-heading {
-    font-family: "Noto Sans TC", "Montserrat", sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    /* 2026-10-28（使用者指示）：英文字型改用全站自訂的 trade-gothic（= League Gothic 自架）
+       變數定義於 static/css/bc-fonts.css；中文沒有字形會自動落到 Noto Sans TC */
+    font-family: var(--bc-font-trade-gothic);
+    font-weight: 400; /* trade-gothic 只有單一字重 400（宣告 100-900 故不會被合成假粗體） */
+    letter-spacing: -0.01em;
     line-height: 1.2;
     color: #fff;
     margin-bottom: 14px;
@@ -16,6 +18,8 @@
     font-size: 50px;
 }
 .bc-series-heading-sub {
+    /* 中文副標（咖啡豆，專屬風味／一種興奮感…）維持原本的 Noto Sans TC，不套 trade-gothic */
+    font-family: "Noto Sans TC", "Montserrat", sans-serif;
     display: block;
     font-size: 18px;
     font-weight: 200;

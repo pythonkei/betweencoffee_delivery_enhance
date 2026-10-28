@@ -1,0 +1,55 @@
+/* ============================================================
+   bc-fonts.css — 全站自訂 web font（2026-10-28 新增，使用者指示）
+   ------------------------------------------------------------
+   目的：新增英文 web font family「trade-gothic」供全站使用
+        （用法：font-family: var(--bc-font-trade-gothic);）
+   ------------------------------------------------------------
+   實際字體檔：League Gothic（Tyler Finck / Caroline Hadilaksono / Micah Rich）
+     · 授權：SIL Open Font License 1.1（可自架、可商業使用）
+     · 來源：Google Fonts v13 → 已下載自架於 static/fonts/trade-gothic/
+       （不依賴 fonts.gstatic.com：Render 部署不受跨域／外部斷線影響）
+     · 為什麼叫 trade-gothic：設計指定的字型是「Trade Gothic」，但那是
+       Monotype 的商業字型、Google Fonts 沒有；依使用者決定改用最接近的免費
+       condensed gothic（League Gothic）並沿用 trade-gothic 這個 family 名稱。
+       日後若取得授權檔，只要換掉下方 @font-face 的 src（檔名照舊），
+       全站引用寫法完全不用改。
+   ------------------------------------------------------------
+   註：League Gothic 只有單一字重 400，可變軸只有寬度（wdth 75–100，此處用
+       Google Fonts 提供的 100%）。@font-face 刻意宣告 font-weight: 100 900，
+       讓任何字重請求都命中這個檔案、不會被瀏覽器合成假粗體（faux bold 在
+       窄體標題字上會糊掉）。要更窄的字形請改用 wdth 75 的檔案並在
+       @font-face 加 font-stretch: 75%。
+   ============================================================ */
+
+/* latin（主要字集：英文、數字、標點） */
+@font-face {
+    font-family: "trade-gothic";
+    font-style: normal;
+    font-weight: 100 900;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url("../fonts/trade-gothic/LeagueGothic-latin.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+        U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* latin-ext（含 é / ñ / ő 等歐洲字元） */
+@font-face {
+    font-family: "trade-gothic";
+    font-style: normal;
+    font-weight: 100 900;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url("../fonts/trade-gothic/LeagueGothic-latin-ext.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+        U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+        U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+    /* 全站英文 condensed 標題字：trade-gothic → 系統窄體 → Noto Sans TC（中文後備）
+       注意：trade-gothic 沒有中文字形，中文會自動落到 Noto Sans TC（全站已載入）。 */
+    --bc-font-trade-gothic: "trade-gothic", "Arial Narrow", "Helvetica Neue",
+        "Noto Sans TC", sans-serif;
+}
