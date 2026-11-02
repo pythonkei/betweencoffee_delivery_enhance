@@ -277,8 +277,10 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: calc(var(--cw-size, 31.25rem) * 0.4);
-  height: calc(var(--cw-size, 31.25rem) * 0.4);
+  /* 2026-11-02（使用者指示）：中心照片放大 → 0.4 → 0.5（實際可見尺寸再乘
+     .cw-center-picture 的 scale，見下） */
+  width: calc(var(--cw-size, 31.25rem) * 0.5);
+  height: calc(var(--cw-size, 31.25rem) * 0.5);
   text-align: center;
   pointer-events: none;
   z-index: 1;
@@ -304,7 +306,8 @@
   display: block;
   width: 100%;
   height: 100%;
-  transform: scale(0.9);
+  /* 原站 scale(0.9)；照片縮小留白 → 改 1（容器已放大到 0.5 倍字輪） */
+  transform: scale(1);
 }
 .bc-popeye50 .cw-center-img {
   width: 100%;
@@ -320,6 +323,9 @@
 
 .bc-popeye50 .cw-center-name {
   margin-top: 0.3rem;
+  /* 2026-11-02（使用者指示）：中心高亮品名縮小（原站繼承 1rem；此處獨立給字級，
+     用 vmin 隨螢幕縮放，避免大螢幕過大） */
+  font-size: clamp(0.7rem, 1.25vmin, 0.85rem);
   font-weight: bold;
   min-height: 1rem;
 }
@@ -337,9 +343,12 @@
     box-shadow: 0 0 1rem 0.75rem var(--cw-bg);
   }
   .bc-popeye50 .cw-center-picture {
-    transform: scale(0.85);
+    transform: scale(0.94);
   }
   .bc-popeye50 .cw-center-name {
+    /* 手機 vmin 太小會讓 clamp 落到 0.7rem（實測 10.3px）→ 明確給 0.78rem 保可讀性
+       （仍比原本的 1rem 小） */
+    font-size: 0.78rem;
     margin-right: -1rem;
     margin-left: -1rem;
     padding: 0.25rem 1rem 0.3rem;
