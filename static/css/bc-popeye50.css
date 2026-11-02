@@ -24,13 +24,32 @@
         → 品牌色：--bgcolor #0e0e0e（背景）、--primarycolor #c49b63（主色）。
      5. body.is-loading / is-ready → .bc-popeye50.is-loading / is-ready。
      6. 行動端 .cw-center-name 的 radial-gradient 是原站用來「遮住字輪」的
-        遮罩（邊緣透明，不是裝飾性漸層色）→ 沿用。
+        遮罩（邊緣透明，不是裝飾性漸層色）→ **[2026-11-02 移除]**：本站字輪半徑
+        大於中心名稱方塊，字不會壓到名字，遮罩反而會變成深色貼布。
+
+   2026-11-02（使用者指示：移除黑色背景）
+     - 本模組原本鋪一層 #0e0e0e 純黑底；但 about 頁 body 有 bg_4.jpg 黑板材質，
+       下面所有 section 都是透明（露出材質）→ 只有第一屏是純黑，接縫很明顯。
+     - 為什麼不直接 transparent：about 頁在 .bc-page-content 底下有一層
+       .rotate-mau（height:170vw、z-index:-1 的巨型米色字母環 #eeecde）。
+       它平時被第一屏的黑底蓋住；若本模組改成全透明，字母環會直接穿出第一屏
+       （實測字母會壓在字輪與杯子上，非常吵）。
+     - 因此改鋪「和 body 完全相同的一張背景」：style-bootstrap.css:3123
+       body{background:url(../images/bg_4.jpg) no-repeat fixed; background-size:cover}
+       → fixed ＋ cover ＋ 原點 0% 0%，與 body 同圖、同縮放、同定位，
+         第一屏與下方區塊是同一塊材質，接縫處完全看不出來，同時擋住字母環。
+       （iOS Safari 會把 background-attachment:fixed 當 scroll，但本模組高度
+         ＝100dvh＝視窗高，cover 的縮放結果與 body 在視窗上的結果相同 → 不影響。）
+     - 開場 loader 的黑幕一併透明（stage 本來就 opacity:0，不需要靠黑底遮擋）。
+     - 連帶移除手機版「深色遮罩」：.cw-center-img-wrap 的 background＋box-shadow、
+       .cw-center-name 的 radial-gradient＋text-shadow（材質上會變成深色方塊）。
    ============================================================ */
 
 .bc-popeye50 {
   /* 原站由 :root 提供；這裡以品牌色覆寫（原站白底黑字 → 本站深底金字） */
   --bgcolor: #0e0e0e;
   --primarycolor: #c49b63;
+  /* 僅保留給保險動畫與舊遮罩語意使用；畫面已不再鋪底色 */
   --cw-bg: var(--bgcolor, #0e0e0e);
   --cw-fg: var(--primarycolor, #c49b63);
   /* 原站 DM Sans + Typekit「dnp-shuei-gothic-kin-std」不可沿用 → 品牌內文字型 */
@@ -42,7 +61,13 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background-color: var(--cw-bg);
+  /* 2026-11-02（使用者指示）：移除黑底 → 改鋪與 body 相同的固定材質（見檔頭說明） */
+  background-color: transparent;
+  background-image: url("../images/bg_4.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: 0% 0%;
+  background-size: cover;
   color: var(--cw-fg);
   font-family: var(--cw-font);
   font-weight: 400;
@@ -74,7 +99,9 @@
   position: absolute;
   inset: 0;
   z-index: 10;
-  background-color: var(--cw-bg);
+  /* 2026-11-02（使用者指示）：原本是 #0e0e0e 全螢幕黑幕，改透明 → 開場的細線與年份
+     直接疊在頁面黑板材質上（stage 本身 opacity:0，不需要靠黑底遮擋） */
+  background-color: transparent;
   --cw-loader-year-bottom-offset: 1rem;
   --cw-loader-year-position-dur: 520ms;
   opacity: 1;
@@ -82,6 +109,7 @@
   transition: background-color var(--cw-loader-bg-fade, 520ms) ease;
 }
 .bc-popeye50 .cw-loader.is-complete {
+  /* 2026-11-02：底色已改透明 → 這條淡出只剩「保留原時間軸契約」的作用（no-op） */
   background-color: transparent;
 }
 @supports (bottom: env(safe-area-inset-bottom)) {
@@ -339,8 +367,10 @@
     font-size: var(--cw-word-size, clamp(10px, 2.9vmin, 13px));
   }
   .bc-popeye50 .cw-center-img-wrap {
-    background: var(--cw-bg);
-    box-shadow: 0 0 1rem 0.75rem var(--cw-bg);
+    /* 2026-11-02：原站在此鋪一塊底＋大範圍 box-shadow 遮住字輪；本站照片是去背 PNG、
+       且字輪半徑（s/2）大於照片盒半角，字不會壓到照片 → 移除深色貼布（會透出黑方塊） */
+    background: transparent;
+    box-shadow: none;
   }
   .bc-popeye50 .cw-center-picture {
     transform: scale(0.94);
@@ -352,13 +382,13 @@
     margin-right: -1rem;
     margin-left: -1rem;
     padding: 0.25rem 1rem 0.3rem;
-    background: radial-gradient(ellipse at center, var(--cw-bg) 0 58%, transparent 78%);
-    border-radius: 999px;
+    /* 2026-11-02：原站的 radial-gradient 是「遮住字輪」的深色遮罩；本站字輪半徑大於
+       名稱方塊、字不會壓到名字 → 移除（在黑板材質上會變成深色膠囊） */
+    background: none;
+    border-radius: 0;
     line-height: 1.2;
     overflow-wrap: anywhere;
-    text-shadow:
-      0 0 0.35rem var(--cw-bg),
-      0 0 0.75rem var(--cw-bg);
+    text-shadow: none;
   }
   .bc-popeye50 .cw-title-sub {
     top: 8rem;
