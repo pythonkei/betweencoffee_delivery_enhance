@@ -22,6 +22,8 @@
      4. 年份區間讀 data-year-start / data-year-end（預設 2020→2026）
      5. 捲出視窗時暫停 rAF（本頁下方還有很長內容，避免長駐耗電）
      6. prefers-reduced-motion：開場直接到終態、轉輪不自動旋轉
+     7. [2026-11-02] 中心圖文加連結 → 目前高亮咖啡的詳情頁（url 來自 wheel_items）；
+        拖曳轉字輪後鬆手會吃掉那次 click（位移門檻 8px），避免誤觸導頁
    ============================================================ */
 (function () {
   'use strict';
@@ -85,6 +87,7 @@
 
     var imgEl = stage.querySelector('.cw-center-img');
     var nameEl = stage.querySelector('.cw-center-name');
+    var centerLink = stage.querySelector('.cw-center-link');
     var centerWebpSource = stage.querySelector('.cw-center-source-webp');
     if (!imgEl || !nameEl) return;
 
@@ -241,7 +244,9 @@
     var finalYearsBottomReserve = 0;
 
     function baseWheelSize(width, height) {
-      return Math.max(remToViewportValue(7.5), Math.min(width, height) * 0.92);
+      // 2026-11-02（使用者指示第二輪：字輪略微縮小）0.92 → 0.86：
+      // 直徑＝min(寬,高) 的 86%，字輪外緣離視窗邊界多留約 3%（每側）。
+      return Math.max(remToViewportValue(7.5), Math.min(width, height) * 0.86);
     }
 
     function angleGapAt(index) {
@@ -555,6 +560,20 @@
       return bestIdx;
     }
 
+    // 2026-11-02（使用者指示）：中心＝目前高亮咖啡 → 連到該咖啡的詳情頁
+    // url 由 About view 放進 wheel_items（reverse("coffee", product_id=...)）
+    function updateCenterLink(it) {
+      if (!centerLink) return;
+      var url = it && typeof it.url === 'string' ? it.url : '';
+      if (url) {
+        centerLink.setAttribute('href', url);
+        centerLink.setAttribute('aria-label', (it.name || it.word || '咖啡') + '：前往商品詳情頁');
+      } else {
+        centerLink.removeAttribute('href');
+        centerLink.removeAttribute('aria-label');
+      }
+    }
+
     function updateCurrent() {
       var idx = getCurrentIndex();
       if (idx === currentIdx) return;
@@ -567,6 +586,7 @@
       }
       var it = wheelItems[idx];
       nameEl.textContent = it.name || it.word || '';
+      updateCenterLink(it);
       if (imageUrl(it)) {
         imgEl.classList.remove('is-loaded');
         imgEl.onload = function () { imgEl.classList.add('is-loaded'); };
@@ -634,6 +654,12 @@
     var dragging = false;
     var lastAngle = 0;
     var dragPointerId = null;
+    // 中心圖文＝詳情頁連結 → 拖曳轉字輪後鬆手不要觸發導頁：
+    // 記下起點，位移超過 8px 就算「拖曳」，該次 click 直接吃掉。
+    var dragStartX = 0;
+    var dragStartY = 0;
+    var dragMoved = false;
+    var DRAG_CLICK_TOLERANCE = 8;
 
     function pointerAngle(clientX, clientY) {
       var r = stage.getBoundingClientRect();
@@ -646,15 +672,29 @@
       if (!isInWheelCircle(e.clientX, e.clientY)) return;
       dragging = true;
       dragPointerId = e.pointerId;
-      try { stage.setPointerCapture(e.pointerId); } catch (_) {}
       stage.classList.add('is-dragging');
       lastAngle = pointerAngle(e.clientX, e.clientY);
       velocity = 0;
       lastInteract = performance.now();
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragMoved = false;
+      // 2026-11-02：不在 pointerdown 就 setPointerCapture —— 實測 Chrome 一旦在
+      // pointerdown 抓走指標，後續 click 的 target 會變成 stage，中心連結（<a>）
+      // 的原生導頁就失效。改成「位移超過門檻（真正開始拖曳）才 capture」，
+      // 單純點擊時 <a> 照常導頁。
     });
 
     stage.addEventListener('pointermove', function (e) {
       if (!dragging || e.pointerId !== dragPointerId) return;
+      if (!dragMoved) {
+        var mx = e.clientX - dragStartX;
+        var my = e.clientY - dragStartY;
+        if ((mx * mx + my * my) > DRAG_CLICK_TOLERANCE * DRAG_CLICK_TOLERANCE) {
+          dragMoved = true;
+          try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+      }
       var a = pointerAngle(e.clientX, e.clientY);
       var d = a - lastAngle;
       if (d > 180) d -= 360;
@@ -674,6 +714,25 @@
     stage.addEventListener('pointerup', endDrag);
     stage.addEventListener('pointercancel', endDrag);
     stage.addEventListener('pointerleave', endDrag);
+    // 拖曳途中才 capture，若在 stage 外放開也要收尾
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    // 中心是 <a href>（預設可「拖出連結」）→ 拖曳字輪時不要讓瀏覽器轉成原生拖曳，
+    // 否則 pointermove / pointerup 會被吃掉、click 也不會補發
+    stage.addEventListener('dragstart', function (e) {
+      e.preventDefault();
+    });
+
+    if (centerLink) {
+      // 拖曳後鬆手的那次 click 不導頁；單純點擊（位移 < 8px）才前往詳情頁
+      centerLink.addEventListener('click', function (e) {
+        if (dragMoved) {
+          e.preventDefault();
+          dragMoved = false;
+        }
+      });
+    }
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stop(); else start();

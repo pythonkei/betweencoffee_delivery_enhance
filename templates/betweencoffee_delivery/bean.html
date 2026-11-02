@@ -287,9 +287,9 @@
             <div class="bc-series-list">
                 {% for item in series_beans %}
                 <div class="bc-series-slide">
-                    <a class="bc-series-item">
+                    <a class="bc-series-item" draggable="false">
                         <picture class="bc-series-picture">
-                            <img src="{{ item.image.url }}" alt="{{ item.name }}" loading="lazy" decoding="async">
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" loading="lazy" decoding="async" draggable="false">
                         </picture>
                         <div class="bc-series-caption">
                             <p class="bc-series-caption-name">{{ item.name }}</p>
@@ -637,7 +637,7 @@
 <!-- 2026-10-28（使用者指示）：about.html 的「咖啡豆 SERIES 括號滑桿」整個模組移入本頁
      （位置＝商品主區 .ftco-subpage-section.ftco-section-single-product 正下方），
      故本頁需載入原本只在 about 載入的 bc-series.css。 -->
-<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261028d" />
+<link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261102b" />
 {% endblock %}
 
 {% block extra_scripts %}
@@ -645,5 +645,5 @@
 <script src="{% static 'js/bc-coffee-comment.js' %}?v=20261024a"></script>
 <!-- 2026-10-28（使用者指示）：咖啡豆 SERIES 括號滑桿自 about.html 移入本頁
      → 需載入同一支行爲腳本（拖曳／左右箭頭／進視口加 .show 觸發手繪圓圈動畫） -->
-<script src="{% static 'js/bc-series.js' %}?v=20261028a"></script>
+<script src="{% static 'js/bc-series.js' %}?v=20261102b"></script>
 {% endblock %}

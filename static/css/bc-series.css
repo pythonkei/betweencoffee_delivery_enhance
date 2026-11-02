@@ -68,6 +68,8 @@
 
 .bc-series-item {
     display: block;
+    /* 2026-11-02：詳情頁連結不要被「拖出連結」的原生拖曳干擾（會中斷 pointer 事件） */
+    -webkit-user-drag: none;
 }
 
 .bc-series-picture {
@@ -80,6 +82,12 @@
     height: 100%;
     object-fit: cover;
     vertical-align: top;
+    /* 2026-11-02：項目已是 <a href> 商品詳情頁連結 → 圖片不再當原生拖曳來源。
+       原本靠 pointerdown 的 preventDefault() 壓掉原生拖曳，但那會連帶讓 click
+       無法完成導頁；改成圖片本身不接受指標事件（拖曳一律由 bc-series.js 的
+       --js-x 處理），點擊則由外層 <a> 正常導頁。 */
+    pointer-events: none;
+    -webkit-user-drag: none;
 }
 
 /* 箭頭 pager（行動端在滑桿下方） */

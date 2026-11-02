@@ -4,6 +4,8 @@
      標題 [data-blurred] 切換模糊。
    - 左右箭頭移動 --js-x。
    - .bc-series-bracket（第二組）：每張照片一格，鬆開時吸附到最近格。
+   - 2026-11-02：項目改為 <a href> 商品詳情頁連結 → 拖曳位移超過 8px 時
+     攔掉那次 click（避免轉滑桿時誤觸導頁）。
    ============================================================ */
 (function () {
     "use strict";
@@ -76,25 +78,57 @@
         var isDragging = false;
         var startX = 0;
         var startJsX = 0;
+        // 2026-11-02：.bc-series-item 加上詳情頁連結後，拖曳放手不能誤觸導頁
+        // → 位移超過 8px 就算拖曳，該次 click 直接吃掉（capture 階段攔）。
+        var dragStartClientX = 0;
+        var dragMoved = false;
+        var DRAG_CLICK_TOLERANCE = 8;
 
         scrolling.addEventListener("pointerdown", function (e) {
             isDragging = true;
             startX = e.clientX;
             startJsX = getJsX();
-            try {
-                scrolling.setPointerCapture(e.pointerId);
-            } catch (err) {}
+            dragStartClientX = e.clientX;
+            dragMoved = false;
             scrolling.classList.add("bc-series-dragging");
             scrolling.style.cursor = "grabbing";
-            e.preventDefault();
+            // 2026-11-02：不再 e.preventDefault()／setPointerCapture()
+            //   preventDefault 會讓外層 <a> 的 click 無法完成導頁；
+            //   capture 會把 click 的 target 換成 scrolling（同樣導不了頁）。
+            //   原生拖曳改由 bc-series.css 的 .bc-series-picture > img{pointer-events:none}
+            //   與 .bc-series-slide{user-select:none;touch-action:none} 壓住，
+            //   pointermove / pointerup 都掛在 window 上，不需 capture 也收得到。
         });
 
         window.addEventListener("pointermove", function (e) {
             if (!isDragging) return;
+            if (!dragMoved && Math.abs(e.clientX - dragStartClientX) > DRAG_CLICK_TOLERANCE) {
+                dragMoved = true;
+            }
             var dx = e.clientX - startX;
             var nx = Math.max(maxLeft(), Math.min(0, startJsX + dx));
             setJsX(nx);
             syncBlur();
+        });
+
+        // 連結在 pointerdown 已被 preventDefault 的情況下仍可能收到 click
+        // → 只要判定為拖曳就阻止預設行為（不導頁）
+        scrolling.addEventListener(
+            "click",
+            function (e) {
+                if (!dragMoved) return;
+                e.preventDefault();
+                e.stopPropagation();
+                dragMoved = false;
+            },
+            true
+        );
+
+        // 2026-11-02：<a href> 預設可被「拖出連結」，一旦觸發原生拖曳，
+        // 後續 pointermove / pointerup 會被瀏覽器吃掉（滑桿卡住、click 也不會來）
+        // → 一律擋掉預設拖曳（圖片另由 CSS pointer-events:none 處理）
+        scrolling.addEventListener("dragstart", function (e) {
+            e.preventDefault();
         });
 
         window.addEventListener("pointerup", function () {

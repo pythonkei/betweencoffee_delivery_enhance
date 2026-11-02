@@ -43,6 +43,15 @@
      - 開場 loader 的黑幕一併透明（stage 本來就 opacity:0，不需要靠黑底遮擋）。
      - 連帶移除手機版「深色遮罩」：.cw-center-img-wrap 的 background＋box-shadow、
        .cw-center-name 的 radial-gradient＋text-shadow（材質上會變成深色方塊）。
+
+   2026-11-02（使用者指示第二輪）
+     1. 旋轉字輪略微縮小：直徑係數 0.92 → 0.86（在 bc-popeye50.js 的 baseWheelSize，
+        不在 CSS）→ 字輪離視窗邊緣多留一點呼吸空間。
+     2. 中心品名略微放大：桌機 clamp(0.82rem, 1.5vmin, 1rem)（原 0.7/1.25vmin/0.85）、
+        手機 0.9rem（原 0.78rem）。放大後名稱方塊仍在字輪內圈之內，不會被字壓到。
+     3. 中心圖文加上連結 → 目前高亮咖啡的詳情頁（.cw-center-link，url 由 About view
+        放進 wheel_items；JS 在中心換品項時同步換 href）。
+        拖曳轉字輪後鬆手不會誤觸導頁（JS 內 dragMoved 門檻 8px）。
    ============================================================ */
 
 .bc-popeye50 {
@@ -314,6 +323,27 @@
   z-index: 1;
 }
 
+/* 中心＝連結（2026-11-02 使用者指示：咖啡相關連結 → 詳情頁）
+   .cw-center 本身 pointer-events:none（避免擋住字輪拖曳），由連結取回事件。
+   目標網址＝目前高亮咖啡的詳情頁，JS 於中心換品項時同步 href。 */
+.bc-popeye50 .cw-center-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-user-drag: none;
+}
+.bc-popeye50 .cw-center-link:focus-visible {
+  outline: 1px solid var(--cw-fg);
+  outline-offset: 4px;
+}
+.bc-popeye50 .cw-center-link:hover .cw-center-name,
+.bc-popeye50 .cw-center-link:focus-visible .cw-center-name {
+  /* 品牌金 hover（#d4ab73）：只提亮文字，不加位移或陰影，維持輕鬆感 */
+  color: #d4ab73;
+}
+
 .bc-popeye50 .cw-center-img-wrap {
   display: block;
   width: 100%;
@@ -322,8 +352,8 @@
   padding: 0;
   border: 0;
   background: transparent;
-  /* 原站是可點開燈箱的 button；本站不做燈箱 → 不給 pointer 游標 */
-  cursor: default;
+  /* 2026-11-02：中心圖文已是詳情頁連結 → 照片上也給 pointer 游標 */
+  cursor: pointer;
   pointer-events: auto;
   transform-origin: 50% 50%;
   transition:
@@ -351,11 +381,13 @@
 
 .bc-popeye50 .cw-center-name {
   margin-top: 0.3rem;
-  /* 2026-11-02（使用者指示）：中心高亮品名縮小（原站繼承 1rem；此處獨立給字級，
-     用 vmin 隨螢幕縮放，避免大螢幕過大） */
-  font-size: clamp(0.7rem, 1.25vmin, 0.85rem);
+  /* 2026-11-02（使用者指示第二輪）：中心高亮品名略微放大
+     0.7rem / 1.25vmin / 0.85rem → 0.82rem / 1.5vmin / 1rem（桌機 1440×900 約 13.5px）
+     用 vmin 隨螢幕縮放，避免大螢幕過大 */
+  font-size: clamp(0.82rem, 1.5vmin, 1rem);
   font-weight: bold;
   min-height: 1rem;
+  transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ---------------- 斷點（原站 767px：手機字級／中心遮罩） ---------------- */
@@ -376,9 +408,8 @@
     transform: scale(0.94);
   }
   .bc-popeye50 .cw-center-name {
-    /* 手機 vmin 太小會讓 clamp 落到 0.7rem（實測 10.3px）→ 明確給 0.78rem 保可讀性
-       （仍比原本的 1rem 小） */
-    font-size: 0.78rem;
+    /* 2026-11-02（使用者指示第二輪）：手機 0.78rem → 0.9rem（略微放大，仍小於本站正文） */
+    font-size: 0.9rem;
     margin-right: -1rem;
     margin-left: -1rem;
     padding: 0.25rem 1rem 0.3rem;
@@ -389,6 +420,14 @@
     line-height: 1.2;
     overflow-wrap: anywhere;
     text-shadow: none;
+  }
+  /* 2026-11-02：手機字輪半徑較小＋品名放大後，長字（WakeMeup／Nice Step／Sunshine）的内端
+     會伸進品名區。原站是用深色底塊遮住字輪（黑板材上會露出方塊），這裡改用徑向遮罩讓靠中心的
+     一段自然淡出：視覺上不留矩形邊界，也不擋字輪外圈的閱讀。
+     遮罩半徑＝字輪半徑（.cw-wheel 是 --cw-size 正方形，closest-side 即環半徑）。 */
+  .bc-popeye50 .cw-wheel {
+    -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0) 54%, #000 76%);
+    mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0) 54%, #000 76%);
   }
   .bc-popeye50 .cw-title-sub {
     top: 8rem;

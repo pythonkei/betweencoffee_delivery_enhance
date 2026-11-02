@@ -458,11 +458,14 @@ class About(View):
         # 2026-11-02（使用者指示）：首屏移植 popeyemagazine.jp/50interviews/ 旋轉字輪
         # → 字輪字（英文品名）／中心圖文（中文亮點＋去背圖）都改由本店咖啡提供。
         # 品項不足 10 筆時前端會自動重複排列補滿圓周（只影響密度，不改資料）。
+        # 2026-11-02（使用者指示第二輪）：首屏字輪中心圖文加上連結 → 該咖啡的詳情頁
+        # （url 於前端換品項時同步換 href，見 static/js/bc-popeye50.js 的 updateCenterLink）
         wheel_items = [
             {
                 "word": coffee.name,
                 "name": coffee.highlight or coffee.name,
                 "image": coffee.get_index_image(),
+                "url": reverse("coffee", kwargs={"product_id": coffee.id}),
             }
             for coffee in series_coffees
         ]
