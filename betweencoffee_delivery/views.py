@@ -455,9 +455,22 @@ class About(View):
         # 2026-10-28（使用者指示）：咖啡豆 SERIES 括號滑桿已移至咖啡豆詳情頁
         # （bean.html，商品主區下方）→ 本頁不再需要 series_beans。
 
+        # 2026-11-02（使用者指示）：首屏移植 popeyemagazine.jp/50interviews/ 旋轉字輪
+        # → 字輪字（英文品名）／中心圖文（中文亮點＋去背圖）都改由本店咖啡提供。
+        # 品項不足 10 筆時前端會自動重複排列補滿圓周（只影響密度，不改資料）。
+        wheel_items = [
+            {
+                "word": coffee.name,
+                "name": coffee.highlight or coffee.name,
+                "image": coffee.get_index_image(),
+            }
+            for coffee in series_coffees
+        ]
+
         context = {
             "cart": cart,  # keep cart count fn
             "series_coffees": series_coffees,
+            "wheel_items": wheel_items,
             # 2026-10-08：loogg.jp「.top_art」sticky 堆疊卡片模組自 index.html 移至本頁
             # （置於 .bc-fujiya-photo 區塊正下方）。內容與動畫參數不變，
             # 與 landing context 共用同一個 builder。

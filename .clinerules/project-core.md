@@ -45,6 +45,9 @@
 | `static/js/staff-order-management/base-order-renderer-v2.js` | 員工端渲染器基底 |
 | `static/css/bc-components.css` | 品牌元件庫（`.bc-btn` / `.bc-input` / `.bc-card` / `.bc-order-collapse`） |
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
+| `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 首頁「咖啡豆製程」捲動模組（`[2b-2]`；移植 union-tec `homeService`：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS） |
+| `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`；3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
+| `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | `/about/` 最上方首屏（移植 popeyemagazine.jp/50interviews）：loader 年份 2020→2026 滾動＋慣性旋轉字輪；資料由 `About` view 的 `wheel_items`（CoffeeItem）經 `json_script` 注入 |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
 ## 4. 開發規範

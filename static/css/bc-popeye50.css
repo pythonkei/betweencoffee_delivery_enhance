@@ -1,0 +1,388 @@
+/* ============================================================
+   bc-popeye50.css — popeyemagazine.jp/50interviews/ 首屏動畫移植（about.html 第一屏）
+   2026-11-02 建立（使用者指示：把該站最上方的動畫 1:1 搬到 about 頁最上方）
+   ------------------------------------------------------------------
+   來源：https://popeyemagazine.jp/wp-content/themes/popeyemagazine-v4/
+         dist/special/50interviews/styles.css（792 行）
+
+   保留（1:1，動畫參數完全不改）
+     .cw-loader / .cw-loader-line(-fill) / .cw-loader-year  開場：細線＋年份滾動
+     .cw-stage / .cw-wheel / .cw-word / .cw-center*          慣性旋轉字輪
+     .cw-title-sub                                           直排副標
+   移除
+     原站 1-36 行「全站 reset」、48-68 行 html/body/a（直接貼會打爛整頁）
+     .cw-logo（POPEYE 商標；左上品牌由站上 .bc-navbar-brand-fixed 呈現）
+     .cw-nav / .cw-about / .cw-index / .cw-modal / .cw-celebration /
+     .cw-confetti / .cw-balloon（本頁不做這些互動）
+     body.popeye-50interviews-single 專用分支（單篇頁）
+
+   改寫（不影響動畫行為，只是必要的 scoping）
+     1. 所有選擇器 scope 在 .bc-popeye50 之下，不污染其他頁面。
+     2. position:fixed → absolute：模組只佔第一屏，不浮在整份 about 頁上。
+     3. .cw-stage width:100vw → 100%（避免捲軸造成水平溢出）。
+     4. :root 的 --cw-bg/--cw-fg/--cw-font 改由 .bc-popeye50 提供
+        → 品牌色：--bgcolor #0e0e0e（背景）、--primarycolor #c49b63（主色）。
+     5. body.is-loading / is-ready → .bc-popeye50.is-loading / is-ready。
+     6. 行動端 .cw-center-name 的 radial-gradient 是原站用來「遮住字輪」的
+        遮罩（邊緣透明，不是裝飾性漸層色）→ 沿用。
+   ============================================================ */
+
+.bc-popeye50 {
+  /* 原站由 :root 提供；這裡以品牌色覆寫（原站白底黑字 → 本站深底金字） */
+  --bgcolor: #0e0e0e;
+  --primarycolor: #c49b63;
+  --cw-bg: var(--bgcolor, #0e0e0e);
+  --cw-fg: var(--primarycolor, #c49b63);
+  /* 原站 DM Sans + Typekit「dnp-shuei-gothic-kin-std」不可沿用 → 品牌內文字型 */
+  --cw-font: "Noto Sans TC", sans-serif;
+
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--cw-bg);
+  color: var(--cw-fg);
+  font-family: var(--cw-font);
+  font-weight: 400;
+  font-size: clamp(1rem, 1.7vmin, 1.6rem);
+  line-height: 1;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-feature-settings: "palt" 1;
+  isolation: isolate;
+}
+
+/* 貼齊視窗頂端：bc-components.css 會給「內容首個 section」margin-top 100px/72px/60px
+   預留 navbar 高度；本模組是「蓋滿第一屏」的 hero（原站 loader 也蓋滿整個視窗、
+   navbar 浮在上面），故抵銷。否則模組中心點會低於視窗中心、loader 的底部年份會落到視窗外。 */
+.bc-page-content > section.bc-popeye50:first-of-type {
+  margin-top: 0;
+}
+
+/* 原站 reset 的 * { box-sizing: border-box } → 只在本模組內生效 */
+.bc-popeye50 *,
+.bc-popeye50 *::before,
+.bc-popeye50 *::after {
+  box-sizing: border-box;
+}
+
+/* ---------------- loader（開場：細線 ＋ 年份滾動） ---------------- */
+.bc-popeye50 .cw-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background-color: var(--cw-bg);
+  --cw-loader-year-bottom-offset: 1rem;
+  --cw-loader-year-position-dur: 520ms;
+  opacity: 1;
+  pointer-events: none;
+  transition: background-color var(--cw-loader-bg-fade, 520ms) ease;
+}
+.bc-popeye50 .cw-loader.is-complete {
+  background-color: transparent;
+}
+@supports (bottom: env(safe-area-inset-bottom)) {
+  .bc-popeye50 .cw-loader {
+    --cw-loader-year-bottom-offset: calc(1rem + env(safe-area-inset-bottom));
+  }
+}
+@supports (bottom: constant(safe-area-inset-bottom)) {
+  .bc-popeye50 .cw-loader {
+    --cw-loader-year-bottom-offset: calc(1rem + constant(safe-area-inset-bottom));
+  }
+}
+.bc-popeye50 .cw-loader-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0.0625rem;
+  background: transparent;
+  transform: translateY(-50%);
+}
+.bc-popeye50 .cw-loader-line-fill {
+  width: 0;
+  height: 100%;
+  background: var(--cw-fg);
+  transform-origin: 100% 50%;
+}
+.bc-popeye50 .cw-loader-year {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  z-index: 1;
+  margin: 0;
+  letter-spacing: 0;
+  font-family: "Azeret Mono", var(--cw-font);
+  font-size: clamp(1.2rem, 1.7vmin, 1.8rem);
+  font-weight: 400;
+  line-height: 1;
+  padding: 0 1rem;
+  background-color: var(--bgcolor, #0e0e0e);
+  color: var(--cw-fg);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition:
+    opacity var(--cw-loader-year-fade, 560ms) ease,
+    font-size 420ms ease;
+  will-change: left, top, opacity, transform, font-size;
+}
+.bc-popeye50.is-loading .cw-loader-year {
+  font-size: clamp(2rem, 4.2vmin, 4.4rem);
+}
+.bc-popeye50 .cw-loader.is-year-layout-animated .cw-loader-year {
+  transition:
+    opacity var(--cw-loader-year-fade, 560ms) ease,
+    top var(--cw-loader-year-position-dur, 520ms) ease,
+    transform var(--cw-loader-year-position-dur, 520ms) ease,
+    font-size 420ms ease;
+}
+.bc-popeye50 .cw-loader-year.is-visible {
+  opacity: 1;
+}
+.bc-popeye50 .cw-loader-start-year {
+  left: 0;
+}
+
+/* ---------------- 直排副標（原站 .cw-title-sub） ---------------- */
+.bc-popeye50 .cw-title-sub {
+  position: absolute;
+  /* 原站 right:1rem; top:5rem；本站右緣被 .bc-attract-buy（Order 分頁）與會員／
+     購物車按鈕佔滿（y≈90–390），且 loader 年份固定在左右兩側垂直中線 →
+     改掛左緣、navbar 品牌下方（只改位置，不動字級與淡入時序） */
+  left: 1rem;
+  top: 7rem;
+  z-index: 11;
+  margin: 0;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  color: var(--cw-fg);
+  font-size: clamp(0.8rem, 1.7vmin, 1.4rem);
+  letter-spacing: 0.08rem;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity var(--cw-title-sub-fade, 560ms) ease;
+}
+/* 原站 reset 有 b { font: inherit } → 副標實際不是粗體；照原樣還原 */
+.bc-popeye50 .cw-title-sub b {
+  font-weight: inherit;
+}
+.bc-popeye50 .cw-title-sub.is-visible {
+  opacity: 1;
+}
+
+/* ---------------- stage / wheel ---------------- */
+.bc-popeye50 .cw-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* 原站 touch-action:none（該站只有這一屏、不需要捲動）。本頁下方還有很長的內容，
+     若鎖住垂直手勢會讓使用者在首屏完全無法下滑 → 改 pan-y：
+     垂直手勢＝正常捲頁（瀏覽器會發 pointercancel，JS 的 endDrag 會收尾），
+     水平手勢＝旋轉字輪。 */
+  touch-action: pan-y;
+  /* 原站 overscroll-behavior:contain（同上，該站不需捲頁）。overflow:hidden 讓 stage
+     成為 scroll container，contain 會把滾輪事件鎖在 stage 內 → 整頁無法捲動，故移除。 */
+  overscroll-behavior: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: grab;
+  opacity: 1;
+  transition: opacity var(--cw-stage-fade, 420ms) ease;
+}
+.bc-popeye50 .cw-stage.is-dragging {
+  cursor: grabbing;
+}
+.bc-popeye50.is-loading .cw-stage {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bc-popeye50 .cw-wheel-hitarea {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: var(--cw-size, 37.5rem);
+  height: var(--cw-size, 37.5rem);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  touch-action: none;
+}
+
+.bc-popeye50 .cw-wheel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--cw-size, 37.5rem);
+  height: var(--cw-size, 37.5rem);
+  transform: translate(-50%, -50%) rotate(var(--cw-rotation, 0deg));
+  transform-origin: 50% 50%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.bc-popeye50 .cw-empty {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  color: var(--cw-fg);
+  font-size: clamp(1rem, 2vmin, 1.25rem);
+  line-height: 1.6;
+  text-align: center;
+  letter-spacing: 0;
+}
+.bc-popeye50 .cw-empty[hidden] {
+  display: none;
+}
+.bc-popeye50 .cw-stage.is-empty {
+  cursor: default;
+}
+
+.bc-popeye50 .cw-word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  margin-top: -0.5rem;
+  white-space: nowrap;
+  font-size: var(--cw-word-size, clamp(8px, 1.7vmin, 20px));
+  line-height: 1;
+  color: #cccccc;
+  text-align: left;
+  transform-origin: 0 50%;
+  transition: color 160ms ease;
+  transform:
+    rotate(var(--angle, 0deg))
+    translateX(var(--cw-radius, 18.75rem))
+    translateX(-100%);
+}
+.bc-popeye50 .cw-word.is-current {
+  color: var(--cw-fg);
+}
+
+/* ---------------- 中心（人像＋名稱） ---------------- */
+.bc-popeye50 .cw-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(var(--cw-size, 31.25rem) * 0.4);
+  height: calc(var(--cw-size, 31.25rem) * 0.4);
+  text-align: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bc-popeye50 .cw-center-img-wrap {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  /* 原站是可點開燈箱的 button；本站不做燈箱 → 不給 pointer 游標 */
+  cursor: default;
+  pointer-events: auto;
+  transform-origin: 50% 50%;
+  transition:
+    opacity 1600ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bc-popeye50 .cw-center-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.9);
+}
+.bc-popeye50 .cw-center-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.bc-popeye50 .cw-center-img.is-loaded {
+  opacity: 1;
+}
+
+.bc-popeye50 .cw-center-name {
+  margin-top: 0.3rem;
+  font-weight: bold;
+  min-height: 1rem;
+}
+
+/* ---------------- 斷點（原站 767px：手機字級／中心遮罩） ---------------- */
+@media (max-width: 767px) {
+  .bc-popeye50.is-loading .cw-loader-year {
+    font-size: clamp(1.55rem, 6.5vw, 2.2rem);
+  }
+  .bc-popeye50 .cw-word {
+    font-size: var(--cw-word-size, clamp(10px, 2.9vmin, 13px));
+  }
+  .bc-popeye50 .cw-center-img-wrap {
+    background: var(--cw-bg);
+    box-shadow: 0 0 1rem 0.75rem var(--cw-bg);
+  }
+  .bc-popeye50 .cw-center-picture {
+    transform: scale(0.85);
+  }
+  .bc-popeye50 .cw-center-name {
+    margin-right: -1rem;
+    margin-left: -1rem;
+    padding: 0.25rem 1rem 0.3rem;
+    background: radial-gradient(ellipse at center, var(--cw-bg) 0 58%, transparent 78%);
+    border-radius: 999px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-shadow:
+      0 0 0.35rem var(--cw-bg),
+      0 0 0.75rem var(--cw-bg);
+  }
+  .bc-popeye50 .cw-title-sub {
+    top: 8rem;
+  }
+}
+
+/* 使用者要求減少動態：轉輪不自動旋轉（JS 同步停用 rAF），過渡時間歸零 */
+@media (prefers-reduced-motion: reduce) {
+  .bc-popeye50 .cw-loader,
+  .bc-popeye50 .cw-loader-year,
+  .bc-popeye50 .cw-title-sub,
+  .bc-popeye50 .cw-stage,
+  .bc-popeye50 .cw-word {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* 保險：JS 若沒執行（或時間軸被瀏覽器節流卡住），15 秒後由 CSS 強制收掉 loader
+   並顯示字輪，避免首屏永遠停在開場畫面（時間與 js 內的保險一致） */
+.bc-popeye50.is-loading .cw-loader {
+  animation: bc-popeye50-loader-failsafe 1ms linear 15s forwards;
+}
+.bc-popeye50.is-loading .cw-stage {
+  animation: bc-popeye50-stage-failsafe 1ms linear 15s forwards;
+}
+@keyframes bc-popeye50-loader-failsafe {
+  to {
+    background-color: transparent;
+  }
+}
+@keyframes bc-popeye50-stage-failsafe {
+  to {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
