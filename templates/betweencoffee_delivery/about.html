@@ -6,12 +6,12 @@
 {% block title %}Between Coffee - About{% endblock %}
 
 {% block extra_css %}
-<!-- 2026-11-02（使用者指示）：popeyemagazine.jp/50interviews/ 首屏動畫移植
-     （loader 年份計數 ＋ 慣性旋轉字輪；視覺 1:1，內容改為本店咖啡）
-     → 位置＝本頁最上方（.rotate-mau 之後、SERIES 之前）
-     需搭配 js/bc-popeye50.js 與下方 #bc-popeye50-data -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="{% static 'css/bc-popeye50.css' %}?v=20261102f" />
+<!-- 2026-11-03（使用者指示）：yurumaru.life 首屏「sticky 影片 + 產品照弧形輪播」移植
+     （取代 2026-11-02 的 popeye50 字輪；舊模組檔案仍在 static/ 不過本頁不再載入）
+     → 位置＝.rotate-mau 之後、SERIES 之前
+     結構：.sticky-bg__bg（影片 sticky 釘住一屏）＋ .sticky-bg__content（margin-top:-100vh 覆蓋）
+     參數：Splide perPage3/gap10vw/padding14vw/autoplay4000/1750ms，斷點 680 → 1 張 -->
+<link rel="stylesheet" href="{% static 'css/bc-sticky-mv.css' %}?v=20261103g" />
 <!-- About 頁面 SERIES 滑桿 -->
 <link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261102b" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
@@ -57,7 +57,7 @@
      → css ?v=20261018a（about 頁仍以本模組作真頁尾；首頁則用它當第一屏 hero）。
      2026-10-19（使用者指示）：所有斷點都隱藏 .m-footer-inner（行動版頁尾區塊）
      → css ?v=20261019a。 -->
-<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261025a" />
+<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261102d" />
 <!-- 2026-10-12: bkkdw26.greydientlab.com .hero-description-wrapper 模組（含 @font-face 自架
      BDO Grotesk / Geist Mono、Tailwind utility 1:1 scoped 重建 + 768/1024 斷點） -->
 <link rel="stylesheet" href="{% static 'css/bc-hero-description.css' %}?v=20261012a" />
@@ -74,44 +74,71 @@
 <div class="rotate-mau"><div class="rotate-mau__inner"><div class="rotate-mau__inner__item"><div class="rotate-mau__inner__item__inner"></div></div></div></div>
 
 
-<!-- 2026-11-02（使用者指示）：popeyemagazine.jp/50interviews/ 首屏動畫移植
-     ① loader：細線伸出後年份 2020→2026 沿線滾動、抹除、年份滑到角落（時間軸同原站）
-     ② 字輪：咖啡品名繞圈自動慢轉，可滑鼠滾輪／拖曳旋轉（含慣性），中心圖文跟著換
-     資料來源＝下方 #bc-popeye50-data（About view 以 series_coffees 組出）
-     ③ 中心（照片＋品名）＝目前高亮咖啡的連結 → 該咖啡詳情頁（2026-11-02 使用者指示，
-        href 由 JS 依 wheel_items[].url 同步；拖曳轉字輪不會誤觸導頁） -->
-<section class="bc-popeye50 is-loading" data-year-start="2020" data-year-end="2026" aria-label="Between Coffee 咖啡字輪">
-    <div class="cw-loader" aria-hidden="true">
-        <div class="cw-loader-line"><div class="cw-loader-line-fill"></div></div>
-        <div class="cw-loader-year cw-loader-start-year">2020</div>
-        <div class="cw-loader-year cw-loader-moving-year">2020</div>
-    </div>
-
-    <p class="cw-title-sub"><b>一杯咖啡<br>一段留白</b></p>
-
-    <div class="cw-stage">
-        <div class="cw-wheel-hitarea" aria-hidden="true"></div>
-        <div class="cw-center" aria-live="polite">
-            {% if series_coffees %}
-            <a class="cw-center-link" href="{% url 'coffee' product_id=series_coffees.0.id %}"
-               aria-label="{{ series_coffees.0.highlight|default:series_coffees.0.name }}：前往商品詳情頁">
-            {% else %}
-            <a class="cw-center-link">
-            {% endif %}
-                <div class="cw-center-img-wrap">
-                    <picture class="cw-center-picture">
-                        <source class="cw-center-source-webp" type="image/webp" />
-                        <img class="cw-center-img" alt="" decoding="async" draggable="false" />
-                    </picture>
-                </div>
-                <div class="cw-center-name"></div>
-            </a>
+<!-- 2026-11-03（使用者指示）：yurumaru.life 首屏「sticky 影片 + 產品照弧形輪播」
+     ① 影片層：.sticky-bg__bg position:sticky top:0 height:100vh → 捲動時釘住
+     ② 內容層：.sticky-bg__content margin-top:-100vh → 文字與產品列捲過釘住的影片
+        第一屏＝大字 + 說明 + 按鈕，產品列在底部露頭；再捲一屏則整組離場交棒 SERIES
+     ③ 產品列：原生 JS 輪播（perPage3 / gap10vw / padding14vw / autoplay 4s / 拖曳 flick 200px）
+        點產品圖 → 該咖啡詳情頁（拖曳後不會誤觸，見 bc-sticky-mv.js）
+     資料來源＝About view 的 series_coffees（6 筆咖啡的 name/highlight/price/去背圖）
+     影片：static/media/hk_topshot-720p.mp4（1280×720 / 31s / 4.4MB，原 2560×1440 已壓縮）
+          poster：static/images/hk_topshot-poster.jpg -->
+<section id="bc-sticky-mv" aria-label="Between Coffee 首屏">
+    <div class="sticky-bg">
+        <div class="sticky-bg__bg" aria-hidden="true">
+            <video class="mv-video" autoplay muted loop playsinline preload="metadata"
+                   poster="{% static 'images/hk_topshot-poster.jpg' %}"
+                   src="{% static 'media/hk_topshot-720p.mp4' %}"></video>
         </div>
-        <p class="cw-empty" hidden>咖啡準備中。</p>
-        <div class="cw-wheel" aria-hidden="true"></div>
-    </div>
 
-    {{ wheel_items|json_script:"bc-popeye50-data" }}
+        <div class="sticky-bg__content">
+            <div class="sticky-bg__inner">
+                <div class="page-top__mv__textBox">
+                    <p class="enTitle">Specialty Coffee Stand</p>
+                    <h1 class="bc-mv-logo">Between Coffee</h1>
+                    <p class="lead">一杯咖啡<br>一段留白</p>
+                    <p class="enText">
+                        城市的一角，豆子在手沖裡慢慢展開。<br>
+                        把等待的時間留給自己，帶走一杯剛好的溫度。
+                    </p>
+                    <a class="bc-btn bc-btn-secondary" href="{% url 'coffee_menu' %}">
+                        <i class="icon-shopping-cart" aria-hidden="true"></i> 看咖啡菜單
+                    </a>
+                </div>
+
+                {% if series_coffees %}
+                <div class="page-top__mv__product">
+                    <ul class="mv-product__list" tabindex="0" role="group" aria-label="咖啡品項輪播（可拖曳）">
+                        {% for coffee in series_coffees %}
+                        <li class="mv-product__slide">
+                            <a class="page-top__mv__product__imageBox"
+                               href="{% url 'coffee' coffee.id %}"
+                               aria-label="{{ coffee.name }}：前往商品詳情頁">
+                                <span class="p-image">
+                                    <img src="{{ coffee.get_index_image }}" alt="{{ coffee.name }}"
+                                         loading="lazy" decoding="async" draggable="false">
+                                </span>
+                            </a>
+                            <div class="page-top__mv__product__textBox">
+                                <p class="color">Coffee {{ forloop.counter|stringformat:"02d" }}</p>
+                                <p class="title">{{ coffee.highlight|default:coffee.name }}</p>
+                                <p class="p-price">${{ coffee.price|floatformat:"-2"|default:"0" }}</p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <p class="bc-mv-empty">咖啡準備中。</p>
+                {% endif %}
+
+                <div class="page-top__mv__foot">
+                    <span>Between Coffee — Hong Kong</span>
+                    <span>Scroll</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 
@@ -1442,8 +1469,8 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- 2026-11-02（使用者指示）：popeyemagazine.jp/50interviews/ 首屏動畫（年份 loader ＋ 慣性字輪） -->
-<script defer src="{% static 'js/bc-popeye50.js' %}?v=20261102c"></script>
+<!-- 2026-11-03（使用者指示）：yurumaru.life 首屏 sticky 影片 + 產品列輪播（原生 JS，無 Splide） -->
+<script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261103c"></script>
 <!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
 <script src="{% static 'js/bc-series.js' %}?v=20261102b"></script>
 <!-- hakujuji csBlock__leader：逐字亮起動畫 -->

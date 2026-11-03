@@ -47,7 +47,8 @@
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 首頁「咖啡豆製程」捲動模組（`[2b-2]`；移植 union-tec `homeService`：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS） |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`；3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
-| `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | `/about/` 最上方首屏（移植 popeyemagazine.jp/50interviews）：loader 年份 2020→2026 滾動＋慣性旋轉字輪；資料由 `About` view 的 `wheel_items`（CoffeeItem）經 `json_script` 注入 |
+| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hk_topshot-720p.mp4` | `/about/` 最上方首屏（移植 yurumaru.life `.page-top__mv__wrap`）：`position:sticky` 影片釘住一屏＋產品照弧形輪播（原生 JS 重寫 Splide：per 3/1、autoplay 4s、前後各一組複本循環）；`--mv-len:200vh`、`--mv-text-h:64vh`，斷點 680 |
+| `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | **（2026-11-03 起 about 頁不再載入，被 bc-sticky-mv 取代；檔案保留可回滾）** 原 about 首屏字輪（移植 popeyemagazine.jp/50interviews） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
 ## 4. 開發規範

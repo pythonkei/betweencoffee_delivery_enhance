@@ -130,3 +130,15 @@ yarn-error.log*
 # 使用者提供的原始 APNG 素材（僅供重新產圖；頁面實際使用 static/images/recommended-pages/title-*.png）
 /static/images/ani_coffee_apng.png
 /static/images/ani_bean_apng.png
+
+# 首頁「咖啡豆製程」模組的原始照片（僅供 scripts/make_hs_images.py 重新產圖；
+# 頁面實際使用 static/images/home-service/hs-*.webp，共 1.4MB 已入庫）
+/static/images/diego-catto-9LqctKiRP5c-unsplash.jpg
+/static/images/jolucasru-coffee-8066888.jpg
+/static/images/zhxj560-coffee-4512564_1920.jpg
+/static/images/46173-coffee-1044387_1920.jpg
+
+# About 首頁 sticky 影片的原始素材（2560×1440 / 31s / 33.5MB，僅供重新壓縮；
+# 頁面實際使用 static/media/hk_topshot-720p.mp4，4.5MB 已入庫。壓縮指令見
+# static/css/bc-sticky-mv.css 檔頭說明）
+/static/images/hk_topshot.mp4

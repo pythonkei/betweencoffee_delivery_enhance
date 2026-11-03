@@ -1,0 +1,326 @@
+/* ============================================================================
+   bc-sticky-mv.css — About 頁首屏「sticky 影片背景 + 產品照弧形輪播」
+   2026-11-03 建立
+   ----------------------------------------------------------------------------
+   來源：yurumaru.life 首頁 .page-top__mv__wrap / .sticky-bg（Shopify 主題）
+         原站量測（1440×900）：.sticky-bg 高 2862px、.sticky-bg__bg 900px
+         （scrollY=900 時實測 top:0，確認釘住）、.sticky-bg__content margin-top:-900px。
+         Splide 參數（原站 data-splide 原值）：
+           type:loop  easing:cubic-bezier(.83,0,.17,1)  speed:1750
+           perPage:3  gap:10vw  padding:14vw  focus:center  autoplay:4000
+           breakpoints: {1000:{perPage:3}, 680:{perPage:1, gap:15vw, padding:25%}}
+         分層上浮：.splide__slide translateY(-18%)／.is-prev,is-next-logical -6%／
+                   .is-active-logical 0；track padding-top:3%；list align-items:flex-end
+
+   [機制]（三層，缺一不可）
+     #bc-sticky-mv            外框；高度由 __inner 撐開（min-height:200vh）
+     .sticky-bg__bg           position:sticky;top:0;height:100vh → 影片釘住
+     .sticky-bg__content      margin-top:-100vh;z-index:1 → 內容拉回覆蓋影片層
+   釘住時間 = __inner 高度 - 100vh（此處 200vh - 100vh = 一屏的捲動）
+     __inner 200vh = textBox 70vh（第一屏大字）＋ product（照片列，第一屏底部露頭）
+                    ＋ foot（貼底小字，填滿尾段空間）
+
+   [品牌映射]
+     原站 --White #e9e6e4        → var(--bc-text)
+     原站 --en_go "Ysabeau SC"   → var(--bc-font-trade-gothic)（static/css/bc-fonts.css）
+     原站 .lead (MFW-Koburina)   → Noto Serif TC（品牌標題字）
+     原站 .p-button              → .bc-btn.bc-btn-secondary（bc-components.css）
+     原站背景壓暗 #3e3e3e × multiply × var(--value-op)[JS 漸變]
+        → 固定 rgba(14,14,14,.55)（不移植 --progressFull 漸變；禁用漸層色）
+     原站 .sticky-bg 無底色      → 補 background:var(--bc-bg)（蓋掉 bc-rotate-mau 的 z-index:-1 透出）
+
+   [不移植] SVG 品牌 logo 逐字延遲進場、p-button 圓箭頭、--progressFull 捲動壓暗
+   ============================================================================ */
+
+#bc-sticky-mv {
+    /* 捲動總長：200vh（原站 397vh；此處縮短為「一屏釘住 + 一屏滑過」） */
+    --mv-len: 200vh;
+    /* 第一屏文字區高度（剩下一屏高度留給產品列露頭） */
+    --mv-text-h: 64vh;
+    /* 輪播：同時可見張數／間距／左右留白（原站 perPage/gap/padding） */
+    --mv-per: 3;
+    --mv-gap: 10vw;
+    --mv-pad: 14vw;
+    /* 原站 easing / speed */
+    --mv-ease: cubic-bezier(0.83, 0, 0.17, 1);
+    --mv-dur: 1.75s;
+    /* 導覽列淨空（base.html 的固定 navbar） */
+    --mv-nav: 84px;
+
+    position: relative;
+    min-height: var(--mv-len);
+    background: var(--bc-bg);
+    color: var(--bc-text);
+    /* 建立獨立堆疊層，避免與前後區塊（.rotate-mau z-index:-1）互相干擾 */
+    isolation: isolate;
+}
+
+/* ===== 影片層（sticky 釘住） ===== */
+#bc-sticky-mv .sticky-bg__bg {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--bc-bg);
+}
+
+#bc-sticky-mv .sticky-bg__bg > * {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 壓暗層（原站 :before + mix-blend-mode:multiply；此處固定不透明度） */
+#bc-sticky-mv .sticky-bg__bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(14, 14, 14, 0.55);
+}
+
+/* ===== 內容層（負 margin 拉回覆蓋影片） ===== */
+#bc-sticky-mv .sticky-bg__content {
+    position: relative;
+    z-index: 1;
+    margin-top: -100vh;
+}
+
+#bc-sticky-mv .sticky-bg__inner {
+    display: flex;
+    flex-direction: column;
+    min-height: var(--mv-len);
+}
+
+/* 全幅首屏：抵銷 bc-components.css 對「內容首個 section」預留的 navbar margin-top（100/72/60px），
+   影片改為從頁面最頂端開始鋪（文字區另有 --mv-nav padding 淨空導覽列） */
+.bc-page-content > section#bc-sticky-mv:first-of-type {
+    margin-top: 0;
+}
+
+/* ===== 第一屏文字（原站 .page-top__mv__textBox） ===== */
+#bc-sticky-mv .page-top__mv__textBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.4rem;
+    min-height: var(--mv-text-h);
+    padding: var(--mv-nav) 6vw 0;
+    text-align: center;
+}
+
+#bc-sticky-mv .bc-mv-logo {
+    margin: 0;
+    font-family: var(--bc-font-trade-gothic);
+    font-size: clamp(2.6rem, 11vw, 11rem);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--bc-text);
+}
+
+#bc-sticky-mv .lead {
+    margin: 0;
+    font-family: "Noto Serif TC", serif;
+    font-size: clamp(1.15rem, 1.9vw, 1.6rem);
+    font-weight: 400;
+    line-height: 1.7;
+    letter-spacing: 0.06em;
+    color: var(--bc-text);
+}
+
+#bc-sticky-mv .enTitle {
+    margin: 0;
+    font-family: var(--bc-font-trade-gothic);
+    font-size: 0.85rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--bc-gold);
+}
+
+#bc-sticky-mv .enText {
+    max-width: 34em;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 300;
+    line-height: 1.9;
+    color: var(--bc-text-muted);
+}
+
+#bc-sticky-mv .page-top__mv__textBox .bc-btn {
+    margin-top: 0.4rem;
+}
+
+/* ===== 產品照輪播（原站 .page-top__mv__product / Splide） ===== */
+#bc-sticky-mv .page-top__mv__product {
+    overflow: hidden;
+    padding-top: 3%; /* 原站 .splide__track{padding-top:3%} */
+    cursor: grab;
+    touch-action: pan-y;
+}
+
+#bc-sticky-mv .page-top__mv__product.is-dragging {
+    cursor: grabbing;
+}
+
+#bc-sticky-mv .mv-product__list {
+    display: flex;
+    align-items: flex-end; /* 原站 .splide__list{align-items:flex-end} */
+    gap: var(--mv-gap);
+    margin: 0;
+    padding: 0 var(--mv-pad);
+    list-style: none;
+    /* transform 由 bc-sticky-mv.js 設定（translateX） */
+    transition: transform var(--mv-dur) var(--mv-ease);
+    will-change: transform;
+}
+
+#bc-sticky-mv .mv-product__slide {
+    flex: 0 0 auto;
+    width: calc(
+        (100vw - 2 * var(--mv-pad) - (var(--mv-per) - 1) * var(--mv-gap)) /
+            var(--mv-per)
+    );
+    text-align: center;
+    /* 原站分層上浮：非聚焦張先壓低 18% */
+    transform: translateY(-18%);
+    transition: transform var(--mv-dur) var(--mv-ease);
+}
+
+#bc-sticky-mv .mv-product__slide.is-prev-logical,
+#bc-sticky-mv .mv-product__slide.is-next-logical {
+    transform: translateY(-6%);
+}
+
+#bc-sticky-mv .mv-product__slide.is-active-logical {
+    transform: translateY(0);
+}
+
+#bc-sticky-mv .page-top__mv__product__imageBox {
+    display: block;
+    width: 100%;
+    max-width: 240px; /* 原站 .p-image max-width */
+    margin: 0 auto;
+    text-decoration: none;
+}
+
+#bc-sticky-mv .page-top__mv__product__imageBox .p-image {
+    /* 商品去背圖多為 2:3 直幅 → 用 3:4 盒子 contain，不裁切也不拉長。
+       img 用絕對定位，避免圖片原始比例把盒子撐高（aspect-ratio 只是建議值）。 */
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 8px; /* 品牌：圖片圓角 8 */
+}
+
+#bc-sticky-mv .page-top__mv__product__imageBox img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 商品去背 PNG：完整顯示不裁切 */
+    transition: transform 0.25s var(--mv-ease);
+}
+
+#bc-sticky-mv .mv-product__slide.is-active-logical img {
+    transform: scale(1.04);
+}
+
+#bc-sticky-mv .page-top__mv__product__textBox {
+    margin-top: 0.9rem;
+}
+
+#bc-sticky-mv .page-top__mv__product__textBox .color {
+    margin: 0 0 0.35rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--bc-text-muted);
+}
+
+#bc-sticky-mv .page-top__mv__product__textBox .title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--bc-text);
+}
+
+#bc-sticky-mv .page-top__mv__product__textBox .p-price {
+    margin: 0.35rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--bc-gold);
+}
+
+/* ===== 貼底小字（原站 .page-top__mv__foot） ===== */
+#bc-sticky-mv .page-top__mv__foot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: auto;
+    padding: 0 6vw calc(2.4rem + env(safe-area-inset-bottom, 0px));
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--bc-text-muted);
+}
+
+/* ===== 空資料 ===== */
+#bc-sticky-mv .bc-mv-empty {
+    margin: 2rem 0;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--bc-text-muted);
+}
+
+/* ===== 斷點（原站 breakpoint 680） ===== */
+@media (max-width: 680px) {
+    #bc-sticky-mv {
+        --mv-per: 1;
+        --mv-gap: 15vw;
+        /* 用 vw 而非 %：width calc 內的 % 會對父層解析，導致卡片寬度不受控 */
+        --mv-pad: 25vw;
+        --mv-text-h: 60vh;
+        --mv-nav: 72px;
+    }
+
+    #bc-sticky-mv .page-top__mv__foot {
+        padding-bottom: calc(1.8rem + env(safe-area-inset-bottom, 0px));
+        font-size: 0.66rem;
+    }
+
+    /* 手機一次只露一張卡 → 非聚焦卡片的文字淡出，避免左右邊緣出現半截字 */
+    #bc-sticky-mv .mv-product__slide .page-top__mv__product__textBox {
+        transition: opacity 0.3s var(--mv-ease);
+    }
+
+    #bc-sticky-mv .mv-product__slide:not(.is-active-logical) .page-top__mv__product__textBox {
+        opacity: 0;
+    }
+}
+
+/* ===== 減少動態 ===== */
+@media (prefers-reduced-motion: reduce) {
+    #bc-sticky-mv .mv-product__list,
+    #bc-sticky-mv .mv-product__slide,
+    #bc-sticky-mv .page-top__mv__product__imageBox img {
+        transition: none;
+    }
+
+    #bc-sticky-mv .mv-product__slide,
+    #bc-sticky-mv .mv-product__slide.is-prev-logical,
+    #bc-sticky-mv .mv-product__slide.is-next-logical,
+    #bc-sticky-mv .mv-product__slide.is-active-logical {
+        transform: none;
+    }
+}
