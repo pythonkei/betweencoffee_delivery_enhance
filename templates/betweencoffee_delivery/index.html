@@ -145,6 +145,23 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      ＋照片格改為環形咖啡照列。 -->
 <section class="hero bc-brand-stage-hero">
 {% include 'betweencoffee_delivery/partials/bc_brand_stage_hero.html' %}
+<!-- 2026-11-03（使用者指示）：移植 hub.ballaholic.jp 的 .embla 卡片 hover 互動
+     「使用該站 .embla 模組內的 hover 效果（顯示更多細節互動效果），移植到
+       .hero bc-brand-stage-hero，當滑鼠懸停在咖啡照片上時顯示互動效果」。
+     [來源] 該站 #home-navi-carousel > .embla 的卡片 hover（疊 10% 主題色）＋
+       #mouse-stalker：跟著游標跑的 108px 圓形徽章（白框、主題色 90% 底、
+       scale 0→1 回彈 .5s cubic-bezier(.34,1.92,.53,.7)、離開 200ms 後收回、
+       觸控裝置不啟動）。行為已移植到 static/js/bc-hand-hover.js（說明見該檔檔頭）。
+     [本專案] 徽章改品牌金 --bc-gold，內容＝該杯咖啡名稱（讀 <a aria-label>）＋
+       view more ⇒ hover 就看得到這杯是什麼；照片本身同時放大（CSS 在
+       static/css/bc-hand-ring.css 檔尾）；hover 期間暫停 5s 自動輪播。
+     [為何放在這裡] 必須是 <section> 的直屬子節點、不在任何會 transform／filter
+       的容器內，position:fixed 才不會被祖先變成相對定位（照片環所在的
+       #bc-brand-stage 內有多層 transform）。about 頁沒有環形照片列，故不放。 -->
+<div id="bc-stage-hand-badge" class="bc-hand-badge" data-bc-hand-badge aria-hidden="true">
+  <span class="bc-hand-badge__name" data-bc-hand-badge-name></span>
+  <span class="bc-hand-badge__more">view more</span>
+</div>
 </section>
 
 <!-- 2026-10-24（使用者指示）：移植 union-tec.jp/capability 的 recommendedPages 模組
@@ -867,8 +884,12 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      首頁 hero 與其下方 BC 動態 hero 的照片格（#bc-stage-photo-ring）共用；
      必須排在 bc-gunte-hero.css 之前（同名變數/屬性以 hero 的規則為準）。
      2026-10-14 稍後：照片格改為與 hero 同一顆整頁大圓（100vw，不再縮進格子）→ 檔頭註解更新
-     ⇒ 版號 ?v=20261014a 升為 ?v=20261014b（WhiteNoise MAX_AGE=1 年，必須升版才會重載） -->
-<link rel="stylesheet" href="{% static 'css/bc-hand-ring.css' %}?v=20261024a">
+     ⇒ 版號 ?v=20261014a 升為 ?v=20261014b（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
+     2026-11-03（使用者指示「移植 hub.ballaholic.jp 的 .embla hover 互動」）：
+     檔尾新增「照片 hover 放大（@media (hover:hover) and (pointer:fine)）」＋
+     「跟著游標跑的圓形徽章 .bc-hand-badge」（品牌金、回彈 .5s、200ms 收尾延遲）
+     ⇒ 版號升為 ?v=20261103c。 -->
+<link rel="stylesheet" href="{% static 'css/bc-hand-ring.css' %}?v=20261103c">
 <!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
      BC 動態模組（原 #bc-bg-footer，2026-10-18 更名 #bc-brand-stage）——單一來源；
      全樣式 scoped 於 #bc-brand-stage，故與 about 頁共用同一份 CSS 不會互相影響。

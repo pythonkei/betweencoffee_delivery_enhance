@@ -97,3 +97,121 @@
 .hero_hand_item.-current img {
   scale: 1;
 }
+/* ============================================================================
+   2026-11-03（使用者指示）：移植 hub.ballaholic.jp 的 .embla 卡片 hover 互動
+   ----------------------------------------------------------------------------
+   「使用 https://hub.ballaholic.jp/ .embla 模組內的 hover 效果（顯示更多細節互動效果），
+     移植到 .hero bc-brand-stage-hero，當滑鼠懸停在咖啡照片上時顯示互動效果」
+
+   [來源實作（2026-11-03 取得的該站 main.html / main.css / main.js）]
+     · #home-navi-carousel > .embla 的卡片 <a class="nav-carousel-item">：
+       hover 疊 10% 主題色、transition-all .5s，
+       --common-ease: cubic-bezier(.22,.87,.5,1)
+     · #mouse-stalker 徽章（＝「顯示更多細節」那顆跟著游標跑的圓）：
+       108px（h-27 w-27）、border-2 白、主題色 90% 底、rounded-full、
+       scale-0 → scale-100、transition-transform .5s，
+       --bounce-ease: cubic-bezier(.34,1.92,.53,.7)（會 overshoot 回彈）。
+       進入照片：立即定位並放大；離開：等 200ms 才收回（卡片間移動不閃爍）。
+       追蹤方式是直接改 left/top（不吃過渡）⇒ 只有圓自己在彈，跟游標是即時的。
+       觸控裝置（ontouchstart／maxTouchPoints > 0）整段不啟動。
+
+   [本專案的對應]
+     1. 卡片底色高亮 → 照片放大：咖啡照是去背 PNG、底下是純黑品牌底，
+        疊 10% 主題色肉眼看不到 ⇒ 改成 scale 放大（current 1 → 1.08、
+        其餘 0.5 → 0.56），過渡時間與曲線沿用原站的 .5s / --common-ease。
+     2. 徽章改用品牌金 --bc-gold（白框、黑字，符合品牌色系統），
+        內容＝該杯咖啡名稱 ＋ view more（名稱由 bc-hand-hover.js 從
+        <a aria-label>／<img alt> 讀取）—— 原站只有 "view more"，
+        我們多顯示名稱，hover 就能看到這杯是什麼 ⇒ 「更多細節」。
+     3. 徽章 markup 在 templates/betweencoffee_delivery/index.html 的
+        <section class="hero bc-brand-stage-hero"> 內（#bc-stage-hand-badge），
+        只放在 section 直屬層級、不在任何會 transform 的容器裡
+        —— position:fixed 才不會被祖先的 transform/filter 變成相對定位。
+
+   [為何寫在這裡] 與環形照片列同一份模組（hero 與 about 頁共用；about 頁沒有
+     [data-bc-hand-ring]，以下規則自然無作用）。
+   ============================================================================ */
+
+/* ---- ① 照片 hover：只給「真的有 hover」的裝置（觸控裝置不會卡在 hover 狀態） ----
+   特異度刻意低於 .hero_hand.is-ready.is-dragging／.is-snap 的規則
+   （(0,4,1) > (0,2,2)）⇒ 拖曳中與第一次定位時仍以那兩條為準，不會互相打架。 */
+@media (hover: hover) and (pointer: fine) {
+  .hero_hand_item a:hover img {
+    scale: 0.56;
+    transition: scale 0.5s cubic-bezier(0.22, 0.87, 0.5, 1);
+  }
+
+  .hero_hand_item.-current a:hover img {
+    scale: 1.08;
+  }
+}
+
+/* ---- ② 跟著游標跑的圓形徽章 ----
+   left/top 由 JS 直接改（px、viewport 座標），translate(-50%,-50%) 讓圓心落在
+   游標上；縮放走獨立的 scale 屬性 ⇒ 位移即時、只有圓自己回彈（與原站相同做法）。 */
+.bc-hand-badge {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 900;            /* 高於品牌舞台內容（2／3）、低於 navbar 與浮動購物車（≥100000） */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 108px;
+  height: 108px;
+  padding: 10px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(196, 155, 99, 0.92);   /* --bc-gold #c49b63 的 92% */
+  color: #0e0e0e;                          /* --bc-bg：金底上的深字（對比 ≈ 7:1） */
+  text-align: center;
+  pointer-events: none;                    /* 徽章永不攔截點擊 → <a> 照常跳詳情頁 */
+  transform: translate(-50%, -50%);
+  scale: 0;                                /* 對應原站的 scale-0（只有圓隱形，仍在文件流程外） */
+  transition: scale 0.5s cubic-bezier(0.34, 1.92, 0.53, 0.7);
+  will-change: scale;
+}
+
+.bc-hand-badge.is-on {
+  scale: 1;
+}
+
+.bc-hand-badge__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;                   /* 長名稱最多兩行（超過以省略號收尾） */
+  overflow: hidden;
+  max-width: 100%;
+  /* 與照片下方 caption（.bc-series-caption-name）同一套字：Josefin Sans ＋ 大寫 */
+  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+  font-size: 0.75rem;                      /* 12px：108px 圓內兩行仍留白 */
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: normal;
+  text-transform: uppercase;
+  word-break: break-word;
+}
+
+.bc-hand-badge__more {
+  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+  font-size: 0.5rem;                       /* 8px */
+  line-height: 1.2;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.66;
+}
+
+/* 使用者要求減少動態時：徽章直接出現／消失、照片放大也直接跳到位（不做回彈/過渡） */
+@media (prefers-reduced-motion: reduce) {
+  .bc-hand-badge {
+    transition: none;
+  }
+
+  .hero_hand_item a:hover img,
+  .hero_hand_item.-current a:hover img {
+    transition: none;
+  }
+}
