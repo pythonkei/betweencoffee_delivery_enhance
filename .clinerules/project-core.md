@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`02ecab8a`（about 首屏：品名再縮、highlight 略大、產品列再上移 `--mv-pull`）＋docs 收尾。正式站 live＝`c3f7509c`（deploy `dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z manual）⇒ **待部署 16 筆**。⚠ **實測 live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0、仍載入 `bc-popeye50.css?v=20261102f`）→ 「手機／平板像桌機尺寸」的回報在部署前都不會消失，不是 CSS 問題。**autoDeploy＝off → push 不部署，必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`36fdfb2d`（sticky-MV 黑遮罩 70%→75%，css `?v=20261104j`；前一筆 `02ecab8a` 為品名再縮／highlight 略大／產品列上移 `--mv-pull`）＋docs 收尾。正式站 live＝`c3f7509c`（deploy `dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z manual）⇒ **待部署 17 筆**。⚠ **實測 live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0、仍載入 `bc-popeye50.css?v=20261102f`）→ 「手機／平板像桌機尺寸」的回報在部署前都不會消失，不是 CSS 問題。**autoDeploy＝off → push 不部署，必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
