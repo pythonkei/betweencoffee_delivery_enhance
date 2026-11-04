@@ -11,7 +11,7 @@
      → 位置＝.rotate-mau 之後、SERIES 之前
      結構：.sticky-bg__bg（影片 sticky 釘住一屏）＋ .sticky-bg__content（margin-top:-100vh 覆蓋）
      參數：Splide perPage3/gap10vw/padding14vw/autoplay4000/1750ms，斷點 680 → 1 張 -->
-<link rel="stylesheet" href="{% static 'css/bc-sticky-mv.css' %}?v=20261103g" />
+<link rel="stylesheet" href="{% static 'css/bc-sticky-mv.css' %}?v=20261104b" />
 <!-- About 頁面 SERIES 滑桿 -->
 <link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261102b" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
@@ -131,6 +131,41 @@
                 {% else %}
                 <p class="bc-mv-empty">咖啡準備中。</p>
                 {% endif %}
+
+                <!-- 2026-11-04（使用者指示）：複製 about 頁品牌舞台的三個區塊
+                     （#bc-stage-headline-fresh-beans / #bc-stage-headline-roasted-daily /
+                       #bc-stage-marquee）到產品列下方，內容與
+                       partials/bc_brand_stage.html:72 / :79 / :132 逐字相同。
+                     · id 改 bc-mv- 前綴：同一頁的頁尾品牌舞台已有同名 id，不可重複。
+                     · 不加 data-reveal：bc-brand-stage.js 的 GSAP 揭示只作用於
+                       #bc-brand-stage 內部，加了會停在 visibility:hidden。
+                     · 跑馬燈的捲動由 main.js 對全域 .scroller 初始化，不需額外 JS。
+                     樣式：static/css/bc-sticky-mv.css 的「品牌舞台三段」段。 -->
+                <div class="mv-stage">
+                    <div id="bc-mv-headline-fresh-beans" class="heading-group-wrap is-right">
+                        <h1 class="h1">Fresh</h1>
+                        <h1 class="h1">beans</h1>
+                    </div>
+                    <div id="bc-mv-headline-roasted-daily" class="heading-group-wrap is-right">
+                        <h1 class="h1">roasted</h1>
+                        <h1 class="h1">daily</h1>
+                    </div>
+                    <div id="bc-mv-marquee" class="foooter-mail">
+                        <div class="p1">
+                            Available for
+                            <br />
+                            takeaway &amp; Relaxing
+                        </div>
+                        <div class="scroller-box">
+                            <div class="scroller">
+                                <ul class="tag-list scroller__inner">
+                                    <li>BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN</li>
+                                    <li>BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN BETWEEN</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="page-top__mv__foot">
                     <span>Between Coffee — Hong Kong</span>
@@ -1470,7 +1505,7 @@
 
 {% block extra_scripts %}
 <!-- 2026-11-03（使用者指示）：yurumaru.life 首屏 sticky 影片 + 產品列輪播（原生 JS，無 Splide） -->
-<script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261103c"></script>
+<script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261104b"></script>
 <!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
 <script src="{% static 'js/bc-series.js' %}?v=20261102b"></script>
 <!-- hakujuji csBlock__leader：逐字亮起動畫 -->

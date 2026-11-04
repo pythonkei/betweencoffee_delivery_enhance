@@ -143,11 +143,22 @@
       list.style.transform = 'translate3d(' + translateX() + 'px, 0, 0)';
     }
 
-    /* 無動畫瞬移（loop 歸位或 resize 重算；需強制 reflow 才不會補間） */
+    /* 無動畫瞬移（loop 歸位或 resize 重算；需強制 reflow 才不會補間）
+       2026-11-04（使用者回報「繞完一圈回到 Coffee 01 後，卡片異常往上抖一下再回原位」
+       ／「手動左右滑動時同樣發生」）：
+       原本只瞬移 .mv-product__list，slide 的 translateY（-18% / -6% / 0）仍走
+       var(--mv-dur) = 1.75s 過渡 → 歸位那一幀新聚焦的那張正從 -73.5px（-18%）
+       慢慢爬回 0，看起來就是「歸位後卡片自己往上抖一下」。
+       修法：加 .is-jumping 讓 CSS 把 slide／img 的 transition 關掉，在「無過渡」狀態下
+       先切換焦點角色、再改 list 位移，強制 reflow 後才移除 → 一幀內換好、畫面完全不變
+       （歸位後聚焦的是複製品對應的本尊，視覺完全等價）。 */
     function jump() {
+      list.classList.add('is-jumping');
       list.style.transition = 'none';
+      updateClasses();
       list.style.transform = 'translate3d(' + translateX() + 'px, 0, 0)';
       void list.offsetWidth;
+      list.classList.remove('is-jumping');
       list.style.transition = '';
     }
 
@@ -266,6 +277,13 @@
       },
       true
     );
+
+    /* 桌面滑鼠拖曳：商品卡是 <a>，按住往左右拖會觸發瀏覽器原生 HTML5 drag-and-drop
+       → 送出 pointercancel，輪播拖到 30px 就被中斷（實測 dragstart 後只剩 1 次 pointermove）。
+       直接擋掉 dragstart（圖片本身也已是 draggable="false"）；觸控不會觸發 dragstart，不受影響。 */
+    product.addEventListener('dragstart', function (e) {
+      e.preventDefault();
+    });
 
     product.addEventListener('pointerdown', onDown);
     window.addEventListener('pointermove', onMove);

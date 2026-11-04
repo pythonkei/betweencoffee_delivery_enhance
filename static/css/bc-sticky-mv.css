@@ -203,6 +203,14 @@
     transform: translateY(0);
 }
 
+/* 瞬移中（loop 歸位／尺寸重算，由 bc-sticky-mv.js 的 jump() 加上 .is-jumping）：
+   slide 的分層上浮與圖片放大都必須關掉過渡，否則歸位那一幀「剛被聚焦」的卡片
+   會從 -18% 往上爬回 0（使用者回報的「回到 Coffee 01 後往上抖一下」）。 */
+#bc-sticky-mv .mv-product__list.is-jumping .mv-product__slide,
+#bc-sticky-mv .mv-product__list.is-jumping .page-top__mv__product__imageBox img {
+    transition: none;
+}
+
 #bc-sticky-mv .page-top__mv__product__imageBox {
     display: block;
     width: 100%;
@@ -275,6 +283,80 @@
     color: var(--bc-text-muted);
 }
 
+/* ===== 品牌舞台三段（2026-11-04 使用者指示） =====
+   把 about 頁 #bc-brand-stage 內的 #bc-stage-headline-fresh-beans /
+   #bc-stage-headline-roasted-daily / #bc-stage-marquee 三塊複製到首屏產品列下方
+   （來源 templates/betweencoffee_delivery/partials/bc_brand_stage.html:72/79/132，
+   文字內容逐字相同）。
+   · id 改 bc-mv- 前綴：同頁已有同名 #bc-stage-*（頁尾品牌舞台），HTML id 不可重複。
+   · 原樣式全部掛在 #bc-brand-stage 底下（.h1 / .p1 / .mt-8 都是 scoped 規則），
+     搬到首屏後失效 → 這裡補回字級與間距；數值取自 about 頁 #bc-stage-* 的 computed style：
+       h1  Akzidenz Grotesk Pro 500 / 80px / line-height .88 / letter-spacing -.0495em
+       p1  12.44px / line-height 1.07 / letter-spacing -.027em
+     字型檔 @font-face 在 bc-brand-stage.css 是全域宣告，本頁已載入，不需重複。
+   · 不加 data-reveal：bc-brand-stage.js 的 GSAP 揭示只作用於 #bc-brand-stage 內部
+     （#bc-brand-stage [data-reveal]{visibility:hidden} 也是 scoped），加了反而永遠隱形。 */
+#bc-sticky-mv .mv-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: clamp(1.8rem, 5vh, 3.2rem);
+    /* 右側要讓開浮動購物車 .bc-attract-buy（position:fixed right:26px / width:40px +
+       24px hover 熱區 → 佔到 right:90px），否則大字會被 Order 長條壓住 */
+    padding: 0 max(6vw, 104px) 0 6vw;
+}
+
+#bc-sticky-mv .mv-stage .heading-group-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* 原站 .heading-group-wrap.is-right：靠右對齊 */
+}
+
+#bc-sticky-mv .mv-stage .h1 {
+    margin: 0;
+    font-family: "Akzidenz Grotesk Pro", Arial, sans-serif;
+    font-size: clamp(2rem, 5.6vw, 5rem);
+    font-weight: 500;
+    line-height: 0.88;
+    letter-spacing: -0.0495em;
+    color: var(--bc-text);
+}
+
+#bc-sticky-mv .mv-stage .foooter-mail {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start; /* 原站 justify-self:start：文字與跑馬燈靠左 */
+    gap: 1.6rem;
+    width: 100%;
+    min-width: 0;
+}
+
+#bc-sticky-mv .mv-stage .p1 {
+    margin: 0;
+    font-family: "Akzidenz Grotesk Pro", Arial, sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.07;
+    letter-spacing: -0.027em;
+    color: var(--bc-text);
+}
+
+/* 跑馬燈：.scroller-box / .scroller / .tag-list 來自 style-utilities.css（全域，捲動由
+   main.js 對 document 內所有 .scroller 初始化）。但 .scroller 原本只有 max-width:2000px、
+   沒有寬度約束 → 直接搬進首屏會把頁面撐出橫向捲動（.tag-list li 固定 1108px 寬），
+   這裡補 100% 寬 + overflow:hidden。 */
+#bc-sticky-mv .mv-stage .scroller-box {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    color: var(--bc-text);
+}
+
+#bc-sticky-mv .mv-stage .scroller {
+    width: 100%;
+    max-width: none;
+    overflow: hidden;
+}
+
 /* ===== 空資料 ===== */
 #bc-sticky-mv .bc-mv-empty {
     margin: 2rem 0;
@@ -297,6 +379,17 @@
     #bc-sticky-mv .page-top__mv__foot {
         padding-bottom: calc(1.8rem + env(safe-area-inset-bottom, 0px));
         font-size: 0.66rem;
+    }
+
+    /* 品牌舞台三段：手機縮小字級與留白（大字仍靠右，維持原本的編輯感） */
+    #bc-sticky-mv .mv-stage {
+        gap: 1.4rem;
+        /* 手機的 .bc-attract-buy 是 right:13 / width:34（+8 熱區）→ 右邊留 64px */
+        padding: 0 max(5vw, 64px) 0 5vw;
+    }
+
+    #bc-sticky-mv .mv-stage .h1 {
+        font-size: clamp(1.9rem, 10vw, 3rem);
     }
 
     /* 手機一次只露一張卡 → 非聚焦卡片的文字淡出，避免左右邊緣出現半截字 */

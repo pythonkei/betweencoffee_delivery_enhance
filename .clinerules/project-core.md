@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-03）**：`origin/main` 尖端＝`e2a5d747`（about 首屏改 sticky 影片＋產品照弧形輪播，取代 popeye50）。**autoDeploy＝off → push 不會部署，必須在 dashboard 按 Manual Deploy**。即時複驗：`git log --oneline -3`＋Render API（service `srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`e2a5d747`（about 首屏改 sticky 影片＋產品照弧形輪播，取代 popeye50）＋`fc7b7cb3`（docs）。**autoDeploy＝off → push 不會部署，必須在 dashboard 按 Manual Deploy**。即時複驗：`git log --oneline -3`＋Render API（service `srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
@@ -47,7 +47,7 @@
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 首頁「咖啡豆製程」捲動模組（`[2b-2]`；移植 union-tec `homeService`：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS） |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`；3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
-| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hk_topshot-720p.mp4` | `/about/` 最上方首屏（移植 yurumaru.life `.page-top__mv__wrap`）：`position:sticky` 影片釘住一屏＋產品照弧形輪播（原生 JS 重寫 Splide：per 3/1、autoplay 4s、前後各一組複本循環）；`--mv-len:200vh`、`--mv-text-h:64vh`，斷點 680 |
+| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hk_topshot-720p.mp4` | `/about/` 最上方首屏（移植 yurumaru.life `.page-top__mv__wrap`）：`position:sticky` 影片釘住一屏＋產品照弧形輪播（原生 JS 重寫 Splide：per 3/1、autoplay 4s、前後各一組複本循環）；`--mv-len:200vh`、`--mv-text-h:64vh`，斷點 680。產品列下方另有 `.mv-stage`＝複製品牌舞台的 Fresh beans／roasted daily／BETWEEN 跑馬燈三段（id 用 `bc-mv-` 前綴避免與頁尾 `#bc-stage-*` 重複）。**禁止在 `jump()` 之外只瞬移 list**：slide 的 `translateY` 過渡必須靠 `.is-jumping` 一起關掉，否則 loop 歸位／拖曳換手時新聚焦的卡片會從 -18% 往上抖 |
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | **（2026-11-03 起 about 頁不再載入，被 bc-sticky-mv 取代；檔案保留可回滾）** 原 about 首屏字輪（移植 popeyemagazine.jp/50interviews） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
