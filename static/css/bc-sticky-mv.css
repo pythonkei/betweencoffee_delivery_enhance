@@ -59,6 +59,11 @@
        注意 min-height 只是下限：文字內容比它高時盒子會自己長大，
        所以「實際」上移量 = min(這個值, 文字區剩餘空間)，不會壓到文字。 */
     --mv-lift: 200px;
+    /* 2026-11-04（使用者指示「整個產品列動畫模組再略微向上」）：--mv-lift 只在
+       「文字區被 min-height 撐住」的寬度才有效（390/768/1024 實測 min-height = 實際高）；
+       1280/1440 的文字內容本來就比 min-height 高（398>312、416>376）→ 加 lift 完全沒反應。
+       因此改用獨立的上移量：產品列自身負 margin（不影響文字盒），所有寬度都確實上移。 */
+    --mv-pull: 32px;
     /* 輪播：同時可見張數／間距／左右留白（原站 perPage/gap/padding） */
     --mv-per: 3;
     /* 2026-11-04（使用者指示「咖啡照片加大尺寸」）：左右留白與間距再收一級
@@ -201,6 +206,8 @@
 /* ===== 產品照輪播（原站 .page-top__mv__product / Splide） ===== */
 #bc-sticky-mv .page-top__mv__product {
     overflow: hidden;
+    /* 產品列整組上移（見 --mv-pull 說明）；負 margin 不會影響上方文字盒 */
+    margin-top: calc(-1 * var(--mv-pull));
     padding-top: 3%; /* 原站 .splide__track{padding-top:3%} */
     cursor: grab;
     touch-action: pan-y;
@@ -329,9 +336,10 @@
    （1280px：23.7 → 21.8px；1440px：26.6 → 24.3px；390px：20.5 → 19.1px）。 */
 #bc-sticky-mv .page-top__mv__product__textBox .color {
     margin: 0 0 0.35rem;
-    /* 第四次調整（同日，使用者再要求縮小）→ clamp(1.2rem, 1.55vw, 1.5rem)
-       （1280px：21.8 → 19.8px；1440px：24.3 → 22.0px；390px：19.1 → 17.6px） */
-    font-size: clamp(1.2rem, 1.55vw, 1.5rem);
+    /* 第五次調整（同日，使用者「略微再縮小」）→ clamp(1.15rem, 1.45vw, 1.4rem)
+       （390px：17.6 → 16.9px；1024px：19.2 → 18.4px；1280px：19.8 → 18.6px；
+        1440px：22.3 → 20.9px） */
+    font-size: clamp(1.15rem, 1.45vw, 1.4rem);
     font-weight: 500;
     line-height: 1.25;
     /* 品名含中文（如「抹茉」）→ 取消 uppercase 與大字距，中英混排才不會鬆散 */
@@ -340,9 +348,11 @@
     color: var(--bc-text);
 }
 
+/* 高亮文案（coffee.highlight）：2026-11-04 使用者「略為加大」→ 1rem → 1.08rem
+   （390px：14.7 → 15.8px；1024px 以上：16 → 17.3px；用 rem 才會跟 root 流體字級一起縮放） */
 #bc-sticky-mv .page-top__mv__product__textBox .title {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.08rem;
     font-weight: 400;
     color: var(--bc-text-muted);
 }
@@ -566,6 +576,8 @@
         --mv-text-h: calc(var(--mv-vh) * 0.6);
         /* 手機第一屏矮、文字區本來就緊 → 上移量減半，避免文字被壓到（見 --mv-lift） */
         --mv-lift: 150px;
+        /* 手機的產品列上移量也收一點（桌面 32px → 手機 22px） */
+        --mv-pull: 22px;
         --mv-nav: 72px;
         /* 手機（390×844 實測）卡片 289px 仍在第一屏內 → 預算 0.42 只在極矮視窗才介入 */
         --mv-card-cap: calc(var(--mv-vh) * 0.42);
