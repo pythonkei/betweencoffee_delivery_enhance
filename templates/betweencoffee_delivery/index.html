@@ -104,6 +104,10 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        [2] <section class="hero bc-brand-stage-hero">（第一屏＝品牌舞台，內含 #bc-brand-stage）
        [2b] <aside class="bc-recommended-pages">（推薦雙卡；2026-10-24 由 .feed--video 下方搬到
             品牌舞台正下方，中間不插留白 section）
+       [2b-2] <section class="bc-home-service">（咖啡豆製程捲動模組；2026-10-30 移植
+            union-tec.jp 首頁 homeService —— 膠囊 clip-path 隨捲動放大到滿版、
+            四段製程圖片輪播／模糊轉清晰、左側標籤與網格字母。位置＝推薦雙卡與
+            capabilities 之間；partial＋CSS＋JS 皆為新檔，見下方 include 註解）
        [2c] <section class="capabilities bc-capabilities">（sukima capabilities-gallery；
             2026-10-27 由 about 頁整組移入，位置＝推薦雙卡正下方）
        [3] <section hidden class="hero bc-gunte-hero">（暫時隱藏）
@@ -151,7 +155,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      [來源] 該站 #home-navi-carousel > .embla 的卡片 hover（疊 10% 主題色）＋
        #mouse-stalker：跟著游標跑的 108px 圓形徽章（白框、主題色 90% 底、
        scale 0→1 回彈 .5s cubic-bezier(.34,1.92,.53,.7)、離開 200ms 後收回、
-       觸控裝置不啟動）。行為已移植到 static/js/bc-hand-hover.js（說明見該檔檔頭）。
+       觸控裝置不啟動）。JS 為該站 bundle 的 bC()，行為已移植到
+       static/js/bc-hand-hover.js（說明見該檔檔頭）。
      [本專案] 徽章改品牌金 --bc-gold，內容＝該杯咖啡名稱（讀 <a aria-label>）＋
        view more ⇒ hover 就看得到這杯是什麼；照片本身同時放大（CSS 在
        static/css/bc-hand-ring.css 檔尾）；hover 期間暫停 5s 自動輪播。
@@ -241,6 +246,21 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 </aside>
 
 
+<!-- 2026-10-30（使用者指示）：首頁新增「咖啡豆製程」捲動模組，移植 union-tec.jp 首頁
+     <section x-data="homeService">。位置＝推薦雙卡（aside.bc-recommended-pages）正下方、
+     capabilities-gallery 之前（見檔頭 [2b-2]）。
+     - markup：partials/bc_home_service.html（class 全部改為 .bc-hs-*）
+     - 樣式：static/css/bc-home-service.css
+     - 腳本：static/js/bc-home-service.js（原生 JS：不依賴 Alpine／Lenis／three.js／GSAP，
+             幾何與時序 1:1 取自原站 bundle，說明見該檔檔頭）
+     - 素材：static/images/home-service/hs-{1..4}{,-sp,-blur,-clip}.webp
+             （scripts/make_hs_images.py 產生；原始 JPG 留在 static/images/ 未使用）
+     註：Django 模板註解不支援跨行（會原樣輸出成文字），多行說明請用 HTML 註解
+         或 comment 區塊。 -->
+{% include 'betweencoffee_delivery/partials/bc_home_service.html' %}
+
+
+
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 自 about.html 整組移入本頁，
      位置＝推薦雙卡（<aside class="bc-recommended-pages">）正下方。
      - markup：原 about.html 區塊整段搬移（.capabilities-gallery ＝ cgi-left／cgi-right 團隊照
@@ -249,8 +269,10 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      - 動畫：static/js/bc-capabilities.js（原生 scroll + rAF，非 GSAP → 不依賴載入順序）
        分段：cgi 照片左右歸位 0.10-0.32 → 36 幀逐幀 0.32-0.44 →「！」畫線 0.44-0.60；
        反向滾動會重置回 frame-1／dashoffset 305 初始狀態
-     - 版面：.capabilities-gallery 為 align-self:flex-end ＋ max-width 606px（≥1920 為 880px）
-       → 貼齊區塊右緣（與 about 頁原位置一致）；.bc-capabilities 上下 padding 96px
+     - 版面：.capabilities-gallery 為 align-self:center ＋ --cap-scale 等比放大
+       （2026-10-27 使用者指示：原本 flex-end 貼右緣、606px → 改為頁面置中，
+        ≥834 放大 1.30／≥1280 1.40／≥1920 1.60 倍＝818／848／970px）；
+       .bc-capabilities 上下 padding 96px。倍率只動 CSS 變數，動畫參數不變。
      - 素材：static/images/capabilities-left.webp／capabilities-right.webp、
        static/animations/wwcd/1-36.webp -->
 <section class="capabilities bc-capabilities">
@@ -867,8 +889,12 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      互動 JS：bc-recommended-pages.js。 -->
 <link rel="stylesheet" href="{% static 'css/bc-recommended-pages.css' %}?v=20261027a">
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 樣式隨模組自 about.html 移入本頁
-     （about 已不再載入；檔案內容未變，版號沿用）。為模組在首頁的唯一定義來源。 -->
-<link rel="stylesheet" href="{% static 'css/bc-capabilities.css' %}?v=20260825b">
+     （about 已不再載入）。為模組在首頁的唯一定義來源。
+     版號 20260825b → 20261027a：模組整體放大＋頁面置中。 -->
+<!-- 2026-10-30（使用者指示）：咖啡豆製程捲動模組（.bc-home-service，移植 union-tec
+     homeService）。樣式 scoped 在 .bc-home-service／.bc-hs__*，只在本頁載入。 -->
+<link rel="stylesheet" href="{% static 'css/bc-home-service.css' %}?v=20261030a">
+<link rel="stylesheet" href="{% static 'css/bc-capabilities.css' %}?v=20261027a">
 <!-- 2026-10-25（使用者指示）：SALON/STORE SEARCH 大區塊（.bc-search）整組移至 about 頁
      （markup → about.html；bc-search.css／bc-search.js 改由 about.html 載入）。 -->
 <!-- 2026-08-11：首頁輪播 morph 影片動畫樣式（僅首頁需，從 base 移出條件載入） -->
@@ -885,6 +911,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      必須排在 bc-gunte-hero.css 之前（同名變數/屬性以 hero 的規則為準）。
      2026-10-14 稍後：照片格改為與 hero 同一顆整頁大圓（100vw，不再縮進格子）→ 檔頭註解更新
      ⇒ 版號 ?v=20261014a 升為 ?v=20261014b（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
+     2026-10-29（使用者指示「把左右滑動加回來」）：新增 .is-dragging／cursor: grab／
+     touch-action: pan-y 等拖曳手感樣式 ⇒ 版號 ?v=20261024a 升為 ?v=20261029a。
      2026-11-03（使用者指示「移植 hub.ballaholic.jp 的 .embla hover 互動」）：
      檔尾新增「照片 hover 放大（@media (hover:hover) and (pointer:fine)）」＋
      「跟著游標跑的圓形徽章 .bc-hand-badge」（品牌金、回彈 .5s、200ms 收尾延遲）
@@ -899,7 +927,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      ⇒ 版號 ?v=20261018a 升為 ?v=20261019a（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
      2026-10-19 稍後（首頁效能 P0）：新增 [data-reveal] 的 1.5s bc-reveal-guard 保險
      ⇒ 版號再升為 ?v=20261019b。 -->
-<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261025a" />
+<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261102d" />
 <!-- 2026-10-25（使用者指示）：原本緊接在本行之後的 500+ 行內聯 <style>（品牌舞台 hero 的
      逐斷點覆寫）已整段移入 static/css/bc-brand-stage.css 檔尾（「首頁專用覆寫」區段）。
      該檔是 extra_css 的最後一支 <link>，串接位置與原本的內聯樣式相同（同特異度仍勝過
@@ -946,8 +974,20 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        bc-hand-ring.js 第一次定位改為 .is-snap（關掉 scale 0.5→1 的過渡）＋ revealPhoto()
        呼叫 bc-brand-stage.js 新增的 window.BC_MEDIA_REVEAL（與文字同一套 goo 濾鏡）；
        bc-brand-stage.js 的 boot() 調換為 initGsap → initClockHandRing（API 先就位）。
-       ⇒ 版號：bc-hand-ring.css／bc-hand-ring.js／bc-brand-stage.js 均升為 ?v=20261024a。 -->
-<script src="{% static 'js/bc-hand-ring.js' %}?v=20261024a"></script>
+       ⇒ 版號：bc-hand-ring.css／bc-hand-ring.js／bc-brand-stage.js 均升為 ?v=20261024a。
+     2026-10-29（使用者指示「左右滑動加回來」）：原本的拖曳是 GUNTE hero 的 Splide 提供的，
+       移除後只剩 5s 自動輪播 ⇒ bc-hand-ring.js 新增 bindDrag()（Pointer Events 1:1 跟手、
+       放手吸附最近一格、手勢期間暫停自動輪播、放手後重新計時 5s）；
+       點照片仍是 <a> 跳詳情頁（位移 < 6px 不介入）。bc-brand-stage.js 未動。
+       ⇒ 版號：bc-hand-ring.js ?v=20261024a 升為 ?v=20261029a（CSS 同步）。 -->
+<script src="{% static 'js/bc-hand-ring.js' %}?v=20261029a"></script>
+<!-- 2026-11-03（使用者指示）：環形咖啡照的 hover 互動（移植 hub.ballaholic.jp 的 .embla）——
+     跟著游標跑的圓形徽章（顯示該杯咖啡名稱 ＋ view more）、照片 hover 放大、
+     hover 期間暫停 5s 自動輪播。樣式在 bc-hand-ring.css 檔尾（.bc-hand-badge），
+     徽章 markup 在本頁 <section class="hero bc-brand-stage-hero"> 內
+     （#bc-stage-hand-badge）；觸控裝置不啟動（與原站一致）。
+     必須排在 bc-hand-ring.js 之後（會呼叫 BC_HAND_RING.startAuto／stopAuto）。 -->
+<script src="{% static 'js/bc-hand-hover.js' %}?v=20261103a"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
 <!-- 2026-10-25（使用者指示）：bc-steps-rive.js 隨四步 Rive 圖示列移至 about.html
@@ -958,6 +998,11 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 動畫隨模組自 about.html 移入本頁
      （原生 scroll + requestAnimationFrame，不依賴 GSAP／ScrollTrigger；about 已不再載入）。 -->
 <script src="{% static 'js/bc-capabilities.js' %}?v=20260825k"></script>
+<!-- 2026-10-30（使用者指示）：咖啡豆製程捲動模組（原生 JS，無 GSAP／Alpine／three.js）。
+     內容：clip-path 膠囊→滿版（easeInCirc + 每幀 lerp 0.15）、四段製程圖片 3s 輪播、
+     模糊→清晰、收尾背景上移縮放、標籤 aria-current、網格字母 tick。
+     幾何／時序取自原站 bundle，說明見 static/js/bc-home-service.js 檔頭。 -->
+<script src="{% static 'js/bc-home-service.js' %}?v=20261030a"></script>
 <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
      已抽成全站共用檔 static/js/bc-attract-place.js（base.html 全域載入）——
      使用者指示「所有模板浮動購物車修改位置和 index 一樣」→ 全站（含首頁）共用同一套定位，

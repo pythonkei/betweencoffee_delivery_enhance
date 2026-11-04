@@ -66,8 +66,21 @@
   pointer-events: auto;
 }
 
+/* 2026-10-29（把左右拖曳加回來，見 bc-hand-ring.js 的 bindDrag）：
+   <a> 是可點的照片連結 —— touch-action: pan-y ⇒ 直向手勢仍交還瀏覽器捲動頁面，
+   只有橫向交給 JS；cursor: grab ⇒ 提示「可以抓著轉」；user-select: none ⇒ 拖曳不會選到文字。 */
 .hero_hand_item a {
   display: block;
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 拖曳中：游標換成「抓著」 */
+.hero_hand.is-dragging,
+.hero_hand.is-dragging .hero_hand_item a {
+  cursor: grabbing;
 }
 
 /* 2026-09-07：img 已被 <a> 包住 → 用後代選擇器（否則參考網站尺寸/scale 失效、圖過大） */
@@ -76,10 +89,23 @@
   scale: 0.5;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
+  touch-action: pan-y;   /* 2026-10-29：與 <a> 一致（直向手勢交給瀏覽器捲動） */
 }
 
 .hero_hand.is-ready .hero_hand_item img {
   transition: scale var(--bc-hand-ease);
+}
+
+/* 2026-10-29（使用者指示「把左右滑動加回來」）：拖曳中的過渡。
+   圓盤必須 0 過渡才會貼著手指轉；照片的 scale 換成短過渡（0.18s），
+   讓「過半格換高亮」跟得上手指又不會硬跳。放手移除 .is-dragging 後即恢復原值
+   （圓盤 1.2s 吸附到最近一格）。 */
+.hero_hand.is-ready.is-dragging .hero_hand_list {
+  transition: none;
+}
+
+.hero_hand.is-ready.is-dragging .hero_hand_item img {
+  transition: scale 0.18s ease-out;
 }
 
 /* 2026-10-24（使用者指示「bc-stage-photo-ring-list 第一個咖啡初始是從小到放大，
@@ -97,6 +123,7 @@
 .hero_hand_item.-current img {
   scale: 1;
 }
+
 /* ============================================================================
    2026-11-03（使用者指示）：移植 hub.ballaholic.jp 的 .embla 卡片 hover 互動
    ----------------------------------------------------------------------------

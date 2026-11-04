@@ -1,0 +1,208 @@
+/* ============================================================
+   bc-catch.css — about 頁「品牌宣言字體輪播」（catch copy）
+   2026-10-31 建立（使用者指示：移植 eightdesign.co.jp 的 PZL1xq_catch 動畫）
+   ------------------------------------------------------------------
+   來源：eightdesign.co.jp 首頁 Concept 區 <h3 class="PZL1xq_catch">。
+   該站是 Next.js + CSS Modules，類名 hash 前綴為 PZL1xq_。原始結構：
+     h3.PZL1xq_catch（display:grid、gap:8px、固定寬 745px）
+       ├ div.PZL1xq_eye            裝飾用「眼睛」SVG（本頁省略，見下方差異 3）
+       ├ span.PZL1xq_catchLine[data-catch-line="1"]  × 4 個 catchLineItem
+       ├ span.PZL1xq_catchLine[data-catch-line="2"]  × 4 個 catchLineItem
+       └ span.PZL1xq_catchLine[data-catch-line="3"]  × 4 個 catchLineItem
+   每一行＝同一句話的 4 種「字體處理」（原站是 4 張描邊 SVG 圖，例如 DELIGHT 的
+   粗黑體／細寬體／襯線體／極粗黑，行高一律 102px）。4 張圖絕對定位疊在同一格，
+   靠 CSS keyframes 以 step-end 每 185ms 交換 → 遠看就是「字型輪盤」；三行相位
+   彼此錯開，於是整個區塊一直重新排列組合。
+
+   原站量測值（2026-10-31 以 Playwright 實測 1440×900）：
+     · html { font-size: 1px } → 原站 rem 等於 px，故 745rem／102rem 都是字面 px
+     · .PZL1xq_catch：width 745px、gap 8px、高 336px
+     · .PZL1xq_catchLine：高 102px（第 3 行 140px 且 margin-top:-24px，
+       因第 3 行有一張帶下伸部的描邊圖高 142px）
+     · animation: .74s step-end infinite；4 個 item 的 delay
+       0／-.555s／-.37s／-.185s（.74 ÷ 4 = .185 → 永遠只有 1 個可見）
+     · 行相位（--catch-line-delay）：第 2 行 -.1s、第 3 行 -.2s
+       （本頁改為 -.09s／-.18s，理由見下方「行相位」註解）
+   除行相位外，本檔完全沿用上述時間軸與延遲值（含 0%,24.99% / 25%,100% 的 keyframe
+   切點），只把「SVG 圖」換成「即時文字」，因此模組不含任何圖片、也不需 JS。
+
+   與原站的刻意差異：
+     1. 原站每行是 4 張事前描好邊的日文 SVG（字體是設計師自繪／商業字型），
+        本頁改用即時文字，只用全站已載入的字型（Noto Serif TC ／ Noto Sans TC）
+        與品牌色 var(--bc-gold)，不新增字型檔、圖片或第三方資源。
+     2. 原站 ≤767px 會關閉輪播（animation:none，只留第一種字體）；本頁全斷點保留
+        （輪播就是這個模組的重點），僅在 prefers-reduced-motion 時靜止於第一種字體。
+     3. 原站右上角有一顆會「凝視」的裝飾眼睛（GSAP yPercent 來回），本頁依指示
+        不加任何額外 UI → 省略。
+     4. 原站固定 745px 寬；本頁改用 --bc-catch-fs（clamp）等比縮放，行動版不會破版。
+
+   要改文案：只動 about.html 內 .bc-catch 的 12 個 span（每行的 4 個 span 文字相同，
+   依序套 --serif／--light／--outline／--black 循環，換行順序可自由排列）。
+   要改速度：.bc-catch__item 的 animation-duration 與三個 item delay 需一起改
+   （delay = duration × n/4，n = 1,2,3）。
+   ============================================================ */
+
+.bc-catch {
+  /* 字級：1440 寬 → 118px（4 字約 490px 寬，行高 124px，整塊 ≈ 390px 高）；
+     390 寬 → 40px。原站是固定 px，這裡等比縮放以維持各斷點的視覺比重。 */
+  --bc-catch-fs: clamp(40px, 8.2vw, 118px);
+  /* 行距：原站 8px / 745px 寬 ≈ 1.07%；這裡用同比例縮放，行動版縮到 2px 左右 */
+  --bc-catch-gap: clamp(2px, 0.55vw, 8px);
+  /* 行高：原站 102px 對應字面圖高 106px；文字版取 1.05em（上下留一點給襯線的
+     字腔與基線差），三行等高 → 換字體時版面完全不跳動。 */
+  --bc-catch-line-h: calc(var(--bc-catch-fs) * 1.05);
+
+  position: relative;
+  overflow: hidden;
+  padding: 80px 24px 88px;
+}
+
+/* 逐行堆疊（原站 .PZL1xq_catch 的 display:grid + gap:8px） */
+.bc-catch__lines {
+  display: grid;
+  gap: var(--bc-catch-gap);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 單行：高度固定、字級固定；四個字體變體疊在同一格（絕對定位），
+   所以只會換「字體」，不會換「位置」→ 不會有任何 layout shift。 */
+.bc-catch__line {
+  position: relative;
+  display: block;
+  height: var(--bc-catch-line-h);
+  font-size: var(--bc-catch-fs);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* 單一變體：預設隱形，靠下方 keyframes 每 185ms 輪流顯示（原站 .PZL1xq_catchLineItem） */
+.bc-catch__item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  white-space: nowrap;
+  opacity: 0;
+  will-change: opacity;
+  animation-name: bc-catch-switch;
+  animation-duration: 0.74s;
+  animation-timing-function: step-end;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-delay: calc(var(--bc-catch-line-delay, 0s) + var(--bc-catch-item-delay, 0s));
+}
+
+/* 原站 keyframes 原封不動（0～24.99% 不透明、25% 起全透明 + step-end →
+   每個變體只在自己那 1/4 的時間內出現，且切換是硬切不是淡入淡出） */
+@keyframes bc-catch-switch {
+  0%,
+  24.99% {
+    opacity: 1;
+  }
+  25%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 行相位：第 2 行領先 0.09s、第 3 行領先 0.18s。
+   原站是 -.1s／-.2s；本頁三行共用同一組 4 種字體（原站每行是不同字），若照抄，
+   第 3 行相位會跨過兩個 slot（0.2 ÷ 0.185 > 1）→ 三行可能同時顯示同一種字體。
+   改成 0.09／0.18（都 < 一個 slot 0.185）＋下方「三行從不同字體起步」的順序，
+   可確保任一時刻三行一定是三種不同字體（相位錯開的手感與原站一致）。 */
+.bc-catch__line[data-catch-line="2"] {
+  --bc-catch-line-delay: -0.09s;
+}
+
+.bc-catch__line[data-catch-line="3"] {
+  --bc-catch-line-delay: -0.18s;
+}
+
+/* 同一行內 4 個變體的相位：0／-.555s／-.37s／-.185s（.74 ÷ 4 = .185） */
+.bc-catch__item:nth-child(2) {
+  --bc-catch-item-delay: -0.555s;
+}
+
+.bc-catch__item:nth-child(3) {
+  --bc-catch-item-delay: -0.37s;
+}
+
+.bc-catch__item:nth-child(4) {
+  --bc-catch-item-delay: -0.185s;
+}
+
+/* ------------------------------------------------------------------
+   四種字體處理（同一句話、同一個字級，只換 family／weight／字距／顏色）
+   對應原站每行的 4 張 SVG：襯線體／細寬體／描邊體／極粗黑體
+   ------------------------------------------------------------------ */
+
+/* 1) 品牌金・粗襯線 */
+.bc-catch__item--serif {
+  font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--bc-gold, #c49b63);
+}
+
+/* 2) 白色・細黑體 + 大字距（原站細寬體） */
+.bc-catch__item--light {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-weight: 300;
+  letter-spacing: 0.34em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 3) 空心描邊（金色細線 + 透明填色）；不支援 -webkit-text-stroke 的瀏覽器
+   退回實心細襯線，不會出現「空白行」 */
+.bc-catch__item--outline {
+  font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--bc-gold, #c49b63);
+}
+
+@supports (-webkit-text-stroke: 1px currentColor) {
+  .bc-catch__item--outline {
+    font-weight: 400;
+    color: transparent;
+    -webkit-text-stroke: max(1px, calc(var(--bc-catch-fs) * 0.012))
+      var(--bc-gold, #c49b63);
+  }
+}
+
+/* 4) 白色・極粗黑體（原站最重的那一版） */
+.bc-catch__item--black {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* 無障礙：12 個變體是同一句話的重複渲染，對讀屏器只留一句靜態文字
+   （標題由 about.html 的 .bc-catch__sr 提供，視覺上不佔位、不加任何 UI） */
+.bc-catch__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 使用者關閉動畫時：停在第一種字體（等同原站行動版只顯示第一張圖的做法） */
+@media (prefers-reduced-motion: reduce) {
+  .bc-catch__item {
+    animation: none;
+    opacity: 0;
+  }
+  .bc-catch__item:first-child {
+    opacity: 1;
+  }
+}

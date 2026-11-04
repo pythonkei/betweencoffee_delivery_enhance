@@ -1,5 +1,6 @@
 /* ============================================================
-   bc-capabilities.css — About 頁面 sukima capabilities-gallery
+   bc-capabilities.css — sukima capabilities-gallery
+   （2026-08-25 建於 about.html；2026-10-27 整組移入 index.html 首頁）
    完全複製 https://sukima.tokyo.jp/ 的 .capabilities-gallery：
    - 左右團隊照片（cgi-left/right，scroll scrub 時從位移歸位）
    - capabilities-anim-char 36 幀逐幀動畫（anim-frame visibility 切換）
@@ -8,8 +9,19 @@
      anim-char 位置、surprise 41/61/81px
    - 黑底適配（本地品牌背景）；SVG 高亮 #BFFF00 保留
    - 動畫：bc-capabilities.js 原生 scroll scrub
+
+   2026-10-27（使用者指示）：模組整體放大 ＋ 頁面置中
+   - 放大：以單一變數 --cap-scale 等比縮放（gallery 的 max-width／gap／
+     padding 與閃電 SVG 寬度都乘上它）。anim-char、cgi 皆以 gallery
+     百分比定位 ⇒ 自動跟著等比放大，不必另設數值。
+     倍率階梯：base 1（手機本來就滿版，尺寸不變）→ ≥834 1.30 →
+     ≥1280 1.40 → ≥1920 1.60。
+   - 置中：.capabilities-gallery 由 align-self:flex-end（貼右緣）
+     改為 center（.bc-page-content 滿版無內距 ⇒ 等於頁面置中）。
    ============================================================ */
 .bc-capabilities {
+    /* 模組放大倍率（2026-10-27 使用者指示；見檔頭說明） */
+    --cap-scale: 1;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -20,10 +32,10 @@
     display: flex; /* 原站 class 含 flx（display:flex）；缺此導致兩圖垂直分離 */
     font-size: 0;
     width: 100%;
-    align-self: flex-end;
-    gap: 18px;
-    max-width: 606px;
-    padding: 30px 0;
+    align-self: center; /* 2026-10-27：原本 flex-end（貼右緣）→ 頁面置中 */
+    gap: calc(18px * var(--cap-scale));
+    max-width: calc(606px * var(--cap-scale));
+    padding: calc(30px * var(--cap-scale)) 0;
 }
 .bc-capabilities .cgi {
     flex: 1;
@@ -68,15 +80,20 @@
     z-index: 2;
     top: 6px;
     right: 6px;
-    width: 41px;
+    width: calc(41px * var(--cap-scale));
     height: auto;
     transform: translate(100%, -100%);
 }
 
 @media (min-width: 834px) {
+    .bc-capabilities {
+        --cap-scale: 1.3; /* 2026-10-27：桌機／平板放大 1.3 倍（原 606px） */
+    }
     .bc-capabilities .capabilities-gallery {
-        gap: 34px;
-        padding: 60px 0;
+        /* 兩側至少留 24px 邊距（834px 這種窄桌機寬度時 1.3 倍會幾乎貼邊） */
+        max-width: min(calc(606px * var(--cap-scale)), calc(100% - 48px));
+        gap: calc(34px * var(--cap-scale));
+        padding: calc(60px * var(--cap-scale)) 0;
     }
     .bc-capabilities .cgi-left {
         transform: translate3d(18px, 0, 0);
@@ -89,15 +106,23 @@
         left: 46.5%;
     }
     .bc-capabilities .surprise-anim-svg {
-        width: 61px;
+        width: calc(61px * var(--cap-scale));
+    }
+}
+
+@media (min-width: 1280px) {
+    .bc-capabilities {
+        --cap-scale: 1.4; /* 2026-10-27：大螢幕再放大（原 606px → 848px） */
     }
 }
 
 @media (min-width: 1920px) {
+    .bc-capabilities {
+        --cap-scale: 1.6; /* 2026-10-27：超寬螢幕（原站 880px → 970px） */
+    }
     .bc-capabilities .capabilities-gallery {
-        gap: 46px;
-        padding: 80px 0;
-        max-width: 880px;
+        gap: calc(46px * var(--cap-scale));
+        padding: calc(80px * var(--cap-scale)) 0;
     }
     .bc-capabilities .cgi-left {
         transform: translate3d(23px, 0, 0);
@@ -110,6 +135,6 @@
         left: 45%;
     }
     .bc-capabilities .surprise-anim-svg {
-        width: 81px;
+        width: calc(81px * var(--cap-scale));
     }
 }

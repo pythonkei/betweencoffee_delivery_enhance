@@ -1,0 +1,429 @@
+/* ============================================================
+   bc-home-service.css — 首頁「咖啡豆製程」捲動模組（homeService 移植）
+   2026-10-30 建立
+   ------------------------------------------------------------------
+   來源：union-tec.jp 首頁 <section x-data="homeService">（Alpine + Lenis +
+         three.js 網格 + GSAP MorphSVG）。本模組為原生 JS 重寫：
+         - 幾何、時序、class 狀態機（is-in / is-out / is-appearing）1:1 照抄
+         - 捲動量測與 clip-path 縮放：static/js/bc-home-service.js
+         - 網格改用 CSS 實線 + DOM 字母（原站 PC 的 three.js canvas 省略）
+   結構（總高 ≈ header + 100svh + 100svh = 原站量測 1897px @1440×900）：
+     .bc-hs__header  一般文檔流（標題 + 說明）
+     .bc-hs__anchor  0 高度錨點（JS 量 topP 用）
+     .bc-hs__gap     手機 -120px 上拉（原站 .sp:-mt-120）
+     .bc-hs__bg      sticky top-0 h-100svh；clip-path 膠囊（捲動時放大到滿版）
+     .bc-hs__stage   sticky top-0 -mt-100svh h-100svh；左側標籤 + 右下 CTA + 網格層
+     .bc-hs__leave   h-100svh 收尾 spacer（100svh 的捲動區間）
+   單位對照（原站 --spacing = 1px，故 Tailwind 數字即 px）：
+     mt-110→110 / pc:mt-212→212；pt-8/16；w-208→208 / pc:w-320→320；
+     top-[max(68px,50%-162px)]；pc:top-142 pc:right-142；gap-40；pb-24；
+     標籤字 24→64px、內縮 --x 25→51px、icon 9→19px
+   品牌映射：字型改用品牌字（Noto Serif TC 標題 / Noto Sans TC 內文）、
+             色票全用 --bc-*；bgCover 的 linear-gradient(#00000080) 改純色 rgba(0,0,0,.5)。
+   斷點：模組沿用原站的 pc: = 64rem = 1024px（與本站 768/1200 不同，勿混用）。
+   ============================================================ */
+
+/* ===== 外框 ===== */
+.bc-home-service {
+    /* 網格格點尺寸（原站量測：SP 93.6px＝24vw、PC 176px＝12.222vw）
+       → 兩者都等於 8.18 欄，維持「欄數固定、格點隨視窗放大」的構圖。 */
+    --hs-cell: 24vw;
+    --hs-gutter: 24px;
+    --hs-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --hs-ease-io: cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+    margin-top: 110px;
+    background: var(--bc-bg, #0e0e0e);
+    color: var(--bc-text, rgba(255, 255, 255, 0.9));
+}
+
+/* ===== header（原站 container + border-t-text + 4 欄 grid） ===== */
+.bc-hs__header {
+    position: relative;
+    z-index: 3;
+    padding: 0 var(--hs-gutter);
+}
+.bc-hs__header-inner {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 8px;
+}
+.bc-hs__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    font-weight: 600;
+}
+.bc-hs__heading-en {
+    font-family: "Noto Serif TC", serif;
+    font-size: 2rem; /* 32px */
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: #fff;
+}
+.bc-hs__heading-ja {
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.6;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.65);
+}
+.bc-hs__lead {
+    margin: 24px 0 0;
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.6;
+    font-weight: 300;
+    text-align: justify;
+    color: var(--bc-text-muted, rgba(255, 255, 255, 0.5));
+}
+
+/* ===== 錨點 / 手機上拉 ===== */
+.bc-hs__anchor {
+    height: 0;
+}
+.bc-hs__gap {
+    height: 0;
+    margin-top: -120px; /* 原站 .sp:-mt-120 */
+}
+
+/* ===== 背景層（膠囊 clip → 滿版） ===== */
+.bc-hs__bg {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 500px;
+    overflow: hidden;
+    background: var(--bc-bg, #0e0e0e);
+    isolation: isolate;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    clip-path: url(#bc-hs-bg-clip);
+}
+.bc-hs__svg-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+.bc-hs__bg-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+/* 4 張圖堆疊（原站 .pile）＋ 收尾時的 translate/scale 由 JS 寫在 transform */
+.bc-hs__items {
+    position: absolute;
+    inset: 0;
+    transform: translate3d(0, 0%, 0) scale(1);
+    will-change: transform;
+}
+.bc-hs__media {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translate(0) scale(1.04);
+}
+.bc-hs__media.is-out {
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.8s var(--hs-ease-io);
+}
+.bc-hs__media.is-in {
+    opacity: 1;
+    z-index: 1;
+    transition: opacity 0.8s var(--hs-ease-io), transform 6s linear;
+    transform: translate(0) scale(1);
+}
+.bc-hs__media.is-appearing {
+    z-index: 2;
+}
+.bc-hs__media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.bc-hs__media picture {
+    position: absolute;
+    inset: 0;
+}
+/* 模糊版疊在清晰版之上（原站預先模糊的獨立檔案；透明度由 JS 同步） */
+.bc-hs__media .bc-hs__img-blur {
+    opacity: 0;
+    transform: translateZ(0);
+}
+/* 全幅階段的 50% 暗幕（原站 linear-gradient(#00000080,#00000080) → 純色） */
+.bc-hs__cover {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    opacity: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+/* 右上角小膠囊（收尾階段淡入；clip 形狀 320×222） */
+.bc-hs__clip-images {
+    position: absolute;
+    top: max(68px, calc(50% - 162px));
+    right: 16px;
+    width: 208px;
+    display: grid;
+    overflow: hidden;
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 0.3s var(--hs-ease-io);
+    clip-path: url(#bc-hs-image-clip);
+}
+.bc-hs__clip-images.is-in {
+    opacity: 1;
+    transition: opacity 0.8s var(--hs-ease-io);
+}
+.bc-hs__clip-image {
+    grid-area: 1 / 1;
+    position: relative;
+    opacity: 0;
+}
+.bc-hs__clip-image.is-out {
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.8s var(--hs-ease-io);
+}
+.bc-hs__clip-image.is-in {
+    opacity: 1;
+    z-index: 1;
+    transition: opacity 0.8s var(--hs-ease-io);
+}
+.bc-hs__clip-image.is-appearing {
+    z-index: 2;
+}
+.bc-hs__clip-image img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 320 / 222;
+    object-fit: cover;
+}
+
+
+/* ===== 前景 stage（sticky，與背景層同範圍：-100svh 讓它疊在背景之上） ===== */
+.bc-hs__stage {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 100svh;
+    min-height: 500px;
+    margin-top: -100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 40px;
+    padding: 0 var(--hs-gutter) 24px;
+    overflow: hidden;
+}
+
+/* ===== 左側四個標籤 ===== */
+.bc-hs__labels {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    font-family: "Noto Serif TC", serif;
+    font-size: 1.5rem; /* 24px → pc 64px */
+    line-height: 1.2;
+    font-weight: 600;
+    color: #fff;
+}
+.bc-hs__label {
+    --hs-label-x: 25px; /* 原站 --x: calc(25 * 1px) */
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+.bc-hs__label > span {
+    display: inline-block;
+    transition: transform 0.8s var(--hs-ease-io);
+}
+.bc-hs__label-icon {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 9px; /* pc 19px */
+    height: auto;
+    fill: currentColor;
+    opacity: 0;
+    transform: translateY(-50%) scale(0);
+    transform-origin: 0 50%;
+    transition: transform 0.5s var(--hs-ease-io), opacity 0.5s var(--hs-ease-io);
+}
+.bc-hs__label[aria-current="true"] .bc-hs__label-icon {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+    transition: transform 0.7s var(--hs-ease-out), opacity 0.5s var(--hs-ease-out);
+}
+.bc-hs__label[aria-current="true"] > span {
+    transform: translateX(var(--hs-label-x));
+    transition: transform 0.8s var(--hs-ease-out);
+}
+.bc-hs__label-en {
+    display: inline-block;
+    margin-left: 0.5em;
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 0.38em;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    vertical-align: 0.22em;
+}
+
+/* ===== CTA（沿用 .bc-btn / .bc-btn-primary，只補尺寸） ===== */
+.bc-hs__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    gap: 12px;
+    min-width: 176px;
+    min-height: 40px;
+    padding: 9px 24px;
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 0.8125rem; /* 13px → pc 16px */
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* ===== 網格層（與背景同一個 clip 形狀 → 只出現在膠囊/滿版圖上） ===== */
+.bc-hs__grid {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    overflow: hidden;
+    clip-path: url(#bc-hs-bg-clip);
+}
+.bc-hs__grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(to right, rgba(255, 255, 255, 0.1) 0 0.6px, transparent 0.6px var(--hs-cell)),
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0 0.6px, transparent 0.6px var(--hs-cell));
+}
+.bc-hs__letters {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    --hs-letter-size: 10px;
+    --hs-letter-scale: 0.2;
+    color: #fff;
+}
+.bc-hs__letters .letter {
+    position: absolute;
+    left: calc(var(--col) * var(--hs-cell));
+    top: calc(var(--row) * var(--hs-cell));
+    display: block;
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: var(--hs-letter-size);
+    line-height: 1;
+    font-weight: 700;
+    text-align: center;
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(var(--hs-letter-scale));
+    transform-origin: 50% 50%;
+}
+
+/* ===== 收尾 spacer ===== */
+.bc-hs__leave {
+    position: relative;
+    height: 100svh;
+    min-height: 500px;
+    pointer-events: none;
+}
+
+/* ============================================================
+   ≥64rem（1024px）＝ 原站 pc: 斷點
+   ============================================================ */
+@media screen and (min-width: 64rem) {
+    .bc-home-service {
+        --hs-cell: 12.222vw;
+        --hs-gutter: 28px;
+        margin-top: 212px;
+    }
+    .bc-hs__header-inner {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        column-gap: 24px;
+        align-items: start;
+        padding-top: 16px;
+    }
+    .bc-hs__heading {
+        grid-column: 1 / span 1;
+        gap: 16px;
+    }
+    .bc-hs__heading-en {
+        font-size: 2.5rem; /* 40px */
+    }
+    .bc-hs__heading-ja {
+        font-size: 1rem; /* 16px */
+    }
+    .bc-hs__lead {
+        grid-column: 2 / span 2;
+        margin-top: 0;
+        font-size: 1.125rem; /* 18px */
+        max-width: 40em;
+    }
+    .bc-hs__gap {
+        margin-top: 0;
+    }
+    .bc-hs__clip-images {
+        top: 142px;
+        right: 142px;
+        width: 320px;
+    }
+    .bc-hs__stage {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 40px;
+    }
+    .bc-hs__labels {
+        gap: 12px;
+        font-size: 4rem; /* 64px */
+    }
+    .bc-hs__label {
+        --hs-label-x: 51px;
+    }
+    .bc-hs__label-icon {
+        width: 19px;
+    }
+    .bc-hs__cta {
+        align-self: flex-end;
+        margin-left: auto;
+        min-width: 216px;
+        min-height: 48px;
+        padding: 12px 32px;
+        font-size: 1rem; /* 16px */
+    }
+}
+
+/* ============================================================
+   無障礙 / 降級
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    .bc-hs__media,
+    .bc-hs__media.is-in,
+    .bc-hs__clip-images,
+    .bc-hs__clip-image,
+    .bc-hs__label > span,
+    .bc-hs__label-icon {
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* JS 未執行（或腳本失敗）時：第一張圖已由 markup 的 .is-in 直接顯示，
+   不會留下整塊全黑的滿版區，故不需額外的 no-js fallback 規則。 */

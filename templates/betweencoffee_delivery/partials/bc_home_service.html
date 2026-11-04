@@ -1,0 +1,199 @@
+{% comment %}
+   ============================================================
+   bc_home_service.html — 首頁「咖啡豆製程」捲動模組
+   2026-10-30 建立（使用者指示：移植 union-tec.jp 首頁 homeService 區塊）
+   ------------------------------------------------------------------
+   來源：https://www.union-tec.jp/  <section x-data="homeService">
+         Alpine + Lenis + three.js 網格 + GSAP MorphSVG 的組合；
+         本檔為 markup 1:1 移植（class 全部改為 .bc-hs-*），
+         幾何與時序見 static/js/bc-home-service.js 檔頭說明。
+   掛載位置：index.html「推薦頁面雙卡（aside.bc-recommended-pages）」之後、
+             「capabilities-gallery」之前 —— 見 index.html 檔頭 [2b-2] 註解。
+   樣式：static/css/bc-home-service.css
+   腳本：static/js/bc-home-service.js（原生 JS，無 Alpine／GSAP／three.js）
+   素材：static/images/home-service/hs-{1..4}{,-sp,-blur,-clip}.webp
+         由 scripts/make_hs_images.py 產生
+   ------------------------------------------------------------------
+   結構對照（左 = 本檔 class，右 = 原站）：
+     .bc-hs__bg        .home-service-bg（sticky + clip-path 膠囊）
+     .bc-hs__items     [x-ref=bgItemsContainer]（收尾 translate/scale）
+     .bc-hs__media     .home-service-bg__media-item（is-in/is-out 交叉淡入）
+     .bc-hs__cover     [x-ref=bgCover]（50% 暗幕）
+     .bc-hs__clip-images  [x-ref=clipImageContainer]（右上小膠囊）
+     .bc-hs__stage     sticky stage（標籤 + CTA + 網格）
+     .bc-hs__label     .home-service__label（aria-current 驅動圓點 + 內縮）
+     .bc-hs__grid      .site-grid-service
+     .bc-hs__leave     [x-ref=leave]（收尾 100svh）
+   ------------------------------------------------------------
+   注意：說明一律寫在 comment 區塊（本行所屬區塊）或 HTML 註解裡，
+         不要用井號式模板註解包多行 —— Django 那個語法只認單行，
+         跨行會原樣輸出成頁面文字。
+   ============================================================
+{% endcomment %}
+{% load static %}
+<section class="bc-home-service" data-bc-home-service>
+
+    {# ---- header：標題 + 說明（原站 container / border-t-text / 4 欄 grid） ---- #}
+    <div class="bc-hs__header">
+        <div class="bc-hs__header-inner">
+            <h2 class="bc-hs__heading">
+                <span class="bc-hs__heading-en">Beans</span>
+                <span class="bc-hs__heading-ja">咖啡豆</span>
+            </h2>
+            <p class="bc-hs__lead">
+                從產地的風土、處理法的細節，到烘焙曲線與出爐的那一刻。
+                我們把每支豆子的來歷寫清楚，讓你在家也能沖出店裡的那一杯。
+            </p>
+        </div>
+    </div>
+
+    {# ---- 量測錨點（topP 起點）＋ 手機上拉 120px ---- #}
+    <div class="bc-hs__anchor" data-hs-anchor aria-hidden="true"></div>
+    <div class="bc-hs__gap" aria-hidden="true"></div>
+
+    {% comment %}
+       背景層：膠囊 clip-path，捲動時放大到滿版。
+       clip 路徑座標系固定 463×320（原站 d 原封不動）；JS 每幀覆寫 path 的
+       transform（objectBoundingBox 正規化），下方初始值只是 JS 尚未執行時的近似值。
+    {% endcomment %}
+    <div class="bc-hs__bg" data-hs-bg>
+        <svg class="bc-hs__svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+            <clipPath id="bc-hs-bg-clip" clipPathUnits="objectBoundingBox">
+                <path data-hs-clip-path
+                      transform="translate(0 0) translate(0.5 0.5) scale(0.45 0.49761) translate(-0.5 -0.5) scale(0.00215983 0.003125)"
+                      d="M393.18 30.3479C344.828 2.96078 277.953 0 231.5 0C185.047 0 118.172 2.96078 69.8198 30.3479C25.9816 55.1849 0 105.4 0 160C0 214.6 25.9816 264.821 69.8198 289.652C118.172 317.039 185.047 320 231.5 320C277.953 320 344.828 317.039 393.18 289.652C437.018 264.821 463 214.6 463 160C463 105.4 437.018 55.1786 393.18 30.3479Z" />
+            </clipPath>
+            <clipPath id="bc-hs-image-clip" clipPathUnits="objectBoundingBox">
+                <path d="M272.505 21.0539C238.993 2.05404 192.644 0 160.448 0C128.252 0 81.9026 2.05404 48.3907 21.0539C18.0073 38.2845 0 73.1211 0 111C0 148.879 18.0073 183.72 48.3907 200.946C81.9026 219.946 128.252 222 160.448 222C192.644 222 238.993 219.946 272.505 200.946C302.888 183.72 320.896 148.879 320.896 111C320.896 73.1211 302.888 38.2802 272.505 21.0539Z"
+                      transform="scale(0.0031152648 0.0045045045)" />
+            </clipPath>
+        </svg>
+
+        <div class="bc-hs__bg-inner" data-hs-bg-inner>
+            <div class="bc-hs__items" data-hs-items>
+
+
+                {# ---- 1 產地（第一張預設 is-in；JS 初始化會再次 add，idempotent） ---- #}
+                <div class="bc-hs__media is-in">
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-1.webp' %}">
+                        <img src="{% static 'images/home-service/hs-1-sp.webp' %}"
+                             alt="裝在麻布袋裡的生咖啡豆" decoding="async" loading="lazy">
+                    </picture>
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-1-blur.webp' %}">
+                        <img class="bc-hs__img-blur" src="{% static 'images/home-service/hs-1-blur.webp' %}"
+                             alt="" decoding="async" loading="lazy">
+                    </picture>
+                </div>
+
+                {# ---- 2 處理法 ---- #}
+                <div class="bc-hs__media">
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-2.webp' %}">
+                        <img src="{% static 'images/home-service/hs-2-sp.webp' %}"
+                             alt="處理完成的生咖啡豆特寫" decoding="async" loading="lazy">
+                    </picture>
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-2-blur.webp' %}">
+                        <img class="bc-hs__img-blur" src="{% static 'images/home-service/hs-2-blur.webp' %}"
+                             alt="" decoding="async" loading="lazy">
+                    </picture>
+                </div>
+
+                {# ---- 3 烘焙 ---- #}
+                <div class="bc-hs__media">
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-3.webp' %}">
+                        <img src="{% static 'images/home-service/hs-3-sp.webp' %}"
+                             alt="烘豆機滾筒中翻滾的咖啡豆" decoding="async" loading="lazy">
+                    </picture>
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-3-blur.webp' %}">
+                        <img class="bc-hs__img-blur" src="{% static 'images/home-service/hs-3-blur.webp' %}"
+                             alt="" decoding="async" loading="lazy">
+                    </picture>
+                </div>
+
+                {# ---- 4 出爐 ---- #}
+                <div class="bc-hs__media">
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-4.webp' %}">
+                        <img src="{% static 'images/home-service/hs-4-sp.webp' %}"
+                             alt="剛烘焙完成、正在散熱的咖啡豆" decoding="async" loading="lazy">
+                    </picture>
+                    <picture>
+                        <source media="(min-width: 64rem)" srcset="{% static 'images/home-service/hs-4-blur.webp' %}">
+                        <img class="bc-hs__img-blur" src="{% static 'images/home-service/hs-4-blur.webp' %}"
+                             alt="" decoding="async" loading="lazy">
+                    </picture>
+                </div>
+            </div>
+
+            {# ---- 滿版階段的 50% 暗幕（原站 linear-gradient(#00000080) → 純色） ---- #}
+            <div class="bc-hs__cover" data-hs-cover aria-hidden="true"></div>
+
+            {# ---- 右上角小膠囊（收尾階段淡入，與背景同一個 timerIndex） ---- #}
+            <div class="bc-hs__clip-images" data-hs-clip-images>
+                <div class="bc-hs__clip-image is-in">
+                    <img src="{% static 'images/home-service/hs-1-clip.webp' %}" alt=""
+                         decoding="async" loading="lazy">
+                </div>
+                <div class="bc-hs__clip-image">
+                    <img src="{% static 'images/home-service/hs-2-clip.webp' %}" alt=""
+                         decoding="async" loading="lazy">
+                </div>
+                <div class="bc-hs__clip-image">
+                    <img src="{% static 'images/home-service/hs-3-clip.webp' %}" alt=""
+                         decoding="async" loading="lazy">
+                </div>
+                <div class="bc-hs__clip-image">
+                    <img src="{% static 'images/home-service/hs-4-clip.webp' %}" alt=""
+                         decoding="async" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ---- 前景 stage：sticky 疊在背景上（margin-top:-100svh） ---- #}
+    <div class="bc-hs__stage" data-hs-stage>
+
+        {# 圓點圖示（4 個標籤共用；同一個 <symbol>，避免重複貼 path） #}
+        <svg class="bc-hs__svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+            <symbol id="bc-hs-dot" viewBox="0 0 3 2">
+                <path d="M2.5476 0.189675C2.23431 0.0185048 1.80099 0 1.5 0C1.19901 0 0.765693 0.0185048 0.452396 0.189675C0.168348 0.344905 0 0.658749 0 1C0 1.34125 0.168348 1.65513 0.452396 1.81033C0.765693 1.9815 1.19901 2 1.5 2C1.80099 2 2.23431 1.9815 2.5476 1.81033C2.83165 1.65513 3 1.34125 3 1C3 0.658749 2.83165 0.344866 2.5476 0.189675Z"/>
+            </symbol>
+        </svg>
+
+        {# aria-current 由 JS 依 timerIndex 切換（與背景圖片輪播同步） #}
+        <div class="bc-hs__labels">
+            <p class="bc-hs__label" data-hs-label aria-current="true">
+                <svg class="bc-hs__label-icon" width="9" height="6" aria-hidden="true" focusable="false"><use href="#bc-hs-dot"/></svg>
+                <span>產地風土<span class="bc-hs__label-en">Origin</span></span>
+            </p>
+            <p class="bc-hs__label" data-hs-label aria-current="false">
+                <svg class="bc-hs__label-icon" width="9" height="6" aria-hidden="true" focusable="false"><use href="#bc-hs-dot"/></svg>
+                <span>處理法<span class="bc-hs__label-en">Process</span></span>
+            </p>
+            <p class="bc-hs__label" data-hs-label aria-current="false">
+                <svg class="bc-hs__label-icon" width="9" height="6" aria-hidden="true" focusable="false"><use href="#bc-hs-dot"/></svg>
+                <span>烘焙曲線<span class="bc-hs__label-en">Roast</span></span>
+            </p>
+            <p class="bc-hs__label" data-hs-label aria-current="false">
+                <svg class="bc-hs__label-icon" width="9" height="6" aria-hidden="true" focusable="false"><use href="#bc-hs-dot"/></svg>
+                <span>新鮮出爐<span class="bc-hs__label-en">Fresh</span></span>
+            </p>
+        </div>
+
+        <a class="bc-btn bc-btn-primary bc-hs__cta" href="{% url 'bean_menu' %}">探索咖啡豆</a>
+
+        {# ---- 網格層：細線 + 字母矩陣（原站 PC 為 three.js canvas → 此處純 CSS/DOM） ---- #}
+        <div class="bc-hs__grid" aria-hidden="true">
+            <div class="bc-hs__grid-lines"></div>
+            <div class="bc-hs__letters" data-hs-letters></div>
+        </div>
+    </div>
+
+    {# ---- 收尾 spacer：100svh 的捲動區間（小膠囊淡入、背景上移縮放都在此區間） ---- #}
+    <div class="bc-hs__leave" data-hs-leave aria-hidden="true"></div>
+</section>

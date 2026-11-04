@@ -613,32 +613,118 @@
    [縮放] --wc-scale:1.3。bc-weather.css 的所有尺寸都是 calc(原值 * var(--wc-scale,1))
      （先例＝bc-reviews.css 的 --rv-scale）；只在 hero 內宣告 → about 頁 navbar 那顆
      不繼承（×1）→ about 外觀零變動。
-   [定位] 放進 #bc-stage-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格：
-     · align-self:start：貼齊該格頂端。該格高度＝整條時鐘列高（由照片格撐出；2026-10-15
-       原始 419.6px → 照片放大 529.6px → 當日稍後照片縮小 460.4px），若用預設的 stretch
-       會撐滿整列並讓內容垂直置中而與 { 重疊；center 更是直接疊上去。start 讓它恆在垂直
-       置中的 { 之上（實測 1440 間距 81.8 → 136.8 → 102.2px：天氣留在列頂、{ 隨列高置中
-       ⇒ 列高 +110 時 +55、列高 −69.2 時 −34.6；≥992px 其餘斷點 1905 = 154.0、1280 = 84.4、
-       992 = 52.3px，皆遠大於 0；≤991px 各斷點與改動前逐值相同、全斷點皆不重疊）。
+   [定位 ≤991px] 放進 #bc-stage-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格、
+     在 { 的正上方（該斷點時鐘列只有 9 小欄、左側沒有多餘寬度放 111px 寬的天氣，維持原樣）：
+     · align-self:start：貼齊該格頂端。該格高度＝整條時鐘列高（由照片格撐出），若用預設的
+       stretch／center 會與 { 重疊；start 讓它恆在垂直置中的 { 之上。
      · justify-self:center：與同格的 { 水平同中心（兩者都置中於欄 1）。
+   [定位 ≥992px] 2026-11-02（使用者指示）：「bc-stage-weather 移到最左側 { 符號的左邊，
+     時鐘 { 15 : 照片 : 19 } 整個內部相應縮小間隔」→ 天氣改成時鐘左邊獨立一欄：
+     · .footer-time 由 8 欄（1fr×8）改為 **10 欄**：
+         欄1 = 天氣（--bc-clock-side-w 固定 124px）
+         欄2~9 = 時鐘 { 15 : 照片(跨2) : 19 }
+         欄10 = 同寬空欄（鏡像留白，不放置任何內容）
+     · 為什麼要右側鏡像空欄：時鐘那 8 欄本來左右對稱於照片（照片跨第 4-5 欄，實測 1440
+       照片格 550→890、中心 720＝頁面正中；環形圓心＝cell 中心，見下方 B1）。只在左邊
+       加一欄會讓照片與整顆環形圓心右移 63px（實測），置中的咖啡就不是頁面正中央了。
+       補一欄等寬留白後照片中心仍在 720。
+     · 為什麼「間隔相應縮小」：9 個欄間距（9×16＝144）＋兩側固定欄（2×124＝248）先被扣掉，
+       剩下的 1016px 才分給 8 個時鐘欄（原 8 欄時是 1408−112＝1296）⇒ 每欄 162 → 127px
+       （@1440），`{`／`15`／冒號／照片／`}` 之間的空隙同步由約 124px 收到 75~89px。
+     · 固定 124px（不用 vw）：.weather 是固定 px（110.9×88.4，bc-weather.css 全是 px×
+       --wc-scale）→ 需要預留的寬度不隨視寬變；124 已含左右各 6.5px 餘量。
+     · 環形照片不受影響：.footer-logo-cell 是被 flex-shrink 縮到欄寬（288 → 270px），
+       但環是 absolute、定位點＝cell 中心（width:0 ＋ left:50%），照片寬 280px 固定
+       ⇒ 照片尺寸與圓心都不變（實測 1440 環照片 280×400、中心 720 逐值不變）。
+     · align-self 由 start 改為 center：天氣不再在 { 上方，而是與同列垂直置中的 { 站在
+       同一條線上；justify-self:center 仍讓它在自己的欄內置中。
    [高度] .weather 在 hero 內改為 height:auto（見 bc-weather.css）：navbar 的
      height:100%／80px 是為 flex 容器設計，照搬到 grid 格會與 { 重疊。 */
 .bc-brand-stage-hero #bc-brand-stage #bc-stage-weather {
   grid-area: 1 / 1 / 2 / 2;
   align-self: start;
   justify-self: center;
+  /* [為什麼要 position:relative + z-index] 環形照片列（#bc-stage-photo-ring）的照片是整頁大圓
+     （R＝100vw）上的 absolute 項目，圓弧掃到最左緣時照片會「穿過」天氣元件所在的區塊
+     （實測 @1440 rotate(-25/-75/-150deg)：單張照片與天氣矩形的交集面積都是 9798px，
+      等於 110.9×88.4 的天氣框幾乎整片被蓋住（日期列被杯身／蒸氣線壓過）；@1920 相同）。
+     天氣本身沒有底色，抬到照片之上後：照片照樣看得到（透過來），但 icon／溫度／日期
+     永遠壓在照片前面 ⇒ 不會被蓋掉。
+     · 只是 grid item 的堆疊順序（position:relative 對 grid item 的版面零影響，實測 rect 不變）；
+       #bc-stage-photo-ring 的 z-index 是 auto ⇒ 3 已足夠，也不影響浮動購物車（z-index ≥100000）。
+     · 修好後量測（elementFromPoint 掃天氣矩形 9 點 × 8 秒）：711/711 全部命中天氣、0 次命中照片
+       （1440）；1920／1200／992 幾何不變（天氣右緣 < `{` 左緣 60~103px）。
+     · 照片穿過 { }／數字的情況是既有設計（見 docs/verify/cdp_verify_clock_clash.py 的量法），
+       這裡只處理「2026-11-02 把天氣移到時鐘列中線後才出現」的那一段。 */
+  position: relative;
+  z-index: 3;
 }
-/* ≥992px 必須把 { 明確釘回「欄 1、列 1」。
-   [原因] 本頁 .footer-time 8 欄配置的排列靠 grid 自動置位：`{` 與 `15` 只宣告了
-     place-self:center、沒有 grid-area（≤991px 才有明確值，見 bc-brand-stage.css）。
-     新增的天氣格先佔走欄 1 後，自動置位會把 `{` 放到欄 2、`15` 往後找空格
-     （撞上明確定位的冒號／照片再退），照片列（span 2）最終落點也會偏移
-     —— 實測會出現隱式欄、整列跑版。
-   [作法] 把 `{` 釘在欄 1（＝天氣所在的同一格，兩者上下不重疊，理由見上），
-     自動置位序列即完全不變：欄 1={(+天氣) 2=15 3=: 4-5=照片 6=: 7=19 8=}。 */
+/* ≥992px：天氣左移到 { 的左邊、時鐘縮成 8 欄（＋兩側留白欄），見上方 [定位 ≥992px]。
+   [為什麼每個時鐘子項都寫死 grid-area] 原 8 欄配置靠 grid 自動置位；改了欄數與欄寬後
+     自動置位的落點會偏移（照片是 span 2、`}` 原本落在欄 8），故一次把全部子項釘死：
+       欄2 `{`　欄3 `15`　欄4 `:`　欄5-6 照片　欄7 `:`　欄8 `19`　欄9 `}`
+     （欄1＝天氣、欄10＝空欄）。place-self:center 沿用上方既有規則，不重複宣告。 */
 @media screen and (min-width: 992px) {
+  .bc-brand-stage-hero #bc-brand-stage {
+    --bc-clock-side-w: 124px;
+    /* 2026-11-02（使用者指示）：「天氣太靠近左邊緣，略微移右一點」。
+       [為什麼用 transform 而不是改欄寬／padding] 天氣是 grid item（欄 1、justify-self:center），
+       改欄寬會連帶壓縮 8 個時鐘欄、把照片環圓心推離頁面正中（見上方 [定位 ≥992px] 的鏡像欄說明）；
+       改 padding 會撐大 item 寬度。transform 不參與 grid 版面計算、也不影響後面時鐘子項的 rect
+       ⇒ `{`／數字／照片環位置逐值不變，只有天氣自己右移。
+       [數值] clamp(24px, 2.4vw, 48px)：實測 992→23.8、1200→28.8、1440→34.6、1920→46.1
+         （天氣左緣 22.5 → 57.1 @1440，視覺上與左上角 BETWEEEN logo 的左緣 68 幾乎同一起點）。
+         右移後與 `{`（1440 固定在 208.2）的間距 74.8 → 40.2px，仍有呼吸空間。
+         下限 24px 是 992px 斷點的安全值（該斷點間距最小 48.7 → 24.9px，再大就會貼到 `{`）；
+         ≤991px 不套用——該斷點天氣在 { 正上方置中，右移會破壞水平同中心。
+       [安全性] #bc-stage-weather 的 data-reveal="clip-down" 只動 clip-path（bc-brand-stage.js:276-293
+        的 animateClipReveal 不寫 transform），不會被 GSAP 的 inline transform 覆蓋；
+        transform 會建立新的堆疊脈絡，但 z-index:3 仍高於照片環（auto）。 */
+    --bc-weather-nudge: clamp(24px, 2.4vw, 48px);
+  }
+  .bc-brand-stage-hero #bc-brand-stage .footer-time {
+    grid-template-columns:
+      var(--bc-clock-side-w) repeat(8, minmax(0, 1fr)) var(--bc-clock-side-w);
+  }
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-weather {
+    align-self: center;
+    /* 右移一點點（變數與說明見上方 --bc-weather-nudge） */
+    transform: translateX(var(--bc-weather-nudge, 0px));
+  }
+  /* [為什麼要 flex-shrink:0] .footer-logo-cell 是 .footer-time-inner（display:flex）的
+     flex item，寬度 288vw/ratio（＝20vw）預設會被 flex-shrink 縮到欄寬：
+       · 改動前 @1440 欄寬 270（=20vw 288 → 縮到 270）、@992 欄寬 198.4（=20vw，剛好不縮）；
+       · 改成 10 欄後 @992 欄寬只剩 166.7 ⇒ 文字區可用寬 190.4 → 158.7，
+         而 highlight 18px 最長行 171.73px ⇒ **會折行**（改動前 992 是單行，驗證腳本 E10 有守門）。
+     把 cell 固定在 20vw（992 = 198.4、1440 = 288）後文字區回到 190.4 ⇒ 全桌機斷點單行。
+     · 只有 ≥992px 這樣做：≤991px 的 cell 本來就必須靠 flex-shrink 塞進 .footer-time-inner
+       （該斷點寬度刻意不鏡射，見上方檔頭說明），維持可縮。
+     · 超出欄寬的部分：cell 比欄寬多 2×(198.4−166.7)/2≈16px，靠 .footer-time-inner 的
+       justify-content:center 左右對稱溢出（環形定位點＝cell 中心 ⇒ 圓心與照片位置不變）；
+       #bc-brand-stage 是 overflow:hidden ⇒ 不產生水平捲軸（實測 scrollWidth == 視寬）。 */
+  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
+    flex-shrink: 0;
+  }
   .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-brace-open {
-    grid-area: 1 / 1 / 2 / 2;
+    grid-area: 1 / 2 / 2 / 3;
+  }
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-hours {
+    grid-area: 1 / 3 / 2 / 4;
+  }
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-colon-before-minutes {
+    grid-area: 1 / 4 / 2 / 5;
+  }
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring {
+    grid-area: 1 / 5 / 2 / 7;
+  }
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-colon-after-minutes {
+    grid-area: 1 / 7 / 2 / 8;
+  }
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-minutes {
+    grid-area: 1 / 8 / 2 / 9;
+  }
+  .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-brace-close {
+    grid-area: 1 / 9 / 2 / 10;
   }
 }
 .bc-brand-stage-hero #bc-brand-stage #bc-stage-weather .weather {

@@ -71,6 +71,17 @@
        「與 Fresh / Beans 相同」的 goo 揭示（引擎＝bc-brand-stage.js 的 window.BC_MEDIA_REVEAL，
        同一組 STD／AMP／OFF 濾鏡與同樣的 1.2s / 'Out' 時間軸）。
      · 之後換張完全不變：仍是圓盤旋轉 ＋ scale 0.5 ⇄ 1 過渡；.is-snap 只在第一次定位時存在。
+   [2026-10-29 使用者指示「把左右滑動加回來」（原本的拖曳是 GUNTE hero 的 Splide 提供的，
+     2026-10-19 效能 P0 移除 splide.min.js／bc-gunte-hero.js 後只剩 5s 自動輪播）]
+     · 新增 bindDrag()：以 Pointer Events 讓使用者「抓著照片左右拖」，圓盤 1:1 跟手
+       （水平位移換算成弧長角度，見 DEG_PER_PX_UNIT 與 d.degPerPx）；
+       放手吸附到最近一格並呼叫 startAuto() ⇒ 停下後 5s 恢復自動輪播。
+     · 位移 < DRAG_START_PX ＝「點一下」 ⇒ 完全不介入，<a> 照常跳該支咖啡的詳情頁；
+       判定為拖曳時才在 root 的 capture 階段吞掉緊接而來的 click（拖曳不該跳頁）。
+     · 直向手勢一開始就放棄（d = null）＋ CSS 的 touch-action: pan-y
+       ⇒ 手機直向滑動仍是捲動頁面，不會被照片吃走。
+     · 拖曳中圓盤角度夾在「第 1 張 ~ 最後一張」的既有扇形內（7 格只佔 150°，不是整圈；
+       自動輪播第 7 → 第 1 張本來就是繞回，手動在兩端「快甩」時比照辦理，見 finish()）。
    ============================================================ */
 (function () {
   'use strict';
@@ -91,6 +102,15 @@
   var CAPTION_REVEAL_DELAY = 0;
   var CAPTION_REVEAL_DUR = 0.45;
   var CAPTION_REVEAL_STAGGER = 0;
+  /* 2026-10-29：手動拖曳（見檔頭與 bindDrag / finish）。
+     DRAG_START_PX  起拖門檻（px）：小於此值＝點擊（照常跳咖啡詳情頁），大於才算拖曳。
+     DRAG_COMMIT    放手時至少走一格的位移比例（0.3＝拖過 30% 格距就換張）。
+     DRAG_FLICK_V   放手速度門檻（px/ms；向左為負）：超過就多走一格（快甩手勢）。
+     DEG_PER_PX     180/π：把「水平位移 ÷ 圓半徑」換算成圓盤角度（＝弧長 1:1，貼著手指走）。 */
+  var DRAG_START_PX = 6;
+  var DRAG_COMMIT = 0.3;
+  var DRAG_FLICK_V = 0.35;
+  var DEG_PER_PX = 57.29578;
   var instances = [];  // 已註冊的環
   var lastIndex = null; // 最後一次 goAll() 的索引（晚註冊者的會合依據）
   /* 2026-10-20：沒有 hero（Splide）推播時的自帶節拍（見檔頭「2026-10-20 回歸修正」）。 */
@@ -135,6 +155,8 @@
       };
       this.list.addEventListener('transitionend', this._onEnd);
     }
+    // 2026-10-29：手動拖曳（抓著照片左右轉；1 格以上才需要）
+    if (this.items.length > 1) this.bindDrag();
   }
 
   Ring.prototype.count = function () { return this.items.length; };
@@ -232,8 +254,7 @@
     // 文字也不必等過渡結束；之後只要索引變了就會轉。
     var rotates = first ? false : (idx !== this.cur);
     if (this.list) this.list.style.transform = 'rotate(' + (idx * STEP) + 'deg)';
-    var k;
-    for (k = 0; k < n; k++) this.items[k].classList.toggle('-current', k === idx);
+    this.highlight(idx);   // 只讓第 idx 格是 -current（2026-10-29 抽成方法，拖曳中也用同一支）
     if (this.captions.length) {
       if (rotates) {
         this.holdCaptions(idx);            // 有過渡 ⇒ 文字等它轉完（見檔頭：只顯示置中的那杯）
@@ -254,6 +275,131 @@
       this.revealPhoto(idx);
     }
     return idx;
+  };
+
+  /* 圖片高亮：只讓第 i 格是 -current（i 會先正規化到 [0, n)）。 */
+  Ring.prototype.highlight = function (i) {
+    var n = this.items.length;
+    if (!n) return;
+    var idx = ((Math.round(i) % n) + n) % n;
+    for (var k = 0; k < n; k++) this.items[k].classList.toggle('-current', k === idx);
+  };
+
+  /* ---------- 2026-10-29：手動拖曳（抓著照片左右轉） ----------
+     [為什麼掛在 .hero_hand 根節點] 照片在 <a><img> 內、根節點本身是 pointer-events:none
+       ⇒ 只有照片區吃得到事件；pointerdown 由 <a>/<img> 冒泡上來即可攔到，
+       頁面其他區塊（含下方時鐘列）不受影響。
+     [1:1 跟手] 圓盤角度 = 起拖角度 ＋ dx × (180/π ÷ R)，R ＝ .hero_hand_list 寬度的一半
+       （＝--circle-radius）。因為照片是繞著同一個圓心轉，這樣換算等於「弧長跟手」——
+       被抓的那杯幾乎貼著手指移動。
+     [放手判定] 位移換算的格數四捨五入 → 沒滿半格但已拖過 30% 格距仍走一格（DRAG_COMMIT）；
+       再加上快甩（DRAG_FLICK_V）補一格，同方向不重複加 ⇒ 一次手勢最多走一格，不會亂跳。
+     [不會干擾頁面捲動] 直向位移一超過橫向就放棄手勢（self.d = null）；
+       CSS 另加 touch-action: pan-y ⇒ 瀏覽器只把橫向手勢交給本模組。 */
+  Ring.prototype.bindDrag = function () {
+    var self = this;
+    var root = this.root;
+    // 2026-10-29：若哪天恢復被 hidden 的 GUNTE hero（bc-gunte-hero.js ＋ Splide），
+    // 拖曳由 Splide 負責（drag: true）→ 這裡讓位，避免兩套手勢互搶。
+    if (root.closest && root.closest('.splide, .bc-gunte-hero')) return;
+
+    function stamp() {
+      return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
+    }
+
+    function down(e) {
+      if (self.d) return;                                       // 已有一個手勢在跑
+      if (e.button !== undefined && e.button !== 0) return;      // 只認主鍵／單指
+      if (self.items.length < 2 || !self.list) return;
+      var R = self.list.offsetWidth ? self.list.offsetWidth / 2 : 0;
+      self.d = {
+        id: e.pointerId,
+        cap: (e.target && e.target.setPointerCapture) ? e.target : root,
+        x0: e.clientX,
+        y0: e.clientY,
+        lastX: e.clientX,
+        lastT: stamp(),
+        v: 0,                       // 放手速度（px/ms；往左為負）
+        moved: false,
+        rot0: (self.cur < 0 ? 0 : self.cur) * STEP,
+        degPerPx: DEG_PER_PX / (R || 1),
+        rot: null
+      };
+    }
+
+    function move(e) {
+      var d = self.d;
+      if (!d || e.pointerId !== d.id) return;
+      var dx = e.clientX - d.x0;
+      var dy = e.clientY - d.y0;
+      if (!d.moved) {
+        if (Math.abs(dx) < DRAG_START_PX && Math.abs(dy) < DRAG_START_PX) return;  // 還在點擊容差內
+        if (Math.abs(dy) > Math.abs(dx)) { self.d = null; return; }   // 直向 → 交還瀏覽器捲動
+        d.moved = true;
+        root.classList.add('is-dragging');       // CSS：關掉圓盤旋轉過渡（要貼著手指）
+        stopAuto();                              // 手動操作期間暫停自動輪播
+        if (d.cap.setPointerCapture) {
+          try { d.cap.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+        }
+      }
+      var t = stamp();
+      d.v = (e.clientX - d.lastX) / Math.max(1, t - d.lastT);
+      d.lastX = e.clientX;
+      d.lastT = t;
+      // 夾在既有扇形內（第 1 張 0° ~ 最後一張 (n-1)×STEP，例如 6×-25 = -150°）：
+      // 本設計不是整圈，拖出範圍沒有意義
+      var lo = (self.items.length - 1) * STEP;
+      var rot = d.rot0 + dx * d.degPerPx;
+      d.rot = Math.max(lo, Math.min(0, rot));
+      self.list.style.transform = 'rotate(' + d.rot.toFixed(2) + 'deg)';
+      self.highlight(Math.round(d.rot / STEP));  // 過半格就換高亮（is-dragging 期間用短過渡）
+    }
+
+    function finish(e, aborted) {
+      var d = self.d;
+      if (!d || (e && e.pointerId !== d.id)) return;
+      self.d = null;
+      if (d.cap.releasePointerCapture) {
+        try { d.cap.releasePointerCapture(d.id); } catch (err) { /* ignore */ }
+      }
+      if (!d.moved) return;               // 只是點一下 → 不介入，<a> 照常跳詳情頁
+      root.classList.remove('is-dragging');
+      // 拖曳結束的 click 不該導頁：在 capture 階段吞掉（250ms 後自動失效，避免卡住下一次點擊）
+      self._suppress = true;
+      setTimeout(function () { self._suppress = false; }, 250);
+      var n = self.items.length;
+      // 位移換算走了幾格（STEP 為負：往左拖 ⇒ delta < 0 ⇒ 索引變大）
+      var delta = (d.rot === null ? 0 : d.rot - d.rot0);
+      var steps = Math.round(delta / STEP);
+      // 慢速但已拖過 30% 格距 → 至少走一格（否則一格的弧長很長，慢慢拖會「拖不動」）
+      if (!steps && Math.abs(delta) >= DRAG_COMMIT * Math.abs(STEP)) steps = delta < 0 ? 1 : -1;
+      // 快甩：同方向沒走就補一格（不同方向不重複加，避免一次手勢跳兩格）
+      if (!aborted) {
+        var flick = d.v <= -DRAG_FLICK_V ? 1 : (d.v >= DRAG_FLICK_V ? -1 : 0);
+        if (flick && (steps === 0 || (steps > 0) !== (flick > 0))) steps += flick;
+      }
+      var r = self.cur + steps;
+      // 已在兩端就繞到另一端（與 5s 自動輪播「第 7 → 第 1 張」一致）
+      if (r < 0) r = n - 1;
+      else if (r > n - 1) r = 0;
+      // 用 goAll()（而不是 self.go()）：模組層的 lastIndex 也要更新，否則 5s 自動輪播
+      // 會從「拖曳前的舊索引」接著跑（autoTick 是 lastIndex + 1）。
+      goAll(r);      // 吸附到目標格（轉盤過渡照舊）＋ 文字等圓盤到位才切
+      startAuto();   // 放手後重新計時 ⇒ 停下 5s 恢復自動輪播
+    }
+
+    root.addEventListener('pointerdown', down);
+    root.addEventListener('pointermove', move);
+    root.addEventListener('pointerup', function (e) { finish(e, false); });
+    root.addEventListener('pointercancel', function (e) { finish(e, true); });
+    // 原生圖片拖放會蓋掉手勢（Firefox／Safari 沒有 -webkit-user-drag）→ 一律關掉
+    root.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    root.addEventListener('click', function (e) {
+      if (!self._suppress) return;
+      self._suppress = false;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
   };
 
   function register(root, caption) {

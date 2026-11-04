@@ -2715,7 +2715,11 @@ body {
 /* ===== kariomons .staff 整合（2026-08-23）
    完整複製 kariomons.com/onlineshop/1377 .staff
    （2 個 inner：圓形照片 86px + 名字 + 評論，虛線分隔）
-   深色適配：文字白色/品牌金、虛線淺色、字型 Noto Sans TC */
+   深色適配：文字白色/品牌金、虛線淺色、字型 Noto Sans TC
+   2026-10-28（使用者指示「title-sub／name／text 文字放大」）：
+   標題 13→17px、姓名 13→16px、內文 14→16px（行高 1.7→1.75）；
+   行動端同步 13／11→15px、11→14px、12→14px（行高 1.6→1.7）。
+   容器、頭像 96px、虛線、內距皆未動（只放大字）。 */
 .bc-staff {
   box-sizing: border-box;
   width: 100%; /* 與 .block-23 同寬（容器內） */
@@ -2727,7 +2731,7 @@ body {
   position: static; /* 標題置於內文上方，不佔用左側 → 文字區域全寬 */
   color: var(--bc-gold, #c49b63);
   font-family: "Noto Sans TC", sans-serif;
-  font-size: 13px;
+  font-size: 17px; /* 2026-10-28：13px → 17px */
   font-weight: bold;
   line-height: 1.65;
   letter-spacing: 0.12em;
@@ -2782,7 +2786,7 @@ body {
 }
 .bc-staff .inner h3 strong {
   font-family: "Noto Sans TC", sans-serif;
-  font-size: 13px;
+  font-size: 16px; /* 2026-10-28：13px → 16px */
   letter-spacing: 0.08em;
   text-transform: capitalize;
   color: #fff;
@@ -2791,10 +2795,10 @@ body {
   padding: 0 0 0 30px;
 }
 .bc-staff .inner p {
-  font-size: 14px;
+  font-size: 16px; /* 2026-10-28：14px → 16px */
   text-align: justify;
   letter-spacing: 0.06em;
-  line-height: 1.7;
+  line-height: 1.75; /* 2026-10-28：1.7 → 1.75（配合字級放大） */
   color: var(--bc-text-muted, rgba(255, 255, 255, 0.5));
   margin: 0;
 }
@@ -2808,6 +2812,7 @@ body {
   }
   .bc-staff .title-sub {
     position: static;
+    font-size: 15px; /* 2026-10-28：13px → 15px */
     margin-bottom: 14px;
   }
   .bc-staff .inner {
@@ -2822,14 +2827,14 @@ body {
     height: 64px;
   }
   .bc-staff .inner h3 strong {
-    font-size: 11px;
+    font-size: 14px; /* 2026-10-28：11px → 14px */
   }
   .bc-staff .inner .txt {
     padding-left: 14px;
   }
   .bc-staff .inner p {
-    font-size: 12px;
-    line-height: 1.6;
+    font-size: 14px; /* 2026-10-28：12px → 14px */
+    line-height: 1.7; /* 2026-10-28：1.6 → 1.7 */
   }
 }
 

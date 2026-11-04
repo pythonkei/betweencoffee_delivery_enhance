@@ -142,3 +142,14 @@ yarn-error.log*
 # 頁面實際使用 static/media/hk_topshot-720p.mp4，4.5MB 已入庫。壓縮指令見
 # static/css/bc-sticky-mv.css 檔頭說明）
 /static/images/hk_topshot.mp4
+
+# 本機暫存／候補素材（2026-11-04 盤點：全站程式碼皆無引用，且與已入庫檔重複；
+# 保留在本機工作區，不入版控。若日後要正式採用，再把該筆規則刪掉即可。）
+#   hero_bg.mp4 81MB（頁面用的是 static/media/hk_topshot-720p.mp4）
+#   recommended-pages/ 底下底線開頭的是 bean_bg.webm／coffee_bg.webm／clip-bean-ani.png 的暫存變體
+/static/images/hero_bg.mp4
+/static/images/recommended-pages/__bean_bg.webm
+/static/images/recommended-pages/_bean_bg.webm
+/static/images/recommended-pages/_coffee_bg.webm
+/static/images/recommended-pages/_clip-bean-ani.png
+
