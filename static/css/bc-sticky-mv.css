@@ -73,6 +73,12 @@
     /* 卡片高度預算（見 .mv-product__list 的 --mv-card-w）：
        0.30 × 視窗高是「照片 + 品名仍留在第一屏」的實測上限。 */
     --mv-card-cap: calc(var(--mv-vh) * 0.3);
+    /* 產品列 ↔ 品牌舞台三段（Fresh beans）之間的間隔（2026-11-04 使用者指示「加大」）。
+       原本寫死在 .mv-stage 的 5vh（1440×900 實測只有 46px，Fresh beans 幾乎貼著品名）→
+       拉到 9vh（同尺寸 81px，約 1.8 倍），並保留 clamp 上下限避免極高／極矮視窗失控。
+       下方 .page-top__mv__foot 是 margin-top:auto 貼底，吃掉的是中間的彈性空白，
+       所以加大這裡不會讓整個區塊變高或超出兩屏。 */
+    --mv-stage-gap: clamp(3.2rem, 9vh, 6.4rem);
     /* 原站 easing / speed */
     --mv-ease: cubic-bezier(0.83, 0, 0.17, 1);
     --mv-dur: 1.75s;
@@ -410,7 +416,7 @@
     column-gap: 16px; /* 原 --_special-units---grid-gap（≥992 = 16px） */
     row-gap: 16px;
     align-items: start;
-    margin-top: clamp(1.8rem, 5vh, 3.2rem);
+    margin-top: var(--mv-stage-gap); /* 與產品列的間隔（見 --mv-stage-gap） */
     /* 右側要讓開浮動購物車 .bc-attract-buy（position:fixed right:26px / width:40px +
        24px hover 熱區 → 佔到 right:90px），否則大字會被 Order 長條壓住 */
     padding: 0 max(6vw, 104px) 0 6vw;
@@ -581,6 +587,8 @@
         --mv-nav: 72px;
         /* 手機（390×844 實測）卡片 289px 仍在第一屏內 → 預算 0.42 只在極矮視窗才介入 */
         --mv-card-cap: calc(var(--mv-vh) * 0.42);
+        /* 手機第一屏空間緊 → 間隔回收一級（9vh → 7vh），但仍比原本的 5vh 大 */
+        --mv-stage-gap: clamp(2.4rem, 7vh, 4.5rem);
     }
 
     #bc-sticky-mv .page-top__mv__foot {
