@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`4cab6d9e`（Nice Step 補 index 圖；sticky-MV 第三輪＝`174663e5`：`--mv-stage-gap` 18vh、`--mv-gap` 10vw／`--mv-pad` 9vw、css `?v=20261104m`；前幾筆 `e959ae26` 第二輪、`80f6e911` 第一輪、`36fdfb2d` 黑遮罩 75%、`02ecab8a` 品名／highlight／`--mv-pull`）。正式站 live＝`c3f7509c`（2026-11-03 manual）⇒ **待部署 25 筆**。⚠ **live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0、仍載入 `bc-popeye50.css?v=20261102f`）→ 「手機／平板像桌機尺寸」的回報在部署前都不會消失，不是 CSS 問題。**autoDeploy＝off → push 不部署，必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-04）**：`origin/main` 尖端＝Nice Step index 圖修正（migration `0084`）＋本篇文件；再前一筆 `174663e5`＝sticky-MV 第三輪（`--mv-stage-gap` 18vh、`--mv-gap` 10vw／`--mv-pad` 9vw、css `?v=20261104m`；前幾筆 `e959ae26` 第二輪、`80f6e911` 第一輪、`36fdfb2d` 黑遮罩 75%、`02ecab8a` 品名／highlight／`--mv-pull`）。正式站 live＝`c3f7509c`（2026-11-03 manual）⇒ **待部署 25 筆**。⚠ **live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0、仍載入 `bc-popeye50.css?v=20261102f`）→ 「手機／平板像桌機尺寸」的回報在部署前都不會消失，不是 CSS 問題。**autoDeploy＝off → push 不部署，必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
