@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`1ac05ea5`（sticky-MV 第三輪：產品列↔Fresh beans 間隔 `--mv-stage-gap` 再 14vh→18vh，各組咖啡間距 `--mv-gap` 12vw→10vw／`--mv-pad` 8vw→9vw 略微收回，CSS commit `174663e5`、css `?v=20261104m`；前幾筆 `e959ae26` 第二輪、`80f6e911` 第一輪、`36fdfb2d` 黑遮罩 75%、`02ecab8a` 品名／highlight／`--mv-pull`）。正式站 live＝`c3f7509c`（deploy `dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z manual）⇒ **待部署 24 筆**（`git rev-list --count c3f7509c..origin/main`）。⚠ **實測 live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0、仍載入 `bc-popeye50.css?v=20261102f`）→ 「手機／平板像桌機尺寸」的回報在部署前都不會消失，不是 CSS 問題。**autoDeploy＝off → push 不部署，必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`4cab6d9e`（Nice Step 補 index 圖；sticky-MV 第三輪＝`174663e5`：`--mv-stage-gap` 18vh、`--mv-gap` 10vw／`--mv-pad` 9vw、css `?v=20261104m`；前幾筆 `e959ae26` 第二輪、`80f6e911` 第一輪、`36fdfb2d` 黑遮罩 75%、`02ecab8a` 品名／highlight／`--mv-pull`）。正式站 live＝`c3f7509c`（2026-11-03 manual）⇒ **待部署 25 筆**。⚠ **live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0、仍載入 `bc-popeye50.css?v=20261102f`）→ 「手機／平板像桌機尺寸」的回報在部署前都不會消失，不是 CSS 問題。**autoDeploy＝off → push 不部署，必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
@@ -84,6 +84,7 @@
 - **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方內容自動整齊上移，不要再補留白。
 - **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。同理 2026-11-04 起 `static/images/hero_bg.mp4`（81MB／4K；**它是 `/about/` 首屏影片的原始素材，頁面用轉出的 `hero_bg-720p.mp4`，勿刪**）與 `recommended-pages/` 底線開頭的 webm／png 暫存變體也列 `.gitignore`。
 - **新增 CSS／JS 檔要跟引用它的模板同一次 commit**：2026-10-31 的 `about.html` 已引用 `static/css/bc-catch.css` 但檔案沒入庫 ⇒ 正式站該頁一直 404、字體輪播沒樣式，直到 2026-11-04 `e9bdefdb` 才補上。push 後用 `git ls-tree -r origin/main --name-only static/css static/js | grep <檔名>` 對照一次。
+- **商品圖走 `get_index_image()`**：`image_index` 空 → fallback 到詳情圖（`860×1100`，杯身佔畫布寬 80%），列表圖是 `840×1200`（杯身 62–87%）；同一個 3:4 `object-fit: contain` 盒下杯身寬差可達 40% ⇒ 看起來像「某組間距跟別組不同」。**要讓某品項在列表／輪播一致，補 `image_index`（data migration），不要針對單品加 CSS 間距**。2026-11-04 `#7 Nice Step` 即為此狀況（`0084_nicestep_index_image`）。
 
 ## 8. 文件導覽
 
