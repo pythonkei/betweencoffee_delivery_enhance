@@ -61,8 +61,13 @@
     --mv-lift: 200px;
     /* 輪播：同時可見張數／間距／左右留白（原站 perPage/gap/padding） */
     --mv-per: 3;
-    --mv-gap: 10vw;
-    --mv-pad: 14vw;
+    /* 2026-11-04（使用者指示「咖啡照片加大尺寸」）：左右留白與間距再收一級
+       （14vw／10vw → 10vw／8vw），大螢幕卡片 21.3vw（1440px ＝ 307px，原本 250px）。 */
+    --mv-gap: 8vw;
+    --mv-pad: 10vw;
+    /* 卡片高度預算（見 .mv-product__list 的 --mv-card-w）：
+       0.30 × 視窗高是「照片 + 品名仍留在第一屏」的實測上限。 */
+    --mv-card-cap: calc(var(--mv-vh) * 0.3);
     /* 原站 easing / speed */
     --mv-ease: cubic-bezier(0.83, 0, 0.17, 1);
     --mv-dur: 1.75s;
@@ -218,11 +223,32 @@
 }
 
 #bc-sticky-mv .mv-product__list {
+    /* 卡片寬＝寬度公式與「高度預算」取小：
+       照片變大後卡片也變高（3:4），若只看寬度會在 1280×800 這類矮視窗把品名擠出第一屏
+       （使用者回報「尺寸不合適」的成因之一）。--mv-card-cap 由各斷點設定成 vh 的倍數。
+       上限生效時左右留白自動加大 → 整列仍然置中（bc-sticky-mv.js 讀 paddingLeft 計算基點）。 */
+    --mv-card-w: min(
+        calc(
+            (100vw - 2 * var(--mv-pad) - (var(--mv-per) - 1) * var(--mv-gap)) /
+                var(--mv-per)
+        ),
+        var(--mv-card-cap, 100vw)
+    );
+    --mv-pad-eff: max(
+        var(--mv-pad),
+        calc(
+            (
+                100vw - var(--mv-per) * var(--mv-card-w) -
+                    (var(--mv-per) - 1) * var(--mv-gap)
+            ) / 2
+        )
+    );
+
     display: flex;
     align-items: flex-end; /* 原站 .splide__list{align-items:flex-end} */
     gap: var(--mv-gap);
     margin: 0;
-    padding: 0 var(--mv-pad);
+    padding: 0 var(--mv-pad-eff);
     list-style: none;
     /* transform 由 bc-sticky-mv.js 設定（translateX） */
     transition: transform var(--mv-dur) var(--mv-ease);
@@ -231,10 +257,7 @@
 
 #bc-sticky-mv .mv-product__slide {
     flex: 0 0 auto;
-    width: calc(
-        (100vw - 2 * var(--mv-pad) - (var(--mv-per) - 1) * var(--mv-gap)) /
-            var(--mv-per)
-    );
+    width: var(--mv-card-w);
     text-align: center;
     /* 原站分層上浮：非聚焦張先壓低 18% */
     transform: translateY(-18%);
@@ -261,7 +284,10 @@
 #bc-sticky-mv .page-top__mv__product__imageBox {
     display: block;
     width: 100%;
-    max-width: 240px; /* 原站 .p-image max-width */
+    /* 原站 .p-image 是固定 max-width:240px → 卡片再寬照片也停在 240px，
+       平板（iPad Pro 直立卡片可到 420px）與桌機因此都像「沒放大的桌機版」。
+       改成跟著卡片長大、只留一個上限避免超寬螢幕無限膨脹。 */
+    max-width: 400px;
     margin: 0 auto;
     text-decoration: none;
 }
@@ -303,7 +329,9 @@
    （1280px：23.7 → 21.8px；1440px：26.6 → 24.3px；390px：20.5 → 19.1px）。 */
 #bc-sticky-mv .page-top__mv__product__textBox .color {
     margin: 0 0 0.35rem;
-    font-size: clamp(1.3rem, 1.7vw, 1.62rem);
+    /* 第四次調整（同日，使用者再要求縮小）→ clamp(1.2rem, 1.55vw, 1.5rem)
+       （1280px：21.8 → 19.8px；1440px：24.3 → 22.0px；390px：19.1 → 17.6px） */
+    font-size: clamp(1.2rem, 1.55vw, 1.5rem);
     font-weight: 500;
     line-height: 1.25;
     /* 品名含中文（如「抹茉」）→ 取消 uppercase 與大字距，中英混排才不會鬆散 */
@@ -507,35 +535,40 @@
 /* 平板（681–1024px）：原站只有 {1000:3, 680:1} 兩段，中間會擠成 3 張小卡
    （820px 時每張僅 142px、四周還留 14vw 空白）；且 iPad Pro 直立寬 1024px，
    落在「桌機」3 張小卡那側 → 使用者回報「平板看起來還是桌面尺寸」。
-   這裡改成 2 張 + 縮小留白：卡片寬 (100vw − 20vw − 8vw)/2 ≈ 36vw。 */
+   這裡改成 2 張 + 縮小留白：卡片寬 (100vw − 12vw − 6vw)/2 ≈ 41vw（768px ＝ 315px）。 */
 @media (max-width: 1024px) and (min-width: 681px) {
     #bc-sticky-mv {
         --mv-per: 2;
-        --mv-gap: 8vw;
-        --mv-pad: 10vw;
+        --mv-gap: 6vw;
+        --mv-pad: 6vw;
         --mv-text-h: calc(var(--mv-vh) * 0.62);
+        /* 平板第一屏較高 → 卡片高度預算放寬（1024×1366 可到 420px 卡片／400px 照片） */
+        --mv-card-cap: calc(var(--mv-vh) * 0.335);
     }
 }
 
 /* 中桌機（1025–1439px）：原站 14vw 左右留白 + 10vw 間距在 1025px 會把卡片壓到 178px，
-   視覺上像「縮小的桌機版」。這裡收到 10vw／8vw（卡片 ≈ 24vw，1280px 時 288px）。 */
+   視覺上像「縮小的桌機版」。這裡收到 7vw／6vw（卡片 ≈ 24.7vw，1280px 時 316px）。 */
 @media (max-width: 1439px) and (min-width: 1025px) {
     #bc-sticky-mv {
-        --mv-gap: 8vw;
-        --mv-pad: 10vw;
+        --mv-gap: 6vw;
+        --mv-pad: 7vw;
     }
 }
 
 @media (max-width: 680px) {
     #bc-sticky-mv {
         --mv-per: 1;
-        --mv-gap: 15vw;
-        /* 用 vw 而非 %：width calc 內的 % 會對父層解析，導致卡片寬度不受控 */
-        --mv-pad: 25vw;
+        --mv-gap: 11vw;
+        /* 用 vw 而非 %：width calc 內的 % 會對父層解析，導致卡片寬度不受控
+           （2026-11-04：25vw → 13vw，390px 卡片 195px → 289px；照片跟著變大） */
+        --mv-pad: 13vw;
         --mv-text-h: calc(var(--mv-vh) * 0.6);
         /* 手機第一屏矮、文字區本來就緊 → 上移量減半，避免文字被壓到（見 --mv-lift） */
         --mv-lift: 150px;
         --mv-nav: 72px;
+        /* 手機（390×844 實測）卡片 289px 仍在第一屏內 → 預算 0.42 只在極矮視窗才介入 */
+        --mv-card-cap: calc(var(--mv-vh) * 0.42);
     }
 
     #bc-sticky-mv .page-top__mv__foot {
