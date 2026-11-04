@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`ef98d37e`（about 首屏 bc-sticky-mv 修 loop 歸位抖動＋滑鼠拖曳，並在產品列下方加品牌舞台三段 `.mv-stage`；前兩筆 `e2a5d747` 首屏改 sticky 影片、`fc7b7cb3` docs）。**autoDeploy＝off → push 不會部署，必須在 dashboard 按 Manual Deploy**。即時複驗：`git log --oneline -3`＋Render API（service `srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`e9bdefdb`（`0bd7172d` about 首屏三段改回品牌舞台 **7 欄 grid 格位**；`e9bdefdb` 補齊 10-28 起累積未提交前端＝首頁製程模組、`bc-catch.css` 入庫、舞台天氣 10 欄、拖曳、`.bc-staff` 字級）。正式站 live＝`c3f7509c`（deploy `dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z manual）⇒ **待部署 6 筆**。**autoDeploy＝off → push 不會部署，必須在 dashboard 按 Manual Deploy**。即時複驗：`git log --oneline -3`＋Render API（service `srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
@@ -47,7 +47,7 @@
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 首頁「咖啡豆製程」捲動模組（`[2b-2]`；移植 union-tec `homeService`：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS） |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`；3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
-| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hk_topshot-720p.mp4` | `/about/` 最上方首屏（移植 yurumaru.life `.page-top__mv__wrap`）：`position:sticky` 影片釘住一屏＋產品照弧形輪播（原生 JS 重寫 Splide：per 3/1、autoplay 4s、前後各一組複本循環）；`--mv-len:200vh`、`--mv-text-h:64vh`，斷點 680。產品列下方另有 `.mv-stage`＝複製品牌舞台的 Fresh beans／roasted daily／BETWEEN 跑馬燈三段（id 用 `bc-mv-` 前綴避免與頁尾 `#bc-stage-*` 重複）。**禁止在 `jump()` 之外只瞬移 list**：slide 的 `translateY` 過渡必須靠 `.is-jumping` 一起關掉，否則 loop 歸位／拖曳換手時新聚焦的卡片會從 -18% 往上抖 |
+| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hk_topshot-720p.mp4` | `/about/` 最上方首屏（移植 yurumaru.life `.page-top__mv__wrap`）：`position:sticky` 影片釘住一屏＋產品照弧形輪播（原生 JS 重寫 Splide：per 3/1、autoplay 4s、前後各一組複本循環）；`--mv-len:200vh`、`--mv-text-h:64vh`，斷點 680。產品列下方另有 `.mv-stage`＝複製品牌舞台的 Fresh beans／roasted daily／BETWEEN 跑馬燈三段（id 用 `bc-mv-` 前綴避免與頁尾 `#bc-stage-*` 重複）。**`.mv-stage` 必須是 7 欄 grid 並照抄原站格位**（fresh `1/3/2/6`、roasted `2/4/3/7`＋`mt 8px`、marquee `2/3/3/5`＝與 roasted 同列在左；≤991 改 6 欄：`1/1/2/5`／`2/4/3/7`／`2/1/3/4`＋`justify-self:start`），字級與間距用原站流體公式（h1 `calc(90vw/14.4)`／≤991 `calc(45vw/3.93)`、p1 `calc(14vw/14.4)`／`calc(12vw/3.93)`、grid-gap 16px／`calc(12vw/3.93)`、`.foooter-mail` row-gap 40px／`calc(16vw/3.93)`、`.scroller-box` `line-height:1`）；改成 flex 直向堆疊會讓位置與 about 頁不同（2026-11-04 使用者提問後修正）。**禁止在 `jump()` 之外只瞬移 list**：slide 的 `translateY` 過渡必須靠 `.is-jumping` 一起關掉，否則 loop 歸位／拖曳換手時新聚焦的卡片會從 -18% 往上抖 |
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | **（2026-11-03 起 about 頁不再載入，被 bc-sticky-mv 取代；檔案保留可回滾）** 原 about 首屏字輪（移植 popeyemagazine.jp/50interviews） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
@@ -82,7 +82,8 @@
 - **Migration 編號**：`python3 manage.py makemigrations --check` 必須乾淨；資料搬移用 data migration，不在 view 裡寫死。
 - **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:207` `#bc-brand-stage .footer-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。
 - **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方內容自動整齊上移，不要再補留白。
-- **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。
+- **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。同理 2026-11-04 起 `static/images/hero_bg.mp4`（81MB，全站無引用）與 `recommended-pages/` 底線開頭的 webm／png 暫存變體也列 `.gitignore`。
+- **新增 CSS／JS 檔要跟引用它的模板同一次 commit**：2026-10-31 的 `about.html` 已引用 `static/css/bc-catch.css` 但檔案沒入庫 ⇒ 正式站該頁一直 404、字體輪播沒樣式，直到 2026-11-04 `e9bdefdb` 才補上。push 後用 `git ls-tree -r origin/main --name-only static/css static/js | grep <檔名>` 對照一次。
 
 ## 8. 文件導覽
 

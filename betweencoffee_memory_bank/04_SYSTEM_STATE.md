@@ -1,6 +1,6 @@
 # 系統狀態
 
-> 2026-10-25 複驗版（2026-10-23 精簡版；原檔 181KB 已封存：`docs/archive/memory_bank_04_full_20261017.md`）。
+> 2026-11-04 複驗版（2026-10-25 版之後累積 10-28 ~ 11-04 共 6 個 session；原檔 181KB 已封存：`docs/archive/memory_bank_04_full_20261017.md`）。
 > 逐筆變更細節請用 `git log`，不要回頭讀封存檔。
 
 ## 系統狀態摘要
@@ -17,8 +17,8 @@
 | 員工端渲染器 v2 | ✅ 完成 | BaseOrderRendererV2 + 4 個 v2 渲染器 |
 | 測試 | ⚠️ 不足 | 覆蓋率低（以 `docs/verify/` CDP 腳本補前端驗證） |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
-| 部署（Render） | ⚠️ 部署落後多筆 | 現行 `live`＝deploy `dep-dbermb1srm7s73d4s13g`／commit `cc99a3a4`／trigger `manual`／finished 2026-10-25 08:20Z（2026-10-28 Render API 複驗；前一筆 `dep-dbed2vm7bikc73825md0`＝`a732cc28` 現為 `deactivated`）。2026-10-23 的 `56c1bcc9` 失敗（Supabase pooler ENOTFOUND）已排除 ⇒ **DB 可連**。`origin/main` 尖端＝`b29ff324`（2026-10-28）⇒ 待手動部署 `cc99a3a4..b29ff324`（#59／#60／#61、capabilities 搬家、bc-staff 字級、bc-series 全套）。**autoDeploy＝off，push 不會觸發部署** |
-| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`b29ff324`（2026-10-28 推 `738e8660..b29ff324` 共 4 筆；一律 `git log -1`／Render API 複驗，不寫死文件 hash），本機 `main`＝`origin/main`；工作區僅剩未提交的 bc-staff 字級／capabilities／首頁樣式微調 |
+| 部署（Render） | ⚠️ 部署落後 6 筆 | 現行 `live`＝deploy `dep-dbkpv7tg1s2s73df3leg`／commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-04 Render API 複驗）。`origin/main` 尖端＝`e9bdefdb` ⇒ **待部署 `c3f7509c..e9bdefdb`**（`e2a5d747` about 首屏 sticky 影片、`ef98d37e` loop／拖曳修正＋三段、`fc7b7cb3`／`e49ac4d9` docs、`0bd7172d` 三段改 grid 格位、`e9bdefdb` 10-28~11-04 累積前端）。**autoDeploy＝off，push 不會觸發部署** | 
+| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`e9bdefdb`（2026-11-04：`0bd7172d` 三段 grid 修正＋`e9bdefdb` 補齊 10-28 起累積未提交前端，含製程模組／`bc-catch.css`／舞台天候列／拖曳）；本機 `main`＝`origin/main`、工作區乾淨（僅 `.gitignore` 排除的本機暫存素材）。複驗一律 `git log -1`／Render API，不寫死文件 hash |
 
 ## 資料庫現狀
 
@@ -32,17 +32,20 @@
 
 > ℹ️ 生產 DB 連線：2026-10-23 曾回 `ENOTFOUND`（tenant `postgres.tmxvuwadktvfjtawckib`）導致部署失敗，但 2026-10-24 15:43Z 的手動部署（`a732cc28`）**成功且 live** ⇒ 連線已恢復。生產 migration 進度請以該次部署後的 `eshop/migrations` 記錄為準；本機 MCP 的兩個 PostgreSQL 連線仍是同一顆本地庫（`0081`–`0083` applied 時間戳同為 `2026-10-24T06:03:31Z`），不可當作生產現況。
 
-## 近期變更（最近 9 筆，一行式）
+## 近期變更（最近 13 筆，一行式）
 
 | 日期 | 內容 |
 |---|---|
-| 2026-10-25 | 版控收尾：`a732cc28..d27f7c90` 推上 `origin/main`（`#59 edf3e87c`、`#60 7a073263`、`#61 d27f7c90`），本機與遠端一致；原始 APNG 素材 `static/images/ani_{coffee,bean}_apng.png`（12.8MB）加 `.gitignore` 不入庫。同日 Render API 複驗：正式站 live＝`a732cc28`（`dep-dbed2vm7bikc73825md0`，2026-10-24 15:43Z 手動部署成功）⇒ 10-23 的 DB ENOTFOUND 已排除 |
+| 2026-11-04 | `/about/` 首屏 `bc-sticky-mv` 三段（`.mv-stage`）改回品牌舞台 **7 欄 grid 明確格位**（原 flex 堆疊位置與 about 頁不同；fresh `1/3/2/6`、roasted `2/4/3/7`＋8px、marquee `2/3/3/5` 同列靠左；≤991px 6 欄覆寫），字級改原站流體公式（h1 `90vw/14.4`、p1 `14vw/14.4`）；`bc-sticky-mv.css?v=20261104c`（`0bd7172d`） |
+| 2026-11-04 | 補齊 10-28 起累積未提交前端（`e9bdefdb`）：首頁「咖啡豆製程」模組（`bc-home-service.{css,js}`＋partial＋`make_hs_images.py`＋`images/home-service/*`）、`/about/` 字體輪播 `bc-catch.css` **入庫**（此檔先前只在 about.html 被引用、未 commit ⇒ 正式站 404）、品牌舞台 `.footer-time` 8→10 欄（天氣移到 `{` 左側，欄10 鏡像留白）＋天氣 `z-index:3`、capabilities `--cap-scale` 等比放大＋置中、環形照片列左右拖曳（`bc-hand-ring.js bindDrag()`）、`/bean/<id>/` `.bc-staff` 字級 17／16／16、`.gitignore` 排除 `hero_bg.mp4`（81MB 未引用）等暫存大檔 |
+| 2026-11-03 | `/about/` 首屏改 **sticky 影片＋產品照弧形輪播**（移植 yurumaru.life `.page-top__mv__wrap`；`bc-sticky-mv.{css,js}`、`static/media/hk_topshot-720p.mp4` 4.4MB＋poster），取代 11-02 的 popeye50 字輪（舊檔保留、不再載入）：`--mv-len:200vh`、`--mv-text-h:64vh`、原生 JS 重寫 Splide（per 3/1、autoplay 4s、前後各一組複本無縫循環）；同日修 loop 歸位抖動（`jump()` 加 `.is-jumping` 同關過渡）與滑鼠拖曳被原生 `dragstart` 中斷（`e.preventDefault()`），並在產品列下方加品牌舞台三段（`e2a5d747`／`ef98d37e`） |
+| 2026-11-03 | 首頁品牌舞台環形咖啡照列 hover 互動（移植 hub.ballaholic.jp `.embla`）：`static/js/bc-hand-hover.js`（跟隨游標圓形徽章 108px、`mouseleave` 延遲 200ms、觸控不啟動）＋ `bc-hand-ring.css` 照片 hover 放大（current 1.08／其餘 0.56，僅 `(hover:hover) and (pointer:fine)`）；`bc-hand-ring.css?v=20261103c`（`c3f7509c`，**現行 live**） |
+| 2026-11-02 | 首屏字輪微調（已由 11-03 sticky mv 取代）：直徑係數 `0.92→0.86`、中心品名 13.5／13.2px、手機 `.cw-wheel` 徑向遮罩、中心圖文＋SERIES 項目連結咖啡詳情頁（`87d66040`）；另 `bc-popeye50` 移除黑底改鋪 `bg_4` 材質（`33a4c06a`） |
+| 2026-10-31 | `/about/` 新增「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`：3 行 × 4 種字體、`.74s` step-end／每格 185ms、行相位 −0.09／−0.18s、純 CSS 無 JS＋`prefers-reduced-motion` 靜止），置於 `.bc-reviews-section` 正下方；樣式 `static/css/bc-catch.css`（本輪 `e9bdefdb` 才入庫） |
+| 2026-10-30 | 首頁「咖啡豆製程」捲動模組 `[2b-2]`（移植 union-tec.jp `homeService`：clip-path 膠囊→滿版、4 段輪播＋模糊轉清晰、標籤與網格字母；原生 JS 不依賴 Alpine／Lenis／three.js／GSAP）；素材 `images/home-service/hs-{1..4}{,-sp,-blur,-clip}.webp`（`scripts/make_hs_images.py` 產生）；完整數據 → `docs/archive/task_progress_20261102_home_service.md` |
+| 2026-10-28 | capabilities 模組搬家（about→首頁）＋`--cap-scale` 等比放大（≥834 1.30／≥1280 1.40／≥1920 1.60）＋頁面置中；`/bean/<id>/` `.bc-staff` 字級放大（`bc-components.css?v=20261028a`）；自架 `trade-gothic` 字型＋`.bc-series-heading` 行距／字級；bean SERIES 括號滑桿搬到商品主區下方（`29eb67d1`／`f57eb768`／`f730abab`） |
+| 2026-10-25 | 版控收尾：`a732cc28..d27f7c90` 推上 `origin/main`（`#59 edf3e87c`、`#60 7a073263`、`#61 d27f7c90`）；原始 APNG 素材（12.8MB）列 `.gitignore` |
 | 2026-10-24 | #61 首頁「推薦頁面」雙卡（移植 union-tec.jp `recommendedPages`）＋同日調整：① 隱藏首頁 `#bc-stage-socials`（extra_css `.bc-brand-stage-hero #bc-stage-socials{display:none}`，`hidden` 屬性會被 `.footer-socials{display:flex}` 蓋掉）② 模組由 `.feed--video` 下方搬到 `.bc-brand-stage-hero` 正下方。新版號 `?v=20261024b`（css）／`20261024a`（js）（`d27f7c90` 已 push） |
 | 2026-10-24 | #60 品牌舞台環形照片列「第一張咖啡」改 goo 揭示（沿用標題文字的 `stdDeviation 50→0` 時間軸，不再 scale 0.5→1）；`bc-hand-ring.js/css`、`bc-brand-stage.js`（新增 `window.BC_MEDIA_REVEAL`）、index／about `?v=20261024a`（`7a073263` 已 push） |
 | 2026-10-24 | #59 咖啡豆詳情頁「店員氣泡」：`BeanItem` 10 欄位＋`measure_bubble_geometry()`、Admin 2 fieldset、migration `0081`–`0083`（幾何／文案 seed）；`.bc-coffee-comment` 宿主 selector 改中性 `.bc-photo-comment`（`edf3e87c` 已 push） |
 | 2026-10-22~23 | #58／#58b 首頁四步旅程 Rive 圖示列（`bc-steps`）：自架 Rive 2.35.2、intro/hover/rest 修正、靜止 4s 自動循環、圖示純白；桌機 4 欄／手機 2×2／reduced-motion 驗證通過（已 push `a732cc28`） |
-| 2026-10-17 | #57 移除 hero／導覽列時鐘（`bc-weather.js` ORDER 去掉 `clock`），只留天氣圖示＋溫度（`28b1c322` 已 push） |
-| 2026-10-16 | #56 首頁照片格桌機（≥992px）名稱／highlight 字級 24/18px、`--bc-hero-caption-h` 68.38（`71018e97` 已 push） |
-| 2026-10-15 | #55 首頁照片格桌機照片縮小 280×400、字級 20/16px（`aaf7c2aa` 已 push） |
-| 2026-10-14 | #51 首頁順序反轉（GUNTE hero 回第一屏）＋ GUNTE 環形字修正（`bf495475` 已 push） |
-| 2026-10-12 | hero 時鐘手機 `{ }`（9 欄）＋ `w-node-*` id 語意化（`6e29b447`，已部署） |
