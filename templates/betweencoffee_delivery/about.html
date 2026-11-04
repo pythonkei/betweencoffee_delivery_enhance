@@ -11,7 +11,13 @@
      → 位置＝.rotate-mau 之後、SERIES 之前
      結構：.sticky-bg__bg（影片 sticky 釘住一屏）＋ .sticky-bg__content（margin-top:-100vh 覆蓋）
      參數：Splide perPage3/gap10vw/padding14vw/autoplay4000/1750ms，斷點 680 → 1 張 -->
-<link rel="stylesheet" href="{% static 'css/bc-sticky-mv.css' %}?v=20261104c" />
+<link rel="stylesheet" href="{% static 'css/bc-sticky-mv.css' %}?v=20261104g" />
+<noscript>
+    <!-- 產品列在 CSS 預設 opacity:0，等 bc-sticky-mv.js 定位完成才加 .is-mv-ready 淡入
+         （避免 JS 執行前先畫出 translateY(-18%) 的錯誤位置 → 使用者回報的「往下移動」）。
+         JS 被停用時這段還原為可見，否則商品會整片消失。 -->
+    <style>#bc-sticky-mv .page-top__mv__product { opacity: 1 !important; }</style>
+</noscript>
 <!-- About 頁面 SERIES 滑桿 -->
 <link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261102b" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
@@ -81,14 +87,15 @@
      ③ 產品列：原生 JS 輪播（perPage3 / gap10vw / padding14vw / autoplay 4s / 拖曳 flick 200px）
         點產品圖 → 該咖啡詳情頁（拖曳後不會誤觸，見 bc-sticky-mv.js）
      資料來源＝About view 的 series_coffees（6 筆咖啡的 name/highlight/price/去背圖）
-     影片：static/media/hk_topshot-720p.mp4（1280×720 / 31s / 4.4MB，原 2560×1440 已壓縮）
-          poster：static/images/hk_topshot-poster.jpg -->
+     影片：static/media/hero_bg-720p.mp4（1280×720 / 16.8s，由 static/images/hero_bg.mp4
+          3840×2160 / 40Mbps / 81MB 轉檔；原檔已列 .gitignore 不入庫）
+          poster：static/images/hero_bg-poster.jpg（同支影片第 1 秒截圖） -->
 <section id="bc-sticky-mv" aria-label="Between Coffee 首屏">
     <div class="sticky-bg">
         <div class="sticky-bg__bg" aria-hidden="true">
             <video class="mv-video" autoplay muted loop playsinline preload="metadata"
-                   poster="{% static 'images/hk_topshot-poster.jpg' %}"
-                   src="{% static 'media/hk_topshot-720p.mp4' %}"></video>
+                   poster="{% static 'images/hero_bg-poster.jpg' %}"
+                   src="{% static 'media/hero_bg-720p.mp4' %}"></video>
         </div>
 
         <div class="sticky-bg__content">
@@ -96,11 +103,19 @@
                 <div class="page-top__mv__textBox">
                     <p class="enTitle">Specialty Coffee Stand</p>
                     <h1 class="bc-mv-logo">Between Coffee</h1>
-                    <p class="lead">一杯咖啡<br>一段留白</p>
+                    <!-- 2026-11-04（使用者指示）：「一杯咖啡」那行隱藏、lead 只留單行。
+                         少掉一行 lead 後文字區變矮 → 下方 .page-top__mv__product 整組
+                         上移約 200px，第一屏（1440×900）就看得到咖啡名稱與高亮文字。
+                         原寫法（可回滾）：<p class="lead">一杯咖啡<br>一段留白</p> -->
+                    <p class="lead">一段留白</p>
                     <p class="enText">
                         城市的一角，豆子在手沖裡慢慢展開。<br>
                         把等待的時間留給自己，帶走一杯剛好的溫度。
                     </p>
+                    <!-- 2026-11-04（使用者指示）：此按鈕隱藏（markup 保留可回滾）。
+                         收合方式＝static/css/bc-sticky-mv.css 的
+                         #bc-sticky-mv .page-top__mv__textBox .bc-btn{display:none}，
+                         不用 hidden 屬性（作者 CSS 會壓過 UA 的 [hidden]）。 -->
                     <a class="bc-btn bc-btn-secondary" href="{% url 'coffee_menu' %}">
                         <i class="icon-shopping-cart" aria-hidden="true"></i> 看咖啡菜單
                     </a>
@@ -120,7 +135,11 @@
                                 </span>
                             </a>
                             <div class="page-top__mv__product__textBox">
-                                <p class="color">Coffee {{ forloop.counter|stringformat:"02d" }}</p>
+                                <!-- 2026-11-04（使用者指示）：原本的流水號「Coffee 01～06」
+                                     改成咖啡名稱（如 WakeMeup／抹茉），並加大字級
+                                     （見 bc-sticky-mv.css 的 __textBox .color）。
+                                     下一行 .title 仍是該品項的高亮文案。 -->
+                                <p class="color">{{ coffee.name }}</p>
                                 <p class="title">{{ coffee.highlight|default:coffee.name }}</p>
                                 <p class="p-price">${{ coffee.price|floatformat:"-2"|default:"0" }}</p>
                             </div>
@@ -1505,7 +1524,7 @@
 
 {% block extra_scripts %}
 <!-- 2026-11-03（使用者指示）：yurumaru.life 首屏 sticky 影片 + 產品列輪播（原生 JS，無 Splide） -->
-<script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261104b"></script>
+<script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261104d"></script>
 <!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
 <script src="{% static 'js/bc-series.js' %}?v=20261102b"></script>
 <!-- hakujuji csBlock__leader：逐字亮起動畫 -->

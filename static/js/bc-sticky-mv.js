@@ -81,9 +81,18 @@
     var list = product ? product.querySelector('.mv-product__list') : null;
     if (!product || !list) return;
 
+    /* 產品列在 CSS 預設是 opacity:0（避免 JS 定位前先畫出 -18% 的錯誤位置），
+       任何一條「不跑輪播」的退場路徑都必須把它揭露，否則商品會永遠看不到。 */
+    function reveal() {
+      product.classList.add('is-mv-ready');
+    }
+
     var originals = Array.prototype.slice.call(list.children);
     var n = originals.length;
-    if (!n) return; /* 空資料 → CSS 的 .bc-mv-empty 顯示提示 */
+    if (!n) {
+      reveal(); /* 空資料 → CSS 的 .bc-mv-empty 顯示提示 */
+      return;
+    }
 
     /* 前後各複製一組 slide：loop 時 pos 超出 [n, 2n) 就瞬移一組（原站 type:loop）。
        前面那組是必要的——pos = 第一張時左側仍有鄰卡，弧形排列才兩邊都滿。 */
@@ -333,11 +342,16 @@
       else startAuto();
     });
 
-    /* ---------------- 啟動 ---------------- */
+    /* ---------------- 啟動 ----------------
+       2026-11-04（使用者回報「初始顯示時產品列往下移動」，第二次修）：
+       第一次修把 setX(false) + updateClasses() 換成 jump()（先關過渡、一幀內換好狀態），
+       但那只能讓「換狀態」本身無動畫 —— 瀏覽器在 JS 執行前就已經把「全部 -18%」
+       畫出來了（實測 t≈500ms 已繪製、t≈1383ms 才換狀態，1280px 差 72px），
+       所以仍會看到整排往下跳。這次改成：CSS 先把整列 opacity:0，定位完成才 reveal()。 */
     measure();
     pos = OFFSET; /* 從第一張原始 slide 開始（前面那組是複製品） */
-    setX(false);
-    updateClasses();
+    jump();
+    reveal();
     startAuto();
   }
 

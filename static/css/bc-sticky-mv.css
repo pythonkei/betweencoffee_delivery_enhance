@@ -26,17 +26,39 @@
      原站 .lead (MFW-Koburina)   → Noto Serif TC（品牌標題字）
      原站 .p-button              → .bc-btn.bc-btn-secondary（bc-components.css）
      原站背景壓暗 #3e3e3e × multiply × var(--value-op)[JS 漸變]
-        → 固定 rgba(14,14,14,.55)（不移植 --progressFull 漸變；禁用漸層色）
+        → 固定 rgba(0,0,0,.7) 黑色覆蓋層（2026-11-04 使用者指定 70%；不移植漸變）
      原站 .sticky-bg 無底色      → 補 background:var(--bc-bg)（蓋掉 bc-rotate-mau 的 z-index:-1 透出）
+
+   [首屏不閃動的關鍵]（2026-11-04 修「初始顯示時產品列往下掉」）
+     卡片預設是 translateY(-18%)（非聚焦態），聚焦態 0 由 JS 加 .is-active-logical 才成立
+     → 若先讓瀏覽器畫出「全部 -18%」再等 JS 定位，就會看到整排往下滑 72px
+     （實測 t≈500ms 已繪製、t≈1383ms 才換狀態；jump() 只關過渡、擋不住「先畫出來」）。
+     對策：.page-top__mv__product 預設 opacity:0，bc-sticky-mv.js 完成首次 jump()
+     後才加 .is-mv-ready 淡入 → 任何 -18%／未置中的中間狀態都不會被看見。
+     JS 失效時靠 about.html 的 <noscript> 樣式還原為可見。
 
    [不移植] SVG 品牌 logo 逐字延遲進場、p-button 圓箭頭、--progressFull 捲動壓暗
    ============================================================================ */
 
 #bc-sticky-mv {
-    /* 捲動總長：200vh（原站 397vh；此處縮短為「一屏釘住 + 一屏滑過」） */
-    --mv-len: 200vh;
+    /* 視窗高單位（2026-11-04 修正「手機／平板尺寸不合適」）：
+       手機瀏覽器（iOS Safari、Android Chrome）工具列會讓 100vh 大於「可見高度」，
+       導致 sticky 影片層與 -100vh 的內容層錯位、文字區看起來像桌機比例。
+       改用 svh（small viewport height＝工具列顯示時的可視高）。
+       專案慣例：先寫 vh 再覆寫 svh（bc-home-service.css:96、bc-rotate-mau.css:17）；
+       不支援 svh 的瀏覽器會直接丟棄第二行 → 自動退回 100vh。 */
+    --mv-vh: 100vh;
+    --mv-vh: 100svh;
+    /* 捲動總長：2 屏（原站 397vh；此處縮短為「一屏釘住 + 一屏滑過」） */
+    --mv-len: calc(var(--mv-vh) * 2);
     /* 第一屏文字區高度（剩下一屏高度留給產品列露頭） */
-    --mv-text-h: 64vh;
+    --mv-text-h: calc(var(--mv-vh) * 0.64);
+    /* 2026-11-04（使用者指示）：產品列整組再上移約 200px。
+       做法＝把文字區的最小高度扣掉這個量（產品列是 flex column 的下一項，
+       文字區矮多少、它就往上多少），下方 .mv-stage／foot 也跟著上移。
+       注意 min-height 只是下限：文字內容比它高時盒子會自己長大，
+       所以「實際」上移量 = min(這個值, 文字區剩餘空間)，不會壓到文字。 */
+    --mv-lift: 200px;
     /* 輪播：同時可見張數／間距／左右留白（原站 perPage/gap/padding） */
     --mv-per: 3;
     --mv-gap: 10vw;
@@ -59,7 +81,9 @@
 #bc-sticky-mv .sticky-bg__bg {
     position: sticky;
     top: 0;
-    height: 100vh;
+    /* 必須與 .sticky-bg__content 的負 margin 同一個單位（--mv-vh），
+       否則手機工具列一收合就會錯位（見檔頭 --mv-vh 說明） */
+    height: var(--mv-vh);
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
@@ -75,20 +99,23 @@
     object-fit: cover;
 }
 
-/* 壓暗層（原站 :before + mix-blend-mode:multiply；此處固定不透明度） */
+/* 黑色覆蓋層（2026-11-04 使用者指示：不透明度 70%）
+   原站是 :before + mix-blend-mode:multiply + JS 漸變；此處固定不透明度、不用漸層。
+   影片本身偏亮（俯拍市景），.7 是「仍看得見影片流動、白字對比更強」的平衡點
+   （同日先調到 .6，使用者覺得還是不夠暗 → .7）。 */
 #bc-sticky-mv .sticky-bg__bg::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: rgba(14, 14, 14, 0.55);
+    background: rgba(0, 0, 0, 0.7);
 }
 
 /* ===== 內容層（負 margin 拉回覆蓋影片） ===== */
 #bc-sticky-mv .sticky-bg__content {
     position: relative;
     z-index: 1;
-    margin-top: -100vh;
+    margin-top: calc(var(--mv-vh) * -1);
 }
 
 #bc-sticky-mv .sticky-bg__inner {
@@ -110,9 +137,13 @@
     align-items: center;
     justify-content: center;
     gap: 1.4rem;
-    min-height: var(--mv-text-h);
+    /* 扣掉 --mv-lift → 產品列整組上移（見檔頭變數說明） */
+    min-height: calc(var(--mv-text-h) - var(--mv-lift));
     padding: var(--mv-nav) 6vw 0;
     text-align: center;
+    /* 2026-11-04：白字對比主要靠 60% 黑色覆蓋層；這裡只留極淡陰影修邊
+       （不用漸層、不加底色塊，維持品牌調性） */
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
 }
 
 #bc-sticky-mv .bc-mv-logo {
@@ -152,10 +183,14 @@
     font-weight: 300;
     line-height: 1.9;
     color: var(--bc-text-muted);
+    /* 60% 覆蓋層已足夠撐對比，只補一層淡陰影即可（不再需要雙層重影） */
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
 
+/* 2026-11-04（使用者指示）：隱藏「看咖啡菜單」按鈕（markup 保留在 about.html 可回滾）。
+   不用 HTML 的 hidden 屬性：作者 CSS（本條）特異度較高，直接 display:none 最保險。 */
 #bc-sticky-mv .page-top__mv__textBox .bc-btn {
-    margin-top: 0.4rem;
+    display: none;
 }
 
 /* ===== 產品照輪播（原站 .page-top__mv__product / Splide） ===== */
@@ -164,6 +199,18 @@
     padding-top: 3%; /* 原站 .splide__track{padding-top:3%} */
     cursor: grab;
     touch-action: pan-y;
+    /* 2026-11-04（使用者回報「初始顯示時產品列向下移動」，第二次修）：
+       卡片預設 transform 是 -18%，聚焦態 0 要等 JS 加 .is-active-logical 才成立。
+       上一版只靠 jump() 關過渡，仍擋不住「JS 未執行前瀏覽器已先畫出 -18%」這一幀
+       → 整排往下跳 18%（1280px 實測 72px）。
+       改成定位完成前整列不顯示，bc-sticky-mv.js 的 jump() 之後才加 .is-mv-ready 淡入
+       （見檔頭 [首屏不閃動的關鍵]）。 */
+    opacity: 0;
+}
+
+#bc-sticky-mv .page-top__mv__product.is-mv-ready {
+    opacity: 1;
+    transition: opacity 0.3s var(--mv-ease);
 }
 
 #bc-sticky-mv .page-top__mv__product.is-dragging {
@@ -247,26 +294,34 @@
     margin-top: 0.9rem;
 }
 
+/* 2026-11-04（使用者指示）：這行原本是流水號「Coffee 01／02…」→ 改成咖啡名稱
+   （WakeMeup／Sunshine／Flat White／Black Blend／Nice Step／抹茉），並再加大為卡片主標；
+   下一行 .title 是高亮文案（降一級、次文色）。
+   第二次調整（同日）：使用者覺得略大 → 從 clamp(1.6rem,2.1vw,2rem) 收到
+   clamp(1.4rem,1.85vw,1.75rem)（1280px：26.9 → 23.7px；1440px：30.2 → 25.2px）。
+   第三次調整（同日）：使用者覺得還要再小一點 → clamp(1.3rem,1.7vw,1.62rem)
+   （1280px：23.7 → 21.8px；1440px：26.6 → 24.3px；390px：20.5 → 19.1px）。 */
 #bc-sticky-mv .page-top__mv__product__textBox .color {
     margin: 0 0 0.35rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--bc-text-muted);
+    font-size: clamp(1.3rem, 1.7vw, 1.62rem);
+    font-weight: 500;
+    line-height: 1.25;
+    /* 品名含中文（如「抹茉」）→ 取消 uppercase 與大字距，中英混排才不會鬆散 */
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: var(--bc-text);
 }
 
 #bc-sticky-mv .page-top__mv__product__textBox .title {
     margin: 0;
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: var(--bc-text);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--bc-text-muted);
 }
 
+/* 2026-11-04（使用者指示）：首屏產品列不顯示價格（markup 保留在 about.html 可回滾）。 */
 #bc-sticky-mv .page-top__mv__product__textBox .p-price {
-    margin: 0.35rem 0 0;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--bc-gold);
+    display: none;
 }
 
 /* ===== 貼底小字（原站 .page-top__mv__foot） ===== */
@@ -447,14 +502,39 @@
     color: var(--bc-text-muted);
 }
 
-/* ===== 斷點（原站 breakpoint 680） ===== */
+/* ===== 斷點（原站 breakpoint 680 + 2026-11-04 補平板段） ===== */
+
+/* 平板（681–1024px）：原站只有 {1000:3, 680:1} 兩段，中間會擠成 3 張小卡
+   （820px 時每張僅 142px、四周還留 14vw 空白）；且 iPad Pro 直立寬 1024px，
+   落在「桌機」3 張小卡那側 → 使用者回報「平板看起來還是桌面尺寸」。
+   這裡改成 2 張 + 縮小留白：卡片寬 (100vw − 20vw − 8vw)/2 ≈ 36vw。 */
+@media (max-width: 1024px) and (min-width: 681px) {
+    #bc-sticky-mv {
+        --mv-per: 2;
+        --mv-gap: 8vw;
+        --mv-pad: 10vw;
+        --mv-text-h: calc(var(--mv-vh) * 0.62);
+    }
+}
+
+/* 中桌機（1025–1439px）：原站 14vw 左右留白 + 10vw 間距在 1025px 會把卡片壓到 178px，
+   視覺上像「縮小的桌機版」。這裡收到 10vw／8vw（卡片 ≈ 24vw，1280px 時 288px）。 */
+@media (max-width: 1439px) and (min-width: 1025px) {
+    #bc-sticky-mv {
+        --mv-gap: 8vw;
+        --mv-pad: 10vw;
+    }
+}
+
 @media (max-width: 680px) {
     #bc-sticky-mv {
         --mv-per: 1;
         --mv-gap: 15vw;
         /* 用 vw 而非 %：width calc 內的 % 會對父層解析，導致卡片寬度不受控 */
         --mv-pad: 25vw;
-        --mv-text-h: 60vh;
+        --mv-text-h: calc(var(--mv-vh) * 0.6);
+        /* 手機第一屏矮、文字區本來就緊 → 上移量減半，避免文字被壓到（見 --mv-lift） */
+        --mv-lift: 150px;
         --mv-nav: 72px;
     }
 
