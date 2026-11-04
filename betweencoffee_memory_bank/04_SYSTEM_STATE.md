@@ -17,8 +17,8 @@
 | 員工端渲染器 v2 | ✅ 完成 | BaseOrderRendererV2 + 4 個 v2 渲染器 |
 | 測試 | ⚠️ 不足 | 覆蓋率低（以 `docs/verify/` CDP 腳本補前端驗證） |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
-| 部署（Render） | ⚠️ 部署落後 6 筆 | 現行 `live`＝deploy `dep-dbkpv7tg1s2s73df3leg`／commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-04 Render API 複驗）。`origin/main` 尖端＝`e9bdefdb` ⇒ **待部署 `c3f7509c..e9bdefdb`**（`e2a5d747` about 首屏 sticky 影片、`ef98d37e` loop／拖曳修正＋三段、`fc7b7cb3`／`e49ac4d9` docs、`0bd7172d` 三段改 grid 格位、`e9bdefdb` 10-28~11-04 累積前端）。**autoDeploy＝off，push 不會觸發部署** | 
-| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`e9bdefdb`（2026-11-04：`0bd7172d` 三段 grid 修正＋`e9bdefdb` 補齊 10-28 起累積未提交前端，含製程模組／`bc-catch.css`／舞台天候列／拖曳）；本機 `main`＝`origin/main`、工作區乾淨（僅 `.gitignore` 排除的本機暫存素材）。複驗一律 `git log -1`／Render API，不寫死文件 hash |
+| 部署（Render） | ⚠️ 部署落後 7 筆 | 現行 `live`＝deploy `dep-dbkpv7tg1s2s73df3leg`／commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-04 Render API 複驗）。`origin/main` 尖端＝`7251018f` ⇒ **待部署 `c3f7509c..7251018f`**（`e2a5d747` about 首屏 sticky 影片、`ef98d37e` loop／拖曳修正＋三段、`fc7b7cb3`／`e49ac4d9` docs、`0bd7172d` 三段改 grid 格位、`e9bdefdb` 10-28~11-04 累積前端、`7251018f` docs 記憶文件同步）。**autoDeploy＝off，push 不會觸發部署** | 
+| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`7251018f`（2026-11-04 共 3 筆：`0bd7172d` 三段 grid 修正、`e9bdefdb` 補齊 10-28 起累積未提交前端（製程模組／`bc-catch.css`／舞台天候列／拖曳）、`7251018f` docs 記憶文件同步）；本機 `main`＝`origin/main`、工作區乾淨（僅 `.gitignore` 排除的本機暫存素材）。複驗一律 `git log -1`／Render API，不寫死文件 hash |
 
 ## 資料庫現狀
 

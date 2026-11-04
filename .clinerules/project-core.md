@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`e9bdefdb`（`0bd7172d` about 首屏三段改回品牌舞台 **7 欄 grid 格位**；`e9bdefdb` 補齊 10-28 起累積未提交前端＝首頁製程模組、`bc-catch.css` 入庫、舞台天氣 10 欄、拖曳、`.bc-staff` 字級）。正式站 live＝`c3f7509c`（deploy `dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z manual）⇒ **待部署 6 筆**。**autoDeploy＝off → push 不會部署，必須在 dashboard 按 Manual Deploy**。即時複驗：`git log --oneline -3`＋Render API（service `srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-04）**：`origin/main` 尖端＝`7251018f`（`0bd7172d` about 首屏三段改回品牌舞台 **7 欄 grid 格位**；`e9bdefdb` 補齊 10-28 起累積未提交前端＝首頁製程模組、`bc-catch.css` 入庫、舞台天氣 10 欄、拖曳、`.bc-staff` 字級；`7251018f` docs 記憶文件同步）。正式站 live＝`c3f7509c`（deploy `dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z manual）⇒ **待部署 7 筆**。**autoDeploy＝off → push 不會部署，必須在 dashboard 按 Manual Deploy**。即時複驗：`git log --oneline -3`＋Render API（service `srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
