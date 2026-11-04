@@ -66,19 +66,22 @@
     --mv-pull: 32px;
     /* 輪播：同時可見張數／間距／左右留白（原站 perPage/gap/padding） */
     --mv-per: 3;
-    /* 2026-11-04（使用者指示「咖啡照片加大尺寸」）：左右留白與間距再收一級
-       （14vw／10vw → 10vw／8vw），大螢幕卡片 21.3vw（1440px ＝ 307px，原本 250px）。 */
-    --mv-gap: 8vw;
-    --mv-pad: 10vw;
+    /* 2026-11-04（使用者指示「咖啡照片加大尺寸」）：左右留白與間距收一級（14vw／10vw → 10vw／8vw）。
+       第二次（同日，使用者「每組咖啡加大間隔」）：間距 8vw → 12vw，同時把左右留白 10vw → 8vw。
+       原因：卡片寬＝(100vw − 2×pad − (per−1)×gap)/per，只加大 gap 會讓卡片（＝照片）變小；
+       留白與間距互補（per=3 時 Δpad = −Δgap）才能「組與組更開、照片一樣大」。
+       1440×1080 實測卡片 307 → 288（−6%），1440×900 因 --mv-card-cap 生效仍是 270（不變）。 */
+    --mv-gap: 12vw;
+    --mv-pad: 8vw;
     /* 卡片高度預算（見 .mv-product__list 的 --mv-card-w）：
        0.30 × 視窗高是「照片 + 品名仍留在第一屏」的實測上限。 */
     --mv-card-cap: calc(var(--mv-vh) * 0.3);
     /* 產品列 ↔ 品牌舞台三段（Fresh beans）之間的間隔（2026-11-04 使用者指示「加大」）。
        原本寫死在 .mv-stage 的 5vh（1440×900 實測只有 46px，Fresh beans 幾乎貼著品名）→
-       拉到 9vh（同尺寸 81px，約 1.8 倍），並保留 clamp 上下限避免極高／極矮視窗失控。
+       第一輪拉到 9vh（81px），第二輪（使用者「再次加大」）拉到 14vh（同尺寸 126px）。
        下方 .page-top__mv__foot 是 margin-top:auto 貼底，吃掉的是中間的彈性空白，
-       所以加大這裡不會讓整個區塊變高或超出兩屏。 */
-    --mv-stage-gap: clamp(3.2rem, 9vh, 6.4rem);
+       所以加大這裡不會讓整個區塊變高或超出兩屏（實測 secH 仍 = 2 屏）。 */
+    --mv-stage-gap: clamp(4rem, 14vh, 9.5rem);
     /* 原站 easing / speed */
     --mv-ease: cubic-bezier(0.83, 0, 0.17, 1);
     --mv-dur: 1.75s;
@@ -551,12 +554,14 @@
 /* 平板（681–1024px）：原站只有 {1000:3, 680:1} 兩段，中間會擠成 3 張小卡
    （820px 時每張僅 142px、四周還留 14vw 空白）；且 iPad Pro 直立寬 1024px，
    落在「桌機」3 張小卡那側 → 使用者回報「平板看起來還是桌面尺寸」。
-   這裡改成 2 張 + 縮小留白：卡片寬 (100vw − 12vw − 6vw)/2 ≈ 41vw（768px ＝ 315px）。 */
+   這裡改成 2 張 + 縮小留白：卡片寬 (100vw − 12vw − 6vw)/2 ≈ 41vw（768px ＝ 315px）。
+   [2026-11-04 使用者「每組咖啡加大間隔」] 間距 6vw → 9vw、留白 6vw → 4vw
+   （per=2 時 Δpad = −Δgap/2，卡片寬不變：768px 仍是 (100vw−8vw−9vw)/2 ≈ 315px）。 */
 @media (max-width: 1024px) and (min-width: 681px) {
     #bc-sticky-mv {
         --mv-per: 2;
-        --mv-gap: 6vw;
-        --mv-pad: 6vw;
+        --mv-gap: 9vw;
+        --mv-pad: 4vw;
         --mv-text-h: calc(var(--mv-vh) * 0.62);
         /* 平板第一屏較高 → 卡片高度預算放寬（1024×1366 可到 420px 卡片／400px 照片） */
         --mv-card-cap: calc(var(--mv-vh) * 0.335);
@@ -564,18 +569,22 @@
 }
 
 /* 中桌機（1025–1439px）：原站 14vw 左右留白 + 10vw 間距在 1025px 會把卡片壓到 178px，
-   視覺上像「縮小的桌機版」。這裡收到 7vw／6vw（卡片 ≈ 24.7vw，1280px 時 316px）。 */
+   視覺上像「縮小的桌機版」。這裡收到 7vw／6vw（卡片 ≈ 24.7vw，1280px 時 316px）。
+   [2026-11-04 使用者「每組咖啡加大間隔」] 間距 6vw → 9vw、留白 7vw → 5vw
+   （per=3 時 Δpad = −Δgap，卡片寬幾乎不變）。 */
 @media (max-width: 1439px) and (min-width: 1025px) {
     #bc-sticky-mv {
-        --mv-gap: 6vw;
-        --mv-pad: 7vw;
+        --mv-gap: 9vw;
+        --mv-pad: 5vw;
     }
 }
 
 @media (max-width: 680px) {
     #bc-sticky-mv {
         --mv-per: 1;
-        --mv-gap: 11vw;
+        /* 一次只露一張卡 → gap 不影響卡片寬（(per−1)=0），純粹決定「換卡時的呼吸感」，
+           故 2026-11-04 使用者「每組咖啡加大間隔」直接 11vw → 15vw，卡片維持 289px */
+        --mv-gap: 15vw;
         /* 用 vw 而非 %：width calc 內的 % 會對父層解析，導致卡片寬度不受控
            （2026-11-04：25vw → 13vw，390px 卡片 195px → 289px；照片跟著變大） */
         --mv-pad: 13vw;
@@ -587,8 +596,8 @@
         --mv-nav: 72px;
         /* 手機（390×844 實測）卡片 289px 仍在第一屏內 → 預算 0.42 只在極矮視窗才介入 */
         --mv-card-cap: calc(var(--mv-vh) * 0.42);
-        /* 手機第一屏空間緊 → 間隔回收一級（9vh → 7vh），但仍比原本的 5vh 大 */
-        --mv-stage-gap: clamp(2.4rem, 7vh, 4.5rem);
+        /* 手機第一屏空間緊 → 間隔比桌機小一級（14vh → 11vh），但仍遠大於原本的 5vh */
+        --mv-stage-gap: clamp(3rem, 11vh, 6rem);
     }
 
     #bc-sticky-mv .page-top__mv__foot {
