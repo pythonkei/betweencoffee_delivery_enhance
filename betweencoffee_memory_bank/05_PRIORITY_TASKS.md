@@ -5,10 +5,10 @@
 
 ## 當前版本控制狀態（2026-11-04 複驗）
 
-- ✅ `origin/main`＝`7251018f`（本輪 3 筆：`0bd7172d` 三段 grid 修正、`e9bdefdb` 補齊 10-28 起累積前端、`7251018f` docs 記憶文件同步），本機 `main`＝`origin/main`、工作區乾淨（不寫死文件 hash，複驗用 `git log -1`）
+- ✅ `origin/main`＝`0c4189fe`（本輪 4 筆：`0bd7172d` 三段 grid 修正、`e9bdefdb` 補齊 10-28 起累積前端、`7251018f`／`0c4189fe` docs 記憶文件同步與收尾），本機 `main`＝`origin/main`、工作區乾淨（不寫死文件 hash，複驗用 `git log -1`）
 - ℹ️ 2026-11-04 之前的 `e2a5d747`／`ef98d37e`／`fc7b7cb3`／`e49ac4d9` 均已在遠端
 - ℹ️ `.gitignore` 排除的本機暫存素材（`static/images/hero_bg.mp4` 81MB 未引用、`recommended-pages/` 底線開頭 webm／png 變體）不入庫
-- ⚠ 正式站 live＝`c3f7509c`（`dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z 手動部署成功）⇒ **待部署 `c3f7509c..7251018f` 共 7 筆（6 筆 code＋1 筆 docs）**；autoDeploy＝off → push 不會上線
+- ⚠ 正式站 live＝`c3f7509c`（`dep-dbkpv7tg1s2s73df3leg`，2026-11-03 08:47Z 手動部署成功）⇒ **待部署 `c3f7509c..origin/main`（4 筆 code／feature＋docs）**；autoDeploy＝off → push 不會上線
 
 ## 近期優先（未完成）
 
