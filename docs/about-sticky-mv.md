@@ -30,8 +30,8 @@
 - **`.mv-stage`**：複製品牌舞台三段（id 用 `bc-mv-` 前綴避免與頁尾重複），必須是 **7 欄 grid 且照抄原站格位**：fresh `1/3/2/6`、roasted `2/4/3/7` + `mt 8px`、marquee `2/3/3/5`（與 roasted 同列左）；≤991 6 欄：`1/1/2/5`／`2/4/3/7`／`2/1/3/4` + `justify-self:start`。字級照原站流體公式（14.4／≤991 3.93），`.scroller-box` `line-height: 1`；**不可改成 flex 堆疊**。
 - **覆蓋層**：`.sticky-bg__bg::before` 的 `rgba(0,0,0,.75)`（2026-11-04 定案 75%；不是真實元素，量測要 `getComputedStyle(el, '::before')`）。
 - **版號**：動到 css/js 必須升 `about.html` 的 `?v=`（WhiteNoise 快取 1 年）。
-- **這排 6 張卡都吃 `CoffeeItem.get_index_image()`**（`image_index` 空 → 自動 fallback 到詳情頁 `image`）。詳情圖是 `860×1100`／杯身佔畫布寬 80%，列表圖是 `840×1200`／杯身佔 62–87%，兩者在同一個 3:4 `.p-image` 盒 `object-fit: contain` 下渲染出的杯身寬差可達 40%（例：`nicestep_detail` 217px vs `nicestep_index` 156px）→ 該組看起來「比別組擠／間距不一樣」。
-  **修法一律補 `image_index`，不要在 CSS 針對單品加間距**（2026-11-04：`#7 Nice Step` `image_index` 一直空著，migration `0084` 補 `coffee_images/nicestep_index.png`，杯身 217 → 156px，與抹茉 154／Flat White 162 一致）。
+- **這排卡的資料來源＝`mv_coffees`（不是 `series_coffees`）**：`betweencoffee_delivery/views.py` 的 `About` 用 `MV_EXCLUDE_IDS = {7}` 從 6 筆裡排除 #7 Nice Step → 首屏只放 5 張；下方「咖啡 SERIES 括號滑桿」與字輪仍用完整 6 筆。要增減首屏品項改那個常數，不要在模板加條件。
+- **杯身大小不一致的根因**：這排吃 `CoffeeItem.get_index_image()`（`image_index` 空 → fallback 到詳情頁 `image`）。詳情圖 `860×1100`／杯身佔畫布寬 80%，列表圖 `840×1200`／杯身 62–87%，在同一個 3:4 `object-fit: contain` 盒裡渲染出的杯身寬可差 40%（`nicestep_detail` 217px vs `nicestep_index` 156px）→ 該組看起來「比別組擠／間距不同」。**修法補 `image_index`（data migration `0084`），不要針對單品加 CSS 間距**。
 
 ## 3. 驗證
 

@@ -24,6 +24,10 @@ from django.views import View
 from cart.cart import Cart  # Import the Cart class
 from eshop.models import BeanItem, CoffeeItem
 
+# /about/ 首屏產品列（page-top__mv__product）要排除的咖啡 id。
+# 2026-11-04（使用者指示）：可在此增減；只影響首屏輪播，不影響下方 SERIES 滑桿／字輪。
+MV_EXCLUDE_IDS = {7}  # #7 Nice Step
+
 
 # 處理index, about HTTP 請求所發生的情況
 # 當使用者向伺服器發送 GET 請求時渲染 HTML template模板
@@ -452,6 +456,14 @@ class About(View):
         series_coffees = list(
             CoffeeItem.objects.filter(id__in=[1, 2, 3, 4, 7, 8]).order_by("id")
         )
+        # 2026-11-04（使用者指示）：首屏產品列（page-top__mv__product）只放 5 張，
+        # 移除 #7 Nice Step（使用者：「page-top__mv__product 減少 Nice Step 該咖啡組」）。
+        # 只影響首屏輪播；下方「咖啡 SERIES 括號滑桿」與字輪仍用完整 6 筆 series_coffees。
+        # 註：Nice Step 原本 image_index 空著 → fallback 到詳情圖，杯身渲染比其他組大，
+        # 已由 migration 0084 補上 nicestep_index.png（其他列表／商品卡一併受益）。
+        mv_coffees = [
+            coffee for coffee in series_coffees if coffee.id not in MV_EXCLUDE_IDS
+        ]
         # 2026-10-28（使用者指示）：咖啡豆 SERIES 括號滑桿已移至咖啡豆詳情頁
         # （bean.html，商品主區下方）→ 本頁不再需要 series_beans。
 
@@ -473,6 +485,9 @@ class About(View):
         context = {
             "cart": cart,  # keep cart count fn
             "series_coffees": series_coffees,
+            # 2026-11-04（使用者指示）：首屏產品列只放 5 張（排除 MV_EXCLUDE_IDS）；
+            # 下方 SERIES 括號滑桿與字輪仍用 series_coffees 的完整 6 筆。
+            "mv_coffees": mv_coffees,
             "wheel_items": wheel_items,
             # 2026-10-08：loogg.jp「.top_art」sticky 堆疊卡片模組自 index.html 移至本頁
             # （置於 .bc-fujiya-photo 區塊正下方）。內容與動畫參數不變，

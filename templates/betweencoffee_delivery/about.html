@@ -86,7 +86,8 @@
         第一屏＝大字 + 說明 + 按鈕，產品列在底部露頭；再捲一屏則整組離場交棒 SERIES
      ③ 產品列：原生 JS 輪播（perPage3 / gap10vw / padding14vw / autoplay 4s / 拖曳 flick 200px）
         點產品圖 → 該咖啡詳情頁（拖曳後不會誤觸，見 bc-sticky-mv.js）
-     資料來源＝About view 的 series_coffees（6 筆咖啡的 name/highlight/price/去背圖）
+     資料來源＝About view 的 mv_coffees（首屏 5 筆：series_coffees 排除 MV_EXCLUDE_IDS，
+     2026-11-04 起排除 #7 Nice Step；下方 SERIES 括號滑桿仍用 series_coffees 6 筆）
      影片：static/media/hero_bg-720p.mp4（1280×720 / 16.8s，由 static/images/hero_bg.mp4
           3840×2160 / 40Mbps / 81MB 轉檔；原檔已列 .gitignore 不入庫）
           poster：static/images/hero_bg-poster.jpg（同支影片第 1 秒截圖） -->
@@ -121,10 +122,10 @@
                     </a>
                 </div>
 
-                {% if series_coffees %}
+                {% if mv_coffees %}
                 <div class="page-top__mv__product">
                     <ul class="mv-product__list" tabindex="0" role="group" aria-label="咖啡品項輪播（可拖曳）">
-                        {% for coffee in series_coffees %}
+                        {% for coffee in mv_coffees %}
                         <li class="mv-product__slide">
                             <a class="page-top__mv__product__imageBox"
                                href="{% url 'coffee' coffee.id %}"
