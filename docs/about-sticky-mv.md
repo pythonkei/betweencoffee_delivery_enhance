@@ -26,7 +26,7 @@
 - **產品列淡入**：`.page-top__mv__product` 預設 `opacity: 0`，JS `jump()` 後才加 `.is-mv-ready`。若拿掉，JS 執行前瀏覽器已畫出 `-18%`，整排看起來往下掉；`about.html` 的 `<noscript>` 還原。
 - **瞬移**：loop 歸位／尺寸重算時必須同時關掉 slide 與 img 過渡（`.is-jumping`），否則新聚焦卡片會從 `-18%` 往上抖。
 - **`.mv-stage`**：複製品牌舞台三段（id 用 `bc-mv-` 前綴避免與頁尾重複），必須是 **7 欄 grid 且照抄原站格位**：fresh `1/3/2/6`、roasted `2/4/3/7` + `mt 8px`、marquee `2/3/3/5`（與 roasted 同列左）；≤991 6 欄：`1/1/2/5`／`2/4/3/7`／`2/1/3/4` + `justify-self:start`。字級照原站流體公式（14.4／≤991 3.93），`.scroller-box` `line-height: 1`；**不可改成 flex 堆疊**。
-- **覆蓋層**：`.sticky-bg__bg::before` 的 `rgba(0,0,0,.7)`（不是真實元素，量測要 `getComputedStyle(el, '::before')`）。
+- **覆蓋層**：`.sticky-bg__bg::before` 的 `rgba(0,0,0,.75)`（2026-11-04 定案 75%；不是真實元素，量測要 `getComputedStyle(el, '::before')`）。
 - **版號**：動到 css/js 必須升 `about.html` 的 `?v=`（WhiteNoise 快取 1 年）。
 
 ## 3. 驗證

@@ -26,7 +26,7 @@
      原站 .lead (MFW-Koburina)   → Noto Serif TC（品牌標題字）
      原站 .p-button              → .bc-btn.bc-btn-secondary（bc-components.css）
      原站背景壓暗 #3e3e3e × multiply × var(--value-op)[JS 漸變]
-        → 固定 rgba(0,0,0,.7) 黑色覆蓋層（2026-11-04 使用者指定 70%；不移植漸變）
+        → 固定 rgba(0,0,0,.75) 黑色覆蓋層（2026-11-04 使用者指定 75%；不移植漸變）
      原站 .sticky-bg 無底色      → 補 background:var(--bc-bg)（蓋掉 bc-rotate-mau 的 z-index:-1 透出）
 
    [首屏不閃動的關鍵]（2026-11-04 修「初始顯示時產品列往下掉」）
@@ -109,16 +109,16 @@
     object-fit: cover;
 }
 
-/* 黑色覆蓋層（2026-11-04 使用者指示：不透明度 70%）
+/* 黑色覆蓋層（2026-11-04 使用者指示：不透明度 75%）
    原站是 :before + mix-blend-mode:multiply + JS 漸變；此處固定不透明度、不用漸層。
-   影片本身偏亮（俯拍市景），.7 是「仍看得見影片流動、白字對比更強」的平衡點
-   （同日先調到 .6，使用者覺得還是不夠暗 → .7）。 */
+   影片本身偏亮（俯拍市景）；演進：.6（首版）→ .7（同日「不夠暗」）→ .75（同日「再暗一點」）。
+   要再調只改下面 background 的第四個數字即可（數值＝不透明度，0.75 = 75%）。 */
 #bc-sticky-mv .sticky-bg__bg::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.75);
 }
 
 /* ===== 內容層（負 margin 拉回覆蓋影片） ===== */
