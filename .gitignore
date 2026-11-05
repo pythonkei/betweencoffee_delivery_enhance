@@ -147,6 +147,8 @@ yarn-error.log*
 # 保留在本機工作區，不入版控。若日後要正式採用，再把該筆規則刪掉即可。）
 #   hero_bg.mp4 81MB（3840×2160 / 40Mbps / 16.8s）→ 2026-11-04 起它是 about 首屏背景
 #     影片的原始素材，頁面實際用的是由它轉出的 static/media/hero_bg-720p.mp4（3.6MB，已入庫）
+#     2026-11-05 使用者改指定 static/media/hero_bg_v2.webm（3.4MB，已入庫）為首屏影片，
+#     原 mp4 降為 <source> 後備（不吃 WebM 的瀏覽器才用）
 #   recommended-pages/ 底下底線開頭的是 bean_bg.webm／coffee_bg.webm／clip-bean-ani.png 的暫存變體
 /static/images/hero_bg.mp4
 /static/images/recommended-pages/__bean_bg.webm
