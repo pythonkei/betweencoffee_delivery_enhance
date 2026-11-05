@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-05）**：`origin/main` 尖端＝about 首屏影片換 `hero_bg_v2.webm`＋黑遮罩 `rgba(0,0,0,.8)`（css `?v=20261105a`）；前兩筆＝首屏輪播移除 #7 Nice Step（`views.MV_EXCLUDE_IDS={7}` → 5 張）＋ migration `0084`（補 `nicestep_index.png`）、sticky-MV 間距第三輪（`--mv-stage-gap` 18vh、gap 10vw／pad 9vw）。正式站 live＝`c3f7509c`（2026-11-03 manual）⇒ **待部署 29 筆**。⚠ **live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0）→ 部署前相關回報都不會消失，不是 CSS 問題。**autoDeploy＝off → 必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-05）**：`origin/main` 尖端＝about 首屏影片換 `hero_bg_v2.webm`＋黑遮罩 `rgba(0,0,0,.8)`（css `?v=20261105a`）；前＝首屏輪播排除 #7（`views.MV_EXCLUDE_IDS={7}` → 5 張）＋ `0084`（補 `nicestep_index.png`）、間距第三輪。正式站 live＝`c3f7509c`（2026-11-03 manual）⇒ **待部署 29 筆**。⚠ **live `/about/` 仍完全沒有 sticky-MV**（`grep -c bc-sticky-mv` = 0）→ 部署前相關回報都不會消失，不是 CSS 問題。**autoDeploy＝off → 必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
