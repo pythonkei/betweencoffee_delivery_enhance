@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-06）**：`origin/main` 尖端＝`8799454e`＋本輪「about 首屏影片多層輪播」。正式站 live＝`c3f7509c`（11-03 manual）⇒ **待部署數十筆**；⚠ live `/about/` 仍無 sticky-MV（`grep -c bc-sticky-mv` = 0）→ 部署後用它複驗（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。**autoDeploy＝off，push 不會部署**。
+- **版本狀態（2026-11-06）**：`origin/main` 尖端＝`fdd2b236`＋本輪「about 首屏影片 hero_00~hero_06 依序 7 支＋黑遮罩 70%」。正式站 live＝`c3f7509c`（11-03 manual）⇒ **待部署 47 筆**；⚠ live `/about/` 仍無 sticky-MV（`grep -c bc-sticky-mv` = 0）→ 部署後用它複驗（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。**autoDeploy＝off，push 不會部署**。
 
 ## 2. 核心業務
 
@@ -47,7 +47,7 @@
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 首頁「咖啡豆製程」捲動模組（`[2b-2]`；移植 union-tec `homeService`：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS） |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`；3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
-| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_bg_v2.webm`（＋後備 `hero_bg-720p.mp4`；poster `images/hero_bg_v2-poster.jpg`；原始 4K 已 gitignore） | `/about/` 最上方首屏 sticky 影片＋產品照輪播（`--mv-vh`＝`100svh`；斷點張數／gap／pad：≥1440 3/10vw/9vw、1025–1439 3/8/5.5、681–1024 2/8/4.5、≤680 1/13/13（≤680 per=1 → gap 不影響卡片寬）；卡片寬＝min(寬度公式, `--mv-card-cap`＝vh×0.30／平板 .335／手機 .42)；照片 `max-width:400px`；`.color`＝品名 `clamp(1.15rem,1.45vw,1.4rem)`、`.title`＝highlight `1.08rem`；產品列↔Fresh beans 間隔 `--mv-stage-gap`＝`clamp(4.5rem,18vh,12rem)`／≤680 `13vh`；黑遮罩 `rgba(0,0,0,.8)`（z-index 10）。**2026-11-06 起影片多層輪播**：片單＝`views.MV_VIDEOS`（6 支，末 3 支 11-06 追加、含 1 支直式）、層數＝min(片單, `MV_MAX`＝6)；模板只渲染第 0 層，JS 洗牌建 1–5 層並在「剩 0.75s」時讓下一層交叉淡入 0.6s（`.is-on`＝opacity 1／z-index 3），換完才暫停舊層＋補載下一支；只有 1 支時＝舊行為）。**地雷／`.mv-stage` 格位／淡入與瞬移細節見 `docs/about-sticky-mv.md`**。 |
+| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00.webm`~`hero_06.webm`（7 支片單） | `/about/` 最上方首屏 sticky 影片＋產品照輪播（`--mv-vh`＝`100svh`；斷點張數／gap／pad：≥1440 3/10vw/9vw、1025–1439 3/8/5.5、681–1024 2/8/4.5、≤680 1/13/13（≤680 per=1 → gap 不影響卡片寬）；卡片寬＝min(寬度公式, `--mv-card-cap`＝vh×0.30／平板 .335／手機 .42)；照片 `max-width:400px`；`.color`＝品名 `clamp(1.15rem,1.45vw,1.4rem)`、`.title`＝highlight `1.08rem`；產品列↔Fresh beans 間隔 `--mv-stage-gap`＝`clamp(4.5rem,18vh,12rem)`／≤680 `13vh`；黑遮罩 `rgba(0,0,0,.7)`（11-06 由 80% 改 70%，z-index 10）。**11-06 起多層輪播**：片單＝`views.MV_VIDEOS`（7 支，**依清單順序** `0→…→6→0`，不洗牌）、層數＝min(片單, `MV_MAX`＝7)；模板只渲染第 0 層，JS 依序建 1–6 層，剩 0.75s 時下一層交叉淡入 0.6s（`.is-on`＝opacity 1／z-index 3），換完才暫停舊層＋補載下一支；只有 1 支＝舊行為）。**地雷／`.mv-stage` 格位／淡入細節見 `docs/about-sticky-mv.md`**。 |
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（移植 popeyemagazine.jp/50interviews）。**2026-11-06 重新載入，置於 `#bc-sticky-mv` 下方**（11-03 起曾停用、檔案保留） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
