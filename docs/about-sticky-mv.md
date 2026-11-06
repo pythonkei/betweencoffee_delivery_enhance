@@ -28,13 +28,34 @@
 - **產品列淡入**：`.page-top__mv__product` 預設 `opacity: 0`，JS `jump()` 後才加 `.is-mv-ready`。若拿掉，JS 執行前瀏覽器已畫出 `-18%`，整排看起來往下掉；`about.html` 的 `<noscript>` 還原。
 - **瞬移**：loop 歸位／尺寸重算時必須同時關掉 slide 與 img 過渡（`.is-jumping`），否則新聚焦卡片會從 `-18%` 往上抖。
 - **`.mv-stage`**：複製品牌舞台三段（id 用 `bc-mv-` 前綴避免與頁尾重複），必須是 **7 欄 grid 且照抄原站格位**：fresh `1/3/2/6`、roasted `2/4/3/7` + `mt 8px`、marquee `2/3/3/5`（與 roasted 同列左）；≤991 6 欄：`1/1/2/5`／`2/4/3/7`／`2/1/3/4` + `justify-self:start`。字級照原站流體公式（14.4／≤991 3.93），`.scroller-box` `line-height: 1`；**不可改成 flex 堆疊**。
-- **覆蓋層**：`.sticky-bg__bg::before` 的 `rgba(0,0,0,.8)`（2026-11-05 改 80%；不是真實元素，量測要 `getComputedStyle(el, '::before')`）。
-- **影片**：`about.html` 用 `<source>` 兩層而非 `src` —— 第一層 `media/hero_bg_v2.webm`（1280×720 / VP8 / 30fps / 11.2s / 3.4MB，2026-11-05 起），第二層 `media/hero_bg-720p.mp4` 後備（部分 Safari 不吃 WebM）。**不可改用單一 `src`**，否則 Safari 會變黑。poster＝`images/hero_bg_v2-poster.jpg`（v2 第 2 秒截圖）。
+- **覆蓋層**：`.sticky-bg__bg::before` 的 `rgba(0,0,0,.8)`（2026-11-05 改 80%；不是真實元素，量測要 `getComputedStyle(el, '::before')`）。**2026-11-06 起 `z-index` 由 `1` 提到 `10`**：多層影片的最新層是 `z-index: 3`，遮罩不抬高就會在交叉淡入那 0.6s 露出沒遮罩的亮畫面。
+- **影片**：`about.html` 用 `<source>` 兩層而非 `src` —— 第一層 `media/hero_bg_v2.webm`（1280×720 / VP8 / 30fps / 11.2s / 3.4MB，2026-11-05 起），第二層 `media/hero_bg-720p.mp4` 後備（部分 Safari 不吃 WebM）。**不可改用單一 `src`**，否則 Safari 會變黑。poster＝`images/hero_bg_v2-poster.jpg`（v2 第 2 秒截圖）。2026-11-06 起「第 0 層」的檔名來自 `views.MV_VIDEOS[0]`，模板不寫死。
 - **版號**：動到 css/js 必須升 `about.html` 的 `?v=`（WhiteNoise 快取 1 年）。
 - **這排卡的資料來源＝`mv_coffees`（不是 `series_coffees`）**：`betweencoffee_delivery/views.py` 的 `About` 用 `MV_EXCLUDE_IDS = {7}` 從 6 筆裡排除 #7 Nice Step → 首屏只放 5 張；下方「咖啡 SERIES 括號滑桿」與字輪仍用完整 6 筆。要增減首屏品項改那個常數，不要在模板加條件。
 - **杯身大小不一致的根因**：這排吃 `CoffeeItem.get_index_image()`（`image_index` 空 → fallback 到詳情頁 `image`）。詳情圖 `860×1100`／杯身佔畫布寬 80%，列表圖 `840×1200`／杯身 62–87%，在同一個 3:4 `object-fit: contain` 盒裡渲染出的杯身寬可差 40%（`nicestep_detail` 217px vs `nicestep_index` 156px）→ 該組看起來「比別組擠／間距不同」。**修法補 `image_index`（data migration `0084`），不要針對單品加 CSS 間距**。
 
-## 3. 驗證
+## 3. 影片多層輪播（2026-11-06，移植 weekday.co.jp `.p-hero__videos`）
+
+**資料來源** `betweencoffee_delivery/views.py` 檔頭：`MV_MAX`（層數上限，5）、`MV_VIDEOS`（片單，每筆可含
+`webm`／`mp4`／`poster`）。`About.get` 用 `django.templatetags.static.static()` 轉成絕對 URL 放進 context
+（`mv_videos`／`mv_max`）→ 模板 `json_script` 輸出 `bc-sticky-mv-videos`／`bc-sticky-mv-max`。
+⚠ 換影片要用**新檔名**（`WHITENOISE_MAX_AGE`＝1 年，同名檔會被快取）。
+
+**分層**：第 0 層由模板渲染（`#mv-video-0`，帶 `autoplay/muted/loop/poster` ⇒ 無 JS 時等於舊版單支）；
+第 1～N 層由 `bc-sticky-mv.js` 的 `initVideo()` 建立後 `append` 到 `.sticky-bg__bg`（**必須是直接子元素**，
+才吃得到 `> * { position:absolute; inset:0; object-fit:cover }`）。
+
+**播放邏輯**：洗牌（排除與第 0 層同片者）→ 先只 `loadLayer(1)`（前兩支）→ 當前層 `timeupdate` 距結束
+`MV_LEAD_S`＝0.75s 時找下一個「已載入且沒壞」的層 → 加 `.is-on`（CSS `.6s` 淡入、`z-index:3`）→
+0.6s 後才暫停舊層、歸零、移除 `.is-on` → `loadNextUnloaded()` 補載下一支。
+
+**與原站刻意不同**：① `z-index` 固定 3（原站累加）——遮罩要永遠最上層；② 找層有 `MV_MAX_ITER` 上限
+（原站 `do…while` 在只剩一支載好時會無限迴圈）；③ 每層保留 `loop`（下一支還沒好時不會凍在最後一幀）。
+
+**常見誤解**：`json_script` 的 `<script>` 要放在 `.sticky-bg__bg` **外面**（放進去會變成 direct child，被
+`> *` 規則 `display:block` 撐開）；`reduced-motion` 下只留 1 層且不播（`transition:none`）。
+
+## 4. 驗證
 
 Playwright／CDP 量測（載入後動態 resize，不需重載）：`--mv-per` = 1/1/2/2/3/3/3（360/390/768/1024/1280/1440/1920）、
 無水平溢出、聚焦卡片中心 = 視窗寬 / 2（拖曳與 autoplay 換手後亦然）、`nameBottom < innerHeight`。

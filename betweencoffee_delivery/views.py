@@ -18,6 +18,7 @@ from django.db.models import Q
 
 # betweencoffee_delivery/views.py
 from django.shortcuts import get_object_or_404, render
+from django.templatetags.static import static
 from django.urls import reverse
 from django.views import View
 
@@ -27,6 +28,28 @@ from eshop.models import BeanItem, CoffeeItem
 # /about/ 首屏產品列（page-top__mv__product）要排除的咖啡 id。
 # 2026-11-04（使用者指示）：可在此增減；只影響首屏輪播，不影響下方 SERIES 滑桿／字輪。
 MV_EXCLUDE_IDS = {7}  # #7 Nice Step
+
+# /about/ 首屏背景影片（.sticky-bg__bg）多層輪播設定。
+# 2026-11-06（使用者指示）：改成「可載入多支影片、依序輪播」→ 機制移植
+# weekday.co.jp 首頁 .p-hero__videos（多層 <video> + 提前 0.75s 交叉淡入，
+# 細節見 static/js/bc-sticky-mv.js 的 initVideo）。
+# · 第一筆＝模板預先渲染的第 0 層（首屏 poster 就是它，因此不參與洗牌）；
+#   第 1 層之後每次載入在瀏覽器端洗牌（bc-sticky-mv.js 的 shuffle）。
+# · 每筆可含 webm / mp4 / poster，缺少的鍵就不輸出對應 <source>（單 mp4 也能用）。
+# · MV_MAX＝同時最多幾層（原站寫死 t < 5）。
+# ⚠ 換影片務必用「新檔名」：WHITENOISE_MAX_AGE＝1 年，同名檔會被瀏覽器快取。
+MV_MAX = 5
+MV_VIDEOS = [
+    {
+        "webm": "media/hero_bg_v2.webm",
+        "mp4": "media/hero_bg-720p.mp4",
+        "poster": "images/hero_bg_v2-poster.jpg",
+    },
+    # 同一段畫面的 mp4 版（hero_bg-720p.mp4）只是第 0 層的後備碼，不再列為獨立一筆，
+    # 否則 Chrome（走 webm）會覺得「同一段播兩次」。以下兩支是本頁既有素材。
+    {"mp4": "media/hk_topshot-720p.mp4"},
+    {"mp4": "media/roasting.mp4"},
+]
 
 
 # 處理index, about HTTP 請求所發生的情況
@@ -482,6 +505,18 @@ class About(View):
             for coffee in series_coffees
         ]
 
+        # 2026-11-06（使用者指示）：首屏背景影片改「多支輪播」（見檔頭 MV_VIDEOS 說明）。
+        # json_script 產出的 JSON 內無法執行 {% static %} → 在此先解析成絕對 URL；
+        # 模板的第 0 層 <video> 與 JSON 共用同一份清單，避免兩處各寫一次檔名。
+        mv_videos = [
+            {
+                key: static(item[key])
+                for key in ("webm", "mp4", "poster")
+                if item.get(key)
+            }
+            for item in MV_VIDEOS
+        ]
+
         context = {
             "cart": cart,  # keep cart count fn
             "series_coffees": series_coffees,
@@ -499,6 +534,9 @@ class About(View):
             # fallback 成 static/images/search_img01/02.png。
             "search_bean_01": BeanItem.objects.filter(pk=7).first(),
             "search_bean_02": BeanItem.objects.filter(pk=6).first(),
+            # 2026-11-06：首屏背景影片多層輪播（第 0 層由模板渲染，其餘由 JS 依洗牌補上）
+            "mv_videos": mv_videos,
+            "mv_max": MV_MAX,
         }
         return render(request, "betweencoffee_delivery/about.html", context)
 

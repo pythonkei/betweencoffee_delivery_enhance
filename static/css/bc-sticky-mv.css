@@ -122,12 +122,14 @@
 /* 黑色覆蓋層（2026-11-04 使用者指示：不透明度 75% → 2026-11-05 改 80%）
    原站是 :before + mix-blend-mode:multiply + JS 漸變；此處固定不透明度、不用漸層。
    影片本身偏亮（俯拍市景）；演進：.6（首版）→ .7 → .75 → .8（2026-11-05）。
-   要再調只改下面 background 的第四個數字即可（數值＝不透明度，0.8 = 80%）。 */
+   要再調只改下面 background 的第四個數字即可（數值＝不透明度，0.8 = 80%）。
+   2026-11-06：多層影片的「最新層」z-index 是 3（見檔尾 .is-on 規則），
+   所以遮罩由 1 提到 10 —— 否則交叉淡入的那 0.6s 會看到沒有遮罩的亮畫面。 */
 #bc-sticky-mv .sticky-bg__bg::before {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 10;
     background: rgba(0, 0, 0, 0.8);
 }
 
@@ -639,3 +641,30 @@
         transform: none;
     }
 }
+
+/* ===== 背景影片：多層輪播（2026-11-06；移植 weekday.co.jp .p-hero__videos） =====
+   第 0 層由模板渲染（帶 poster、預設 .is-on），第 1～N 層由 bc-sticky-mv.js
+   依 views.MV_VIDEOS 洗牌後動態建立，全部都是 .sticky-bg__bg 的直接子元素
+   → 尺寸/object-fit 由上面「#bc-sticky-mv .sticky-bg__bg > *」統一給，這裡只管圖層。
+
+   切換＝JS 幫「進場的那一層」加 .is-on：opacity 0 → 1（0.6s）、z-index 3（壓過其他層）。
+   刻意與原站不同的地方：原站的 z-index 是累加的（1,2,3…），本頁改成「最新＝3、其餘＝0」，
+   因為 .sticky-bg__bg::before 黑遮罩（z-index:10）必須永遠蓋在所有影片層上面。 */
+#bc-sticky-mv .sticky-bg__bg .mv-video {
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#bc-sticky-mv .sticky-bg__bg .mv-video.is-on {
+    opacity: 1;
+    z-index: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* 不做交叉淡入（JS 在 reduced-motion 下也不會建立多層） */
+    #bc-sticky-mv .sticky-bg__bg .mv-video {
+        transition: none;
+    }
+}
+
