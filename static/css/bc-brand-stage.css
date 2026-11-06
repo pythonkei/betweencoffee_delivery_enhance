@@ -868,7 +868,7 @@
 }
 /* [2026-10-14 稍後移除] 原本這裡的兩條規則（`.footer-logo-item a.footer-logo-link`
    由 block 改 flex column、讓 img 撐滿「格子高 − 文字高」）隨照片格改為環形照片列而失效：
-   格內已無 .footer-logo-link / .footer-logo-item，照片改由 .hero_hand_item a > img 呈現
+   格內已無 .footer-logo-link / .footer-logo-item，照片改由 .hero_bc_item a > img 呈現
    （尺寸見上方 B1 與 bc-hand-ring.css）。
    文字區（.bc-ring-caption）改為照片區之後的自然流區塊 → 不需要 flex 分配高度。 */
 /* [文字樣式] 沿用 SERIES 區塊的 .bc-series-caption 系列命名與其視覺定義

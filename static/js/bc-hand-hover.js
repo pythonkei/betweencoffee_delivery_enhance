@@ -17,13 +17,21 @@
    [本專案照抄的行為] 200ms 的收尾延遲、以 left/top 追蹤（位移不吃過渡、只有縮放過渡）、
      觸控裝置不啟動、mouseenter 時清計時器（快速滑過多張照片不會殘留）。
    [本專案的差異]
-     · 徽章內容多了「這杯咖啡的名稱」——讀 <a aria-label>／<img alt>
-       （＝hero_coffees.N.name）⇒ hover 時就看得到這杯是什麼（＝使用者要的「更多細節」）。
+     · 徽章內容原為「這杯咖啡的名稱 ＋ view more」（名稱讀 <a aria-label>／<img alt>
+       ＝hero_coffees.N.name）⇒ hover 就看得到這杯是什麼。
+     · 2026-11-05（使用者指示）：徽章下方那行字由 "view more" 改為 "Detail"（上方「來源實作」
+       那段描述的是原站），並移除徽章白框（CSS 在 bc-hand-ring.css 的 .bc-hand-badge）；
+       照片格的類別名 .hero_hand_item → .hero_bc_item（下面 ITEM_SELECTOR 已同步改）。
+     · 2026-11-05 稍後（使用者指示）：圓內「只顯示 Detail，無需咖啡名稱」⇒ 移除
+       [data-bc-hand-badge-name] 的讀取與填入（labelOf()／NAME_SELECTOR 已刪），
+       徽章 markup 只剩 <span class="bc-hand-badge__more">Detail</span>。
+       日後要恢復名稱：markup 加回該 span，並在 show() 內把
+       badge.querySelector('[data-bc-hand-badge-name]').textContent 設為 <a aria-label>。
      · hover 期間暫停 5s 自動輪播（bc-hand-ring.js 的 startAuto／stopAuto）：
        否則照片會在游標底下轉走、徽章跟著亂跳；離開後 startAuto() 重新計時。
      · 拖曳（bc-hand-ring.js 的 bindDrag）與頁面捲動時立刻收回徽章。
      · CSS（.bc-hand-badge／照片放大）在 static/css/bc-hand-ring.css 檔尾；
-       本檔只負責「什麼時候顯示、顯示在哪、顯示哪個名稱」。
+       本檔只負責「什麼時候顯示、顯示在哪」。
    [範圍] 只作用於有 [data-bc-hand-ring] 的環（首頁品牌舞台的 #bc-stage-photo-ring；
      被 hidden 的 GUNTE hero 也同構，日後恢復時行為一致）；about 頁沒有環 → no-op。
    ============================================================ */
@@ -31,9 +39,8 @@
   'use strict';
 
   var RING_SELECTOR = '[data-bc-hand-ring]';
-  var ITEM_SELECTOR = '.hero_hand_item';
+  var ITEM_SELECTOR = '.hero_bc_item';
   var BADGE_SELECTOR = '[data-bc-hand-badge]';
-  var NAME_SELECTOR = '[data-bc-hand-badge-name]';
   var ON = 'is-on';
   /* 與原站相同的 200ms 收尾延遲：離開一張照片後、進入下一張前不會先縮再放大 */
   var HIDE_DELAY = 200;
@@ -55,14 +62,16 @@
     var rings = document.querySelectorAll(RING_SELECTOR);
     if (!badge || !rings.length) return;
 
-    var nameEl = badge.querySelector(NAME_SELECTOR);
     var hideTimer = null;   // 200ms 收尾延遲的計時器
     var frame = 0;          // rAF id（0＝沒有排隊中的更新）
     var x = 0;              // 游標的 viewport 座標
     var y = 0;
     var active = false;     // 徽章是否正跟著某張照片
 
-    /* 追蹤：直接改 left/top（不吃過渡，與原站相同）⇒ 圓心即時貼著游標。
+    /* 追蹤：直接改 left/top（不吃過渡，與原站相同）⇒ 圓心即時跟著游標。
+       2026-11-05（使用者回報「手形游標遮住 DETAIL 文字」）：圓心不再落在游標上，
+       CSS 用 translate 偏移到游標右上方（--bc-hand-badge-dx／dy，見 bc-hand-ring.css）
+       ⇒ 游標停在圓的左下緣、不會蓋住中央的文字；本檔只給游標座標，不需改。
        用 rAF 合併同一幀內的多個 mousemove，避免高頻事件造成多餘的樣式計算。 */
     function apply() {
       badge.style.left = x + 'px';
@@ -93,15 +102,9 @@
       if (window.BC_HAND_RING) window.BC_HAND_RING.startAuto();
     }
 
-    /* 取這張照片的咖啡名稱：<a aria-label>（markup 一定有）→ <img alt> 依序退讓 */
-    function labelOf(item) {
-      var a = item.querySelector('a');
-      var img = item.querySelector('img');
-      return (a && a.getAttribute('aria-label')) || (img && img.alt) || '';
-    }
-
-    function show(item, e) {
-      if (nameEl) nameEl.textContent = labelOf(item);
+    /* 2026-11-05（使用者指示）：圓內只顯示 "Detail" ⇒ 這裡不再讀取／填入咖啡名稱
+       （原本的 labelOf(item) 讀 <a aria-label> → <img alt> 已移除）。 */
+    function show(e) {
       if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
       track(e);
       badge.classList.add(ON);
@@ -133,7 +136,7 @@
       var items = root.querySelectorAll(ITEM_SELECTOR);
       for (var i = 0; i < items.length; i++) {
         (function (item) {
-          item.addEventListener('mouseenter', function (e) { show(item, e); });
+          item.addEventListener('mouseenter', function (e) { show(e); });
           item.addEventListener('mouseleave', hideSoft);
         })(items[i]);
       }

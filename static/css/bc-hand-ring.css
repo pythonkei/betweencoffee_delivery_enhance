@@ -13,14 +13,17 @@
    [結構]
      .hero_hand                       定位點＝圓心正上方 R 處（＝環的頂點/apex）
        └ .hero_hand_list              2R × 2R 的旋轉盤（transform: rotate(index × -25deg)）
-           └ 7 × .hero_hand_item      style="--angle:-90|-65|…|60"（每格差 25°）
+           └ 7 × .hero_bc_item        style="--angle:-90|-65|…|60"（每格差 25°）
                └ <a href="…"><img></a> -current 那格 scale 1，其餘 0.5
 
-   [為什麼類別名沿用 hero_hand / hero_hand_list / hero_hand_item]
+   [為什麼類別名沿用 hero_hand / hero_hand_list]
      兩邊（GUNTE hero 與照片格）共用同一組 markup 與同一份 JS；改名只會製造 diff 風險。
      本檔已把選擇器「去前綴」（不再限定在 .bc-gunte-hero 內）⇒ 任何容器都能用。
      hero 專屬的部分留在 bc-gunte-hero.css：進場動畫（.-load）、圓心高度（top）、
      逐斷點的 --bc-hand-img-w。
+   （2026-11-05 使用者指示：只有照片「每一格」的 .hero_hand_item 改名為 .hero_bc_item，
+     容器仍叫 .hero_hand／.hero_hand_list —— 本檔、bc-gunte-hero.css、bc-brand-stage.css
+     的選擇器與 bc-hand-ring.js／bc-hand-hover.js 的查詢字串已同步。）
 
    [可覆寫的 CSS 變數]
      --circle-radius   圓半徑（預設 100vw＝hero 值；照片格亦同值 ⇒ 兩者是同一顆整頁大圓）
@@ -51,7 +54,7 @@
   transition: transform var(--bc-hand-ease);
 }
 
-.hero_hand_item {
+.hero_bc_item {
   position: absolute;
   pointer-events: auto;
   translate: calc(cos(var(--angle) * 1deg) * var(--circle-radius) - 50%)
@@ -62,14 +65,14 @@
 }
 
 /* 2026-09-07：改為咖啡頁連結後，current 也保持可點擊 */
-.hero_hand_item.-current {
+.hero_bc_item.-current {
   pointer-events: auto;
 }
 
 /* 2026-10-29（把左右拖曳加回來，見 bc-hand-ring.js 的 bindDrag）：
    <a> 是可點的照片連結 —— touch-action: pan-y ⇒ 直向手勢仍交還瀏覽器捲動頁面，
    只有橫向交給 JS；cursor: grab ⇒ 提示「可以抓著轉」；user-select: none ⇒ 拖曳不會選到文字。 */
-.hero_hand_item a {
+.hero_bc_item a {
   display: block;
   cursor: grab;
   touch-action: pan-y;
@@ -79,12 +82,12 @@
 
 /* 拖曳中：游標換成「抓著」 */
 .hero_hand.is-dragging,
-.hero_hand.is-dragging .hero_hand_item a {
+.hero_hand.is-dragging .hero_bc_item a {
   cursor: grabbing;
 }
 
 /* 2026-09-07：img 已被 <a> 包住 → 用後代選擇器（否則參考網站尺寸/scale 失效、圖過大） */
-.hero_hand_item img {
+.hero_bc_item img {
   width: var(--bc-hand-img-w);
   scale: 0.5;
   -webkit-user-drag: none;
@@ -92,7 +95,7 @@
   touch-action: pan-y;   /* 2026-10-29：與 <a> 一致（直向手勢交給瀏覽器捲動） */
 }
 
-.hero_hand.is-ready .hero_hand_item img {
+.hero_hand.is-ready .hero_bc_item img {
   transition: scale var(--bc-hand-ease);
 }
 
@@ -104,7 +107,7 @@
   transition: none;
 }
 
-.hero_hand.is-ready.is-dragging .hero_hand_item img {
+.hero_hand.is-ready.is-dragging .hero_bc_item img {
   transition: scale 0.18s ease-out;
 }
 
@@ -116,11 +119,11 @@
    window.BC_MEDIA_REVEAL，與標題文字同一套濾鏡）。
    定位完成後 JS 在兩個 frame 內移除 .is-snap，之後換張的旋轉／縮放過渡完全不受影響。 */
 .hero_hand.is-ready.is-snap .hero_hand_list,
-.hero_hand.is-ready.is-snap .hero_hand_item img {
+.hero_hand.is-ready.is-snap .hero_bc_item img {
   transition: none;
 }
 
-.hero_hand_item.-current img {
+.hero_bc_item.-current img {
   scale: 1;
 }
 
@@ -146,10 +149,11 @@
      1. 卡片底色高亮 → 照片放大：咖啡照是去背 PNG、底下是純黑品牌底，
         疊 10% 主題色肉眼看不到 ⇒ 改成 scale 放大（current 1 → 1.08、
         其餘 0.5 → 0.56），過渡時間與曲線沿用原站的 .5s / --common-ease。
-     2. 徽章改用品牌金 --bc-gold（白框、黑字，符合品牌色系統），
-        內容＝該杯咖啡名稱 ＋ view more（名稱由 bc-hand-hover.js 從
-        <a aria-label>／<img alt> 讀取）—— 原站只有 "view more"，
-        我們多顯示名稱，hover 就能看到這杯是什麼 ⇒ 「更多細節」。
+     2. 徽章改用品牌金 --bc-gold（品牌色系統），內容＝該杯咖啡名稱 ＋ Detail
+        （名稱由 bc-hand-hover.js 從 <a aria-label>／<img alt> 讀取）——
+        原站只有 "view more"，我們多顯示名稱，hover 就能看到這杯是什麼 ⇒「更多細節」。
+        2026-11-05（使用者指示）：文字改為 "Detail"，並移除白框（原站 border-2 白；
+        本專案改為 border: 0，只剩金底）⇒ .bc-hand-badge 的 border-radius 仍為 50%。
      3. 徽章 markup 在 templates/betweencoffee_delivery/index.html 的
         <section class="hero bc-brand-stage-hero"> 內（#bc-stage-hand-badge），
         只放在 section 直屬層級、不在任何會 transform 的容器裡
@@ -163,20 +167,29 @@
    特異度刻意低於 .hero_hand.is-ready.is-dragging／.is-snap 的規則
    （(0,4,1) > (0,2,2)）⇒ 拖曳中與第一次定位時仍以那兩條為準，不會互相打架。 */
 @media (hover: hover) and (pointer: fine) {
-  .hero_hand_item a:hover img {
+  .hero_bc_item a:hover img {
     scale: 0.56;
     transition: scale 0.5s cubic-bezier(0.22, 0.87, 0.5, 1);
   }
 
-  .hero_hand_item.-current a:hover img {
+  .hero_bc_item.-current a:hover img {
     scale: 1.08;
   }
 }
 
 /* ---- ② 跟著游標跑的圓形徽章 ----
-   left/top 由 JS 直接改（px、viewport 座標），translate(-50%,-50%) 讓圓心落在
-   游標上；縮放走獨立的 scale 屬性 ⇒ 位移即時、只有圓自己回彈（與原站相同做法）。 */
+   left/top 由 JS 直接改（px、viewport 座標），再用 translate 讓「圓心」落在游標的
+   右上方（--bc-hand-badge-dx／dy）；縮放走獨立的 scale 屬性 ⇒ 位移即時、只有圓自己
+   回彈（與原站相同做法）。
+   2026-11-05（使用者回報「hover 後手形游標遮住 DETAIL 文字」）：原站是圓心正對游標
+   （translate(-50%,-50%)）＋圓本身就是游標（cursor: none）；本專案保留系統手形游標，
+   若圓心壓在游標上，箭頭／手掌圖示正好蓋住正中央的 "DETAIL"。⇒ 圓心偏移到游標右上
+   （dx 30px／dy -32px）：游標落在圓的左下緣、文字區（中心 ±8px 高）不再被遮，
+   手形游標仍看得到（點照片跳詳情頁的可點性提示保留）。 */
 .bc-hand-badge {
+  /* 圓心相對游標的偏移：想讓圓貼回正中心就把兩者都設 0 */
+  --bc-hand-badge-dx: 30px;
+  --bc-hand-badge-dy: -32px;
   position: fixed;
   left: 0;
   top: 0;
@@ -190,13 +203,20 @@
   width: 108px;
   height: 108px;
   padding: 10px 12px;
-  border: 2px solid rgba(255, 255, 255, 0.9);
+  /* 2026-11-05（使用者指示）：移除白色外框（原 border: 2px solid rgba(255,255,255,.9)），
+     圓形只剩品牌金底 ⇒ 直徑不變（box-sizing: border-box），內容區左右各多 2px。 */
+  border: 0;
   border-radius: 50%;
   background: rgba(196, 155, 99, 0.92);   /* --bc-gold #c49b63 的 92% */
   color: #0e0e0e;                          /* --bc-bg：金底上的深字（對比 ≈ 7:1） */
   text-align: center;
   pointer-events: none;                    /* 徽章永不攔截點擊 → <a> 照常跳詳情頁 */
-  transform: translate(-50%, -50%);
+  /* 2026-11-05（使用者回報游標遮字）：圓心不再正對游標，改落在游標右上方，
+     讓系統手形游標停在圓的左下緣、不會蓋住正中央的 "DETAIL"。 */
+  transform: translate(
+    calc(-50% + var(--bc-hand-badge-dx)),
+    calc(-50% + var(--bc-hand-badge-dy))
+  );
   scale: 0;                                /* 對應原站的 scale-0（只有圓隱形，仍在文件流程外） */
   transition: scale 0.5s cubic-bezier(0.34, 1.92, 0.53, 0.7);
   will-change: scale;
@@ -206,29 +226,19 @@
   scale: 1;
 }
 
-.bc-hand-badge__name {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;                   /* 長名稱最多兩行（超過以省略號收尾） */
-  overflow: hidden;
-  max-width: 100%;
-  /* 與照片下方 caption（.bc-series-caption-name）同一套字：Josefin Sans ＋ 大寫 */
-  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
-  font-size: 0.75rem;                      /* 12px：108px 圓內兩行仍留白 */
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: normal;
-  text-transform: uppercase;
-  word-break: break-word;
-}
-
+/* 2026-11-05（使用者指示）：圓內只顯示 "Detail"、不再顯示該杯咖啡名稱
+   ⇒ 原本的 .bc-hand-badge__name（兩行 clamp、0.75rem）與 bc-hand-hover.js 讀取
+   <a aria-label>／<img alt> 的邏輯已一併移除；單行文字置中，字級放大到 0.8rem、
+   不再壓 0.66 透明度（單行小字太小會看不清），金底上的深字對比仍 ≈ 7:1。
+   同日晚（使用者指示「Detail 字體加粗 500」）：font-weight 500
+   （base.html 已載入 Josefin Sans wght@300;400;500;600;700，非合成粗體）。 */
 .bc-hand-badge__more {
   font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
-  font-size: 0.5rem;                       /* 8px */
+  font-weight: 500;                        /* 2026-11-05 使用者指示：加粗到 500 */
+  font-size: 0.8rem;                       /* 12.8px：圓內唯一一行 */
   line-height: 1.2;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0.66;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;               /* 內文 "Detail" → 畫面上顯示 DETAIL */
 }
 
 /* 使用者要求減少動態時：徽章直接出現／消失、照片放大也直接跳到位（不做回彈/過渡） */
@@ -237,8 +247,8 @@
     transition: none;
   }
 
-  .hero_hand_item a:hover img,
-  .hero_hand_item.-current a:hover img {
+  .hero_bc_item a:hover img,
+  .hero_bc_item.-current a:hover img {
     transition: none;
   }
 }

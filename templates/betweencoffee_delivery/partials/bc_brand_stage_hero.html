@@ -91,7 +91,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
         <h1 data-reveal="text" id="bc-stage-clock-brace-close" class="h1 bc-stage-clock-brace">}</h1>
         <div id="bc-stage-photo-ring" class="footer-time-inner">
           <div data-reveal="clip-down" class="footer-logo-cell">
-            <div class="footer-logo-list-wrap w-dyn-list">
+            <div class="hero-ring-list-warp w-dyn-list">
               <!-- 2026-10-14（使用者指示）：本格由「一次顯示一張的輪播照片」改為 GUNTE hero 的
                    環形照片列（.hero_hand）——**與 hero 同一顆整頁大圓**（--circle-radius:100vw）：
                    換張時整片扇形旋轉、current 置中、左右鄰居落在頁面兩緣（scale 0.5、低約 9.4vw），
@@ -116,16 +116,22 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                      咖啡照比例 1.429」＝ 193vw/ratio（≤991px 126vw/ratio）；圓心＝照片區的
                      水平中心＋垂直中心。以上全在 index.html 的 <style> 內以 #bc-stage-photo-ring
                      前綴設定（詳見該處 B1 註解）。 -->
+              <!-- 2026-11-05（使用者指示）：本格外層 .footer-logo-list-wrap 改名 .hero-ring-list-warp、
+                   環上每一格 .hero_hand_item 改名 .hero_bc_item（.hero_hand／.hero_hand_list 與
+                   .footer-logo-list 等 Webflow 舊 class 不動；CSS 本來就沒有
+                   .footer-logo-list-wrap 的規則，故只是語意改名，不影響版面）。
+                   about 頁的真頁尾（partials/bc_brand_stage.html）仍叫 .footer-logo-list-wrap
+                   —— 那裡裝的是 deco 標誌輪播，不是環形照片。 -->
               <div class="footer-logo-list">
                 <div class="hero_hand" data-bc-hand-ring>
                   <div id="bc-stage-photo-ring-list" class="hero_hand_list">
-                    <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}" aria-label="{{ hero_coffees.0.name }}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"/></a></div>
-                    <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}" aria-label="{{ hero_coffees.1.name }}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"/></a></div>
-                    <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}" aria-label="{{ hero_coffees.2.name }}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"/></a></div>
-                    <div class="hero_hand_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}" aria-label="{{ hero_coffees.3.name }}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"/></a></div>
-                    <div class="hero_hand_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}" aria-label="{{ hero_coffees.4.name }}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"/></a></div>
-                    <div class="hero_hand_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}" aria-label="{{ hero_coffees.5.name }}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"/></a></div>
-                    <div class="hero_hand_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}" aria-label="{{ hero_coffees.6.name }}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"/></a></div>
+                    <div class="hero_bc_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}" aria-label="{{ hero_coffees.0.name }}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"/></a></div>
+                    <div class="hero_bc_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}" aria-label="{{ hero_coffees.1.name }}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"/></a></div>
+                    <div class="hero_bc_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}" aria-label="{{ hero_coffees.2.name }}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"/></a></div>
+                    <div class="hero_bc_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}" aria-label="{{ hero_coffees.3.name }}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"/></a></div>
+                    <div class="hero_bc_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}" aria-label="{{ hero_coffees.4.name }}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"/></a></div>
+                    <div class="hero_bc_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}" aria-label="{{ hero_coffees.5.name }}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"/></a></div>
+                    <div class="hero_bc_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}" aria-label="{{ hero_coffees.6.name }}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"/></a></div>
                   </div>
                 </div>
               </div>

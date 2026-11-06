@@ -103,7 +103,7 @@
 > `static/js/bc-hand-ring.js`（`BC_HAND_RING.register(root, caption?)` / `goAll(i)` / `index()`；
 > 唯一索引來源＝hero 的 Splide，`register()` 會讓晚註冊者會合 ⇒ 載入順序無關、沒有輪詢或事件橋接），
 > hero 的 `updateSlideStates()` 改呼叫 `goAll()`（原 `rotateHeroHand()` 內容移入模組）；
-> 照片格 markup 改為 7 × `.hero_hand_item`（與 `#hero_hand_list` 同源）＋ 一組 7 筆
+> 照片格 markup 改為 7 × `.hero_bc_item`（與 `#hero_hand_list` 同源）＋ 一組 7 筆
 > 「名稱/highlight」（只有 `-current` 顯示；`bc-brand-stage.js` 只負責註冊）；
 > 照片格幾何（半徑/照片寬/圓心）在 `index.html` extra_css 逐斷點覆寫（本版為縮小版）、
 > `.footer-logo-cell` 與 `.footer-logo-list` 加 `overflow: clip`（本版已移除）。

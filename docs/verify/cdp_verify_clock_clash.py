@@ -235,7 +235,7 @@ CTX_JS = r"""
             inline:inl(list), transform:st(list,'transform'),
             imgW:list?getComputedStyle(list).getPropertyValue('--bc-hand-img-w'):null};
 """ + r"""
-  var items=list?list.querySelectorAll('.hero_hand_item'):[];
+  var items=list?list.querySelectorAll('.hero_bc_item'):[];
   out.items=[];
   for(var i=0;i<items.length;i++){
     var it=items[i], img=it.querySelector('img');
@@ -270,7 +270,7 @@ SEL_DIGITS = ("#bc-stage-clock-hours,#bc-stage-clock-minutes,"
               "#bc-stage-clock-colon-before-minutes,#bc-stage-clock-colon-after-minutes")
 SEL_BALL = ".tax-nav"
 SEL_WEATHER = "#bc-stage-weather"
-SEL_ITEM = "#bc-stage-photo-ring-list .hero_hand_item:nth-child(%d)"
+SEL_ITEM = "#bc-stage-photo-ring-list .hero_bc_item:nth-child(%d)"
 
 
 # ---------------------------------------------------------------- 像素工具（無 numpy，純 PIL）

@@ -7,7 +7,7 @@
      · #bc-stage-clock 內、{ 之前新增 <div id="bc-stage-weather" class="bc-stage-weather"
        data-reveal="clip-down"> ＋ 與 nav.html:33-48 逐字相同的 .weather（自帶 .weather--visible）。
      · 照片格 7 筆（2026-10-14 稍後再改為 GUNTE hero 的環形照片列縮小版 ——
-       .hero_hand / .hero_hand_item ＋ 一組 7 筆「名稱/highlight」，只有 -current 顯示）。
+       .hero_hand / .hero_bc_item ＋ 一組 7 筆「名稱/highlight」，只有 -current 顯示）。
   2. static/css/bc-weather.css
      · 幾何規則由 `#ftco-navbar .weather` 擴為 `#ftco-navbar .weather, #bc-brand-stage .weather`，
        所有尺寸改為 calc(原值 * var(--wc-scale, 1))（先例＝bc-reviews.css 的 --rv-scale）；
@@ -94,7 +94,7 @@
   E. 首頁 navbar 那顆不受影響：visibility hidden、.view 寬 80（≥992）/38（≤991，
      皆未縮放）、仍被填充（日期/溫度/icon）。
   F. 照片格（2026-10-14 改版：GUNTE hero 環形照片列縮小版 ＋ 單一「當前咖啡」文字）：
-     7 個 .hero_hand_item（每筆 alt 非空）＋ [data-bc-ring-caption] 內 7 筆
+     7 個 .hero_bc_item（每筆 alt 非空）＋ [data-bc-ring-caption] 內 7 筆
      [data-bc-ring-caption-item]，恰 1 筆 -current、name/highlight 非空、且與環的 -current
      同索引（顯示中的 name == 該筆 img alt）；文字區高度 = --bc-hero-caption-h（±1px）；
      照片區（.footer-logo-list）高度 = ≥992px 400vw/ratio（@1440 = 400.00）／
@@ -239,11 +239,11 @@ MEASURE_JS = r"""
 
   /* ---- F 照片格（2026-10-14 改版：環形照片列 ＋ 單一「當前咖啡」文字） ----
      照片格不再是「7 格輪播、每格一組名稱/highlight」，而是 GUNTE hero 的環形照片列
-     （7 個 .hero_hand_item）＋ 一組 7 筆的名稱/highlight（只有 -current 那筆顯示）。
+     （7 個 .hero_bc_item）＋ 一組 7 筆的名稱/highlight（只有 -current 那筆顯示）。
      故 F 改驗：環形筆數/alt、文字 7 筆且恰 1 筆顯示、該筆與環的 -current 同索引、
      文字高度＝--bc-hero-caption-h、照片區高度＝改動前照片高度、字級/顏色斷點。 */
   var ringItems = Array.prototype.slice.call(
-      document.querySelectorAll('#bc-stage-photo-ring .hero_hand_item'));
+      document.querySelectorAll('#bc-stage-photo-ring .hero_bc_item'));
   out.ring_count = ringItems.length;
   out.ring_alts = ringItems.map(function(el){
     var im = el.querySelector('img');
@@ -574,7 +574,7 @@ async def main():
 
 
             # ---------- F 照片列文字 ----------
-            # 照片格＝環形照片列（2026-10-14 改版）：7 個 .hero_hand_item ＋ 一組 7 筆文字，
+            # 照片格＝環形照片列（2026-10-14 改版）：7 個 .hero_bc_item ＋ 一組 7 筆文字，
             # 只有 -current 那筆顯示（索引由 GUNTE hero 的 Splide 推播；環形幾何/同步的細節由
             # docs/verify/cdp_verify_hero_coffee_photos.py 專責驗）。
             ring_alts = m.get("ring_alts") or []

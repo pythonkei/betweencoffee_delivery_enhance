@@ -2,7 +2,7 @@
 """CDP 驗證：首頁照片格（#bc-stage-photo-ring）＝ GUNTE hero 的「環形照片列」（與 hero 同一顆大圓）。
 
 2026-10-14（使用者指示）：照片格由「7 格輪播（一次只顯示一張）」改為與 GUNTE hero 共用的
-環形照片列 —— 同一組 class（.hero_hand / .hero_hand_list / .hero_hand_item）、同一份
+環形照片列 —— 同一組 class（.hero_hand / .hero_hand_list / .hero_bc_item）、同一份
 static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Splide index** 驅動
 （bc-gunte-hero.js 的 updateSlideStates → BC_HAND_RING.goAll）：圓盤旋轉 idx × −25°、
 -current 那張放大、其餘 0.5 倍。
@@ -49,7 +49,7 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
      隱藏→顯示 ≈1200ms、顯示當下 cur == 置中那杯）。
 
 檢查項目（A–F 每個 viewport 各一輪；G＝/about/ 反向守門；H＝互動）
-  A 結構：`#bc-stage-photo-ring` 內有 .hero_hand > #bc-stage-photo-ring-list > 恰 7 個 .hero_hand_item；
+  A 結構：`#bc-stage-photo-ring` 內有 .hero_hand > #bc-stage-photo-ring-list > 恰 7 個 .hero_bc_item；
     --angle 依序 -90/-65/-40/-15/10/35/60；每個含 <a href="/coffee/N/"> ＋ <img>（非 lazy）；
     文字列 [data-bc-ring-caption] 內恰 7 筆 [data-bc-ring-caption-item]；
     首頁已無舊輪播 hook（[data-stage-logo="item"] / "wrap"）；
@@ -157,12 +157,12 @@ PROBE_JS = r"""
   var area=cell?cell.querySelector('.footer-logo-list'):null;
   var hand=cell?cell.querySelector('.hero_hand'):null;
   var list=document.getElementById('bc-stage-photo-ring-list');
-  var items=list?Array.prototype.slice.call(list.querySelectorAll('.hero_hand_item')):[];
+  var items=list?Array.prototype.slice.call(list.querySelectorAll('.hero_bc_item')):[];
   var caption=cell?cell.querySelector('.footer-logo-caption'):null;
   var caps=Array.prototype.slice.call(
       document.querySelectorAll('#bc-stage-photo-ring [data-bc-ring-caption-item]'));
   var heroList=document.getElementById('hero_hand_list');
-  var heroItems=heroList?Array.prototype.slice.call(heroList.querySelectorAll('.hero_hand_item')):[];
+  var heroItems=heroList?Array.prototype.slice.call(heroList.querySelectorAll('.hero_bc_item')):[];
   var slides=document.querySelectorAll('.bc-gunte-hero .splide__slide');
   var active=document.querySelector('.bc-gunte-hero .splide__slide.state-active');
   var actIdx=-1;
@@ -530,7 +530,7 @@ async def main():
             bfw, bfh, bfl, bfc, bfr = EXPECT.get(w, (0, 0, 0, 0, 0))
 
             # ---------- A 結構 ----------
-            failures.append(check("A1 #bc-stage-photo-ring-list 內恰 7 個 .hero_hand_item",
+            failures.append(check("A1 #bc-stage-photo-ring-list 內恰 7 個 .hero_bc_item",
                                   m.get("itemCount") == 7, m.get("itemCount")))
             failures.append(check("A2 --angle 依序 -90/-65/-40/-15/10/35/60",
                                   [i.get("angle") for i in items] == ANGLES,

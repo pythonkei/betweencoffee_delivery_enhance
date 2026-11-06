@@ -84,7 +84,7 @@ MEASURE_JS = r"""
       ? getComputedStyle(items[0]).backgroundColor === 'rgba(0, 0, 0, 0)' : null;
   /* 2026-10-14：首頁的環形照片列（筆數；幾何/同步細節由
      docs/verify/cdp_verify_hero_coffee_photos.py 專責驗） */
-  out.ring_count = root.querySelectorAll('#bc-stage-photo-ring .hero_hand_item').length;
+  out.ring_count = root.querySelectorAll('#bc-stage-photo-ring .hero_bc_item').length;
   return out;
 })()
 """

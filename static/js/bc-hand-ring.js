@@ -65,7 +65,7 @@
    [2026-10-24 使用者指示]「bc-stage-photo-ring-list 第一個咖啡現在初始是從小到放大動畫，
      修改為 bc-stage-headline-fresh-beans 'Follow Your Rhythm' 文字相同的動畫」。
      · 原因：register() → go() 的第一次定位是在 .is-ready 已加上的狀態下做的 ⇒ 第 1 張
-       從 .hero_hand_item img 的預設 scale 0.5 過渡到 -current 的 scale 1（＝那段「放大」）。
+       從 .hero_bc_item img 的預設 scale 0.5 過渡到 -current 的 scale 1（＝那段「放大」）。
      · 修法：第一次定位期間改為同時加上 .is-snap（bc-hand-ring.css：把圓盤旋轉與 img 的
        scale 過渡關掉）⇒ 第 1 張直接以最終尺寸就位；定位完成後由 revealPhoto() 播放
        「與 Fresh / Beans 相同」的 goo 揭示（引擎＝bc-brand-stage.js 的 window.BC_MEDIA_REVEAL，
@@ -133,7 +133,7 @@
   function Ring(root, caption) {
     this.root = root;
     this.list = root.querySelector('.hero_hand_list');
-    this.items = this.list ? this.list.querySelectorAll('.hero_hand_item') : [];
+    this.items = this.list ? this.list.querySelectorAll('.hero_bc_item') : [];
     this.captionBox = caption || null;
     this.captions = caption ? caption.querySelectorAll('[data-bc-ring-caption-item]') : [];
     this.cur = -1;

@@ -160,12 +160,24 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      [本專案] 徽章改品牌金 --bc-gold，內容＝該杯咖啡名稱（讀 <a aria-label>）＋
        view more ⇒ hover 就看得到這杯是什麼；照片本身同時放大（CSS 在
        static/css/bc-hand-ring.css 檔尾）；hover 期間暫停 5s 自動輪播。
+     2026-11-05（使用者指示）：
+       ① 徽章內文 "view more" → "Detail"（.bc-hand-badge__more 仍為 uppercase，
+          畫面上顯示 DETAIL；要原樣顯示 Detail 就把該條 text-transform 拿掉）；
+          同日再指示：圓內「只顯示 Detail」，原本的咖啡名稱（.bc-hand-badge__name）
+          移除 ⇒ 徽章 markup 只剩這一個 span；
+       ② 移除徽章白色外框（.bc-hand-badge 的 border 已刪，圓形只剩品牌金底）；
+       ③ 環形照片格的類別名 .hero_hand_item → .hero_bc_item
+          （.hero_hand／.hero_hand_list 不動；HTML／CSS／JS 同步改名）；
+       ④ 照片格最外層 .footer-logo-list-wrap → .hero-ring-list-warp
+          （partials/bc_brand_stage_hero.html；CSS 沒有對應規則，純語意改名）。
      [為何放在這裡] 必須是 <section> 的直屬子節點、不在任何會 transform／filter
        的容器內，position:fixed 才不會被祖先變成相對定位（照片環所在的
        #bc-brand-stage 內有多層 transform）。about 頁沒有環形照片列，故不放。 -->
 <div id="bc-stage-hand-badge" class="bc-hand-badge" data-bc-hand-badge aria-hidden="true">
-  <span class="bc-hand-badge__name" data-bc-hand-badge-name></span>
-  <span class="bc-hand-badge__more">view more</span>
+  <!-- 2026-11-05（使用者指示）：圓內只顯示 "Detail"，不再顯示該杯咖啡名稱
+       （原本這裡還有一個 <span class="bc-hand-badge__name" data-bc-hand-badge-name>，
+       JS 會從 <a aria-label> 填入名稱；該 span 與對應的 JS／CSS 已一併移除）。 -->
+  <span class="bc-hand-badge__more">Detail</span>
 </div>
 </section>
 
@@ -427,13 +439,13 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
                 <div class="hero_hand">
                     <div id="hero_hand_list" class="hero_hand_list">
 
-                        <div class="hero_hand_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"></a></div>
-                        <div class="hero_hand_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"></a></div>
+                        <div class="hero_bc_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"></a></div>
+                        <div class="hero_bc_item" style="--angle:-65"><a href="{% url 'coffee' hero_coffees.1.id %}"><img src="{{ hero_coffees.1.get_index_image }}" alt="{{ hero_coffees.1.name }}"></a></div>
+                        <div class="hero_bc_item" style="--angle:-40"><a href="{% url 'coffee' hero_coffees.2.id %}"><img src="{{ hero_coffees.2.get_index_image }}" alt="{{ hero_coffees.2.name }}"></a></div>
+                        <div class="hero_bc_item" style="--angle:-15"><a href="{% url 'coffee' hero_coffees.3.id %}"><img src="{{ hero_coffees.3.get_index_image }}" alt="{{ hero_coffees.3.name }}"></a></div>
+                        <div class="hero_bc_item" style="--angle:10"><a href="{% url 'coffee' hero_coffees.4.id %}"><img src="{{ hero_coffees.4.get_index_image }}" alt="{{ hero_coffees.4.name }}"></a></div>
+                        <div class="hero_bc_item" style="--angle:35"><a href="{% url 'coffee' hero_coffees.5.id %}"><img src="{{ hero_coffees.5.get_index_image }}" alt="{{ hero_coffees.5.name }}"></a></div>
+                        <div class="hero_bc_item" style="--angle:60"><a href="{% url 'coffee' hero_coffees.6.id %}"><img src="{{ hero_coffees.6.get_index_image }}" alt="{{ hero_coffees.6.name }}"></a></div>
                     </div>
                 </div>
             </div>
@@ -916,8 +928,19 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      2026-11-03（使用者指示「移植 hub.ballaholic.jp 的 .embla hover 互動」）：
      檔尾新增「照片 hover 放大（@media (hover:hover) and (pointer:fine)）」＋
      「跟著游標跑的圓形徽章 .bc-hand-badge」（品牌金、回彈 .5s、200ms 收尾延遲）
-     ⇒ 版號升為 ?v=20261103c。 -->
-<link rel="stylesheet" href="{% static 'css/bc-hand-ring.css' %}?v=20261103c">
+     ⇒ 版號升為 ?v=20261103c。
+     2026-11-05（使用者指示）：照片格類別名 .hero_hand_item → .hero_bc_item
+     （本檔 15 處選擇器）＋ 徽章移除白色外框（border 刪除）
+     ⇒ 版號升為 ?v=20261105a。
+     2026-11-05 稍後（使用者指示）：徽章圓內只留 "Detail"、移除咖啡名稱
+     （刪掉 .bc-hand-badge__name 規則，__more 字級 0.5rem → 0.8rem）
+     ⇒ 版號升為 ?v=20261105b。
+     2026-11-05 晚（使用者指示「Detail 字體加粗 500」）：__more 加 font-weight: 500
+     ⇒ 版號升為 ?v=20261105c。
+     2026-11-05 晚（使用者回報「hover 後手形游標遮住 DETAIL 文字」）：徽章圓心由
+     正對游標改為偏移到游標右上方（--bc-hand-badge-dx 30px／dy -32px）
+     ⇒ 版號升為 ?v=20261105d。 -->
+<link rel="stylesheet" href="{% static 'css/bc-hand-ring.css' %}?v=20261105d">
 <!-- 2026-10-09（使用者指示）：首頁 footer 由 base.html 的靜態 ftco 頁尾改為 about 頁的
      BC 動態模組（原 #bc-bg-footer，2026-10-18 更名 #bc-brand-stage）——單一來源；
      全樣式 scoped 於 #bc-brand-stage，故與 about 頁共用同一份 CSS 不會互相影響。
@@ -979,15 +1002,25 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        移除後只剩 5s 自動輪播 ⇒ bc-hand-ring.js 新增 bindDrag()（Pointer Events 1:1 跟手、
        放手吸附最近一格、手勢期間暫停自動輪播、放手後重新計時 5s）；
        點照片仍是 <a> 跳詳情頁（位移 < 6px 不介入）。bc-brand-stage.js 未動。
-       ⇒ 版號：bc-hand-ring.js ?v=20261024a 升為 ?v=20261029a（CSS 同步）。 -->
-<script src="{% static 'js/bc-hand-ring.js' %}?v=20261029a"></script>
+       ⇒ 版號：bc-hand-ring.js ?v=20261024a 升為 ?v=20261029a（CSS 同步）。
+     2026-11-05（使用者指示）：照片格類別名 .hero_hand_item → .hero_bc_item
+       （本檔的 ITEM 查詢字串同步改）⇒ 版號升為 ?v=20261105a。 -->
+<script src="{% static 'js/bc-hand-ring.js' %}?v=20261105a"></script>
 <!-- 2026-11-03（使用者指示）：環形咖啡照的 hover 互動（移植 hub.ballaholic.jp 的 .embla）——
-     跟著游標跑的圓形徽章（顯示該杯咖啡名稱 ＋ view more）、照片 hover 放大、
-     hover 期間暫停 5s 自動輪播。樣式在 bc-hand-ring.css 檔尾（.bc-hand-badge），
+     跟著游標跑的圓形徽章（顯示該杯咖啡名稱 ＋ view more；2026-11-05 起只顯示 Detail）、
+     照片 hover 放大、hover 期間暫停 5s 自動輪播。樣式在 bc-hand-ring.css 檔尾（.bc-hand-badge），
      徽章 markup 在本頁 <section class="hero bc-brand-stage-hero"> 內
      （#bc-stage-hand-badge）；觸控裝置不啟動（與原站一致）。
-     必須排在 bc-hand-ring.js 之後（會呼叫 BC_HAND_RING.startAuto／stopAuto）。 -->
-<script src="{% static 'js/bc-hand-hover.js' %}?v=20261103a"></script>
+     必須排在 bc-hand-ring.js 之後（會呼叫 BC_HAND_RING.startAuto／stopAuto）。
+     2026-11-05（使用者指示）：徽章文字 "view more" → "Detail"；照片格類別名
+     .hero_hand_item → .hero_bc_item（本檔 ITEM_SELECTOR 同步改）
+     ⇒ 版號 ?v=20261103a 升為 ?v=20261105a。
+     2026-11-05 稍後（使用者指示「圓形內部互動顯示的文字僅顯示 Detail，無需咖啡名稱」）：
+     JS 不再讀 <a aria-label> 填入名稱（labelOf／NAME_SELECTOR 已刪）
+     ⇒ 版號升為 ?v=20261105b。
+     2026-11-05 晚（使用者回報「手形游標遮住 DETAIL 文字」）：本檔僅更新註解
+     （圓心偏移改在 CSS 的 --bc-hand-badge-dx／dy），仍照規矩升版 ⇒ ?v=20261105c。 -->
+<script src="{% static 'js/bc-hand-hover.js' %}?v=20261105c"></script>
 <!-- 2026-09-11：複製版 .feed（.feed--video）底層影片載入/播放（IntersectionObserver） -->
 <script src="{% static 'js/bc-feed-video.js' %}?v=20260916a"></script>
 <!-- 2026-10-25（使用者指示）：bc-steps-rive.js 隨四步 Rive 圖示列移至 about.html
