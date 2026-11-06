@@ -156,6 +156,17 @@
 .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tr"] { --cb-out: -3%; }
 .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="mr"] { --cb-out: 5%; }
 .bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="br"] { --cb-out: 2%; }
+
+/* 2026-11-06（使用者指示）：個別落點做像素級微調 ——
+     tl 左上 → 右移 4px
+     tr 右上 → 上移 6px ＋ 右移 6px
+   用 margin 偏移，不改上方 left / top 的 %：① 手機（≤767.98px）的 top 由
+   下方 media query 另外給值，margin 不受影響 → 桌機／手機同步生效；
+   ② 不影響 --cb-out 各落點「刻意錯開」的相對關係。
+   同時移動氣泡（.img）與頭部圖章（.blowing::after），因為兩者都掛在
+   這個錨點框底下。要回滾只需刪掉這兩行。 */
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tl"] { margin-left: 4px; }
+.bc-photo-comment .bc-coffee-comment .staff-comment[data-pos="tr"] { margin-left: 6px; margin-top: -6px; }
 /* v3（2026-09-13）幾何基準與各斷點實測（保留紀錄）：
    氣泡水平置中於錨點框（寬 1.2rem）→ 氣泡左緣 = left + 0.6rem − 半個氣泡寬；
    對齊目標為杯外留白 0.5fs（≈6.5~8.5px）。因 fs / rem 隨斷點變化，
