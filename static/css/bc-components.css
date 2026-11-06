@@ -4530,3 +4530,33 @@ a.member-nav-item span { overflow: hidden; text-overflow: ellipsis; }
 .ftco-navbar-light {
   z-index: 100;
 }
+
+/* ===== 2026-11-05：coffee / bean 詳情頁「左右欄間距」加寬（使用者指示） =====
+   問題（1440px 實測，容器 1140 → 兩欄各 546）：
+     /bean/x/  方形商品圖把左欄塞滿（516×516）→ 照片右緣到右欄文字僅 63px；
+               右側 staff-comment 氣泡（pattern-2）再往右凸 → 氣泡右緣距文字只剩 28px。
+     /coffee/x/ 1080–1199 斷點（容器 960）→ 氣泡右緣距文字只剩 7px（最擠）。
+   解法（使用者選定＝放寬容器，不改照片尺寸、不加 padding）：
+     ≥1200px ：.container 1140 → 1320（兩欄各 636）
+     992–1199：.container  960 → 1140（兩欄各 546；視窗 <1140 時即滿寬）
+   為何安全：
+     1. 照片尺寸由 style-custom.css 的 max-width / max-height 決定
+        （咖啡 88.825% + 限高 458；豆 100% + 限高 516）→ 容器變寬時照片不變大，
+        只是左右黑留白變多，間距自然變寬。
+     2. 氣泡覆蓋層（bc-coffee-comment.css）以 aspect-ratio + translate(-50%,-50%)
+        貼齊「照片」而非 .img-box → 自動跟隨，不需要重測 bubble_safe_left/right。
+     3. ftco-section-single-product 全站只有 coffee.html:39 與 bean.html:38 兩個
+        section 使用 → navbar / footer / 菜單頁 / cart / about 完全不受影響。
+     4. <992px 為上下堆疊版面 → 不套用。
+   回滾：刪除本區塊即可。 */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .ftco-subpage-section.ftco-section-single-product > .container {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ftco-subpage-section.ftco-section-single-product > .container {
+    max-width: 1320px;
+  }
+}

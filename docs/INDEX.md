@@ -40,6 +40,10 @@
 | `docs/archive/04_SYSTEM_STATE_history_202607-202609.md` | 2026-07~09 系統狀態歷史（195K） | 同上 |
 | `docs/archive/task_progress_20261024_issue59_bean_bubbles.md` | #59 咖啡豆詳情頁氣泡文字完整記錄（2026-10-25 從 `task_progress.md` 移出） | 追查氣泡欄位／migration `0081`–`0083` 細節 |
 | `docs/archive/task_progress_20261104_done_rows.md` | 2026-10-24 ~ 10-28 一行式完成紀錄（2026-11-04 從 `task_progress.md` 移出，控制 11.7K 預算） | 追查 #58~#61／SERIES 字型等舊項目 |
+| `docs/archive/task_progress_20261105_pushed_batches.md` | about 首屏 sticky MV／首頁製程 `[2b-2]`／#61 推薦雙卡／#59–#60 摘要（2026-11-05 從 `task_progress.md` 移出） | 追查已 push 批次參數與驗證值 |
+| `docs/archive/task_progress_20261105_sticky_mv_details.md` | about 首屏 sticky 影片＋產品照輪播的完整細節（sticky 機制／輪播參數／踩雷） | 改 `bc-sticky-mv` 前先讀 |
+| `docs/archive/task_progress_20261105_weather_navbar.md` | navbar 天氣模組手機／平板位移的根因與舊值對照 | 再動 `bc-weather.css` 時比對 |
+| `docs/archive/task_progress_20261105_baker_ring_badge.md` | 氣泡頭像換 `baker_01–04.svg`（box 換算）＋首頁環形照片列改名／hover 徽章 | 再動 `bc-coffee-comment.css`／`bc-hand-ring.css` 時比對 |
 | `docs/reports/**`（47 份） | 2026 年一次性「完成報告／遷移報告／優化方案」 | 只 `grep` 關鍵字 |
 | `docs/*.md`（頂層 20+ 份：`*完成報告`、`*修復報告`、`*清理總結`、`MCP-*`、`Memory-Bank-*`） | 一次性報告與 MCP 安裝紀錄 | 只 `grep` 關鍵字 |
 
