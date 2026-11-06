@@ -64,31 +64,71 @@
   visibility: visible;
 }
 
-/* ---- 與 c-attract（右側虛線/Order 按鈕）中心點對齊（2026-08-26 需求）
-   weather 水平中心對齊 Order 按鈕視覺中心（2026-09-16 前同位置為 #borders 右側虛線）。
-   位移 = weather centerX − 虛線 centerX（weekday 加大後 768+ 容器 84px / 移動端 60px）：
-     ≥768px       84px 容器、虛線 right:65px → 需左移 9px
-     576–767.98px 60px 容器、虛線 right:36px → 需右移 8px
-     ≤575.98px    60px 容器、虛線 right:32px → 需右移 12px
-   使用 transform（不影響 flex 佈局與 navbar 高度）
-   （2026-10-14：位移是為了對齊 navbar 右側的 Order 按鈕，hero 那顆不需要
-    → 四條斷點規則維持 #ftco-navbar 前綴。） */
+/* ---- 中心線對齊 navbar 右側浮動列（浮動購物車 → Order 長條 → 個人圓鈕）----
+   【2026-11-05 第二版】使用者複驗：「手機端仍然位移，應該是與 bc-floating-cart 垂直對齊」
+   → 對齊基準從「右緣」改為**中心點 = 浮動購物車的垂直軸心**。
+   第一版用「weather 右緣 = .bc-attract-buy 右緣」推固定 translateX（−11／+3／+5px），
+   在平板（weather 盒寬 67.4px）剛好等於軸線對齊，但手機端 weather 盒寬只有 38px，
+   右緣齊平 ⇒ 中心點落在軸心右側 8px（≤767.98）／6px（≤575.98）
+   → 目視就是「天氣沒有跟下面的購物袋同一條線、往右偏」。
+
+   [軸心值] 浮動購物車 = --bc-fc-right ＋ 44px 點擊盒的一半（bc-components.css:1526-1690）：
+       ≥992px        66px（--bc-fc-right 44 + 22）
+       768–991.98px  60px（--bc-fc-right 38 + 22）
+       ≤767.98px     39px（--bc-fc-right 17 + 22）
+       ≤575.98px     35px（--bc-fc-right 13 + 22）
+   （實測 1440／1024／991／768／767／575／390／360 的購物袋中心距右緣逐值吻合。）
+
+   [位移量] weather 是 .container（padding-right: 15px）的 flex item，
+   未位移時右緣 = 100vw − 15px：
+     translateX = 15px − 軸心 + 50%
+   其中 50% ＝ 元素自身寬度的一半（CSS transform 的百分比以自身 border-box 為基準）
+   ⇒ 溫度位數、日期字串變長變短時仍自動置中，不必逐斷點硬編固定值。
+
+   [實測 before → after]（中心點距右緣／軸心）：
+     1440  67.2 → 66.0／66     1024  67.2 → 66.0／66
+     991   59.7 → 60.0／60     768   59.7 → 60.0／60
+     767   31.0 → 39.0／39     575   29.0 → 35.0／35
+     390   29.0 → 35.0／35     360   29.0 → 35.0／35
+
+   ⚠ 耦合：軸心值來自 bc-components.css 的 --bc-fc-right（浮動購物車）與
+     bc-slideout-cart.js 的 inline 定位（量 Buy 長條後寫入同一組值）；
+     任一邊調整，這裡的 --bc-weather-axis 必須同步。
+   ⚠ 只作用於 #ftco-navbar；首頁 hero 那顆（#bc-brand-stage .weather）不需對齊浮動列。
+   使用 transform（不影響 flex 佈局與 navbar 高度）。 */
 #ftco-navbar .weather {
-  transform: translateX(-11px);
+  --bc-weather-axis: 66px;
+  transform: translateX(calc(15px - var(--bc-weather-axis) + 50%));
 }
-@media (min-width: 768px) and (max-width: 991.98px) {
+
+@media screen and (min-width: 768px) and (max-width: 991.98px) {
   #ftco-navbar .weather {
-    transform: translateX(-20px);
+    --bc-weather-axis: 60px;
   }
 }
-@media (min-width: 576px) and (max-width: 767.98px) {
+
+/* ---- ≤767.98px：先把天氣推回 navbar 右側（位移的另一半原因）----
+   2026-11-05 一併修掉：bc-components.css:2975-2978 在 ≤767.98px 把
+   `.ftco_navbar .container` 設為 `justify-content: initial`（原本是為了「logo 與漢堡
+   水平中心點對齊」），但漢堡自 2026-09-21 起全站 `display: none`
+   （bc-attract.css:52-54）→ 該斷點 container 只剩 [logo][weather] 兩個 flex item，
+   失去 ≥768px 的 space-between 後 weather 緊貼 logo 右緣
+   （實測 390px：weather x=166.9、右緣 204.9，就在 logo 字母旁邊）。
+   about 頁那顆標了 .weather--visible，補 margin-left: auto 推回 container 右緣，
+   再由上方 translateX(15px − 軸心 + 50%) 把中心點對到浮動購物車軸心。
+   ⚠ 只作用於 .weather--visible（about 頁）；其他頁面那顆 visibility:hidden 但仍佔位，
+     行為不變，也避免動到全站 bc-components.css 的既有規則。 */
+@media screen and (max-width: 767.98px) {
+  #ftco-navbar .weather.weather--visible {
+    margin-left: auto;
+  }
   #ftco-navbar .weather {
-    transform: translateX(-3px);
+    --bc-weather-axis: 39px;
   }
 }
 @media screen and (max-width: 575.98px) {
   #ftco-navbar .weather {
-    transform: translateX(1px);
+    --bc-weather-axis: 35px;
   }
 }
 
