@@ -18,7 +18,7 @@
 | About 首屏影片 | ✅ 多層輪播 | 2026-11-06 起 `/about/` 的 `.mv-video` 最多 6 層（`views.MV_MAX`／片單 6 支）、每次載入洗牌、播到剩 `0.75s` 讓下一層交叉淡入 0.6s；片單＝`views.MV_VIDEOS`（末 3 支 11-06 追加：`index_hero_bg.mp4`／`bean_bg.webm`／`13687671-hd_720_1280_60fps.mp4` 直式） |
 | 測試 | ⚠️ 不足 | 覆蓋率低（以 `docs/verify/` CDP 腳本補前端驗證） |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
-| 部署（Render） | ⚠️ 部署落後 47 筆 | 現行 `live`＝deploy `dep-dbkpv7tg1s2s73df3leg`／commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-04 Render API 複驗）。`origin/main` 尖端＝`69c5cb51`（2026-11-06）⇒ **待部署 `c3f7509c..origin/main`（47 筆）**（11-04 ~ 11-06 累積：about 首屏 sticky 影片與三段、`bc-catch` 字輪、`bc-popeye50` 回到首屏、詳情頁容器加寬／`baker` 頭像、首頁環形照片列改名與徽章、navbar 天氣對齊、首屏影片多層輪播 → 追加 3 支成 6 支 → 整組換 `hero_00`~`hero_06` 依序 7 支＋黑遮罩改 70%）。**autoDeploy＝off，push 不會觸發部署** | 
+| 部署（Render） | ⚠️ 部署落後 47 筆（功能 commit 計至 `fdd2b236`） | 現行 `live`＝deploy `dep-dbkpv7tg1s2s73df3leg`／commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-04 Render API 複驗）。`origin/main` 尖端＝`69c5cb51`（2026-11-06）⇒ **待部署 `c3f7509c..origin/main`（47 筆）**（11-04 ~ 11-06 累積：about 首屏 sticky 影片與三段、`bc-catch` 字輪、`bc-popeye50` 回到首屏、詳情頁容器加寬／`baker` 頭像、首頁環形照片列改名與徽章、navbar 天氣對齊、首屏影片多層輪播 → 追加 3 支成 6 支 → 整組換 `hero_00`~`hero_06` 依序 7 支＋黑遮罩改 70%）。**autoDeploy＝off，push 不會觸發部署** | 
 | 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`0c4189fe`（2026-11-04 共 4 筆：`0bd7172d` 三段 grid 修正、`e9bdefdb` 補齊 10-28 起累積未提交前端（製程模組／`bc-catch.css`／舞台天候列／拖曳）、`7251018f`／`0c4189fe` docs 記憶文件同步與版本狀態收尾）；本機 `main`＝`origin/main`、工作區乾淨（僅 `.gitignore` 排除的本機暫存素材）。複驗一律 `git log -1`／Render API，不寫死文件 hash |
 
 ## 資料庫現狀
