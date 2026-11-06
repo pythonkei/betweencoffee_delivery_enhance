@@ -32,10 +32,11 @@
 
 > ℹ️ 生產 DB 連線：2026-10-23 曾回 `ENOTFOUND`（tenant `postgres.tmxvuwadktvfjtawckib`）導致部署失敗，但 2026-10-24 15:43Z 的手動部署（`a732cc28`）**成功且 live** ⇒ 連線已恢復。生產 migration 進度請以該次部署後的 `eshop/migrations` 記錄為準；本機 MCP 的兩個 PostgreSQL 連線仍是同一顆本地庫（`0081`–`0083` applied 時間戳同為 `2026-10-24T06:03:31Z`），不可當作生產現況。
 
-## 近期變更（最近 13 筆，一行式）
+## 近期變更（最近 14 筆，一行式）
 
 | 日期 | 內容 |
 |---|---|
+| 2026-11-06 | `/about/` **重新載入 `bc-popeye50` 字輪並改置於 `#bc-sticky-mv` 正下方**（11-03 起停用的模組回歸）：只改 `about.html` 三處（extra_css 連結／section markup 插在 sticky-mv 收尾之後／`defer` JS 緊接 `bc-sticky-mv.js`）；CSS／JS 檔未改 ⇒ 沿用 `?v=20261102f`／`?v=20261102c`。實測 DOM 順序 sticky-mv→popeye50→series、gap 0；1440／390 無水平溢出、字輪自動旋轉＋中心連結導頁正常、sticky 影片不受影響 |
 | 2026-11-04 | `/about/` 首屏 `bc-sticky-mv` 三段（`.mv-stage`）改回品牌舞台 **7 欄 grid 明確格位**（原 flex 堆疊位置與 about 頁不同；fresh `1/3/2/6`、roasted `2/4/3/7`＋8px、marquee `2/3/3/5` 同列靠左；≤991px 6 欄覆寫），字級改原站流體公式（h1 `90vw/14.4`、p1 `14vw/14.4`）；`bc-sticky-mv.css?v=20261104c`（`0bd7172d`） |
 | 2026-11-04 | 補齊 10-28 起累積未提交前端（`e9bdefdb`）：首頁「咖啡豆製程」模組（`bc-home-service.{css,js}`＋partial＋`make_hs_images.py`＋`images/home-service/*`）、`/about/` 字體輪播 `bc-catch.css` **入庫**（此檔先前只在 about.html 被引用、未 commit ⇒ 正式站 404）、品牌舞台 `.footer-time` 8→10 欄（天氣移到 `{` 左側，欄10 鏡像留白）＋天氣 `z-index:3`、capabilities `--cap-scale` 等比放大＋置中、環形照片列左右拖曳（`bc-hand-ring.js bindDrag()`）、`/bean/<id>/` `.bc-staff` 字級 17／16／16、`.gitignore` 排除 `hero_bg.mp4`（81MB 未引用）等暫存大檔 |
 | 2026-11-03 | `/about/` 首屏改 **sticky 影片＋產品照弧形輪播**（移植 yurumaru.life `.page-top__mv__wrap`；`bc-sticky-mv.{css,js}`、`static/media/hk_topshot-720p.mp4` 4.4MB＋poster），取代 11-02 的 popeye50 字輪（舊檔保留、不再載入）：`--mv-len:200vh`、`--mv-text-h:64vh`、原生 JS 重寫 Splide（per 3/1、autoplay 4s、前後各一組複本無縫循環）；同日修 loop 歸位抖動（`jump()` 加 `.is-jumping` 同關過渡）與滑鼠拖曳被原生 `dragstart` 中斷（`e.preventDefault()`），並在產品列下方加品牌舞台三段（`e2a5d747`／`ef98d37e`） |

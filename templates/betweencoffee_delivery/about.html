@@ -18,6 +18,11 @@
          JS 被停用時這段還原為可見，否則商品會整片消失。 -->
     <style>#bc-sticky-mv .page-top__mv__product { opacity: 1 !important; }</style>
 </noscript>
+<!-- 2026-11-06（使用者指示）：重新載入 popeyemagazine.jp/50interviews/ 字輪模組（bc-popeye50）
+     → 位置＝#bc-sticky-mv 正下方（2026-11-03 導入 sticky 影片首屏時曾自本頁移除，
+       檔案 static/css/bc-popeye50.css / static/js/bc-popeye50.js 一直保留）。
+     檔案自移除後未改動 ⇒ 沿用當時版號 ?v=20261102f（CSS）／?v=20261102c（JS）。 -->
+<link rel="stylesheet" href="{% static 'css/bc-popeye50.css' %}?v=20261102f" />
 <!-- About 頁面 SERIES 滑桿 -->
 <link rel="stylesheet" href="{% static 'css/bc-series.css' %}?v=20261102b" />
 <!-- productFv/US 區塊的 blob 遮罩樣式 -->
@@ -198,6 +203,51 @@
             </div>
         </div>
     </div>
+</section>
+
+
+<!-- 2026-11-06（使用者指示）：重新顯示 popeyemagazine.jp/50interviews/ 字輪模組，
+     並改放在 #bc-sticky-mv 正下方（原本 2026-11-02 是在頁面最上方、被 sticky 影片取代後移除）。
+     ① loader：細線伸出後年份 2020→2026 沿線滾動、抹除、年份滑到角落（時間軸同原站）
+     ② 字輪：咖啡品名繞圈自動慢轉，可滑鼠滾輪／拖曳旋轉（含慣性），中心圖文跟著換
+     資料來源＝下方 #bc-popeye50-data（About view 以 series_coffees 組出，context 仍保留）
+     ③ 中心（照片＋品名）＝目前高亮咖啡的連結 → 該咖啡詳情頁
+        （href 由 JS 依 wheel_items[].url 同步；拖曳轉字輪不會誤觸導頁）
+     樣式：static/css/bc-popeye50.css（本頁 extra_css）／腳本：static/js/bc-popeye50.js（extra_scripts）
+     註：模組 height:100vh＋overflow:hidden＋isolation:isolate，loader 是自身範圍內的
+         position:absolute → 移到第二屏不會覆蓋上方 sticky 影片，也不會撐出水平捲軸。 -->
+<section class="bc-popeye50 is-loading" data-year-start="2020" data-year-end="2026" aria-label="Between Coffee 咖啡字輪">
+    <div class="cw-loader" aria-hidden="true">
+        <div class="cw-loader-line"><div class="cw-loader-line-fill"></div></div>
+        <div class="cw-loader-year cw-loader-start-year">2020</div>
+        <div class="cw-loader-year cw-loader-moving-year">2020</div>
+    </div>
+
+    <p class="cw-title-sub"><b>一杯咖啡<br>一段留白</b></p>
+
+    <div class="cw-stage">
+        <div class="cw-wheel-hitarea" aria-hidden="true"></div>
+        <div class="cw-center" aria-live="polite">
+            {% if series_coffees %}
+            <a class="cw-center-link" href="{% url 'coffee' product_id=series_coffees.0.id %}"
+               aria-label="{{ series_coffees.0.highlight|default:series_coffees.0.name }}：前往商品詳情頁">
+            {% else %}
+            <a class="cw-center-link">
+            {% endif %}
+                <div class="cw-center-img-wrap">
+                    <picture class="cw-center-picture">
+                        <source class="cw-center-source-webp" type="image/webp" />
+                        <img class="cw-center-img" alt="" decoding="async" draggable="false" />
+                    </picture>
+                </div>
+                <div class="cw-center-name"></div>
+            </a>
+        </div>
+        <p class="cw-empty" hidden>咖啡準備中。</p>
+        <div class="cw-wheel" aria-hidden="true"></div>
+    </div>
+
+    {{ wheel_items|json_script:"bc-popeye50-data" }}
 </section>
 
 
@@ -1530,6 +1580,9 @@
 {% block extra_scripts %}
 <!-- 2026-11-03（使用者指示）：yurumaru.life 首屏 sticky 影片 + 產品列輪播（原生 JS，無 Splide） -->
 <script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261104d"></script>
+<!-- 2026-11-06（使用者指示）：popeyemagazine.jp/50interviews/ 字輪模組（bc-popeye50）重新啟用
+     → 置於 #bc-sticky-mv 正下方；檔案未改動，沿用 ?v=20261102c。 -->
+<script defer src="{% static 'js/bc-popeye50.js' %}?v=20261102c"></script>
 <!-- About 頁面 SERIES 滑桿：滾動時標題模糊 -->
 <script src="{% static 'js/bc-series.js' %}?v=20261102b"></script>
 <!-- hakujuji csBlock__leader：逐字亮起動畫 -->
