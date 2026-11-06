@@ -26,7 +26,8 @@
      原站 .lead (MFW-Koburina)   → Noto Serif TC（品牌標題字）
      原站 .p-button              → .bc-btn.bc-btn-secondary（bc-components.css）
      原站背景壓暗 #3e3e3e × multiply × var(--value-op)[JS 漸變]
-        → 固定 rgba(0,0,0,.8) 黑色覆蓋層（2026-11-05 使用者指定 80%；不移植漸變）
+        → 固定 rgba(0,0,0,.7) 黑色覆蓋層（2026-11-06 使用者指定 70%；
+          2026-11-05 原為 80%；不移植漸變）
      原站 .sticky-bg 無底色      → 補 background:var(--bc-bg)（蓋掉 bc-rotate-mau 的 z-index:-1 透出）
 
    [首屏不閃動的關鍵]（2026-11-04 修「初始顯示時產品列往下掉」）
@@ -130,7 +131,8 @@
     position: absolute;
     inset: 0;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.8);
+    /* 2026-11-06（使用者指示「黑色圖層覆蓋視頻不透明度改為 70%」）：.8 → .7 */
+    background: rgba(0, 0, 0, 0.7);
 }
 
 /* ===== 內容層（負 margin 拉回覆蓋影片） ===== */

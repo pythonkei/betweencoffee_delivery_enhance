@@ -11,7 +11,7 @@
      → 位置＝.rotate-mau 之後、SERIES 之前
      結構：.sticky-bg__bg（影片 sticky 釘住一屏）＋ .sticky-bg__content（margin-top:-100vh 覆蓋）
      參數：Splide perPage3/gap10vw/padding14vw/autoplay4000/1750ms，斷點 680 → 1 張 -->
-<link rel="stylesheet" href="{% static 'css/bc-sticky-mv.css' %}?v=20261106a" />
+<link rel="stylesheet" href="{% static 'css/bc-sticky-mv.css' %}?v=20261106b" />
 <noscript>
     <!-- 產品列在 CSS 預設 opacity:0，等 bc-sticky-mv.js 定位完成才加 .is-mv-ready 淡入
          （避免 JS 執行前先畫出 translateY(-18%) 的錯誤位置 → 使用者回報的「往下移動」）。
@@ -93,16 +93,15 @@
         點產品圖 → 該咖啡詳情頁（拖曳後不會誤觸，見 bc-sticky-mv.js）
      資料來源＝About view 的 mv_coffees（首屏 5 筆：series_coffees 排除 MV_EXCLUDE_IDS，
      2026-11-04 起排除 #7 Nice Step；下方 SERIES 括號滑桿仍用 series_coffees 6 筆）
-     影片：static/media/hero_bg_v2.webm（2026-11-05 使用者指定；1280×720 / VP8 / 30fps / 11.2s / 3.4MB）
-           ＋後備 static/media/hero_bg-720p.mp4（1280×720 / 16.8s，由 static/images/hero_bg.mp4
-           3840×2160 / 40Mbps / 81MB 轉檔；原檔已列 .gitignore 不入庫）
-           用 <source> 而非 src：不吃 WebM 的瀏覽器（部分 Safari）自動退回 mp4，不會變黑畫面
-          poster：static/images/hero_bg_v2-poster.jpg（v2 第 2 秒截圖；僅影片解碼前顯示）
+     影片：static/media/hero_00.webm ~ hero_06.webm（2026-11-06 使用者指定；七支 webm
+           依檔名順序輪播，清單在 views.MV_VIDEOS，層數上限 views.MV_MAX＝7）
+           用 <source type="video/webm">：不吃 WebM 的瀏覽器（很舊的 Safari）會顯示品牌黑底
+          poster：本輪不設（舊的 images/hero_bg_v2-poster.jpg 是舊影片截圖，內容不符）
      2026-11-06（使用者指示）：影片從「單支」升級為「多支輪播」（移植 weekday.co.jp 首頁
           .p-hero__videos：多層 <video> 疊放，播到剩 0.75s 時下一層淡入，0.6s 過場）。
           ① 這裡只渲染「第 0 層」，檔名來自 About view 的 mv_videos.0（＝views.MV_VIDEOS 第一筆）；
              保留 autoplay/muted/loop／poster ⇒ JS 沒跑時與舊版行為完全相同。
-          ② 播放清單其餘筆數由 json_script 帶給 bc-sticky-mv.js，JS 洗牌後動態建立
+          ② 播放清單其餘筆數由 json_script 帶給 bc-sticky-mv.js，JS「依清單順序」動態建立
              第 1～N 層（上限 views.MV_MAX）並接管播放；換影片改 views.MV_VIDEOS，
              不要在模板寫死檔名。⚠ 換檔請用新檔名（WhiteNoise 快取 1 年）。 -->
 <section id="bc-sticky-mv" aria-label="Between Coffee 首屏">
@@ -1589,7 +1588,7 @@
 
 {% block extra_scripts %}
 <!-- 2026-11-03（使用者指示）：yurumaru.life 首屏 sticky 影片 + 產品列輪播（原生 JS，無 Splide） -->
-<script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261106b"></script>
+<script defer src="{% static 'js/bc-sticky-mv.js' %}?v=20261106c"></script>
 <!-- 2026-11-06（使用者指示）：popeyemagazine.jp/50interviews/ 字輪模組（bc-popeye50）重新啟用
      → 置於 #bc-sticky-mv 正下方；檔案未改動，沿用 ?v=20261102c。 -->
 <script defer src="{% static 'js/bc-popeye50.js' %}?v=20261102c"></script>

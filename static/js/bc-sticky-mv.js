@@ -41,8 +41,8 @@
          第 1 層之後由本檔建立並 append 到 .sticky-bg__bg —— 必須是直接子元素，
          才吃得到 CSS 的「> * { position:absolute; inset:0; object-fit:cover }」。
        · 影片池＝About view 的 views.MV_VIDEOS（json_script "bc-sticky-mv-videos"）：
-         第 0 層固定用第一筆（poster 已顯示，避免一載入就換片），第 1 層之後
-         每次載入洗牌決定（原站 GLOBAL.methods.util.shuffleArray）。
+         第 0 層固定用第一筆，第 1 層之後「依清單順序」建立
+         （2026-11-06 第二輪：使用者指定 hero_00 → hero_06 依序播，不再洗牌）。
        · 先只載入前兩層；canplaythrough 後第 0 層淡入（.is-on），之後才可能換片。
        · 當前層播到「距結束 MV_LEAD_S 秒」→ 找下一個「已載入且沒壞掉」的層 →
          加 .is-on（CSS 0.6s 淡入、z-index 3）→ 淡入完成才暫停舊層並歸零 →
@@ -56,7 +56,7 @@
      ------------------------------------------------------------------ */
   var MV_LEAD_S = 0.75; /* 原站 i = .75：距結束 0.75s 就開始換片 */
   var MV_FADE_MS = 600; /* 原站 gsap duration = .8 * i = 0.6s（需與 CSS transition 一致） */
-  var MV_MAX_ITER = 8; /* 找下一層的防呆上限（層數＝min(片單長度, MV_MAX)） */
+  var MV_MAX_ITER = 16; /* 找下一層的防呆上限（只需遠大於層數，避免全未就緒時空轉） */
 
   /* 讀 json_script（<script type="application/json">） */
   function readJson(id, fallback) {
@@ -69,19 +69,7 @@
     }
   }
 
-  /* Fisher–Yates（原站 GLOBAL.methods.util.shuffleArray 的等效實作） */
-  function shuffle(list) {
-    var arr = list.slice();
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = arr[i];
-      arr[i] = arr[j];
-      arr[j] = tmp;
-    }
-    return arr;
-  }
-
-  /* 同一支影片（同 webm+mp4 組合）視為重複 → 用來把第 0 層從洗牌池中排除 */
+  /* 同一支影片（同 webm+mp4 組合）視為重複 → 建立層時用來跳過與第 0 層同片者 */
   function itemKey(item) {
     if (!item) return '';
     return (item.webm || '') + '|' + (item.mp4 || '');
@@ -271,14 +259,15 @@
     /* 第 0 層＝模板已渲染的那個（來源、poster 都來自 views.MV_VIDEOS[0]） */
     makeLayer(firstEl, playlist.length ? playlist[0] : null, true);
 
-    /* 第 1 層之後：洗牌（排除與第 0 層同片者）後依序建立，總數上限 limit 層 */
+    /* 第 1 層之後：依清單順序建立（排除與第 0 層同片者），總數上限 limit 層。
+       2026-11-06 第二輪（使用者指示「依序輪播」）→ 移除洗牌，改固定順序：
+       hero_00 → hero_01 → … → 最後一支 → 回到 hero_00。 */
     if (playlist.length > 1) {
       var firstKey = itemKey(playlist[0]);
       var pool = [];
       for (var p = 1; p < playlist.length; p++) {
         if (itemKey(playlist[p]) !== firstKey) pool.push(playlist[p]);
       }
-      pool = shuffle(pool);
       var extra = Math.min(pool.length, limit - 1);
       for (var c = 0; c < extra; c++) {
         var clone = document.createElement('video');
