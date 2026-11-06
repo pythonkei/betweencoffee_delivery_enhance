@@ -100,7 +100,7 @@
      2026-11-06（使用者指示）：影片從「單支」升級為「多支輪播」（移植 weekday.co.jp 首頁
           .p-hero__videos：多層 <video> 疊放，播到剩 0.75s 時下一層淡入，0.6s 過場）。
           ① 這裡只渲染「第 0 層」，檔名來自 About view 的 mv_videos.0（＝views.MV_VIDEOS 第一筆）；
-             保留 autoplay/muted/loop／poster ⇒ JS 沒跑時與舊版行為完全相同。
+             保留 autoplay/muted/loop ⇒ JS 沒跑時與舊版行為相同（本輪片單沒有 poster）。
           ② 播放清單其餘筆數由 json_script 帶給 bc-sticky-mv.js，JS「依清單順序」動態建立
              第 1～N 層（上限 views.MV_MAX）並接管播放；換影片改 views.MV_VIDEOS，
              不要在模板寫死檔名。⚠ 換檔請用新檔名（WhiteNoise 快取 1 年）。 -->
