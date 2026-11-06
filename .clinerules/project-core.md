@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-06）**：`origin/main` 尖端＝`f30cbe4b`／`621a4ae9`（11-05 四筆：首頁環形照片列改名＋徽章只留 `Detail`、詳情頁氣泡頭像換 `baker_01–04.svg`、navbar 天氣對齊購物車軸心、詳情頁容器加寬 `≥1200→1320`／`992–1199→1140`）；再前＝about 首屏 `hero_bg_v2.webm`＋黑遮罩、輪播排除 #7（5 張）＋ `0084`。正式站 live＝`c3f7509c`（11-03 manual）⇒ **待部署 38 筆**。⚠ **live `/about/` 仍無 sticky-MV**（`grep -c bc-sticky-mv` = 0）→ 部署前相關回報都不會消失，不是 CSS 問題。**autoDeploy＝off → 必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
+- **版本狀態（2026-11-06）**：`origin/main` 尖端＝`8799454e`（11-05 四筆：首頁環形照片列改名＋徽章只留 `Detail`、詳情頁氣泡頭像換 `baker_01–04.svg`、navbar 天氣對齊購物車軸心、詳情頁容器加寬 `≥1200→1320`／`992–1199→1140`）；再前＝about 首屏 `hero_bg_v2.webm`＋黑遮罩、輪播排除 #7（5 張）＋ `0084`。正式站 live＝`c3f7509c`（11-03 manual）⇒ **待部署 40 筆**。⚠ **live `/about/` 仍無 sticky-MV**（`grep -c bc-sticky-mv` = 0）→ 部署前相關回報都不會消失，不是 CSS 問題。**autoDeploy＝off → 必須 dashboard 按 Manual Deploy**。複驗：`curl -s …/about/ | grep -c bc-sticky-mv`（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。
 
 ## 2. 核心業務
 
