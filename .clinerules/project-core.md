@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-06）**：`origin/main` 尖端＝`75b0b6b9`＋本輪「about 首屏影片 hero_00~hero_06 依序 7 支＋黑遮罩 70%」。正式站 live＝`c3f7509c`（11-03 manual）⇒ **待部署 47 筆**（計至 `fdd2b236`）；⚠ live `/about/` 仍無 sticky-MV（`grep -c bc-sticky-mv` = 0）→ 部署後用它複驗（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。**autoDeploy＝off，push 不會部署**。
+- **版本狀態（2026-11-06）**：`origin/main` 尖端＝本輪 about 首屏影片「`hero_00`~`hero_06` 依序 7 支＋黑遮罩 70%」（功能 commit `fdd2b236`；最新 hash 一律 `git log -1`）。正式站 live＝`c3f7509c`（11-03 manual）⇒ **待部署 47 筆**（計至 `fdd2b236`）；⚠ live `/about/` 仍無 sticky-MV（`grep -c bc-sticky-mv` = 0）→ 部署後用它複驗（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。**autoDeploy＝off，push 不會部署**。
 
 ## 2. 核心業務
 
