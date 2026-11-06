@@ -36,8 +36,11 @@
 
 ## 3. 影片多層輪播（2026-11-06，移植 weekday.co.jp `.p-hero__videos`）
 
-**資料來源** `betweencoffee_delivery/views.py` 檔頭：`MV_MAX`（層數上限，5）、`MV_VIDEOS`（片單，每筆可含
-`webm`／`mp4`／`poster`）。`About.get` 用 `django.templatetags.static.static()` 轉成絕對 URL 放進 context
+**資料來源** `betweencoffee_delivery/views.py` 檔頭：`MV_MAX`（層數上限，現為 6 ⇒ 層數＝min(片單長度, `MV_MAX`)）、
+`MV_VIDEOS`（片單，每筆可含 `webm`／`mp4`／`poster`；2026-11-06 追加後共 6 支：`hero_bg_v2.webm`↔`hero_bg-720p.mp4`
+後備／`hk_topshot-720p.mp4`／`roasting.mp4`／`index_hero_bg.mp4`(1920×1080)／`bean_bg.webm`(1280×720)／
+`13687671-hd_720_1280_60fps.mp4`(720×1280 直式，滿版 cover 只露中間一條，屬預期)）。
+`About.get` 用 `django.templatetags.static.static()` 轉成絕對 URL 放進 context
 （`mv_videos`／`mv_max`）→ 模板 `json_script` 輸出 `bc-sticky-mv-videos`／`bc-sticky-mv-max`。
 ⚠ 換影片要用**新檔名**（`WHITENOISE_MAX_AGE`＝1 年，同名檔會被快取）。
 
@@ -46,8 +49,9 @@
 才吃得到 `> * { position:absolute; inset:0; object-fit:cover }`）。
 
 **播放邏輯**：洗牌（排除與第 0 層同片者）→ 先只 `loadLayer(1)`（前兩支）→ 當前層 `timeupdate` 距結束
-`MV_LEAD_S`＝0.75s 時找下一個「已載入且沒壞」的層 → 加 `.is-on`（CSS `.6s` 淡入、`z-index:3`）→
-0.6s 後才暫停舊層、歸零、移除 `.is-on` → `loadNextUnloaded()` 補載下一支。
+`MV_LEAD_S`＝0.75s 時找下一個「就緒」的層（`isReady()`＝`readyState >= 3` 即時判斷，不只看 `canplaythrough`）
+→ 加 `.is-on`（CSS `.6s` 淡入、`z-index:3`）→ 0.6s 後才暫停舊層、歸零、移除 `.is-on` → `loadNextUnloaded()`
+補載下一支。找不到就緒層時也呼叫 `loadNextUnloaded()`，否則載入鏈會停住（2026-11-06 修）。
 
 **與原站刻意不同**：① `z-index` 固定 3（原站累加）——遮罩要永遠最上層；② 找層有 `MV_MAX_ITER` 上限
 （原站 `do…while` 在只剩一支載好時會無限迴圈）；③ 每層保留 `loop`（下一支還沒好時不會凍在最後一幀）。

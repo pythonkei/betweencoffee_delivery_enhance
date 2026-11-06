@@ -36,9 +36,10 @@ MV_EXCLUDE_IDS = {7}  # #7 Nice Step
 # · 第一筆＝模板預先渲染的第 0 層（首屏 poster 就是它，因此不參與洗牌）；
 #   第 1 層之後每次載入在瀏覽器端洗牌（bc-sticky-mv.js 的 shuffle）。
 # · 每筆可含 webm / mp4 / poster，缺少的鍵就不輸出對應 <source>（單 mp4 也能用）。
-# · MV_MAX＝同時最多幾層（原站寫死 t < 5）。
+# · MV_MAX＝同時最多幾層（原站寫死 t < 5）。層數 = min(片單長度, MV_MAX)
+#   ⇒ 片單變長時要一起調，否則多出來的片永遠輪不到。
 # ⚠ 換影片務必用「新檔名」：WHITENOISE_MAX_AGE＝1 年，同名檔會被瀏覽器快取。
-MV_MAX = 5
+MV_MAX = 6
 MV_VIDEOS = [
     {
         "webm": "media/hero_bg_v2.webm",
@@ -46,9 +47,14 @@ MV_VIDEOS = [
         "poster": "images/hero_bg_v2-poster.jpg",
     },
     # 同一段畫面的 mp4 版（hero_bg-720p.mp4）只是第 0 層的後備碼，不再列為獨立一筆，
-    # 否則 Chrome（走 webm）會覺得「同一段播兩次」。以下兩支是本頁既有素材。
+    # 否則 Chrome（走 webm）會覺得「同一段播兩次」。以下幾支是本頁既有素材。
     {"mp4": "media/hk_topshot-720p.mp4"},
     {"mp4": "media/roasting.mp4"},
+    # 2026-11-06（使用者指示）追加三支，依指定順序：
+    #   1920×1080 / 8.6s、1280×720 / 10s、720×1280 直式 / 7.5s
+    {"mp4": "media/index_hero_bg.mp4"},
+    {"webm": "media/bean_bg.webm"},
+    {"mp4": "media/13687671-hd_720_1280_60fps.mp4"},
 ]
 
 

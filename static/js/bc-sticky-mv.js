@@ -56,7 +56,7 @@
      ------------------------------------------------------------------ */
   var MV_LEAD_S = 0.75; /* 原站 i = .75：距結束 0.75s 就開始換片 */
   var MV_FADE_MS = 600; /* 原站 gsap duration = .8 * i = 0.6s（需與 CSS transition 一致） */
-  var MV_MAX_ITER = 8; /* 找下一層的防呆上限（層數最多 5） */
+  var MV_MAX_ITER = 8; /* 找下一層的防呆上限（層數＝min(片單長度, MV_MAX)） */
 
   /* 讀 json_script（<script type="application/json">） */
   function readJson(id, fallback) {
@@ -118,6 +118,14 @@
       if (layer && layer.el && !layer.el.paused) layer.el.pause();
     }
 
+    /* 「這一層現在能不能直接播」——用 readyState 即時判斷，不依賴 canplaythrough
+       （preload 較省時 canplaythrough 不一定會發，會讓換片卡住沒載好的層）。
+       HAVE_FUTURE_DATA＝3：已有目前 + 下一段資料，切過去不會黑畫面。 */
+    function isReady(layer) {
+      if (!layer || layer.failed || !layer.el) return false;
+      return layer.el.readyState >= 3;
+    }
+
     /* 補載「第一個還沒載入」的層（原站 a()） */
     function loadNextUnloaded() {
       for (var i = 0; i < layers.length; i++) {
@@ -163,7 +171,7 @@
        force＝第二層下載失敗時仍要起播（否則整頁背景會永遠停在 poster）。 */
     function maybeStart(force) {
       if (started) return;
-      if (!force && layers.length > 1 && !layers[1].loaded) return;
+      if (!force && layers.length > 1 && !isReady(layers[1]) && !layers[1].loaded) return;
       started = true;
       firstEl.classList.add('is-on');
       if (inView && !document.hidden) playLayer(layers[0]);
@@ -178,13 +186,17 @@
       for (var i = 0; i < MV_MAX_ITER; i++) {
         next = next + 1 >= layers.length ? 0 : next + 1;
         if (next === from) break;
-        if (layers[next].loaded && !layers[next].failed) {
+        if (isReady(layers[next])) {
           found = true;
           break;
         }
       }
-      /* 下一層還沒好 → 留在當前層（它保留 loop，畫面不會凍住） */
-      if (!found) return;
+      /* 下一層還沒好 → 留在當前層（它保留 loop，畫面不會凍住），
+         並把握時間補載下一支（否則整條載入鏈會停在這裡不再前進）。 */
+      if (!found) {
+        loadNextUnloaded();
+        return;
+      }
 
       current = next;
       layers[next].el.classList.add('is-on');
@@ -216,6 +228,14 @@
       el.addEventListener('canplaythrough', function () {
         layer.loaded = true;
         layer.loading = false;
+        maybeStart();
+      });
+
+      /* canplaythrough 在「省流量」情境不一定會發 → 另外用 canplay 兜底，
+         只要 readyState 夠就視為可用（換片判斷另外用 isReady 即時看）。 */
+      el.addEventListener('canplay', function () {
+        layer.loading = false;
+        if (el.readyState >= 3) layer.loaded = true;
         maybeStart();
       });
 
@@ -268,7 +288,7 @@
         clone.setAttribute('muted', '');
         clone.setAttribute('playsinline', '');
         clone.setAttribute('aria-hidden', 'true');
-        clone.preload = 'none';
+        clone.preload = 'auto'; /* 只有被 loadLayer() 點到的層才會真的抓檔案 */
         clone.loop = true;
         clone.setAttribute('data-index', String(c + 1));
         bg.appendChild(clone);
