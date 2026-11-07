@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-07）**：`origin/main` 尖端＝本輪 about 首屏影片「`hero_00`~`hero_06` 依序 7 支＋黑遮罩 80%→70%→**75%**」（`fdd2b236`；hash 查 `git log -1`）。live＝`c3f7509c`（11-03）⇒ **待部署 47 筆＋**（計至 `fdd2b236`＋11-06/07 docs）；⚠ live `/about/` 仍無 sticky-MV（`grep -c bc-sticky-mv` = 0）→ 部署後用它複驗（>0 才算成功）＋Render API（`srv-d8jce6rtqb8s73897t4g`）。**autoDeploy＝off，push 不會部署**。
+- **版本狀態（2026-11-07）**：`origin/main` 尖端＝about 首屏 7 支 `hero_00`~`hero_06`＋黑遮罩 **75%**（hash 查 `git log -1`）。live＝`c3f7509c`（11-03）⇒ **待部署 47 筆＋**；⚠ live `/about/` 尚無 sticky-MV → 部署後 `grep -c bc-sticky-mv` >0 才算成功。
 
 ## 2. 核心業務
 
@@ -47,7 +47,7 @@
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 首頁「咖啡豆製程」捲動模組（`[2b-2]`；移植 union-tec `homeService`：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS） |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`；3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
-| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00.webm`~`hero_06.webm`（7 支片單） | `/about/` 最上方首屏 sticky 影片＋產品照輪播（`--mv-vh`＝`100svh`；斷點張數／gap／pad：≥1440 3/10vw/9vw、1025–1439 3/8/5.5、681–1024 2/8/4.5、≤680 1/13/13（≤680 per=1 → gap 不影響卡片寬）；卡片寬＝min(寬度公式, `--mv-card-cap`＝vh×0.30／平板 .335／手機 .42)；照片 `max-width:400px`；`.color`＝品名 `clamp(1.15rem,1.45vw,1.4rem)`、`.title`＝highlight `1.08rem`；產品列↔Fresh beans 間隔 `--mv-stage-gap`＝`clamp(4.5rem,18vh,12rem)`／≤680 `13vh`；黑遮罩 `rgba(0,0,0,.75)`（11-07 起；演進 80%→70%→75%，z-index 10）。**11-06 起多層輪播**：片單＝`views.MV_VIDEOS`（7 支，**依清單順序** `0→…→6→0`，不洗牌）、層數＝min(片單, `MV_MAX`＝7)；模板只渲染第 0 層，JS 依序建 1–6 層，剩 0.75s 時下一層交叉淡入 0.6s（`.is-on`＝opacity 1／z-index 3），換完才暫停舊層＋補載下一支；只有 1 支＝舊行為）。細節見 `docs/about-sticky-mv.md`。 |
+| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00.webm`~`hero_06.webm`（7 支片單） | `/about/` 最上方首屏 sticky 影片＋產品照輪播（`--mv-vh`＝`100svh`；斷點張數／gap／pad：≥1440 3/10vw/9vw、1025–1439 3/8/5.5、681–1024 2/8/4.5、≤680 1/13/13（≤680 per=1 → gap 不影響卡片寬）；卡片寬＝min(寬度公式, `--mv-card-cap`＝vh×0.30／平板 .335／手機 .42)；照片 `max-width:400px`；`.color`＝品名 `clamp(1.15rem,1.45vw,1.4rem)`、`.title`＝highlight `1.08rem`；產品列↔Fresh beans 間隔 `--mv-stage-gap`＝`clamp(4.5rem,18vh,12rem)`／≤680 `13vh`；黑遮罩 `rgba(0,0,0,.75)`（11-07 起；演進 80%→70%→75%，z-index 10）。**11-06 起多層輪播**：片單＝`views.MV_VIDEOS`（7 支，**依清單順序** `0→…→6→0`，不洗牌）、層數＝min(片單, `MV_MAX`＝7)、影片 URL 由 `_mv_versioned_static()` 加 `?v=<mtime>` 破 WhiteNoise 長快取（換同名檔即失效）；模板只渲染第 0 層，JS 依序建 1–6 層，剩 0.75s 時下一層交叉淡入 0.6s（`.is-on`＝opacity 1／z-index 3），換完才暫停舊層＋補載下一支；只有 1 支＝舊行為）。細節見 `docs/about-sticky-mv.md`。 |
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（移植 popeyemagazine.jp/50interviews）。**2026-11-06 重新載入，置於 `#bc-sticky-mv` 下方**（11-03 起曾停用、檔案保留） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
@@ -55,7 +55,7 @@
 
 - Python：flake8 + black + isort（`pyproject.toml`）；JS：ES6 class；CSS：`bc-` 前綴、BEM-ish。
 - Commit：`feat|fix|docs|style|refactor|test|chore`；分支 `main`（生產）/ `develop` / `feature/*` / `bugfix/*`。
-- **前端版號**：WhiteNoise 快取 1 年 → **改任何 `static/js/*.js`、`static/css/*.css` 必須同步升 `?v=`**（格式 `YYYYMMDDx`，同檔同日多次改就換字母）。
+- **前端版號**：WhiteNoise 快取 1 年 → **改任何 `static/js/*.js`、`static/css/*.css` 必須同步升 `?v=`**（格式 `YYYYMMDDx`，同檔同日多次改就換字母）。影片例外：`views._mv_versioned_static()` 自動加 `?v=<mtime>`（11-07 起），換 `hero_*.webm` 直接覆蓋同名檔即可。
 - 前端改動完成定義：`manage.py check` 0 issue + 實際載入頁面無 console error + 目標尺寸/狀態實測。
 
 ## 5. 常見任務速查
@@ -82,8 +82,8 @@
 - **Migration 編號**：`python3 manage.py makemigrations --check` 必須乾淨；資料搬移用 data migration，不在 view 裡寫死。
 - **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:207` `#bc-brand-stage .footer-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。
 - **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方內容自動整齊上移，不要再補留白。
-- **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。同理 2026-11-04 起 `static/images/hero_bg.mp4`（81MB／4K；**它是 `/about/` 首屏影片的原始素材，頁面用轉出的 `hero_bg-720p.mp4`，勿刪**）與 `recommended-pages/` 底線開頭的 webm／png 暫存變體也列 `.gitignore`。
-- **新增 CSS／JS 檔要跟引用它的模板同一次 commit**：2026-10-31 的 `about.html` 已引用 `static/css/bc-catch.css` 但檔案沒入庫 ⇒ 正式站該頁一直 404、字體輪播沒樣式，直到 2026-11-04 `e9bdefdb` 才補上。push 後用 `git ls-tree -r origin/main --name-only static/css static/js | grep <檔名>` 對照一次。
+- **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。同理 `static/images/hero_bg.mp4`（81MB／4K，首屏影片原始素材，**勿刪**）與 `recommended-pages/` 底線開頭的 webm／png 暫存變體也列 `.gitignore`。
+- **新增 CSS／JS 檔要跟引用它的模板同一次 commit**（曾漏 `bc-catch.css` → 正式站該頁 404 到 11-04 才補）。push 後用 `git ls-tree -r origin/main --name-only static/css static/js | grep <檔名>` 對照一次。
 - **商品圖走 `get_index_image()`**：`image_index` 空 → fallback 到詳情圖（`860×1100`，杯身佔畫布寬 80%），列表圖是 `840×1200`（杯身 62–87%）；同一個 3:4 `object-fit: contain` 盒下杯身寬差可達 40% ⇒ 看起來像「某組間距跟別組不同」。**要讓某品項在列表／輪播一致，補 `image_index`（data migration），不要針對單品加 CSS 間距**（`0084` 補 #7 Nice Step）。
 - **`/about/` 首屏輪播品項＝`views.About` 的 `MV_EXCLUDE_IDS`**（現為 `{7}` → 5 張）；`series_coffees` 仍是完整 6 筆，只給下方 SERIES 括號滑桿／字輪用。增減首屏品項改常數，不要在模板加 `{% if coffee.id != 7 %}`。
 

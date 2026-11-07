@@ -30,7 +30,7 @@
 - **`.mv-stage`**：複製品牌舞台三段（id 用 `bc-mv-` 前綴避免與頁尾重複），必須是 **7 欄 grid 且照抄原站格位**：fresh `1/3/2/6`、roasted `2/4/3/7` + `mt 8px`、marquee `2/3/3/5`（與 roasted 同列左）；≤991 6 欄：`1/1/2/5`／`2/4/3/7`／`2/1/3/4` + `justify-self:start`。字級照原站流體公式（14.4／≤991 3.93），`.scroller-box` `line-height: 1`；**不可改成 flex 堆疊**。
 - **覆蓋層**：`.sticky-bg__bg::before` 的 `rgba(0,0,0,.75)`（**2026-11-07 使用者指定 75%**；演進 80% → 70%（11-06）→ 75%（11-07）。不是真實元素，量測要 `getComputedStyle(el, '::before')`）。**2026-11-06 起 `z-index` 由 `1` 提到 `10`**：多層影片的最新層是 `z-index: 3`，遮罩不抬高就會在交叉淡入那 0.6s 露出沒遮罩的亮畫面。
 - **影片**：`about.html` 用 `<source type="video/webm">` 而非 `src`（第 0 層檔案來自 `views.MV_VIDEOS[0]`，模板不寫死）。2026-11-06 第二輪起片單整組換成 **`media/hero_00.webm` ~ `hero_06.webm` 七支**（全部 webm，1280×720），**沒有 mp4 後備、也沒有 poster**（舊 `hero_bg_v2-poster.jpg` 是舊影片截圖，內容不符 ⇒ 影片解碼前是品牌黑底 `#0e0e0e`）。不吃 WebM 的極舊瀏覽器會只剩黑底。
-- **版號**：動到 css/js 必須升 `about.html` 的 `?v=`（WhiteNoise 快取 1 年）。
+- **版號**：動到 css/js 必須升 `about.html` 的 `?v=`（WhiteNoise 快取 1 年）。影片不用手動升版號，見 §3 的快取機制。
 - **這排卡的資料來源＝`mv_coffees`（不是 `series_coffees`）**：`betweencoffee_delivery/views.py` 的 `About` 用 `MV_EXCLUDE_IDS = {7}` 從 6 筆裡排除 #7 Nice Step → 首屏只放 5 張；下方「咖啡 SERIES 括號滑桿」與字輪仍用完整 6 筆。要增減首屏品項改那個常數，不要在模板加條件。
 - **杯身大小不一致的根因**：這排吃 `CoffeeItem.get_index_image()`（`image_index` 空 → fallback 到詳情頁 `image`）。詳情圖 `860×1100`／杯身佔畫布寬 80%，列表圖 `840×1200`／杯身 62–87%，在同一個 3:4 `object-fit: contain` 盒裡渲染出的杯身寬可差 40%（`nicestep_detail` 217px vs `nicestep_index` 156px）→ 該組看起來「比別組擠／間距不同」。**修法補 `image_index`（data migration `0084`），不要針對單品加 CSS 間距**。
 
@@ -42,9 +42,14 @@
 … → `hero_06.webm`（實測長度 7.0 / 6.1 / 10.0 / 7.0 / 4.0 / 5.0 / 4.0 s，總量約 8.0MB））。
 `About.get` 用 `django.templatetags.static.static()` 轉成絕對 URL 放進 context
 （`mv_videos`／`mv_max`）→ 模板 `json_script` 輸出 `bc-sticky-mv-videos`／`bc-sticky-mv-max`。
-⚠ 換影片要用**新檔名**（`WHITENOISE_MAX_AGE`＝1 年，同名檔會被快取）。
+**快取（2026-11-07 修正）**：`WHITENOISE_MAX_AGE`＝1 年 ⇒ 同名檔換內容瀏覽器不會來問。
+原本的做法是「換影片要改新檔名」；2026-11-07（使用者回報「`hero_00~06` 換了內容還顯示舊版」）
+改成 `views._mv_versioned_static()`：URL 後面自動加 `?v=<檔案 mtime>`，換檔即換網址 →
+一定重新下載，平時網址穩定、長快取照樣有效。**覆蓋同名 `hero_*.webm` 即可，不必改名、也不必手動升版號**。
+（css/js 仍走 `?v=YYYYMMDDx` 手動升版號。）
 ℹ 舊素材（`hero_bg_v2.webm`／`hero_bg-720p.mp4`／`hk_topshot-720p.mp4`／`roasting.mp4`／
-`index_hero_bg.mp4`／`bean_bg.webm`／`13687671-hd_720_1280_60fps.mp4`）仍留在 `static/media/`，只是不在片單裡。
+`bean_bg.webm`／`13687671-hd_720_1280_60fps.mp4`）仍留在 `static/media/`，只是不在片單裡；
+`index_hero_bg.mp4`（3.6MB，未被任何頁面引用）已於 2026-11-07 刪除。
 
 **分層**：第 0 層由模板渲染（`#mv-video-0`，帶 `autoplay/muted/loop` ⇒ 無 JS 時等於舊版單支）；
 第 1～N 層由 `bc-sticky-mv.js` 的 `initVideo()` 建立後 `append` 到 `.sticky-bg__bg`（**必須是直接子元素**，

@@ -14,6 +14,9 @@ a = aardvark, b = baboon, c = cat
 它將它們與函數中的參數進行匹配。當然，您可以*在函數定義和函數呼叫中同時擁有它們。
 """
 
+import os
+
+from django.contrib.staticfiles import finders
 from django.db.models import Q
 
 # betweencoffee_delivery/views.py
@@ -39,7 +42,10 @@ MV_EXCLUDE_IDS = {7}  # #7 Nice Step
 # · 每筆可含 webm / mp4 / poster，缺少的鍵就不輸出對應 <source>（單 mp4 也能用）。
 # · MV_MAX＝同時最多幾層（原站寫死 t < 5）。層數 = min(片單長度, MV_MAX)
 #   ⇒ 片單變長時要一起調，否則多出來的片永遠輪不到。
-# ⚠ 換影片務必用「新檔名」：WHITENOISE_MAX_AGE＝1 年，同名檔會被瀏覽器快取。
+# · 快取：WHITENOISE_MAX_AGE＝1 年 ⇒ 同名檔換內容，瀏覽器不會來問就沿用舊快取。
+#   2026-11-07（使用者回報「hero_00~06 換了影片內容還顯示舊版」）：改由下方
+#   _mv_versioned_static() 在 URL 後自動加 ?v=<檔案 mtime>，換檔即換網址，
+#   不必再改檔名、也不必手動升版號（舊做法：換片要改名）。
 MV_MAX = 7
 MV_VIDEOS = [
     # 2026-11-06（使用者指示）：整組換成 hero_00 ~ hero_06 七支 webm，依檔名順序播放。
@@ -53,6 +59,24 @@ MV_VIDEOS = [
     {"webm": "media/hero_05.webm"},
     {"webm": "media/hero_06.webm"},
 ]
+
+
+def _mv_versioned_static(rel_path):
+    """把 static() 的 URL 加上 ?v=<檔案 mtime>，用來破 WhiteNoise 的 1 年長快取。
+
+    2026-11-07（使用者回報）：`hero_00~06.webm` 換了內容但檔名不變，瀏覽器直接
+    用快取（WHITENOISE_MAX_AGE＝31536000）→ 看起來「還顯示舊版本」。
+    以檔案最後修改時間當版號：換檔 → mtime 變 → 網址變 → 一定重新下載；
+    平時（沒換檔）網址穩定，長快取照樣有效。找不到檔案時退回原始 URL。
+    """
+    url = static(rel_path)
+    abs_path = finders.find(rel_path)
+    if not abs_path:
+        return url
+    try:
+        return f"{url}?v={int(os.path.getmtime(abs_path))}"
+    except OSError:
+        return url
 
 
 # 處理index, about HTTP 請求所發生的情況
@@ -513,7 +537,7 @@ class About(View):
         # 模板的第 0 層 <video> 與 JSON 共用同一份清單，避免兩處各寫一次檔名。
         mv_videos = [
             {
-                key: static(item[key])
+                key: _mv_versioned_static(item[key])
                 for key in ("webm", "mp4", "poster")
                 if item.get(key)
             }
