@@ -40,7 +40,22 @@
   .code { margin-top: 12px; font-size: .62rem; line-height: 1.5; opacity: .55; word-break: break-all; }
   /* 預覽用覆寫：取消 fixed 定位（讓 20 個候選並排）；其餘（無底色／無邊框／無陰影、
      hover 轉金、badge、--bc-fc-size 尺寸、SVG 1.15em）全部沿用正式 CSS */
-  .card .bc-floating-cart { position: static; top: auto; right: auto; bottom: auto; left: auto; pointer-events: auto; }
+  .card .bc-floating-cart,
+  .ov-cell .bc-floating-cart { position: static; top: auto; right: auto; bottom: auto; left: auto; pointer-events: auto; }
+
+  /* ① 放大對照（2026-11-09 追加）：96px 讓造型細節看得出來；仍是同一個 .bc-floating-cart-btn
+     結構（只把 --bc-fc-size 放大）⇒ 樣式 100% 來自正式 CSS，不在預覽頁重刻 */
+  .overview { margin: 0 0 26px; display: grid; gap: 10px; }
+  .ov-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px;
+            padding-top: 12px; border-top: 1px dashed rgba(255, 255, 255, .08); }
+  .ov-row:first-child { border-top: 0; padding-top: 0; }
+  .ov-tag { flex: 0 0 26px; align-self: center; font-size: .62rem; font-weight: 500;
+            color: rgba(255, 255, 255, .45); line-height: 1.2; }
+  .ov-cell { flex: 1 1 96px; min-width: 96px; text-align: center; }
+  .ov-cell .ov-nm { display: block; margin-top: 4px; font-size: .6rem; font-family: monospace;
+                    color: rgba(255, 255, 255, .35); white-space: nowrap; }
+  .ov-h { font-size: .82rem; font-weight: 500; color: rgba(255, 255, 255, .65); margin: 0 0 12px; }
+  .grid { margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -53,6 +68,9 @@
   目前線上：<code>01 購物袋（線條）</code>。滑鼠移上去可看 hover 變金色；選定後把該格 SVG 內容貼進
   <code>base.html</code> 的 <code>&lt;svg class="bc-fc-icon"&gt;</code> 即可。
 </p>
+<h2 class="ov-h">① 放大對照（96px，先看造型再挑）</h2>
+<div class="overview" id="overview"></div>
+<h2 class="ov-h">② 實際尺寸預覽（37／34／31px）</h2>
 <div class="grid" id="grid"></div>
 <script>
   /* SVG 一律 viewBox="0 0 24 24"；元素 class 只有兩種：
@@ -71,8 +89,11 @@
           + '<path class="bc-fc-line" d="M5.9 11.5h12.2"/>'
           + '<path class="bc-fc-line" d="M8.3 8.4v1.5a1.4 1.4 0 0 0 2.8 0V8.4"/>'
           + '<path class="bc-fc-line" d="M12.9 8.4v1.5a1.4 1.4 0 0 0 2.8 0V8.4"/>',
-      solid: '<path class="bc-fc-solid" d="M5.1 8.4h13.8l-1.15 11.7a1.9 1.9 0 0 1-1.9 1.7H8.15a1.9 1.9 0 0 1-1.9-1.7z"/>'
-          + '<rect class="bc-fc-solid" x="5.5" y="8.4" width="13" height="2.4"/>'
+      /* 實心態：折口線與兩個打孔用 evenodd「挖洞」（真鏤空、透出底色，不靠深色線硬畫） */
+      solid: '<path class="bc-fc-solid" fill-rule="evenodd" d="M5.1 8.4h13.8l-1.15 11.7a1.9 1.9 0 0 1-1.9 1.7H8.15a1.9 1.9 0 0 1-1.9-1.7z'
+          + ' M5.8 11.1h12.4v0.75H5.8z'
+          + ' M8.8 9.7a0.9 0.9 0 1 0 1.8 0a0.9 0.9 0 1 0-1.8 0Z'
+          + ' M13.4 9.7a0.9 0.9 0 1 0 1.8 0a0.9 0.9 0 1 0-1.8 0Z"/>'
     },
     /* 3 帆布袋：袋身較高＋長提把 */
     tote: {
@@ -95,7 +116,10 @@
           + '<path class="bc-fc-line" d="M8.6 9.2V7.3a3.4 3.4 0 0 1 6.8 0v1.9"/>'
           + '<path class="bc-fc-line" d="M9.5 12.6v4.7"/>'
           + '<path class="bc-fc-line" d="M14.5 12.6v4.7"/>',
-      solid: '<path class="bc-fc-solid" d="M4.3 9.2h15.4l-1.45 9.9a2.1 2.1 0 0 1-2.1 1.8H7.85a2.1 2.1 0 0 1-2.1-1.8z"/>'
+      /* 實心態：兩條垂直格線用 evenodd 鏤空 */
+      solid: '<path class="bc-fc-solid" fill-rule="evenodd" d="M4.3 9.2h15.4l-1.45 9.9a2.1 2.1 0 0 1-2.1 1.8H7.85a2.1 2.1 0 0 1-2.1-1.8z'
+          + ' M9.45 12.4h0.7v4.9h-0.7z'
+          + ' M14.35 12.4h0.7v4.9h-0.7z"/>'
           + '<path class="bc-fc-line" d="M8.6 9.2V7.3a3.4 3.4 0 0 1 6.8 0v1.9"/>'
     },
     /* 6 購物推車：把手斜籃＋兩個輪子 */
@@ -113,16 +137,23 @@
       line: '<rect class="bc-fc-line" x="6.4" y="4.6" width="11.2" height="2.9" rx="1.1"/>'
           + '<path class="bc-fc-line" d="M7.8 7.5h8.4l-1.05 12a1.8 1.8 0 0 1-1.8 1.7h-2.7a1.8 1.8 0 0 1-1.8-1.7z"/>'
           + '<path class="bc-fc-line" d="M9.9 12.4h4.2"/>',
-      solid: '<rect class="bc-fc-solid" x="6.4" y="4.6" width="11.2" height="2.9" rx="1.1"/>'
-          + '<path class="bc-fc-solid" d="M7.8 7.5h8.4l-1.05 12a1.8 1.8 0 0 1-1.8 1.7h-2.7a1.8 1.8 0 0 1-1.8-1.7z"/>'
+      /* 實心態：杯蓋與杯身之間、杯套位置用 evenodd 鏤空（杯蓋／杯身仍相連成一體） */
+      solid: '<path class="bc-fc-solid" fill-rule="evenodd" d="'
+          + 'M7.5 4.6h9.2a1.1 1.1 0 0 1 1.1 1.1v0.7a1.1 1.1 0 0 1-1.1 1.1H7.5a1.1 1.1 0 0 1-1.1-1.1V5.7a1.1 1.1 0 0 1 1.1-1.1z'
+          + ' M7.8 7.5h8.4l-1.05 12a1.8 1.8 0 0 1-1.8 1.7h-2.7a1.8 1.8 0 0 1-1.8-1.7z'
+          + ' M8.05 8.05h7.9v0.7H8.05z'
+          + ' M9.7 12.05h4.6v0.7H9.7z"/>'
     },
     /* 8 紙箱：等角三面盒（頂面分隔線＋中線） */
     box: {
       line: '<path class="bc-fc-line" d="M12 3.6 20.3 8v8.1L12 20.4 3.7 16.1V8z"/>'
           + '<path class="bc-fc-line" d="M3.7 8 12 12.2 20.3 8"/>'
           + '<path class="bc-fc-line" d="M12 12.2v8.2"/>',
-      solid: '<path class="bc-fc-solid" d="M12 3.6 20.3 8v8.1L12 20.4 3.7 16.1V8z"/>'
-          + '<path class="bc-fc-line" d="M3.7 8 12 12.2 20.3 8"/>'
+      /* 實心態：頂面 V 與中線用 evenodd 鏤空（否則整顆會變成一塊多邊形，看不出是箱子） */
+      solid: '<path class="bc-fc-solid" fill-rule="evenodd" d="'
+          + 'M12 3.6 20.3 8v8.1L12 20.4 3.7 16.1V8z'
+          + ' M3.7 8 12 12.2 20.3 8 20.3 8.75 12 12.95 3.7 8.75z'
+          + ' M11.65 13.35h0.7v6.75h-0.7z"/>'
     },
     /* 9 禮物盒：盒蓋＋盒身＋緞帶＋蝴蝶結 */
     gift: {
@@ -131,10 +162,13 @@
           + '<path class="bc-fc-line" d="M12 9.4v12.2"/>'
           + '<path class="bc-fc-line" d="M12 9.4c-1.4-2.9-3.5-4.2-4.7-3-1.2 1.2.2 3 4.7 3z"/>'
           + '<path class="bc-fc-line" d="M12 9.4c1.4-2.9 3.5-4.2 4.7-3 1.2 1.2-.2 3-4.7 3z"/>',
-      solid: '<rect class="bc-fc-solid" x="3.8" y="9.4" width="16.4" height="4.1" rx="1.1"/>'
-          + '<path class="bc-fc-solid" d="M5.3 13.5h13.4v5.7a2.4 2.4 0 0 1-2.4 2.4H7.7a2.4 2.4 0 0 1-2.4-2.4z"/>'
-          + '<path class="bc-fc-solid" d="M12 9.4c-1.4-2.9-3.5-4.2-4.7-3-1.2 1.2.2 3 4.7 3z"/>'
-          + '<path class="bc-fc-solid" d="M12 9.4c1.4-2.9 3.5-4.2 4.7-3 1.2 1.2-.2 3-4.7 3z"/>'
+      /* 實心態：垂直緞帶用 evenodd 鏤空（盒蓋＋盒身＋兩個蝴蝶結合成單一 path 才能挖洞） */
+      solid: '<path class="bc-fc-solid" fill-rule="evenodd" d="'
+          + 'M4.9 9.4h14.2a1.1 1.1 0 0 1 1.1 1.1v1.9a1.1 1.1 0 0 1-1.1 1.1H4.9a1.1 1.1 0 0 1-1.1-1.1v-1.9a1.1 1.1 0 0 1 1.1-1.1z'
+          + ' M5.3 13.5h13.4v5.7a2.4 2.4 0 0 1-2.4 2.4H7.7a2.4 2.4 0 0 1-2.4-2.4z'
+          + ' M12 9.4c-1.4-2.9-3.5-4.2-4.7-3-1.2 1.2.2 3 4.7 3z'
+          + ' M12 9.4c1.4-2.9 3.5-4.2 4.7-3 1.2 1.2-.2 3-4.7 3z'
+          + ' M11.65 10.1h0.7v11.2h-0.7z"/>'
     },
     /* 10 店面：遮雨棚波浪＋屋身＋門 */
     shop: {
@@ -142,9 +176,10 @@
           + '<path class="bc-fc-line" d="M4.9 9.3v10.3h14.2V9.3"/>'
           + '<path class="bc-fc-line" d="M4 9.3a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/>'
           + '<path class="bc-fc-line" d="M9.9 19.6v-4.4h4.2v4.4"/>',
-      solid: '<path class="bc-fc-solid" d="M5.6 4.4h12.8L20 9.3H4z"/>'
-          + '<path class="bc-fc-solid" d="M4.9 9.3h14.2v10.3H4.9z"/>'
-          + '<rect x="9.9" y="15.2" width="4.2" height="4.4" fill="#0e0e0e"/>'
+      /* 實心態：門是「真鏤空」（evenodd 挖洞，透出底色）——舊版用 fill="#0e0e0e" 硬畫黑，
+         一旦浮動鈕出現在淺色背景上就會看到黑色方塊。 */
+      solid: '<path class="bc-fc-solid" d="M5.6 4.4h12.8l1.6 4.7a2 2 0 0 0-4 0a2 2 0 0 0-4 0a2 2 0 0 0-4 0a2 2 0 0 0-4 0z"/>'
+          + '<path class="bc-fc-solid" fill-rule="evenodd" d="M4.9 9.6h14.2v10H4.9z M9.9 15.2h4.2v4.4h-4.2z"/>'
     }
   };
   var OPTIONS = [
@@ -162,6 +197,22 @@
   var SIZES = [37, 34, 31];
   var LABELS = { 37: '37px 桌機', 34: '34px 平板', 31: '31px 手機' };
   var MODES = [['line', '線條'], ['solid', '實心']];
+
+  /* ① 放大對照：--bc-fc-size 設 91px ⇒ SVG = 91×1.05 ≈ 96px（樣式仍全部來自正式 CSS） */
+  document.getElementById('overview').innerHTML = MODES.map(function (m) {
+    var cells = OPTIONS.map(function (o, i) {
+      return '<div class="ov-cell">'
+        + '<div class="bc-floating-cart" style="--bc-fc-size:91px">'
+        +   '<button class="bc-floating-cart-btn" type="button" tabindex="-1" aria-hidden="true">'
+        +     '<svg class="bc-fc-icon" viewBox="0 0 24 24">' + ICONS[o[2]][m[0]] + '</svg>'
+        +   '</button>'
+        + '</div>'
+        + '<span class="ov-nm">' + (i + 1 < 10 ? '0' : '') + (i + 1) + ' ' + o[0] + '</span>'
+        + '</div>';
+    }).join('');
+    return '<div class="ov-row"><span class="ov-tag">' + m[1] + '</span>' + cells + '</div>';
+  }).join('');
+
   document.getElementById('grid').innerHTML = OPTIONS.map(function (o, i) {
     var rows = MODES.map(function (m) {
       var cells = SIZES.map(function (s) {
