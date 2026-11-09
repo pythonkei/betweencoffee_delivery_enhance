@@ -108,6 +108,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
             union-tec.jp 首頁 homeService —— 膠囊 clip-path 隨捲動放大到滿版、
             四段製程圖片輪播／模糊轉清晰、左側標籤與網格字母。位置＝推薦雙卡與
             capabilities 之間；partial＋CSS＋JS 皆為新檔，見下方 include 註解）
+            ⚠ 2026-11-09（使用者指示）：**整組移出本頁 → about.html**（位置＝
+            `.bc-search` 正下方）；partial／CSS／JS 檔保留，只改掛載點。
        [2c] <section class="capabilities bc-capabilities">（sukima capabilities-gallery；
             2026-10-27 由 about 頁整組移入，位置＝推薦雙卡正下方）
        [3] <section hidden class="hero bc-gunte-hero">（暫時隱藏）
@@ -259,8 +261,9 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 
 
 <!-- 2026-10-30（使用者指示）：首頁新增「咖啡豆製程」捲動模組，移植 union-tec.jp 首頁
-     <section x-data="homeService">。位置＝推薦雙卡（aside.bc-recommended-pages）正下方、
-     capabilities-gallery 之前（見檔頭 [2b-2]）。
+     <section x-data="homeService">。2026-11-09（使用者指示）：**整組移至 about.html**
+     （位置＝`.bc-search` 正下方；markup／CSS／JS 一併移轉，見 about.html 的註解）。
+     本頁不再輸出，partial 與樣式／腳本檔保留在原路徑。
      - markup：partials/bc_home_service.html（class 全部改為 .bc-hs-*）
      - 樣式：static/css/bc-home-service.css
      - 腳本：static/js/bc-home-service.js（原生 JS：不依賴 Alpine／Lenis／three.js／GSAP，
@@ -269,7 +272,6 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
              （scripts/make_hs_images.py 產生；原始 JPG 留在 static/images/ 未使用）
      註：Django 模板註解不支援跨行（會原樣輸出成文字），多行說明請用 HTML 註解
          或 comment 區塊。 -->
-{% include 'betweencoffee_delivery/partials/bc_home_service.html' %}
 
 
 
@@ -904,8 +906,9 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      （about 已不再載入）。為模組在首頁的唯一定義來源。
      版號 20260825b → 20261027a：模組整體放大＋頁面置中。 -->
 <!-- 2026-10-30（使用者指示）：咖啡豆製程捲動模組（.bc-home-service，移植 union-tec
-     homeService）。樣式 scoped 在 .bc-home-service／.bc-hs__*，只在本頁載入。 -->
-<link rel="stylesheet" href="{% static 'css/bc-home-service.css' %}?v=20261030a">
+     homeService）。樣式 scoped 在 .bc-home-service／.bc-hs__*。
+     2026-11-09（使用者指示）：模組整組移至 about.html（`.bc-search` 下方）
+     ⇒ 本頁不再載入該樣式／腳本，改由 about.html 的 extra_css／extra_scripts 載入。 -->
 <link rel="stylesheet" href="{% static 'css/bc-capabilities.css' %}?v=20261027a">
 <!-- 2026-10-25（使用者指示）：SALON/STORE SEARCH 大區塊（.bc-search）整組移至 about 頁
      （markup → about.html；bc-search.css／bc-search.js 改由 about.html 載入）。 -->
@@ -956,6 +959,17 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      該檔是 extra_css 的最後一支 <link>，串接位置與原本的內聯樣式相同（同特異度仍勝過
      bc-hand-ring.css／bc-components.css）；所有選擇器都帶 .bc-brand-stage-hero 前綴，
      about 頁不會受影響。要改首頁 hero 樣式請直接改該檔檔尾，不要再寫回本檔。 -->
+<!-- 2026-11-07（使用者指示）：移植 hicard.studio 首頁 .fv__photoarea 的「背景照片視差」
+     ——品牌舞台 hero 的背景照片（markup 在 partials/bc_brand_stage_hero.html 的
+     #bc-brand-stage 第一個子節點 .bc-photoarea；位移由 js/bc-photoarea.js 控制）。
+     2026-11-09 起：5 格中第 3 格改為影片容器（.bc-pa-video＋<video>），其餘 4 格仍是照片。
+     2026-11-09 稍後（使用者指示）：每格（4 張照片＋影片）加黑蒙版壓暗
+     （filter:brightness(var(--pa-dim))，等同疊一層 rgba(0,0,0,1--pa-dim)）
+     ⇒ 初版 40%（--pa-dim:.6、?v=20261109c），同日改 50%（--pa-dim:.5、?v=20261109d），
+       同日再依使用者指示改 **60%**（--pa-dim:.4、?v=20261109e）。
+     必須排在 bc-brand-stage.css 之後：本檔對 #bc-brand-stage 補 isolation:isolate，
+     讓 z-index:-1 的照片層留在 stage 內（機制與差異見該檔檔頭）。只有首頁載入。 -->
+<link rel="stylesheet" href="{% static 'css/bc-photoarea.css' %}?v=20261109e">
 {% endblock %}
 
 {% block extra_scripts %}
@@ -1034,8 +1048,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-10-30（使用者指示）：咖啡豆製程捲動模組（原生 JS，無 GSAP／Alpine／three.js）。
      內容：clip-path 膠囊→滿版（easeInCirc + 每幀 lerp 0.15）、四段製程圖片 3s 輪播、
      模糊→清晰、收尾背景上移縮放、標籤 aria-current、網格字母 tick。
-     幾何／時序取自原站 bundle，說明見 static/js/bc-home-service.js 檔頭。 -->
-<script src="{% static 'js/bc-home-service.js' %}?v=20261030a"></script>
+     幾何／時序取自原站 bundle，說明見 static/js/bc-home-service.js 檔頭。
+     2026-11-09（使用者指示）：隨模組移至 about.html（`.bc-search` 下方）⇒ 本頁不再載入。 -->
 <!-- 2026-09-21：原本此處的『首頁把 bc-attract-buy/profile 對齊 navbar-brand 頂邊』inline 腳本
      已抽成全站共用檔 static/js/bc-attract-place.js（base.html 全域載入）——
      使用者指示「所有模板浮動購物車修改位置和 index 一樣」→ 全站（含首頁）共用同一套定位，
@@ -1062,6 +1076,14 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
 <script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261024a"></script>
+<!-- 2026-11-07（使用者指示）：品牌舞台 hero 的背景照片視差（移植 hicard.studio 的
+     .fv__photoarea／Sticky1）。依賴 base.html 全域 defer 的 gsap + ScrollTrigger，
+     故同樣用 defer（排在它們之後執行）；找不到 .bc-photoarea、或 GSAP 未載入、
+     或 prefers-reduced-motion:reduce 都會直接 return（照片留在靜態位置）。
+     2026-11-09：第 3 格改為影片容器（.bc-pa-video＋<video>），本檔同時負責「進到視窗才播、
+     捲離就 pause」；播放邏輯與 GSAP 解耦（CDN 掛掉時影片照樣正常）。
+     機制與驗收見 docs/home-photoarea.md。 -->
+<script defer src="{% static 'js/bc-photoarea.js' %}?v=20261109b"></script>
 {% endblock %}
 
 {% block bcc_footer %}

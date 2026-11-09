@@ -1,0 +1,137 @@
+/* ============================================================
+   bc-photoarea.css — 首頁 hero 的「背景照片視差層」
+   2026-11-07 建立（移植 hicard.studio 首頁 .fv__photoarea）
+
+   來源：https://hicard.studio/ja （Next.js + gsap/ScrollTrigger）
+         · markup = <div class="fv__photoarea sticky1 photoarea_xy"> ＋ 5 個 <img data-para="-100…-500">
+         · 原站 CSS（_next/static/css/1fcc684cf9ba4ee2.css）
+             .fv__photoarea{position:relative;height:120vh;margin-bottom:-120vh;
+                            z-index:200;pointer-events:none}
+             .fv__photoarea img{position:absolute;height:auto;width:480rem;max-width:576px}
+             html{font-size:.0694vw} ⇒ 1rem ≈ 1px@1440 ⇒ 480rem ≈ 33vw
+             ≤768px ⇒ width:162.5rem（≈41.6vw）＋ y_n 換另一組百分比
+         · 原站 JS（page.js 的 Sticky1）：容器與每張圖各自掛一個 ScrollTrigger，
+             y 分別是「容器高 − pad 高」× factor 與 data-para（單位 rem），皆 scrub ⇒
+             兩層位移相加 ⇒ 照片比內容更快往上飄。
+
+   與原站的三處刻意差異（本地版面沒有 120vh 的內容盒，改用 hero 現成的高度）：
+     ① 容器＝ position:absolute;inset:0（跟著 #bc-brand-stage 的高度，不再自己撐 120vh
+        ＋負 margin 去抵消）⇒ 不必動任何既有版面高度，也不會多出「可捲動空間」。
+     ② 尺寸單位由 rem 換成 vw／px（min(33.3vw,560px)）：原站那套 rem 依賴他們自己的
+        html{font-size}，本地全域沒有這個設定，直接寫 vw 才不會隨根字級飄。
+     ③ 視差量由「rem」換成「vh」：hero 高度是「一屏的內容盒」而不是 120vh，
+        vh 才能讓效果在任何視窗高度下維持同樣比例（數值見模板的 data-para）。
+
+   圖層：容器 z-index:-1 ＋ hero 變體的 #bc-brand-stage{isolation:isolate}
+      ⇒ 負層留在 stage 內、永遠畫在所有舞台內容（環形咖啡照／時鐘／大字）之下。
+      首頁 hero 的 #bc-brand-stage 與 .footer 底色已是 transparent
+      （bc-brand-stage.css 檔尾「首頁專用覆寫」段，讓 body 的 bg_4.jpg 透出）
+      ⇒ 不需要再處理任何遮蓋問題。about 頁的真頁尾不含此模組、也不吃這些選擇器。
+   ============================================================ */
+
+.bc-photoarea {
+  /* 照片寬：原站 480rem（≈33vw）／上限 576px；換算成 min() 後同尺寸 */
+  --pa-w: 33.3vw;
+  --pa-w-cap: 560px;
+  /* 黑蒙版濃度：.4 ＝ 疊一層 rgba(0,0,0,.6)（.5 ＝ 疊黑 50%），見下方 filter 段 */
+  --pa-dim: 0.4;
+
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* stage 本身已 overflow:hidden，這裡再加一層是同值的保險（照片不可能溢出 hero） */
+  overflow: hidden;
+  /* 純裝飾層：不吃滑鼠事件 ⇒ 環形照的 hover／拖曳／連結完全不受影響 */
+  pointer-events: none;
+}
+
+/* 讓負 z-index 的背景層留在 #bc-brand-stage 內（stage 已是 position:relative）。
+   不加這條時，負層會漂到最近的祖先堆疊脈絡（可能是 root），
+   雖然首頁背景同樣是透明的、畫面看起來一樣，但換頁／換背景就會露出來。 */
+.bc-brand-stage-hero #bc-brand-stage {
+  isolation: isolate;
+}
+
+.bc-photoarea img,
+.bc-photoarea .bc-pa-video {
+  position: absolute;
+  height: auto;
+  width: min(var(--pa-w), var(--pa-w-cap));
+  /* 由 JS 設 translate3d；先給 0 讓沒有 JS（或 GSAP 掛掉）時也是正常靜態照片 */
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+/* 寬版（原站 .yoko 那一張）：等比裁切，讓節奏與 4 張直式不同 */
+.bc-photoarea img.yoko,
+.bc-photoarea .bc-pa-video.yoko {
+  width: min(calc(var(--pa-w) * 1.35), 760px);
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+/* ---- 影片格位（2026-11-09）：第 3 格由 <img> 改為 .bc-pa-video 容器＋內層 <video> ----
+   外層吃上面那組幾何規則（寬度／aspect-ratio／位移都由它負責），這裡只補「容器裁切」與
+   「內層影片填滿」；內層不再掛 transform（位移統一由外層 [data-para] 帶） */
+.bc-photoarea .bc-pa-video {
+  overflow: hidden;
+  /* div 沒有固有比例 ⇒ 給預設直式（與照片 768×1075 同）；.yoko 那條會覆寫成 3/2 */
+  aspect-ratio: 768 / 1075;
+}
+
+.bc-photoarea .bc-pa-video > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- 黑蒙版 60%（2026-11-09 使用者指示：50% → 60%）：每張照片／影片各自壓暗 ----
+   等於在每一格上疊一層 rgba(0,0,0,.6)：alpha 合成的結果是 C×.4 ＋ 0×.6 ＝ .4C，
+   與 brightness(.4) 的逐通道乘算完全等價 —— 所以不必為 <img> 再加外層 wrapper
+   （<img> 是 replaced element，::after／::before 不會渲染，做不出「真」遮罩層）。
+   要調濃淡只改 --pa-dim：.4 ＝ 60% 黑（現值）、.5 ＝ 50% 黑、.6 ＝ 40% 黑、.3 ＝ 70% 黑、
+   1 ＝ 不壓暗。
+   （未播／reduced-motion 時該格本來就沒有畫面，所以不會有「先亮後暗」的落差。） */
+.bc-photoarea img,
+.bc-photoarea .bc-pa-video > video {
+  filter: brightness(var(--pa-dim));
+}
+
+/* ---- 落點：原站 .photoarea_xy 的 .x_n／.y_n 百分比逐值照抄 ---- */
+.bc-photoarea .x_1 { left: 0; }
+.bc-photoarea .x_2 { left: 10%; }
+.bc-photoarea .x_3 { right: 10%; }
+.bc-photoarea .x_4 { right: 0; }
+.bc-photoarea .x_5 { left: 20%; }
+
+.bc-photoarea .y_1 { top: 0; }
+.bc-photoarea .y_2 { top: 20%; }
+.bc-photoarea .y_3 { bottom: 20%; }
+.bc-photoarea .y_4 { bottom: 0; }
+.bc-photoarea .y_5 { bottom: 30%; }
+
+/* ---- 層序：原站 .d_1~.d_5 是層級標記，這裡明確對應 z-index 1–5 ----
+   （重疊時「號碼大的在上」，與原站 DOM 順序的堆疊結果一致，但不依賴 DOM 順序） */
+.bc-photoarea .d_1 { z-index: 1; }
+.bc-photoarea .d_2 { z-index: 2; }
+.bc-photoarea .d_3 { z-index: 3; }
+.bc-photoarea .d_4 { z-index: 4; }
+.bc-photoarea .d_5 { z-index: 5; }
+
+/* ---- ≤768px：原站同樣縮寬＋換一組 y 落點（照片在手機上改成「一路往下排」） ---- */
+@media screen and (max-width: 768px) {
+  .bc-photoarea {
+    --pa-w: 41.6vw;
+    --pa-w-cap: 300px;
+  }
+
+  .bc-photoarea .y_1 { top: 0; }
+  .bc-photoarea .y_2 { top: 10%; }
+  .bc-photoarea .y_3 { top: 30%; bottom: auto; }
+  .bc-photoarea .y_4 { top: 60%; bottom: auto; }
+  .bc-photoarea .y_5 { top: 85%; bottom: auto; }
+  /* yoko 在手機改回與其他張同寬（原站 ≤768px 也是單一寬度；影片格位同規則） */
+  .bc-photoarea img.yoko,
+  .bc-photoarea .bc-pa-video.yoko { width: min(var(--pa-w), var(--pa-w-cap)); }
+}

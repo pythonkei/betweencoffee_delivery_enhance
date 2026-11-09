@@ -7,8 +7,10 @@
          Alpine + Lenis + three.js 網格 + GSAP MorphSVG 的組合；
          本檔為 markup 1:1 移植（class 全部改為 .bc-hs-*），
          幾何與時序見 static/js/bc-home-service.js 檔頭說明。
-   掛載位置：index.html「推薦頁面雙卡（aside.bc-recommended-pages）」之後、
-             「capabilities-gallery」之前 —— 見 index.html 檔頭 [2b-2] 註解。
+   掛載位置：about.html（`/about/`）「SALON/STORE SEARCH 大區塊（aside.bc-search）」正下方、
+             `.bc-product-real` 之前 —— 見 about.html 內容區註解。
+             2026-11-09（使用者指示）自 index.html `[2b-2]`（推薦雙卡之後）整組移入本頁；
+             partial／CSS／JS 路徑不變，只改掛載點。
    樣式：static/css/bc-home-service.css
    腳本：static/js/bc-home-service.js（原生 JS，無 Alpine／GSAP／three.js）
    素材：static/images/home-service/hs-{1..4}{,-sp,-blur,-clip}.webp

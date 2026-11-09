@@ -76,6 +76,14 @@
 <link rel="stylesheet" href="{% static 'css/bc-steps.css' %}?v=20261023a">
 <!-- 2026-10-25（使用者指示）：SALON/STORE SEARCH 大區塊（.bc-search）自 index.html 移入本頁 -->
 <link rel="stylesheet" href="{% static 'css/bc-search.css' %}?v=20260918a">
+<!-- 2026-11-09（使用者指示）：咖啡豆製程捲動模組（.bc-home-service，移植 union-tec
+     homeService）自 index.html 整組移入本頁 → 位置＝`.bc-search` 正下方
+     （原首頁位置 [2b-2]：推薦雙卡與 capabilities 之間）。
+     - markup：partials/bc_home_service.html（class 全部改為 .bc-hs-*）
+     - 樣式：本行；腳本：extra_scripts 的 bc-home-service.js（原生 JS，無 GSAP／Alpine）
+     - 素材：static/images/home-service/hs-{1..4}{,-sp,-blur,-clip}.webp
+     版號 20261030a → 20261109a：檔頭註解改記「about 頁」，CSS 規則未變。 -->
+<link rel="stylesheet" href="{% static 'css/bc-home-service.css' %}?v=20261109a">
 {% endblock %}
 
 
@@ -369,6 +377,15 @@
         </div>
     </a>
 </aside>
+
+<!-- 2026-11-09（使用者指示）：咖啡豆製程捲動模組（.bc-home-service）自 index.html 移入，
+     位置＝`.bc-search` 正下方、`.bc-product-real` 之前（原首頁 [2b-2]）。
+     結構（總高 ≈ 100svh + 100svh）：header 文檔流 → sticky 膠囊背景（clip-path 隨捲動
+     放大到滿版）→ sticky stage（左側標籤＋右下 CTA＋網格字母）→ 100svh 收尾 spacer。
+     樣式 bc-home-service.css、腳本 bc-home-service.js（皆本頁 extra_css／extra_scripts）；
+     模組用原生 scroll 量測（getBoundingClientRect），與本頁 GSAP／ScrollTrigger 不衝突；
+     sticky 生效前提＝祖先不得有 overflow/transform（.bc-page-content 只有 position:relative）。 -->
+{% include 'betweencoffee_delivery/partials/bc_home_service.html' %}
 
 <div class="bc-product-real">
 <section class='c-sec c-sec-product-real' data-bg='black'>
@@ -1640,6 +1657,13 @@
      · bc-steps-rive.js 自帶 IntersectionObserver，接近視口才動態注入自架 rive.js，不需 defer。 -->
 <script defer src="{% static 'js/bc-search.js' %}?v=20260813a"></script>
 <script src="{% static 'js/bc-steps-rive.js' %}?v=20261023b"></script>
+<!-- 2026-11-09（使用者指示）：咖啡豆製程捲動模組（原生 JS，無 GSAP／Alpine／three.js），
+     隨模組自 index.html 移入 → 位置＝`.bc-search` 下方。內容：clip-path 膠囊→滿版
+     （easeInCirc + 每幀 lerp 0.15）、四段製程圖片 3s 輪播、模糊→清晰、收尾背景上移縮放、
+     標籤 aria-current、網格字母 tick。不需 defer：自身用 rAF + getBoundingClientRect，
+     不依賴 gsap／ScrollTrigger；放最後可確保 DOM 已就位（同 index 原載入位置）。
+     版號 20261030a → 20261109a：檔頭註解改記「about 頁」，程式邏輯未變。 -->
+<script src="{% static 'js/bc-home-service.js' %}?v=20261109a"></script>
 {% endblock %}
 
 {% block bcc_footer %}

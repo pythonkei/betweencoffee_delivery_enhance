@@ -1,7 +1,10 @@
 /* ============================================================
-   bc-home-service.js — 首頁「咖啡豆製程」捲動模組（union-tec homeService 移植）
-   2026-10-30 建立
+   bc-home-service.js — 「咖啡豆製程」捲動模組（union-tec homeService 移植）
+   2026-10-30 建立｜2026-11-09 自首頁移到 about.html（`.bc-search` 下方）
    ------------------------------------------------------------------
+   掛載：about.html extra_scripts（?v=20261109a）＋ partials/bc_home_service.html
+         原首頁位置 [2b-2] 已移除；量測全用 getBoundingClientRect，
+         不綁頁面位置 ⇒ 換頁掛載不需改邏輯。
    原站是什麼：
      section[x-data="homeService"]（Alpine）＋ Lenis 平滑捲動
      ＋ three.js 網格（PC）＋ GSAP MorphSVG。本檔以原生 JS 重寫，

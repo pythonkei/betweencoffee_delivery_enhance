@@ -13,6 +13,7 @@
 | `betweencoffee_memory_bank/05_PRIORITY_TASKS.md` | 未完成事項與優先序 | 4.5K |
 | `task_progress.md` | 當前任務進度（只留現況；歷史已封存） | 10.4K |
 | `docs/about-sticky-mv.md` | `/about/` 首屏 sticky MV 實作細節（尺寸變數、地雷、`.mv-stage` 格位、驗證方式）→ 改這塊前必讀 | 3K |
+| `docs/home-photoarea.md` | 首頁 hero 背景照片視差（`.bc-photoarea`；兩層 scrub、圖層/isolation、遠端素材換法、驗收清單）→ 改這塊前必讀 | 6K |
 | `docs/guides/RENDER_DEPLOY_GUIDE.md` | Render 部署步驟（Docker、env、migration） | 11K |
 | `docs/guides/WEBSOCKET_MIGRATION_GUIDE.md` | WebSocket 三層架構與遷移 | 8K |
 | `docs/security/git-history-cleanup.md` | 金鑰清除與 repo 安全待辦 | — |

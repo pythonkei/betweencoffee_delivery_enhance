@@ -41,6 +41,49 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
 
 {% endcomment %}
 <div id="bc-brand-stage">
+<!-- 2026-11-07（使用者指示）：移植 hicard.studio 首頁 .fv__photoarea 的「背景照片視差」——
+     把 5 張照片鋪在環形咖啡照（#bc-stage-photo-ring）與時鐘（#bc-stage-clock）的**底下**。
+     [圖層] 本層 position:absolute + z-index:-1 + pointer-events:none，並由 hero 變體在
+       #bc-brand-stage 加 isolation:isolate（見 static/css/bc-photoarea.css）⇒ 照片永遠在
+       所有舞台內容之下、也不吃滑鼠事件 ⇒ 環形照的 hover／拖曳、時鐘、連結都不受影響。
+       （首頁 hero 的 #bc-brand-stage／.footer 底色已是 transparent → 免處理遮蓋。）
+     [素材] 2026-11-09 起改為本站自存：static/images/photoarea/pa-1~5.webp
+        （原站 hicard.studio 的 768×1075 jpg，5 支合計 758KB → 轉 webp q82 後 524KB；
+         來源 URL 見 docs/home-photoarea.md §3，要換圖直接覆蓋同名檔並升 ?v= 即可）。
+        寫死 width/height（2026-11-09 換圖後為各檔實際尺寸，比例仍全是 768:1075）
+        是為了避免載入時版面跳動（照片是絕對定位，不會撐開 hero）。
+     [落點] class 的 x_n／y_n ＝ 原站 .photoarea_xy 的百分比落點（逐值照抄的 CSS 在
+       bc-photoarea.css），d_n ＝ 層序 1–5；第 3 格是寬版（原站 .yoko），且 2026-11-09 起
+       該格是影片容器（見下方 pa-3，pa-3.webp 轉為該 video 的 poster）。
+     [視差] data-para ＝ 該張位移量（vh，原站 -100~-500rem 的等比換算）；
+       data-pa-shift ＝ 整層額外上飄量（原站 Sticky1 的容器位移）。
+       兩層相加＝照片比內容更快往上飄，機制／驗收見 docs/home-photoarea.md。 -->
+<div class="bc-photoarea" aria-hidden="true" data-pa-shift="-10">
+  <img class="x_4 y_2 d_1" data-para="-8" alt="" width="768" height="1075"
+       loading="lazy" decoding="async"
+       src="{% static 'images/photoarea/pa-1.webp' %}?v=20261109b">
+  <img class="x_2 y_3 d_2" data-para="-13" alt="" width="640" height="896"
+       loading="lazy" decoding="async"
+       src="{% static 'images/photoarea/pa-2.webp' %}?v=20261109b">
+  <!-- 2026-11-09（使用者指示）：pa-3 這個格位改為「影片容器」——外層 .bc-pa-video 沿用同一組
+       幾何 class（x_3 y_5 d_3 yoko）＋ data-para（視差位移掛外層），內層 <video> 填滿容器並 cover。
+       本格不再使用照片檔（pa-3 已於 11-09 15:27 改名為 pa-3__.webp 備份、不參與畫面）
+       ⇒ <video> 沒有 poster：影片還沒播／prefers-reduced-motion／iOS 省電擋 autoplay 時，
+       該格就是「空的」（露出後面的深色底，不會破圖、也不會多一支 404 請求）。
+       播不播由 bc-photoarea.js 決定：進到視窗才 play、捲離就 pause。
+       換素材＝改下面 <source> 的檔名（現用 hero_00.webm，1280×720、6 秒、762K）並升 ?v=。 -->
+  <div class="x_3 y_5 d_3 yoko bc-pa-video" data-para="-18">
+    <video class="bc-pa-video__el" muted loop playsinline preload="none" tabindex="-1">
+      <source src="{% static 'media/hero_00.webm' %}?v=20261109a" type="video/webm">
+    </video>
+  </div>
+  <img class="x_1 y_4 d_4" data-para="-23" alt="" width="767" height="1074"
+       loading="lazy" decoding="async"
+       src="{% static 'images/photoarea/pa-4.webp' %}?v=20261109b">
+  <img class="x_5 y_1 d_5" data-para="-28" alt="" width="768" height="1075"
+       loading="lazy" decoding="async"
+       src="{% static 'images/photoarea/pa-5.webp' %}?v=20261109b">
+</div>
 <div class="footer">
   <div class="footer-inner">
     <div class="w-layout-grid grid is-footer">

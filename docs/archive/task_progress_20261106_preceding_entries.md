@@ -29,3 +29,15 @@
 - `bc-sticky-mv.js`（`?v=20261106b`）：① 換片判斷改 `isReady()`＝`readyState >= 3` 即時看，不再只信 `canplaythrough`（省流量時它不一定會發 → 會卡在沒載好的層）；② 找不到就緒層時補呼叫 `loadNextUnloaded()`（原本只在成功換片後才補載，載入鏈可能停住）；③ `clone.preload` `none → auto`（沒被 `loadLayer()` 點到的層仍不會下載）。
 - 實測（Playwright 8000）：6 層全建立、強制快轉 30s 得到 `4→5→0→1→2→3→4…` 完整循環 38 次（6 支全輪到、全程 1 個 `.is-on`＋淡入中 2 個）、初次載入只抓 2 支（5.4MB）、390 無水平溢出、reduced-motion 只 1 層 paused、console 0 error、`manage.py check` 0 issue、flake8 無新增問題。
 - 注意：片單總量約 22MB（原 3 支 14.4MB＋新 7.7MB），仍是「用到才載」。
+
+
+**`/about/` 重新顯示 `bc-popeye50` 字輪，位置改到 `#bc-sticky-mv` 正下方 — 2026-11-06 完成（已 push `f88da5de`）**
+
+| 項目 | 內容 |
+|---|---|
+| 指示 | 「修改 about.html：重新顯示 section bc-popeye50，並移動到 bc-sticky-mv 下方」 |
+| 改動 | 只改 `templates/betweencoffee_delivery/about.html`（+53 行）：① extra_css 加 `bc-popeye50.css?v=20261102f`；② markup 插在 `#bc-sticky-mv` 收尾 `</section>` 之後（DOM 順序＝`#bc-sticky-mv` → `.bc-popeye50` → `.bc-series-hero.bc-series-bracket`）；③ extra_scripts 加 `bc-popeye50.js?v=20261102c`（`defer`，緊接 `bc-sticky-mv.js`）。CSS／JS 檔本身未改 ⇒ 沿用原版號 |
+| 免改後端 | `views.About` 的 `wheel_items`（`betweencoffee_delivery/views.py:475-491`）與 `series_coffees` 移除期間一直留在 context |
+| 驗證（Playwright，8081） | gap 0、模組 1440×900／390×844、字輪自動旋轉、中心連結實點導頁 `/coffee/2/`、無水平溢出、上方 sticky 影片正常播放（currentTime 前進）、console 0 error、`manage.py check` 0 issue |
+| 已知行為 | 開場 loader 約 7s 進終態（載入即開始跑，模組在第二屏看不到）；要「進視窗才播」需改 `bc-popeye50.js` 的 `runIntro()` |
+| 截圖 | `/home/kei/bc-about-popeye50-below-mv-{1280,390}.png` |
