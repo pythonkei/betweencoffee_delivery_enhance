@@ -29,6 +29,7 @@
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 16px; }
   .card { background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 16px; }
   .hd { display: flex; align-items: baseline; gap: 8px; }
+  .hd .cur { margin-left: auto; font-size: .62rem; font-weight: 500; color: #c49b63; white-space: nowrap; }
   .no { font-size: 1.05rem; font-weight: 700; color: #c49b63; line-height: 1; }
   .nm { font-size: .9rem; font-weight: 500; }
   .dsc { font-size: .7rem; font-weight: 300; color: rgba(255, 255, 255, .4); margin-top: 3px; }
@@ -65,8 +66,9 @@
   右上角為金色數字 badge — 與線上完全一致。<br>
   20 個候選＝10 種造型 ×（<b>線條</b> <code>.bc-fc-line</code>／<b>實心</b> <code>.bc-fc-solid</code>），
   每列列出三種斷點尺寸（桌機 <code>37px</code>／平板 <code>34px</code>／手機 <code>31px</code>；手機另有 44px 透明點擊區，只縮字形不縮可點範圍）。<br>
-  目前線上：<code>01 購物袋（線條）</code>。滑鼠移上去可看 hover 變金色；選定後把該格 SVG 內容貼進
-  <code>base.html</code> 的 <code>&lt;svg class="bc-fc-icon"&gt;</code> 即可。
+  目前線上：<code>04 手提包（線條）</code>（使用者 2026-11-09 選定，卡片右上標「★ 使用中」）。<br>
+  滑鼠移上去可看 hover 變金色；要換造型＝把該格 SVG 內容貼進
+  <code>base.html:190</code> 的 <code>&lt;svg class="bc-fc-icon"&gt;</code> 即可。
 </p>
 <h2 class="ov-h">① 放大對照（96px，先看造型再挑）</h2>
 <div class="overview" id="overview"></div>
@@ -197,6 +199,8 @@
   var SIZES = [37, 34, 31];
   var LABELS = { 37: '37px 桌機', 34: '34px 平板', 31: '31px 手機' };
   var MODES = [['line', '線條'], ['solid', '實心']];
+  /* 目前 base.html:190 使用的造型（使用者 2026-11-09 選定）→ 卡片標「★ 使用中」 */
+  var CURRENT = 'handbag';
 
   /* ① 放大對照：--bc-fc-size 設 91px ⇒ SVG = 91×1.05 ≈ 96px（樣式仍全部來自正式 CSS） */
   document.getElementById('overview').innerHTML = MODES.map(function (m) {
@@ -229,7 +233,8 @@
       return '<div class="row"><span class="tag">' + m[1] + '</span>' + cells + '</div>';
     }).join('');
     return '<div class="card">'
-      + '<div class="hd"><span class="no">' + (i + 1) + '</span><span class="nm">' + o[0] + '</span></div>'
+      + '<div class="hd"><span class="no">' + (i + 1) + '</span><span class="nm">' + o[0] + '</span>'
+      + (o[2] === CURRENT ? '<span class="cur">★ 使用中</span>' : '') + '</div>'
       + '<div class="dsc">' + o[1] + '</div>'
       + rows
       + '<div class="code">' + '&lt;svg class="bc-fc-icon" viewBox="0 0 24 24"&gt;…&lt;/svg&gt;' + '</div>'

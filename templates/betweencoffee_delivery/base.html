@@ -184,12 +184,13 @@
         換造型＝把下面 <svg> 的內容換成預覽頁該格；元素只分兩種 class：
           bc-fc-line（線條：fill:none + stroke:currentColor）／bc-fc-solid（實心：fill:currentColor）
         尺寸＝1.05em（吃 --bc-fc-size），顏色一律 currentColor ⇒ hover 轉品牌金自動生效。
-        目前使用：01 購物袋（線條） -->
+        目前使用：04 手提包（線條）— 使用者 2026-11-09 選定（梯形包身＋短提把＋中央金屬扣） -->
 <div id="bc-floating-cart" class="bc-floating-cart">
   <button id="bc-floating-cart-btn" class="bc-floating-cart-btn" aria-label="購物車">
     <svg class="bc-fc-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <rect class="bc-fc-line" x="4.2" y="8.2" width="15.6" height="12.9" rx="2.3"/>
-      <path class="bc-fc-line" d="M8.5 8.2V6.5a3.5 3.5 0 0 1 7 0v1.7"/>
+      <path class="bc-fc-line" d="M4.6 9.6h14.8l1.2 8.6a2.1 2.1 0 0 1-2.1 2.3H5.5a2.1 2.1 0 0 1-2.1-2.3z"/>
+      <path class="bc-fc-line" d="M8.8 9.6V7.9a3.2 3.2 0 0 1 6.4 0v1.7"/>
+      <path class="bc-fc-line" d="M10.6 13.7h2.8"/>
     </svg>
     <!-- 2026-09-21（使用者指示）：圖示常駐顯示——空車也看得到；數量為 0 時只隱藏數字圓圈
          （伺服器端先判斷，之後由 bc-slideout-cart.js 的 _updateBadge 同步） -->
