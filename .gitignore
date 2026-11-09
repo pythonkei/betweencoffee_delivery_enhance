@@ -156,3 +156,6 @@ yarn-error.log*
 /static/images/recommended-pages/_coffee_bg.webm
 /static/images/recommended-pages/_clip-bean-ani.png
 
+
+# Playwright MCP 截圖／快照輸出（本機驗證用，不入版控）
+.playwright-mcp/
