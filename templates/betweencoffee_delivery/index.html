@@ -962,7 +962,9 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-11-07（使用者指示）：移植 hicard.studio 首頁 .fv__photoarea 的「背景照片視差」
      ——品牌舞台 hero 的背景照片（markup 在 partials/bc_brand_stage_hero.html 的
      #bc-brand-stage 第一個子節點 .bc-photoarea；位移由 js/bc-photoarea.js 控制）。
-     2026-11-09 起：5 格中第 3 格改為影片容器（.bc-pa-video＋<video>），其餘 4 格仍是照片。
+     2026-11-09 起：5 格中第 3 格改為影片容器（.bc-pa-video＋<video>），其餘 4 格仍是照片；
+     2026-11-09 稍晚：該格再改為「可輪播的影片容器」（多支 <video> 疊在同一框，清單＝
+     views.PA_VIDEOS，現況 3 支：hero_00 → hero_04 → hero_05）⇒ 本檔升 ?v=20261109h。
      2026-11-09 稍後（使用者指示）：每格（4 張照片＋影片）加黑蒙版壓暗
      （filter:brightness(var(--pa-dim))，等同疊一層 rgba(0,0,0,1--pa-dim)）
      ⇒ 初版 40%（--pa-dim:.6、?v=20261109c），同日改 50%（--pa-dim:.5、?v=20261109d），
@@ -970,7 +972,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        → **75%（--pa-dim:.25、?v=20261109g）**。
      必須排在 bc-brand-stage.css 之後：本檔對 #bc-brand-stage 補 isolation:isolate，
      讓 z-index:-1 的照片層留在 stage 內（機制與差異見該檔檔頭）。只有首頁載入。 -->
-<link rel="stylesheet" href="{% static 'css/bc-photoarea.css' %}?v=20261109g">
+<link rel="stylesheet" href="{% static 'css/bc-photoarea.css' %}?v=20261109h">
 {% endblock %}
 
 {% block extra_scripts %}
@@ -1083,8 +1085,10 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      或 prefers-reduced-motion:reduce 都會直接 return（照片留在靜態位置）。
      2026-11-09：第 3 格改為影片容器（.bc-pa-video＋<video>），本檔同時負責「進到視窗才播、
      捲離就 pause」；播放邏輯與 GSAP 解耦（CDN 掛掉時影片照樣正常）。
+     2026-11-09（同日）：該格改為「可輪播的影片容器」——可放多支 <video>（清單＝views.PA_VIDEOS，
+     現況 3 支：hero_00 → hero_04 → hero_05），照 DOM 順序循環、距結束 0.75s 交叉淡入下一支。
      機制與驗收見 docs/home-photoarea.md。 -->
-<script defer src="{% static 'js/bc-photoarea.js' %}?v=20261109b"></script>
+<script defer src="{% static 'js/bc-photoarea.js' %}?v=20261109c"></script>
 {% endblock %}
 
 {% block bcc_footer %}

@@ -89,6 +89,19 @@ def _mv_versioned_static(rel_path):
 # 關掉 JS／GSAP 掛掉時也一樣有效。
 PHOTOAREA_TILES = 5
 
+# 首頁 hero 背景照片區第 3 格（`.bc-pa-video`）的影片輪播清單。
+# 2026-11-09（使用者指示）：由「單支影片」改為「可輪播的影片容器」，依清單順序循環播放。
+#   · 要加片／換片只改這裡（模板 `{% for pa_video in pa_videos %}` 自動長出 <video>，
+#     bc-photoarea.js 也照 DOM 順序輪播），不必動模板、CSS、JS。
+#   · 版號由下方 _mv_versioned_static() 自動加 ?v=<檔案 mtime> ⇒ 換同名檔就失效快取，
+#     不像圖片那邊需要手動升 ?v=。
+#   · 順序（現況）：① hero_00.webm（原本那一支）→ ② hero_04.webm → ③ hero_05.webm。
+PA_VIDEOS = [
+    "media/hero_00.webm",
+    "media/hero_04.webm",
+    "media/hero_05.webm",
+]
+
 
 def _photoarea_slots(count=PHOTOAREA_TILES):
     """回傳 count 組落點配對 `[{"x": 3, "y": 1}, …]`（給模板的 `.x_n`／`.y_n`）。
@@ -113,6 +126,8 @@ class Index(View):
         context = _build_landing_context(request)
         # 2026-11-09：hero 背景照片每次載入重排落點（見上方 _photoarea_slots 說明）
         context["pa_slots"] = _photoarea_slots()
+        # 2026-11-09：第 3 格影片清單（見上方 PA_VIDEOS；mtime 版號由 _mv_versioned_static 加）
+        context["pa_videos"] = [_mv_versioned_static(path) for path in PA_VIDEOS]
         return render(request, "betweencoffee_delivery/index.html", context)
 
 

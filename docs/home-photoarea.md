@@ -7,7 +7,8 @@
 
 ## 一、效果是什麼
 
-首頁第一屏（品牌舞台 hero：時鐘 `{ 21 : 59 }` ＋環形咖啡照 ＋大字）的**背後**鋪 5 格照片，
+首頁第一屏（品牌舞台 hero：時鐘 `{ 21 : 59 }` ＋環形咖啡照 ＋大字）的**背後**鋪 5 格
+（4 張照片 ＋ 第 3 格是**影片輪播**，內含 3 支依序播放，見 §四之二），
 往下捲時這 5 格比內容更快往上飄（多層視差），彼此錯位、依序離開畫面。
 每格都壓了一層 **75% 黑蒙版**（2026-11-09 起，見 §四之三）⇒ 照片退成氛圍，不搶前面時鐘／環形照／大字。
 **每次重新整理，5 格的落點都會重排**（2026-11-09 起，比照原站；見 §四之四）。
@@ -18,6 +19,9 @@
 |---|---|---|---|
 | 容器 | `.bc-photoarea` | `data-pa-shift`（vh，預設 `-10`）× factor | 原站 Sticky1 的容器位移 |
 | 單張 | 每個 `[data-para]` 元素（4 個 `<img>` ＋ 1 個影片容器 `.bc-pa-video`） | `data-para`（vh，`-8 / -13 / -18 / -23 / -28`） | 原站 `data-para="-100…-500"` 等比換算 |
+
+> 第 5 個 `[data-para]` 是影片容器（內含 3 支依序輪播的 `<video>`，見 §四之二）；位移／視差
+> 一律掛在**外層容器**，內層影片只做 `object-fit:cover`。
 
 - ScrollTrigger 兩層都是 `trigger:#bc-brand-stage`、`start:'top top'`、`end:'bottom top'`、
   `scrub:1`、`invalidateOnRefresh:true`（`vh` 用 `window.innerHeight` 現算 ⇒ 換視窗高度會重算）。
@@ -42,8 +46,9 @@
 
 - 位置：`static/images/photoarea/pa-1.webp` ~ `pa-5.webp`（`pa-n` 對應 DOM 的 `d_n`），皆 `768×1075`。
 - **`pa-3.webp` 已不使用**：2026-11-09 15:27 使用者把它改名為 `pa-3__.webp`（只當備份，不參與畫面），
-  第 3 格改由影片填滿（見 §四之二）。`<video>` **沒有** `poster` ⇒ 影片未播／不允許播時該格是空的
-  （露出後面的深色底），好處是不會多一支 404 請求；缺點是 reduced-motion 使用者看不到靜態畫面。
+  第 3 格改由影片輪播填滿（3 支依序，見 §四之二）。`<video>` **沒有** `poster` ⇒ 影片未播／
+  不允許播時該格是空的（露出後面的深色底），好處是不會多一支 404 請求；缺點是 reduced-motion
+  使用者看不到靜態畫面。
 - 由來：原站 hicard.studio 的 5 支 `768×1075` jpg（合計 758KB），2026-11-09 下載後
   以 Pillow 轉 `webp q=82, method=6`（不帶 metadata）→ 合計 **524KB（省 31%）**，jpg 原檔已刪、
   不留重複素材。原始 URL（要重新下載時用）：
@@ -85,36 +90,56 @@
   上表只是「座標 → 位置」的定義；**哪一格拿到哪個 x/y 每次載入都不同**（§四之四）。
 - `.d_1~.d_5` → `z-index 1~5`（重疊時號碼大的在上；不依賴 DOM 順序）。
 
-### 四之二、第 3 格＝影片容器（2026-11-09 使用者指示）
+### 四之二、第 3 格＝可輪播的影片容器（2026-11-09 使用者指示）
 
-第 3 格（`.yoko .d_3` ＋洗牌得來的 `.x_n／.y_n`）由 `<img>` 改成「容器＋影片」：
+第 3 格（`.yoko .d_3` ＋洗牌得來的 `.x_n／.y_n`）由 `<img>` 改成「容器＋多支影片」：
 
 ```html
 <div class="x_{{ pa_slots.2.x|default:3 }} y_{{ pa_slots.2.y|default:5 }} d_3 yoko bc-pa-video" data-para="-18">
-  <video class="bc-pa-video__el" muted loop playsinline preload="none" tabindex="-1">
-    <source src="{% static 'media/hero_00.webm' %}?v=20261109a" type="video/webm">
+  {% for pa_video in pa_videos %}
+  <video class="bc-pa-video__el{% if forloop.first %} is-on{% endif %}" muted loop playsinline preload="none" tabindex="-1">
+    <source src="{{ pa_video }}" type="video/webm">
   </video>
+  {% endfor %}
 </div>
 ```
 
+- **片單＝單一來源**：`betweencoffee_delivery/views.py` 的 `PA_VIDEOS`，**依序播放、不洗牌**：
+  ① `media/hero_00.webm`（原本那一支）② `media/hero_04.webm` ③ `media/hero_05.webm`。
+  `Index.get` 把它轉成 `context["pa_videos"]` 給模板 ⇒ **加片／減片／換順序只改 `PA_VIDEOS`**，
+  模板、CSS、JS 都不用動。
+- **堆疊與交叉淡入**：多支影片全部 `position:absolute; inset:0` 疊在同一個框（`object-fit:cover`），
+  預設 `opacity:0`；只有帶 `.is-on` 的那支 `opacity:1` ＋ `z-index:1`。換片＝下一支加 `.is-on`
+  疊上來（`transition:opacity .6s` 交叉淡入），淡完 JS 才把舊支的 `.is-on` 拿掉並暫停歸零。
+  `z-index` 只給 `.is-on`（不是靠 DOM 順序）⇒ 輪播繞回第 1 支時也一定壓在最上層。
 - **幾何沿用**：外層 `.bc-pa-video` 吃 `.bc-photoarea img` 同一組規則（`position:absolute`、
   `width:min(33.3vw,560px)`、`.yoko` 的 ×1.35（上限 760px）＋ `aspect-ratio:3/2`），只多補
-  `overflow:hidden`；內層 `video{width:100%;height:100%;object-fit:cover}` ⇒ 換素材不必改任何尺寸。
+  `overflow:hidden`；內層 `video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}`
+  ⇒ 換素材不必改任何尺寸。
 - **位移掛外層**：JS 抓 `[data-para]`（img 與容器一視同仁），影片自己不掛 transform。
-- **播放規則**（`setupVideos()`，刻意與 GSAP 解耦）：
+- **播放／換片規則**（`setupVideoCarousel()`，刻意與 GSAP 解耦；換片參數沿用 `bc-sticky-mv.js`）：
 
   | 情況 | 行為 |
   |---|---|
-  | 照片區在視窗內 | `play()`（`preload="none"` ⇒ 進畫面才抓檔） |
-  | 捲離視窗 | `pause()`（不讓滾過去的 hero 繼續解碼／吃電） |
-  | `prefers-reduced-motion:reduce` | 不播，停在第一幀之前（`readyState 0`）⇒ 該格空白（無 `poster`，見 §三） |
+  | 照片區在視窗內 | 播當前那一支（`preload="none"` ⇒ 進畫面才抓檔） |
+  | 當前支播滿 1 秒 | 預載下一支（`preload="auto"` ＋ `load()`）——不在開場一次抓完 3 支（合計約 2.2MB） |
+  | 距當前支結束 **0.75s** | 換片：下一支加 `.is-on` 淡入 **0.6s** → 淡完暫停舊支並歸零 |
+  | 下一支還沒 ready | 這輪先不換（當前支有 `loop`，畫面不會凍住）並補載；buffer 被瀏覽器回收過就重新 `load()` |
+  | `timeupdate` 漏掉換片窗口（掉幀／seek） | 兜底：播放位置明顯倒退＝`loop` 已繞回開頭 ⇒ 立刻換片，不會同一支多播一輪 |
+  | 捲離視窗／分頁切到背景 | `pause()`（不讓滾過去的 hero 繼續解碼／吃電）；回來從原位置續播 |
+  | `prefers-reduced-motion:reduce` | 不播、`readyState 0`（連檔案都不抓）⇒ 該格空白（無 `poster`，見 §三） |
   | `play()` 被瀏覽器拒絕（iOS 省電／低電量） | 靜默失敗，該格空白，不報錯 |
+  | 片單只有 1 支 | 等同舊行為：`loop` 自己循環，不進換片流程 |
   | 沒有 `IntersectionObserver` | 直接播 |
 
-- **素材**：`static/media/hero_00.webm`（1280×720、6 秒、762KB），原本是 `/about/` 首屏 sticky MV 的第 1 支。
-  換檔＝改 `<source>` 檔名＋升 `?v=`。本格位是 3:2＋`cover` ⇒ 16:9 影片會左右各裁約 8%。
-- **快取**：這裡的 `?v=20261109a` 是手動升的（about 頁那條由 `views._mv_versioned_static()` 自動加 mtime）
-  ⇒ **換掉 `hero_00.webm` 時，本行 `?v=` 要一起升**，否則瀏覽器可能續用舊檔。
+- **實測（1440×900、`?v=20261109c`）**：`0 → 1` 在 5.82s 交叉淡入、6.44s 淡完暫停舊支；
+  `1 → 2` 10.31s；`2 → 0` 繞回正常（淡入那支 `z-index:1`）。捲到 `y=3000` 三支全 `paused`、
+  回頂部續播；console 0 error。
+- **素材（實測尺寸）**：`hero_00.webm` 1280×720／5.97s／762KB、`hero_04.webm` **1080×718**／5.0s／718KB、
+  `hero_05.webm` 1280×720／5.0s／705KB —— 都是 `/about/` 首屏 sticky MV 用的同一批檔案。
+  本格位是 3:2＋`cover` ⇒ 兩支 16:9 會左右各裁約 8%，`hero_04`（1.50）幾乎不裁。
+- **快取**：URL 由 `views._mv_versioned_static()` 自動加 `?v=<檔案 mtime>`（與 about 頁同一套）
+  ⇒ **換同名檔直接覆蓋即可**，不必手動升 `?v=`（圖片那 4 格仍要手動升）。
 
 ### 四之三、每格黑蒙版 75%（2026-11-09 使用者指示，同日演進 40% → 50% → 60% → 70% → 75%）
 
@@ -183,8 +208,8 @@ class Index(View):
 |---|---|
 | 找不到 `#bc-brand-stage`／`.bc-photoarea`／裡面沒有 `[data-para]` 元素 | `return`（不報錯） |
 | GSAP／ScrollTrigger 沒載入（CDN 掛） | 視差 `return`（照片／影片容器停在 CSS 的 `translate3d(0,0,0)`＝靜態背景）；**影片播放不受影響** |
-| `prefers-reduced-motion:reduce` | 視差 `return`（實測 `ScrollTrigger.getAll()` 相關 trigger = 0）；影片不播、`readyState 0`（連檔案都不抓）⇒ 該格空白 |
-| 影片檔案 404／格式不支援 | 該格空白（無 `poster`），版面不壞；其餘 4 格照常 |
+| `prefers-reduced-motion:reduce` | 視差 `return`（實測 `ScrollTrigger.getAll()` 相關 trigger = 0）；影片全部不播、`readyState 0`（連檔案都不抓）⇒ 該格空白 |
+| 片單中某一支 404／格式不支援 | 那支永遠不 ready ⇒ 換片時跳過（留在當前支繼續 loop），版面不壞；若第 1 支就壞 ⇒ 該格空白 |
 | `/about/` | 不載入本檔、也不含 `.bc-photoarea`；`isolation` 規則只在 `.bc-brand-stage-hero` 之下生效 |
 
 ## 六、驗收清單（改完照這串跑）
@@ -194,20 +219,24 @@ class Index(View):
    - `.bc-photoarea` 的 computed `z-index:-1`、`pointer-events:none`；`#bc-brand-stage` 的 `isolation:isolate`。
    - 5 張 `naturalWidth=768`（圖真的有載到）。
    - `document.documentElement.scrollWidth === window.innerWidth`（不會橫向溢出）。
-3. 影片格位（第 3 格）：
-   - `video.videoWidth === 1280`、`videoHeight === 720`、`paused === false`（在首屏時）。
+3. 影片格位（第 3 格，輪播容器）：
+   - `document.querySelectorAll('.bc-pa-video > video').length === 3`（＝`views.PA_VIDEOS` 長度），
+     載入後**只有 1 支**帶 `.is-on`（`opacity:1`、`z-index:1`），其餘 `opacity:0`。
+   - 當前那支 `paused === false`、`videoWidth > 0`；換片順序必須是 `hero_00 → hero_04 → hero_05 → 回 hero_00`。
+   - 觀察 6～11 秒：換片瞬間**兩支同時 `opacity` 介於 0–1**（交叉淡入），淡完（0.6s 後）舊支
+     `paused === true` 且 `currentTime === 0`。
    - 容器寬＝`min(41.6vw/33.3vw ×1.35, 760px)`、高＝寬×2/3（3:2），`overflow:hidden`。
-   - 往下捲過 hero（如 `y=2000`）→ `video.paused === true`；捲回 → 又 `false`。
-   - DevTools 開 `prefers-reduced-motion: reduce` 重新載入 → `video.paused === true`、`currentTime === 0`、
-     `readyState === 0`（影片檔沒被抓）⇒ 該格空白、4 張照片仍在、視差 transform 全為 `none`。
+   - 往下捲過 hero（如 `y=2000`）→ 三支全部 `paused === true`；捲回 → 當前那支 `false`。
+   - DevTools 開 `prefers-reduced-motion: reduce` 重新載入 → 三支全 `paused === true`、`readyState === 0`
+     （影片檔沒被抓）⇒ 該格空白、4 張照片仍在、視差 transform 全為 `none`。
 4. 逐段捲動（0 / 300 / 700 / 1300）讀 `getComputedStyle(tile).transform`（4 張 img ＋ 1 個影片容器）：
    位移量必須與 `data-para × vh × factor × 進度` 成比例（比例＝para 的比值）。
 5. `elementFromPoint()` 打在環形照與時鐘上 → 不可以命中 `.bc-photoarea` 內的 `img`／`.bc-pa-video`。
 6. 模擬 `prefers-reduced-motion: reduce` → 所有 transform 為 0。
 7. 手機 390×844：照片寬 162px（41.6vw）、位移為桌面的一半、沒有橫向溢出。
 8. `/about/` 回應內 `grep -c bc-photoarea` = 0。
-9. 蒙版：`getComputedStyle(el).filter === 'brightness(0.25)'` —— 4 張 `img` 與第 3 格 `video` 都要有；
-   容器 `.bc-photoarea` 本身**不該**有 filter（否則會多壓一次）。
+9. 蒙版：`getComputedStyle(el).filter === 'brightness(0.25)'` —— 4 張 `img` 與第 3 格的 **3 支 `video`**
+   都要有；容器 `.bc-photoarea` 本身**不該**有 filter（否則會多壓一次）。
 10. 落點洗牌：連跑 5 次 `curl -s http://127.0.0.1:8081/ | grep -o 'class="x_[0-9] y_[0-9] d_[0-9][^"]*"'`
     —— 每次都不同，且同一次載入內 5 個 `x_n` 互不重複、5 個 `y_n` 互不重複（各自是 1–5 的排列），
     `.d_n`、`data-para`、照片檔順序固定不變；`yoko` 永遠在 `.bc-pa-video` 那格。

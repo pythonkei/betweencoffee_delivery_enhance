@@ -70,9 +70,14 @@
   object-fit: cover;
 }
 
-/* ---- 影片格位（2026-11-09）：第 3 格由 <img> 改為 .bc-pa-video 容器＋內層 <video> ----
+/* ---- 影片格位（2026-11-09）：第 3 格＝.bc-pa-video 容器＋內層多支 <video>（可輪播） ----
    外層吃上面那組幾何規則（寬度／aspect-ratio／位移都由它負責），這裡只補「容器裁切」與
-   「內層影片填滿」；內層不再掛 transform（位移統一由外層 [data-para] 帶） */
+   「內層影片填滿」；內層不再掛 transform（位移統一由外層 [data-para] 帶）。
+   多支影片共用同一個框 ⇒ 全部 position:absolute 疊在一起，只有帶 .is-on 的那支 opacity:1；
+   換片＝下一支加 .is-on 疊上來（0.6s 交叉淡入，需與 bc-photoarea.js 的 VIDEO_FADE_MS 一致），
+   淡完 JS 才把舊支的 .is-on 拿掉並暫停。
+   z-index 只給 .is-on ⇒ 不論下一支在 DOM 順序的前或後，淡入的一定在上層
+   （輪播繞回第 1 支時才不會被上一支蓋住）。 */
 .bc-photoarea .bc-pa-video {
   overflow: hidden;
   /* div 沒有固有比例 ⇒ 給預設直式（與照片 768×1075 同）；.yoko 那條會覆寫成 3/2 */
@@ -80,10 +85,20 @@
 }
 
 .bc-photoarea .bc-pa-video > video {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* 當前那一支（輪播時由 JS 搬動這個 class；第 1 支由模板直接帶上） */
+.bc-photoarea .bc-pa-video > video.is-on {
+  opacity: 1;
+  z-index: 1;
 }
 
 /* ---- 黑蒙版 75%（2026-11-09 使用者指示，同日演進 40% → 50% → 60% → 70% → 75%）：

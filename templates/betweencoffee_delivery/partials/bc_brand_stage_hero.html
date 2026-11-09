@@ -72,17 +72,23 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
   <img class="x_{{ pa_slots.1.x|default:2 }} y_{{ pa_slots.1.y|default:3 }} d_2" data-para="-13" alt="" width="640" height="896"
        loading="lazy" decoding="async"
        src="{% static 'images/photoarea/pa-2.webp' %}?v=20261109b">
-  <!-- 2026-11-09（使用者指示）：pa-3 這個格位改為「影片容器」——外層 .bc-pa-video 沿用同一組
-       幾何 class（d_3 yoko ＋洗牌得來的 x_n／y_n）＋ data-para（視差位移掛外層），內層 <video> 填滿容器並 cover。
+  <!-- 2026-11-09（使用者指示）：pa-3 這個格位是「可輪播的影片容器」——外層 .bc-pa-video 沿用同一組
+       幾何 class（d_3 yoko ＋洗牌得來的 x_n／y_n）＋ data-para（視差位移掛外層）；
+       內層可放多支 <video>（全部絕對定位疊在同一框，只有帶 .is-on 的那支 opacity:1，
+       換片＝下一支淡入 0.6s，見 bc-photoarea.css）。清單＝views.PA_VIDEOS（依序輪播）：
+       ① hero_00.webm（原本那支）② hero_04.webm ③ hero_05.webm —— 要加片只改 views.py，
+       模板會自動長出 <video>，不必動這裡。
        本格不再使用照片檔（pa-3 已於 11-09 15:27 改名為 pa-3__.webp 備份、不參與畫面）
        ⇒ <video> 沒有 poster：影片還沒播／prefers-reduced-motion／iOS 省電擋 autoplay 時，
        該格就是「空的」（露出後面的深色底，不會破圖、也不會多一支 404 請求）。
-       播不播由 bc-photoarea.js 決定：進到視窗才 play、捲離就 pause。
-       換素材＝改下面 <source> 的檔名（現用 hero_00.webm，1280×720、6 秒、762K）並升 ?v=。 -->
+       播不播／何時換片由 bc-photoarea.js 的 setupVideoCarousel() 決定：
+       進到視窗才 play、捲離就 pause、距結束 0.75s 換下一支。 -->
   <div class="x_{{ pa_slots.2.x|default:3 }} y_{{ pa_slots.2.y|default:5 }} d_3 yoko bc-pa-video" data-para="-18">
-    <video class="bc-pa-video__el" muted loop playsinline preload="none" tabindex="-1">
-      <source src="{% static 'media/hero_00.webm' %}?v=20261109a" type="video/webm">
+    {% for pa_video in pa_videos %}
+    <video class="bc-pa-video__el{% if forloop.first %} is-on{% endif %}" muted loop playsinline preload="none" tabindex="-1">
+      <source src="{{ pa_video }}" type="video/webm">
     </video>
+    {% endfor %}
   </div>
   <img class="x_{{ pa_slots.3.x|default:1 }} y_{{ pa_slots.3.y|default:4 }} d_4" data-para="-23" alt="" width="767" height="1074"
        loading="lazy" decoding="async"
