@@ -15,6 +15,7 @@ a = aardvark, b = baboon, c = cat
 """
 
 import os
+import random
 
 from django.contrib.staticfiles import finders
 from django.db.models import Q
@@ -79,6 +80,27 @@ def _mv_versioned_static(rel_path):
         return url
 
 
+# 首頁 hero 背景照片區（`.bc-photoarea`）的「落點洗牌」。
+# 2026-11-09（使用者指示）：移植 hicard.studio/ja 的行為——原站每次請求都重新分配
+# 每張照片的 `.x_n`／`.y_n` 落點（照片本體與 `data-para`、`.d_n` 層序固定不變），
+# 所以「重新整理網站」照片的位置就不一樣。
+# 這裡在 view 端做（＝伺服器端渲染時就決定）而不是在 JS 裡做：HTML 送到瀏覽器時
+# 落點已經是隨機後的值 ⇒ 不會出現「先排在原位、載入後才跳位」的閃動，
+# 關掉 JS／GSAP 掛掉時也一樣有效。
+PHOTOAREA_TILES = 5
+
+
+def _photoarea_slots(count=PHOTOAREA_TILES):
+    """回傳 count 組落點配對 `[{"x": 3, "y": 1}, …]`（給模板的 `.x_n`／`.y_n`）。
+
+    x 與 y **各自獨立**洗牌（比照原站）：同一次載入不會有兩張撞同一個 x 或同一個 y，
+    但 x 與 y 之間沒有固定配對 ⇒ 組合數 count! × count!（5 格＝14,400 種）。
+    """
+    xs = random.sample(range(1, count + 1), count)
+    ys = random.sample(range(1, count + 1), count)
+    return [{"x": x, "y": y} for x, y in zip(xs, ys)]
+
+
 # 處理index, about HTTP 請求所發生的情況
 # 當使用者向伺服器發送 GET 請求時渲染 HTML template模板
 class Index(View):
@@ -89,6 +111,8 @@ class Index(View):
 
         # 简化：上下文处理器已经处理了cart，这里不需要重复
         context = _build_landing_context(request)
+        # 2026-11-09：hero 背景照片每次載入重排落點（見上方 _photoarea_slots 說明）
+        context["pa_slots"] = _photoarea_slots()
         return render(request, "betweencoffee_delivery/index.html", context)
 
 

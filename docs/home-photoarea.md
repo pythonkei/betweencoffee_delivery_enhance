@@ -3,12 +3,14 @@
 > 2026-11-07 建立。移植 **hicard.studio** 首頁的 `.fv__photoarea` ＋ GSAP「Sticky1」位移。
 > 改這塊前必讀；檔案只有 3 個：`static/css/bc-photoarea.css`、`static/js/bc-photoarea.js`、
 > markup 在 `templates/betweencoffee_delivery/partials/bc_brand_stage_hero.html`（`#bc-brand-stage` 第一個子節點）。
+> 另外落點洗牌在 view：`betweencoffee_delivery/views.py` 的 `_photoarea_slots()`（見 §四之四）。
 
 ## 一、效果是什麼
 
 首頁第一屏（品牌舞台 hero：時鐘 `{ 21 : 59 }` ＋環形咖啡照 ＋大字）的**背後**鋪 5 格照片，
 往下捲時這 5 格比內容更快往上飄（多層視差），彼此錯位、依序離開畫面。
 每格都壓了一層 **70% 黑蒙版**（2026-11-09 起，見 §四之三）⇒ 照片退成氛圍，不搶前面時鐘／環形照／大字。
+**每次重新整理，5 格的落點都會重排**（2026-11-09 起，比照原站；見 §四之四）。
 
 兩層位移（相加，皆 `scrub`、皆 `ease:'none'`）：
 
@@ -80,14 +82,15 @@
 - 落點：`.x_1 left:0`／`.x_2 left:10%`／`.x_3 right:10%`／`.x_4 right:0`／`.x_5 left:20%`；
   `.y_1 top:0`／`.y_2 top:20%`／`.y_3 bottom:20%`／`.y_4 bottom:0`／`.y_5 bottom:30%`。
   `≤768px` 改成一路往下排：`top 0 / 10% / 30% / 60% / 85%`（`y_3`、`y_4` 需 `bottom:auto`）。
+  上表只是「座標 → 位置」的定義；**哪一格拿到哪個 x/y 每次載入都不同**（§四之四）。
 - `.d_1~.d_5` → `z-index 1~5`（重疊時號碼大的在上；不依賴 DOM 順序）。
 
 ### 四之二、第 3 格＝影片容器（2026-11-09 使用者指示）
 
-第 3 格（`.x_3 .y_5 .d_3 .yoko`）由 `<img>` 改成「容器＋影片」：
+第 3 格（`.yoko .d_3` ＋洗牌得來的 `.x_n／.y_n`）由 `<img>` 改成「容器＋影片」：
 
 ```html
-<div class="x_3 y_5 d_3 yoko bc-pa-video" data-para="-18">
+<div class="x_{{ pa_slots.2.x|default:3 }} y_{{ pa_slots.2.y|default:5 }} d_3 yoko bc-pa-video" data-para="-18">
   <video class="bc-pa-video__el" muted loop playsinline preload="none" tabindex="-1">
     <source src="{% static 'media/hero_00.webm' %}?v=20261109a" type="video/webm">
   </video>
@@ -139,6 +142,41 @@
   可改成「單一覆蓋層」省掉 5 個 filter：`.bc-photoarea::after{content:'';position:absolute;inset:0;z-index:6;background:rgba(0,0,0,.7)}`
   —— 差別是重疊處只壓一次（每格各自壓 ⇒ 重疊處會壓兩次、更暗），視覺取捨自行決定。
 
+### 四之四、每次載入重排落點（2026-11-09 使用者指示）
+
+原站（hicard.studio/ja）每次請求都由**伺服器**重新分配每張照片的 `.x_n`／`.y_n`：照片本體、
+`data-para`、`.d_n` 固定不動，只有「擺在哪個落點」每次不同 ⇒ 重新整理就換一種構圖。
+本專案照同一個做法，在 **view 端**洗牌（不是丟給 JS）：
+
+```python
+# betweencoffee_delivery/views.py
+PHOTOAREA_TILES = 5
+
+def _photoarea_slots(count=PHOTOAREA_TILES):
+    xs = random.sample(range(1, count + 1), count)   # x 自己排一次
+    ys = random.sample(range(1, count + 1), count)   # y 自己排一次
+    return [{"x": x, "y": y} for x, y in zip(xs, ys)]
+
+class Index(View):
+    def get(self, request, *args, **kwargs):
+        context["pa_slots"] = _photoarea_slots()     # 只有首頁要
+```
+
+模板（`partials/bc_brand_stage_hero.html`）逐格寫 `x_{{ pa_slots.N.x|default:<原值> }}`，
+`N` = 0–4 依序對應 `.d_1`～`.d_5`。
+
+- **為什麼在 server 做**：HTML 送到瀏覽器時落點已經是隨機值 ⇒ 不會出現「先排在原位、載入後才跳位」
+  的閃動；關掉 JS／GSAP 掛掉／`prefers-reduced-motion` 時也一樣有效（原站本身也是 SSR 端洗牌）。
+- **x 與 y 各自獨立排列**（比照原站實測結果）：同一次載入不會有兩張撞同一個 x 或同一個 y，
+  但 x 與 y 之間沒有固定配對 ⇒ 組合數 `5! × 5! = 14,400`。
+- **固定不動的**：照片檔（`pa-1~5`／影片）、`data-para`（視差量）、`.d_n`（層序）、
+  `.yoko`（只有影片那格是寬版，不能跟著洗牌——來源是 16:9）。
+- **`|default:` 是保險**：別的模板 include 本檔卻沒給 `pa_slots` 時，會退回原本的固定落點
+  （`x_4 y_2` / `x_2 y_3` / `x_3 y_5` / `x_1 y_4` / `x_5 y_1`），不會 5 張疊在左上角。
+- **不用升 `?v=`**：這個改動只碰 view ＋ 模板，沒有動任何 `static/**`。
+- **要固定落點**：把 `context["pa_slots"]` 那行拿掉（自動走 fallback），或改 `_photoarea_slots()`
+  回傳固定清單。
+
 ## 五、守衛與降級
 
 | 情況 | 行為 |
@@ -170,3 +208,6 @@
 8. `/about/` 回應內 `grep -c bc-photoarea` = 0。
 9. 蒙版：`getComputedStyle(el).filter === 'brightness(0.3)'` —— 4 張 `img` 與第 3 格 `video` 都要有；
    容器 `.bc-photoarea` 本身**不該**有 filter（否則會多壓一次）。
+10. 落點洗牌：連跑 5 次 `curl -s http://127.0.0.1:8081/ | grep -o 'class="x_[0-9] y_[0-9] d_[0-9][^"]*"'`
+    —— 每次都不同，且同一次載入內 5 個 `x_n` 互不重複、5 個 `y_n` 互不重複（各自是 1–5 的排列），
+    `.d_n`、`data-para`、照片檔順序固定不變；`yoko` 永遠在 `.bc-pa-video` 那格。

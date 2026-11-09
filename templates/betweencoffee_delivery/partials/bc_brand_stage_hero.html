@@ -55,32 +55,39 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
      [落點] class 的 x_n／y_n ＝ 原站 .photoarea_xy 的百分比落點（逐值照抄的 CSS 在
        bc-photoarea.css），d_n ＝ 層序 1–5；第 3 格是寬版（原站 .yoko），且 2026-11-09 起
        該格是影片容器（見下方 pa-3，pa-3.webp 轉為該 video 的 poster）。
+     [隨機] 2026-11-09（使用者指示）：比照原站「每次載入都換位置」——5 格的 x_n／y_n
+       改由 view 端洗牌後填入（betweencoffee_delivery/views.py 的 _photoarea_slots()，
+       index 的 context 變數 pa_slots；x 與 y 各自獨立取 1–5 的排列）。
+       照片本體、data-para（視差量）、d_n（層序）仍固定跟著該格 ⇒ 只有「擺哪裡」變，
+       動態行為不變。模板寫成 {{ pa_slots.0.x|default:4 }} 這種形式：沒有 pa_slots
+       （別的模板 include 本檔卻沒給 context）時退回原本的固定落點，不會 5 張疊在左上角。
+       驗證：重整幾次看 render 出來的 class 就會不同（同一次載入內 x 與 y 各只用一次）。
      [視差] data-para ＝ 該張位移量（vh，原站 -100~-500rem 的等比換算）；
        data-pa-shift ＝ 整層額外上飄量（原站 Sticky1 的容器位移）。
        兩層相加＝照片比內容更快往上飄，機制／驗收見 docs/home-photoarea.md。 -->
 <div class="bc-photoarea" aria-hidden="true" data-pa-shift="-10">
-  <img class="x_4 y_2 d_1" data-para="-8" alt="" width="768" height="1075"
+  <img class="x_{{ pa_slots.0.x|default:4 }} y_{{ pa_slots.0.y|default:2 }} d_1" data-para="-8" alt="" width="768" height="1075"
        loading="lazy" decoding="async"
        src="{% static 'images/photoarea/pa-1.webp' %}?v=20261109b">
-  <img class="x_2 y_3 d_2" data-para="-13" alt="" width="640" height="896"
+  <img class="x_{{ pa_slots.1.x|default:2 }} y_{{ pa_slots.1.y|default:3 }} d_2" data-para="-13" alt="" width="640" height="896"
        loading="lazy" decoding="async"
        src="{% static 'images/photoarea/pa-2.webp' %}?v=20261109b">
   <!-- 2026-11-09（使用者指示）：pa-3 這個格位改為「影片容器」——外層 .bc-pa-video 沿用同一組
-       幾何 class（x_3 y_5 d_3 yoko）＋ data-para（視差位移掛外層），內層 <video> 填滿容器並 cover。
+       幾何 class（d_3 yoko ＋洗牌得來的 x_n／y_n）＋ data-para（視差位移掛外層），內層 <video> 填滿容器並 cover。
        本格不再使用照片檔（pa-3 已於 11-09 15:27 改名為 pa-3__.webp 備份、不參與畫面）
        ⇒ <video> 沒有 poster：影片還沒播／prefers-reduced-motion／iOS 省電擋 autoplay 時，
        該格就是「空的」（露出後面的深色底，不會破圖、也不會多一支 404 請求）。
        播不播由 bc-photoarea.js 決定：進到視窗才 play、捲離就 pause。
        換素材＝改下面 <source> 的檔名（現用 hero_00.webm，1280×720、6 秒、762K）並升 ?v=。 -->
-  <div class="x_3 y_5 d_3 yoko bc-pa-video" data-para="-18">
+  <div class="x_{{ pa_slots.2.x|default:3 }} y_{{ pa_slots.2.y|default:5 }} d_3 yoko bc-pa-video" data-para="-18">
     <video class="bc-pa-video__el" muted loop playsinline preload="none" tabindex="-1">
       <source src="{% static 'media/hero_00.webm' %}?v=20261109a" type="video/webm">
     </video>
   </div>
-  <img class="x_1 y_4 d_4" data-para="-23" alt="" width="767" height="1074"
+  <img class="x_{{ pa_slots.3.x|default:1 }} y_{{ pa_slots.3.y|default:4 }} d_4" data-para="-23" alt="" width="767" height="1074"
        loading="lazy" decoding="async"
        src="{% static 'images/photoarea/pa-4.webp' %}?v=20261109b">
-  <img class="x_5 y_1 d_5" data-para="-28" alt="" width="768" height="1075"
+  <img class="x_{{ pa_slots.4.x|default:5 }} y_{{ pa_slots.4.y|default:1 }} d_5" data-para="-28" alt="" width="768" height="1075"
        loading="lazy" decoding="async"
        src="{% static 'images/photoarea/pa-5.webp' %}?v=20261109b">
 </div>
