@@ -966,10 +966,11 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      2026-11-09 稍後（使用者指示）：每格（4 張照片＋影片）加黑蒙版壓暗
      （filter:brightness(var(--pa-dim))，等同疊一層 rgba(0,0,0,1--pa-dim)）
      ⇒ 初版 40%（--pa-dim:.6、?v=20261109c），同日改 50%（--pa-dim:.5、?v=20261109d），
-       同日再依序改 60%（--pa-dim:.4、?v=20261109e）→ **70%（--pa-dim:.3、?v=20261109f）**。
+       同日再依序改 60%（--pa-dim:.4、?v=20261109e）→ 70%（--pa-dim:.3、?v=20261109f）
+       → **75%（--pa-dim:.25、?v=20261109g）**。
      必須排在 bc-brand-stage.css 之後：本檔對 #bc-brand-stage 補 isolation:isolate，
      讓 z-index:-1 的照片層留在 stage 內（機制與差異見該檔檔頭）。只有首頁載入。 -->
-<link rel="stylesheet" href="{% static 'css/bc-photoarea.css' %}?v=20261109f">
+<link rel="stylesheet" href="{% static 'css/bc-photoarea.css' %}?v=20261109g">
 {% endblock %}
 
 {% block extra_scripts %}

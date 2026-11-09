@@ -9,7 +9,7 @@
 
 首頁第一屏（品牌舞台 hero：時鐘 `{ 21 : 59 }` ＋環形咖啡照 ＋大字）的**背後**鋪 5 格照片，
 往下捲時這 5 格比內容更快往上飄（多層視差），彼此錯位、依序離開畫面。
-每格都壓了一層 **70% 黑蒙版**（2026-11-09 起，見 §四之三）⇒ 照片退成氛圍，不搶前面時鐘／環形照／大字。
+每格都壓了一層 **75% 黑蒙版**（2026-11-09 起，見 §四之三）⇒ 照片退成氛圍，不搶前面時鐘／環形照／大字。
 **每次重新整理，5 格的落點都會重排**（2026-11-09 起，比照原站；見 §四之四）。
 
 兩層位移（相加，皆 `scrub`、皆 `ease:'none'`）：
@@ -116,25 +116,25 @@
 - **快取**：這裡的 `?v=20261109a` 是手動升的（about 頁那條由 `views._mv_versioned_static()` 自動加 mtime）
   ⇒ **換掉 `hero_00.webm` 時，本行 `?v=` 要一起升**，否則瀏覽器可能續用舊檔。
 
-### 四之三、每格黑蒙版 70%（2026-11-09 使用者指示，同日演進 40% → 50% → 60% → 70%）
+### 四之三、每格黑蒙版 75%（2026-11-09 使用者指示，同日演進 40% → 50% → 60% → 70% → 75%）
 
 ```css
-.bc-photoarea { --pa-dim: 0.3; }                     /* .3 ＝ 疊 black 70% */
+.bc-photoarea { --pa-dim: 0.25; }                    /* .25 ＝ 疊 black 75% */
 .bc-photoarea img,
 .bc-photoarea .bc-pa-video > video { filter: brightness(var(--pa-dim)); }
 ```
 
 - **為什麼不是「遮罩層」**：`<img>` 是 replaced element，`::before`／`::after` 不會渲染 ⇒ 真遮罩層
-  得為每一格加 wrapper（改 markup ＋全部幾何選擇器）。而 `rgba(0,0,0,.7)` 疊在圖上的結果是
-  `C×.3 ＋ 0×.7 ＝ .3C`，`brightness(.3)` 同樣是逐通道乘 `.3` ⇒ **畫面完全等價**，一行 CSS 就够。
+  得為每一格加 wrapper（改 markup ＋全部幾何選擇器）。而 `rgba(0,0,0,.75)` 疊在圖上的結果是
+  `C×.25 ＋ 0×.75 ＝ .25C`，`brightness(.25)` 同樣是逐通道乘 `.25` ⇒ **畫面完全等價**，一行 CSS 就够。
 - **涵蓋範圍**：4 張 `<img>` ＋ 第 3 格的 `<video>`（影片會裁切、縮放顯示 ⇒ 影格同樣被壓暗；
   不會「先亮後暗」閃一下）。**不含** body 背景圖、也不含 stage 上的內容（時鐘／環形照／大字仍全亮）。
-- **調濃淡**：只改 `--pa-dim`。`.3`＝70% 黑（現值）、`.4`＝60% 黑、`.5`＝50% 黑、`.6`＝40% 黑、
-  `1`＝不壓暗；
+- **調濃淡**：只改 `--pa-dim`。`.25`＝75% 黑（現值）、`.3`＝70% 黑、`.4`＝60% 黑、`.5`＝50% 黑、
+  `.6`＝40% 黑、`1`＝不壓暗；
   手機斷點共用同一個值（要分開就寫在 `≤768px` 的 `.bc-photoarea` 區塊）。
 - **之後若要在蒙版「上」再疊東西**（漸層、文字、hover 提亮）：改 wrapper 結構
   `<div class="x_1 y_4 d_4 …" data-para="-23"><img …><span class="bc-pa-mask"></span></div>`，
-  幾何 class／`data-para` 留在 wrapper、`img{width:100%;height:auto}`、`.bc-pa-mask{position:absolute;inset:0;background:rgba(0,0,0,.7)}`。
+  幾何 class／`data-para` 留在 wrapper、`img{width:100%;height:auto}`、`.bc-pa-mask{position:absolute;inset:0;background:rgba(0,0,0,.75)}`。
 - **效能（2026-11-09 實測，headless Chromium 軟體渲染、1440×900、一邊捲動一邊播影片；
   當時 `--pa-dim:.6`，純乘算 filter 的成本與乘數無關）**：
   有蒙版 69.8ms/幀（14.3fps）vs 無蒙版 57.3ms/幀（17.5fps）⇒ 約 **+20% 每幀時間**。
@@ -206,7 +206,7 @@ class Index(View):
 6. 模擬 `prefers-reduced-motion: reduce` → 所有 transform 為 0。
 7. 手機 390×844：照片寬 162px（41.6vw）、位移為桌面的一半、沒有橫向溢出。
 8. `/about/` 回應內 `grep -c bc-photoarea` = 0。
-9. 蒙版：`getComputedStyle(el).filter === 'brightness(0.3)'` —— 4 張 `img` 與第 3 格 `video` 都要有；
+9. 蒙版：`getComputedStyle(el).filter === 'brightness(0.25)'` —— 4 張 `img` 與第 3 格 `video` 都要有；
    容器 `.bc-photoarea` 本身**不該**有 filter（否則會多壓一次）。
 10. 落點洗牌：連跑 5 次 `curl -s http://127.0.0.1:8081/ | grep -o 'class="x_[0-9] y_[0-9] d_[0-9][^"]*"'`
     —— 每次都不同，且同一次載入內 5 個 `x_n` 互不重複、5 個 `y_n` 互不重複（各自是 1–5 的排列），
