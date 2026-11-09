@@ -6,7 +6,7 @@
  2. #bc-floating-cart 貼在 .bc-attract-buy 正上方（底緣貼齊按鈕盒上緣）
  3. 中心線對齊（圓心 x == 按鈕盒中心 x）
  4. 僅圖示：border-width 0、border-radius 0、無底色、無陰影
- 5. 圖示尺寸依斷點 52 / 48 / 44px
+ 5. 圖示尺寸依斷點 37 / 34 / 31px（2026-11-09 起圖示為 inline SVG，實測盒寬＝字級×1.05）
  6. 點擊命中：elementFromPoint(圖示中心) 命中浮動鈕（不被 Buy 按鈕熱區蓋住）
  7. 無水平溢出；兩個圖示字型可用
 """
@@ -34,7 +34,7 @@ JS = r"""
   var out={};
   var fc = document.getElementById('bc-floating-cart');
   var btn = document.getElementById('bc-floating-cart-btn');
-  var icon = btn ? btn.querySelector('.material-icons, .material-symbols-outlined') : null;
+  var icon = btn ? btn.querySelector('.material-icons, .material-symbols-outlined, svg.bc-fc-icon') : null;
   var buy = document.querySelector('.bc-attract-buy');
 
   /* 1. 首頁 yama 購物車列 */
@@ -139,8 +139,11 @@ JS = r"""
                          backgroundImage: bcs.backgroundImage, backgroundColor: bcs.backgroundColor,
                          boxShadow: bcs.boxShadow, fontSize: bcs.fontSize} : null;
   out.icon_font_size = icon ? getComputedStyle(icon).fontSize : null;
-  out.icon_glyph = icon ? icon.textContent.trim() : null;
-  out.icon_class = icon ? icon.className : null;
+  /* 2026-11-09：圖示改 inline SVG（.bc-fc-icon，1.05em）→ 沒有字形文字，class 用 getAttribute 讀
+     （SVG 的 className 是 SVGAnimatedString，直接序列化會壞掉） */
+  out.icon_is_svg = !!(icon && icon.tagName.toLowerCase() === 'svg');
+  out.icon_glyph = icon && !out.icon_is_svg ? icon.textContent.trim() : (out.icon_is_svg ? 'svg' : null);
+  out.icon_class = icon ? (out.icon_is_svg ? icon.getAttribute('class') : icon.className) : null;
   /* 缺字偵測：圖示字形寬度應 ≈ 字級（1em）；若字型無此字形會退回多字文字 → 寬度遠大於字級 */
   if (icon) {
     var _ir = icon.getBoundingClientRect();
@@ -186,7 +189,8 @@ JS = r"""
     out.hit_is_cart = !!(hit && (hit === btn || btn.contains(hit) || hit === icon));
   }
   out.no_overflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
-  out.font_icons_ready = document.fonts.check('52px "Material Icons"');
+  out.font_icons_ready = document.fonts.check('52px "Material Icons"')
+    || !!document.querySelector('#bc-floating-cart svg.bc-fc-icon');   /* 2026-11-09：改 SVG 後不需字型 */
   out.font_symbols_ready = document.fonts.check('52px "Material Symbols Outlined"');
   return out;
 })()

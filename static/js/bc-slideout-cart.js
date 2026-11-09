@@ -440,6 +440,8 @@ class SlideoutCart {
     // 2026-10-19（首頁效能 P0）：首頁的浮動鈕圖示已改為 icomoon（.icon-shopping-bag，
     // 首頁不再載入 Material 字型）→ 選擇器與字型家族改為依實際 computed font-family 判斷，
     // 兩種字型都能正確預載。
+    // 2026-11-09：浮動鈕圖示再改為 inline SVG（.bc-fc-icon）→ 這裡的 querySelector 抓不到元素、
+    // 整段自動跳過（SVG 不依賴字型，不會有文字閃現）；其他頁面若仍是字型圖示則照常預載。
     if (document.fonts && document.fonts.load) {
       const icon = this.floatingCart.querySelector('.material-icons, .material-symbols-outlined, .icon');
       if (icon) {

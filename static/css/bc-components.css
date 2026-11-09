@@ -1612,6 +1612,38 @@ body {
   line-height: 1;
 }
 
+/* 2026-11-09（使用者指示「提供 10 種選擇，線條及實心形狀」）：
+   浮動購物車圖示改為 inline SVG —— 首頁 2026-10-19 起不載入 Material 字型、
+   icomoon 也只有單一造型，SVG 才能同時提供「線條／實心」兩態（不新增圖示字型檔）。
+   尺寸＝1.05em（補掉 SVG 沒有字形留白的差異）→ 吃 .bc-floating-cart-btn
+   的 font-size（＝--bc-fc-size）；顏色一律 currentColor ⇒ 上方 hover 轉品牌金的規則自動生效。
+   造型庫（10 種 × 線條／實心＝20 個候選）：
+     static/preview/bc-floating-cart-icons-v2.html */
+.bc-floating-cart-btn svg.bc-fc-icon {
+  display: block;
+  width: 1.05em;   /* 墨跡 ≈0.79em ≈ 原 icomoon 字形大小（字形有內建留白，SVG 沒有） */
+  height: 1.05em;
+  flex: 0 0 auto;
+  overflow: visible;
+  /* 下移 0.1em：右上角 22px 金色 badge 才不會壓住袋口／提把（字形原本自帶上方留白） */
+  transform: translateY(0.1em);
+}
+
+/* 線條態：只描邊不填色（粗細 1.6/24 ≈ 2.7% 邊長，與 icomoon 線稿觀感一致） */
+.bc-floating-cart-btn svg.bc-fc-icon :is(path, rect, circle, ellipse, polygon, line, polyline).bc-fc-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 實心態：填滿輪廓；少數裝飾線仍可疊 .bc-fc-line 在實心上 */
+.bc-floating-cart-btn svg.bc-fc-icon :is(path, rect, circle, ellipse, polygon, line, polyline).bc-fc-solid {
+  fill: currentColor;
+  stroke: none;
+}
+
 .bc-floating-cart-btn:hover {
   color: var(--bc-gold);   /* 僅顏色變化（無底色、無陰影） */
   background: none;
@@ -1624,8 +1656,12 @@ body {
 
 .bc-floating-cart-badge {
   position: absolute;
-  top: -4px;   /* 2026-09-21：圖示無圓框，數字貼圖示右上角 */
-  right: -4px;
+  /* 2026-11-09：圖示改 inline SVG（墨跡幾乎滿版、沒有字形留白）→ 圓點改為「圓心貼齊盒右上角」，
+     transform 再往右上各推 35%，否則 22px 圓點會壓住袋口／提把（原 top/right:-4px 是為字形留白設計）。
+     外溢量 3.3px（略小於原 -4px），浮動鈕與 .bc-attract-buy 的軸心對齊不受影響。 */
+  top: 0;
+  right: 0;
+  transform: translate(35%, -35%);
   min-width: 22px;
   height: 22px;
   border-radius: 11px;

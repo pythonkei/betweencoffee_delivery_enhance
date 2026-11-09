@@ -41,7 +41,7 @@
          2026-10-17：navbar-brand 改為固定左上角 ＋ mix-blend-mode 自動變色（.bc-navbar-brand-fixed）→ 升版號
          2026-10-28：`/bean/<id>/` 的 .bc-staff 文字放大（title-sub 17px／姓名 16px／內文 16px）→ 升版號
          2026-11-05：coffee/bean 詳情頁主區 .container 加寬（≥1200→1320、992–1199→1040，左右欄間距）→ 升版號 -->
-    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20261105a />
+    <link rel="stylesheet" href={% static "css/bc-components.css" %}?v=20261109a />
 
     <!-- 2026-08-09: 全域響應式設計尺度系統（最後載入，覆蓋既有固定尺寸） -->
     <link rel="stylesheet" href={% static "css/responsive-system.css" %}?v=20260809l />
@@ -173,23 +173,24 @@
 
 <!-- 浮動購物車按鈕（有商品即顯示；伺服器端渲染初始值避免閃出，2026-08-14）
      2026-09-21 改版（使用者指定）：
-     ① 只顯示「購物袋圖示本體」——無圓形底、無邊框、無陰影（外觀見 bc-components.css）
+     ① 只顯示「圖示本體」——無圓形底、無邊框、無陰影（外觀見 bc-components.css）
      ② 位置改為 .bc-attract-buy 正上方、中心線對齊、圖示尺寸同按鈕寬
         （座標由 bc-slideout-cart.js 量測按鈕後寫入 CSS 變數 --bc-fc-*）
-     ③ 圖示 5 個候選（皆已實測存在於已載入字型；換圖示＝只改下面那一行的文字）：
-          1 shopping_bag     購物袋（Material Icons）← 目前使用
-          2 local_mall       提袋（Material Icons）
-          3 shopping_basket  提籃（Material Icons）
-          4 work             公事包（Material Icons）
-          5 backpack         背包（Material Icons）
-            （※ 曾評估 Material Symbols 的 tote／grocery，但本專案載入的字型變體無此字形、
-               實測會退回文字，故不採用 — 見預覽頁註解）
-        可視化預覽（載入正式 CSS、含 52/48/44 三種尺寸）：
-          http://127.0.0.1:8081/static/preview/bc-floating-cart-icons.html -->
+     2026-11-09（使用者指示「修改購物車圖標，提供 10 種選擇，線條及實心形狀」）：
+     ③ 圖示改為 **inline SVG**（原本 icomoon 只有單一 shopping-bag 造型；Material 字型在首頁
+        2026-10-19 起不載入）→ 10 種造型 × 線條／實心 = 20 個候選，不新增任何圖示字型檔。
+        造型庫與逐格預覽（載入正式 CSS、含 37/34/31 三種尺寸）：
+          http://127.0.0.1:8081/static/preview/bc-floating-cart-icons-v2.html
+        換造型＝把下面 <svg> 的內容換成預覽頁該格；元素只分兩種 class：
+          bc-fc-line（線條：fill:none + stroke:currentColor）／bc-fc-solid（實心：fill:currentColor）
+        尺寸＝1.05em（吃 --bc-fc-size），顏色一律 currentColor ⇒ hover 轉品牌金自動生效。
+        目前使用：01 購物袋（線條） -->
 <div id="bc-floating-cart" class="bc-floating-cart">
   <button id="bc-floating-cart-btn" class="bc-floating-cart-btn" aria-label="購物車">
-    <!-- 2026-10-19（首頁效能 P0）：material-symbols-outlined → icomoon（首頁不再載入 Material 字型） -->
-    <span class="icon icon-shopping-bag" aria-hidden="true"></span>
+    <svg class="bc-fc-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect class="bc-fc-line" x="4.2" y="8.2" width="15.6" height="12.9" rx="2.3"/>
+      <path class="bc-fc-line" d="M8.5 8.2V6.5a3.5 3.5 0 0 1 7 0v1.7"/>
+    </svg>
     <!-- 2026-09-21（使用者指示）：圖示常駐顯示——空車也看得到；數量為 0 時只隱藏數字圓圈
          （伺服器端先判斷，之後由 bc-slideout-cart.js 的 _updateBadge 同步） -->
     <span class="bc-floating-cart-badge bc-cart-count"{% if not cart_count %} style="display:none;"{% endif %}>{{ cart_count }}</span>
@@ -354,7 +355,7 @@
          必須早於 bc-slideout-cart.js（後者會呼叫 window.bcAttractPlace.anchorTop()） -->
     <script src={% static "js/bc-attract-place.js" %}?v=20261002a></script>
     <!-- 滑出購物車 -->
-    <script src={% static "js/bc-slideout-cart.js" %}?v=20261019a></script>
+    <script src={% static "js/bc-slideout-cart.js" %}?v=20261109a></script>
 
     <!-- delivery tut -->
 
