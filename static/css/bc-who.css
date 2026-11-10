@@ -1,5 +1,7 @@
 /* ============================================================
-   bc-who.css — About 頁面 sukima who section
+   bc-who.css — sukima who section（2026-11-10 起掛 index.html 首頁，
+   位置＝<aside class="bc-recommended-pages"> 正下方；原在 about.html）
+   全部規則 scoped 於 .bc-who-section，頁面無關。
    完全複製 https://sukima.tokyo.jp/ 的 .section.who（#who）：
    - 逐字揭示（wwa-anim-char opacity .5→1）
    - spacer/visual 寬度展開 + img/video scale 0→1

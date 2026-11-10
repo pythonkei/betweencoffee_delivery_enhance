@@ -3,7 +3,8 @@
    ------------------------------------------------------------
    2026-10-12：完整移植自 https://bkkdw26.greydientlab.com/（WordPress 主題
    bkkdw）acf/blocks/hero 的 .hero-description-wrapper（位於 section.gl-b-header）。
-   放置位置：about.html 之 .bc-who-section 正下方。
+   放置位置：about.html 之 .bc-product-real 正下方（原 .bc-who-section 已於 2026-11-10 移至
+   index.html，位置＝推薦雙卡 <aside class="bc-recommended-pages"> 正下方）。
 
    移植原則（使用者要求：顯示與動畫效果與原站完全一樣、不添加任何額外 UI）：
    - 標記（HTML）與原站 1:1，class 名稱原樣保留。

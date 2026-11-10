@@ -1,5 +1,7 @@
 /* ============================================================
-   bc-who.js — About 頁面 sukima who section 滾動 scrub 動畫
+   bc-who.js — sukima who section 滾動 scrub 動畫
+   （2026-11-10 起掛 index.html 首頁，位置＝推薦雙卡正下方；原在 about.html。
+     查詢範圍限 .bc-who-section，與頁面無關。）
    完全複製 sukima.tokyo.jp 的 setupWhoTextAnimation（GSAP
    ScrollTrigger scrub）：who section 進入視口時，依滾動進度
    逐字揭示（原站時間軸參數：元素間隔 0.5s、img/video scale

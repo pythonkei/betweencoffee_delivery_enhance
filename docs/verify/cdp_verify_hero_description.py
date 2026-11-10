@@ -7,7 +7,8 @@ acf/blocks/hero）的 .hero-description-wrapper —— HTML 1:1、Tailwind utili
 
 本腳本對「同一個視窗尺寸」連續量兩個站（本機 /about/ 與原站首頁），逐項比對：
   A. 結構：.hero-description-wrapper / .hero-description 存在；本機端位置緊接
-     .bc-who-section 之後、後接 .row-animation（原站無此兄弟，僅本機驗）
+     .bc-product-real 之後、後接 .row-animation（原站無此兄弟，僅本機驗）
+     ※ 2026-11-10：原本緊接的 .bc-who-section 已移至 index.html（推薦雙卡正下方）
   B. 文案：正規化空白後 textContent 與原站逐字相同（1:1 內文）
   C. SplitType：chars = 228（269 字元 − 41 空白）、words > 0、.number 內 15 個 char
      且其文字 == 100,000,000,000
@@ -309,8 +310,9 @@ async def main():
             # ---- A. 結構（本機端） ----
             chk(loc is not None, "A1 .hero-description-wrapper + .hero-description 存在")
             if loc:
-                chk("bc-who" in loc["prev"],
-                    f"A2 位置：前一個兄弟＝{loc['prev']}（應為 .bc-who-section）")
+                chk("bc-product-real" in loc["prev"],
+                    f"A2 位置：前一個兄弟＝{loc['prev']}（應為 .bc-product-real；"
+                    f"who section 已於 2026-11-10 移至 index.html）")
                 chk("row-animation" in loc["next"],
                     f"A3 位置：後一個兄弟＝{loc['next']}（應為 .row-animation）")
                 # ---- C. SplitType 切字 ----
