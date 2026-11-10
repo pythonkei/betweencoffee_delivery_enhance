@@ -23,11 +23,17 @@ BC 品牌舞台（#bc-brand-stage）共享片段 —— about 頁的「真頁尾
    → 手機／平板看不到），改為 `.h1.bc-stage-clock-brace`；≤991px 時鐘列與首頁同步改 9 欄
    `{ 15 : 照片 : 19 }`（共用同一份 CSS，兩頁外觀一致）。
 
+2026-11-10（使用者指示「footer 讓人困惑，因為這是 hero 部分」）：class 層全域改名
+ footer* → bc-stage-*（.bc-stage-content / -inner / .bc-stage-time / .bc-stage-photo-* /
+ .bc-stage-socials / .bc-stage-marquee / .bc-stage-m-*）—— 本檔與 hero 變體、bc-brand-stage.css、
+ bc-brand-stage.js 同一次改完；對照表見 bc-brand-stage.css 檔頭。本檔的 <footer> 標籤保留
+ （bc-yama-header.js 靠 querySelector('footer') 判斷交會，只換 class 名稱不影響行為）。
+
 {% endcomment %}
 <div id="bc-brand-stage">
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="w-layout-grid grid is-footer">
+<footer class="bc-stage-content">
+  <div class="bc-stage-content-inner">
+    <div class="w-layout-grid grid is-stage">
       <div id="bc-stage-headline-hug-in-a-cup" class="heading-group-wrap">
         <h1 data-reveal="text" class="h1">Hug in</h1>
         <h1 data-reveal="text" class="h1">a Cup</h1>
@@ -36,29 +42,29 @@ BC 品牌舞台（#bc-brand-stage）共享片段 —— about 頁的「真頁尾
         <h1 data-reveal="text" class="h1">Perfect</h1>
         <h1 data-reveal="text" class="h1">to Go</h1>
       </div>
-      <div id="bc-stage-clock" class="footer-time">
+      <div id="bc-stage-clock" class="bc-stage-time">
         <!-- 2026-10-08：時間括號由 ( ) 改為 { }，與兩側冒號同一組標點視覺 -->
         <h1 data-reveal="text" id="bc-stage-clock-brace-open" class="h1 bc-stage-clock-brace">{</h1>
         <h1 data-stage-clock="hours" data-reveal="text" id="bc-stage-clock-hours" class="h1">00</h1>
         <h1 data-reveal="text" id="bc-stage-clock-brace-close" class="h1 bc-stage-clock-brace">}</h1>
-        <div id="bc-stage-photo-ring" class="footer-time-inner">
-          <div data-stage-logo="wrap" data-reveal="clip-down" class="footer-logo-cell">
-            <div class="footer-logo-list-wrap w-dyn-list">
-              <div data-stage-logo="list" role="list" class="footer-logo-list w-dyn-items">
-                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+        <div id="bc-stage-photo-ring" class="bc-stage-time-inner">
+          <div data-stage-logo="wrap" data-reveal="clip-down" class="bc-stage-photo-cell">
+            <div class="bc-stage-photo-list-wrap w-dyn-list">
+              <div data-stage-logo="list" role="list" class="bc-stage-photo-list w-dyn-items">
+                <div data-stage-logo="item" role="listitem" class="bc-stage-photo-item w-dyn-item">
                   <!-- 2026-10-08：加版本查詢字串，避免瀏覽器續用快取中的舊黑色 deco SVG（白 fill 版本才會生效） -->
                   <img src="{% static 'images/deco_01.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="bc-stage-photo-item w-dyn-item">
                   <img src="{% static 'images/deco_02.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="bc-stage-photo-item w-dyn-item">
                   <img src="{% static 'images/deco_05.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="bc-stage-photo-item w-dyn-item">
                   <img src="{% static 'images/deco_06.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
-                <div data-stage-logo="item" role="listitem" class="footer-logo-item w-dyn-item">
+                <div data-stage-logo="item" role="listitem" class="bc-stage-photo-item w-dyn-item">
                   <img src="{% static 'images/deco_07.svg' %}?v=20261008a" loading="lazy" alt="" class="img contain"/>
                 </div>
               </div>
@@ -77,7 +83,7 @@ BC 品牌舞台（#bc-brand-stage）共享片段 —— about 頁的「真頁尾
         <h1 data-reveal="text" class="h1">roasted</h1>
         <h1 data-reveal="text" class="h1">daily</h1>
       </div>
-      <div id="bc-stage-socials" class="footer-socials">
+      <div id="bc-stage-socials" class="bc-stage-socials">
         <div class="socials-list-wrap w-dyn-list">
           <div data-reveal="w" role="list" class="social-list w-dyn-items">
             <div data-reveal="div" role="listitem" class="social-item w-dyn-item">
@@ -129,13 +135,13 @@ BC 品牌舞台（#bc-brand-stage）共享片段 —— about 頁的「真頁尾
           </div>
         </div>
       </div>
-      <div id="bc-stage-marquee" class="foooter-mail">
+      <div id="bc-stage-marquee" class="bc-stage-marquee">
         <div data-reveal="text" class="p1">
           Available for
           <br/>
           takeaway &amp; Relaxing
         </div>
-        <!-- 2026-10-08：原本的「Write directly to:」email CTA（.footer-mail-inner）改為 index footer 的水平跑馬燈
+        <!-- 2026-10-08：原本的「Write directly to:」email CTA（.bc-stage-mail-inner）改為 index footer 的水平跑馬燈
              （與 base.html footer 的 .scroller-box 逐字相同）。樣式來自 css/style-utilities.css；
              捲動由 static/js/main.js 全域初始化 .scroller（設 data-animated + 複製 li 成 4 個達成無縫循環），
              about 頁已載入以上兩檔，故此處不需新增任何 JS。 -->
@@ -150,12 +156,12 @@ BC 品牌舞台（#bc-brand-stage）共享片段 —— about 頁的「真頁尾
       </div>
     </div>
   </div>
-  <div class="m-footer-inner is-mobile">
-    <div class="m-footer-inner-wrap">
-      <div class="m-footer-name">
+  <div class="bc-stage-m-inner is-mobile">
+    <div class="bc-stage-m-inner-wrap">
+      <div class="bc-stage-m-name">
         <div data-reveal="text" class="h1 is-display">Between Coffee</div>
       </div>
-      <div class="m-footer-meta">
+      <div class="bc-stage-m-meta">
         <div data-reveal="text" class="p1">&copy; 2026 All Right Reserved</div>
         <div data-reveal="text" class="p1">Hug in a Cup, Perfect to Go</div>
       </div>

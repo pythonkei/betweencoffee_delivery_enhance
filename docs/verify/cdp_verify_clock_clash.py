@@ -3,7 +3,7 @@
 
 [為什麼需要這支（與 cdp_verify_clock_braces.py 的 E1 不同）]
   cdp_verify_clock_braces.py 的 E1 是「時鐘可見子項的 rect 兩兩不重疊」；但 2026-10-15 桌機照片
-  放大（1440 時 336x480）後，環形照片列（#bc-stage-photo-ring-list）本來就會離開 .footer-logo-cell
+  放大（1440 時 336x480）後，環形照片列（#bc-stage-photo-ring-list）本來就會離開 .bc-stage-photo-cell
   （bc-brand-stage.js 的 releaseRingClip 設計：揭示跑完即釋放裁切）⇒ rect 重疊是設計必然、不是 bug。
   真正該問的是「不同元素的可見像素是否落在同一點」＝像素級遮蔽，本腳本量這個。
 
@@ -14,14 +14,14 @@
     [data-reveal] 的可見性 = CSS `#bc-brand-stage [data-reveal]{visibility:hidden}`
     （static/css/bc-brand-stage.css:94）＋ JS 於 whenFontsReady 寫入的 inline visibility:visible
     （static/js/bc-brand-stage.js:288）。把 inline 設成 '' 不是還原、而是「刪掉 inline 宣告」
-    ⇒ 退回 CSS 的 hidden ⇒ .footer-logo-cell 內整個環形照片列（visibility 繼承）永久隱形
+    ⇒ 退回 CSS 的 hidden ⇒ .bc-stage-photo-cell 內整個環形照片列（visibility 繼承）永久隱形
     ⇒ 之後所有像素差 = 0（實測：照片貢獻像素 54047 px → 0 px）。
 
 [讓「揭示」真的跑完（沿用 cdp_verify_hero_coffee_photos.py）]
   1. SCROLL_CELL_JS 捲到照片格（該 cell 在首屏外，不捲則 data-reveal="clip-down" 永不觸發）
   2. SPEED_GSAP_JS  GSAP globalTimeline.timeScale(100)：本機 CDP 的 rAF 被節流，
                      DUR_L=1.2s 的 clip 揭示實測要 16-36 秒（真瀏覽器 1.2s）
-  3. wait_reveal()   輪詢 .footer-logo-cell 的 clip-path 變成 'none'（揭示跑完並被釋放）
+  3. wait_reveal()   輪詢 .bc-stage-photo-cell 的 clip-path 變成 'none'（揭示跑完並被釋放）
   4. FREEZE/STABLE   把「有限次」CSS transition 一律 finish() 推到終點（不是 pause()）。
                      ⚠ pause() 會把它凍在半途；之後插入 <style> 觸發 style recalc 時，
                        被丟棄的 CSSTransition 會直接跳到終值 ⇒ 基準圖與之後每張圖都差一塊
@@ -74,7 +74,7 @@ SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-stage-photo-rin
 SPEED_GSAP_JS = ("(function(){if(window.gsap&&window.gsap.globalTimeline){"
                  "window.gsap.globalTimeline.timeScale(100);return true;}return false;})()")
 
-CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-stage-photo-ring .footer-logo-cell');"
+CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-stage-photo-ring .bc-stage-photo-cell');"
                 "return e?getComputedStyle(e).clipPath:null;})()")
 
 PAUSE_JS = ("(function(){var s=document.querySelector('.bc-gunte-hero .splide');"
@@ -223,7 +223,7 @@ CTX_JS = r"""
   out.clock={}; IDS.forEach(function(id){ var e=document.getElementById(id);
     out.clock[id]={box:box(e), vis:st(e,'visibility'), display:st(e,'display'),
                    op:st(e,'opacity'), z:st(e,'zIndex')}; });
-  var cell=document.querySelector('#bc-stage-photo-ring .footer-logo-cell');
+  var cell=document.querySelector('#bc-stage-photo-ring .bc-stage-photo-cell');
   var hand=document.querySelector('#bc-stage-photo-ring .hero_hand');
   var list=document.getElementById('bc-stage-photo-ring-list');
   out.cell={box:box(cell), vis:st(cell,'visibility'), clip:st(cell,'clipPath'),
@@ -264,7 +264,7 @@ CTX_JS = r"""
 
 # ---------------------------------------------------------------- 圖層選擇器
 SEL_PHOTOS = "#bc-stage-photo-ring-list"
-SEL_CELL = "#bc-stage-photo-ring .footer-logo-cell"
+SEL_CELL = "#bc-stage-photo-ring .bc-stage-photo-cell"
 SEL_BRACES = "#bc-stage-clock-brace-open,#bc-stage-clock-brace-close"
 SEL_DIGITS = ("#bc-stage-clock-hours,#bc-stage-clock-minutes,"
               "#bc-stage-clock-colon-before-minutes,#bc-stage-clock-colon-after-minutes")
@@ -491,7 +491,7 @@ async def phase_prod(sess, rep):
              [await sess.ev("typeof window.ScrollTrigger"), await sess.ev("typeof window.SplitText")])
     rep.info("document.fonts.status", await sess.ev("document.fonts?document.fonts.status:null"))
     st = await sess.settle()
-    rep.check("P1-1 揭示跑完、.footer-logo-cell 的 clip-path 已釋放（none）",
+    rep.check("P1-1 揭示跑完、.bc-stage-photo-cell 的 clip-path 已釋放（none）",
               st["clip_released"], await sess.ev(CELL_CLIP_JS))
     c1 = await sess.ctx()
     rep.info("data-reveal 統計（總數/可見/隱藏/無 inline）",
@@ -556,7 +556,7 @@ async def phase_clobber(sess, rep):
     px0 = npx(mask(a, p0))
     rep.info("A) 初始：環形照片貢獻像素", "%d px" % px0)
 
-    # ---- 對照組：安全法（stylesheet !important）對 .footer-logo-cell 做 hide→restore
+    # ---- 對照組：安全法（stylesheet !important）對 .bc-stage-photo-cell 做 hide→restore
     await sess.hide(SEL_CELL, True)
     await sess.stable()
     await sess.shot()

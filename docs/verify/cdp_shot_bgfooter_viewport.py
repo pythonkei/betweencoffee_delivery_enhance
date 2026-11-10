@@ -31,15 +31,15 @@ async def main():
             r = await send(msg("Runtime.evaluate", {"expression": e, "returnByValue": True}))
             return r.get("result", {}).get("value")
 
-        # 將釘牌（.footer-logo-cell）置中於視窗，確保白色線稿（黑底，無金底）完整入鏡
+        # 將釘牌（.bc-stage-photo-cell）置中於視窗，確保白色線稿（黑底，無金底）完整入鏡
         CENTER_JS = (
-            "(function(){var e=document.querySelector('#bc-brand-stage .footer-logo-cell');"
+            "(function(){var e=document.querySelector('#bc-brand-stage .bc-stage-photo-cell');"
             "if(!e)return null;var r=e.getBoundingClientRect();"
             "window.scrollTo(0, Math.round(window.scrollY + r.top + r.height/2 - innerHeight/2));"
             "return Math.round(window.scrollY);})()"
         )
         INFO_JS = (
-            "(function(){var e=document.querySelector('#bc-brand-stage .footer-logo-cell');"
+            "(function(){var e=document.querySelector('#bc-brand-stage .bc-stage-photo-cell');"
             "var c=e?e.getBoundingClientRect():null;return {y:Math.round(window.scrollY),"
             "sh:document.body.scrollHeight,ih:innerHeight,"
             "cell:c?{top:Math.round(c.top),h:Math.round(c.height),"

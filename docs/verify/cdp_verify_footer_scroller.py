@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""CDP 驗證：/about/ footer 的 .footer-mail-inner（email CTA）已改為共用 partial 的 .scroller-box 跑馬燈
+"""CDP 驗證：/about/ footer 的 .bc-stage-mail-inner（email CTA）已改為共用 partial 的 .scroller-box 跑馬燈
 （與 base.html ftco 頁尾逐字相同；2026-10-09 起首頁 / 亦改用同一 partial 的 #bc-brand-stage 版本）。
 
 改動背景（2026-10-08）
   templates/.../about.html：刪 <div class="footer-mail-inner">（"Write directly to:" + mailto hello@betweencoffee.hk），
   同層插入與 base.html footer 逐字相同的 .scroller-box（2 個 BETWEEN <li>）。
-  static/css/bc-brand-stage.css：移除 .footer-mail-inner 規則，新增 scoped 補償
+  static/css/bc-brand-stage.css：移除 .bc-stage-mail-inner 規則，新增 scoped 補償
   （#bc-brand-stage .scroller-box/.scroller/.scroller__inner/.tag-list li），
   因為 `#bc-brand-stage div,ul,li{margin:0;padding:0}`（ID 特異度）會蓋掉
   .scroller__inner{padding-block:2rem} 與 .tag-list li{padding:.1rem}。
 
 檢查項目
-  A. 舊結構已移除：.footer-mail-inner 不存在、footer 內已無 mailto:hello@betweencoffee.hk
-  B. 新結構存在：.foooter-mail > .scroller-box > .scroller > ul.tag-list.scroller__inner，2 個 li（原始）
+  A. 舊結構已移除：.bc-stage-mail-inner 不存在、footer 內已無 mailto:hello@betweencoffee.hk
+  B. 新結構存在：.bc-stage-marquee > .scroller-box > .scroller > ul.tag-list.scroller__inner，2 個 li（原始）
   C. JS 生效：.scroller[data-animated=true]、.scroller__inner 子節點 = 4（正本複製成 4）、aria-hidden 2 個
   D. 動畫：animation-name == scroll、animation-duration 60s / timing-function linear、play-state == running；
      取樣前先以 1×1 截圖強制產生 BeginFrame（headless tab 若無 frame producer，CSS animation 會停在
@@ -27,11 +27,11 @@
      桌面額外驗絕對值 32px / 1.6px / 1108px / 22px。
      （2026-10-09：首頁 / 的頁尾已改為共用 partial 的 #bc-brand-stage，基準頁因此由 / 移往 /coffee_menu/；
        首頁自身的保真度改由 J 項驗。）
-  F. 幾何：.scroller 寬 <= .foooter-mail 寬 + 1；.scroller overflow == hidden；無水平溢出；
-     F5/F6（2026-10-08 新增）「.foooter-mail 未撐破所屬 grid」＋「寬 <= viewport 寬」——
-     舊版只驗 scroller <= mail，當 .foooter-mail 走 shrink-to-fit 被 .scroller{max-width:2000px}
+  F. 幾何：.scroller 寬 <= .bc-stage-marquee 寬 + 1；.scroller overflow == hidden；無水平溢出；
+     F5/F6（2026-10-08 新增）「.bc-stage-marquee 未撐破所屬 grid」＋「寬 <= viewport 寬」——
+     舊版只驗 scroller <= mail，當 .bc-stage-marquee 走 shrink-to-fit 被 .scroller{max-width:2000px}
      撐到 2000px（平板 1108px）時兩邊同步變大、照樣 PASS，抓不到「跑馬燈橫貫 footer」的缺陷。
-  G. 相鄰文字仍在：.foooter-mail 內 .p1 仍含 "Available for" / "takeaway & Relaxing"
+  G. 相鄰文字仍在：.bc-stage-marquee 內 .p1 仍含 "Available for" / "takeaway & Relaxing"
   H. base.html ftco 頁尾無回歸（/coffee_menu/）：.ftco-footer .scroller-box 仍 data-animated + 4 子節點
      + padding-block 32px + li 桌面值 1108px / 22px + 動畫 scroll / 60s / linear（H1–H7）
   J. 首頁 / 的 #bc-brand-stage 跑馬燈保真（2026-10-09 新增，配合首頁頁尾置換）：與 H 的 base.html 基準
@@ -86,16 +86,16 @@
         currentTime=0，computed opacity 一直停在過渡起點 0，等 15 秒也不動；逼 frame 後
         實測 0 → 0.30 → 1，約 1 秒），等「記錄的那張」opacity 為 1 才讀值。
   J16–J19（2026-10-09，配合「置頂 hero 去掉頁尾感」）：index.html extra_css 新增
-     `.bc-brand-stage-hero #bc-brand-stage{background:transparent}` / `.bc-brand-stage-hero #bc-brand-stage .footer{同上}` /
-     `.bc-brand-stage-hero #bc-brand-stage .grid.is-footer{border-top:0 none}`（只覆寫首頁、不動
+     `.bc-brand-stage-hero #bc-brand-stage{background:transparent}` / `.bc-brand-stage-hero #bc-brand-stage .bc-stage-content{同上}` /
+     `.bc-brand-stage-hero #bc-brand-stage .grid.is-stage{border-top:0 none}`（只覆寫首頁、不動
      bc-brand-stage.css，故 about 真頁尾不受影響）——
-     J16 置頂 hero 的頂部分隔線已移除：.grid.is-footer computed border-top-width 0px / style none
+     J16 置頂 hero 的頂部分隔線已移除：.grid.is-stage computed border-top-width 0px / style none
          （原本 bc-brand-stage.css:152 的 1px solid rgba(255,255,255,.08)，實測繪出 y=14 的
          rgb(32,32,32) 線），且 padding-top 仍非 0；
          2026-10-18（使用者指示「距離頂部太多、主要內容要置中」）：首頁 ≥992px 的
          padding-top 改由 index.html extra_css 的置中算式提供（1440×900 → 63.8px、
          1280×800 → 52.91px；≤991px 仍是 bc-brand-stage.css 的 u-72）→ 本項只守門「非 0」；
-     J17 自帶黑底已移除：#bc-brand-stage 與 .footer computed background-color 皆 rgba(0,0,0,0)
+     J17 自帶黑底已移除：#bc-brand-stage 與 .bc-stage-content computed background-color 皆 rgba(0,0,0,0)
          → 由頁面自身底色穿透（body 的固定背景照片 bg_4.jpg，style-bootstrap.css:3118，
          與首頁其餘區塊一致）；
      J18 作用域錨點正確：首頁 #bc-brand-stage 的父層是 SECTION.hero.bc-brand-stage-hero（about 頁為 BODY）
@@ -119,12 +119,12 @@ MEASURE_JS = r"""
   var out = {};
 
   // A. 舊結構
-  out.old_el_exists = !!document.querySelector('.footer-mail-inner');
-  out.old_rule_refs = document.querySelectorAll('.footer-mail-inner').length;
+  out.old_el_exists = !!document.querySelector('.bc-stage-mail-inner');
+  out.old_rule_refs = document.querySelectorAll('.bc-stage-mail-inner').length;
   out.mailto_hrefs = Array.prototype.slice.call(document.querySelectorAll('a[href^="mailto:"]'))
       .map(function(a){ return a.getAttribute('href'); });
 
-  var mail = document.querySelector('.foooter-mail');
+  var mail = document.querySelector('.bc-stage-marquee');
   out.foooter_mail_found = !!mail;
 
   // B. 新結構
@@ -202,7 +202,7 @@ MEASURE_JS = r"""
   out.no_h_overflow = out.doc_scroll_w <= out.inner_w + 1;
 
   // F5/F6（2026-10-08 新增）：跑馬燈必須被限制在自己的 grid 欄位內。
-  // 背景：F2/F3 只驗「scroller <= .foooter-mail」，當 .foooter-mail 因 justify-self:start 走
+  // 背景：F2/F3 只驗「scroller <= .bc-stage-marquee」，當 .bc-stage-marquee 因 justify-self:start 走
   // shrink-to-fit、被 .scroller{max-width:2000px} 撐到 2000px 時，兩邊同時變大 → 舊檢查照樣 PASS
   // （實測：平板 1108 / 行動 2000，全靠 #bc-brand-stage{overflow:hidden} 裁掉 → 視覺越欄）。
   // 故改驗「所屬 grid 不溢出」＋「不寬於 viewport」，直接抓越欄這個症狀。
@@ -251,7 +251,7 @@ MEASURE_JS = r"""
     }
   }
   // J. 首頁 / 的 #bc-brand-stage 跑馬燈（2026-10-09：首頁頁尾改用共用 partial，保真度與 base.html 比對）
-  var bg = document.querySelector('#bc-brand-stage .foooter-mail .scroller')
+  var bg = document.querySelector('#bc-brand-stage .bc-stage-marquee .scroller')
         || document.querySelector('#bc-brand-stage .scroller');
   out.bg_found = !!bg;
   out.index_ftco_count = document.querySelectorAll('.ftco-footer').length;
@@ -418,8 +418,8 @@ INDEX_HERO_JS = r"""
   // 這三組值由 index.html extra_css 的 .bc-brand-stage-hero #bc-brand-stage … 覆寫提供；
   // about 頁（真頁尾）不受影響，由下方 ABOUT_GUARD_JS 反向確認。
   if (root) {
-    var grid = root.querySelector('.grid.is-footer');
-    var fdiv = root.querySelector('.footer');
+    var grid = root.querySelector('.grid.is-stage');
+    var fdiv = root.querySelector('.bc-stage-content');
     out.grid_found = !!grid;
     if (grid) {
       var gs = getComputedStyle(grid);
@@ -470,8 +470,8 @@ ABOUT_GUARD_JS = r"""
 (function(){
   var root = document.getElementById('bc-brand-stage');
   if (!root) return {found: false};
-  var grid = root.querySelector('.grid.is-footer');
-  var fdiv = root.querySelector('.footer');
+  var grid = root.querySelector('.grid.is-stage');
+  var fdiv = root.querySelector('.bc-stage-content');
   var gs = grid ? getComputedStyle(grid) : null;
   return {
     found: true,
@@ -489,7 +489,7 @@ ABOUT_GUARD_JS = r"""
 # 動畫取樣：transform + 動畫時鐘（startTime / currentTime）
 ANIM_SAMPLE_JS = r"""
 (function(){
-  var i = document.querySelector('.foooter-mail .scroller__inner');
+  var i = document.querySelector('.bc-stage-marquee .scroller__inner');
   if (!i) return null;
   var a = (i.getAnimations ? i.getAnimations() : []);
   return {
@@ -504,7 +504,7 @@ ANIM_SAMPLE_JS = r"""
 # 動畫確定性驗證：pause + seek 到 50%（30s），讀 computed transform 與 keyframes，再復原播放
 ANIM_SEEK_JS = r"""
 (function(){
-  var i = document.querySelector('.foooter-mail .scroller__inner');
+  var i = document.querySelector('.bc-stage-marquee .scroller__inner');
   if (!i || !i.getAnimations) return null;
   var a = i.getAnimations()[0];
   if (!a) return null;
@@ -582,7 +582,7 @@ async def main():
                            {"width": w, "height": h, "deviceScaleFactor": 1, "mobile": False}))
             await asyncio.sleep(0.4)
 
-        async def shot(name, sel=".foooter-mail"):
+        async def shot(name, sel=".bc-stage-marquee"):
             rr = await evaljs(
                 "(function(){var e=document.querySelector('" + sel + "');"
                 "if(!e)return null;var r=e.getBoundingClientRect();"
@@ -627,14 +627,14 @@ async def main():
 
             print(f"\n=== /about/ {w}x{h} ({name}) ===")
             # A
-            failures.append(check("A1 .footer-mail-inner 已移除", m.get("old_el_exists") is False,
+            failures.append(check("A1 .bc-stage-mail-inner 已移除", m.get("old_el_exists") is False,
                                   m.get("old_rule_refs")))
             failures.append(check("A2 footer 內無 mailto:hello@betweencoffee.hk",
                                   not any("hello@betweencoffee.hk" in (x or "")
                                           for x in (m.get("mailto_hrefs") or [])),
                                   m.get("mailto_hrefs")))
             # B
-            failures.append(check("B1 .foooter-mail 存在", m.get("foooter_mail_found") is True))
+            failures.append(check("B1 .bc-stage-marquee 存在", m.get("foooter_mail_found") is True))
             failures.append(check("B2 .scroller-box 存在", m.get("scroller_box_found") is True))
             failures.append(check("B3 ul.tag-list.scroller__inner 存在",
                                   m.get("inner_found") is True and m.get("inner_is_taglist") is True))
@@ -757,17 +757,17 @@ async def main():
             # F
             failures.append(check("F1 .scroller overflow = hidden", m.get("scroller_overflow") == "hidden",
                                   m.get("scroller_overflow")))
-            failures.append(check("F2 .scroller 寬 <= .foooter-mail 寬", m.get("scroller_fits") is True,
+            failures.append(check("F2 .scroller 寬 <= .bc-stage-marquee 寬", m.get("scroller_fits") is True,
                                   f"{m.get('scroller_w')} <= {m.get('mail_w')}"))
-            failures.append(check("F3 .scroller-box 不超出 .foooter-mail", m.get("box_fits") is True,
+            failures.append(check("F3 .scroller-box 不超出 .bc-stage-marquee", m.get("box_fits") is True,
                                   f"{m.get('box_w')} / {m.get('mail_w')}"))
             failures.append(check("F4 無水平溢出", m.get("no_h_overflow") is True,
                                   f"scrollW {m.get('doc_scroll_w')} vs innerW {m.get('inner_w')}"))
-            failures.append(check("F5 .foooter-mail 未撐破所屬 grid（跑馬燈不越欄）",
+            failures.append(check("F5 .bc-stage-marquee 未撐破所屬 grid（跑馬燈不越欄）",
                                   m.get("grid_no_overflow") is True,
                                   f"grid scrollW {m.get('parent_grid_scroll_w')} vs clientW "
                                   f"{m.get('parent_grid_client_w')}（{m.get('parent_grid_tag')}）"))
-            failures.append(check("F6 .foooter-mail 寬 <= viewport 寬（跑馬燈被欄位裁切、不橫貫全寬）",
+            failures.append(check("F6 .bc-stage-marquee 寬 <= viewport 寬（跑馬燈被欄位裁切、不橫貫全寬）",
                                   m.get("mail_fits_win") is True,
                                   f"{m.get('mail_w')} <= {m.get('inner_w')}"))
             # G
@@ -1006,7 +1006,7 @@ async def main():
                               f"讀值當下[index={hero.get('active_slide_index')} "
                               f"aria={hero.get('active_slide_aria_label')} "
                               f"opacity={hero.get('active_ttl_opacity')}]"))
-        failures.append(check("J16 置頂 hero 的頂部分隔線已移除（.grid.is-footer border-top 0px/none，"
+        failures.append(check("J16 置頂 hero 的頂部分隔線已移除（.grid.is-stage border-top 0px/none，"
                               "原本為 1px solid rgba(255,255,255,.08)）且 padding-top 非 0"
                               "（2026-10-18 起桌面為置中算式，≤991px 仍為 u-72）",
                               hero.get("grid_border_top_w") == "0px"
@@ -1014,7 +1014,7 @@ async def main():
                               and hero.get("grid_padding_top") not in (None, "0px"),
                               f"border={hero.get('grid_border_top_w')}/{hero.get('grid_border_top_style')} "
                               f"padTop={hero.get('grid_padding_top')}"))
-        failures.append(check("J17 自帶黑底已移除（#bc-brand-stage 與 .footer 皆 transparent → 由頁面底色穿透）",
+        failures.append(check("J17 自帶黑底已移除（#bc-brand-stage 與 .bc-stage-content 皆 transparent → 由頁面底色穿透）",
                               hero.get("root_bg") == "rgba(0, 0, 0, 0)"
                               and hero.get("footer_bg") == "rgba(0, 0, 0, 0)",
                               f"root={hero.get('root_bg')} footer={hero.get('footer_bg')}"))
@@ -1059,7 +1059,7 @@ async def main():
                               m3.get("grid_no_overflow") is True,
                               f"grid scrollW {m3.get('parent_grid_scroll_w')} vs clientW "
                               f"{m3.get('parent_grid_client_w')}"))
-        failures.append(check("I6（無動畫狀態也）.foooter-mail 寬 <= viewport 寬",
+        failures.append(check("I6（無動畫狀態也）.bc-stage-marquee 寬 <= viewport 寬",
                               m3.get("mail_fits_win") is True,
                               f"{m3.get('mail_w')} <= {m3.get('inner_w')}"))
         await shot("mobile_reduced_motion")

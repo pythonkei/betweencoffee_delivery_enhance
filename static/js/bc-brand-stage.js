@@ -1,5 +1,7 @@
 /* ============================================================================
-   BC brand footer — animation ported from bleibtgleich.dev (Slater / slater615.js)
+   BC brand stage — animation ported from bleibtgleich.dev (Slater / slater615.js)
+   （原檔名 bc-bg-footer.js／原標題「BC brand footer」，2026-10-18 更名 bc-brand-stage.js；
+     class 層 footer* → bc-stage-* 於 2026-11-10 完成，對照表見 bc-brand-stage.css 檔頭）
    ----------------------------------------------------------------------------
    2026-10-07: 只移植本模組需要的部分（reveal / goo 文字揭示 / 時間 / logo / 連結 hover），
    範圍限縮於 #bc-brand-stage，且不依賴 Barba / Lenis / 站內轉場。
@@ -63,7 +65,7 @@
     var hide = function (el) { el.style.position = 'absolute'; el.style.display = 'none'; };
 
     if (window.__bcStageLogoInterval) { clearInterval(window.__bcStageLogoInterval); window.__bcStageLogoInterval = null; }
-    if (wrap._footerLogoClick) { wrap.removeEventListener('click', wrap._footerLogoClick); wrap._footerLogoClick = null; }
+    if (wrap._stagePhotoClick) { wrap.removeEventListener('click', wrap._stagePhotoClick); wrap._stagePhotoClick = null; }
 
     // 保險：不足 2 張時不輪播，只顯示第一張
     if (items.length < 2) { items.forEach(function (el, i) { i ? hide(el) : show(el); }); return; }
@@ -76,13 +78,13 @@
       if (window.__bcStageLogoInterval) clearInterval(window.__bcStageLogoInterval);
       window.__bcStageLogoInterval = setInterval(next, 5000);
     };
-    wrap._footerLogoClick = function () { next(); start(); };
-    wrap.addEventListener('click', wrap._footerLogoClick);
+    wrap._stagePhotoClick = function () { next(); start(); };
+    wrap.addEventListener('click', wrap._stagePhotoClick);
     start();
   }
 
   /* ---------------- 首頁照片格的環形照片列（2026-10-14 使用者指示） ----------------
-     標的＝partials/bc_brand_stage_hero.html 內 #bc-stage-photo-ring 的 .footer-logo-cell：一格 .hero_hand
+     標的＝partials/bc_brand_stage_hero.html 內 #bc-stage-photo-ring 的 .bc-stage-photo-cell：一格 .hero_hand
      （7 筆咖啡照的圓弧）＋ 一組「當前那支咖啡」的名稱/highlight（[data-bc-ring-caption]）。
      [同步] 索引來源只有一個：GUNTE hero 的 Splide 推播（bc-gunte-hero.js 的
        updateSlideStates → BC_HAND_RING.goAll），模組會讓晚註冊的環直接會合到 hero 當下的
@@ -292,10 +294,10 @@
       else if (mode === 'hide') gsap.to(els, { clipPath: map.hidden, webkitClipPath: map.hidden, duration: DUR_S, delay: delay == null ? 0 : delay, stagger: .5 * STAGGER, ease: 'power2.in', overwrite: true });
     }
 
-    /* 2026-10-14（使用者指示「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，動畫展示是
+    /* 2026-10-14（使用者指示「展示咖啡動畫不是 bc-stage-photo-list-wrap，區域太小了，動畫展示是
        使用整個頁面的。參考 hero_hand」）：進場裁切（animateClipReveal）只是一次性的揭示效果，
        但 GSAP 會把 clip-path 留在 `inset(0%)` —— 那等於一個「永久把內容框在元素邊界內」的裁切框。
-       首頁照片格的環形照片列是**整頁扇形**：側邊鄰居本來就會跑到 .footer-logo-cell 之外
+       首頁照片格的環形照片列是**整頁扇形**：側邊鄰居本來就會跑到 .bc-stage-photo-cell 之外
        （照片格不裁、由 #bc-brand-stage 的 overflow:hidden 裁），留著這個裁切框會把左右鄰居整張
        切掉（實測：鄰居 rect 存在、圖片 complete、但 elementFromPoint 命中的是 #bc-stage-clock ⇒
        被 clip 切到 0 可見）。
@@ -351,7 +353,7 @@
       });
     }
 
-    /* -- 掃描 footer 內的 data-reveal（原 initElementsReveal 的 footer 子集） -- */
+    /* -- 掃描品牌舞台內的 data-reveal（原 initElementsReveal 的子集） -- */
     function initElementsReveal(scope) {
       // 先統一還原所有 [data-reveal] 的可見性（含作為 trigger 用的 data-reveal="w" 群組容器；
       // 原站 CSS 對 [data-reveal] 一律 visibility:hidden，但 w 容器不會被動畫設為 visible）

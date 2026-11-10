@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-07）**：`origin/main` 尖端＝about 首屏 7 支 `hero_00`~`hero_06`＋黑遮罩 **75%**（hash 查 `git log -1`）。live＝`c3f7509c`（11-03）⇒ **待部署 47 筆＋**；⚠ live `/about/` 尚無 sticky-MV → 部署後 `grep -c bc-sticky-mv` >0 才算成功。
+- **版本狀態（2026-11-10）**：live＝`c3f7509c`（11-03）⇒ **待部署 66 筆**（`git rev-list --count c3f7509c..main`）；部署後 `/about/` 應有 `bc-sticky-mv`（`grep -c` >0 才算成功）。
 
 ## 2. 核心業務
 
@@ -81,7 +81,7 @@
 - **`.bc-attract` 負 margin** 會讓「外層盒」與「可見長條」差 24px，量測一律量可見元素。
 - **Render free plan** 無 Redis：不要引入需要 Redis 的功能；Celery 任務同步執行。
 - **Migration 編號**：`python3 manage.py makemigrations --check` 必須乾淨；資料搬移用 data migration，不在 view 裡寫死。
-- **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:207` `#bc-brand-stage .footer-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。
+- **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:230` `#bc-brand-stage .bc-stage-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。（2026-11-10 前該 class 名為 `.footer-socials`。）
 - **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方內容自動整齊上移，不要再補留白。
 - **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。同理 `static/images/hero_bg.mp4`（81MB／4K，首屏影片原始素材，**勿刪**）與 `recommended-pages/` 底線開頭的 webm／png 暫存變體也列 `.gitignore`。
 - **新增 CSS／JS 檔要跟引用它的模板同一次 commit**（曾漏 `bc-catch.css` → 正式站該頁 404 到 11-04 才補）。push 後用 `git ls-tree -r origin/main --name-only static/css static/js | grep <檔名>` 對照一次。

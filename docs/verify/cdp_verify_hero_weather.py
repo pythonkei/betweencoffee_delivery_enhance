@@ -20,12 +20,12 @@
      · #bc-stage-weather{grid-area:1/1/2/2;align-self:start;justify-self:center}、
        ≥992px 把 #bc-stage-clock-brace-open 釘回 1/1/2/2（否則自動置位會整列跑版）、
        .weather{--wc-scale:1.3}；
-     · .footer-logo-caption 字級與顏色（bc-series.css 只載入 about 頁，故本頁自帶同值宣告）；
+     · .bc-stage-photo-caption 字級與顏色（bc-series.css 只載入 about 頁，故本頁自帶同值宣告）；
        2026-10-14 稍後：照片格改為環形照片列（見 docs/verify/cdp_verify_hero_coffee_photos.py），
-       高度改掛 .footer-logo-list（照片區）＋ .bc-ring-caption 7 筆文字（只顯示一筆）
-       ⇒ 兩者相加仍等於改動前的 .footer-logo-item 高度。
+       高度改掛 .bc-stage-photo-list（照片區）＋ .bc-ring-caption 7 筆文字（只顯示一筆）
+       ⇒ 兩者相加仍等於改動前的 .bc-stage-photo-item 高度。
        ⚠ 2026-10-15（使用者指示「桌機（≥992px）咖啡照片放大到 1440 時 336×480」）：
-       ≥992px 的 .footer-logo-list 高改為 480vw/ratio、.footer-logo-cell 上下內距歸零
+       ≥992px 的 .bc-stage-photo-list 高改為 480vw/ratio、.bc-stage-photo-cell 上下內距歸零
        ⇒ 照片區高度與 cell 內距**不再等於改動前**（這是刻意的）；≤991px 逐值不變。
        本檔下方 F4 的期望值已同步改為 4.80 * w / 14.4（見 expected_img_h()）。
        ⚠ 2026-10-15 稍後（使用者指示「桌機的咖啡照片太大、名稱與 highlight 太小」）：
@@ -97,7 +97,7 @@
      7 個 .hero_bc_item（每筆 alt 非空）＋ [data-bc-ring-caption] 內 7 筆
      [data-bc-ring-caption-item]，恰 1 筆 -current、name/highlight 非空、且與環的 -current
      同索引（顯示中的 name == 該筆 img alt）；文字區高度 = --bc-hero-caption-h（±1px）；
-     照片區（.footer-logo-list）高度 = ≥992px 400vw/ratio（@1440 = 400.00）／
+     照片區（.bc-stage-photo-list）高度 = ≥992px 400vw/ratio（@1440 = 400.00）／
      ≤991px 180vw/ratio（＝改動前值，未動）（皆 ±1px）；
      首頁已無舊輪播 hook（data-stage-logo=item）；font-size 為 20/16（≥992）、13/10（768–991）、
      11/9（≤767）；highlight 為品牌金 rgb(196, 155, 99)；name 為 Josefin Sans ＋ uppercase ＋ 白字。
@@ -139,7 +139,7 @@ SCALE_DESKTOP, SCALE_SHARED = 14.4, 3.93
 
 
 def expected_img_h(w):
-    """照片區（.footer-logo-list）高度：≥992px 為 `calc(400vw / 14.4)`
+    """照片區（.bc-stage-photo-list）高度：≥992px 為 `calc(400vw / 14.4)`
     （2026-10-15 使用者指示「桌機咖啡照片太大」；上一輪（同日稍早）為 480vw/14.4、原始為 276vw/14.4）、
     ≤991px 為 `calc(180vw / 3.93)`（未動）。
     → ≥992px = 4.00 * viewportWidth、≤991px = 1.80 * viewportWidth。"""
@@ -276,11 +276,11 @@ MEASURE_JS = r"""
   })();
   out.cap_vis = caps.filter(function(el){ return el.classList.contains('-current'); }).length;
   out.cap_h = (function(){
-    var c = document.querySelector('#bc-stage-photo-ring .footer-logo-caption');
+    var c = document.querySelector('#bc-stage-photo-ring .bc-stage-photo-caption');
     return c ? +c.getBoundingClientRect().height.toFixed(2) : 0;
   })();
   out.photo_h = (function(){
-    var a = document.querySelector('#bc-stage-photo-ring .footer-logo-list');
+    var a = document.querySelector('#bc-stage-photo-ring .bc-stage-photo-list');
     return a ? +a.getBoundingClientRect().height.toFixed(2) : 0;
   })();
   out.legacy_items = document.querySelectorAll(

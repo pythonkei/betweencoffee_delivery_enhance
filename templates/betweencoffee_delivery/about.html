@@ -66,9 +66,11 @@
 <!-- 2026-10-07: BC 動態模組（移植自 bleibtgleich.dev Webflow footer；全樣式 scoped 於 #bc-brand-stage）
      2026-10-18（使用者指示）：模組更名（bc-bg-footer → bc-brand-stage）、檔名同步更改
      → css ?v=20261018a（about 頁仍以本模組作真頁尾；首頁則用它當第一屏 hero）。
-     2026-10-19（使用者指示）：所有斷點都隱藏 .m-footer-inner（行動版頁尾區塊）
-     → css ?v=20261019a。 -->
-<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261102d" />
+     2026-10-19（使用者指示）：所有斷點都隱藏 .bc-stage-m-inner（行動版頁尾區塊）
+     → css ?v=20261019a。
+     2026-11-10（使用者指示）：class 層 footer* → bc-stage-*（對照見該檔檔頭）
+     → css ?v=20261110b。 -->
+<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261110c" />
 <!-- 2026-10-12: bkkdw26.greydientlab.com .hero-description-wrapper 模組（含 @font-face 自架
      BDO Grotesk / Geist Mono、Tailwind utility 1:1 scoped 重建 + 768/1024 斷點） -->
 <link rel="stylesheet" href="{% static 'css/bc-hero-description.css' %}?v=20261110a" />
@@ -1615,10 +1617,12 @@
      → 版號同步升為 ?v=20261018b。
      2026-10-19：BC_TEXT_REVEAL 新增選填的 stagger 參數，首頁咖啡名稱 / Highlight 由 0.65s／
      0.02s／0.06s 再收緊為 0.45s／0s／0s（同步）；本頁仍走預設 1.2s／0.1s，行為不變
-     → 版號同步升為 ?v=20261019b。 -->
+     → 版號同步升為 ?v=20261019b。
+     2026-11-10：class 層 footer* → bc-stage-*（只換 class 名稱，JS 邏輯未動）
+     → 版號升為 ?v=20261110b。 -->
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261024a"></script>
+<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261110c"></script>
 <!-- 2026-10-12: hero-description-wrapper 逐字變色動畫所需函式庫（SplitType 0.3.3，與原站同版；
      以 defer 於本檔前載入 → 執行順序 gsap → ScrollTrigger → SplitText → CustomEase → SplitType → 本模組） -->
 <script defer src="{% static 'js/vendor/split-type.min.js' %}"></script>

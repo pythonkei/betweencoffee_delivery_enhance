@@ -37,7 +37,7 @@
 ```
 - `#bc-brand-stage` 本身已是 `position:relative;overflow:hidden`，所以**不需要**動 hero 高度、
   也不會多出可捲動空間（原站是 `height:120vh` ＋ `margin-bottom:-120vh`，本地直接吃 stage 的高度）。
-- 首頁 hero 的 `#bc-brand-stage` 與 `.footer` 底色已是 `transparent`
+- 首頁 hero 的 `#bc-brand-stage` 與 `.bc-stage-content`（原 `.footer`，2026-11-10 改名）底色已是 `transparent`
   （`bc-brand-stage.css` 檔尾「首頁專用覆寫」段）⇒ 照片直接透出，不必處理遮蓋。
 - `pointer-events:none` ⇒ 環形照 hover 徽章／拖曳／連結、時鐘、nav 全不受影響
   （驗收方式：`document.elementFromPoint()` 取環形照與時鐘中心，`closest('.bc-photoarea')` 必為 null）。

@@ -1,10 +1,11 @@
 /* ============================================================================
-   BC brand footer - ported from bleibtgleich.dev (Webflow) footer
+   BC brand stage（原 Webflow「footer」區塊；首頁當第一屏 hero、about 頁當真頁尾）
+   - ported from bleibtgleich.dev (Webflow) footer
    ----------------------------------------------------------------------------
    2026-10-07 port:
    - Every selector prefixed with `#bc-brand-stage ` (incl. #w-node-*, renamed to
      semantic ids on 2026-10-12 — see below)
-     to avoid Webflow generic classes (.grid/.img/.h1/.footer...) colliding with
+     to avoid Webflow generic classes (.grid/.img/.h1/.bc-stage-content...) colliding with
      BC Bootstrap + bc-* styles.
    - Source defined html{font-size:1vw} so 1rem == 1vw; literal rem -> vw here to
      keep the exact fluid scaling (desktop ratio 14.4, <=991px 3.93) w/o touching
@@ -26,7 +27,7 @@
      a204f672…8db → bc-footer-mail-inner（已無對應元素：email CTA 已改跑馬燈）
    同批：時鐘的 { } 由 `h1.is-desktop` 改為 `.h1.bc-clock-brace`（≤991px 原本被
    `.is-desktop{display:none}` 隱藏），手機／平板改為 9 欄顯示 → 見檔尾區塊。
-   （`.is-desktop` / `.is-mobile` 工具類規則保留：`.is-mobile` 原本只給 .m-footer-inner
+   （`.is-desktop` / `.is-mobile` 工具類規則保留：`.is-mobile` 原本只給 .bc-stage-m-inner
    使用，2026-10-19 起該區塊所有斷點都隱藏（見檔尾），故兩者目前皆無可見元素，
    保留以維持 Webflow 移植原樣。）
 
@@ -46,9 +47,32 @@
          #bc-footer-mail（跑馬燈）               → #bc-stage-marquee
          data-footer-time / data-footer-logo     → data-stage-clock / data-stage-logo
        首頁 wrapper `.bc-bg-hero` → `.bc-brand-stage-hero`（index.html）。
-     · Webflow 匯出的 class 層（.footer / .footer-time / .footer-logo-* / .foooter-mail…）
-       維持原名：與移植來源逐字對應，且本檔所有規則仍 scoped 在 #bc-brand-stage 之下，
-       不會與其他模組互相影響。
+     · Webflow 匯出的 class 層（原 .footer / .footer-time / .footer-logo-* / .foooter-mail…）
+       當時維持原名：與移植來源逐字對應，且本檔所有規則仍 scoped 在 #bc-brand-stage 之下，
+       不會與其他模組互相影響。→ 2026-11-10 已全部改名為 bc-stage-*（見下段）。
+
+   2026-11-10（使用者指示：「footer 讓人困惑，因為這是 hero 部分」）：class 層全域改名
+   —— 兩個 partial（index 的 hero 變體 / about 的真頁尾）＋本檔＋bc-brand-stage.js 同步，
+   單一定義、about 頁外觀不變（只換名字，所有宣告值與選擇器特異度皆未動）：
+     .footer                → .bc-stage-content
+     .footer-inner          → .bc-stage-content-inner
+     .grid.is-footer        → .grid.is-stage
+     .footer-time           → .bc-stage-time
+     .footer-time-inner     → .bc-stage-time-inner
+     .footer-logo-cell      → .bc-stage-photo-cell
+     .footer-logo-item      → .bc-stage-photo-item
+     .footer-logo-list      → .bc-stage-photo-list
+     .footer-logo-list-wrap → .bc-stage-photo-list-wrap
+     .footer-logo-caption   → .bc-stage-photo-caption
+     .footer-logo-link      → .bc-stage-photo-link
+     .footer-socials        → .bc-stage-socials
+     .footer-mail-inner     → .bc-stage-mail-inner（已無對應元素）
+     .m-footer-inner        → .bc-stage-m-inner
+     .m-footer-inner-wrap   → .bc-stage-m-inner-wrap
+     .m-footer-name         → .bc-stage-m-name
+     .m-footer-meta         → .bc-stage-m-meta
+     .foooter-mail（原 Webflow 拼字錯誤）→ .bc-stage-marquee（與既有 id #bc-stage-marquee 同名）
+   ※ <footer> 標籤（about 頁的真頁尾）與所有 id / data-* 屬性一律不動。
    ============================================================================ */
 
 @font-face{
@@ -163,7 +187,7 @@
 #bc-brand-stage .grid.fill{flex:1;}
 #bc-brand-stage .grid.row-0{grid-row-gap:var(--_units---u-0);}
 #bc-brand-stage .grid._6-cols{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}
-#bc-brand-stage .grid.is-footer{padding-top:var(--_units---u-120);border-top:var(--_special-units---stroke)solid var(--_colors---border--100);}
+#bc-brand-stage .grid.is-stage{padding-top:var(--_units---u-120);border-top:var(--_special-units---stroke)solid var(--_colors---border--100);}
 #bc-brand-stage .img{flex:none;width:100%;height:100%;}
 #bc-brand-stage .img.contain{object-fit:contain;}
 /* 2026-10-07：移除 .img.is-invert（filter:invert(1)）—改由 deco_*.svg 檔案內白色 fill 於黑底呈現。 */
@@ -179,8 +203,8 @@
 #bc-brand-stage .icon-wrap.is-15{width:calc(15vw/var(--_special-units---global--scale-ratio));height:calc(15vw/var(--_special-units---global--scale-ratio));justify-content:center;align-items:center;display:flex;}
 #bc-brand-stage .icon-wrap.is-20{width:var(--_units---u-20);height:var(--_units---u-20);}
 #bc-brand-stage .icon-wrap.is-contact{width:calc(80vw/var(--_special-units---global--scale-ratio));}
-#bc-brand-stage .footer{background-color:var(--_colors---background--bg);}
-#bc-brand-stage .footer-inner{padding:var(--_units---u-16)var(--_units---u-16)var(--_units---u-120);}
+#bc-brand-stage .bc-stage-content{background-color:var(--_colors---background--bg);}
+#bc-brand-stage .bc-stage-content-inner{padding:var(--_units---u-16)var(--_units---u-16)var(--_units---u-120);}
 #bc-brand-stage .link-button{padding:var(--_units---u-4)var(--_units---u-8);border-radius:var(--_units---u-32);justify-content:center;align-items:center;display:flex;}
 #bc-brand-stage .link-button.left-offset{margin-left:calc(var(--_units---u-6)*-1);min-width:max-content;}
 #bc-brand-stage .social-list{grid-column-gap:var(--_units---u-8);grid-row-gap:var(--_units---u-8);flex-flow:row;display:flex;}
@@ -201,28 +225,28 @@
 #bc-brand-stage .code-embed-2.is-2{transform-style:preserve-3d;position:absolute;left:31.6vw;transform:rotateX(-180deg)rotateY(0)rotate(0);}
 #bc-brand-stage .code-embed-2.is-2{position:absolute;left:31.6vw;transform:none;}
 #bc-brand-stage .text-link.is-2{position:absolute;inset:auto auto 0% 0%;}
-#bc-brand-stage .foooter-mail{grid-column-gap:var(--_units---u-40);grid-row-gap:var(--_units---u-40);flex-flow:column;justify-content:flex-end;align-items:stretch;display:flex;}
-#bc-brand-stage .foooter-mail.flex-align-left{justify-content:center;align-items:center;}
-#bc-brand-stage .foooter-mail.flex-align-right{justify-content:flex-end;align-items:center;}
-#bc-brand-stage .footer-socials{padding-top:var(--_units---u-104);justify-content:center;align-items:center;display:flex;}
-#bc-brand-stage .footer-socials.flex-align-left{justify-content:center;align-items:center;}
-#bc-brand-stage .footer-socials.flex-align-right{justify-content:flex-end;align-items:center;}
-#bc-brand-stage .footer-time{margin-top:var(--_units---u-104);margin-bottom:var(--_units---u-104);grid-column-gap:var(--_special-units---grid-gap);grid-row-gap:var(--_special-units---grid-gap);grid-template-rows:auto;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;grid-auto-columns:1fr;display:grid;}
-#bc-brand-stage .footer-time-inner{justify-content:center;align-items:center;display:flex;}
+#bc-brand-stage .bc-stage-marquee{grid-column-gap:var(--_units---u-40);grid-row-gap:var(--_units---u-40);flex-flow:column;justify-content:flex-end;align-items:stretch;display:flex;}
+#bc-brand-stage .bc-stage-marquee.flex-align-left{justify-content:center;align-items:center;}
+#bc-brand-stage .bc-stage-marquee.flex-align-right{justify-content:flex-end;align-items:center;}
+#bc-brand-stage .bc-stage-socials{padding-top:var(--_units---u-104);justify-content:center;align-items:center;display:flex;}
+#bc-brand-stage .bc-stage-socials.flex-align-left{justify-content:center;align-items:center;}
+#bc-brand-stage .bc-stage-socials.flex-align-right{justify-content:flex-end;align-items:center;}
+#bc-brand-stage .bc-stage-time{margin-top:var(--_units---u-104);margin-bottom:var(--_units---u-104);grid-column-gap:var(--_special-units---grid-gap);grid-row-gap:var(--_special-units---grid-gap);grid-template-rows:auto;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;grid-auto-columns:1fr;display:grid;}
+#bc-brand-stage .bc-stage-time-inner{justify-content:center;align-items:center;display:flex;}
 /* 2026-10-07：移除品牌金釘牌底色（--_colors---fill--primary），改與 footer 同底色，
    由 deco_*.svg 白色 fill 於黑底呈現（不再需要反相）。 */
-#bc-brand-stage .footer-logo-cell{padding-top:var(--_units---u-40);padding-bottom:var(--_units---u-40);cursor:pointer;width:calc(192vw/var(--_special-units---global--scale-ratio));}
-#bc-brand-stage .footer-logo-item{height:calc(184vw/var(--_special-units---global--scale-ratio));display:none;position:absolute;inset:0%;}
-#bc-brand-stage .footer-logo-item:first-child{display:block;position:relative;}
-#bc-brand-stage .footer-logo-list{position:relative;}
+#bc-brand-stage .bc-stage-photo-cell{padding-top:var(--_units---u-40);padding-bottom:var(--_units---u-40);cursor:pointer;width:calc(192vw/var(--_special-units---global--scale-ratio));}
+#bc-brand-stage .bc-stage-photo-item{height:calc(184vw/var(--_special-units---global--scale-ratio));display:none;position:absolute;inset:0%;}
+#bc-brand-stage .bc-stage-photo-item:first-child{display:block;position:relative;}
+#bc-brand-stage .bc-stage-photo-list{position:relative;}
 /* 2026-10-09（使用者指示）：首頁 hero 的照片列改為「咖啡照＋連結」後（照片與連結比照
    index.html #hero_hand_list 的 hero_coffees.0~6；see partials/bc_brand_stage_hero.html），
-   每個 .footer-logo-item 內多包一層 <a>。因 reset（L48）不會讓 a 撐開，且 `.img` 的
+   每個 .bc-stage-photo-item 內多包一層 <a>。因 reset（L48）不會讓 a 撐開，且 `.img` 的
    width/height:100% 需有 block 父層才能解析（inline 高度塌陷），故讓 <a> 填滿整個格子；
-   其餘輪播用的絕對定位 / display 切換仍由上面兩條 .footer-logo-item 規則決定，不受影響。
+   其餘輪播用的絕對定位 / display 切換仍由上面兩條 .bc-stage-photo-item 規則決定，不受影響。
    （about 頁尾的 bc_brand_stage.html 仍為 deco 標誌，此規則對它無作用、無副作用。） */
-#bc-brand-stage .footer-logo-item a{display:block;width:100%;height:100%;}
-/* 2026-10-08：about footer 的 .footer-mail-inner（email CTA）改用 index footer 的 .scroller-box 跑馬燈。
+#bc-brand-stage .bc-stage-photo-item a{display:block;width:100%;height:100%;}
+/* 2026-10-08：about footer 的 .bc-stage-mail-inner（email CTA）改用 index footer 的 .scroller-box 跑馬燈。
    樣式來源：static/css/style-utilities.css（.scroller-box / .scroller / .tag-list）
    捲動來源：static/js/main.js querySelectorAll('.scroller')（設 data-animated + 複製 li 無縫循環）
    [補償] 上方 reset `#bc-brand-stage div,ul,li{margin:0;padding:0}`（ID 特異度 1,0,1）會蓋掉
@@ -249,19 +273,19 @@
 }
 /* 2026-10-08：修掉 ≤991px 跑馬燈衝出欄位（量到 2000px）的缺陷。
    [成因] 下方 Webflow 原樣規則 `#bc-brand-stage #bc-stage-marquee{grid-area:5/1/6/4;justify-self:start}`
-   （平板欄寬僅 341px）讓 .foooter-mail 走 shrink-to-fit：item 寬 = fit-content = min(max-content, …)，
+   （平板欄寬僅 341px）讓 .bc-stage-marquee 走 shrink-to-fit：item 寬 = fit-content = min(max-content, …)，
    而 max-content 由跑馬燈決定 —— main.js 設 data-animated=true 後 .scroller__inner{flex-wrap:nowrap}，
    2 個 li 各 1108px（.tag-list li{width:1108px}）＋ .scroller{max-width:2000px} → item 量到 2000px
    （行動 2000px、平板 1108px→2000px，desktop 因 justify-self:auto 本來就拉伸到欄寬 336px）。
    超出欄位的部分只能靠 #bc-brand-stage{overflow:hidden} 裁掉，視覺上跑馬燈橫貫整個 footer、
    壓到相鄰裝飾字。
-   [修法] width:100%（＝自己的 grid area 寬）＋ min-width:0：.foooter-mail 不再 shrink-to-fit，
+   [修法] width:100%（＝自己的 grid area 寬）＋ min-width:0：.bc-stage-marquee 不再 shrink-to-fit，
    跑馬燈恆被限制在欄寬內（平板 341px／行動 173px），再由 .scroller 自身的 overflow:hidden 裁切、
    捲動動畫照常；min-width:0 用來擋 min-width:auto 以 min-content(min=2000px) 反過來把格子撐開。
    [影響] ≥992px 走 `justify-self:auto`（stretch）＋ grid-area:5/3/6/5，實測 336px 完全不變；
-   全站只有 about.html 使用 #bc-brand-stage/.foooter-mail。 */
-#bc-brand-stage .foooter-mail{min-width:0;width:100%;}
-@media screen and (max-width:991px){#bc-brand-stage{--_fonts---font-body:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---font-display:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---h1--size:calc(45vw/var(--_special-units---global--scale-ratio));--_fonts---h1--line-height:90%;--_fonts---h1--letter-spacing:-.6vw;--_fonts---h2--size:calc(40vw/var(--_special-units---global--scale-ratio));--_fonts---h2--line-height:80%;--_fonts---h2--letter-spacing:-.1vw;--_fonts---h3--size:0vw;--_fonts---h3--line-height:0%;--_fonts---h3--letter-spacing:0em;--_fonts---h4--size:0vw;--_fonts---h4--line-height:0%;--_fonts---h4--letter-spacing:0em;--_fonts---h5--size:0vw;--_fonts---h5--line-height:0%;--_fonts---h5--letter-spacing:0em;--_fonts---h6--size:0vw;--_fonts---h6--line-height:0%;--_fonts---h6--letter-spacing:0em;--_fonts---p1--size:calc(12vw/var(--_special-units---global--scale-ratio));--_fonts---p1--line-height:100%;--_fonts---p1--letter-spacing:-.02625vw;--_fonts---l1--size:1vw;--_fonts---l1--line-height:100%;--_fonts---l1--letter-spacing:-.016em;--104px:calc(104vw/var(--_special-units---global--scale-ratio));--72px:calc(72vw/var(--_special-units---global--scale-ratio));--64px:calc(64vw/var(--_special-units---global--scale-ratio));--96px:calc(96vw/var(--_special-units---global--scale-ratio));--0px:calc(0vw/var(--_special-units---global--scale-ratio));--1px:calc(1vw/var(--_special-units---global--scale-ratio));--2px:calc(2vw/var(--_special-units---global--scale-ratio));--4px:calc(4vw/var(--_special-units---global--scale-ratio));--6px:calc(6vw/var(--_special-units---global--scale-ratio));--8px:calc(8vw/var(--_special-units---global--scale-ratio));--10px:calc(10vw/var(--_special-units---global--scale-ratio));--12px:calc(12vw/var(--_special-units---global--scale-ratio));--16px:calc(16vw/var(--_special-units---global--scale-ratio));--20px:calc(20vw/var(--_special-units---global--scale-ratio));--24px:calc(24vw/var(--_special-units---global--scale-ratio));--28px:calc(28vw/var(--_special-units---global--scale-ratio));--32px:calc(32vw/var(--_special-units---global--scale-ratio));--36px:calc(36vw/var(--_special-units---global--scale-ratio));--40px:calc(40vw/var(--_special-units---global--scale-ratio));--44px:calc(44vw/var(--_special-units---global--scale-ratio));--48px:calc(48vw/var(--_special-units---global--scale-ratio));--52px:calc(52vw/var(--_special-units---global--scale-ratio));--56px:calc(56vw/var(--_special-units---global--scale-ratio));--60px:calc(60vw/var(--_special-units---global--scale-ratio));--68px:calc(68vw/var(--_special-units---global--scale-ratio));--80px:calc(80vw/var(--_special-units---global--scale-ratio));--88px:calc(88vw/var(--_special-units---global--scale-ratio));--112px:calc(112vw/var(--_special-units---global--scale-ratio));--120px:calc(120vw/var(--_special-units---global--scale-ratio));--128px:calc(128vw/var(--_special-units---global--scale-ratio));--144px:calc(144vw/var(--_special-units---global--scale-ratio));--168px:calc(168vw/var(--_special-units---global--scale-ratio));--192px:calc(192vw/var(--_special-units---global--scale-ratio));--200px:calc(200vw/var(--_special-units---global--scale-ratio));--240px:calc(240vw/var(--_special-units---global--scale-ratio));--_special-units---global--100vh:100vh;--_special-units---1-cell:calc(162vw/var(--_special-units---global--scale-ratio));--_special-units---grid-gap:var(--12px);--_special-units---global--scale-ratio:3.93;--_special-units---stroke:calc(.25vw/var(--_special-units---global--scale-ratio));--_special-units---global--padding:var(--_units---u-16);--_units---u-0:var(--0px);--_units---u-120:var(--120px);--_units---u-104:var(--104px);--_units---u-240:var(--240px);--_units---u-72:var(--72px);--_units---u-4:var(--4px);--_units---u-8:var(--8px);--_units---u-12:var(--12px);--_units---u-16:var(--16px);--_units---u-24:var(--24px);--_units---u-32:var(--32px);--_units---u-48:var(--48px);--_units---u-64:var(--64px);--_units---u-96:var(--96px);--_units---u-144:var(--144px);--_units---u-192:var(--192px);--_units---u-20:var(--20px);--_units---u-80:var(--80px);--_units---u-6:var(--6px);--_units---u-200:var(--200px);--_units---u-128:var(--128px);--_units---u-10:var(--10px);--_units---u-2:var(--2px);--_units---u-40:var(--40px);--_units---u-36:var(--36px);}#bc-brand-stage .h1._1-cell-offset{margin-left:calc(66vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .h1.is-display{font-size:calc(75vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .h1.is-modified{transform:rotate(10deg);}#bc-brand-stage .p1.mt-240{margin-top:var(--_units---u-120);}#bc-brand-stage .grid{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-brand-stage .grid.is-footer{padding-top:var(--_units---u-72);}#bc-brand-stage .img.width-auto{width:auto;}#bc-brand-stage .heading-group-wrap.mt-8,#bc-brand-stage .heading-group-wrap.is-right.mt-8{margin-top:var(--_units---u-0);}#bc-brand-stage .icon-wrap.is-contact{width:calc(56vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .footer-inner{padding-top:var(--_units---u-0);padding-bottom:var(--_units---u-72);}#bc-brand-stage .footer-inner:where(.w-variant-27776d25-5053-5aa6-2108-a99a2e23347b){display:none;}#bc-brand-stage .link-button{background-color:var(--_colors---fill--tertiary);}#bc-brand-stage .social-item:hover{background-color:var(--_colors---background--transparent);}#bc-brand-stage .is-desktop{display:none;}#bc-brand-stage .m-footer-name{padding-right:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:center;align-items:center;display:flex;}#bc-brand-stage .m-footer-meta{padding-right:var(--_units---u-16);padding-bottom:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:space-between;align-items:center;display:flex;}#bc-brand-stage .is-mobile{display:block;}#bc-brand-stage .m-footer-inner-wrap{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);flex-flow:column;display:flex;}#bc-brand-stage ._404-description.grid{padding-right:var(--_units---u-48);padding-left:var(--_units---u-48);text-align:center;}#bc-brand-stage .foooter-mail{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);}#bc-brand-stage .foooter-mail.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-brand-stage .footer-socials{padding-top:var(--_units---u-72);}#bc-brand-stage .footer-socials.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-brand-stage .footer-time{margin-top:var(--_units---u-48);margin-bottom:var(--_units---u-48);grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-brand-stage .footer-logo-cell{padding-top:var(--_units---u-24);padding-bottom:var(--_units---u-24);}#bc-brand-stage .footer-logo-item{height:calc(120vw/var(--_special-units---global--scale-ratio));}}
+   全站只有 about.html 使用 #bc-brand-stage/.bc-stage-marquee。 */
+#bc-brand-stage .bc-stage-marquee{min-width:0;width:100%;}
+@media screen and (max-width:991px){#bc-brand-stage{--_fonts---font-body:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---font-display:"Akzidenz Grotesk Pro",Arial,sans-serif;--_fonts---h1--size:calc(45vw/var(--_special-units---global--scale-ratio));--_fonts---h1--line-height:90%;--_fonts---h1--letter-spacing:-.6vw;--_fonts---h2--size:calc(40vw/var(--_special-units---global--scale-ratio));--_fonts---h2--line-height:80%;--_fonts---h2--letter-spacing:-.1vw;--_fonts---h3--size:0vw;--_fonts---h3--line-height:0%;--_fonts---h3--letter-spacing:0em;--_fonts---h4--size:0vw;--_fonts---h4--line-height:0%;--_fonts---h4--letter-spacing:0em;--_fonts---h5--size:0vw;--_fonts---h5--line-height:0%;--_fonts---h5--letter-spacing:0em;--_fonts---h6--size:0vw;--_fonts---h6--line-height:0%;--_fonts---h6--letter-spacing:0em;--_fonts---p1--size:calc(12vw/var(--_special-units---global--scale-ratio));--_fonts---p1--line-height:100%;--_fonts---p1--letter-spacing:-.02625vw;--_fonts---l1--size:1vw;--_fonts---l1--line-height:100%;--_fonts---l1--letter-spacing:-.016em;--104px:calc(104vw/var(--_special-units---global--scale-ratio));--72px:calc(72vw/var(--_special-units---global--scale-ratio));--64px:calc(64vw/var(--_special-units---global--scale-ratio));--96px:calc(96vw/var(--_special-units---global--scale-ratio));--0px:calc(0vw/var(--_special-units---global--scale-ratio));--1px:calc(1vw/var(--_special-units---global--scale-ratio));--2px:calc(2vw/var(--_special-units---global--scale-ratio));--4px:calc(4vw/var(--_special-units---global--scale-ratio));--6px:calc(6vw/var(--_special-units---global--scale-ratio));--8px:calc(8vw/var(--_special-units---global--scale-ratio));--10px:calc(10vw/var(--_special-units---global--scale-ratio));--12px:calc(12vw/var(--_special-units---global--scale-ratio));--16px:calc(16vw/var(--_special-units---global--scale-ratio));--20px:calc(20vw/var(--_special-units---global--scale-ratio));--24px:calc(24vw/var(--_special-units---global--scale-ratio));--28px:calc(28vw/var(--_special-units---global--scale-ratio));--32px:calc(32vw/var(--_special-units---global--scale-ratio));--36px:calc(36vw/var(--_special-units---global--scale-ratio));--40px:calc(40vw/var(--_special-units---global--scale-ratio));--44px:calc(44vw/var(--_special-units---global--scale-ratio));--48px:calc(48vw/var(--_special-units---global--scale-ratio));--52px:calc(52vw/var(--_special-units---global--scale-ratio));--56px:calc(56vw/var(--_special-units---global--scale-ratio));--60px:calc(60vw/var(--_special-units---global--scale-ratio));--68px:calc(68vw/var(--_special-units---global--scale-ratio));--80px:calc(80vw/var(--_special-units---global--scale-ratio));--88px:calc(88vw/var(--_special-units---global--scale-ratio));--112px:calc(112vw/var(--_special-units---global--scale-ratio));--120px:calc(120vw/var(--_special-units---global--scale-ratio));--128px:calc(128vw/var(--_special-units---global--scale-ratio));--144px:calc(144vw/var(--_special-units---global--scale-ratio));--168px:calc(168vw/var(--_special-units---global--scale-ratio));--192px:calc(192vw/var(--_special-units---global--scale-ratio));--200px:calc(200vw/var(--_special-units---global--scale-ratio));--240px:calc(240vw/var(--_special-units---global--scale-ratio));--_special-units---global--100vh:100vh;--_special-units---1-cell:calc(162vw/var(--_special-units---global--scale-ratio));--_special-units---grid-gap:var(--12px);--_special-units---global--scale-ratio:3.93;--_special-units---stroke:calc(.25vw/var(--_special-units---global--scale-ratio));--_special-units---global--padding:var(--_units---u-16);--_units---u-0:var(--0px);--_units---u-120:var(--120px);--_units---u-104:var(--104px);--_units---u-240:var(--240px);--_units---u-72:var(--72px);--_units---u-4:var(--4px);--_units---u-8:var(--8px);--_units---u-12:var(--12px);--_units---u-16:var(--16px);--_units---u-24:var(--24px);--_units---u-32:var(--32px);--_units---u-48:var(--48px);--_units---u-64:var(--64px);--_units---u-96:var(--96px);--_units---u-144:var(--144px);--_units---u-192:var(--192px);--_units---u-20:var(--20px);--_units---u-80:var(--80px);--_units---u-6:var(--6px);--_units---u-200:var(--200px);--_units---u-128:var(--128px);--_units---u-10:var(--10px);--_units---u-2:var(--2px);--_units---u-40:var(--40px);--_units---u-36:var(--36px);}#bc-brand-stage .h1._1-cell-offset{margin-left:calc(66vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .h1.is-display{font-size:calc(75vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .h1.is-modified{transform:rotate(10deg);}#bc-brand-stage .p1.mt-240{margin-top:var(--_units---u-120);}#bc-brand-stage .grid{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-brand-stage .grid.is-stage{padding-top:var(--_units---u-72);}#bc-brand-stage .img.width-auto{width:auto;}#bc-brand-stage .heading-group-wrap.mt-8,#bc-brand-stage .heading-group-wrap.is-right.mt-8{margin-top:var(--_units---u-0);}#bc-brand-stage .icon-wrap.is-contact{width:calc(56vw/var(--_special-units---global--scale-ratio));}#bc-brand-stage .bc-stage-content-inner{padding-top:var(--_units---u-0);padding-bottom:var(--_units---u-72);}#bc-brand-stage .bc-stage-content-inner:where(.w-variant-27776d25-5053-5aa6-2108-a99a2e23347b){display:none;}#bc-brand-stage .link-button{background-color:var(--_colors---fill--tertiary);}#bc-brand-stage .social-item:hover{background-color:var(--_colors---background--transparent);}#bc-brand-stage .is-desktop{display:none;}#bc-brand-stage .bc-stage-m-name{padding-right:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:center;align-items:center;display:flex;}#bc-brand-stage .bc-stage-m-meta{padding-right:var(--_units---u-16);padding-bottom:var(--_units---u-16);padding-left:var(--_units---u-16);justify-content:space-between;align-items:center;display:flex;}#bc-brand-stage .is-mobile{display:block;}#bc-brand-stage .bc-stage-m-inner-wrap{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);flex-flow:column;display:flex;}#bc-brand-stage ._404-description.grid{padding-right:var(--_units---u-48);padding-left:var(--_units---u-48);text-align:center;}#bc-brand-stage .bc-stage-marquee{grid-column-gap:var(--_units---u-16);grid-row-gap:var(--_units---u-16);}#bc-brand-stage .bc-stage-marquee.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-brand-stage .bc-stage-socials{padding-top:var(--_units---u-72);}#bc-brand-stage .bc-stage-socials.flex-align-right.is-last{margin-bottom:var(--_units---u-0);}#bc-brand-stage .bc-stage-time{margin-top:var(--_units---u-48);margin-bottom:var(--_units---u-48);grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;}#bc-brand-stage .bc-stage-photo-cell{padding-top:var(--_units---u-24);padding-bottom:var(--_units---u-24);}#bc-brand-stage .bc-stage-photo-item{height:calc(120vw/var(--_special-units---global--scale-ratio));}}
 @media screen and (max-width:479px){#bc-brand-stage .grid{width:100%;}}
 #bc-brand-stage #bc-stage-headline-hug-in-a-cup{grid-area:1/3/2/7;}
 #bc-brand-stage #bc-stage-headline-perfect-to-go{grid-area:2/4/3/7;}
@@ -298,7 +322,7 @@
           ≥992px 走上方 8 欄規則完全不受影響（見 docs/verify/cdp_verify_clock_braces.py）。 */
 @media screen and (max-width:991px){
   /* 時鐘 9 欄（覆寫上方 Webflow 區塊的 1fr 1fr 1fr 1fr 1fr 1fr） */
-  #bc-brand-stage .footer-time{grid-template-columns:repeat(9,minmax(0,1fr));}
+  #bc-brand-stage .bc-stage-time{grid-template-columns:repeat(9,minmax(0,1fr));}
   /* 由外而內：{ 15 : 照片 : 19 } → 欄 1..9 */
   #bc-brand-stage #bc-stage-clock-brace-open{grid-area:1/1/2/2;}
   #bc-brand-stage #bc-stage-clock-hours{grid-area:1/2/2/3;justify-self:center;}
@@ -318,15 +342,15 @@
   #bc-brand-stage #bc-stage-marquee{grid-area:5/1/6/4;justify-self:start;}
 }
 
-/* ── 2026-10-19（使用者指示）：所有斷點都隱藏 .m-footer-inner ──────────────────
-   .m-footer-inner 是 Webflow 移植的行動版頁尾（「Between Coffee／© 版權」那塊）：
+/* ── 2026-10-19（使用者指示）：所有斷點都隱藏 .bc-stage-m-inner ──────────────────
+   .bc-stage-m-inner 是 Webflow 移植的行動版頁尾（「Between Coffee／© 版權」那塊）：
    桌機已由 `#bc-brand-stage .is-mobile{display:none}` 隱藏，但 ≤991px 的區塊會把
    `.is-mobile` 改回 display:block（原本要讓它在手機／平板顯示）。使用者要求
    「所有端都隱藏」⇒ 這裡補一條同特異度、但排在檔尾最後的規則覆蓋掉它，
    首頁 hero partial 與 about 頁頁尾 partial 都不再出現此區塊。
    刻意保留 markup 與 `.is-mobile` 工具類：日後若要恢復，只需刪掉這條規則，
    不必動兩份 partial（`.is-mobile` 在模板中僅此一處使用，隱藏後等同無作用）。 */
-#bc-brand-stage .m-footer-inner{display:none;}
+#bc-brand-stage .bc-stage-m-inner{display:none;}
 
 
 
@@ -376,13 +400,13 @@
 }
 /* 2026-10-09（使用者指示）：置頂 hero 去掉「頁尾感」——移除頂部分隔線與自帶黑底。
    [來源] 該模組（#bc-brand-stage，Hug in a Cup 時鐘）原本是頁尾，樣式沿用 Webflow 來源：
-     · 線 = bc-brand-stage.css:152 `#bc-brand-stage .grid.is-footer{border-top:1px solid
+     · 線 = bc-brand-stage.css:152 `#bc-brand-stage .grid.is-stage{border-top:1px solid
        var(--_colors---border--100)}`，--_colors---border--100 = rgba(255,255,255,.08)
        → 實測繪出 y=14、x=14–1250、rgb(32,32,32) 的 1px 線（頁面底色為 rgb(14,14,14)）。
        這條線在原設計是「與頁尾上方內容分隔」用；置頂當 hero 時就會在畫面頂端
        出現一條突兀的細線，故移除。
      · 黑底 = bc-brand-stage.css:81 `#bc-brand-stage{background-color:var(--_colors---background--bg)}`
-       與 :168 `#bc-brand-stage .footer{background-color:…}`（兩者皆 #0e0e0e）→ 讓模組成為
+       與 :168 `#bc-brand-stage .bc-stage-content{background-color:…}`（兩者皆 #0e0e0e）→ 讓模組成為
        一塊自帶黑底的方塊。移除後由頁面自身的底色穿透（body 的固定背景照片，
        style-bootstrap.css:3118 `background:url(../images/bg_4.jpg) no-repeat fixed`），
        與首頁其餘區塊（.feed--video / ftco-section-blank-* 等，實測已露出同一張照片）一致。
@@ -395,21 +419,21 @@
 .bc-brand-stage-hero #bc-brand-stage {
   background-color: transparent;
 }
-.bc-brand-stage-hero #bc-brand-stage .footer {
+.bc-brand-stage-hero #bc-brand-stage .bc-stage-content {
   background-color: transparent;
 }
-.bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
+.bc-brand-stage-hero #bc-brand-stage .grid.is-stage {
   border-top: 0 none;
 }
 /* 2026-10-24（使用者指示）：首頁品牌舞台的社群列（#bc-stage-socials）隱藏。
    [作法] 只加樣式、不動 markup（partials/bc_brand_stage_hero.html 原樣保留）
-          ⇒ 日後要恢復，刪掉這條規則即可（與檔尾 .m-footer-inner 的處理同一慣例）。
+          ⇒ 日後要恢復，刪掉這條規則即可（與檔尾 .bc-stage-m-inner 的處理同一慣例）。
    [為何不用 hidden 屬性] bc-brand-stage.css:207 有
-          `#bc-brand-stage .footer-socials{display:flex}`（特異度 1,1,0），
+          `#bc-brand-stage .bc-stage-socials{display:flex}`（特異度 1,1,0），
           會蓋過 UA 的 `[hidden]{display:none}`（0,1,0）⇒ 對這塊加 hidden 不會生效，
           只能用同（更）高特異度的作者樣式覆寫。
-   [連帶效果] 它原本佔 .grid.is-footer 的 grid-area:6/3/7/7（≥992px）／grid-column:1/7（≤991px）；
-          display:none 後第 6 列不再產生（連同 .footer-socials 的 padding-top u-104 一起消失），
+   [連帶效果] 它原本佔 .grid.is-stage 的 grid-area:6/3/7/7（≥992px）／grid-column:1/7（≤991px）；
+          display:none 後第 6 列不再產生（連同 .bc-stage-socials 的 padding-top u-104 一起消失），
           其餘格子因全部是明確 grid-area，座標不動 ⇒ 舞台高度變矮、下方內容等量上移。
    [範圍] 只作用首頁 hero；about 頁的真頁尾（partials/bc_brand_stage.html）仍保留社群列，
           若日後要一併隱藏，把選擇器改成 `#bc-stage-socials` 即可。 */
@@ -437,7 +461,7 @@
   --bc-hero-center-n: 43;
 }
 @media screen and (min-width: 768px) {
-  .bc-brand-stage-hero #bc-brand-stage .footer-time {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-time {
     margin-top: 0;
   }
 }
@@ -445,7 +469,7 @@
    2026-10-20 稍後：目標中心 50% → var(--bc-hero-center-n)（43%），時鐘列 margin-top 歸零。
    [改前量測（2026-10-20 稍早版本，目標中心＝50% 視高）]
      1440×900：時鐘列 top 272、高 468、中心 450.0（＝視口中心，誤差 0）；上方空白帶
-       ＝ .footer-inner padding-top 16 ＋ grid padding-top 63.8 ＋ 2 個空列 row-gap 32
+       ＝ .bc-stage-content-inner padding-top 16 ＋ grid padding-top 63.8 ＋ 2 個空列 row-gap 32
        ＋ 時鐘列 margin-top u-104 104 ＝ 215.8px。
      1280×800、1536×864、1920×1080 也都維持 0 誤差；但 1536×864 的 padding 已被
        max(24px) 下限夾住、1920×1080 的 u-104 又膨脹到 138.7px
@@ -457,7 +481,7 @@
      ⇒ 固定值只在某一種長寬比剛好命中（64px 在 1440×900 精準，換個長寬比就偏掉）。
      直接把「時鐘列中心 ＝ 43% 視高」解出來，逐段扣掉它上方的既有間距：
        時鐘列中心 ＝ 0
-                  ＋ .footer-inner padding-top      var(--_units---u-16)
+                  ＋ .bc-stage-content-inner padding-top      var(--_units---u-16)
                   ＋ 本條 padding-top              ← 求解的值
                   ＋ 空列造成的 2 個 row-gap        2 × var(--_special-units---grid-gap)
                   ＋ #bc-stage-clock margin-top    0（2026-10-20 稍後歸零，原 u-104）
@@ -478,7 +502,7 @@
    [範圍] 只作用於首頁（.bc-brand-stage-hero）；about 頁的真頁尾仍走 bc-brand-stage.css
            的 120／72，不受影響。 */
 @media screen and (min-width: 992px) {
-  .bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
+  .bc-brand-stage-hero #bc-brand-stage .grid.is-stage {
     padding-top: max(24px, calc(var(--bc-hero-center-n) * 1vh - var(--_units---u-16) - 2 * var(--_special-units---grid-gap) - (200vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2)));
     padding-top: max(24px, calc(var(--bc-hero-center-n) * 1svh - var(--_units---u-16) - 2 * var(--_special-units---grid-gap) - (200vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2)));
   }
@@ -490,19 +514,19 @@
      —— 390×844 的時鐘列中心 282 本來就偏上（視口中心 422）、距頂端只剩 143px，
      再上移只會更偏離中心。
    [本次調整（2026-10-20 稍後）] 目標中心與桌機共用 var(--bc-hero-center-n)＝43%，
-     且 .footer-time 的 margin-top（u-48＝12.21vw）已在 ≥768px 統一歸零（見上方覆寫），
+     且 .bc-stage-time 的 margin-top（u-48＝12.21vw）已在 ≥768px 統一歸零（見上方覆寫），
      故本段算式不再扣 u-48 —— 那段空間現在由 padding-top 一次決定。
    [為何不能寫成固定值] ≤991 的所有間距都隨「視寬」縮放（u-72＝18.32vw、空列 gap、
      照片區 180vw/ratio），目標位置卻綁視高 ⇒ 固定值只在某一種長寬比剛好命中。
      因此比照 ≥992 的作法，直接把「時鐘列中心 ＝ 43% 視高」解出來：
        時鐘列中心 ＝ padding-top
                    ＋ 2 × grid-gap（.grid 內空列造成的 2 個 row-gap）
-                   ＋ .footer-time 的 margin-top（0，見上方覆寫）
+                   ＋ .bc-stage-time 的 margin-top（0，見上方覆寫）
                    ＋ 時鐘列高 ÷ 2
-       時鐘列高   ＝ 2 × u-24 ＋ 14px（.footer-logo-cell 上下內距，見上方 ≤991 覆寫）
-                   ＋ 180vw/ratio（.footer-logo-list，見上方 ≤991 覆寫）
+       時鐘列高   ＝ 2 × u-24 ＋ 14px（.bc-stage-photo-cell 上下內距，見上方 ≤991 覆寫）
+                   ＋ 180vw/ratio（.bc-stage-photo-list，見上方 ≤991 覆寫）
                    ＋ --bc-hero-caption-h（名稱＋highlight，見下方 B2）
-       （≤991 的 .footer-inner padding-top 為 0，故不列入。）
+       （≤991 的 .bc-stage-content-inner padding-top 為 0，故不列入。）
        時鐘列高 ÷ 2 ＝ u-24 ＋ 7px ＋ 90vw/ratio ＋ caption/2 ← 即算式中的四項。
    [預期] 768×1024：改前 padding 140.7、時鐘列 top 281.4（含 margin-top 93.8；中心 532.6
      ＝比視口中心低 20.6px）→ 改後頂端空白帶 187.6（少 93.8px）。
@@ -518,49 +542,49 @@
    [範圍] 只作用首頁（.bc-brand-stage-hero）；about 頁的真頁尾仍走 bc-brand-stage.css
      的 u-72，不受影響。 */
 @media screen and (min-width: 768px) and (max-width: 991px) {
-  .bc-brand-stage-hero #bc-brand-stage .grid.is-footer {
+  .bc-brand-stage-hero #bc-brand-stage .grid.is-stage {
     padding-top: min(var(--_units---u-72), max(24px, calc(var(--bc-hero-center-n) * 1vh - 2 * var(--_special-units---grid-gap) - var(--_units---u-24) - 7px - (90vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2))));
     padding-top: min(var(--_units---u-72), max(24px, calc(var(--bc-hero-center-n) * 1svh - 2 * var(--_special-units---grid-gap) - var(--_units---u-24) - 7px - (90vw / var(--_special-units---global--scale-ratio)) - (var(--bc-hero-caption-h) / 2))));
   }
 }
 
 /* 2026-10-12（使用者指示）：「bc-brand-stage 內的咖啡照片列尺寸增加 50%」。
-   [標的] 首頁 hero 內 #bc-brand-stage 的 7 張咖啡照列 —— .footer-logo-cell（寬）
-     與 .footer-logo-item（高）；照片本身是 .img{width:100%;height:100%}＋
+   [標的] 首頁 hero 內 #bc-brand-stage 的 7 張咖啡照列 —— .bc-stage-photo-cell（寬）
+     與 .bc-stage-photo-item（高）；照片本身是 .img{width:100%;height:100%}＋
      .img.contain（object-fit:contain），故放大格子即放大照片。
    [原始值] bc-brand-stage.css:195 寬 calc(192vw/scale-ratio)、:196 高 calc(184vw/scale-ratio)；
      同檔 :245 的 @media (max-width:991px) 再把高改為 calc(120vw/scale-ratio)。
      ⇒ 桌機 192×184（@1440 實測 cell 192×264＝上下 padding 40＋184）、
         ≤991px 高 30.53vw。×1.5 後＝寬 288／高 276，≤991px 高 180。
-   [範圍] 只覆寫本頁：about 頁的真頁尾共用同一組 class（.footer-logo-*）與同一份 CSS，
+   [範圍] 只覆寫本頁：about 頁的真頁尾共用同一組 class（.bc-stage-photo-*）與同一份 CSS，
      仍維持原尺寸（deco 標誌釘牌不變）。
    [特異度] 多一個 .bc-brand-stage-hero class ⇒ 高於 bc-brand-stage.css 的原規則，不需 !important
      （與上方三條覆寫同一寫法）。高度必須逐斷點鏡射，因為該檔在 ≤991px 用的是
      不同的基準值（120 而非 184），單一條 calc(276vw/scale-ratio) 在 ≤991px 會變成
      70.23vw（＝+130%，非 +50%）。
-   [≤991px 寬度] 刻意不鏡射：該斷點下 .footer-logo-cell 是 .footer-time-inner 內的
-     flex item（flex-shrink:1），而 .footer-time-inner 在 6 欄格中只佔 3/5 兩欄
+   [≤991px 寬度] 刻意不鏡射：該斷點下 .bc-stage-photo-cell 是 .bc-stage-time-inner 內的
+     flex item（flex-shrink:1），而 .bc-stage-time-inner 在 6 欄格中只佔 3/5 兩欄
      ⇒ 宣告寬度本來就被容器壓到 28.58vw（原宣告 48.86vw 早就被壓縮），覆寫宣告寬度
      不改變實際寬度；該斷點的有效尺寸來自高度，故只鏡射高度。
      2026-10-14（使用者指示）：每張照片下方新增「名稱 ＋ highlight」，照片高度維持不變
        → 高度再加 --bc-hero-caption-h（＝文字區總高，逐斷點值見本檔 B 段）。
-       .footer-logo-cell 的寬度不動（文字沿用同一格寬度、置中對齊）。
-     2026-10-14 稍後（使用者指示：照片格改為環形照片列）：高度改掛在 .footer-logo-list
+       .bc-stage-photo-cell 的寬度不動（文字沿用同一格寬度、置中對齊）。
+     2026-10-14 稍後（使用者指示：照片格改為環形照片列）：高度改掛在 .bc-stage-photo-list
        （＝環形的定位框；環本身是 absolute、不佔流內高度），文字區（.bc-ring-caption）
        在其後以自然流接續 ⇒ 兩者相加與改動前逐值相同（照片區 276vw/ratio、
        ≤991px 180vw/ratio；文字區 --bc-hero-caption-h）。
       2026-10-15（使用者指示）：「桌機（≥992px）的咖啡照片放大到 1440 時 336×480」
         → **只改 ≥992px，≤991px 逐值不動**（下方第一段 media query；回歸斷言見 E7）：
-        · .footer-logo-cell 上下內距歸零（原 padding-top: u-40 + 14px、padding-bottom: u-40）——
-          這段留白「吸收」進照片區 ⇒ 照片頂緣上移到時鐘列（.footer-time）頂端；
-        · .footer-logo-list（＝照片區高）276vw/ratio → 480vw/ratio（@1440 = 480px）；
+        · .bc-stage-photo-cell 上下內距歸零（原 padding-top: u-40 + 14px、padding-bottom: u-40）——
+          這段留白「吸收」進照片區 ⇒ 照片頂緣上移到時鐘列（.bc-stage-time）頂端；
+        · .bc-stage-photo-list（＝照片區高）276vw/ratio → 480vw/ratio（@1440 = 480px）；
         · --bc-hand-img-w（見下方 B1）193vw/ratio → 336vw/ratio（＝480 ÷ 1.4286）。
         ⇒ 逐斷點照片尺寸（寬×高）：1905 = 444.5×635.0、1440 = 336.0×480.0、
           1280 = 298.7×426.7、992 = 231.5×330.7；時鐘列（＝cell）高 @1440 419.6 → 529.6
           （＝480 ＋ 文字區 49.6，內距已歸零）。
        2026-10-15 稍後（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」
          → 同一組三處宣告再改一次（仍然只影響 ≥992px、≤991px 逐值不動；回歸斷言見 E7/E8）：
-         · .footer-logo-list（照片區高）480vw/ratio → 400vw/ratio（@1440 = 400px）；
+         · .bc-stage-photo-list（照片區高）480vw/ratio → 400vw/ratio（@1440 = 400px）；
          · --bc-hand-img-w 336vw/ratio → 280vw/ratio（＝400 ÷ 1.4286，仍精確整除）；
          · 文字：名稱 16px → 20px、highlight 12px → 16px（--bc-hero-caption-h 49.6 → 60.4）。
          ⇒ 逐斷點照片尺寸（寬×高）：1905 = 370.4×529.1、1440 = 280×400、
@@ -580,7 +604,7 @@
          · 唯一連帶：文字區高 +8px ⇒ 時鐘列（＝cell）高等量變高（時鐘數字／`{ }` 隨列內置中
            再下移 4px）、下方內容下移 8px（逐斷點值見 docs/verify/cdp_verify_hero_coffee_photos.py
            的 EXPECT）。 */
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
+.bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-cell {
   width: calc(288vw / var(--_special-units---global--scale-ratio));
 }
 @media screen and (min-width: 992px) {
@@ -588,12 +612,12 @@
      （必須排在該規則之後才蓋得掉 —— 兩者特異度相同，CSS 以來源順序決勝）
      2026-10-15（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」
      → 480vw/ratio → 400vw/ratio（@1440 = 480 → 400px、@1905 = 635 → 529.17px）。 */
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-list {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-list {
     height: calc(400vw / var(--_special-units---global--scale-ratio));
   }
 }
 @media screen and (max-width: 991px) {
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-list {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-list {
     height: calc(180vw / var(--_special-units---global--scale-ratio));
   }
 }
@@ -613,14 +637,14 @@
    [縮放] --wc-scale:1.3。bc-weather.css 的所有尺寸都是 calc(原值 * var(--wc-scale,1))
      （先例＝bc-reviews.css 的 --rv-scale）；只在 hero 內宣告 → about 頁 navbar 那顆
      不繼承（×1）→ about 外觀零變動。
-   [定位 ≤991px] 放進 #bc-stage-clock（.footer-time）這個 grid 的「欄 1、列 1」＝與 { 同一格、
+   [定位 ≤991px] 放進 #bc-stage-clock（.bc-stage-time）這個 grid 的「欄 1、列 1」＝與 { 同一格、
      在 { 的正上方（該斷點時鐘列只有 9 小欄、左側沒有多餘寬度放 111px 寬的天氣，維持原樣）：
      · align-self:start：貼齊該格頂端。該格高度＝整條時鐘列高（由照片格撐出），若用預設的
        stretch／center 會與 { 重疊；start 讓它恆在垂直置中的 { 之上。
      · justify-self:center：與同格的 { 水平同中心（兩者都置中於欄 1）。
    [定位 ≥992px] 2026-11-02（使用者指示）：「bc-stage-weather 移到最左側 { 符號的左邊，
      時鐘 { 15 : 照片 : 19 } 整個內部相應縮小間隔」→ 天氣改成時鐘左邊獨立一欄：
-     · .footer-time 由 8 欄（1fr×8）改為 **10 欄**：
+     · .bc-stage-time 由 8 欄（1fr×8）改為 **10 欄**：
          欄1 = 天氣（--bc-clock-side-w 固定 124px）
          欄2~9 = 時鐘 { 15 : 照片(跨2) : 19 }
          欄10 = 同寬空欄（鏡像留白，不放置任何內容）
@@ -633,7 +657,7 @@
        （@1440），`{`／`15`／冒號／照片／`}` 之間的空隙同步由約 124px 收到 75~89px。
      · 固定 124px（不用 vw）：.weather 是固定 px（110.9×88.4，bc-weather.css 全是 px×
        --wc-scale）→ 需要預留的寬度不隨視寬變；124 已含左右各 6.5px 餘量。
-     · 環形照片不受影響：.footer-logo-cell 是被 flex-shrink 縮到欄寬（288 → 270px），
+     · 環形照片不受影響：.bc-stage-photo-cell 是被 flex-shrink 縮到欄寬（288 → 270px），
        但環是 absolute、定位點＝cell 中心（width:0 ＋ left:50%），照片寬 280px 固定
        ⇒ 照片尺寸與圓心都不變（實測 1440 環照片 280×400、中心 720 逐值不變）。
      · align-self 由 start 改為 center：天氣不再在 { 上方，而是與同列垂直置中的 { 站在
@@ -682,7 +706,7 @@
         transform 會建立新的堆疊脈絡，但 z-index:3 仍高於照片環（auto）。 */
     --bc-weather-nudge: clamp(24px, 2.4vw, 48px);
   }
-  .bc-brand-stage-hero #bc-brand-stage .footer-time {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-time {
     grid-template-columns:
       var(--bc-clock-side-w) repeat(8, minmax(0, 1fr)) var(--bc-clock-side-w);
   }
@@ -691,18 +715,18 @@
     /* 右移一點點（變數與說明見上方 --bc-weather-nudge） */
     transform: translateX(var(--bc-weather-nudge, 0px));
   }
-  /* [為什麼要 flex-shrink:0] .footer-logo-cell 是 .footer-time-inner（display:flex）的
+  /* [為什麼要 flex-shrink:0] .bc-stage-photo-cell 是 .bc-stage-time-inner（display:flex）的
      flex item，寬度 288vw/ratio（＝20vw）預設會被 flex-shrink 縮到欄寬：
        · 改動前 @1440 欄寬 270（=20vw 288 → 縮到 270）、@992 欄寬 198.4（=20vw，剛好不縮）；
        · 改成 10 欄後 @992 欄寬只剩 166.7 ⇒ 文字區可用寬 190.4 → 158.7，
          而 highlight 18px 最長行 171.73px ⇒ **會折行**（改動前 992 是單行，驗證腳本 E10 有守門）。
      把 cell 固定在 20vw（992 = 198.4、1440 = 288）後文字區回到 190.4 ⇒ 全桌機斷點單行。
-     · 只有 ≥992px 這樣做：≤991px 的 cell 本來就必須靠 flex-shrink 塞進 .footer-time-inner
+     · 只有 ≥992px 這樣做：≤991px 的 cell 本來就必須靠 flex-shrink 塞進 .bc-stage-time-inner
        （該斷點寬度刻意不鏡射，見上方檔頭說明），維持可縮。
-     · 超出欄寬的部分：cell 比欄寬多 2×(198.4−166.7)/2≈16px，靠 .footer-time-inner 的
+     · 超出欄寬的部分：cell 比欄寬多 2×(198.4−166.7)/2≈16px，靠 .bc-stage-time-inner 的
        justify-content:center 左右對稱溢出（環形定位點＝cell 中心 ⇒ 圓心與照片位置不變）；
        #bc-brand-stage 是 overflow:hidden ⇒ 不產生水平捲軸（實測 scrollWidth == 視寬）。 */
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-cell {
     flex-shrink: 0;
   }
   .bc-brand-stage-hero #bc-brand-stage #bc-stage-clock-brace-open {
@@ -732,7 +756,7 @@
 }
 
 /* ---- B1. 環形照片列的尺寸與圓心（與 hero 同一顆大圓） ----
-   2026-10-14 稍後（使用者指示）：「展示咖啡動畫不是 footer-logo-list-wrap，區域太小了，
+   2026-10-14 稍後（使用者指示）：「展示咖啡動畫不是 bc-stage-photo-list-wrap，區域太小了，
      動畫展示是使用整個頁面的。參考 hero_hand」→ 原本的「縮小版圓弧」（半徑縮進格子裡、
      超出格子由 overflow:clip 裁掉）改為**與 hero 逐值相同的整頁扇形**：
      · --circle-radius: 100vw（＝bc-hand-ring.css 的預設值＝hero 的值，明寫出來讓「照片格
@@ -754,7 +778,7 @@
      `#bc-brand-stage{overflow:hidden}` 裁（＝hero 由 .bc-gunte-hero{overflow:hidden} 裁，
      同一件事）：±50° 以後的項目落在畫面外、連同超出頁面的部分一起被裁掉
      ⇒ 不會產生水平捲軸（實測 documentElement.scrollWidth ≤ innerWidth）。
-     ⚠ 有第二層裁切，不是 overflow：`.footer-logo-cell` 的 `data-reveal="clip-down"`
+     ⚠ 有第二層裁切，不是 overflow：`.bc-stage-photo-cell` 的 `data-reveal="clip-down"`
        會被 GSAP 在進場後留下 `clip-path: inset(0%)`（＝永久把內容框在格子邊界內）——
        實測側邊鄰居的 rect 存在、圖片也已載入，卻被它整張切掉（elementFromPoint 命中的是
        #bc-stage-clock）。故 bc-brand-stage.js 的 clip 揭示改為「跑完即釋放含 [data-bc-hand-ring]
@@ -774,13 +798,13 @@
        cdp_verify_hero_coffee_photos.py 的 C5 斷言）。
      · 文字列：鄰居 bbox 與它零交集（橫向距離更遠）；current 那張底緣仍精準貼齊文字列頂端。
    [版面影響] 列高＝cell 高：@1440 419.6（原始）→ 529.6（2026-10-15 照片放大）→ 460.4（同日稍後
-     照片縮小）。cell 頂端、#bc-brand-stage、.grid.is-footer 三者文件座標全程完全不動（實測 Δ0）；
-     列變高／變矮時下方內容（.footer-socials 等）等量移動，頁面總高 @1440 3826 → 3936 → 3867
+     照片縮小）。cell 頂端、#bc-brand-stage、.grid.is-stage 三者文件座標全程完全不動（實測 Δ0）；
+     列變高／變矮時下方內容（.bc-stage-socials 等）等量移動，頁面總高 @1440 3826 → 3936 → 3867
      （實測 docHeight）。≤991px 全部逐值不變（docHeight 亦相同）。 */
 
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
-  /* [為什麼要 +14px] 原結構（7 個 .footer-logo-item，其中 :first-child 為 position:relative）
-     實測在「cell 內距底」與「.footer-logo-list 頂」之間有一個**固定 14px** 的間隙
+.bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-cell {
+  /* [為什麼要 +14px] 原結構（7 個 .bc-stage-photo-item，其中 :first-child 為 position:relative）
+     實測在「cell 內距底」與「.bc-stage-photo-list 頂」之間有一個**固定 14px** 的間隙
      （1905/1280/991/390 四斷點皆為 14.0px，與 vw 無關）。改為環形照片列後該間隙消失，
      時鐘列會矮 14px（內容再置中 ⇒ 整列下移 7px）。為維持照片區起點、時鐘列高度與
      改動前逐值相同，這裡把 14px 明確補回（≥992px 的內距來源＝--_units---u-40）。
@@ -796,12 +820,12 @@
      （會量到 padding-top 仍是 u-40 + 14px）。
    [≤991px] 不動：該斷點仍用上方這條（u-40 → u-24，見檔尾的 ≤991px 段），逐值與改動前相同。 */
 @media screen and (min-width: 992px) {
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-cell {
     padding-top: 0;
     padding-bottom: 0;
   }
 }
-/* [2026-10-14 稍後移除] 原本這裡還有一條 `.footer-logo-list { overflow: clip }`（把扇形裁在
+/* [2026-10-14 稍後移除] 原本這裡還有一條 `.bc-stage-photo-list { overflow: clip }`（把扇形裁在
    照片區內）。改為整頁扇形後照片必須離開格子 → 移除；唯一的裁切框是頁面層級的
    `#bc-brand-stage { overflow: hidden }`（見上方 B1 的 [裁切]）。 */
 .bc-brand-stage-hero #bc-brand-stage #bc-stage-photo-ring .hero_hand {
@@ -826,7 +850,7 @@
     --bc-hand-img-w: calc(126vw / var(--_special-units---global--scale-ratio));
   }
   /* 該斷點照片格的內距來源改為 --_units---u-24（見上方 +14px 說明） */
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-cell {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-cell {
     padding-top: calc(var(--_units---u-24) + 14px);
   }
 }
@@ -861,14 +885,14 @@
 /* ---- B2. 文字樣式（名稱 ＋ highlight） ----
    [文字高度] 逐斷點的字級不同（見下方三段），故用 --bc-hero-caption-h 表達
      「文字區總高 = padding-top 8 + 名稱行高 1.3 + highlight 上緣 4 + 行高 1.4」。
-     2026-10-14 稍後：文字區改為 .footer-logo-list（照片區）之後的自然流區塊
-     ⇒ 兩者相加＝改動前的 .footer-logo-item 高度（照片區與時鐘列高度皆不變）。 */
+     2026-10-14 稍後：文字區改為 .bc-stage-photo-list（照片區）之後的自然流區塊
+     ⇒ 兩者相加＝改動前的 .bc-stage-photo-item 高度（照片區與時鐘列高度皆不變）。 */
 .bc-brand-stage-hero #bc-brand-stage {
   --bc-hero-caption-h: calc(8px + 24px * 1.3 + 4px + 18px * 1.4);
 }
-/* [2026-10-14 稍後移除] 原本這裡的兩條規則（`.footer-logo-item a.footer-logo-link`
+/* [2026-10-14 稍後移除] 原本這裡的兩條規則（`.bc-stage-photo-item a.bc-stage-photo-link`
    由 block 改 flex column、讓 img 撐滿「格子高 − 文字高」）隨照片格改為環形照片列而失效：
-   格內已無 .footer-logo-link / .footer-logo-item，照片改由 .hero_bc_item a > img 呈現
+   格內已無 .bc-stage-photo-link / .bc-stage-photo-item，照片改由 .hero_bc_item a > img 呈現
    （尺寸見上方 B1 與 bc-hand-ring.css）。
    文字區（.bc-ring-caption）改為照片區之後的自然流區塊 → 不需要 flex 分配高度。 */
 /* [文字樣式] 沿用 SERIES 區塊的 .bc-series-caption 系列命名與其視覺定義
@@ -891,11 +915,11 @@
    [reset] margin/padding 必須一併改寫：bc-brand-stage.css 的
      `#bc-brand-stage p{margin:0;padding:0}`（1,0,1）會蓋掉 class 規則（0,1,0），
      用 #bc-brand-stage 前綴（1,1,0）才贏得了 reset。 */
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption.bc-series-caption {
+.bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-caption.bc-series-caption {
   padding: 8px 4px 0;
   text-align: center;
 }
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
+.bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-caption .bc-series-caption-name {
   margin: 0;
   font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
   font-size: 24px;
@@ -905,7 +929,7 @@
   color: #fff;
   text-transform: uppercase;
 }
-.bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
+.bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-caption .bc-series-caption-highlight {
   margin: 4px 0 0;
   font-family: "Noto Sans TC", sans-serif;
   font-size: 18px;
@@ -918,10 +942,10 @@
   .bc-brand-stage-hero #bc-brand-stage {
     --bc-hero-caption-h: calc(8px + 13px * 1.3 + 4px + 10px * 1.4);
   }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-caption .bc-series-caption-name {
     font-size: 13px;
   }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-caption .bc-series-caption-highlight {
     font-size: 10px;
   }
 }
@@ -929,10 +953,10 @@
   .bc-brand-stage-hero #bc-brand-stage {
     --bc-hero-caption-h: calc(8px + 11px * 1.3 + 4px + 9px * 1.4);
   }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-name {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-caption .bc-series-caption-name {
     font-size: 11px;
   }
-  .bc-brand-stage-hero #bc-brand-stage .footer-logo-caption .bc-series-caption-highlight {
+  .bc-brand-stage-hero #bc-brand-stage .bc-stage-photo-caption .bc-series-caption-highlight {
     font-size: 9px;
   }
 }

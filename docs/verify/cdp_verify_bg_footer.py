@@ -21,7 +21,7 @@ DOM footer 元素數改由 J 系列（cdp_verify_footer_scroller.py）與本檔 
   1. 頁面範圍：/ 與 /about/ 有 #bc-brand-stage 且不重複；
      DOM footer 元素數 = 0（/）、1（/about/）、1（/coffee_menu/）；
      /coffee_menu/ 沒有 #bc-brand-stage（且仍用 .ftco-footer）。
-  2. 釘牌（.footer-logo-cell）：無品牌金底色（background 透明）、幾何尺寸。
+  2. 釘牌（.bc-stage-photo-cell）：無品牌金底色（background 透明）、幾何尺寸。
   3. 白色線稿：deco 一律白（deco_*.svg 檔案內 root fill:#ffffff），
      <img> 不再套用 .is-invert（filter 為 none）。
   4. 不溢出：documentElement.scrollWidth <= innerWidth + 1。
@@ -50,9 +50,9 @@ MEASURE_JS = r"""
 
   // 2026-10-14：首頁照片格（#bc-stage-photo-ring）已改為環形照片列 —— 不再有
   // [data-stage-logo="wrap"/"item"]（該 hook 僅剩 /about/ 真頁尾的 5 格 deco 輪播在用），
-  // 故釘牌改用 .footer-logo-cell（兩頁都有；/about/ 仍靠 wrap、語意不變）。
+  // 故釘牌改用 .bc-stage-photo-cell（兩頁都有；/about/ 仍靠 wrap、語意不變）。
   var cell = root.querySelector('[data-stage-logo="wrap"]')
-      || root.querySelector('.footer-logo-cell');
+      || root.querySelector('.bc-stage-photo-cell');
   out.cell_found = !!cell;
   if (cell) {
     var r = cell.getBoundingClientRect();

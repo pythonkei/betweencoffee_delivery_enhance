@@ -17,11 +17,11 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
 本檔取代原「7 張咖啡照輪播」版的斷言。
 
 2026-10-15（使用者指示）：「桌機（≥992px）的咖啡照片放大到 1440 時 336×480」——只改 ≥992px：
-  .footer-logo-cell 上下內距歸零（留白吸收進照片區）＋ .footer-logo-list 高 276vw/ratio →
+  .bc-stage-photo-cell 上下內距歸零（留白吸收進照片區）＋ .bc-stage-photo-list 高 276vw/ratio →
   480vw/ratio ＋ --bc-hand-img-w 193vw/ratio → 336vw/ratio（＝480 ÷ 1.4286）。
   逐斷點照片尺寸：1905 = 444.5×635.0、1440 = 336.0×480.0、1280 = 298.7×426.7、
   992 = 231.5×330.7；≤991px 全部逐值不變（含 cell 內距，E7）。時鐘列的頂端、#bc-brand-stage、
-  .grid.is-footer 的文件座標完全不動，只有列高向下長（@1440 419.6 → 529.6），下方內容等量下移。
+  .grid.is-stage 的文件座標完全不動，只有列高向下長（@1440 419.6 → 529.6），下方內容等量下移。
 
 2026-10-15 稍後（使用者指示）：「桌機的咖啡照片太大、名稱與 highlight 太小」——同一組三處宣告再改
   一次（仍然只影響 ≥992px，≤991px 逐值不變）：照片區高 480vw/ratio → 400vw/ratio、
@@ -31,7 +31,7 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
   逐斷點照片尺寸：1905 = 370.41×529.14、1440 = 280×400、1280 = 248.88×355.53、
   992 = 192.88×275.53；列高（＝cell 高）：1905 684.59 → 589.55、1440 529.59 → 460.39、
   1280 476.25 → 415.94、992 380.25 → 335.94；文件總高 @1440 3936 → 3867。
-  時鐘列頂端／#bc-brand-stage／.grid.is-footer 的文件座標仍然 Δ0（實測）；列變矮 ⇒ 時鐘數字與
+  時鐘列頂端／#bc-brand-stage／.grid.is-stage 的文件座標仍然 Δ0（實測）；列變矮 ⇒ 時鐘數字與
   `{ }` 隨置中上移 34.6px（@1440 y 1280.69 → 1246.09）= 副作用方向與上一輪相反，故上一輪
   「左鄰居與 `{` 重疊 22px」這條代價同步縮小（見 cdp_verify_clock_clash.py 的重測值）。
 
@@ -67,12 +67,12 @@ static/css/bc-hand-ring.css 與 static/js/bc-hand-ring.js，並由 **hero 的 Sp
     實質可見 2–3 張且必為 current ± 1（循環，端點索引時只有一側鄰居）；
     左右鄰居的水平中心在圓心 ±0.423R（±2%）且落在頁面兩緣（≤20% / ≥80% 頁寬）＝整頁扇形；
     鄰居 rect 與文字列 rect 無交集；無水平溢出（＝扇形被 #bc-brand-stage 的 overflow:hidden 裁掉）；
-    揭示跑完後照片格無殘留 clip-path（＝側邊鄰居不被 .footer-logo-cell 的 inset(0%) 切掉）。
+    揭示跑完後照片格無殘留 clip-path（＝側邊鄰居不被 .bc-stage-photo-cell 的 inset(0%) 切掉）。
     ⚠ 量測前會先「捲到照片格」——該 cell 在首屏之外，不捲的話 data-reveal="clip-down" 永不觸發，
       就會驗到揭示前的狀態（那正是上述 clip-path 裁切問題的藏身處）。
   E 零回歸：首頁不再有 5 秒輪播（window.__bcStageLogoInterval 為 null）；
-    .footer-logo-cell 寬/高、.footer-logo-list 高、.footer-logo-caption 高、
-    時鐘列（.footer-time）高 逐值比對（基準表 EXPECT，±1px；≥992px 用「改動後」值、
+    .bc-stage-photo-cell 寬/高、.bc-stage-photo-list 高、.bc-stage-photo-caption 高、
+    時鐘列（.bc-stage-time）高 逐值比對（基準表 EXPECT，±1px；≥992px 用「改動後」值、
     ≤991px 用「改動前」值 ⇒ 同時守住兩件事）；E7 專門守「改動只限 ≥992px」——桌機 cell
     上下內距必須是 0，≤991px 必須仍是 u-24 + 14px / u-24（逐值與改動前相同）；
     E8 守連動關係「照片寬 ＝ 照片區高 ÷ 1.4286」（放大／縮小後仍必須成立）；
@@ -102,10 +102,10 @@ BASE = os.environ.get("BC_BASE", "http://localhost:8081")
 CDP = "http://localhost:9222"
 
 # 改動前實測（2026-10-14，改用環形照片列之前；CDP 1905/1280/991/768/390 × 900）：
-#   viewport: (.footer-logo-cell 寬, .footer-logo-cell 高, .footer-logo-list 高,
-#              .footer-logo-caption 高, .footer-time 高)
-# .footer-logo-list 的高度＝改動前的「照片高度」（原 .footer-logo-item 高 − 文字高）：
-# 因為環形照片列是 absolute、不佔流內高度，照片區高度改由 .footer-logo-list 撐起，
+#   viewport: (.bc-stage-photo-cell 寬, .bc-stage-photo-cell 高, .bc-stage-photo-list 高,
+#              .bc-stage-photo-caption 高, .bc-stage-time 高)
+# .bc-stage-photo-list 的高度＝改動前的「照片高度」（原 .bc-stage-photo-item 高 − 文字高）：
+# 因為環形照片列是 absolute、不佔流內高度，照片區高度改由 .bc-stage-photo-list 撐起，
 # 文字區再接在它後面。
 # ⚠ 2026-10-15（使用者指示）：「桌機（≥992px）咖啡照片放大到 1440 時 336×480」⇒ 1905/1280
 #   兩列的 cell 高／list 高已被 EXPECT 取代（本表只留 991/768/390 三列作「≤991px 逐值不變」
@@ -153,12 +153,12 @@ PROBE_JS = r"""
   function p(e,k){ return e?getComputedStyle(e)[k]:null; }
 
   var cell=document.getElementById('bc-stage-photo-ring');
-  var cellBox=cell?cell.querySelector('.footer-logo-cell'):null;
-  var area=cell?cell.querySelector('.footer-logo-list'):null;
+  var cellBox=cell?cell.querySelector('.bc-stage-photo-cell'):null;
+  var area=cell?cell.querySelector('.bc-stage-photo-list'):null;
   var hand=cell?cell.querySelector('.hero_hand'):null;
   var list=document.getElementById('bc-stage-photo-ring-list');
   var items=list?Array.prototype.slice.call(list.querySelectorAll('.hero_bc_item')):[];
-  var caption=cell?cell.querySelector('.footer-logo-caption'):null;
+  var caption=cell?cell.querySelector('.bc-stage-photo-caption'):null;
   var caps=Array.prototype.slice.call(
       document.querySelectorAll('#bc-stage-photo-ring [data-bc-ring-caption-item]'));
   var heroList=document.getElementById('hero_hand_list');
@@ -248,7 +248,7 @@ PROBE_JS = r"""
   })();
   return {
     cellBox:R(cellBox), area:R(area), captionBox:R(caption),
-    clockRow:R(document.querySelector('.footer-time')),
+    clockRow:R(document.querySelector('.bc-stage-time')),
     section:R(section), sectionOverflow:p(section,'overflow'),
     innerW:window.innerWidth, docScrollW:document.documentElement.scrollWidth,
     cellOverflow:p(cellBox,'overflow'), areaOverflow:p(area,'overflow'),
@@ -296,7 +296,7 @@ ARM_CAP_JS = r"""
 (function(){
   window.__capLog=[];
   var list=document.getElementById('bc-stage-photo-ring-list');
-  var cap=document.querySelector('#bc-stage-photo-ring .footer-logo-caption');
+  var cap=document.querySelector('#bc-stage-photo-ring .bc-stage-photo-caption');
   if(!list||!cap) return false;
   var caps=Array.prototype.slice.call(
       document.querySelectorAll('#bc-stage-photo-ring [data-bc-ring-caption-item]'));
@@ -341,8 +341,8 @@ SCROLL_CELL_JS = ("(function(){var e=document.getElementById('bc-stage-photo-rin
 SPEED_GSAP_JS = ("(function(){if(window.gsap&&window.gsap.globalTimeline){"
                  "window.gsap.globalTimeline.timeScale(100);return true;}return false;})()")
 
-# .footer-logo-cell（data-reveal="clip-down"）目前的 clip-path；揭示跑完且被釋放時為 'none'
-CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-stage-photo-ring .footer-logo-cell');"
+# .bc-stage-photo-cell（data-reveal="clip-down"）目前的 clip-path；揭示跑完且被釋放時為 'none'
+CELL_CLIP_JS = ("(function(){var e=document.querySelector('#bc-stage-photo-ring .bc-stage-photo-cell');"
                 "return e?getComputedStyle(e).clipPath:null;})()")
 
 NAV_CLICK_JS = ("(function(){var b=document.querySelectorAll('#hero_nav button');"
@@ -474,7 +474,7 @@ async def main():
             await asyncio.sleep(0.4)
 
         async def wait_reveal(timeout=20.0):
-            """等到 .footer-logo-cell 的 clip-down 揭示跑完並被釋放（clip-path = none）。
+            """等到 .bc-stage-photo-cell 的 clip-down 揭示跑完並被釋放（clip-path = none）。
                ⚠ 本機 rAF 被節流 → 先加速 GSAP 時間軸（見 SPEED_GSAP_JS），再每 0.4s 截圖逼 frame
                  輪詢；真瀏覽器不需要這招（1.2s 自然跑完）。"""
             await evaljs(SPEED_GSAP_JS)
@@ -498,7 +498,7 @@ async def main():
             return False
 
         async def measure():
-            """捲到照片格（讓 GSAP 的進場揭示真的跑完 → .footer-logo-cell 的 clip-path 被釋放）
+            """捲到照片格（讓 GSAP 的進場揭示真的跑完 → .bc-stage-photo-cell 的 clip-path 被釋放）
                → 暫停 hero autoplay → 等文字收斂（＝圓盤旋轉過渡跑完）→ 原子讀取。
                ⚠ 不捲的話揭示永不觸發（該 cell 在首屏之外），就會驗到「揭示前」的狀態
                  —— 那正是「側邊鄰居被 clip-path:inset(0%) 切掉」這個 bug 藏身之處。"""
@@ -676,7 +676,7 @@ async def main():
                                   (m.get("docScrollW"), m.get("innerW"))))
             # D11：環形照片列到 #bc-brand-stage 之間不得有任何「裁切框」——
             #      overflow 已由 A7 驗過（照片格／照片區 visible）；這裡驗另一條容易漏的路：
-            #      .footer-logo-cell 的 data-reveal="clip-down" 會被 GSAP 留下 clip-path:inset(0%)，
+            #      .bc-stage-photo-cell 的 data-reveal="clip-down" 會被 GSAP 留下 clip-path:inset(0%)，
             #      那會把側邊鄰居整張切掉（bc-brand-stage.js 已在揭示跑完後釋放）。
             clip_chain = m.get("clipChain") or []
             failures.append(check("D11 揭示後照片格無殘留 clip-path（側邊鄰居不被格子切掉）",
@@ -692,15 +692,15 @@ async def main():
             cr = m.get("clockRow") or {}
             scope = ("≥992px：cell 內距 0 ＋ 照片區 400vw/ratio ＋ 文字區 68.38"
                      if w >= 992 else "≤991px：逐值與改動前相同（未動）")
-            failures.append(check(f"E2 .footer-logo-cell 寬 {bfw}px ±1（{scope}）",
+            failures.append(check(f"E2 .bc-stage-photo-cell 寬 {bfw}px ±1（{scope}）",
                                   abs(cb.get("w", 0) - bfw) <= 1, cb.get("w")))
-            failures.append(check(f"E3 .footer-logo-cell 高 {bfh}px ±1（時鐘列高度；{scope}）",
+            failures.append(check(f"E3 .bc-stage-photo-cell 高 {bfh}px ±1（時鐘列高度；{scope}）",
                                   abs(cb.get("h", 0) - bfh) <= 1, cb.get("h")))
-            failures.append(check(f"E4 .footer-logo-list 高 {bfl}px ±1（＝照片區高；{scope}）",
+            failures.append(check(f"E4 .bc-stage-photo-list 高 {bfl}px ±1（＝照片區高；{scope}）",
                                   abs(ab.get("h", 0) - bfl) <= 1, ab.get("h")))
-            failures.append(check(f"E5 .footer-logo-caption 高 {bfc}px ±1（文字區高度；{scope}）",
+            failures.append(check(f"E5 .bc-stage-photo-caption 高 {bfc}px ±1（文字區高度；{scope}）",
                                   abs(cp.get("h", 0) - bfc) <= 1, cp.get("h")))
-            failures.append(check(f"E6 .footer-time 高 {bfr}px ±1（整條時鐘列；{scope}）",
+            failures.append(check(f"E6 .bc-stage-time 高 {bfr}px ±1（整條時鐘列；{scope}）",
                                   abs(cr.get("h", 0) - bfr) <= 1, cr.get("h")))
             # E7：2026-10-15 的改動「只限 ≥992px」—— 桌機把 cell 的上下內距歸零（留白吸收進
             #     照片區、照片頂緣上移到列的頂端），≤991px 必須仍是 u-24 + 14px / u-24
@@ -712,7 +712,7 @@ async def main():
                 e7_pt, e7_why = e7_pb + 14.0, "≤991px 未動（u-24 + 14px / u-24）"
             pt_got, pb_got = pxnum(m.get("cellPadTop")), pxnum(m.get("cellPadBottom"))
             failures.append(check(
-                f"E7 .footer-logo-cell 內距 = {e7_pt:.2f}/{e7_pb:.2f}px ±1（{e7_why}）",
+                f"E7 .bc-stage-photo-cell 內距 = {e7_pt:.2f}/{e7_pb:.2f}px ±1（{e7_why}）",
                 pt_got is not None and pb_got is not None
                 and abs(pt_got - e7_pt) <= 1 and abs(pb_got - e7_pb) <= 1,
                 (m.get("cellPadTop"), m.get("cellPadBottom"))))

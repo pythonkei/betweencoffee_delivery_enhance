@@ -2,20 +2,25 @@
 {% comment %}
 BC 品牌動態 hero（#bc-brand-stage 首頁置頂版）＝ partials/bc_brand_stage.html 的 hero 變體。
 2026-10-09（使用者指示）：首頁把 BC 動態模組（Hug in a Cup 時鐘）由頁尾移到最上方當第一個
-hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩處：
-  1. <footer class="footer"> → <div class="footer">（收尾標籤同理）
+hero，GUNTE hero 移到它下方。本檔與頁尾版（bc_brand_stage.html）逐字相同，只差兩處：
+  1. <footer class="bc-stage-content"> → <div class="bc-stage-content">（收尾標籤同理）
      —— bc-yama-header.js 用 document.querySelector('footer')（DOM 第一個 <footer>）作為
         「footer 交會」觀察目標；置頂模組若仍是 <footer>，頁面一載入它就已在視口內 →
         IntersectionObserver 立刻回呼：tax-nav 被移除 init、header-bot 加上 is-hide
         （右下角元件一開站就消失）。改成 <div> 後 querySelector('footer') 為 null，
         交會邏輯自然 no-op（頁尾已無 <footer>，不需再遮擋）。
-        （bc-brand-stage.css 只用 .footer 類別選取，與標籤無關 → 改標籤不動任何樣式。）
+        （bc-brand-stage.css 只用 .bc-stage-content 類別選取，與標籤無關 → 改標籤不動任何樣式。）
   2. 本註解。
-  3. 照片格（#bc-stage-photo-ring 內的 .footer-logo-list）內容不同：本檔為「GUNTE hero 的環形
+  3. 照片格（#bc-stage-photo-ring 內的 .bc-stage-photo-list）內容不同：本檔為「GUNTE hero 的環形
      照片列」——2026-10-14 稍後起與 hero 同一顆**整頁大圓**（--circle-radius:100vw，7 筆
      hero_coffees.0~6，與 index.html #hero_hand_list 同源、共用 static/css/bc-hand-ring.css
      與 static/js/bc-hand-ring.js，索引由 hero 的 Splide 推播）；
      footer 版（bc_brand_stage.html）仍為 5 張 deco 標誌的 5 秒輪播。詳見本檔 L84 起的註解。
+2026-11-10（使用者指示「footer 讓人困惑，因為這是 hero 部分」）：class 層全域改名
+  footer* → bc-stage-*（.bc-stage-content / -inner / .bc-stage-time / .bc-stage-photo-* /
+  .bc-stage-socials / .bc-stage-marquee / .bc-stage-m-*）。本檔與 bc_brand_stage.html、
+  bc-brand-stage.css、bc-brand-stage.js 同一次改完；對照表見 bc-brand-stage.css 檔頭。
+  ※ <footer> 標籤與 id 一律不動（bc-yama-header.js 仍靠 querySelector('footer') 判斷交會）。
  保留 id="bc-brand-stage"：bc-brand-stage.css 的選擇器全以此 id 為前綴、
  bc-brand-stage.js 以 getElementById('bc-brand-stage') 綁定 → 與 about 頁共用同一份 CSS/JS。
 （index 與 about 是不同頁面，同 id 不衝突。）
@@ -46,7 +51,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
      [圖層] 本層 position:absolute + z-index:-1 + pointer-events:none，並由 hero 變體在
        #bc-brand-stage 加 isolation:isolate（見 static/css/bc-photoarea.css）⇒ 照片永遠在
        所有舞台內容之下、也不吃滑鼠事件 ⇒ 環形照的 hover／拖曳、時鐘、連結都不受影響。
-       （首頁 hero 的 #bc-brand-stage／.footer 底色已是 transparent → 免處理遮蓋。）
+       （首頁 hero 的 #bc-brand-stage／.bc-stage-content 底色已是 transparent → 免處理遮蓋。）
      [素材] 2026-11-09 起改為本站自存：static/images/photoarea/pa-1~5.webp
         （原站 hicard.studio 的 768×1075 jpg，5 支合計 758KB → 轉 webp q82 後 524KB；
          來源 URL 見 docs/home-photoarea.md §3，要換圖直接覆蓋同名檔並升 ?v= 即可）。
@@ -97,9 +102,9 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
        loading="lazy" decoding="async"
        src="{% static 'images/photoarea/pa-5.webp' %}?v=20261109b">
 </div>
-<div class="footer">
-  <div class="footer-inner">
-    <div class="w-layout-grid grid is-footer">
+<div class="bc-stage-content">
+  <div class="bc-stage-content-inner">
+    <div class="w-layout-grid grid is-stage">
       <div hidden id="bc-stage-headline-hug-in-a-cup" class="heading-group-wrap">
         <h1 data-reveal="text" class="h1">Hug in</h1>
         <h1 data-reveal="text" class="h1">a Cup</h1>
@@ -108,7 +113,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
         <h1 data-reveal="text" class="h1">Perfect</h1>
         <h1 data-reveal="text" class="h1">to Go</h1>
       </div>
-      <div id="bc-stage-clock" class="footer-time">
+      <div id="bc-stage-clock" class="bc-stage-time">
         <!-- 2026-10-14（使用者指示）：把 about 頁 navbar 右上角的天氣/時鐘元件搬進本模組，
              放在時鐘列左側 { 之上（尺寸 +30%，--wc-scale 見 index.html 的 <style>）。
              [結構] 與 nav.html 的天氣元件逐字相同（同一份 markup），差別只有兩處：
@@ -116,7 +121,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                · 自帶 .weather--visible —— navbar 那顆是「全站隱藏、只有 about 頁顯示」，
                  本顆位於首頁 hero，直接標記可見（bc-weather.css 的 visibility 開關維持
                  #ftco-navbar 專用，不影響本顆）。
-             [定位] 放進 .footer-time（#bc-stage-clock）這個 grid 的「欄 1、列 1」＝與 { 同一格；
+             [定位] 放進 .bc-stage-time（#bc-stage-clock）這個 grid 的「欄 1、列 1」＝與 { 同一格；
                index.html 對它設 align-self:start → 貼齊該格頂端，恆在垂直置中的 { 之上。
                ≥992px 必須同時把 #bc-stage-clock-brace-open 明確釘在同一格，否則自動置位
                會把 { 擠到欄 2，並連帶把照片列推到隱式欄位（見 index.html 註解）。
@@ -145,14 +150,14 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
         <h1 data-reveal="text" id="bc-stage-clock-brace-open" class="h1 bc-stage-clock-brace">{</h1>
         <h1 data-stage-clock="hours" data-reveal="text" id="bc-stage-clock-hours" class="h1">00</h1>
         <h1 data-reveal="text" id="bc-stage-clock-brace-close" class="h1 bc-stage-clock-brace">}</h1>
-        <div id="bc-stage-photo-ring" class="footer-time-inner">
-          <div data-reveal="clip-down" class="footer-logo-cell">
+        <div id="bc-stage-photo-ring" class="bc-stage-time-inner">
+          <div data-reveal="clip-down" class="bc-stage-photo-cell">
             <div class="hero-ring-list-warp w-dyn-list">
               <!-- 2026-10-14（使用者指示）：本格由「一次顯示一張的輪播照片」改為 GUNTE hero 的
                    環形照片列（.hero_hand）——**與 hero 同一顆整頁大圓**（--circle-radius:100vw）：
                    換張時整片扇形旋轉、current 置中、左右鄰居落在頁面兩緣（scale 0.5、低約 9.4vw），
                    ±50° 以後的項目落在畫面外（由 #bc-brand-stage 的 overflow:hidden 裁掉；
-                   另外 .footer-logo-cell 的 clip-down 進場裁切由 bc-brand-stage.js 在跑完後釋放，
+                   另外 .bc-stage-photo-cell 的 clip-down 進場裁切由 bc-brand-stage.js 在跑完後釋放，
                    否則側邊鄰居會被 GSAP 留下的 clip-path:inset(0%) 整張切掉）。
                    （2026-10-14 稍後：使用者指正「區域太小了，動畫展示是使用整個頁面的，
                      參考 hero_hand」→ 原「半徑縮進格子、超出由 overflow:clip 裁掉」已改為此版。）
@@ -172,13 +177,13 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                      咖啡照比例 1.429」＝ 193vw/ratio（≤991px 126vw/ratio）；圓心＝照片區的
                      水平中心＋垂直中心。以上全在 index.html 的 <style> 內以 #bc-stage-photo-ring
                      前綴設定（詳見該處 B1 註解）。 -->
-              <!-- 2026-11-05（使用者指示）：本格外層 .footer-logo-list-wrap 改名 .hero-ring-list-warp、
+              <!-- 2026-11-05（使用者指示）：本格外層 .bc-stage-photo-list-wrap 改名 .hero-ring-list-warp、
                    環上每一格 .hero_hand_item 改名 .hero_bc_item（.hero_hand／.hero_hand_list 與
-                   .footer-logo-list 等 Webflow 舊 class 不動；CSS 本來就沒有
-                   .footer-logo-list-wrap 的規則，故只是語意改名，不影響版面）。
-                   about 頁的真頁尾（partials/bc_brand_stage.html）仍叫 .footer-logo-list-wrap
+                   .bc-stage-photo-list 等 Webflow 舊 class 不動；CSS 本來就沒有
+                   .bc-stage-photo-list-wrap 的規則，故只是語意改名，不影響版面）。
+                   about 頁的真頁尾（partials/bc_brand_stage.html）仍叫 .bc-stage-photo-list-wrap
                    —— 那裡裝的是 deco 標誌輪播，不是環形照片。 -->
-              <div class="footer-logo-list">
+              <div class="bc-stage-photo-list">
                 <div class="hero_hand" data-bc-hand-ring>
                   <div id="bc-stage-photo-ring-list" class="hero_hand_list">
                     <div class="hero_bc_item" style="--angle:-90"><a href="{% url 'coffee' hero_coffees.0.id %}" aria-label="{{ hero_coffees.0.name }}"><img src="{{ hero_coffees.0.get_index_image }}" alt="{{ hero_coffees.0.name }}"/></a></div>
@@ -198,7 +203,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
                    字級等尺寸仍在 index.html 的 <style> 內以 #bc-brand-stage 前綴設定。
                    [高度] 只顯示一筆 ⇒ 佔位與原本 7 格各一組時相同（--bc-hero-caption-h），
                    照片格與整條時鐘列的高度因此不變。 -->
-              <div class="bc-series-caption footer-logo-caption bc-ring-caption" data-bc-ring-caption>
+              <div class="bc-series-caption bc-stage-photo-caption bc-ring-caption" data-bc-ring-caption>
                 <div data-bc-ring-caption-item class="bc-ring-caption-item -current">
                   <p class="bc-series-caption-name">{{ hero_coffees.0.name }}</p>
                   <p class="bc-series-caption-highlight">{{ hero_coffees.0.highlight }}</p>
@@ -243,7 +248,7 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
         <h1 data-reveal="text" class="h1">No.........</h1>
         <h1 data-reveal="text" class="h1">Bullsh*t</h1>
       </div>
-      <div id="bc-stage-socials" class="footer-socials">
+      <div id="bc-stage-socials" class="bc-stage-socials">
         <div class="socials-list-wrap w-dyn-list">
           <div data-reveal="w" role="list" class="social-list w-dyn-items">
             <div data-reveal="div" role="listitem" class="social-item w-dyn-item">
@@ -295,13 +300,13 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
           </div>
         </div>
       </div>
-      <div id="bc-stage-marquee" class="foooter-mail">
+      <div id="bc-stage-marquee" class="bc-stage-marquee">
         <div data-reveal="text" class="p1">
           Available for
           <br/>
           takeaway &amp; Relaxing
         </div>
-        <!-- 2026-10-08：原本的「Write directly to:」email CTA（.footer-mail-inner）改為 index footer 的水平跑馬燈
+        <!-- 2026-10-08：原本的「Write directly to:」email CTA（.bc-stage-mail-inner）改為 index footer 的水平跑馬燈
              （與 base.html footer 的 .scroller-box 逐字相同）。樣式來自 css/style-utilities.css；
              捲動由 static/js/main.js 全域初始化 .scroller（設 data-animated + 複製 li 成 4 個達成無縫循環），
              about 頁已載入以上兩檔，故此處不需新增任何 JS。 -->
@@ -316,12 +321,12 @@ hero，GUNTE hero 移到它下方。本檔與 footer 版逐字相同，只差兩
       </div>
     </div>
   </div>
-  <div class="m-footer-inner is-mobile">
-    <div class="m-footer-inner-wrap">
-      <div class="m-footer-name">
+  <div class="bc-stage-m-inner is-mobile">
+    <div class="bc-stage-m-inner-wrap">
+      <div class="bc-stage-m-name">
         <div data-reveal="text" class="h1 is-display">Between Coffee</div>
       </div>
-      <div class="m-footer-meta">
+      <div class="bc-stage-m-meta">
         <div data-reveal="text" class="p1">&copy; 2026 All Right Reserved</div>
         <div hidden data-reveal="text" class="p1">Hug in a Cup, Perfect to Go</div>
       </div>

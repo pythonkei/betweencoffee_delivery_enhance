@@ -131,7 +131,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      2026-10-13（使用者指示）：首頁順序反轉 —— GUNTE hero 回到「第一眼看到的第一屏」，
        BC 動態模組（#bc-brand-stage）下移到它之後；兩塊 hero 之間加 .ftco-section-blank-small。
        1. markup 取自 partials/bc_brand_stage_hero.html（＝ partials/bc_brand_stage.html 的 hero 變體：
-          兩者逐字相同，僅把最外層的 footer 標籤（class="footer"）改為 div 標籤，
+          兩者逐字相同，僅把最外層的頁尾標籤（class="bc-stage-content"）改為 div 標籤，
           原因見該檔註解 —— bc-yama-header.js 會用 document.querySelector('footer')
           （取 DOM 第一個 footer 元素）當「footer 交會」觀察目標；置頂模組若仍用 footer 標籤，
           頁面一載入它就在視口內 → tax-nav 被移除 init、header-bot 加 is-hide，右下角元件開站即消失）。
@@ -147,7 +147,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-10-18（使用者指示）：品牌舞台（原 bc-bg-footer，現名 bc-brand-stage）回到首頁第一屏；
      本段與下方 GUNTE hero 都保留，GUNTE 僅加 hidden（見檔頭 10-18 註解）。
      partials/bc_brand_stage_hero.html 與 about 頁的 partials/bc_brand_stage.html 同源：
-     僅改用 <div class="footer"> 包裝（避免 bc-yama-header.js 把置頂模組當頁尾觀察目標）
+     僅改用 <div class="bc-stage-content"> 包裝（避免 bc-yama-header.js 把置頂模組當頁尾觀察目標）
      ＋照片格改為環形咖啡照列。 -->
 <section class="hero bc-brand-stage-hero">
 {% include 'betweencoffee_delivery/partials/bc_brand_stage_hero.html' %}
@@ -170,7 +170,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        ② 移除徽章白色外框（.bc-hand-badge 的 border 已刪，圓形只剩品牌金底）；
        ③ 環形照片格的類別名 .hero_hand_item → .hero_bc_item
           （.hero_hand／.hero_hand_list 不動；HTML／CSS／JS 同步改名）；
-       ④ 照片格最外層 .footer-logo-list-wrap → .hero-ring-list-warp
+       ④ 照片格最外層 .bc-stage-photo-list-wrap → .hero-ring-list-warp
           （partials/bc_brand_stage_hero.html；CSS 沒有對應規則，純語意改名）。
      [為何放在這裡] 必須是 <section> 的直屬子節點、不在任何會 transform／filter
        的容器內，position:fixed 才不會被祖先變成相對定位（照片環所在的
@@ -988,11 +988,12 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      全樣式 scoped 於 #bc-brand-stage，故與 about 頁共用同一份 CSS 不會互相影響。
      2026-10-18（使用者指示）：本模組回到首頁第一屏當 hero（markup 用 hero 變體
      partials/bc_brand_stage_hero.html；about 頁仍用 partials/bc_brand_stage.html 當真頁尾）。
-     2026-10-19（使用者指示）：所有斷點都隱藏 .m-footer-inner（行動版頁尾區塊）
+     2026-10-19（使用者指示）：所有斷點都隱藏 .bc-stage-m-inner（行動版頁尾區塊）
      ⇒ 版號 ?v=20261018a 升為 ?v=20261019a（WhiteNoise MAX_AGE=1 年，必須升版才會重載）
      2026-10-19 稍後（首頁效能 P0）：新增 [data-reveal] 的 1.5s bc-reveal-guard 保險
-     ⇒ 版號再升為 ?v=20261019b。 -->
-<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261102d" />
+     ⇒ 版號再升為 ?v=20261019b。
+     2026-11-10（使用者指示）：class 層 footer* → bc-stage-*（對照見檔頭）⇒ ?v=20261110b。 -->
+<link rel="stylesheet" href="{% static 'css/bc-brand-stage.css' %}?v=20261110c" />
 <!-- 2026-10-25（使用者指示）：原本緊接在本行之後的 500+ 行內聯 <style>（品牌舞台 hero 的
      逐斷點覆寫）已整段移入 static/css/bc-brand-stage.css 檔尾（「首頁專用覆寫」區段）。
      該檔是 extra_css 的最後一支 <link>，串接位置與原本的內聯樣式相同（同特異度仍勝過
@@ -1106,7 +1107,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      SplitText / CustomEase（gsap 3.13 起免費）；
      gsap 核心 + ScrollTrigger 已由 base.html 全域以 defer 載入，故以下 defer 依序執行即可。
      2026-10-14 稍後：本檔新增「clip-down 揭示跑完後釋放含環形照片列容器的 clip-path」
-     （整頁扇形必須離開 .footer-logo-cell）→ 版號 ?v=20261014a 升為 ?v=20261014b
+     （整頁扇形必須離開 .bc-stage-photo-cell）→ 版號 ?v=20261014a 升為 ?v=20261014b
      （/about/ 沒有 [data-bc-hand-ring]，行為完全不變，僅同步版號）。
      2026-10-17（使用者指示）：新增 window.BC_TEXT_REVEAL（把同一支 goo 文字揭示開放給
      bc-hand-ring.js，供首頁咖啡名稱 / Highlight 換張時使用）＋ reveal 前先 kill 舊時間軸
@@ -1118,10 +1119,12 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      其餘 data-reveal 文字仍走預設 1.2s）→ 版號 ?v=20261018a 升為 ?v=20261018b。
      2026-10-19（使用者指示「圓盤已到中心，文字揭示仍略慢，再加快一點點」）：
      window.BC_TEXT_REVEAL 再新增選填的 stagger 參數（bc-hand-ring.js 傳 0.45s／0s／0s；
-     其餘 data-reveal 文字仍走預設 1.2s／0.1s）→ 版號升為 ?v=20261019b。 -->
+     其餘 data-reveal 文字仍走預設 1.2s／0.1s）→ 版號升為 ?v=20261019b。
+     2026-11-10：class 層 footer* → bc-stage-*（只換 class 名稱，JS 邏輯未動）
+     → 版號升為 ?v=20261110b。 -->
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
-<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261024a"></script>
+<script defer src="{% static 'js/bc-brand-stage.js' %}?v=20261110c"></script>
 <!-- 2026-11-07（使用者指示）：品牌舞台 hero 的背景照片視差（移植 hicard.studio 的
      .fv__photoarea／Sticky1）。依賴 base.html 全域 defer 的 gsap + ScrollTrigger，
      故同樣用 defer（排在它們之後執行）；找不到 .bc-photoarea、或 GSAP 未載入、
