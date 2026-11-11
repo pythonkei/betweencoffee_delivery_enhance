@@ -23,7 +23,8 @@
    .c-footer__section 是 .l-footer__body 的最後一個子元素，在 .l-footer 版權列之下、
    整份文件最底），因此 coffee.html 以覆寫 bcc_footer（block.super ＋ 本 include）
    輸出，不要塞在 content block 的 footer 之前。
-   背景影片沿用首頁「推薦頁面」咖啡豆卡同一支 bean_bg.webm。
+   背景照片（2026-11-11 使用者指示：不用影片）：static/images/bean_menu.jpg（1920×1280），
+   <img loading="lazy" decoding="async"> ＋ object-fit: cover；影片懶載已從 JS 移除。
    使用方式：include 'betweencoffee_delivery/partials/bc_next_link.html'
              ＋ 需在頁面模板的 bcc_footer block 內放在 block.super 之後。
 ============================================================
@@ -34,10 +35,10 @@
     <a class="bc-next-link__anchor" href="{% url 'bean_menu' %}" aria-label="前往咖啡豆選單">
         <div class="bc-next-link__stage">
             <div class="bc-next-link__media" aria-hidden="true">
-                <video class="bc-next-link__video"
-                       src="{% static 'images/recommended-pages/bean_bg.webm' %}"
-                       muted loop playsinline preload="none"
-                       aria-hidden="true" tabindex="-1"></video>
+                <img class="bc-next-link__img"
+                     src="{% static 'images/bean_menu.jpg' %}"
+                     alt="" loading="lazy" decoding="async"
+                     aria-hidden="true">
             </div>
             <div class="bc-next-link__body">
                 <p class="bc-next-link__label">( <span class="bc-next-link__loop" data-text="Next">Next</span> )</p>

@@ -46,12 +46,12 @@
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 「咖啡豆製程」捲動模組（union-tec `homeService` 移植：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS）。**11-09 起掛 `/about/` 的 `.bc-search` 下方**（首頁 `[2b-2]` 已移除） |
 | `static/css/bc-brand-stage.css`、`static/js/bc-brand-stage.js`、`partials/bc_brand_stage{,_hero}.html` | 首頁／about 共用的「品牌舞台」（時鐘＋環形照片列＋跑馬燈＋社群列；grid-area 版面）。子元素 class **2026-11-10 由 `footer*` 改名 `.bc-stage-*`**（對照表在 CSS 檔頭）；`<footer>`／`id`／`data-*` 未動 |
-| `static/css/bc-photoarea.css`、`static/js/bc-photoarea.js`、`images/photoarea/pa-1~5.webp`、`partials/bc_brand_stage_hero.html` | 首頁 hero 背景照片視差（hicard）：`z-index:-1`＋`pointer-events:none`、≤768px ×0.5、reduced-motion 略過；第 3 格＝影片輪播 `.bc-pa-video`（片單 `views.PA_VIDEOS`）；黑蒙版 **75%**；落點每次載入洗牌。細節見 `docs/home-photoarea.md` |
+| `static/css/bc-photoarea.css`、`static/js/bc-photoarea.js`、`images/photoarea/pa-1~5.webp`、`partials/bc_brand_stage_hero.html` | 首頁 hero 背景照片視差（hicard）：`z-index:-1`＋`pointer-events:none`、黑蒙版 **75%**、落點每次載入洗牌；第 3 格＝影片輪播 `.bc-pa-video`（片單見 views）。細節見 `docs/home-photoarea.md` |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
 | `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00~06.webm`（7 支） | `/about/` 首屏 sticky 影片＋產品照輪播（`--mv-vh`=`100svh`、黑遮罩 75%；片單 `views.MV_VIDEOS` 不洗牌、層數 min(片單,`MV_MAX`=7)、剩 0.75s 交叉淡入 0.6s；URL 由 `_mv_versioned_static()` 加 mtime）。細節見 `docs/about-sticky-mv.md` |
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（移植 popeyemagazine.jp/50interviews）。**2026-11-06 重新載入，置於 `#bc-sticky-mv` 下方**（11-03 曾停用） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
-| `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（移植 daisheng `.c-footer__section`：進場放大淡入／hover 1.1／視差／`( Next )` 上捲）。**置於 `</footer>` 之後**（覆寫 `bcc_footer`＋`block.super`）。說明用 `{% comment %}`（`{# #}` 不可跨行） |
+| `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（移植 daisheng `.c-footer__section`：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景＝照片 `bean_menu.jpg`）。**置於 `</footer>` 之後**（覆寫 `bcc_footer`＋`block.super`）。說明用 `{% comment %}`（`{# #}` 不可跨行） |
 
 ## 4. 開發規範
 

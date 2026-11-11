@@ -50,9 +50,11 @@
      -lg clamp(2rem, 1.503rem + 2.12vw, 3.625rem)、面板高 37.5vw。
    品牌化（.clinerules/uiux-core）：黑底 #0e0e0e、白字／金字 --bc-gold、
    黑色 45% 單色遮罩（不用漸變）、標題 Noto Serif TC、不新增樣式體系。
-   素材：背景影片沿用首頁「推薦頁面」雙卡的
-     static/images/recommended-pages/bean_bg.webm（＝咖啡豆卡同一支），
-     preload="none"，接近視口才載入（見 bc-next-link.js）。
+   素材（2026-11-11 使用者指示：不用影片）：靜態照片
+     static/images/bean_menu.jpg（1920×1280），
+     <img loading="lazy" decoding="async"> ＋ object-fit: cover。
+   進場動畫可重播：每次捲回面板都會再跑一次 1s 的縮放淡入
+     （bc-next-link.js 在面板完全離開視口時關掉 transition 歸位）。
    ============================================================ */
 
 .bc-next-link {
@@ -62,7 +64,8 @@
   background: var(--bc-bg, #0e0e0e);
 }
 
-/* ① 進場：opacity 0 → 1、scale 1.3 → 1（原站 transition: all 1s） */
+/* ① 進場：opacity 0 → 1、scale 1.3 → 1（原站 transition: all 1s）
+   每次捲回面板都重播：js 於面板完全離開視口時（transition:none）移除 .is-active 歸位 */
 .bc-next-link__anchor {
   display: block;
   position: relative;
@@ -112,7 +115,8 @@
   will-change: transform;
 }
 
-.bc-next-link__video {
+/* 背景照片（原為影片，2026-11-11 改靜態圖 bean_menu.jpg） */
+.bc-next-link__img {
   display: block;
   width: 100%;
   height: 100%;
@@ -134,6 +138,8 @@
   z-index: 1;
   text-align: center;
   color: #fff;
+  /* 照片（bean_menu.jpg）中段為亮色咖啡豆，小字靠陰影拉開對比 */
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
 }
 
 /* ④ 「( Next )」：外層 overflow hidden 只留一行，內層上捲＝第二份文字遞補 */
