@@ -13,6 +13,19 @@
      （間隔 0.5s）計算進度，JS 直接設定屬性
    - 響應式斷點：base / ≥704 / ≥834 / ≥1920（與原站一致）
    - 黑底白字適配（本地品牌背景）；SVG 高亮 #BFFF00 保留原樣
+   ------------------------------------------------------------
+   2026-11-11 使用者指示「放大整個模組（文字／照片／GIF／SVG／動畫）」：
+   全模組長度值 ×1.3（純等比縮放，幾何關係不變；section 外距 padding
+   96/80 不動，避免動到頁面節奏）。要再調大小只需等比改下列各斷點
+   的 px（下方列的是「放大前」原值，現值＝原值×1.3）：
+     base  text 24／ls 1.92／max-w 400／min-h 386／title 36／
+           kicker ml 87（font 14 繼承→顯式 18）／spacer 75／v01 58／v03 54／
+           visual h 30／circle 102／arrow 114／bubble 42
+     ≥704  max-w 440／min-h 320
+     ≥834  text 34／ls 2.72／max-w 640／min-h 422／title 56／kicker ml 173／
+           spacer 90／v01 90／v03 76／visual h 43／circle 158／arrow 146／bubble 60
+     ≥1920 text 50／ls 4／max-w 858／title 80／kicker ml 262／
+           spacer 140／v01 144／v03 126／visual h 56／circle 203／arrow 188／bubble 80
    ============================================================ */
 
 /* ---------- 基底 ---------- */
@@ -23,10 +36,12 @@
     padding: 96px 80px;
     max-width: 1920px;
     margin: 0 auto;
+    /* kicker 標籤展開寬度（原站預設 100px；×1.3 放大後避免截字） */
+    --label-width: 150px;
     /* 響應式目標寬度（bc-who.js scroll scrub 讀取） */
-    --who-spacer-w: 75px;
-    --who-visual01-w: 58px;
-    --who-visual03-w: 54px;
+    --who-spacer-w: 98px;
+    --who-visual01-w: 75px;
+    --who-visual03-w: 70px;
 }
 @media all and (max-width: 1080px) {
     .bc-who-section {
@@ -45,19 +60,20 @@
     justify-content: center;
 }
 .bc-who-section .who-kicker {
-    margin-left: 87px;
+    margin-left: 113px;
+    font-size: 18px;
 }
 .bc-who-section .who-content {
     justify-content: flex-end;
 }
 .bc-who-section .who-content-text {
     position: relative;
-    font-size: 24px;
+    font-size: 31px;
     font-weight: 500;
     line-height: 180%;
-    letter-spacing: 1.92px;
-    max-width: 400px;
-    min-height: 386px;
+    letter-spacing: 2.5px;
+    max-width: 520px;
+    min-height: 502px;
     color: #fff; /* 本地黑底適配：白字 */
 }
 
@@ -65,16 +81,16 @@
 /* ---------- section-title ---------- */
 .bc-who-section .section-title {
     position: relative;
-    padding: 0 0 48px;
+    padding: 0 0 62px;
 }
 .bc-who-section .section-title__text {
     position: relative;
     display: inline-block;
     font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
-    font-size: 36px;
+    font-size: 47px;
     line-height: 100%;
     font-weight: 500;
-    letter-spacing: 0.96px;
+    letter-spacing: 1.25px;
     color: #fff;
 }
 .bc-who-section .section-title--left {
@@ -94,7 +110,7 @@
 /* ---------- kicker 括號（sukima-parenthis-anim） ---------- */
 .bc-who-section .sukima-parenthis-anim {
     display: flex;
-    gap: 4px;
+    gap: 5px;
     transform: scale(0) translateZ(0);
     transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -136,7 +152,7 @@
     opacity: 1;
     width: 0;
     position: relative;
-    height: 30px;
+    height: 39px;
 }
 /* 2026-11-11：wwa-visual-03 由 <video wwa.mp4> 改為 <img wwa-03.gif>，
    三個 visual 統一走 img 規則（原 video 選擇器已無對應節點）。 */
@@ -149,17 +165,18 @@
     transform-origin: bottom center;
 }
 .bc-who-section .wwa-anim-visual img {
-    top: 4px;
-    left: 2px;
+    top: 5px;
+    left: 3px;
 }
 .bc-who-section .wwa-visual-01 img {
-    left: -2px;
+    left: -3px;
 }
 /* wwa-03.gif（480×277）比原 wwa.mp4（251×180）扁，top 依「底緣不變」重算：
-   原 video 底 = -2 + 54×180/251 ≈ 36.7 → gif 54×277/480 ≈ 31.2 → top 6px */
+   原 video 底 = -2 + 54×180/251 ≈ 36.7 → gif 54×277/480 ≈ 31.2 → top 6px
+   （2026-11-11 全模組 ×1.3 放大 → 70×277/480 ≈ 40.4，top 8px） */
 .bc-who-section .wwa-visual-03 img {
-    top: 6px;
-    left: 4px;
+    top: 8px;
+    left: 5px;
 }
 
 /* ---------- sukima-anim-wwa / video-anim-wwa 容器 ---------- */
@@ -179,7 +196,7 @@
     position: absolute;
     top: 73%;
     left: 48%;
-    width: 102px;
+    width: 133px;
     height: auto;
     transform: translate(-50%, -50%);
     z-index: 2;
@@ -189,9 +206,9 @@
 }
 .bc-who-section .who-arrow-svg {
     position: absolute;
-    bottom: 3px;
+    bottom: 4px;
     left: 45%;
-    width: 114px;
+    width: 148px;
     height: auto;
     z-index: 2;
     transform: translateY(100%);
@@ -203,91 +220,91 @@
 /* ---------- 響應式 ---------- */
 @media (min-width: 704px) {
     .bc-who-section .who-content-text {
-        max-width: 440px;
-        min-height: 320px;
+        max-width: 572px;
+        min-height: 416px;
     }
 }
 
 @media (min-width: 834px) {
     .bc-who-section {
-        --who-spacer-w: 90px;
-        --who-visual01-w: 90px;
-        --who-visual03-w: 76px;
+        --who-spacer-w: 117px;
+        --who-visual01-w: 117px;
+        --who-visual03-w: 99px;
     }
     .bc-who-section .section-title {
-        padding: 0 0 64px;
+        padding: 0 0 83px;
     }
     .bc-who-section .section-title__text {
-        font-size: 56px;
+        font-size: 73px;
     }
     .bc-who-section .who-kicker {
-        margin-left: 173px;
+        margin-left: 225px;
     }
     .bc-who-section .who-content-text {
-        font-size: 34px;
-        letter-spacing: 2.72px;
-        max-width: 640px;
-        min-height: 422px;
-    }
-    .bc-who-section .wwa-anim-visual {
-        height: 43px;
-    }
-    .bc-who-section .who-circle-svg {
-        width: 158px;
-    }
-    .bc-who-section .who-arrow-svg {
-        width: 146px;
-    }
-    .bc-who-section .wwa-visual-03 img {
-        /* 底緣不變：原 video 底 = -1 + 76×180/251 ≈ 53.5 → gif 76×277/480 ≈ 43.9 → top 10px */
-        top: 10px;
-        left: 6px;
-    }
-}
-
-@media (min-width: 1920px) {
-    .bc-who-section {
-        --who-spacer-w: 140px;
-        --who-visual01-w: 144px;
-        --who-visual03-w: 126px;
-    }
-    .bc-who-section .section-title {
-        padding: 0 0 120px;
-    }
-    .bc-who-section .section-title__text {
-        font-size: 80px;
-    }
-    .bc-who-section .who-kicker {
-        margin-left: 262px;
-    }
-    .bc-who-section .who-content-text {
-        font-size: 50px;
-        letter-spacing: 4px;
-        max-width: 858px;
+        font-size: 44px;
+        letter-spacing: 3.54px;
+        max-width: 832px;
+        min-height: 549px;
     }
     .bc-who-section .wwa-anim-visual {
         height: 56px;
     }
     .bc-who-section .who-circle-svg {
-        width: 203px;
+        width: 205px;
     }
     .bc-who-section .who-arrow-svg {
-        width: 188px;
+        width: 190px;
+    }
+    .bc-who-section .wwa-visual-03 img {
+        /* 底緣不變：117 寬 gif 高 99×277/480 ≈ 67.5；原 76 寬時底 = 10 + 43.9 ≈ 53.9 → 等比 ×1.3 ≈ 70 → top 13px */
+        top: 13px;
+        left: 8px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .bc-who-section {
+        --who-spacer-w: 182px;
+        --who-visual01-w: 187px;
+        --who-visual03-w: 164px;
+    }
+    .bc-who-section .section-title {
+        padding: 0 0 156px;
+    }
+    .bc-who-section .section-title__text {
+        font-size: 104px;
+    }
+    .bc-who-section .who-kicker {
+        margin-left: 341px;
+    }
+    .bc-who-section .who-content-text {
+        font-size: 65px;
+        letter-spacing: 5.2px;
+        max-width: 1115px;
+    }
+    .bc-who-section .wwa-anim-visual {
+        height: 73px;
+    }
+    .bc-who-section .who-circle-svg {
+        width: 264px;
+    }
+    .bc-who-section .who-arrow-svg {
+        width: 244px;
     }
     .bc-who-section .wwa-anim-visual img {
         left: 0;
-        top: -6px;
+        top: -8px;
     }
     .bc-who-section .wwa-visual-02 img {
-        left: 10px;
+        left: 13px;
     }
     .bc-who-section .wwa-visual-03 img {
-        /* 底緣不變：原 video 底 = -19 + 126×180/251 ≈ 71.4 → gif 126×277/480 ≈ 72.7 → top -1px */
+        /* 底緣不變：164 寬 gif 高 164×277/480 ≈ 94.6；原底 = -1 + 72.7 ≈ 71.7 → ×1.3 ≈ 93.2 → top -1px */
         top: -1px;
-        left: 6px;
+        left: 8px;
     }
     .bc-who-section .wwa-visual-01 img {
-        left: -4px;
+        left: -5px;
     }
 }
 
@@ -302,10 +319,10 @@
    ============================================================ */
 .bc-who-section .culture-kangaeteiru-svg {
     position: absolute;
-    top: 8px;
-    right: -8px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
+    top: 10px;
+    right: -10px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
     transform: translate3d(100%, -100%, 0);
-    width: 42px;
+    width: 55px;
     height: auto;
 }
 .bc-who-section.show .thought-bubble-reveal-tracer {
@@ -318,16 +335,16 @@
 }
 @media (min-width: 834px) {
     .bc-who-section .culture-kangaeteiru-svg {
-        top: 22px;
-        right: -8px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
-        width: 60px;
+        top: 29px;
+        right: -10px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
+        width: 78px;
     }
 }
 @media (min-width: 1920px) {
     .bc-who-section .culture-kangaeteiru-svg {
-        top: 41px;
-        right: -14px; /* 2026-08-25 使用者要求稍微向右移動（原 -6） */
-        width: 80px;
+        top: 53px;
+        right: -18px; /* 2026-08-25 使用者要求稍微向右移動（原 -6） */
+        width: 104px;
     }
 }
 
