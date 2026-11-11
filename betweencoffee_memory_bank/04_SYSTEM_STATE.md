@@ -1,6 +1,6 @@
 # 系統狀態
 
-> 2026-11-06 複驗版（2026-10-25 版之後累積 10-28 ~ 11-06 共 7 個 session；原檔 181KB 已封存：`docs/archive/memory_bank_04_full_20261017.md`）。
+> 2026-11-11 複驗版（2026-10-25 版之後累積 10-28 ~ 11-11；原檔 181KB 已封存：`docs/archive/memory_bank_04_full_20261017.md`）。
 > 逐筆變更細節請用 `git log`，不要回頭讀封存檔。
 
 ## 系統狀態摘要
@@ -15,11 +15,11 @@
 | 忠誠度 | ✅ 基礎 | 積分 + 優惠券 |
 | 員工管理 | ✅ 完整 | 隊列 + 付款確認 |
 | 員工端渲染器 v2 | ✅ 完成 | BaseOrderRendererV2 + 4 個 v2 渲染器 |
-| About 首屏影片 | ✅ 多層輪播 | 2026-11-06 起 `/about/` 的 `.mv-video` 最多 6 層（`views.MV_MAX`／片單 6 支）、每次載入洗牌、播到剩 `0.75s` 讓下一層交叉淡入 0.6s；片單＝`views.MV_VIDEOS`（末 3 支 11-06 追加：`index_hero_bg.mp4`／`bean_bg.webm`／`13687671-hd_720_1280_60fps.mp4` 直式） |
+| About 首屏影片 | ✅ 多層輪播 | `/about/` 的 `.mv-video` 層數＝min(片單, `views.MV_MAX`=7)、片單 `views.MV_VIDEOS`＝`hero_00`~`hero_06` **依序不洗牌**、剩 0.75s 下一層交叉淡入 0.6s；首屏輪播品項另受 `MV_EXCLUDE_IDS`（現 `{7}` → 5 張）控制（2026-11-07 定案） |
 | 測試 | ⚠️ 不足 | 覆蓋率低（以 `docs/verify/` CDP 腳本補前端驗證） |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
-| 部署（Render） | ⚠️ 部署落後 47 筆（功能 commit 計至 `fdd2b236`） | 現行 `live`＝deploy `dep-dbkpv7tg1s2s73df3leg`／commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-07 Render API 複驗）。`origin/main` 尖端＝11-07（遮罩 75%）⇒ **待部署 `c3f7509c..origin/main`（47 筆功能＋docs）**（11-04 ~ 11-07 累積：about 首屏 sticky 影片與三段、`bc-catch` 字輪、`bc-popeye50` 回到首屏、詳情頁容器加寬／`baker` 頭像、首頁環形照片列改名與徽章、navbar 天氣對齊、首屏影片多層輪播 → 追加 3 支成 6 支 → 整組換 `hero_00`~`hero_06` 依序 7 支 → 黑遮罩 80%→70%→**75%**）。**autoDeploy＝off，push 不會觸發部署** | 
-| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝`0c4189fe`（2026-11-04 共 4 筆：`0bd7172d` 三段 grid 修正、`e9bdefdb` 補齊 10-28 起累積未提交前端（製程模組／`bc-catch.css`／舞台天候列／拖曳）、`7251018f`／`0c4189fe` docs 記憶文件同步與版本狀態收尾）；本機 `main`＝`origin/main`、工作區乾淨（僅 `.gitignore` 排除的本機暫存素材）。複驗一律 `git log -1`／Render API，不寫死文件 hash |
+| 部署（Render） | ⚠️ 部署落後 66 筆 | 現行 `live`＝commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-11 Render API 複驗）。`origin/main` 尖端＝11-11（`b78d82d1` 品牌舞台 `footer*`→`bc-stage-*` 改名）⇒ **待部署 `c3f7509c..origin/main`（66 筆 code／docs）**（11-04 ~ 11-11 累積：about 首屏 sticky 影片與三段、`bc-catch` 字輪、`bc-popeye50` 回歸、詳情頁容器加寬、環形照片列改名與徽章、首屏影片 7 支多層輪播、黑遮罩 →**75%**、製程模組移 about、首頁 hero 影片輪播與落點洗牌、who section 移首頁、浮動購物車圖示 10 款、品牌舞台 class 改名）。**autoDeploy＝off，push 不會觸發部署** |
+| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝2026-11-11 品牌舞台改名 `b78d82d1`＋本檔同步（以 `git log -1` 複驗，不寫死 hash）；本機 `main`＝`origin/main`；工作區僅剩 `.gitignore` 排除的本機暫存素材（`hero_06_.webm`、`pa-3__.webp`）與已刪檔（`staff0[1-4].png`、`wakemeup.png`）尚未提交 |
 
 ## 資料庫現狀
 
@@ -33,10 +33,12 @@
 
 > ℹ️ 生產 DB 連線：2026-10-23 曾回 `ENOTFOUND`（tenant `postgres.tmxvuwadktvfjtawckib`）導致部署失敗，但 2026-10-24 15:43Z 的手動部署（`a732cc28`）**成功且 live** ⇒ 連線已恢復。生產 migration 進度請以該次部署後的 `eshop/migrations` 記錄為準；本機 MCP 的兩個 PostgreSQL 連線仍是同一顆本地庫（`0081`–`0083` applied 時間戳同為 `2026-10-24T06:03:31Z`），不可當作生產現況。
 
-## 近期變更（最近 14 筆，一行式）
+## 近期變更（最近 15 筆，一行式）
 
 | 日期 | 內容 |
 |---|---|
+| 2026-11-11 | **品牌舞台 `#bc-brand-stage` 的 `footer*` class 全面改名為 `bc-stage-*`**（`b78d82d1`，外觀零變化）：16 組對照表寫在 `static/css/bc-brand-stage.css` 檔頭（`.footer`→`.bc-stage-content`、`.footer-time`→`.bc-stage-time`、`.footer-logo-*`→`.bc-stage-photo-*`、`.footer-socials`→`.bc-stage-socials`、`.m-footer-*`→`.bc-stage-m-*`、Webflow 拼錯的 `.foooter-mail`→`.bc-stage-marquee`…）；同步 2 partial＋CSS＋JS（`_footerLogoClick`→`_stagePhotoClick`）＋`index/about.html`（`?v=20261110c`）＋`docs/verify/` 六支 CDP 腳本 selector；**不動** `<footer>` 標籤、所有 `id`／`data-*` 與 `#bc-sticky-mv .foooter-mail`。驗證：CSS 套表後與改名前逐字元相同（245 規則）、partial 結構相同、`/` 390×844 六項幾何不變、`cdp_verify_bg_footer.py` 41/41 PASS |
+| 2026-11-10 | ① **sukima「who」section 由 `/about/` 搬到首頁**「推薦頁面」雙卡下方（`15c2b93c`，只改兩個模板，CSS／JS 未動）；② **浮動購物車圖示定案 `04 手提包（線條）`**：`base.html` inline SVG 雙態（`.bc-fc-line`／`.bc-fc-solid`）＋`bc-components.css` `svg.bc-fc-icon` 尺寸，版號 `20261109a`；③ 品牌舞台子 class 改名完成並驗證（見 11-11） |
 | 2026-11-09 | ① 首頁 hero 背景照片黑蒙版 40% → 50% → 60% → 70% → **75%**（`bc-photoarea.css` `--pa-dim: .6→.5→.4→.3→.25`，`?v=` 依序 `20261109c`→`d`→`e`→`f`→**`g`**→**`h`**）；② **「咖啡豆製程」模組（`.bc-home-service`）自首頁 `[2b-2]` 整組移到 `/about/` 的 `.bc-search` 正下方**（index 移除 include／CSS／JS 三處，about.html 補回同樣三處；partial／CSS／JS 檔只改檔頭註解、版號 `20261030a`→`20261109a`，邏輯未動）；③ **首頁 hero 照片落點「每次載入重排」**（比照 hicard 原站：view `_photoarea_slots()` 洗牌 → `context["pa_slots"]`，模板逐格寫 `x_{{ pa_slots.N.x\|default:舊值 }}`；x/y 各自是 1–5 排列、`data-para`／`.d_n`／`.yoko` 固定不動；伺服器端決定 ⇒ 無跳位閃動；無 `static/**` 改動、不必升 `?v=`）；④ **首頁 hero 第 3 格影片改為「可輪播容器」**（view 常數 `PA_VIDEOS`＝`hero_00`→`hero_04`→`hero_05` 依序不洗牌 → `context["pa_videos"]`；模板 `{% for %}` 長出多支 `<video>`，CSS 疊同一框＋只有 `.is-on` 可見、JS `setupVideoCarousel()` 距結束 0.75s 換片、0.6s 交叉淡入；要加片只改 `PA_VIDEOS`；`?v=` css `20261109h`／js `20261109c`） |
 | 2026-11-06 | `/about/` **重新載入 `bc-popeye50` 字輪並改置於 `#bc-sticky-mv` 正下方**（11-03 起停用的模組回歸）：只改 `about.html` 三處（extra_css 連結／section markup 插在 sticky-mv 收尾之後／`defer` JS 緊接 `bc-sticky-mv.js`）；CSS／JS 檔未改 ⇒ 沿用 `?v=20261102f`／`?v=20261102c`。實測 DOM 順序 sticky-mv→popeye50→series、gap 0；1440／390 無水平溢出、字輪自動旋轉＋中心連結導頁正常、sticky 影片不受影響 |
 | 2026-11-04 | `/about/` 首屏 `bc-sticky-mv` 三段（`.mv-stage`）改回品牌舞台 **7 欄 grid 明確格位**（原 flex 堆疊位置與 about 頁不同；fresh `1/3/2/6`、roasted `2/4/3/7`＋8px、marquee `2/3/3/5` 同列靠左；≤991px 6 欄覆寫），字級改原站流體公式（h1 `90vw/14.4`、p1 `14vw/14.4`）；`bc-sticky-mv.css?v=20261104c`（`0bd7172d`） |
@@ -47,8 +49,6 @@
 | 2026-10-31 | `/about/` 新增「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`：3 行 × 4 種字體、`.74s` step-end／每格 185ms、行相位 −0.09／−0.18s、純 CSS 無 JS＋`prefers-reduced-motion` 靜止），置於 `.bc-reviews-section` 正下方；樣式 `static/css/bc-catch.css`（本輪 `e9bdefdb` 才入庫） |
 | 2026-10-30 | 首頁「咖啡豆製程」捲動模組 `[2b-2]`（移植 union-tec.jp `homeService`：clip-path 膠囊→滿版、4 段輪播＋模糊轉清晰、標籤與網格字母；原生 JS 不依賴 Alpine／Lenis／three.js／GSAP）；素材 `images/home-service/hs-{1..4}{,-sp,-blur,-clip}.webp`（`scripts/make_hs_images.py` 產生）；完整數據 → `docs/archive/task_progress_20261102_home_service.md` |
 | 2026-10-28 | capabilities 模組搬家（about→首頁）＋`--cap-scale` 等比放大（≥834 1.30／≥1280 1.40／≥1920 1.60）＋頁面置中；`/bean/<id>/` `.bc-staff` 字級放大（`bc-components.css?v=20261028a`）；自架 `trade-gothic` 字型＋`.bc-series-heading` 行距／字級；bean SERIES 括號滑桿搬到商品主區下方（`29eb67d1`／`f57eb768`／`f730abab`） |
-| 2026-10-25 | 版控收尾：`a732cc28..d27f7c90` 推上 `origin/main`（`#59 edf3e87c`、`#60 7a073263`、`#61 d27f7c90`）；原始 APNG 素材（12.8MB）列 `.gitignore` |
 | 2026-10-24 | #61 首頁「推薦頁面」雙卡（移植 union-tec.jp `recommendedPages`）＋同日調整：① 隱藏首頁 `#bc-stage-socials`（extra_css `.bc-brand-stage-hero #bc-stage-socials{display:none}`，`hidden` 屬性會被 `.footer-socials{display:flex}` 蓋掉）② 模組由 `.feed--video` 下方搬到 `.bc-brand-stage-hero` 正下方。新版號 `?v=20261024b`（css）／`20261024a`（js）（`d27f7c90` 已 push） |
 | 2026-10-24 | #60 品牌舞台環形照片列「第一張咖啡」改 goo 揭示（沿用標題文字的 `stdDeviation 50→0` 時間軸，不再 scale 0.5→1）；`bc-hand-ring.js/css`、`bc-brand-stage.js`（新增 `window.BC_MEDIA_REVEAL`）、index／about `?v=20261024a`（`7a073263` 已 push） |
 | 2026-10-24 | #59 咖啡豆詳情頁「店員氣泡」：`BeanItem` 10 欄位＋`measure_bubble_geometry()`、Admin 2 fieldset、migration `0081`–`0083`（幾何／文案 seed）；`.bc-coffee-comment` 宿主 selector 改中性 `.bc-photo-comment`（`edf3e87c` 已 push） |
-| 2026-10-22~23 | #58／#58b 首頁四步旅程 Rive 圖示列（`bc-steps`）：自架 Rive 2.35.2、intro/hover/rest 修正、靜止 4s 自動循環、圖示純白；桌機 4 欄／手機 2×2／reduced-motion 驗證通過（已 push `a732cc28`） |

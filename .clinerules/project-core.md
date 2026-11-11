@@ -23,7 +23,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-10）**：live＝`c3f7509c`（11-03）⇒ **待部署 66 筆**（`git rev-list --count c3f7509c..main`）；部署後 `/about/` 應有 `bc-sticky-mv`（`grep -c` >0 才算成功）。
+- **版本狀態（2026-11-11）**：live＝`c3f7509c`（11-03）⇒ **待部署 67 筆**（`git rev-list --count c3f7509c..main`）；部署後 `/about/` 應有 `bc-sticky-mv`（`grep -c` >0 才算成功）。
 
 ## 2. 核心業務
 
@@ -46,9 +46,10 @@
 | `static/css/bc-components.css` | 品牌元件庫（`.bc-btn` / `.bc-input` / `.bc-card` / `.bc-order-collapse`） |
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 「咖啡豆製程」捲動模組（union-tec `homeService` 移植：clip-path 膠囊→滿版、4 段輪播、標籤＋網格字母；原生 JS）。**11-09 起掛 `/about/` 的 `.bc-search` 下方**（首頁 `[2b-2]` 已移除） |
-| `static/css/bc-photoarea.css`、`static/js/bc-photoarea.js`、`images/photoarea/pa-1~5.webp`、`partials/bc_brand_stage_hero.html` | 首頁 hero 背景照片視差（hicard）：`z-index:-1`＋`pointer-events:none`，hero 變體補 `isolation:isolate`；`data-pa-shift`＋`data-para`（vh）`scrub`、≤768px ×0.5、reduced-motion 略過；第 3 格＝**影片輪播容器** `.bc-pa-video`（多支疊同框、`.is-on` 可見；片單＝`views.PA_VIDEOS`：`hero_00`→`hero_04`→`hero_05` 依序，0.75s 換片＋0.6s 淡入、加片只改該常數，URL 由 `_mv_versioned_static()` 加 mtime）；全格 **75%** 黑蒙版 `--pa-dim:.25`；**落點每次載入洗牌**（`views._photoarea_slots()`→`pa_slots`）。細節見 `docs/home-photoarea.md` |
+| `static/css/bc-brand-stage.css`、`static/js/bc-brand-stage.js`、`partials/bc_brand_stage{,_hero}.html` | 首頁／about 共用的「品牌舞台」（時鐘＋環形照片列＋跑馬燈＋社群列；`#bc-brand-stage` 為明確 grid-area 版面）。子元素 class **2026-11-10 由 `footer*` 改名為 `.bc-stage-*`**（對照表在 CSS 檔頭）；`<footer>` 標籤與所有 `id`／`data-*` 未動 |
+| `static/css/bc-photoarea.css`、`static/js/bc-photoarea.js`、`images/photoarea/pa-1~5.webp`、`partials/bc_brand_stage_hero.html` | 首頁 hero 背景照片視差（hicard）：`z-index:-1`＋`pointer-events:none`、hero 變體補 `isolation:isolate`、≤768px ×0.5、reduced-motion 略過；第 3 格＝影片輪播容器 `.bc-pa-video`（片單常數 `views.PA_VIDEOS`，加片只改它）；黑蒙版 **75%**（`--pa-dim:.25`）；落點每次載入洗牌（`views._photoarea_slots()`）。細節見 `docs/home-photoarea.md` |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（移植 eightdesign.co.jp `.PZL1xq_catch`；3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
-| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00.webm`~`hero_06.webm`（7 支片單） | `/about/` 最上方首屏 sticky 影片＋產品照輪播（`--mv-vh`＝`100svh`；卡片寬上限 `--mv-card-cap`；黑遮罩 `rgba(0,0,0,.75)`，z-index 10。**11-06 起多層輪播**：片單＝`views.MV_VIDEOS`（依序、不洗牌）、層數＝min(片單, `MV_MAX`＝7)、影片 URL 由 `_mv_versioned_static()` 加 `?v=<mtime>`；剩 0.75s 時下一層交叉淡入 0.6s（`.is-on`），換完才暫停舊層＋補下一支）。細節見 `docs/about-sticky-mv.md`。 |
+| `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00~06.webm`（7 支） | `/about/` 最上方首屏 sticky 影片＋產品照輪播（`--mv-vh`=`100svh`、黑遮罩 75%；多層輪播：片單 `views.MV_VIDEOS` 依序不洗牌、層數 min(片單, `MV_MAX`=7)、剩 0.75s 下一層交叉淡入 0.6s；影片 URL 由 `_mv_versioned_static()` 加 mtime）。細節見 `docs/about-sticky-mv.md` |
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（移植 popeyemagazine.jp/50interviews）。**2026-11-06 重新載入，置於 `#bc-sticky-mv` 下方**（11-03 曾停用） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 
