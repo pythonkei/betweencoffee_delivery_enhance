@@ -47,9 +47,11 @@
           純 CSS :hover / :focus-visible（結果等價、少一段 JS）。
 
    尺寸：-lg clamp(2rem, 1.503rem + 2.12vw, 3.625rem)、面板高 37.5vw。
-     「( NEXT )」行 2026-11-11 依使用者指示加大為
-     clamp(1.25rem, .95rem + 1vw, 1.75rem)（原站 -sm 為 .9375rem／≥768 .875rem），
-     字型改 Akzidenz Grotesk Pro（--bc-font-akzidenz）、字重 500、字距 .1em。
+     「( NEXT )」行：原站 -sm 為 .9375rem（≥768 .875rem）→ 2026-11-11 依使用者指示
+     先加大為 clamp(1.25rem, .95rem + 1vw, 1.75rem)（28px＠1280），
+     **同日再依指示縮小** 為 clamp(1rem, .875rem + .5vw, 1.25rem)
+     （16px＠390／18px＠768／20px＠≥1280）；
+     字型 Akzidenz Grotesk Pro（--bc-font-akzidenz）、字重 500、字距 .1em。
    品牌化（.clinerules/uiux-core）：黑底 #0e0e0e、白字／金字 --bc-gold、
    黑色 45% 單色遮罩（不用漸變）、標題 Noto Serif TC、不新增樣式體系。
    素材（2026-11-11 使用者指示：不用影片）：靜態照片
@@ -145,16 +147,18 @@
 }
 
 /* ④ 「( NEXT )」：外層 overflow hidden 只留一行，內層上捲＝第二份文字遞補
-   2026-11-11（使用者指示）：文字改全大寫 NEXT、字級加大、字型改為品牌舞台
+   2026-11-11（使用者指示）：文字改全大寫 NEXT、字型改為品牌舞台
    「Follow Your Rhythm」同一支 Akzidenz Grotesk Pro（--bc-font-akzidenz，
-   @font-face 在全站 css/bc-fonts.css，該檔 base.html 每頁都載）。
+   @font-face 在全站 css/bc-fonts.css，該檔 base.html 每頁都載）；
+   字級先加大後再依指示縮小為 clamp(1rem, .875rem + .5vw, 1.25rem)
+   （16px＠390／18px＠768／20px＠≥1280；原本 0.9375rem）。
    字型／字級／字距一律寫在外層 .bc-next-link__label → 括號與內層
    .bc-next-link__loop 一起套用，避免括號比文字小的視覺斷裂。 */
 .bc-next-link__label {
   overflow: hidden;
   margin: 0;
   font-family: var(--bc-font-akzidenz, "Helvetica Neue", Arial, sans-serif);
-  font-size: clamp(1.25rem, 0.95rem + 1vw, 1.75rem);
+  font-size: clamp(1rem, 0.875rem + 0.5vw, 1.25rem);
   font-weight: 500;
   letter-spacing: 0.1em;
   line-height: 1.5;

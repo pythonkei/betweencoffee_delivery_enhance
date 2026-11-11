@@ -20,9 +20,12 @@
   照片 1920×1280 已載入（img 高＝stage×1.6）、hover 1.1、視差 −10.89%／0.00%、`overflowX=0`、
   reduced-motion 直接 opacity 1／transform none、console 0 error、`manage.py check` 0 issue。
   截圖 `_shot/nextlink_after_footer_{1440,390}.png`、`_shot/nextlink_photo_{1280,390}.png`。
-- 同日追加（使用者指示）：`( Next )` → **`( NEXT )`**、字級 `.9375rem`→`clamp(1.25rem, .95rem + 1vw, 1.75rem)`、
-  字型改 **Akzidenz Grotesk Pro**（品牌舞台「Follow Your Rhythm」同一支；`--bc-font-akzidenz` 定義在
-  `static/css/bc-fonts.css`，因為 `/coffee/<id>/` 沒載 `bc-brand-stage.css`）。
+- 同日追加（使用者指示）：`( Next )` → **`( NEXT )`**、字型改 **Akzidenz Grotesk Pro**
+  （品牌舞台「Follow Your Rhythm」同一支；`--bc-font-akzidenz` 定義在 `static/css/bc-fonts.css`，
+  因為 `/coffee/<id>/` 沒載 `bc-brand-stage.css`）。字級先加大為
+  `clamp(1.25rem, .95rem + 1vw, 1.75rem)`（28px＠1280），**隨即再依使用者指示縮小**為
+  `clamp(1rem, .875rem + .5vw, 1.25rem)`（20px＠≥1280／約 14.8px＠390，`?v=20261111g`）。
+  原站 -sm 為 `.9375rem`（≥768 `.875rem`），那條 768 覆寫已刪。
 
 ## 左上 logo 字級 +6px→再 +2px、浮動購物車數量文字 +1px→再 +1px — 2026-11-11 完成
 
