@@ -121,8 +121,8 @@ body {
        載入與捲動瞬間皆不位移。
      · z-index 9990：高於頁面內容與 navbar(100)、低於購物車抽屜 9998/9999 與
        modal／toast(10000 以上) → 開抽屜/彈窗時 logo 會被正常蓋住。
-     · 2026-11-11（使用者指示「navbar-brand-fixed logo 文字『｛ Between ｝』加大 6px」）：
-       各斷點字級一律 +6px → 40→46／34→40／28→34／26→32；top／left 不動
+     · 2026-11-11（使用者指示「navbar-brand-fixed logo 文字『｛ Between ｝』加大 6px」→ 再加大 2px）：
+       各斷點字級一律 +6px 再加 +2px → 40→48／34→42／28→36／26→34；top／left 不動
        （字級以 line-height:1 由 top 往下長，上緣不變 ⇒ 不會撞到上方留白）。
        ⚠ nav 內的佔位 .bc-navbar-brand-spacer 仍為原 rect（visibility:hidden）
          ⇒ 右側選單與浮動鈕位置不受影響。 */
@@ -133,7 +133,7 @@ body {
   z-index: 9990;
   display: block;
   font-family: "Mogra", Arial, sans-serif;
-  font-size: 46px;   /* 2026-11-11：40 → 46（+6px，使用者指示） */
+  font-size: 48px;   /* 2026-11-11：40 → 46 → 48（+6px 後再 +2px，使用者指示） */
   line-height: 1;
   letter-spacing: -2px;
   text-transform: uppercase;
@@ -152,13 +152,13 @@ body {
   text-decoration: none;
 }
 @media screen and (max-width: 991.98px) {
-  .bc-navbar-brand-fixed { top: 31.5px; left: 15px; font-size: 40px; }
+  .bc-navbar-brand-fixed { top: 31.5px; left: 15px; font-size: 42px; }
 }
 @media screen and (max-width: 767.98px) {
-  .bc-navbar-brand-fixed { top: 30.2px; font-size: 34px; }
+  .bc-navbar-brand-fixed { top: 30.2px; font-size: 36px; }
 }
 @media screen and (max-width: 575.98px) {
-  .bc-navbar-brand-fixed { top: 27.2px; font-size: 32px; }
+  .bc-navbar-brand-fixed { top: 27.2px; font-size: 34px; }
 }
 /* 不支援 mix-blend-mode 的瀏覽器：白字遇淺色底會消失 → 補描邊陰影（純後備，不影響現行外觀） */
 @supports not (mix-blend-mode: difference) {
@@ -1704,7 +1704,7 @@ body {
        ⇒ 按鈕中心＝SVG 幾何中心 (viewBox 30,18)。
      · 2026-11-11 追加（使用者指示「數量文字 no 居中對齊，向上移動 6px」）：
        袋型上寬下窄（頂部開口 54、底部 34）⇒ 視覺重心比幾何中心高，數字看起來偏低；
-       故在 translate 的 Y 再上提 6px（固定 px：數字字級 0.85rem 全斷點相同，用 px 才能讓
+       故在 translate 的 Y 再上提 6px（固定 px：數字字級 0.91rem 全斷點相同，用 px 才能讓
        「數字↔袋身」的相對位置在各斷點一致）。→ 實際 dy ≈ −6px（水平仍 dx = 0）。
      · 白字對深底（#0e0e0e）對比 ≈ 19:1（原「品牌金底＋深字」的另一種高對比解）。 */
   top: 50%;
@@ -1716,9 +1716,10 @@ body {
   background: none;
   color: #fff;
   font-family: Arial, Helvetica, sans-serif;  /* 2026-08-14：數字用系統字體，避免 webfont 載入延遲造成文字閃爍（FOUT） */
-  /* 2026-11-11（使用者指示「bc-attract-buy 數量文字加大 1px」）：
-     0.79rem（12.64px）→ 0.85rem（13.6px）＝ +0.96px ≈ +1px；全斷點同一值（不隨圖示縮小）。 */
-  font-size: 0.85rem;
+  /* 2026-11-11（使用者指示「bc-attract-buy 數量文字加大 1px」→ 再加大 1px）：
+     0.79rem（12.64px）→ 0.85rem（13.6px）→ 0.91rem（14.56px，累計 +1.92px ≈ +2px）；
+     全斷點同一值（不隨圖示縮小），移動端隨 root 等比略小（既有機制）。 */
+  font-size: 0.91rem;
   font-weight: 700;
   display: flex;
   align-items: center;
