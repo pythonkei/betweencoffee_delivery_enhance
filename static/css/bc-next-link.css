@@ -37,20 +37,21 @@
           （height:160%、top:-30%，位移百分比以「媒體自身高度」為基準）
           JS 寫 --bc-nl-y：-14% → 0%（＝舞台高的 -22.4% → 0%）。
           位移量永遠小於上下各 30% 的餘裕 ⇒ 任何滾動位置都不露黑邊。
-     ④ hover 的「( Next )」文字無限上捲
+     ④ 「( Next )」文字無限上捲
         .-loop{display:inline-block;line-height:1.5}
         .-loop:after{content:attr(data-text);position:absolute;top:100%;left:0;width:100%}
         .uHover .-loop{animation:loop_top 1450ms cubic-bezier(.19,1,.22,1) infinite}
         （keyframes：translate3d(0,0,0) → translate3d(0,-100%,0)）
         ⇒ .bc-next-link__loop 同 keyframes／曲線／時長／位移。
-          原站是 JS 監聽 mousemove 對 .js-area 加 .uHover；本檔改用
-          純 CSS :hover / :focus-visible（結果等價、少一段 JS）。
+          原站是 JS 監聽 mousemove 對 .js-area 加 .uHover；本檔最初改用
+          純 CSS :hover / :focus-visible，2026-11-11 依使用者指示再改為
+          **常駐無限循環**（不必懸停也一直上捲；prefers-reduced-motion 除外）。
 
    尺寸：-lg clamp(2rem, 1.503rem + 2.12vw, 3.625rem)、面板高 37.5vw。
      「( NEXT )」行：原站 -sm 為 .9375rem（≥768 .875rem）→ 2026-11-11 依使用者指示
-     先加大為 clamp(1.25rem, .95rem + 1vw, 1.75rem)（28px＠1280），
-     **同日再依指示縮小** 為 clamp(1rem, .875rem + .5vw, 1.25rem)
-     （16px＠390／18px＠768／20px＠≥1280）；
+     先加大為 clamp(1.25rem, .95rem + 1vw, 1.75rem)（28px＠1280）→ 同日縮小為
+     clamp(1rem, .875rem + .5vw, 1.25rem)（20px＠1280）→ **再稍微縮小** 為
+     clamp(0.875rem, 0.8125rem + 0.3vw, 1.0625rem)（約 13.1px＠390／16.8px＠≥1280）；
      字型 Akzidenz Grotesk Pro（--bc-font-akzidenz）、字重 500、字距 .1em。
    品牌化（.clinerules/uiux-core）：黑底 #0e0e0e、白字／金字 --bc-gold、
    黑色 45% 單色遮罩（不用漸變）、標題 Noto Serif TC、不新增樣式體系。
@@ -147,27 +148,36 @@
 }
 
 /* ④ 「( NEXT )」：外層 overflow hidden 只留一行，內層上捲＝第二份文字遞補
-   2026-11-11（使用者指示）：文字改全大寫 NEXT、字型改為品牌舞台
-   「Follow Your Rhythm」同一支 Akzidenz Grotesk Pro（--bc-font-akzidenz，
-   @font-face 在全站 css/bc-fonts.css，該檔 base.html 每頁都載）；
-   字級先加大後再依指示縮小為 clamp(1rem, .875rem + .5vw, 1.25rem)
-   （16px＠390／18px＠768／20px＠≥1280；原本 0.9375rem）。
+   2026-11-11（使用者指示，同日三度調整）：
+   ① 文字改全大寫 NEXT、字型改為品牌舞台「Follow Your Rhythm」同一支
+      Akzidenz Grotesk Pro（--bc-font-akzidenz，@font-face 在全站
+      css/bc-fonts.css，該檔 base.html 每頁都載）。
+   ② 字級：先加大（28px）→ 縮小（20px）→ **再稍微縮小** 為
+      clamp(0.875rem, 0.8125rem + 0.3vw, 1.0625rem)
+      （約 13.1px＠390／16.8px＠≥1280；原站 0.9375rem）。
+   ③ 上捲動畫改為**常駐無限循環**：原本只在 :hover / :focus-visible 才播，
+      現在直接寫在 .bc-next-link__loop 上 → 不必懸停也一直循環。
+      prefers-reduced-motion 由檔尾區塊關掉（animation: none）。
    字型／字級／字距一律寫在外層 .bc-next-link__label → 括號與內層
    .bc-next-link__loop 一起套用，避免括號比文字小的視覺斷裂。 */
 .bc-next-link__label {
   overflow: hidden;
   margin: 0;
   font-family: var(--bc-font-akzidenz, "Helvetica Neue", Arial, sans-serif);
-  font-size: clamp(1rem, 0.875rem + 0.5vw, 1.25rem);
+  font-size: clamp(0.875rem, 0.8125rem + 0.3vw, 1.0625rem);
   font-weight: 500;
   letter-spacing: 0.1em;
   line-height: 1.5;
 }
 
+/* 常駐上捲：1450ms 一輪、無限循環（原站是 hover 才加 .uHover；本專案依指示改常駐）
+   只有 transform → 走合成層；面板離開視口後動畫仍在跑，等同一個小元素的位移，
+   成本可忽略，且不依賴 JS／.is-active，noscript 下也會動。 */
 .bc-next-link__loop {
   position: relative;
   display: inline-block;
   line-height: 1.5;
+  animation: bc-nl-loop 1450ms cubic-bezier(0.19, 1, 0.22, 1) infinite;
 }
 
 .bc-next-link__loop::after {
@@ -176,13 +186,6 @@
   top: 100%;
   left: 0;
   width: 100%;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .bc-next-link__anchor:hover .bc-next-link__loop,
-  .bc-next-link__anchor:focus-visible .bc-next-link__loop {
-    animation: bc-nl-loop 1450ms cubic-bezier(0.19, 1, 0.22, 1) infinite;
-  }
 }
 
 @keyframes bc-nl-loop {

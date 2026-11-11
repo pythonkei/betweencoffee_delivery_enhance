@@ -24,8 +24,8 @@
         換算舞台高 -22.4% → 0%，永遠小於 top:-30% 的餘裕 ⇒ 不露黑邊）。
         以 passive scroll ＋ rAF 節流，且只在面板接近視口時計算。
 
-   ④ 「( Next )」文字上捲：純 CSS（.bc-next-link__loop 的 :hover 動畫），
-       本檔不參與。
+   ④ 「( NEXT )」文字上捲：純 CSS（.bc-next-link__loop 的 animation），
+       2026-11-11 依使用者指示改為**常駐無限循環**（不再等 hover），本檔不參與。
 
    背景素材（2026-11-11 使用者指示：不用影片）：
      靜態照片 static/images/bean_menu.jpg（1920×1280），

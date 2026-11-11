@@ -19,8 +19,9 @@
    互動 4 項（進場放大淡入／hover 放大／背景視差／( NEXT ) 文字上捲）
    全在 static/css/bc-next-link.css ＋ static/js/bc-next-link.js 內，
    本檔只放 markup。使用者指示：面板連結到咖啡豆選單 /bean_menu/。
-   2026-11-11（使用者指示）：( Next ) → 全大寫 ( NEXT )，字級加大、
-   字型改 Akzidenz Grotesk Pro（樣式在 css/bc-next-link.css 的 __label）。
+   2026-11-11（使用者指示）：( Next ) → 全大寫 ( NEXT )，字級調整（加大→縮小→再縮小）、
+   字型改 Akzidenz Grotesk Pro（樣式在 css/bc-next-link.css 的 __label），
+   上捲動畫改為常駐無限循環（不必 hover）。
    位置（2026-11-11 修正）：比照原站 DOM —— 面板要接在「頁尾之後」（原站
    .c-footer__section 是 .l-footer__body 的最後一個子元素，在 .l-footer 版權列之下、
    整份文件最底），因此 coffee.html 以覆寫 bcc_footer（block.super ＋ 本 include）

@@ -23,8 +23,12 @@
 - 同日追加（使用者指示）：`( Next )` → **`( NEXT )`**、字型改 **Akzidenz Grotesk Pro**
   （品牌舞台「Follow Your Rhythm」同一支；`--bc-font-akzidenz` 定義在 `static/css/bc-fonts.css`，
   因為 `/coffee/<id>/` 沒載 `bc-brand-stage.css`）。字級先加大為
-  `clamp(1.25rem, .95rem + 1vw, 1.75rem)`（28px＠1280），**隨即再依使用者指示縮小**為
-  `clamp(1rem, .875rem + .5vw, 1.25rem)`（20px＠≥1280／約 14.8px＠390，`?v=20261111g`）。
+  `clamp(1.25rem, .95rem + 1vw, 1.75rem)`（28px＠1280）→ **縮小**為
+  `clamp(1rem, .875rem + .5vw, 1.25rem)`（20px＠≥1280／約 14.8px＠390，`?v=20261111g`）→
+  **再稍微縮小**為 `clamp(0.875rem, 0.8125rem + 0.3vw, 1.0625rem)`
+  （16.84px＠1280／13.09px＠390，`?v=20261111h`）。
+  上捲動畫一併由「只在 `:hover`／`:focus-visible` 播」改為 **`.bc-next-link__loop` 常駐 1450ms infinite**
+  （不依賴 hover 與 JS，`prefers-reduced-motion` 仍 `animation:none`）。
   原站 -sm 為 `.9375rem`（≥768 `.875rem`），那條 768 覆寫已刪。
 
 ## 左上 logo 字級 +6px→再 +2px、浮動購物車數量文字 +1px→再 +1px — 2026-11-11 完成
