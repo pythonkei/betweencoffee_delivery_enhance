@@ -1526,12 +1526,16 @@ body {
 .bc-floating-cart {
   position: fixed;
   /* 2026-09-21：--bc-fc-gap＝浮動鈕與 Buy 按鈕之間的間距（JS 定位與首頁 place() 都讀這個值）
-     使用者指示：桌面/平板「增加間距」0 → 12px → **20px**；
+     使用者指示：桌面/平板「增加間距」0 → 12px → 20px；
      2026-09-21 追加（手機端）「bc-attract-buy 與 profile 稍微向上移動、縮小浮動購物車間距」
-       → ≤767.98 覆寫為 **12px**（＝長條與圓鈕上移 8px，購物車不動） */
-  --bc-fc-gap: 20px;
-  /* 退化值＝「Buy 按鈕不存在時」的同軸線位置（軸線距右緣 66px、佔位 44px、間距 20px） */
-  top: var(--bc-fc-top, calc(50% - 139px));
+       → ≤767.98 覆寫為 12px（＝長條與圓鈕上移 8px，購物車不動）
+     2026-11-11（使用者指示「onlineshop-cart.svg and bc-attract-buy 縮小間隔 2px」）：
+       20 → **18px**（手機 12 → 10px，見下方 ≤767.98 覆寫）。
+       浮動鈕上緣仍對齊 navbar-brand（bc-attract-place.js 的 anchorTop()）不動，
+       因此實際效果＝「Order 長條＋個人圓鈕一起上移 2px」＝兩者間距縮小 2px。 */
+  --bc-fc-gap: 18px;
+  /* 退化值＝「Buy 按鈕不存在時」的同軸線位置（軸線距右緣 66px、佔位 44px、間距 18px） */
+  top: var(--bc-fc-top, calc(50% - 137px));
   bottom: auto;
   right: var(--bc-fc-right, 44px);
   left: auto;
@@ -1615,18 +1619,51 @@ body {
 /* 2026-11-09（使用者指示「提供 10 種選擇，線條及實心形狀」）：
    浮動購物車圖示改為 inline SVG —— 首頁 2026-10-19 起不載入 Material 字型、
    icomoon 也只有單一造型，SVG 才能同時提供「線條／實心」兩態（不新增圖示字型檔）。
-   尺寸＝1.05em（補掉 SVG 沒有字形留白的差異）→ 吃 .bc-floating-cart-btn
-   的 font-size（＝--bc-fc-size）；顏色一律 currentColor ⇒ 上方 hover 轉品牌金的規則自動生效。
    造型庫（10 種 × 線條／實心＝20 個候選）：
-     static/preview/bc-floating-cart-icons-v2.html */
+     static/preview/bc-floating-cart-icons-v2.html
+
+   2026-11-11（使用者指示「bc-fc-icon 購物車圖標 → onlineshop-cart.svg」）：
+   圖示改為 **外部 SVG 檔 ＋ CSS mask**（檔案＝唯一來源，換檔即換圖）：
+     static/images/onlineshop-cart.svg（60×36、單一線稿 path、stroke 4.25、無填色）
+   · 顏色：background-color 吃 currentColor ⇒ 上方 hover 轉品牌金的規則照舊生效
+   · 尺寸：高度 1.05em → **0.735em**（×0.7）、寬 1.75em → **1.225em**（60:36 等比）。
+     ★ 2026-11-11 使用者指示「onlineshop-cart.svg 縮小 30%」⇒ 字級 37px 時 45.3×27.2（原 64.8×38.8）
+   · 左右 margin（calc）：圖示仍可能比按鈕盒寬，但浮動鈕「佔位」必須維持 44px
+     （bc-slideout-cart.js 的 _placeFloatingCart 與 bc-attract-place.js 都以
+      max(44px, --bc-fc-size) 當盒寬／盒高，各斷點退化值 --bc-fc-right 也是用 44px 算）
+     ⇒ 用 margin-inline 把多出的寬度左右等分吃掉：(44px − 1.225em)/2
+       （37px 時 −0.66px 微幅外溢；34／31px 時圖示已小於 44px ⇒ 自動變正值＝補白）
+       ⇒ 按鈕恆為 44×44、圖示左右對稱於 Buy 長條軸心，JS 定位公式不需改動。
+   · 取消原本的 translateY(0.1em)：數字已改放袋內（見下方 badge），不需再為右上角圓點讓位，
+     這樣 badge 的 50%/50% 才會剛好落在 SVG 的中心點。
+   · 下方 .bc-fc-line／.bc-fc-solid 規則目前無子元素可用（mask 版是空 span），
+     保留供回退 2026-11-09 的 inline SVG 造型。 */
+.bc-floating-cart-btn span.bc-fc-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: calc(0.735em * 60 / 36);  /* 60:36 ⇒ 1.225em（2026-11-11 縮小 30%） */
+  height: 0.735em;
+  margin-inline: calc((44px - 1.225em) / 2);  /* 讓按鈕佔位維持 44px（見上方說明） */
+  background-color: currentColor;
+  -webkit-mask-image: url("/static/images/onlineshop-cart.svg?v=20261111a");
+  mask-image: url("/static/images/onlineshop-cart.svg?v=20261111a");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* 回退版（2026-11-09 的 inline SVG）：只給尺寸，不套 mask／底色。
+   用途 ① 把 span 換回 <svg class="bc-fc-icon"> 的造型時仍可正常顯示；
+        ② static/preview/bc-floating-cart-icons-v2.html 載入正式 CSS 後靠這條取得尺寸。 */
 .bc-floating-cart-btn svg.bc-fc-icon {
   display: block;
-  width: 1.05em;   /* 墨跡 ≈0.79em ≈ 原 icomoon 字形大小（字形有內建留白，SVG 沒有） */
+  width: 1.05em;
   height: 1.05em;
   flex: 0 0 auto;
   overflow: visible;
-  /* 下移 0.1em：右上角 22px 金色 badge 才不會壓住袋口／提把（字形原本自帶上方留白） */
-  transform: translateY(0.1em);
 }
 
 /* 線條態：只描邊不填色（粗細 1.6/24 ≈ 2.7% 邊長，與 icomoon 線稿觀感一致） */
@@ -1656,24 +1693,30 @@ body {
 
 .bc-floating-cart-badge {
   position: absolute;
-  /* 2026-11-09：圖示改 inline SVG（墨跡幾乎滿版、沒有字形留白）→ 圓點改為「圓心貼齊盒右上角」，
-     transform 再往右上各推 35%，否則 22px 圓點會壓住袋口／提把（原 top/right:-4px 是為字形留白設計）。
-     外溢量 3.3px（略小於原 -4px），浮動鈕與 .bc-attract-buy 的軸心對齊不受影響。 */
-  top: 0;
-  right: 0;
-  transform: translate(35%, -35%);
-  min-width: 22px;
-  height: 22px;
-  border-radius: 11px;
-  background: var(--bc-gold);  /* 2026-10-08（使用者指示「index.html 目前第二主題色改為第一主題色」）：改回第一主題色／品牌金 #c49b63（全站元件；2026-09-21 曾改為第二主題色 #FCFF4B） */
-  color: var(--bc-bg);   /* 深色字 #0e0e0e（亮底必配深字：對品牌金 #c49b63 實測 7.5:1；原白色 #fff 對亮底對比不足） */
+  /* 2026-11-11（使用者指示「數量圖示移除圓圈、文字改白色、並在 onlineshop-cart.svg 中心點置中」）：
+     · 無底色、無圓角（原本 22px 品牌金圓點已移除）→ 白色數字直接落在袋身內部
+     · 定位 50%/50%：圖示盒（現 0.735em 高，2026-11-11 縮小 30%）由 flex 置中於 44×44 按鈕、且已無 translateY
+       ⇒ 按鈕中心＝SVG 幾何中心 (viewBox 30,18)。
+     · 2026-11-11 追加（使用者指示「數量文字 no 居中對齊，向上移動 6px」）：
+       袋型上寬下窄（頂部開口 54、底部 34）⇒ 視覺重心比幾何中心高，數字看起來偏低；
+       故在 translate 的 Y 再上提 6px（固定 px：數字字級 0.79rem 全斷點相同，用 px 才能讓
+       「數字↔袋身」的相對位置在各斷點一致）。→ 實際 dy ≈ −6px（水平仍 dx = 0）。
+     · 白字對深底（#0e0e0e）對比 ≈ 19:1（原「品牌金底＋深字」的另一種高對比解）。 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% - 6px));  /* 6px = 視覺置中修正（見上方 2026-11-11 追加） */
+  min-width: 0;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: #fff;
   font-family: Arial, Helvetica, sans-serif;  /* 2026-08-14：數字用系統字體，避免 webfont 載入延遲造成文字閃爍（FOUT） */
   font-size: 0.79rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 6px;
+  padding: 0;
   line-height: 1;
 }
 
@@ -1699,7 +1742,7 @@ body {
   .bc-floating-cart {
     --bc-fc-size: 34px;
     --bc-fc-right: 38px;              /* 可見長條軸心 60（實測）− 44/2 */
-    --bc-fc-top: calc(50% - 132px);   /* 按鈕盒上緣(50% − 136/2) − 佔位 44px − 間距 20px */
+    --bc-fc-top: calc(50% - 130px);   /* 按鈕盒上緣(50% − 136/2) − 佔位 44px − 間距 18px */
   }
 }
 
@@ -1710,18 +1753,19 @@ body {
     /* 2026-09-21（使用者指示「手機端：bc-attract-buy 與個人 profile 稍微向上移動、縮小浮動購物車間距」）：
        購物車位置不動（仍對齊 navbar-brand 頂邊），改為**縮小它與 Buy 長條的間距**
        20px → 12px → 長條與個人圓鈕同步上移 8px（同一件事）。
-       ⚠ 退化 top 同步換算：按鈕盒上緣(50% − 112/2) − 佔位 44px − 間距 12px */
-    --bc-fc-gap: 12px;
+       2026-11-11（使用者指示「onlineshop-cart.svg and bc-attract-buy 縮小間隔 2px」）：12px → **10px**。
+       ⚠ 退化 top 同步換算：按鈕盒上緣(50% − 112/2) − 佔位 44px − 間距 10px */
+    --bc-fc-gap: 10px;
     --bc-fc-right: 17px;              /* 可見長條軸心 39（實測）− 44/2；佔位仍是 44px 點擊區 */
-    --bc-fc-top: calc(50% - 112px);
+    --bc-fc-top: calc(50% - 110px);
   }
 }
 
 @media (max-width: 575.98px) {
   .bc-floating-cart {
     --bc-fc-right: 13px;              /* 可見長條軸心 35（實測）− 44/2 */
-    /* 間距同手機端 12px → 按鈕盒上緣(50% − 96/2) − 佔位 44px − 間距 12px */
-    --bc-fc-top: calc(50% - 104px);
+    /* 間距同手機端 10px → 按鈕盒上緣(50% − 96/2) − 佔位 44px − 間距 10px */
+    --bc-fc-top: calc(50% - 102px);
   }
 }
 

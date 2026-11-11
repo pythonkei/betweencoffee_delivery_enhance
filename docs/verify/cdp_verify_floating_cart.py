@@ -6,8 +6,14 @@
  2. #bc-floating-cart 貼在 .bc-attract-buy 正上方（底緣貼齊按鈕盒上緣）
  3. 中心線對齊（圓心 x == 按鈕盒中心 x）
  4. 僅圖示：border-width 0、border-radius 0、無底色、無陰影
- 5. 圖示尺寸依斷點 37 / 34 / 31px（2026-11-09 起圖示為 inline SVG，實測盒寬＝字級×1.05）
+ 5. 圖示尺寸依斷點 37 / 34 / 31px（2026-11-11 起圖示＝span.bc-fc-icon ＋ onlineshop-cart.svg
+      的 CSS mask：高度＝字級×0.735（0.735em，原 1.05em 縮小 30%）、寬度＝字級×60/36
+      （1.225em），盒寬不再等於字級但按鈕佔位仍為 44×44）
+ 5b. 數字（.bc-floating-cart-badge）：無底色／無圓角、白色字、水平對齊圖示中心（dx ≤ 1px）、
+     垂直上移 6px（dy = −6 ± 1.5px，2026-11-11 使用者指示「向上移動 6px」）
  6. 點擊命中：elementFromPoint(圖示中心) 命中浮動鈕（不被 Buy 按鈕熱區蓋住）
+ 6b. 間距：浮動鈕↔Order 長條 == --bc-fc-gap（桌面/平板 18px、手機 10px）；
+     長條↔個人圓鈕 == --bc-buy-profile-gap（14px，2026-11-11 使用者指示「加大間隔 6px」）
  7. 無水平溢出；兩個圖示字型可用
 """
 import asyncio, json, urllib.request
@@ -34,7 +40,7 @@ JS = r"""
   var out={};
   var fc = document.getElementById('bc-floating-cart');
   var btn = document.getElementById('bc-floating-cart-btn');
-  var icon = btn ? btn.querySelector('.material-icons, .material-symbols-outlined, svg.bc-fc-icon') : null;
+  var icon = btn ? btn.querySelector('.material-icons, .material-symbols-outlined, .bc-fc-icon') : null;
   var buy = document.querySelector('.bc-attract-buy');
 
   /* 1. 首頁 yama 購物車列 */
@@ -139,18 +145,56 @@ JS = r"""
                          backgroundImage: bcs.backgroundImage, backgroundColor: bcs.backgroundColor,
                          boxShadow: bcs.boxShadow, fontSize: bcs.fontSize} : null;
   out.icon_font_size = icon ? getComputedStyle(icon).fontSize : null;
-  /* 2026-11-09：圖示改 inline SVG（.bc-fc-icon，1.05em）→ 沒有字形文字，class 用 getAttribute 讀
-     （SVG 的 className 是 SVGAnimatedString，直接序列化會壞掉） */
+  /* 2026-11-09：圖示改 inline SVG；2026-11-11 再改為「外部 SVG ＋ CSS mask」（span.bc-fc-icon）
+     → 沒有字形文字；class 用 getAttribute 讀（SVG 的 className 是 SVGAnimatedString，序列化會壞掉） */
   out.icon_is_svg = !!(icon && icon.tagName.toLowerCase() === 'svg');
+  var _ics = icon ? getComputedStyle(icon) : null;
+  out.icon_mask = _ics ? (_ics.maskImage || _ics.webkitMaskImage || 'none') : null;
+  out.icon_is_mask = !!(out.icon_mask && out.icon_mask.indexOf('onlineshop-cart.svg') !== -1);
   out.icon_glyph = icon && !out.icon_is_svg ? icon.textContent.trim() : (out.icon_is_svg ? 'svg' : null);
   out.icon_class = icon ? (out.icon_is_svg ? icon.getAttribute('class') : icon.className) : null;
-  /* 缺字偵測：圖示字形寬度應 ≈ 字級（1em）；若字型無此字形會退回多字文字 → 寬度遠大於字級 */
   if (icon) {
     var _ir = icon.getBoundingClientRect();
     var _fs = parseFloat(getComputedStyle(icon).fontSize) || 0;
     out.icon_rect_w = +_ir.width.toFixed(1);
-    out.icon_glyph_ok = _ir.width > 0 && _fs > 0 && _ir.width <= _fs * 1.35;
+    out.icon_rect_h = +_ir.height.toFixed(1);
+    if (out.icon_is_mask) {
+      /* mask 版（2026-11-11）：改驗「有尺寸」＋「寬高比 = 60/36」（字型缺字偵測不適用）
+         2026-11-11 追加（使用者指示「縮小 30%」）：高度須 ≈ 字級 × 0.735（原 1.05） */
+      var _ratio = _ir.height > 0 ? _ir.width / _ir.height : 0;
+      out.icon_ratio = +_ratio.toFixed(3);
+      out.icon_glyph_ok = _ir.width > 0 && _ir.height > 0 && Math.abs(_ratio - 60 / 36) < 0.08;
+      out.icon_h_expect = +(_fs * 0.735).toFixed(1);
+      out.icon_h_ok = _fs > 0 && Math.abs(_ir.height - _fs * 0.735) <= 1.5;
+    } else {
+      /* 字型圖示：字形寬度應 ≈ 字級（1em）；缺字會退回多字文字 → 寬度遠大於字級 */
+      out.icon_glyph_ok = _ir.width > 0 && _fs > 0 && _ir.width <= _fs * 1.35;
+    }
   }
+
+  /* 5b. 數字（2026-11-11 新規格：無圓圈／白字／置中於圖示中心）
+     空車時 badge 是 display:none（量不到 rect）→ 暫時顯示並補一個值，量完還原。 */
+  out.badge = (function () {
+    var b = fc ? fc.querySelector('.bc-floating-cart-badge') : null;
+    if (!b) return { exists: false };
+    var bs2 = getComputedStyle(b);
+    var o = { exists: true, bg: bs2.backgroundColor, radius: bs2.borderTopLeftRadius,
+              border: bs2.borderTopWidth, color: bs2.color };
+    var prevText = b.textContent, prevDisp = b.style.display;
+    b.style.display = '';
+    if (!prevText.trim()) { b.textContent = '1'; }
+    var br2 = b.getBoundingClientRect();
+    var ir2 = icon ? icon.getBoundingClientRect() : null;
+    o.text_w = +br2.width.toFixed(1);
+    o.text_h = +br2.height.toFixed(1);
+    if (ir2 && ir2.width > 0 && br2.width > 0) {
+      o.dx = +((br2.left + br2.width / 2) - (ir2.left + ir2.width / 2)).toFixed(1);
+      o.dy = +((br2.top + br2.height / 2) - (ir2.top + ir2.height / 2)).toFixed(1);
+    }
+    b.textContent = prevText;
+    b.style.display = prevDisp;
+    return o;
+  })();
 
   var bar = document.querySelector('.bc-attract-buy__link');   /* 使用者實際看到的長條 */
   var profile = document.querySelector('.bc-attract-profile');
@@ -161,6 +205,10 @@ JS = r"""
   out.buy_box = buy ? rect(buy) : null;
   out.bar = (bar && buyVisible) ? rect(bar) : null;
   out.profile = (profile && buyVisible) ? rect(profile) : null;
+  /* 2026-11-11：可見圓鈕＝.bc-attract-profile__link（內層 .c-attract 有 margin:-24 位移，
+     與 Order 長條的 .bc-attract-buy__link 同一個 −24px 視覺層）→ 量間距要用這一層 */
+  var profileLink = profile ? profile.querySelector('.bc-attract-profile__link') : null;
+  out.profile_link = (profileLink && buyVisible) ? rect(profileLink) : null;
   if (out.bar && out.cart_wrapper) {
     out.center_diff_px = +(out.cart_wrapper.cx - out.bar.cx).toFixed(1);
     out.cart_top_ok = out.cart_wrapper.y >= -0.5;                       /* 不可被推到畫面外 */
@@ -168,7 +216,8 @@ JS = r"""
                     && ((out.cart_wrapper.y + out.cart_wrapper.h) > out.bar.y + 0.5);
     out.placement = ((out.cart_wrapper.y + out.cart_wrapper.h) <= out.bar.y + 1) ? 'above-bar' : 'below-cluster';
     /* 2026-09-21：與 Buy 按鈕的間距（使用者指示「增加間距」；CSS 定義 --bc-fc-gap：
-       桌面/平板 20px、手機（≤767.98）12px——2026-09-21 使用者追加「手機端縮小間距」） */
+       桌面/平板 18px、手機（≤767.98）10px——
+       2026-09-21 使用者追加「手機端縮小間距」、2026-11-11 再指示「縮小間隔 2px」） */
     out.gap_px = +(out.bar.y - (out.cart_wrapper.y + out.cart_wrapper.h)).toFixed(1);
     out.fc_gap_css = (function () {
       var v = parseFloat(getComputedStyle(fc).getPropertyValue('--bc-fc-gap'));
@@ -179,6 +228,15 @@ JS = r"""
     out.buy_visible = !!(buy && buy.getBoundingClientRect().width > 0);
     out.profile_visible = !!(profile && profile.getBoundingClientRect().width > 0);
     out.profile_below_bar = !!(out.bar && out.profile && out.profile.y >= out.bar.y + out.bar.h - 1);
+    /* 2026-11-11（使用者指示「bc-attract-buy and bc-attract-profile 加大間隔 6px」）：
+       個人圓鈕上緣 − Order 長條下緣 應等於 CSS 變數 --bc-buy-profile-gap（現 14px）。 */
+    out.profile_gap_css = (function () {
+      var navEl2 = document.querySelector('.bc-attract-nav');
+      var v = navEl2 ? parseFloat(getComputedStyle(navEl2).getPropertyValue('--bc-buy-profile-gap')) : NaN;
+      return isFinite(v) ? v : null;
+    })();
+    out.profile_gap_px = (out.bar && out.profile_link)
+      ? +(out.profile_link.y - (out.bar.y + out.bar.h)).toFixed(1) : null;
   }
 
   /* 3. 點擊命中 */
@@ -190,7 +248,7 @@ JS = r"""
   }
   out.no_overflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
   out.font_icons_ready = document.fonts.check('52px "Material Icons"')
-    || !!document.querySelector('#bc-floating-cart svg.bc-fc-icon');   /* 2026-11-09：改 SVG 後不需字型 */
+    || !!document.querySelector('#bc-floating-cart .bc-fc-icon');   /* 2026-11-09 起改 SVG/mask 版 → 不需字型 */
   out.font_symbols_ready = document.fonts.check('52px "Material Symbols Outlined"');
   return out;
 })()
@@ -330,7 +388,34 @@ async def main():
                 if not v.get("hit_is_cart"):
                     fails.append(f"{tag}: 點擊中心未命中浮動鈕（{v.get('hit_at_center')}）")
                 if not v.get("icon_glyph_ok"):
-                    fails.append(f"{tag}: 圖示字型可能缺字（寬 {v.get('icon_rect_w')} vs 字級 {v.get('icon_font_size')}）")
+                    fails.append(f"{tag}: 圖示尺寸異常（寬 {v.get('icon_rect_w')}×高 {v.get('icon_rect_h')}"
+                                 f"／比例 {v.get('icon_ratio')}／字級 {v.get('icon_font_size')}）")
+                if not v.get("icon_is_mask"):
+                    fails.append(f"{tag}: 圖示不是 onlineshop-cart.svg 的 mask（mask-image={v.get('icon_mask')}）")
+                # 2026-11-11（使用者指示「onlineshop-cart.svg 縮小 30%」）：高度＝字級 × 0.735
+                if v.get("icon_is_mask") and not v.get("icon_h_ok"):
+                    fails.append(f"{tag}: 圖示高 {v.get('icon_rect_h')}px != 字級×0.735"
+                                 f"（預期 {v.get('icon_h_expect')}px；原 1.05em 縮小 30%）")
+                # 2026-11-11（使用者指示「數量移除圓圈、白字、對齊 SVG 中心點」）
+                bd = v.get("badge") or {}
+                if bd.get("exists"):
+                    if bd.get("bg") not in ("rgba(0, 0, 0, 0)", "transparent"):
+                        fails.append(f"{tag}: 數字仍有底色 {bd.get('bg')}（應為無圓圈）")
+                    if bd.get("radius") not in ("0px", None):
+                        fails.append(f"{tag}: 數字仍有圓角 {bd.get('radius')}")
+                    if bd.get("border") not in ("0px", None):
+                        fails.append(f"{tag}: 數字仍有邊框 {bd.get('border')}")
+                    if bd.get("color") != "rgb(255, 255, 255)":
+                        fails.append(f"{tag}: 數字顏色 {bd.get('color')} != rgb(255, 255, 255)")
+                    if bd.get("dx") is None or abs(bd.get("dx")) > 1:
+                        fails.append(f"{tag}: 數字未水平置中於圖示（dx={bd.get('dx')}px）")
+                    # 2026-11-11：使用者指示「向上移動 6px」⇒ dy 應為 −6px（容差 ±1.5px）
+                    if bd.get("dy") is None or abs(bd.get("dy") - (-6.0)) > 1.5:
+                        fails.append(
+                            f"{tag}: 數字垂直偏移不符（dy={bd.get('dy')}px，應為 −6±1.5px）"
+                        )
+                else:
+                    fails.append(f"{tag}: 找不到浮動鈕數字 .bc-floating-cart-badge")
                 if name == "index" and v.get("yama_header_bot_display") != "none":
                     fails.append(f"{tag}: header-bot 未隱藏（{v.get('yama_header_bot_display')}）")
                 # 2026-09-21（使用者指示）：
@@ -385,6 +470,14 @@ async def main():
                         fails.append(f"{tag}: bc-attract-profile 不可見（應與 index 相同）")
                     if v.get("placement") == "above-bar" and not v.get("profile_below_bar"):
                         fails.append(f"{tag}: 個人圓鈕不在 Order 長條下方（堆疊順序與 index 不符）")
+                    # 2026-11-11（使用者指示「bc-attract-buy and bc-attract-profile 加大間隔 6px」）：
+                    #   間距期望值讀 CSS 變數 --bc-buy-profile-gap（現 14px）
+                    exp_pg = v.get("profile_gap_css")
+                    if exp_pg is None:
+                        exp_pg = 14
+                    if v.get("profile_gap_px") is not None and abs(v.get("profile_gap_px") - exp_pg) > 1:
+                        fails.append(f"{tag}: 長條↔個人圓鈕間距 {v.get('profile_gap_px')}px"
+                                     f" != {exp_pg}px（--bc-buy-profile-gap）")
                 if v.get("attract_pending"):
                     fails.append(f"{tag}: .bc-attract-pending 未移除（整組可能仍隱藏）")
                 if v.get("overlaps_brand"):

@@ -63,12 +63,19 @@
 <h1>bc-floating-cart 圖示 — 10 種選擇 ×「線條／實心」</h1>
 <p class="note">
   本頁載入正式 <code>bc-components.css</code>：圖示<b>無圓形底、無邊框、無陰影</b>，hover 轉品牌金 <code>#c49b63</code>，
-  右上角為金色數字 badge — 與線上完全一致。<br>
+  數字為<b>白色、無圓圈</b>並置中於圖示中心 — 與線上完全一致。<br>
   20 個候選＝10 種造型 ×（<b>線條</b> <code>.bc-fc-line</code>／<b>實心</b> <code>.bc-fc-solid</code>），
   每列列出三種斷點尺寸（桌機 <code>37px</code>／平板 <code>34px</code>／手機 <code>31px</code>；手機另有 44px 透明點擊區，只縮字形不縮可點範圍）。<br>
-  目前線上：<code>04 手提包（線條）</code>（使用者 2026-11-09 選定，卡片右上標「★ 使用中」）。<br>
-  滑鼠移上去可看 hover 變金色；要換造型＝把該格 SVG 內容貼進
-  <code>base.html:190</code> 的 <code>&lt;svg class="bc-fc-icon"&gt;</code> 即可。
+  <b>2026-11-11 起線上改用外部檔</b>：<code>static/images/onlineshop-cart.svg</code>（60×36）＋ CSS mask，
+  元素是空 <code>&lt;span class="bc-fc-icon"&gt;</code>；本頁的 20 個候選則仍是 inline SVG（回退方案）。<br>
+  <b>2026-11-11 再依指示「onlineshop-cart.svg 縮小 30%」</b>：線上圖示高度 1.05em → <code>0.735em</code>、
+  寬 1.75em → <code>1.225em</code>（字級 37px 時 45.3×27.2；按鈕佔位仍固定 44×44）。
+  本頁候選走的是回退規則 <code>svg.bc-fc-icon</code>（維持 1.05em 方盒），
+  所以下圖比例會<b>比線上大約 30%</b>，只看造型、尺寸請以線上為準。<br>
+  <b>2026-11-11 再依指示「數量文字未居中，向上移動 6px」</b>：線上數字改
+  <code>translate(-50%, calc(-50% - 6px))</code>；本頁載入同一份 CSS，故候選的數字也同步上移 6px。<br>
+  要換回造型＝把該格 SVG 內容貼進 <code>base.html</code> 的 <code>&lt;svg class="bc-fc-icon"&gt;</code>
+  （同時把現行的 <code>&lt;span class="bc-fc-icon"&gt;</code> 換掉；<code>svg.bc-fc-icon</code> 尺寸規則仍在）。
 </p>
 <h2 class="ov-h">① 放大對照（96px，先看造型再挑）</h2>
 <div class="overview" id="overview"></div>
@@ -199,8 +206,9 @@
   var SIZES = [37, 34, 31];
   var LABELS = { 37: '37px 桌機', 34: '34px 平板', 31: '31px 手機' };
   var MODES = [['line', '線條'], ['solid', '實心']];
-  /* 目前 base.html:190 使用的造型（使用者 2026-11-09 選定）→ 卡片標「★ 使用中」 */
-  var CURRENT = 'handbag';
+  /* 2026-11-09 曾使用的造型（handbag）。2026-11-11 起線上改為 onlineshop-cart.svg ＋ mask
+     （見 bc-components.css），所以本頁不再標「★ 使用中」；保留 CURRENT 以便改回時標記。 */
+  var CURRENT = null;
 
   /* ① 放大對照：--bc-fc-size 設 91px ⇒ SVG = 91×1.05 ≈ 96px（樣式仍全部來自正式 CSS） */
   document.getElementById('overview').innerHTML = MODES.map(function (m) {
