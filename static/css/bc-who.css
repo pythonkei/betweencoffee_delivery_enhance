@@ -26,6 +26,11 @@
            spacer 90／v01 90／v03 76／visual h 43／circle 158／arrow 146／bubble 60
      ≥1920 text 50／ls 4／max-w 858／title 80／kicker ml 262／
            spacer 140／v01 144／v03 126／visual h 56／circle 203／arrow 188／bubble 80
+   ------------------------------------------------------------
+   2026-11-11（使用者指示）：.section-title__text 字型由 Josefin Sans 改為
+   品牌舞台「Follow Your Rhythm」同一支 Akzidenz Grotesk Pro
+   （font-family: var(--bc-font-akzidenz)；@font-face 在全站 css/bc-fonts.css）。
+   只有字型變，字級／字距／權重不動。
    ============================================================ */
 
 /* ---------- 基底 ---------- */
@@ -86,7 +91,11 @@
 .bc-who-section .section-title__text {
     position: relative;
     display: inline-block;
-    font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+    /* 2026-11-11（使用者指示）：字型改為品牌舞台「Follow Your Rhythm」同一支
+       Akzidenz Grotesk Pro（--bc-font-akzidenz，@font-face 在全站
+       css/bc-fonts.css）。此標題本身是英文，Akzidenz 直接命中；
+       後備鏈保留 Noto Sans TC 以防日後插入中文字。 */
+    font-family: var(--bc-font-akzidenz, "Josefin Sans", "Noto Sans TC", sans-serif);
     font-size: 47px;
     line-height: 100%;
     font-weight: 500;

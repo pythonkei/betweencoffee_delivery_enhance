@@ -46,8 +46,10 @@
           原站是 JS 監聽 mousemove 對 .js-area 加 .uHover；本檔改用
           純 CSS :hover / :focus-visible（結果等價、少一段 JS）。
 
-   尺寸沿用原站：-sm 0.9375rem（≥768 為 0.875rem）、
-     -lg clamp(2rem, 1.503rem + 2.12vw, 3.625rem)、面板高 37.5vw。
+   尺寸：-lg clamp(2rem, 1.503rem + 2.12vw, 3.625rem)、面板高 37.5vw。
+     「( NEXT )」行 2026-11-11 依使用者指示加大為
+     clamp(1.25rem, .95rem + 1vw, 1.75rem)（原站 -sm 為 .9375rem／≥768 .875rem），
+     字型改 Akzidenz Grotesk Pro（--bc-font-akzidenz）、字重 500、字距 .1em。
    品牌化（.clinerules/uiux-core）：黑底 #0e0e0e、白字／金字 --bc-gold、
    黑色 45% 單色遮罩（不用漸變）、標題 Noto Serif TC、不新增樣式體系。
    素材（2026-11-11 使用者指示：不用影片）：靜態照片
@@ -142,14 +144,19 @@
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
 }
 
-/* ④ 「( Next )」：外層 overflow hidden 只留一行，內層上捲＝第二份文字遞補 */
+/* ④ 「( NEXT )」：外層 overflow hidden 只留一行，內層上捲＝第二份文字遞補
+   2026-11-11（使用者指示）：文字改全大寫 NEXT、字級加大、字型改為品牌舞台
+   「Follow Your Rhythm」同一支 Akzidenz Grotesk Pro（--bc-font-akzidenz，
+   @font-face 在全站 css/bc-fonts.css，該檔 base.html 每頁都載）。
+   字型／字級／字距一律寫在外層 .bc-next-link__label → 括號與內層
+   .bc-next-link__loop 一起套用，避免括號比文字小的視覺斷裂。 */
 .bc-next-link__label {
   overflow: hidden;
   margin: 0;
-  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
-  font-size: 0.9375rem;
-  font-weight: 300;
-  letter-spacing: 0.08em;
+  font-family: var(--bc-font-akzidenz, "Helvetica Neue", Arial, sans-serif);
+  font-size: clamp(1.25rem, 0.95rem + 1vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
   line-height: 1.5;
 }
 
@@ -204,11 +211,8 @@
   color: var(--bc-gold, #c49b63);
 }
 
-@media (min-width: 768px) {
-  .bc-next-link__label {
-    font-size: 0.875rem;
-  }
-}
+/* 2026-11-11：( NEXT ) 行改用 clamp 一次涵蓋手機→桌機，原本的
+   @media (min-width:768px){ .bc-next-link__label{font-size:.875rem} } 已移除。 */
 
 /* 手機：原站 SP 版把面板拉高（80vw）→ 這裡收一點，避免小螢幕佔滿整屏 */
 @media (max-width: 767.98px) {

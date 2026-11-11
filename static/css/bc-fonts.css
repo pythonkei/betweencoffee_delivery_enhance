@@ -47,9 +47,35 @@
         U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* ------------------------------------------------------------
+   Akzidenz Grotesk Pro（單一字重 500 Medium，自架）
+   ------------------------------------------------------------
+   由來：品牌舞台（首頁／about 的 #bc-brand-stage）「Follow Your Rhythm」h1
+        用的就是這支字型，但那份 @font-face 只宣告在 bc-brand-stage.css，
+        其他頁面（例如 /coffee/<id>/ 的 next-link 面板）根本載不到。
+   2026-11-11（使用者指示）：next-link 的「( NEXT )」與首頁
+        .section-title__text 都改成同一支字型 → 在此全站層級補一次宣告，
+        提供 --bc-font-akzidenz 變數。
+   ※ bc-brand-stage.css 內那份同樣的 @font-face 保留不動（兩者 src 相同、
+     互不影響；該模組可獨立搬移）。字重只有 500，其他字重請求一律回落到
+     這個檔案，不要預期有真正的粗體。沒有中文字形 → 中文落到 Noto Sans TC。
+   ------------------------------------------------------------ */
+@font-face {
+    font-family: "Akzidenz Grotesk Pro";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("../fonts/AkzidenzGroteskPro-Md.woff2") format("woff2");
+}
+
 :root {
     /* 全站英文 condensed 標題字：trade-gothic → 系統窄體 → Noto Sans TC（中文後備）
        注意：trade-gothic 沒有中文字形，中文會自動落到 Noto Sans TC（全站已載入）。 */
     --bc-font-trade-gothic: "trade-gothic", "Arial Narrow", "Helvetica Neue",
+        "Noto Sans TC", sans-serif;
+    /* 品牌舞台標題字（Akzidenz Grotesk Pro 500）→ 系統 grotesque → Noto Sans TC。
+       目前用於：/coffee/<id>/ 頁尾 next-link 的「( NEXT )」、
+                首頁 who section 的 .section-title__text。 */
+    --bc-font-akzidenz: "Akzidenz Grotesk Pro", "Helvetica Neue", Arial,
         "Noto Sans TC", sans-serif;
 }
