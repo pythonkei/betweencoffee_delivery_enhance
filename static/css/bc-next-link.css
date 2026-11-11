@@ -1,0 +1,232 @@
+/* ============================================================
+   bc-next-link.css — 咖啡詳情頁底部「前往咖啡豆選單」next-link 面板
+   2026-11-11 建立
+   ------------------------------------------------------------------
+   來源：daisheng.com.tw/business/ 最底部 <.c-footer__section> 模組
+   （使用者指示：把該模組的「互動效果」移植到 /coffee/<id>/ 頁尾，
+     面板本身連結到咖啡豆選單 /bean_menu/）。
+
+   原站 markup（僅供對照，實際 class 已改為 .bc-next-link__*）：
+     <div class="c-footer__section">
+       <a class="js-links js-footerScale" href="…/products/">
+         <div class="c-footer__next -products js-area">
+           <div class="c-footer__bottomTitle">
+             <p class="-sm">( <span class="-loop" data-text="Next">Next</span> )</p>
+             <p class="-lg">Products</p>
+           </div>
+         </div>
+       </a>
+     </div>
+
+   原站 4 個互動 → 本檔對照
+     ① 進場放大淡入
+        .js-footerScale{opacity:0;transform:scale(1.3);transition:all 1s}
+        → .is-footerActive{opacity:1;transform:scale(1)}
+        ⇒ .bc-next-link__anchor 同值；class 名改 .is-active
+          （由 bc-next-link.js 的 IntersectionObserver 加上）
+     ② hover 整塊放大
+        .js-footerScale:hover{transform:scale(1.1)}
+        ⇒ .bc-next-link__anchor.is-active:hover
+          （只在 (hover:hover) and (pointer:fine) 生效，觸控不套）
+     ③ 背景視差
+        .c-footer__next{overflow:hidden;height:37.5vw;transform:translateY(-70%)}
+        ＋ 原站 footer.js 以 GSAP ScrollTrigger scrub
+          （trigger .c-footer__section、start "top bottom"、end "bottom bottom"）
+          把 y 由 -70% 補到 0%
+        ⇒ .bc-next-link__stage（高 37.5vw）＋ .bc-next-link__media
+          （height:160%、top:-30%，位移百分比以「媒體自身高度」為基準）
+          JS 寫 --bc-nl-y：-14% → 0%（＝舞台高的 -22.4% → 0%）。
+          位移量永遠小於上下各 30% 的餘裕 ⇒ 任何滾動位置都不露黑邊。
+     ④ hover 的「( Next )」文字無限上捲
+        .-loop{display:inline-block;line-height:1.5}
+        .-loop:after{content:attr(data-text);position:absolute;top:100%;left:0;width:100%}
+        .uHover .-loop{animation:loop_top 1450ms cubic-bezier(.19,1,.22,1) infinite}
+        （keyframes：translate3d(0,0,0) → translate3d(0,-100%,0)）
+        ⇒ .bc-next-link__loop 同 keyframes／曲線／時長／位移。
+          原站是 JS 監聽 mousemove 對 .js-area 加 .uHover；本檔改用
+          純 CSS :hover / :focus-visible（結果等價、少一段 JS）。
+
+   尺寸沿用原站：-sm 0.9375rem（≥768 為 0.875rem）、
+     -lg clamp(2rem, 1.503rem + 2.12vw, 3.625rem)、面板高 37.5vw。
+   品牌化（.clinerules/uiux-core）：黑底 #0e0e0e、白字／金字 --bc-gold、
+   黑色 45% 單色遮罩（不用漸變）、標題 Noto Serif TC、不新增樣式體系。
+   素材：背景影片沿用首頁「推薦頁面」雙卡的
+     static/images/recommended-pages/bean_bg.webm（＝咖啡豆卡同一支），
+     preload="none"，接近視口才載入（見 bc-next-link.js）。
+   ============================================================ */
+
+.bc-next-link {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  background: var(--bc-bg, #0e0e0e);
+}
+
+/* ① 進場：opacity 0 → 1、scale 1.3 → 1（原站 transition: all 1s） */
+.bc-next-link__anchor {
+  display: block;
+  position: relative;
+  opacity: 0;
+  transform: scale(1.3);
+  transition: opacity 1s ease, transform 1s ease;
+  will-change: opacity, transform;
+  text-decoration: none;
+}
+.bc-next-link__anchor.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ② hover 整塊放大（原站 .js-footerScale:hover） */
+@media (hover: hover) and (pointer: fine) {
+  .bc-next-link__anchor.is-active:hover {
+    transform: scale(1.1);
+  }
+}
+
+.bc-next-link__anchor:focus-visible {
+  outline: 1px solid var(--bc-gold, #c49b63);
+  outline-offset: -8px;
+}
+
+/* ③ 舞台：高 37.5vw（原站 .c-footer__next），overflow hidden 讓位移不外溢 */
+.bc-next-link__stage {
+  position: relative;
+  overflow: hidden;
+  height: 37.5vw;
+  min-height: 280px;
+  max-height: 540px;
+  display: grid;
+  place-items: center;
+  padding: 0 24px;
+}
+
+/* ③ 背景媒體：比舞台高 60%，上緣 -30%；JS 只動 transform（--bc-nl-y） */
+.bc-next-link__media {
+  position: absolute;
+  top: -30%;
+  left: 0;
+  width: 100%;
+  height: 160%;
+  transform: translate3d(0, var(--bc-nl-y, -14%), 0);
+  will-change: transform;
+}
+
+.bc-next-link__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+}
+
+/* 黑色 45% 單色遮罩（純色，非漸變） */
+.bc-next-link__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* 文字區 */
+.bc-next-link__body {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: #fff;
+}
+
+/* ④ 「( Next )」：外層 overflow hidden 只留一行，內層上捲＝第二份文字遞補 */
+.bc-next-link__label {
+  overflow: hidden;
+  margin: 0;
+  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+}
+
+.bc-next-link__loop {
+  position: relative;
+  display: inline-block;
+  line-height: 1.5;
+}
+
+.bc-next-link__loop::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bc-next-link__anchor:hover .bc-next-link__loop,
+  .bc-next-link__anchor:focus-visible .bc-next-link__loop {
+    animation: bc-nl-loop 1450ms cubic-bezier(0.19, 1, 0.22, 1) infinite;
+  }
+}
+
+@keyframes bc-nl-loop {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
+/* 主標（原站 .-lg） */
+.bc-next-link__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: clamp(2rem, 1.503rem + 2.12vw, 3.625rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+}
+
+/* 英文副標（品牌化追加，原站沒有） */
+.bc-next-link__en {
+  margin: 6px 0 0;
+  font-family: "Josefin Sans", "Noto Sans TC", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bc-gold, #c49b63);
+}
+
+@media (min-width: 768px) {
+  .bc-next-link__label {
+    font-size: 0.875rem;
+  }
+}
+
+/* 手機：原站 SP 版把面板拉高（80vw）→ 這裡收一點，避免小螢幕佔滿整屏 */
+@media (max-width: 767.98px) {
+  .bc-next-link__stage {
+    height: 72vw;
+    min-height: 260px;
+    max-height: 460px;
+    padding: 0 16px;
+  }
+}
+
+/* 減少動態：不淡入、不視差、不上捲（JS 端同步跳過） */
+@media (prefers-reduced-motion: reduce) {
+  .bc-next-link__anchor,
+  .bc-next-link__anchor.is-active,
+  .bc-next-link__anchor.is-active:hover {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .bc-next-link__media {
+    transform: none;
+  }
+  .bc-next-link__anchor .bc-next-link__loop {
+    animation: none;
+  }
+}

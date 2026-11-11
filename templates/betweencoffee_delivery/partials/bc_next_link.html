@@ -1,0 +1,49 @@
+{% comment %}
+============================================================
+   betweencoffee_delivery/partials/bc_next_link.html
+   咖啡詳情頁頁尾「前往咖啡豆選單」next-link 面板（2026-11-11 建立）
+   ※ 注意：Django 的 {# #} 不支援跨行、內文也不可再出現 {#／#}（會提早結束註解），
+     故本檔說明一律使用 comment 區塊。
+   ------------------------------------------------------------------
+   移植 daisheng.com.tw/business/ 最底部 .c-footer__section 模組：
+     <div class="c-footer__section">
+       <a class="js-links js-footerScale" href="…/products/">
+         <div class="c-footer__next -products js-area">
+           <div class="c-footer__bottomTitle">
+             <p class="-sm">( <span class="-loop" data-text="Next">Next</span> )</p>
+             <p class="-lg">Products</p>
+           </div>
+         </div>
+       </a>
+     </div>
+   互動 4 項（進場放大淡入／hover 放大／背景視差／( Next ) 文字上捲）
+   全在 static/css/bc-next-link.css ＋ static/js/bc-next-link.js 內，
+   本檔只放 markup。使用者指示：面板連結到咖啡豆選單 /bean_menu/。
+   位置（2026-11-11 修正）：比照原站 DOM —— 面板要接在「頁尾之後」（原站
+   .c-footer__section 是 .l-footer__body 的最後一個子元素，在 .l-footer 版權列之下、
+   整份文件最底），因此 coffee.html 以覆寫 bcc_footer（block.super ＋ 本 include）
+   輸出，不要塞在 content block 的 footer 之前。
+   背景影片沿用首頁「推薦頁面」咖啡豆卡同一支 bean_bg.webm。
+   使用方式：include 'betweencoffee_delivery/partials/bc_next_link.html'
+             ＋ 需在頁面模板的 bcc_footer block 內放在 block.super 之後。
+============================================================
+{% endcomment %}
+{% load static %}
+<noscript><style>.bc-next-link__anchor{opacity:1 !important;transform:none !important}</style></noscript>
+<section class="bc-next-link" data-bc-next-link aria-label="前往咖啡豆選單">
+    <a class="bc-next-link__anchor" href="{% url 'bean_menu' %}" aria-label="前往咖啡豆選單">
+        <div class="bc-next-link__stage">
+            <div class="bc-next-link__media" aria-hidden="true">
+                <video class="bc-next-link__video"
+                       src="{% static 'images/recommended-pages/bean_bg.webm' %}"
+                       muted loop playsinline preload="none"
+                       aria-hidden="true" tabindex="-1"></video>
+            </div>
+            <div class="bc-next-link__body">
+                <p class="bc-next-link__label">( <span class="bc-next-link__loop" data-text="Next">Next</span> )</p>
+                <p class="bc-next-link__title">咖啡豆</p>
+                <p class="bc-next-link__en">Coffee Beans</p>
+            </div>
+        </div>
+    </a>
+</section>
