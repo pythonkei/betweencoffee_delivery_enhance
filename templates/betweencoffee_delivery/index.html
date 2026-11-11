@@ -265,6 +265,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        .wwa-anim-char＋手繪圓圈／箭頭 SVG＋wwa 影片與兩張圖）
      - 樣式：static/css/bc-who.css（本頁 extra_css 載入；about 已移除，勿重複載入）
      - 動畫：static/js/bc-who.js（原生 scroll + rAF，非 GSAP；查詢範圍限 .bc-who-section）
+       ⇒ 2026-11-11（使用者指示「初始出現太快、慢點」）：進度基準改為
+         .who-content-text（文字區塊進視口才開始揭示），並加每秒推進上限。
      - 素材：static/images/wwa-01.svg（線稿；11-11 由 wwa-01.png 換）、wwa-02.png、
        wwa-03.gif（11-11 由 animations/wwa.mp4 換；480×277、3 幀 ×1.2s）
      - 黑底白字；SVG 高亮 #BFFF00 保留原樣 -->
@@ -1088,8 +1090,9 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <script src="{% static 'js/bc-recommended-pages.js' %}?v=20261025a"></script>
 <!-- 2026-11-10（使用者指示）：sukima who section 滾動 scrub 逐字揭示（跟隨滾動進度；
      原生 scroll + rAF，非 GSAP）隨模組自 about.html 移入本頁 ⇒ about 已不再載入。
-     版號 20260825k → 20261110a：檔頭註解改記「index 頁」，邏輯未變。 -->
-<script src="{% static 'js/bc-who.js' %}?v=20261111a"></script>
+     版號 20260825k → 20261110a（檔頭註解）→ 20261111a（文案／字型）→ 20261111b
+     （進度基準改 .who-content-text＋每秒推進上限，見檔頭 2026-11-11 段）。 -->
+<script src="{% static 'js/bc-who.js' %}?v=20261111b"></script>
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 動畫隨模組自 about.html 移入本頁
      （原生 scroll + requestAnimationFrame，不依賴 GSAP／ScrollTrigger；about 已不再載入）。 -->
 <script src="{% static 'js/bc-capabilities.js' %}?v=20260825k"></script>

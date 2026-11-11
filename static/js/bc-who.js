@@ -9,6 +9,16 @@
    - 未引入 GSAP，使用原生 scroll + rAF。
    - kicker 括號 (…) 為原站 CSS transition（.section.show
      觸發一次），由本檔 IO 加 .show。
+   ------------------------------------------------------------
+   2026-11-11（使用者指示）「整體動畫初始出現時間太快，調整慢點」：
+   1) 進度基準由整段 section 改為 .who-content-text 文字區塊。
+      原本 section 頂端一碰視口底部就開始計進度，但文字區塊在
+      section 內還低 381px（桌面）／400px（手機），等文字真的
+      進到畫面時揭示已跑掉 4 成 → 看起來像「一出現就快亮完」。
+      改後：文字區塊頂端碰視口底部＝0、抵達視口頂端＝1，
+      整段揭示都發生在文字可見期間（開始時間自然往後延）。
+   2) 新增每秒推進上限 MAX_STEP_PER_SEC：快速滾動時不再瞬間
+      亮完，全程至少約 2.2s（仍可回捲反向 scrub）。
    ============================================================ */
 (function () {
     "use strict";
@@ -23,6 +33,8 @@
         var circleBrush = section.querySelector(".who-circle-svg .wwa-circle-brush");
         var arrowBrush = section.querySelector(".who-arrow-svg .reveal-brush-arrow-wwa");
         var gif03 = section.querySelector(".wwa-visual-03 img");
+        // 進度基準（2026-11-11）：文字區塊本身，不以整段 section 計。
+        var anchor = section.querySelector(".who-content-text") || section;
 
         // 建構序列（原站 f 陣列邏輯；同元素重複出現時後者覆蓋）
         var itemsByEl = new Map();
@@ -102,9 +114,25 @@
         var currentProgress = 0;
         var targetProgress = 0;
         var animating = false;
+        var lastTs = 0;
+        // 2026-11-11（使用者指示）「調整慢點」：每秒最多推進 45%，
+        // 全程至少約 2.2s；慢速滾動時不會觸發（步幅本來就小）。
+        var MAX_STEP_PER_SEC = 0.45;
 
-        function update() {
-            currentProgress += (targetProgress - currentProgress) * 0.12;
+        function update(ts) {
+            var now = ts || (window.performance && performance.now ? performance.now() : Date.now());
+            // dt 上限 64ms：切回分頁／掉格時不要一次補完
+            var dt = lastTs ? Math.min(64, now - lastTs) : 16.7;
+            lastTs = now;
+
+            var step = (targetProgress - currentProgress) * 0.12;
+            var cap = MAX_STEP_PER_SEC * (dt / 1000);
+            if (step > cap) {
+                step = cap;
+            } else if (step < -cap) {
+                step = -cap;
+            }
+            currentProgress += step;
             if (Math.abs(targetProgress - currentProgress) < 0.0005) {
                 currentProgress = targetProgress;
             }
@@ -135,21 +163,23 @@
             });
         }
 
-        function tick() {
-            update();
+        function tick(ts) {
+            update(ts);
             if (Math.abs(targetProgress - currentProgress) > 0.0005) {
                 requestAnimationFrame(tick);
             } else {
                 animating = false;
+                lastTs = 0;
             }
         }
 
         function setTarget() {
-            var rect = section.getBoundingClientRect();
+            var rect = anchor.getBoundingClientRect();
             var vh = window.innerHeight;
-            // 進度：section 頂部剛進視口底部（rect.top=vh）→ 0；
-            //       section 頂部達視口頂部（rect.top=0）→ 1。
-            // 使用者將 who 區塊滾到視口頂時，全部文字/圓圈/箭頭/小圖完成
+            // 進度（2026-11-11 起以 .who-content-text 為基準）：
+            //   文字區塊頂端剛進視口底部（rect.top=vh）→ 0；
+            //   文字區塊頂端抵達視口頂部（rect.top=0）→ 1。
+            // 使用者把文字滾到視口頂時，全部文字/圓圈/箭頭/小圖完成。
             targetProgress = (vh - rect.top) / vh;
             targetProgress = Math.max(0, Math.min(1, targetProgress));
             if (!animating) {
