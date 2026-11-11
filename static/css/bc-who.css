@@ -138,8 +138,9 @@
     position: relative;
     height: 30px;
 }
-.bc-who-section .wwa-anim-visual img,
-.bc-who-section .wwa-anim-visual video {
+/* 2026-11-11：wwa-visual-03 由 <video wwa.mp4> 改為 <img wwa-03.gif>，
+   三個 visual 統一走 img 規則（原 video 選擇器已無對應節點）。 */
+.bc-who-section .wwa-anim-visual img {
     position: absolute;
     left: 0;
     width: 100%;
@@ -154,8 +155,10 @@
 .bc-who-section .wwa-visual-01 img {
     left: -2px;
 }
-.bc-who-section .wwa-visual-03 video {
-    top: -2px;
+/* wwa-03.gif（480×277）比原 wwa.mp4（251×180）扁，top 依「底緣不變」重算：
+   原 video 底 = -2 + 54×180/251 ≈ 36.7 → gif 54×277/480 ≈ 31.2 → top 6px */
+.bc-who-section .wwa-visual-03 img {
+    top: 6px;
     left: 4px;
 }
 
@@ -235,8 +238,9 @@
     .bc-who-section .who-arrow-svg {
         width: 146px;
     }
-    .bc-who-section .wwa-visual-03 video {
-        top: -1px;
+    .bc-who-section .wwa-visual-03 img {
+        /* 底緣不變：原 video 底 = -1 + 76×180/251 ≈ 53.5 → gif 76×277/480 ≈ 43.9 → top 10px */
+        top: 10px;
         left: 6px;
     }
 }
@@ -277,8 +281,9 @@
     .bc-who-section .wwa-visual-02 img {
         left: 10px;
     }
-    .bc-who-section .wwa-visual-03 video {
-        top: -19px;
+    .bc-who-section .wwa-visual-03 img {
+        /* 底緣不變：原 video 底 = -19 + 126×180/251 ≈ 71.4 → gif 126×277/480 ≈ 72.7 → top -1px */
+        top: -1px;
         left: 6px;
     }
     .bc-who-section .wwa-visual-01 img {

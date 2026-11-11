@@ -4,7 +4,7 @@
      查詢範圍限 .bc-who-section，與頁面無關。）
    完全複製 sukima.tokyo.jp 的 setupWhoTextAnimation（GSAP
    ScrollTrigger scrub）：who section 進入視口時，依滾動進度
-   逐字揭示（原站時間軸參數：元素間隔 0.5s、img/video scale
+   逐字揭示（原站時間軸參數：元素間隔 0.5s、img scale
    延後 2.5s、circle 提前 1s），JS 直接設定元素屬性。
    - 未引入 GSAP，使用原生 scroll + rAF。
    - kicker 括號 (…) 為原站 CSS transition（.section.show
@@ -22,8 +22,7 @@
         var spacer = section.querySelector(".wwa-first-spacer");
         var circleBrush = section.querySelector(".who-circle-svg .wwa-circle-brush");
         var arrowBrush = section.querySelector(".who-arrow-svg .reveal-brush-arrow-wwa");
-        var video = section.querySelector(".wwa-visual-03 video");
-        var videoPlayed = false;
+        var gif03 = section.querySelector(".wwa-visual-03 img");
 
         // 建構序列（原站 f 陣列邏輯；同元素重複出現時後者覆蓋）
         var itemsByEl = new Map();
@@ -64,8 +63,8 @@
                     }
                 } else if (r.classList.contains("wwa-visual-03")) {
                     add({ type: "visual", el: r, delay: idx * 0.5, dur: 3 });
-                    if (video) {
-                        add({ type: "video", el: video, delay: idx * 0.5 + 2.5, dur: 3 });
+                    if (gif03) {
+                        add({ type: "img", el: gif03, delay: idx * 0.5 + 2.5, dur: 3 });
                     }
                 }
             });
@@ -89,9 +88,8 @@
         if (spacer) {
             spacer.style.width = "0px";
         }
-        if (video) {
-            video.pause();
-            video.currentTime = 0;
+        if (gif03) {
+            gif03.style.transform = "scale(0)";
         }
 
         function easePower2Out(k) {
@@ -127,17 +125,6 @@
                     case "img":
                         it.el.style.transform = "scale(" + easePower2Out(k) + ")";
                         break;
-                    case "video":
-                        it.el.style.transform = "scale(" + easePower2Out(k) + ")";
-                        if (k >= 1 && !videoPlayed) {
-                            videoPlayed = true;
-                            video.play().catch(function () {});
-                        } else if (k <= 0 && videoPlayed) {
-                            videoPlayed = false;
-                            video.pause();
-                            video.currentTime = 0;
-                        }
-                        break;
                     case "circle":
                         it.el.style.strokeDashoffset = String(800 - (800 - 377) * easePower2Out(k));
                         break;
@@ -162,7 +149,7 @@
             var vh = window.innerHeight;
             // 進度：section 頂部剛進視口底部（rect.top=vh）→ 0；
             //       section 頂部達視口頂部（rect.top=0）→ 1。
-            // 使用者將 who 區塊滾到視口頂時，全部文字/圓圈/箭頭/影片完成
+            // 使用者將 who 區塊滾到視口頂時，全部文字/圓圈/箭頭/小圖完成
             targetProgress = (vh - rect.top) / vh;
             targetProgress = Math.max(0, Math.min(1, targetProgress));
             if (!animating) {
