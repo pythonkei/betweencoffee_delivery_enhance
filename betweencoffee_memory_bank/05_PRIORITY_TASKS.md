@@ -6,7 +6,7 @@
 ## 當前版本控制狀態（2026-11-11 複驗）
 
 - ✅ `origin/main` 尖端＝2026-11-11 品牌舞台改名 `b78d82d1`（＋本輪 docs 同步），本機 `main`＝`origin/main`（複驗用 `git log -1`，不寫死 hash）
-- ℹ️ 工作區僅剩 `.gitignore` 排除的暫存素材（`hero_06_.webm`、`pa-3__.webp`）與已刪檔（`staff0[1-4].png`、`wakemeup.png`）未提交
+- ⚠ 工作區有**使用者本機 WIP（勿代為 commit）**：`index.html` 首頁 who section 文案、`bc-photoarea.css` 註解、`hero_00/01.webm` 換檔（`hero_06.webm` 刪）、`staff0[1-4].png`／`wakemeup.png` 刪、新增 `pa-3__.webp`／`onlineshop-cart.svg`
 - ℹ️ `.gitignore` 排除的本機素材（`static/images/hero_bg.mp4` 81MB 未引用、`recommended-pages/` 底線開頭變體、`ani_*_apng.png`）不入庫
 - ⚠ 正式站 live＝`c3f7509c`（2026-11-03 08:47Z 手動部署）⇒ **待部署 `c3f7509c..origin/main`（66 筆＋）**；autoDeploy＝off → push 不會上線
 

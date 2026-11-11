@@ -19,7 +19,7 @@
 | 測試 | ⚠️ 不足 | 覆蓋率低（以 `docs/verify/` CDP 腳本補前端驗證） |
 | 監控 | ⚠️ 基礎 | 無告警系統 |
 | 部署（Render） | ⚠️ 部署落後 66 筆 | 現行 `live`＝commit `c3f7509c`（環形照片列 hover 徽章）／trigger `manual`／finished **2026-11-03 08:47Z**（2026-11-11 Render API 複驗）。`origin/main` 尖端＝11-11（`b78d82d1` 品牌舞台 `footer*`→`bc-stage-*` 改名）⇒ **待部署 `c3f7509c..origin/main`（66 筆 code／docs）**（11-04 ~ 11-11 累積：about 首屏 sticky 影片與三段、`bc-catch` 字輪、`bc-popeye50` 回歸、詳情頁容器加寬、環形照片列改名與徽章、首屏影片 7 支多層輪播、黑遮罩 →**75%**、製程模組移 about、首頁 hero 影片輪播與落點洗牌、who section 移首頁、浮動購物車圖示 10 款、品牌舞台 class 改名）。**autoDeploy＝off，push 不會觸發部署** |
-| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝2026-11-11 品牌舞台改名 `b78d82d1`＋本檔同步（以 `git log -1` 複驗，不寫死 hash）；本機 `main`＝`origin/main`；工作區僅剩 `.gitignore` 排除的本機暫存素材（`hero_06_.webm`、`pa-3__.webp`）與已刪檔（`staff0[1-4].png`、`wakemeup.png`）尚未提交 |
+| 版本控制 | ✅ 已推齊 | `origin/main` 尖端＝2026-11-11 品牌舞台改名 `b78d82d1`＋本檔同步（以 `git log -1` 複驗，不寫死 hash）；本機 `main`＝`origin/main`；工作區未提交（使用者本機 WIP，勿代為 commit）：`index.html` who section 文案（`Between Say:`／`Hmm....Coffee is always better hot not matter`）、`bc-photoarea.css` 註解改新 class 名、`hero_00/01.webm` 換檔／`hero_06.webm` 刪除、`staff0[1-4].png`／`wakemeup.png` 刪除、新增 `pa-3__.webp`／`onlineshop-cart.svg` |
 
 ## 資料庫現狀
 
