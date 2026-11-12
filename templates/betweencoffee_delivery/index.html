@@ -289,7 +289,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
             + #BFFF00 刷色塊；id 改 organicRevealMaskMembersWwa／
             organicClipMembersWwa 避免與 about 撞名）。about 用 CSS keyframes 播一次，
             本頁改由 bc-who.js scrub 驅動 stroke-dashoffset（784 → 0），時序接在
-            3 字亮起之處；尺寸 3.7em（em 隨字級走，不必寫斷點）。
+            3 字亮起之處；尺寸 4.44em（em 隨字級走，不必寫斷點；2026-11-13 第二次
+            使用者指示「太小加大 20%」：3.7em → 4.44em）。
         2026-11-12 第三次：ⓑ／ⓔ 兩節點互換位置（使用者指示）。類別名不動 ⇒
         CSS 尺寸／位移與 JS 觸發規則自動跟隨，只有揭示順序變成「gif 先、線稿後」。
         2026-11-12 第四次：圓圈 4.2em → 4.62em（+10%）；gif 與「——有溫度」
@@ -980,7 +981,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-11-10（使用者指示）：sukima who section 樣式隨模組自 about.html 移入本頁
      （about 已不再載入）。為模組在首頁的唯一定義來源；全部規則 scoped 於 .bc-who-section。
      版號 20260825e → 20261110a：檔頭註解改記「index 頁」，CSS 規則未變。 -->
-<link rel="stylesheet" href="{% static 'css/bc-who.css' %}?v=20261112f">
+<link rel="stylesheet" href="{% static 'css/bc-who.css' %}?v=20261113b">
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 樣式隨模組自 about.html 移入本頁
      （about 已不再載入）。為模組在首頁的唯一定義來源。
      版號 20260825b → 20261027a：模組整體放大＋頁面置中。 -->

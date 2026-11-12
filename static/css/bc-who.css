@@ -226,9 +226,9 @@
    差別只在觸發方式：about 是 CSS keyframes（.show 進視口播一次）；
    本頁整段是 scrub 動畫，改由 bc-who.js 依滾動進度寫 stroke-dashoffset
    （784 → 0），與圓圈／箭頭同一套節奏，回捲會倒放。
-   尺寸用 em：3 個 CJK 字 ≈ 3.24em 寬，刷色塊取 3.7em（≈1.15 倍字寬，
-   與 about 的 240px svg／206px 文字同比例）⇒ 27／39／57px 字級
-   = 100／144／211px，不必再寫斷點。 */
+   尺寸用 em：3 個 CJK 字 ≈ 3.24em 寬，刷色塊取 4.44em（≈1.38 倍字寬；
+   2026-11-13 使用者指示「太小加大 20%」：3.7em × 1.2）⇒ 27／39／57px 字級
+   = 120／173／253px，不必再寫斷點。 */
 .bc-who-section .wwa-anim-members {
     position: relative;
     display: inline-block;
@@ -245,7 +245,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 3.7em;
+    width: 4.44em;
     height: auto;
     transform: translate3d(-50%, -50%, 0) rotate(10deg);
     opacity: 0.75;
