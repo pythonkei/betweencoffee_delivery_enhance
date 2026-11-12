@@ -275,7 +275,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      ⇒ 2026-11-12（使用者指示「基於此排版修改文案」）：日文文案改為粵語小店自述，
        93 幀→82 幀；資產節點順序一併依指示重排（節點名稱不動，動畫鏈不變）：
          ⓐ「執著」外包 .sukima-anim-wwa → 手繪圓圈改圈這 2 個字（CSS 修飾子
-            .who-circle-svg--cjk，em 寬度 2.9em、top 48%，免寫斷點）
+            .who-circle-svg--cjk，em 寬度 4.2em（≤400px 降回 3.6em）、top 48%，免寫斷點）
          ⓑ wwa-visual-01（wwa-01.svg）→ 移到句「同時我哋外賣堅持「有熱無凍」」之後
          ⓒ wwa-visual-02（wwa-02.png）→ 留在「…先鎖得住最純粹嘅果香回甘」之後
          ⓓ 手繪箭頭（.video-anim-wwa）→ 2026-11-12 起掛「腦力」（箭頭尖對準
@@ -954,7 +954,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-11-10（使用者指示）：sukima who section 樣式隨模組自 about.html 移入本頁
      （about 已不再載入）。為模組在首頁的唯一定義來源；全部規則 scoped 於 .bc-who-section。
      版號 20260825e → 20261110a：檔頭註解改記「index 頁」，CSS 規則未變。 -->
-<link rel="stylesheet" href="{% static 'css/bc-who.css' %}?v=20261112b">
+<link rel="stylesheet" href="{% static 'css/bc-who.css' %}?v=20261112c">
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 樣式隨模組自 about.html 移入本頁
      （about 已不再載入）。為模組在首頁的唯一定義來源。
      版號 20260825b → 20261027a：模組整體放大＋頁面置中。 -->
