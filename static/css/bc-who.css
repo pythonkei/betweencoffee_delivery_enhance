@@ -219,6 +219,40 @@
     display: inline-block;
 }
 
+/* ---------- wwa-anim-members「有溫度」手繪塗抹（移植 about 的 .bc-other-members） ---------- */
+/* 2026-11-13（使用者指示）：把 about.html `.bc-other-members`【 他にもいます！】
+   的 SVG 動畫搬到「有溫度」。同一組資產與手法：mask 內一條白線 tracer
+   （dasharray 800／offset 784）掃過 ⇒ #BFFF00 手繪刷色塊逐段現形。
+   差別只在觸發方式：about 是 CSS keyframes（.show 進視口播一次）；
+   本頁整段是 scrub 動畫，改由 bc-who.js 依滾動進度寫 stroke-dashoffset
+   （784 → 0），與圓圈／箭頭同一套節奏，回捲會倒放。
+   尺寸用 em：3 個 CJK 字 ≈ 3.24em 寬，刷色塊取 3.7em（≈1.15 倍字寬，
+   與 about 的 240px svg／206px 文字同比例）⇒ 27／39／57px 字級
+   = 100／144／211px，不必再寫斷點。 */
+.bc-who-section .wwa-anim-members {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+}
+/* 文字要壓在刷色塊之上（對應 about 的 .bc-other-members span{z-index:2}）：
+   .wwa-anim-char 的 opacity<1 會形成自己的堆疊脈絡，若不給 z-index，
+   後面出現的絕對定位 svg 會蓋到文字。 */
+.bc-who-section .wwa-anim-members .wwa-anim-char {
+    position: relative;
+    z-index: 2;
+}
+.bc-who-section .wwa-members-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3.7em;
+    height: auto;
+    transform: translate3d(-50%, -50%, 0) rotate(10deg);
+    opacity: 0.75;
+    z-index: 0;
+    pointer-events: none;
+}
+
 /* ---------- who-circle-svg 手繪圓圈 ---------- */
 .bc-who-section .who-circle-svg {
     position: absolute;

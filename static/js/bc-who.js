@@ -32,6 +32,8 @@
         var spacer = section.querySelector(".wwa-first-spacer");
         var circleBrush = section.querySelector(".who-circle-svg .wwa-circle-brush");
         var arrowBrush = section.querySelector(".who-arrow-svg .reveal-brush-arrow-wwa");
+        // 2026-11-13：「有溫度」手繪塗抹（移植 about 的 .bc-other-members）
+        var membersBrush = section.querySelector(".wwa-members-svg .wwa-members-brush");
         var gif03 = section.querySelector(".wwa-visual-03 img");
         // 進度基準（2026-11-11）：文字區塊本身，不以整段 section 計。
         var anchor = section.querySelector(".who-content-text") || section;
@@ -49,7 +51,7 @@
             // 縮排展開跨越 who 進入到滾完的整個 800px 過程）
             add({ type: "spacer", el: spacer, delay: idx * 0.5, dur: 46 });
         }
-        section.querySelectorAll(".wwa-anim-char, .wwa-anim-visual, .sukima-anim-wwa, .video-anim-wwa")
+        section.querySelectorAll(".wwa-anim-char, .wwa-anim-visual, .sukima-anim-wwa, .video-anim-wwa, .wwa-anim-members")
             .forEach(function (r) {
                 if (r.classList.contains("wwa-anim-char")) {
                     add({ type: "char", el: r, delay: idx * 0.5, dur: 0.3 });
@@ -59,6 +61,16 @@
                     });
                     if (circleBrush) {
                         add({ type: "circle", el: circleBrush, delay: idx * 0.5 - 1, dur: 1 });
+                    }
+                } else if (r.classList.contains("wwa-anim-members")) {
+                    // 「有溫度」：3 字逐字亮起後，手繪刷色塊由 mask 白線掃出
+                    // （about `.bc-other-members` 的同一支 SVG；about 用 CSS
+                    //   keyframes 播一次，這裡跟圓圈一樣交給 scrub，回捲可倒放）
+                    r.querySelectorAll(".wwa-anim-char").forEach(function (w) {
+                        add({ type: "char", el: w, delay: idx * 0.5, dur: 0.3 });
+                    });
+                    if (membersBrush) {
+                        add({ type: "members", el: membersBrush, delay: idx * 0.5 - 1, dur: 1.2 });
                     }
                 } else if (r.classList.contains("wwa-visual-01") || r.classList.contains("wwa-visual-02")) {
                     add({ type: "visual", el: r, delay: idx * 0.5, dur: 3 });
@@ -158,6 +170,10 @@
                         break;
                     case "arrow":
                         it.el.style.strokeDashoffset = String(300 * (1 - easePower2Out(k)));
+                        break;
+                    case "members":
+                        // 與 about 的 organicRevealAnimation 一致：784 → 0
+                        it.el.style.strokeDashoffset = String(784 * (1 - easePower2Out(k)));
                         break;
                 }
             });
