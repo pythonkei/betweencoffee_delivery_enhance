@@ -24,7 +24,7 @@
 
    圖層：容器 z-index:-1 ＋ hero 變體的 #bc-brand-stage{isolation:isolate}
       ⇒ 負層留在 stage 內、永遠畫在所有舞台內容（環形咖啡照／時鐘／大字）之下。
-      首頁 hero 的 #bc-brand-stage 與 .footer 底色已是 transparent
+      首頁 hero 的 #bc-brand-stage 與 .bc-stage-content 底色已是 transparent
       （bc-brand-stage.css 檔尾「首頁專用覆寫」段，讓 body 的 bg_4.jpg 透出）
       ⇒ 不需要再處理任何遮蓋問題。about 頁的真頁尾不含此模組、也不吃這些選擇器。
    ============================================================ */
