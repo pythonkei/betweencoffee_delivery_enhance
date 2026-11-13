@@ -7,6 +7,8 @@
    - spacer/visual 寬度展開 + img/video scale 0→1
    - who-circle-svg 手繪圓圈畫線（wwa-circle-brush dashoffset 800→377）
    - who-arrow-svg 手繪箭頭畫線（reveal-brush-arrow-wwa dashoffset 300→0）
+   - wwa-members-svg「有溫度」筆刷緞帶畫線（wwa-members-brush dashoffset 600→0；
+     2026-11-14 改為 sukima #careers .content-block-title 的 svg）
    - kicker 括號 (…) scale 0→1 + label 寬度展開（IO 觸發一次）
    - 動畫驅動：bc-who.js scroll scrub（跟隨滾動進度，與原站
      GSAP ScrollTrigger scrub 一致），逐字元素依原站時間軸
@@ -219,35 +221,38 @@
     display: inline-block;
 }
 
-/* ---------- wwa-anim-members「有溫度」手繪塗抹（移植 about 的 .bc-other-members） ---------- */
-/* 2026-11-13（使用者指示）：把 about.html `.bc-other-members`【 他にもいます！】
-   的 SVG 動畫搬到「有溫度」。同一組資產與手法：mask 內一條白線 tracer
-   （dasharray 800／offset 784）掃過 ⇒ #BFFF00 手繪刷色塊逐段現形。
-   差別只在觸發方式：about 是 CSS keyframes（.show 進視口播一次）；
-   本頁整段是 scrub 動畫，改由 bc-who.js 依滾動進度寫 stroke-dashoffset
-   （784 → 0），與圓圈／箭頭同一套節奏，回捲會倒放。
-   尺寸用 em：3 個 CJK 字 ≈ 3.24em 寬，刷色塊取 4.44em（≈1.38 倍字寬；
-   2026-11-13 使用者指示「太小加大 20%」：3.7em × 1.2）⇒ 27／39／57px 字級
-   = 120／173／253px，不必再寫斷點。 */
+/* ---------- wwa-anim-members「有溫度」筆刷緞帶 ---------- */
+/* 2026-11-14（使用者指示）：改用 sukima.tokyo.jp 的 #careers > .relative.career-intro
+   內 `.content-block-title > svg.title-hatarikata-svg` 的動畫（原本是 about 的
+   `.bc-other-members` 大塗抹塊）。手法相同：mask 內一條白線 tracer
+   （dasharray 600／offset 600）掃過 ⇒ #BFFF00 手繪亂線逐段現形；
+   差別是筆刷形狀＝190×33 的橫向亂線（原站 154×27 貼在標題左下、略低於基線）。
+   觸發：原站 `.content-block.show .flowing-ribbon-reveal-tracer` 是
+   `animSvgStrokeTo 1s ease-in-out forwards`（進視口播一次）；本頁整段是 scrub，
+   改由 bc-who.js 寫 stroke-dashoffset（600 → 0），與圓圈／箭頭同節奏、回捲倒放。
+   尺寸（原站是固定 px 三段 98／154／216，本頁 3 字改用 em 隨字級走）：
+     viewBox 190×33 內的可見墨跡為 x 33→187（寬 154）、y 7→29 ⇒
+     width 4.28em ⇒ 墨跡約 3.46em 寬（比 3 個字 ≈3.26em 左右各出 0.1em）；
+     left -0.84em ⇒ 墨跡左緣落在 -0.1em（svg 左側 33 單位是空白的）；
+     bottom -0.03em ⇒ 墨跡底邊貼在字形底部（墨跡下緣距 svg 底 4 單位 ≈0.09em，
+     原站實測墨跡底比文字 em-box 底高 0.12em）。 */
 .bc-who-section .wwa-anim-members {
     position: relative;
     display: inline-block;
     white-space: nowrap;
 }
-/* 文字要壓在刷色塊之上（對應 about 的 .bc-other-members span{z-index:2}）：
-   .wwa-anim-char 的 opacity<1 會形成自己的堆疊脈絡，若不給 z-index，
-   後面出現的絕對定位 svg 會蓋到文字。 */
+/* 文字要壓在筆刷之上：.wwa-anim-char 的 opacity<1 會形成自己的堆疊脈絡，
+   若不給 z-index，後面出現的絕對定位 svg 會蓋到文字。 */
 .bc-who-section .wwa-anim-members .wwa-anim-char {
     position: relative;
     z-index: 2;
 }
 .bc-who-section .wwa-members-svg {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 4.44em;
+    left: -0.84em;
+    bottom: -0.03em;
+    width: 4.28em;
     height: auto;
-    transform: translate3d(-50%, -50%, 0) rotate(10deg);
     opacity: 0.75;
     z-index: 0;
     pointer-events: none;

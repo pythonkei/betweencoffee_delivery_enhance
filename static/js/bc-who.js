@@ -32,7 +32,8 @@
         var spacer = section.querySelector(".wwa-first-spacer");
         var circleBrush = section.querySelector(".who-circle-svg .wwa-circle-brush");
         var arrowBrush = section.querySelector(".who-arrow-svg .reveal-brush-arrow-wwa");
-        // 2026-11-13：「有溫度」手繪塗抹（移植 about 的 .bc-other-members）
+        // 2026-11-14：「有溫度」手繪筆刷緞帶（移植 sukima #careers .content-block-title 的
+        // .title-hatarikata-svg；mask 白線 tracer dasharray 600／offset 600）
         var membersBrush = section.querySelector(".wwa-members-svg .wwa-members-brush");
         var gif03 = section.querySelector(".wwa-visual-03 img");
         // 進度基準（2026-11-11）：文字區塊本身，不以整段 section 計。
@@ -63,14 +64,15 @@
                         add({ type: "circle", el: circleBrush, delay: idx * 0.5 - 1, dur: 1 });
                     }
                 } else if (r.classList.contains("wwa-anim-members")) {
-                    // 「有溫度」：3 字逐字亮起後，手繪刷色塊由 mask 白線掃出
-                    // （about `.bc-other-members` 的同一支 SVG；about 用 CSS
-                    //   keyframes 播一次，這裡跟圓圈一樣交給 scrub，回捲可倒放）
+                    // 「有溫度」：3 字逐字亮起後，筆刷緞帶由 mask 白線掃出
+                    // （原站 `.content-block.show .flowing-ribbon-reveal-tracer`
+                    //   是 animSvgStrokeTo 1s ease-in-out forwards 播一次；
+                    //   本頁跟圓圈一樣交給 scrub，回捲可倒放）
                     r.querySelectorAll(".wwa-anim-char").forEach(function (w) {
                         add({ type: "char", el: w, delay: idx * 0.5, dur: 0.3 });
                     });
                     if (membersBrush) {
-                        add({ type: "members", el: membersBrush, delay: idx * 0.5 - 1, dur: 1.2 });
+                        add({ type: "members", el: membersBrush, delay: idx * 0.5 - 1, dur: 1 });
                     }
                 } else if (r.classList.contains("wwa-visual-01") || r.classList.contains("wwa-visual-02")) {
                     add({ type: "visual", el: r, delay: idx * 0.5, dur: 3 });
@@ -172,8 +174,9 @@
                         it.el.style.strokeDashoffset = String(300 * (1 - easePower2Out(k)));
                         break;
                     case "members":
-                        // 與 about 的 organicRevealAnimation 一致：784 → 0
-                        it.el.style.strokeDashoffset = String(784 * (1 - easePower2Out(k)));
+                        // 與原站 .flowing-ribbon-reveal-tracer 一致：600 → 0
+                        // （tracer 實長約 543，dasharray 設 600 保證起點全遮）
+                        it.el.style.strokeDashoffset = String(600 * (1 - easePower2Out(k)));
                         break;
                 }
             });
