@@ -6,7 +6,7 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261116c">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261117a">
 {% endblock %}
 
 {% block content %}
@@ -39,17 +39,17 @@
     height: auto;
     padding: 0;
   }
-  /* 2026-11-16（「COFFEE」巨型字模組）：字被 JS 托住時會離開 banner 往下壓在
-     商品區上方（托住距離＝banner 高＋字高，桌機 858px，比 banner 長），需要
-     banner 蓋過後面那個 section。style-bootstrap.css:3340 給
-     .subpage-banner-h500 的是 z-index:0，而同層的 .ftco-subpage-section 是
-     position:relative + z-index:auto，依繪製順序（同在 step 8、依 DOM 順序）
-     會反過來蓋住 banner ⇒ 這裡把本頁 banner 提到 1。
-     導覽列 #ftco-navbar 是 z-index:100，仍在大字之上（逐字往上跑掉時會從
-     導覽列後面消失，與原站相同）；.svg-bg 的 -1 相對 banner 自己的
-     stacking context，不受影響。 */
+  /* 2026-11-17（使用者指示「文字放在產品下層級」）：先前為讓大字在托住時壓在
+     商品區之上，把 banner 提到 z-index:1；現在改回站預設 z-index:0
+     （style-bootstrap.css:3340）。同層的 .ftco-subpage-section 是
+     position:relative + z-index:auto 且 DOM 在其後 ⇒ 依繪製順序（同在 step 8）
+     畫在 banner 之上，巨型字捲進商品區時會從卡片「下面」穿過（托住／出場
+     邏輯不變，只是被商品卡片遮住，卡片間隙仍看得到字）。
+     導覽列 #ftco-navbar 是 z-index:100，仍在最上層；.svg-bg 的 -1 相對 banner
+     自己的 stacking context（z-index:0 會建立），不受影響。
+     ⚠ 不要再把這裡調高，否則字會蓋回商品圖。 */
   .subpage-banner-h500.bc-banner-bgonly {
-    z-index: 1;
+    z-index: 0;
   }
 </style>
 <!-- 2026-09-21（使用者指示「全端 bc-attract-buy and profile 和 index 一樣」）：

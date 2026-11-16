@@ -30,8 +30,10 @@
          拆字進場 ＋ 捲動托住 ＋ 捲動時逐字往上跑掉，托住距離＝banner 高＋字高）
   [放置] templates/betweencoffee_delivery/coffee_menu.html 的
          <section class="subpage-banner-h500 …"> 內、.ftco-subpage-banner 之後。
-         ⚠ 本模組需要 banner 蓋過下方商品區（css 檔頭 [5]）—— 該頁 inline
-           樣式已把 .bc-banner-bgonly 提到 z-index:1，搬移時要一起帶走。
+         ⚠ 本模組的字層級在本頁被設定成「商品卡片的下層」（banner 維持
+           z-index:0，見 css 檔頭 [5] 末尾與 coffee_menu.html 的 inline 說明）：
+           搬到別頁時若要字蓋在內容之上，必須自行調整該頁 banner／內容的
+           z-index，否則大字會被後方 section 遮住。
 ============================================================
 {% endcomment %}
 <div class="bc-coffee-title" data-bc-coffee-title>

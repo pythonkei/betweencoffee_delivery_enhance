@@ -87,9 +87,9 @@
          負值會讓字往上加速離開 viewport，捲 300px 就整組消失。
        ⚠ 起算點用 scrollY，不是 -bannerRect.top：本頁 banner 頂端在 y=100
          （導覽列佔位），用 rect 起算 d 會慢 100px，字早在 y=26 就被導覽列壓住。
-       ⇒ 需要 banner（z-index:0）蓋過後方區塊，見 coffee_menu.html 的
-         inline 樣式（把 .bc-banner-bgonly 提到 z-index:1；導覽列是 z-index
-         100，仍在字之上）。
+       ⇒ 2026-11-17 起 banner 維持站預設 z-index:0（見 coffee_menu.html 的
+         inline 說明）⇒ 字在商品區「下層」，捲進卡片區會被商品卡片遮住；
+         導覽列是 z-index:100，仍在字之上。
 
    [6] 出場（逐字往上滾掉）＝原站捲動行為的移植
        原站實測（2026-11-16，1440×900）：托住期間外層 .char 不動，**內層
