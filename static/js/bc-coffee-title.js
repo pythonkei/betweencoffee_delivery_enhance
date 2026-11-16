@@ -22,13 +22,13 @@
              d = clamp(頁面捲動量 scrollY, 0, holdMax)
              __pin.style.transform = translate3d(0, +d, 0)   ← 正號
           頁面往上跑了 d px，字就往下補 d px ⇒ 字停在 viewport 同一個位置
-          （＝頁首時的位置，桌面約 126px）。d 到上限後 transform 固定不動 ⇒ 字
+          （＝頁首時的位置，桌面約 171px）。d 到上限後 transform 固定不動 ⇒ 字
           改成隨頁面往上、與托住時完全連續，沒有跳動。
-          ※ 托住距離＝banner 高度＋字高（桌機 948px，對應原站實測 1050px／字高
+          ※ 托住距離＝banner 高度＋字高（桌機 858px，對應原站實測 1050px／字高
             510px）：字在 banner 底邊離開後仍會在商品區上方托住一段，商品從字
             後面滑過（＝原站的 .pin z-index:10 效果）。
           ※ 為什麼用 scrollY 而不是 -bannerRect.top：本頁 banner 頂端在 y=100
-            （導覽列的佔位），用 rect 起算 d 會慢 100px，字早在 y=26 就被
+            （導覽列的佔位），用 rect 起算 d 會慢 100px，字早在 y=71 就被
             導覽列壓住。
 
    [出場] 原站實測（1440×900，2026-11-16）：托住期間外層 .char 不動，內層 .char
@@ -42,8 +42,8 @@
              local_i = clamp01((p − off_i) / 0.72)
              y_i     = lift × easeInOutCubic(local_i)
                      lift = −(banner 在頁面的 y ＋ 字在 banner 內的位移 ＋ 字高 ＋ 40)
-          位移量只取「剛好讓整組字離開 viewport 頂端」的距離（桌機 ≈614、手機
-          ≈380），不是固定的 banner 高度 —— 取太大（例如 948）字會在托住還沒
+          位移量只取「剛好讓整組字離開 viewport 頂端」的距離（桌機 ≈569、手機
+          ≈320），不是固定的 banner 高度 —— 取太大（例如 858）字會在托住還沒
           結束就全部噴掉，節奏會比原站快一倍。
           ※ 位移掛在內層 __char-inner（沒有 transition），所以捲動時是 1:1 連動，
             不會被外層進場的 .95s transition 拖慢。
