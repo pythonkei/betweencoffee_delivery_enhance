@@ -1,0 +1,40 @@
+{% comment %}
+============================================================
+  betweencoffee_delivery/partials/bc_coffee_title.html
+  /coffee_menu/ 首屏 banner 的「COFFEE」巨型字（2026-11-16 建立）
+  ※ 注意：Django 的 {# #} 不支援跨行、內文也不可再出現 {#／#}（會提早結束註解），
+    故本檔說明一律使用 comment 區塊。
+  ------------------------------------------------------------------
+  來源：https://und-ny.com/about/ 的首屏
+    <section> > .pin > h1.init-anim（GSAP 在 .pin 外自動加 .pin-spacer）
+  使用者指示（2026-11-16）：
+    ① 把該段的 .pin-spacer ＋ .init-anim 拆字進場移植到 /coffee_menu/ 的
+       .subpage-banner-h500 位置
+    ② 文案 ABOUT US → COFFEE
+    ③ 背景保留原本的 title_bg_img_01.svg（本模組不畫底色）
+
+  [結構] 與原站一對一（class 對照表見 static/css/bc-coffee-title.css 檔頭 [1]）
+    .bc-coffee-title         ＝ 鋪滿 banner 的覆蓋層（純裝飾、不吃滑鼠事件）
+    .bc-coffee-title__pin    ＝ 原站 .pin（托住層；JS 給 translate3d）
+    .bc-coffee-title__word   ＝ 原站 h1.init-anim（文字原文就寫在這裡）
+    .bc-coffee-title__char   ＝ 原站 .char（由 JS 產生，不是手寫標記）
+
+  [為什麼文字直接寫在 h1 內、不在模板拆字]
+    沒有 JS（或腳本被阻擋）時，h1 就是完整一行 "COFFEE"、靜態置中於 banner，
+    版面等於動畫終態；拆字與起點位移全部由 static/js/bc-coffee-title.js 在
+    執行時產生，所以不需要 <noscript> 補救樣式。
+
+  [樣式] static/css/bc-coffee-title.css（由 coffee_menu.html 的 extra_css 載入）
+  [腳本] static/js/bc-coffee-title.js（由 coffee_menu.html 的 extra_scripts 載入；
+         拆字進場 ＋ 捲動托住，托住距離＝banner 高度）
+  [放置] templates/betweencoffee_delivery/coffee_menu.html 的
+         <section class="subpage-banner-h500 …"> 內、.ftco-subpage-banner 之後。
+         ⚠ 本模組需要 banner 蓋過下方商品區（css 檔頭 [5]）—— 該頁 inline
+           樣式已把 .bc-banner-bgonly 提到 z-index:1，搬移時要一起帶走。
+============================================================
+{% endcomment %}
+<div class="bc-coffee-title" data-bc-coffee-title>
+    <div class="bc-coffee-title__pin">
+        <h1 class="bc-coffee-title__word">COFFEE</h1>
+    </div>
+</div>

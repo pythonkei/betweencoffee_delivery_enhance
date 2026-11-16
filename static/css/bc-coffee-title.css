@@ -1,0 +1,165 @@
+/* ============================================================
+   bc-coffee-title.css — /coffee_menu/ 首屏 banner 的「COFFEE」巨型字
+   （2026-11-16 建立，使用者指示：移植 und-ny.com/about/ 首屏 ABOUT US 的
+     .pin-spacer ＋ .init-anim 拆字進場到 coffee_menu 的 subpage-banner-h500，
+     文案 ABOUT US → COFFEE、背景保留 title_bg_img_01.svg）
+   ------------------------------------------------------------
+   [1] 來源（und-ny.com/about/，2026-11-16 於 live 站實測 1440×900）
+       <main data-categoryslug="about"> > section > .pin > h1.init-anim
+         · GSAP 在 .pin 外加 .pin-spacer（實測 width:1390 / height:510，
+           與 h1 同高 ⇒ 等效 pinSpacing:false，沒有為 pin 加高頁面）
+         · .pin 是 position:relative; z-index:10，釘住期間壓在後續內容之上
+           （截圖可見小段文字從大字筆畫後面滑過）
+         · .pin 的 inline transform: translateY(50 → 1148)，即在 viewport
+           y≈170 處托住約 1098px，之後才隨頁面離開
+         · h1 實測 font-size 583.2px（40.5vw）、line-height 466.56px（80%）、
+           padding-bottom 43.2px（3vw）、white-space:nowrap、uppercase、
+           字型 UnDbold（極窄 grotesque）、letter-spacing:normal、純黑字
+         · 拆字：ABOUT US → 7 個 .char（空白不計），每個字外層 translate3d(
+           0,100px,0)；進場 y 100px → 0、ease power4.out、duration ≈1.2s、
+           stagger 0.06s from edges（首尾先起、中央最後）、無 opacity 變化
+         · 手機：.pin 直接 max-md:fixed（純 CSS，不經 JS）
+       本檔命名對照（.bc- 前綴＋BEM-ish，專案慣例）：
+         .bc-coffee-title          ＝ 鋪滿 banner 的覆蓋層（＝原站 pin 的舞台）
+         .bc-coffee-title__pin     ＝ 原站 .pin（本頁由 JS 給 translate3d）
+         .bc-coffee-title__word    ＝ 原站 h1.init-anim
+         .bc-coffee-title__char    ＝ 原站 .char（JS 產生）
+
+   [2] 與原站的三個必要差異（其餘照抄）
+       ① 原站是白底黑字、字高 510px 佔滿整個首屏；本頁 banner 只有 500px
+          且是深底（#0e0e0e＋title_bg_img_01.svg 疊 6% 白），故字色改用
+          var(--bc-text)（白 90%），與站上其他大字一致。
+       ② 原站雙層 .char（外層位移／內層靜止）是為了配合 SplitText 的
+          clip-path 遮罩；本頁沒有遮罩需求 ⇒ 單層 span 即可，行為相同。
+       ③ 托住（pin）改用「transform 反向補償」而不是 GSAP pin（見 [5]）。
+
+   [3] 字級由來（本頁 banner 高度為硬上限）
+       banner：桌機 500px 固定（style-bootstrap.css:3340）、≤767.98px 為
+               82vw（:3352）。桌機版 .subpage-banner-h500 的 y=100、
+               #ftco-navbar 高 140 ⇒ 字頂必須落在 140 以下才不會被導覽列
+               的 logo／連結壓住。
+       字級取 min(50vw, 560px)：
+               1440 → 560px（封頂）⇒ 字寬 ≈1104（77%，兩側各留 168）、
+               行高 0.8 ⇒ 字高 448、置中後字頂 126（實際 ink 頂 ≈148，
+               在 nav 下緣 140 之後）；
+               1120 → 560px ⇒ 字寬 ≈1104（99%，貼滿）；
+               768 → 384px ⇒ 字寬 ≈757（99%）；
+               390 → 195px（banner 高 320）⇒ 字寬 ≈385（99%）／
+               320 → 160px（banner 高 262）⇒ 字寬 ≈316（99%）。
+               ≥1120 之後字寬固定在 1104（trade-gothic 只有 6 字 ≈ 1.97em，
+               再放大就會撞到導覽列；1920 時約佔 58%）。
+       ※ 為什麼用 vw：原站也是 40.5vw，字是「滿版標語」，字級必須跟著視窗
+         寬度走才會一直維持同樣的留白比例。本站字型（trade-gothic）比原站
+         UnDbold 窄 ⇒ 用 50vw 才會得到同樣的「幾乎貼滿」寬度；560px 封頂是
+         「banner 只有 500px 高」這個本頁條件下的上限（再大就會撞到導覽列）。
+
+   [4] 進場（對應原站 data-animation-type="chars"）
+       JS 拆字後，每個字由 CSS 給起點 transform: translate3d(0, .16em, 0)
+       （原站是固定 100px；本頁字級隨視窗變動，改用 em 讓各斷點位移比例一致），
+       下一帧加上根節點 .is-ready ⇒ 由本檔的 transition 收回到 0。
+       時長 .95s、曲線 cubic-bezier(.22,1,.36,1)（≈ power4.out）、
+       每字延遲 60ms 且 from edges（距離首尾越近越早，中央字最後）。
+       起點位移只掛在 JS 產生的 .bc-coffee-title__char 上 ⇒ 沒有 JS／腳本被擋
+       時 h1 就是完整一行字，不會停在下方的位移狀態（不需要 <noscript> 補救）。
+
+   [5] 托住（pin）＝ transform 反向補償，不用 GSAP pin
+       原站 .pin 用 GSAP pin（pinSpacing:false）＋inline translateY；
+       本頁的字是 banner 內的「絕對定位」覆蓋層，若直接用 GSAP pin：
+         · 絕對定位元素沒有流內高度 ⇒ 自動產生的 .pin-spacer 高度為 0，
+           pinSpacing 無法運作；
+         · pin 結束時元素還原成靜止位置，而此刻它的靜止位置已在視窗外
+           上方（捲過 banner 高度）⇒ 大字會「瞬間消失」。
+       故改成：pin 的 inline transform 由 JS 依「頁面捲動量」補償 —— 頁面往上
+       跑了 d px 就 translateY(+d)，d 上限 = banner 高度（＝使用者指定的
+       「釘住約 500px，banner 底邊離開就釋放」）。字因此停在 viewport 的同一
+       位置（＝頁首那個位置，桌面 126px、在導覽列下緣之下），商品列從字後面
+       滑過；d 到上限後 transform 固定在 +bannerH 不再變 ⇒ 大字改成隨頁面
+       一起往上，位置與托住時完全連續（不會跳）。
+       ⚠ 方向不可寫反：translateY 必須「補回」頁面的捲動量（正值）；寫成
+         負值會讓字往上加速離開 viewport，捲 300px 就整組消失。
+       ⚠ 起算點用 scrollY，不是 -bannerRect.top：本頁 banner 頂端在 y=100
+         （導覽列佔位），用 rect 起算 d 會慢 100px，字早在 y=26 就被導覽列壓住。
+       ⇒ 需要 banner（z-index:0）蓋過後方區塊，見 coffee_menu.html 的
+         inline 樣式（把 .bc-banner-bgonly 提到 z-index:1；導覽列是 z-index
+         100，仍在字之上）。
+
+   [6] 無 JS／減少動態
+       · 沒有 JS：不拆字、不托住 ⇒ 靜態巨型字置中於 banner，版面與動畫終態
+         相同（只有「大字不隨捲動托住」這項差異）。
+       · prefers-reduced-motion: reduce：JS 直接跳過拆字與托住；下方的
+         media query 另外把 .bc-coffee-title__char 的 transform 歸零，
+         即使拆字已發生也不會位移。
+   ============================================================ */
+
+/* ---- [A] 根節點：鋪滿 banner 的覆蓋層（不吃滑鼠事件、不畫底色） -------- */
+.bc-coffee-title {
+    --bc-ct-fs: min(50vw, 560px); /* 見 [3] */
+    --bc-ct-dur: 0.95s;           /* 見 [4] */
+    --bc-ct-ease: cubic-bezier(0.22, 1, 0.36, 1); /* ≈ GSAP power4.out */
+
+    position: absolute;
+    inset: 0;
+    z-index: 2; /* 高於 .svg-bg（z-index:-1）；導覽列在 banner 之外，不受影響 */
+    pointer-events: none; /* 純裝飾層：不擋下方連結／點擊 */
+
+    color: var(--bc-text, rgba(255, 255, 255, 0.9));
+    font-family: var(--bc-font-trade-gothic, "Arial Narrow", "Helvetica Neue", "Noto Sans TC", sans-serif);
+    font-size: var(--bc-ct-fs);
+    line-height: 0.8; /* 對應原站 leading-[80%] */
+}
+
+/* ---- [B] 托住層：＝原站 .pin（JS 給 translate3d，托住期間往上鎖） ------- */
+.bc-coffee-title__pin {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center; /* 字在 banner 內水平／垂直置中 */
+    will-change: transform;
+}
+
+/* ---- [C] 大字本體：＝原站 h1.init-anim --------------------------------- */
+.bc-coffee-title__word {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;   /* 不吃 h1 預設 2em */
+    font-weight: 400;     /* trade-gothic 只有單一字重（bc-fonts.css:25） */
+    line-height: inherit;
+    letter-spacing: normal; /* 對應原站 letter-spacing:normal */
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: inherit;
+}
+
+/* ---- [D] 單字：＝原站 .char（JS 產生；起點位移見下方說明） ------------- */
+.bc-coffee-title__char {
+    display: inline-block;
+    /* 起點位移：往下 .16em（原站是固定 100px；本頁字級隨視窗變動，改用 em
+       讓各斷點的比例一致）。只有 JS 產生的 .bc-coffee-title__char 會吃到，
+       所以「沒有 JS」時 h1 不會停在下方位移狀態。
+       ⚠ 不可改由 JS 寫 inline transform：inline 會壓過下面 .is-ready 的
+         `transform: none`（inline 優先於樣式表）⇒ 字會卡在位移狀態。 */
+    transform: translate3d(0, 0.16em, 0);
+    transition: transform var(--bc-ct-dur) var(--bc-ct-ease);
+    will-change: transform;
+}
+
+/* JS 加 .is-ready 後回到基準位置（延遲由 JS 依 from-edges 規則寫在每個字的
+   inline transition-delay） */
+.bc-coffee-title.is-ready .bc-coffee-title__char {
+    transform: none;
+}
+
+/* 空白字元（本頁文案 COFFEE 沒有空白，保留給日後改字用） */
+.bc-coffee-title__space {
+    display: inline-block;
+    width: 0.22em;
+}
+
+/* ---- [E] 減少動態：不做任何位移（見 [6]） ------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+    .bc-coffee-title__char {
+        transform: none !important;
+        transition: none !important;
+    }
+}
