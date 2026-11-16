@@ -52,7 +52,7 @@
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（popeye50 移植，置於 `#bc-sticky-mv` 下方） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 | `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（daisheng `.c-footer__section` 移植：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景 `bean_menu.jpg`；**置於 `</footer>` 之後**）。說明用 `{% comment %}` |
-| `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住） |
+| `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉） |
 
 ## 4. 開發規範
 

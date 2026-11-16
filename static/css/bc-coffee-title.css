@@ -18,19 +18,23 @@
          · 拆字：ABOUT US → 7 個 .char（空白不計），每個字外層 translate3d(
            0,100px,0)；進場 y 100px → 0、ease power4.out、duration ≈1.2s、
            stagger 0.06s from edges（首尾先起、中央最後）、無 opacity 變化
+         · 捲動出場：外層不動，**內層 .char** 逐字往上位移（中央先走、邊緣
+           落後約 190px 捲動距離），詳見 [6]
          · 手機：.pin 直接 max-md:fixed（純 CSS，不經 JS）
        本檔命名對照（.bc- 前綴＋BEM-ish，專案慣例）：
          .bc-coffee-title          ＝ 鋪滿 banner 的覆蓋層（＝原站 pin 的舞台）
          .bc-coffee-title__pin     ＝ 原站 .pin（本頁由 JS 給 translate3d）
          .bc-coffee-title__word    ＝ 原站 h1.init-anim
-         .bc-coffee-title__char    ＝ 原站 .char（JS 產生）
+         .bc-coffee-title__char    ＝ 原站外層 .char（進場位移）
+         .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移）
 
    [2] 與原站的三個必要差異（其餘照抄）
        ① 原站是白底黑字、字高 510px 佔滿整個首屏；本頁 banner 只有 500px
           且是深底（#0e0e0e＋title_bg_img_01.svg 疊 6% 白），故字色改用
           var(--bc-text)（白 90%），與站上其他大字一致。
-       ② 原站雙層 .char（外層位移／內層靜止）是為了配合 SplitText 的
-          clip-path 遮罩；本頁沒有遮罩需求 ⇒ 單層 span 即可，行為相同。
+       ② 原站的雙層 .char（外層進場位移／內層捲動出場位移）本頁照抄 ——
+          分成兩層是必要的：進場要 transition、出場要與捲動 1:1 連動（不能有
+          transition），同一層會被 0.95s 的 transition 拖慢（見 [6]）。
        ③ 托住（pin）改用「transform 反向補償」而不是 GSAP pin（見 [5]）。
 
    [3] 字級由來（本頁 banner 高度為硬上限）
@@ -70,11 +74,12 @@
          · pin 結束時元素還原成靜止位置，而此刻它的靜止位置已在視窗外
            上方（捲過 banner 高度）⇒ 大字會「瞬間消失」。
        故改成：pin 的 inline transform 由 JS 依「頁面捲動量」補償 —— 頁面往上
-       跑了 d px 就 translateY(+d)，d 上限 = banner 高度（＝使用者指定的
-       「釘住約 500px，banner 底邊離開就釋放」）。字因此停在 viewport 的同一
-       位置（＝頁首那個位置，桌面 126px、在導覽列下緣之下），商品列從字後面
-       滑過；d 到上限後 transform 固定在 +bannerH 不再變 ⇒ 大字改成隨頁面
-       一起往上，位置與托住時完全連續（不會跳）。
+       跑了 d px 就 translateY(+d)，d 上限 = banner 高度 ＋ 字高（桌機 500+448
+       ＝ 948；原站實測托住 1050、字高 510，比例相同）。字因此停在 viewport 的
+       同一位置（＝頁首那個位置，桌面 126px、在導覽列下緣之下），商品列從字
+       後面滑過（＝原站 .pin z-index:10 的效果，托住範圍比 banner 長，字會在
+       商品區上方多托一段）；d 到上限後 transform 固定在 +holdMax 不再變 ⇒
+       大字改成隨頁面一起往上，位置與托住時完全連續（不會跳）。
        ⚠ 方向不可寫反：translateY 必須「補回」頁面的捲動量（正值）；寫成
          負值會讓字往上加速離開 viewport，捲 300px 就整組消失。
        ⚠ 起算點用 scrollY，不是 -bannerRect.top：本頁 banner 頂端在 y=100
@@ -83,12 +88,27 @@
          inline 樣式（把 .bc-banner-bgonly 提到 z-index:1；導覽列是 z-index
          100，仍在字之上）。
 
-   [6] 無 JS／減少動態
-       · 沒有 JS：不拆字、不托住 ⇒ 靜態巨型字置中於 banner，版面與動畫終態
-         相同（只有「大字不隨捲動托住」這項差異）。
-       · prefers-reduced-motion: reduce：JS 直接跳過拆字與托住；下方的
-         media query 另外把 .bc-coffee-title__char 的 transform 歸零，
-         即使拆字已發生也不會位移。
+   [6] 出場（逐字往上滾掉）＝原站捲動行為的移植
+       原站實測（2026-11-16，1440×900）：托住期間外層 .char 不動，**內層
+       .char** 隨捲動各自往上位移 —— 中央字先走、邊緣字落後約 190px 捲動距離，
+       全部收在 y ≈ -896px（≈1.54em）；曲線＝起步慢→中段衝出→收尾的
+       power3.inOut 型（中央字約 280→1050px 捲動走完，邊緣字 380→1300）。
+       本頁同樣用「雙層 span」：外層 __char 只做進場（CSS transition），
+       內層 __char-inner 只做出場（JS 依 scrollY 1:1 寫 transform，
+       沒有 transition ⇒ 不會被進場的 .95s 拖慢）。
+       參數（JS 檔頭 [出場]）：起點 = holdMax×0.30、位移量 = 剛好把整組字推出
+       viewport 頂端的距離（banner 頁面 y ＋ 字在 banner 內位移 ＋ 字高 ＋ 40；
+       桌機 ≈614、手機 ≈380）、中央字先走、邊緣字最多落後 28% 區間。
+       ⚠ 位移量不可用固定值：取 -948（banner 高＋字高）會讓字在托住還沒結束
+         就全部跑光，節奏比原站快一倍；取 1em 級又不夠，字會卡在導覽列附近
+         （手機更明顯）。
+
+   [7] 無 JS／減少動態
+       · 沒有 JS：不拆字、不托住、不出場 ⇒ 靜態巨型字置中於 banner，版面與
+         動畫終態相同（只有「大字不隨捲動托住／跑掉」這項差異）。
+       · prefers-reduced-motion: reduce：JS 直接跳過拆字與捲動；下方的
+         media query 另外把 .bc-coffee-title__char（及 __char-inner）的
+         transform 歸零，即使拆字已發生也不會位移。
    ============================================================ */
 
 /* ---- [A] 根節點：鋪滿 banner 的覆蓋層（不吃滑鼠事件、不畫底色） -------- */
@@ -150,16 +170,28 @@
     transform: none;
 }
 
+/* ---- [E] 出場位移層：＝原站內層 .char（JS 依 scrollY 直寫 transform） -----
+   ⚠ 這一層不可以有 transition：出場要與捲動 1:1 連動（見檔頭 [6]）；
+     進場的 transition 留在外層 [D]，兩層分開才不會互相拖慢。 */
+.bc-coffee-title__char-inner {
+    display: inline-block;
+    will-change: transform;
+}
+
 /* 空白字元（本頁文案 COFFEE 沒有空白，保留給日後改字用） */
 .bc-coffee-title__space {
     display: inline-block;
     width: 0.22em;
 }
 
-/* ---- [E] 減少動態：不做任何位移（見 [6]） ------------------------------ */
+/* ---- [F] 減少動態：不做任何位移（見 [7]） ------------------------------ */
 @media (prefers-reduced-motion: reduce) {
     .bc-coffee-title__char {
         transform: none !important;
         transition: none !important;
+    }
+
+    .bc-coffee-title__char-inner {
+        transform: none !important;
     }
 }

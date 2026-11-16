@@ -17,7 +17,8 @@
     .bc-coffee-title         ＝ 鋪滿 banner 的覆蓋層（純裝飾、不吃滑鼠事件）
     .bc-coffee-title__pin    ＝ 原站 .pin（托住層；JS 給 translate3d）
     .bc-coffee-title__word   ＝ 原站 h1.init-anim（文字原文就寫在這裡）
-    .bc-coffee-title__char   ＝ 原站 .char（由 JS 產生，不是手寫標記）
+    .bc-coffee-title__char   ＝ 原站外層 .char（進場位移；由 JS 產生）
+    .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移；由 JS 產生）
 
   [為什麼文字直接寫在 h1 內、不在模板拆字]
     沒有 JS（或腳本被阻擋）時，h1 就是完整一行 "COFFEE"、靜態置中於 banner，
@@ -26,7 +27,7 @@
 
   [樣式] static/css/bc-coffee-title.css（由 coffee_menu.html 的 extra_css 載入）
   [腳本] static/js/bc-coffee-title.js（由 coffee_menu.html 的 extra_scripts 載入；
-         拆字進場 ＋ 捲動托住，托住距離＝banner 高度）
+         拆字進場 ＋ 捲動托住 ＋ 捲動時逐字往上跑掉，托住距離＝banner 高＋字高）
   [放置] templates/betweencoffee_delivery/coffee_menu.html 的
          <section class="subpage-banner-h500 …"> 內、.ftco-subpage-banner 之後。
          ⚠ 本模組需要 banner 蓋過下方商品區（css 檔頭 [5]）—— 該頁 inline

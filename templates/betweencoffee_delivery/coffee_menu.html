@@ -6,7 +6,7 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261116a">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261116b">
 {% endblock %}
 
 {% block content %}
@@ -40,12 +40,14 @@
     padding: 0;
   }
   /* 2026-11-16（「COFFEE」巨型字模組）：字被 JS 托住時會離開 banner 往下壓在
-     商品區上方，需要 banner 蓋過後面那個 section。style-bootstrap.css:3340 給
+     商品區上方（托住距離＝banner 高＋字高，桌機 948px，比 banner 長），需要
+     banner 蓋過後面那個 section。style-bootstrap.css:3340 給
      .subpage-banner-h500 的是 z-index:0，而同層的 .ftco-subpage-section 是
      position:relative + z-index:auto，依繪製順序（同在 step 8、依 DOM 順序）
      會反過來蓋住 banner ⇒ 這裡把本頁 banner 提到 1。
-     導覽列 #ftco-navbar 是 z-index:100，仍在大字之上；.svg-bg 的 -1 相對
-     banner 自己的 stacking context，不受影響。 */
+     導覽列 #ftco-navbar 是 z-index:100，仍在大字之上（逐字往上跑掉時會從
+     導覽列後面消失，與原站相同）；.svg-bg 的 -1 相對 banner 自己的
+     stacking context，不受影響。 */
   .subpage-banner-h500.bc-banner-bgonly {
     z-index: 1;
   }
@@ -140,5 +142,5 @@
 
 {# 首屏「COFFEE」巨型字模組的觸發腳本（見 partials/bc_coffee_title.html 檔頭） #}
 {% block extra_scripts %}
-<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261116a"></script>
+<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261116b"></script>
 {% endblock %}
