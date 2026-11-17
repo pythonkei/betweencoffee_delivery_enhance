@@ -123,7 +123,9 @@
 
     position: absolute;
     inset: 0;
-    z-index: 2; /* 高於 .svg-bg（z-index:-1）；導覽列在 banner 之外，不受影響 */
+    z-index: 2; /* 2026-11-17 起低於 banner 內 .svg-bg（該頁 inline 設 z-index:3，
+                  裝飾在字之上）；兩者一起被後面的商品區（banner 外的 sibling
+                  section）蓋過。導覽列在 banner 之外，不受影響。 */
     pointer-events: none; /* 純裝飾層：不擋下方連結／點擊 */
 
     color: var(--bc-text, rgba(255, 255, 255, 0.9));

@@ -6,7 +6,7 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261117a">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261117b">
 {% endblock %}
 
 {% block content %}
@@ -34,10 +34,44 @@
     position: static;
   }
   .subpage-banner-h500.bc-banner-bgonly .svg-bg {
-    top: 0;
-    bottom: 0;
-    height: auto;
     padding: 0;
+    /* 2026-11-17（使用者指示「title_bg_img_01.svg 層級在 COFFEE 字上、產品
+       下層；位置移到 'C'、尺寸放大 20%」）：
+       · 盒模型改成「插畫大小的固定盒」，用 left/top 百分比＋em 對位。原本是
+         width:1080px ＋ left:-4em/-26em/-18em（各斷點不同）搭 background-size:
+         auto，可視位置隨 media query 漂移、也無法對到某個字。
+       · 尺寸／位置全部用 em（em ＝ 本元素字級，這裡刻意跟 .bc-coffee-title
+         的 --bc-ct-fs 設成同一個 min(40vw,448px)）：字與 'C' 的幾何都隨字級
+         等比縮放 ⇒ 一條規則就吃所有斷點（字級由來見 bc-coffee-title.css [3]）。
+       · 放大 20%：原本 background-size:auto 對 540×700 viewBox 等效 contain
+         進 1080×500 盒（實測 scale 0.714、畫出的插畫 335×311）⇒ 現在
+         scale 0.714×1.2＝0.857 ⇒ 圖 540×0.857＝462.9px、700×0.857＝600px，
+         換算 em（÷448）＝1.0332em × 1.3393em；插畫因此是 402×374（原
+         335×311 的 1.2 倍）。
+       · 對位：'C' 的中心 ＝ banner 中心往左 (字寬−C寬)/2＝0.808em、垂直 ＝
+         banner 中心（字在 banner 內垂直置中，見 bc-coffee-title.css [B]）。
+         插畫在圖內的左上角是 (35,111)/540×700 ⇒ 插畫中心距圖左上
+         (269×0.857, 329×0.857)＝(230.6, 282.0)px＝(0.5147em, 0.6295em)，
+         故 left ＝ 50% − 0.808em − 0.5147em、top ＝ 50% − 0.6295em，
+         兩者都落在 C 的正中央（實測 1440：插畫 402×374、中心 (358,350)
+         ＝ C 中心）。
+       · ⚠ 別改回 `width:auto; left:0; right:0`（想「鋪滿 banner 再用
+         background-position 對位」）—— 這個元素在 Chrome 實測會被算成
+         width:0 並自動置中，位置完全不受控。 */
+    left: calc(50% - 1.3227em);
+    top: calc(50% - 0.6295em);
+    right: auto;
+    bottom: auto;
+    width: 1.0332em;
+    height: 1.3393em;
+    margin: 0;
+    font-size: min(40vw, 448px); /* ⚠ 與 .bc-coffee-title 的 --bc-ct-fs 同步 */
+    background-size: 100% 100%; /* 盒比例＝540:700，不會變形 */
+    background-position: 0 0;
+    /* 字（.bc-coffee-title）是 z-index:2，這裡給 3 ⇒ 裝飾在字之上；商品區是
+       banner 之後的 sibling section，整層仍在 banner 之上 ⇒ 不會蓋到商品卡。 */
+    z-index: 3;
+    pointer-events: none; /* 純裝飾：不擋點擊 */
   }
   /* 2026-11-17（使用者指示「文字放在產品下層級」）：先前為讓大字在托住時壓在
      商品區之上，把 banner 提到 z-index:1；現在改回站預設 z-index:0
