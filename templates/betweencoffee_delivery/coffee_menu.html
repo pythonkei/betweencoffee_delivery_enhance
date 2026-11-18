@@ -6,7 +6,7 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261117b">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261117f">
 {% endblock %}
 
 {% block content %}
@@ -68,10 +68,30 @@
     font-size: min(40vw, 448px); /* ⚠ 與 .bc-coffee-title 的 --bc-ct-fs 同步 */
     background-size: 100% 100%; /* 盒比例＝540:700，不會變形 */
     background-position: 0 0;
+    /* 2026-11-17（使用者指示「title_bg_img_01.svg z-index 位置在 COFFEE 文字上」）：
+       堆疊本來就已經對（本元素 3 > 字 2，同屬 section 這個 stacking context），
+       但**看不到它在字上**——原因是 style-bootstrap.css:3367 給
+       `.subpage-banner-h500 .svg-bg` 的 `opacity: 0.06`：6% 的白線疊在
+       rgba(255,255,255,.9) 的白字上等於完全消失（疊在黑底才看得到）⇒ 肉眼看起來
+       像「被字蓋住」。這裡把本頁的透明度蓋掉（選擇器 0,3,0 > 原規則 0,2,0；
+       其他頁面沿用 0.06 不變）。
+       · 0.5＝現在的值：線稿在字上清楚可見、字仍讀得出來；（實測對照 1440）
+         0.3 更含蓄、0.75 以上幾乎變成白色貼紙。要調只改這一行。
+       · 只影響「畫得亮不亮」，不影響 z-index／進場／托住／出場（那些動的是
+         translate／transform）。 */
+    opacity: 0.5;
     /* 字（.bc-coffee-title）是 z-index:2，這裡給 3 ⇒ 裝飾在字之上；商品區是
        banner 之後的 sibling section，整層仍在 banner 之上 ⇒ 不會蓋到商品卡。 */
     z-index: 3;
     pointer-events: none; /* 純裝飾：不擋點擊 */
+    /* 2026-11-17（使用者指示「互動效果和 COFFEE 文字相同」）：本元素同時標記
+       data-bc-coffee-title-bg ⇒ static/js/bc-coffee-title.js 讓它吃與字完全相同
+       的 進場（translate .16em→0）／托住（與 __pin 同一個 hold）／出場
+       （跟第 0 個字 'C' 同節奏，因為插畫就是對在 C 上；要換字可用根的
+       data-bc-ct-bg-char）。這裡的 left/top/width/height 只是「靜態基準
+       位置」（沒有 JS／減少動態時的樣子），動畫寫的是 translate／transform，
+       不會改動這些值。邏輯見 bc-coffee-title.js 檔頭 [裝飾]、bc-coffee-title.css
+       [6b][G]。 */
   }
   /* 2026-11-17（使用者指示「文字放在產品下層級」）：先前為讓大字在托住時壓在
      商品區之上，把 banner 提到 z-index:1；現在改回站預設 z-index:0
@@ -93,7 +113,12 @@
 <!-- Header Banner-->
 <section class="subpage-banner-h500 py-lg-4 bc-banner-bgonly">
   <div class="ftco-subpage-banner" id="section-counter">
-    <div class="svg-bg ftco-counter noise_animation" style="background-image: url({% static 'images/title_bg_img_01.svg' %});"  ></div>
+    <!-- 2026-11-17：bc-coffee-title-bg ＋ data-bc-coffee-title-bg ⇒ 這張背景插畫
+         與「COFFEE」字吃同一套互動（進場／托住／出場），z-index 仍在字之上、
+         商品卡片之下。見本檔上方 inline 說明與 bc-coffee-title.{css,js}。 -->
+    <div class="svg-bg ftco-counter noise_animation bc-coffee-title-bg"
+         data-bc-coffee-title-bg
+         style="background-image: url({% static 'images/title_bg_img_01.svg' %});"></div>
   </div>
   {% comment %}
   2026-11-16（使用者指示「移植 und-ny.com/about/ 首屏 ABOUT US 的 .pin-spacer ＋
@@ -176,5 +201,5 @@
 
 {# 首屏「COFFEE」巨型字模組的觸發腳本（見 partials/bc_coffee_title.html 檔頭） #}
 {% block extra_scripts %}
-<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261116c"></script>
+<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261117d"></script>
 {% endblock %}

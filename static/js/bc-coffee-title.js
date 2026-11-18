@@ -49,6 +49,33 @@
             不會被外層進場的 .95s transition 拖慢。
           ※ 捲回頂端時 p 回到 0，位移清除，字回到原位（可重播）。
 
+   [裝飾] banner 內的背景插畫（coffee_menu.html 的 title_bg_img_01.svg，標記
+          data-bc-coffee-title-bg）吃同一套互動：
+            進場 = 與字相同的起點位移 .16em／時長／曲線（CSS 用 `translate`
+                   屬性做，見 bc-coffee-title.css [G]），延遲 0（＝第一個字 C）。
+                   起點位移的 class（--anim）由本檔加 ⇒ 腳本沒跑時插畫不動。
+            托住＋出場 = 同一支 JS 直接寫 inline transform
+                   translate3d(0, hold ＋ y, 0)
+                   · hold 與 __pin 完全相同（所以插畫跟字一起被托住、不會先滑走）
+                   · y 與「插畫對齊的那個字」相同 ⇒ 一路保持對齊（預設第 0 個字
+                     ＝C，因為插畫就是以 C 為中心對位；可用根的
+                     data-bc-ct-bg-char="1" 改成跟第 2 個字一起走）
+            用 `translate`（進場）＋ `transform`（捲動）兩條屬性相加，所以插畫
+            不需要像字那樣拆內外兩層。
+            ⚠ 不要改成在 CSS 給插畫 `transform` 起點位移：JS 的 inline transform
+              會整組覆蓋，進場就消失。`.noise_animation` 自己的
+              transform: translate3d(0,0,0)（animate-custom.css:186）會被 inline
+              蓋掉，不影響。
+
+   [kicker] 左上角「( Line Up )」小標（2026-11-17 使用者指示，仿 index.html 的
+          .section-title--left (About)）：外觀與展開動畫全在 CSS（bc-coffee-title.css
+          [H]，載入即播一次，不需要 JS）。本檔只負責「出場」：
+            它在 __pin 內 ⇒ 已隨 ① 被托住，這裡只要補 ② 的位移，
+            沿用第 0 個字（＝最左邊的 C、最外側最早出發）的 local／y
+            ⇒ 字的 C 往上飛時，小標也跟著一起離開畫面，不會單獨留在托住的字上。
+          ⚠ 位移寫在 `transform`，CSS 的位置用 `translate` 屬性（兩條屬性相加）
+            ⇒ 不會互相覆蓋（跟 [裝飾] 同一招）。
+
    [效能] 捲動用 requestAnimationFrame 節流，且值沒變就不寫 style；幾何
           （banner 高度／字高）只在 init 與 resize 量測，不在捲動中讀 offsetHeight。
 
@@ -65,6 +92,8 @@
   var EXIT_START = 0.3;
   // 出場：中央字先走、邊緣字最晚，最多落後 28% 的出場區間（原站約 190px）
   var EXIT_SPREAD = 0.28;
+  // 裝飾層（banner 內背景插畫）的標記，見檔頭 [裝飾]
+  var BG_SELECTOR = "[data-bc-coffee-title-bg]";
 
   function clamp01(value) {
     return value < 0 ? 0 : value > 1 ? 1 : value;
@@ -122,6 +151,7 @@
   function init(root) {
     var word = root.querySelector(".bc-coffee-title__word");
     var pin = root.querySelector(".bc-coffee-title__pin");
+    var kicker = root.querySelector(".bc-coffee-title__kicker");
     var banner = root.closest ? root.closest(".subpage-banner-h500") : null;
     if (!word || !pin || !banner) return;
 
@@ -137,10 +167,29 @@
     if (chars.length) {
       // 強制一次樣式計算，確保起點位移已經生效，下一帧的 .is-ready 才會轉場
       void word.offsetWidth;
-      requestAnimationFrame(function () {
-        root.classList.add("is-ready");
-      });
     }
+
+    /* ---- ①b 裝飾層（見檔頭 [裝飾]）：先進場（起點位移由 CSS [G] 的
+       .bc-coffee-title-bg--anim 給），下一帧再加 .is-ready 讓它跟字一起收回原位。
+       --anim 只有 JS 會加 ⇒ 沒有 JS／腳本被擋時插畫停在靜態基準位置。
+       ⚠ 加 --anim 前要先關掉 transition：這個元素本來是 translate:none，直接
+         加 class 會先跑一段 0 → .16em 的過渡、緊接著 is-ready 又拉回 0，
+         結果完全看不到進場（字沒有這問題，因為 span 是 JS 新建的、出生就帶
+         起點位移，不會有「上一版的值」）。 ---- */
+    var bgs = banner.querySelectorAll(BG_SELECTOR);
+    for (var b = 0; b < bgs.length; b++) {
+      var bgEl = bgs[b];
+      bgEl.style.transition = "none";
+      bgEl.classList.add("bc-coffee-title-bg--anim");
+      void bgEl.offsetWidth;      // 強制 reflow：讓 0.16em 成為已渲染的起點
+      bgEl.style.transition = ""; // 交回 CSS 的 --bc-ct-dur／--bc-ct-ease
+      void bgEl.offsetWidth;      // 再 flush 一次，確認過渡已重新掛上
+    }
+
+    requestAnimationFrame(function () {
+      if (chars.length) root.classList.add("is-ready");
+      for (var b = 0; b < bgs.length; b++) bgs[b].classList.add("is-ready");
+    });
 
     /* ---- ② 出場：每字的起始偏移（中央 0 → 邊緣最大） ---- */
     var count = chars.length;
@@ -150,10 +199,20 @@
       offsets.push(mid > 0 ? (Math.abs(i - mid) / mid) * EXIT_SPREAD : 0);
     }
 
+    /* ---- ②b 裝飾層跟哪一個字一起出場（預設第 0 個＝C，見檔頭 [裝飾]） ---- */
+    var bgCount = bgs.length;
+    var bgOffset = 0;
+    if (bgCount && count) {
+      var bgChar = parseInt(root.getAttribute("data-bc-ct-bg-char") || "0", 10);
+      if (isNaN(bgChar) || bgChar < 0 || bgChar > count - 1) bgChar = 0;
+      bgOffset = offsets[bgChar];
+    }
+
     /* ---- ③ 幾何：只在 init／resize 量測（見檔頭 [效能]） ---- */
     var geo = { holdMax: 0, start: 0, span: 0, lift: 0 };
     var lastHold = -1;
     var lastP = -1;
+    var lastBg = null;
 
     function measure() {
       var bannerH = banner.offsetHeight;
@@ -174,6 +233,7 @@
       // 幾何變了 ⇒ 下一次 update 一定要重算
       lastHold = -1;
       lastP = -1;
+      lastBg = null;
     }
 
     var ticking = false;
@@ -185,7 +245,8 @@
 
       /* ① 托住：頁面往上跑了 d px，字就往下補 d px（正號，見檔頭 [托住]） */
       var hold = Math.min(scroll, geo.holdMax);
-      if (hold !== lastHold) {
+      var holdChanged = hold !== lastHold;
+      if (holdChanged) {
         lastHold = hold;
         if (hold > 0) {
           pin.style.transform = "translate3d(0, " + hold + "px, 0)";
@@ -196,20 +257,59 @@
 
       /* ② 出場：每個字各自往上滾出（見檔頭 [出場]） */
       var p = geo.span > 0 ? clamp01((scroll - geo.start) / geo.span) : 0;
-      if (p === lastP) return;
-      lastP = p;
+      var pChanged = p !== lastP;
 
-      for (var i = 0; i < count; i++) {
-        var inner = chars[i].firstElementChild;
-        if (!inner) continue;
+      if (pChanged) {
+        lastP = p;
 
-        var local = clamp01((p - offsets[i]) / (1 - EXIT_SPREAD));
-        var y = geo.lift * easeInOut(local);
+        for (var i = 0; i < count; i++) {
+          var inner = chars[i].firstElementChild;
+          if (!inner) continue;
 
-        if (y < -0.05) {
-          inner.style.transform = "translate3d(0, " + y.toFixed(2) + "px, 0)";
-        } else if (inner.style.transform) {
-          inner.style.transform = "";
+          var local = clamp01((p - offsets[i]) / (1 - EXIT_SPREAD));
+          var y = geo.lift * easeInOut(local);
+
+          if (y < -0.05) {
+            inner.style.transform = "translate3d(0, " + y.toFixed(2) + "px, 0)";
+          } else if (inner.style.transform) {
+            inner.style.transform = "";
+          }
+        }
+
+        /* ④ 左上角 kicker（見檔頭 [kicker]）：跟第 0 個字（C）一起出場。
+              它在 __pin 內，托住已由 ① 負責 ⇒ 這裡只補出場位移；
+              local 直接取最外側那個字的值，不再另外算一次。 */
+        if (kicker && count) {
+          var kLocal = clamp01((p - offsets[0]) / (1 - EXIT_SPREAD));
+          var kY = geo.lift * easeInOut(kLocal);
+
+          if (kY < -0.05) {
+            kicker.style.transform = "translate3d(0, " + kY.toFixed(2) + "px, 0)";
+          } else if (kicker.style.transform) {
+            kicker.style.transform = "";
+          }
+        }
+      }
+
+      /* ③ 裝飾層：托住 ＋ 出場寫成同一個 transform（兩者在同一元素上相加，
+            見檔頭 [裝飾]）；hold 或 p 任一變了就要重算 */
+      if (bgCount && (holdChanged || pChanged)) {
+        var bgLocal = clamp01((p - bgOffset) / (1 - EXIT_SPREAD));
+        var bgTotal = hold + geo.lift * easeInOut(bgLocal);
+
+        if (lastBg === null || Math.abs(bgTotal - lastBg) > 0.01) {
+          lastBg = bgTotal;
+
+          var bgTransform =
+            Math.abs(bgTotal) < 0.05
+              ? ""
+              : "translate3d(0, " + bgTotal.toFixed(2) + "px, 0)";
+
+          for (var b = 0; b < bgCount; b++) {
+            if (bgs[b].style.transform !== bgTransform) {
+              bgs[b].style.transform = bgTransform;
+            }
+          }
         }
       }
     }

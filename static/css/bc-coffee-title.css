@@ -27,6 +27,9 @@
          .bc-coffee-title__word    ＝ 原站 h1.init-anim
          .bc-coffee-title__char    ＝ 原站外層 .char（進場位移）
          .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移）
+         （2026-11-17 新增，見 [H]）
+         .bc-coffee-title__stage   ＝ 一格 grid：字與左上角 kicker 疊在同一格
+         .bc-coffee-title__kicker  ＝ 字的左上角小標「( Line Up )」
 
    [2] 與原站的三個必要差異（其餘照抄）
        ① 原站是白底黑字、字高 510px 佔滿整個首屏；本頁 banner 只有 500px
@@ -106,6 +109,17 @@
          就全部跑光，節奏比原站快一倍；取 1em 級又不夠，字會卡在導覽列附近
          （手機更明顯）。
 
+   [6b] 裝飾層（title_bg_img_01.svg）＝與字同一套互動（2026-11-17 使用者指示
+        「互動效果和 COFFEE 文字相同、z-index 在 COFFEE 文字上」）
+        · 進場：起點位移 .16em、同一組 --bc-ct-dur／--bc-ct-ease、delay 0
+          （＝第一個字 C；字是 from edges，C 本來就是 delay 0）
+        · 托住＋出場：bc-coffee-title.js 對它寫 inline transform
+          translate3d(0, hold ＋ y, 0)，hold 與 __pin 相同、y 與 C 相同
+          ⇒ 全程貼著 C，不會先滑走。
+        · 技術重點：進場走 `translate` 屬性、捲動走 `transform` 屬性 —— 兩條屬性
+          會相加、互不覆蓋；若都用 transform，JS 一寫就整條被蓋掉（進場消失）。
+          插畫因此不需要像字那樣拆內外兩層。見 [G]。
+
    [7] 無 JS／減少動態
        · 沒有 JS：不拆字、不托住、不出場 ⇒ 靜態巨型字置中於 banner，版面與
          動畫終態相同（只有「大字不隨捲動托住／跑掉」這項差異）。
@@ -114,12 +128,19 @@
          transform 歸零，即使拆字已發生也不會位移。
    ============================================================ */
 
+/* ---- [A0] 字與裝飾層共用的時長／曲線 -------------------------------------
+   兩者是不同元素（裝飾層 .svg-bg 不在 .bc-coffee-title 內），變數不能只掛在
+   字上，故在此共用宣告；見 [4] 與 [G]。 */
+.bc-coffee-title,
+.bc-coffee-title-bg {
+    --bc-ct-dur: 0.95s;           /* 見 [4] */
+    --bc-ct-ease: cubic-bezier(0.22, 1, 0.36, 1); /* ≈ GSAP power4.out */
+}
+
 /* ---- [A] 根節點：鋪滿 banner 的覆蓋層（不吃滑鼠事件、不畫底色） -------- */
 .bc-coffee-title {
     /* 見 [3]；2026-11-17 使用者要求整體縮 20%（50vw→40vw、560→448） */
     --bc-ct-fs: min(40vw, 448px);
-    --bc-ct-dur: 0.95s;           /* 見 [4] */
-    --bc-ct-ease: cubic-bezier(0.22, 1, 0.36, 1); /* ≈ GSAP power4.out */
 
     position: absolute;
     inset: 0;
@@ -190,6 +211,133 @@
     width: 0.22em;
 }
 
+/* ---- [G] 裝飾層：banner 內背景插畫（title_bg_img_01.svg）＝與字同一套互動 ---
+   HTML：coffee_menu.html 的 <div class="svg-bg … bc-coffee-title-bg"
+         data-bc-coffee-title-bg>（定位用的 inline 區塊留在該模板，因為那組
+         width/height/left/top 的 em 數字綁本頁 banner 與字級）
+   · 這裡只負責「進場」：與字相同的起點位移 .16em、同一組 --bc-ct-dur／
+     --bc-ct-ease、delay 0（＝第一個字 C）。
+   · 起點位移掛在 JS 才加的 .bc-coffee-title-bg--anim（＝字的 .bc-coffee-title__char
+     做法）：沒有 JS 時插畫就是靜態基準位置，不會卡在下方的位移狀態。
+     JS 順序：關掉 transition ⇒ 加 --anim ⇒ 強制 reflow ⇒ 還原 transition
+     ⇒ 下一帧加 .is-ready 收回原位（關掉過渡那步不可省，見 js ①b 的說明）。
+   · 托住＋出場由 bc-coffee-title.js 寫 inline transform（見 [6b]/[7]）。
+   ⚠ 進場一定要用 `translate` 屬性、不可用 transform：捲動時 JS 寫的 inline
+     transform 會整條覆蓋掉 CSS 的 transform（進場直接消失）；`translate` 與
+     `transform` 是兩條獨立屬性，會依序相加（translate → rotate → scale →
+     transform）。
+   ⚠ `.noise_animation` 這個 class 自帶 transform: translate3d(0,0,0)
+     （animate-custom.css:186）會被 JS 的 inline transform 蓋過，不衝突。 */
+.bc-coffee-title-bg--anim {
+    translate: 0 0.16em;
+    transition: translate var(--bc-ct-dur) var(--bc-ct-ease);
+    will-change: transform, translate; /* 兩條屬性都會動：translate＝進場、transform＝捲動 */
+}
+
+.bc-coffee-title-bg--anim.is-ready {
+    translate: none;
+}
+
+/* ---- [H] 左上角 kicker：`( Line Up )`（2026-11-17 使用者指示） ------------
+   使用者原話：「在 COFFEE 文字左上角新增文字 (Line Up) 和相同互動效果，
+   顯示文字和效果與 index.html .section-title section-title--left (About) 相同」
+   ------------------------------------------------------------
+   外觀／效果來源＝首頁 who section 的 kicker（index.html:336-347）：
+     .section-title__kicker > .sukima-parenthis-anim
+       · 括號列 ( )：scale(0) → scale(1)，0.5s cubic-bezier(.25,1,.5,1)
+       · 中間的字：max-width 0 → 133px（overflow:hidden 逐字吐出），
+         0.8s ease、延遲 0.3s
+   本站唯一差異是「觸發方式」：
+     首頁靠 bc-who.js 的 IntersectionObserver 在 section 進視口時加 .show；
+     本頁 banner 就是第一屏，等同載入即觸發 ⇒ 直接用 CSS animation 播一次
+     （fill-mode: both ⇒ 延遲期間停在收起的起點），不必新增 JS。
+   ------------------------------------------------------------
+   版面（見 partial 檔頭說明）：
+     .bc-coffee-title__stage   一格 grid，h1 與 kicker 疊在同一格。
+     .bc-coffee-title__kicker  左緣＝字左緣（justify-self:start），
+                               再 translate 往上移「自身高度＋8px」
+                               ⇒ 貼在字的左上角外側。
+   ⚠ stage 必須保持 static（不可 position:relative／absolute）：字在 pin 內靠
+     grid 置中，bc-coffee-title.js 的 measure() 用 word.offsetTop 算出場距離
+     （geo.lift）；stage 一旦變成定位元素就會攔走 word 的 offsetParent、
+     offsetTop 變 0，出場距離會少算「置中偏移」那一段（字跑不乾淨）。
+   ⚠ 本層繼承 .bc-coffee-title 的 trade-gothic 巨型字級 ⇒ 字型與字級都在這裡
+     改寫（只寫 font-size 會留下巨型字的 condensed 字型）。
+   ------------------------------------------------------------------------- */
+.bc-coffee-title__stage {
+    display: grid;
+}
+
+/* 兩個子元素疊在同一格（1/1）：寬高仍由字決定，kicker 不會撐大版面 */
+.bc-coffee-title__stage > * {
+    grid-area: 1 / 1;
+}
+
+.bc-coffee-title__kicker {
+    margin: 0;
+    align-self: start;
+    justify-self: start;
+    /* 往上一個自身高度＋8px：字框頂再往上（見上方版面說明） */
+    translate: 0 calc(-100% - 8px);
+    font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 18px; /* 同首頁 .bc-who-section .who-kicker（≥834 21px、≥1920 26px） */
+    font-weight: 400;
+    /* 標籤會 overflow:hidden 裁切 ⇒ 行高要容得下 "Up" 的 p 字尾 */
+    line-height: 1.5;
+    letter-spacing: normal;
+    white-space: nowrap;
+    color: #fff; /* 同首頁 .sukima-parenthesis／.sukima-label */
+}
+
+/* 括號列＝首頁 .sukima-parenthis-anim（同 gap／同時長／同曲線） */
+.bc-coffee-title__kicker-anim {
+    display: flex;
+    gap: 4px;
+    /* 終態（動畫沒跑／減少動態時就是這個樣子） */
+    transform: none;
+    animation: bc-ct-kicker-pop 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.55s both;
+}
+
+/* 中間的字＝首頁 .sukima-label（max-width 0 → var(--label-width)、0.8s ease、
+   延遲 0.3s；首頁變數值 133px 見 bc-who.css:70）
+   0.85s ＝ 括號列起點（上面 0.55s）＋ 首頁的 0.3s 相對延遲 */
+.bc-coffee-title__kicker-label {
+    overflow: hidden;
+    max-width: var(--bc-ct-kicker-label-w, 133px);
+    animation: bc-ct-kicker-unroll 0.8s ease 0.85s both;
+}
+
+@keyframes bc-ct-kicker-pop {
+    from {
+        transform: scale(0) translateZ(0);
+    }
+    to {
+        transform: scale(1) translateZ(0);
+    }
+}
+
+@keyframes bc-ct-kicker-unroll {
+    from {
+        max-width: 0;
+    }
+    to {
+        max-width: var(--bc-ct-kicker-label-w, 133px);
+    }
+}
+
+/* 字級斷點：與首頁 who-kicker 完全一致（834／1920） */
+@media (min-width: 834px) {
+    .bc-coffee-title__kicker {
+        font-size: 21px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .bc-coffee-title__kicker {
+        font-size: 26px;
+    }
+}
+
 /* ---- [F] 減少動態：不做任何位移（見 [7]） ------------------------------ */
 @media (prefers-reduced-motion: reduce) {
     .bc-coffee-title__char {
@@ -199,5 +347,19 @@
 
     .bc-coffee-title__char-inner {
         transform: none !important;
+    }
+
+    /* 裝飾層（見 [G]）：JS 已整支跳過，這裡再加一層保險 */
+    .bc-coffee-title-bg--anim {
+        translate: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+
+    /* 左上角 kicker（見 [H]）：不播動畫；兩個元素的「終態」就是 CSS 基準值
+       （括號列 transform:none、標籤 max-width 已展開）⇒ 直接顯示完整字樣 */
+    .bc-coffee-title__kicker-anim,
+    .bc-coffee-title__kicker-label {
+        animation: none !important;
     }
 }

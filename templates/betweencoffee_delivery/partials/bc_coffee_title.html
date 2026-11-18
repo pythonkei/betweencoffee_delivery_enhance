@@ -34,10 +34,37 @@
            z-index:0，見 css 檔頭 [5] 末尾與 coffee_menu.html 的 inline 說明）：
            搬到別頁時若要字蓋在內容之上，必須自行調整該頁 banner／內容的
            z-index，否則大字會被後方 section 遮住。
+
+  [左上角 kicker「( Line Up )」（2026-11-17 使用者指示）]
+    使用者原話：「在 COFFEE 文字左上角新增文字 (Line Up) 和相同互動效果，
+    顯示文字和效果與 index.html .section-title section-title--left (About) 相同」
+    · 外觀／效果照抄首頁 who section 的 kicker（index.html:336-347 的
+      .section-title__kicker > .sukima-parenthis-anim）：( ) 由 scale(0) 彈出
+      0.5s cubic-bezier(.25,1,.5,1)，中間的字再由 max-width 0 → 100px 展開
+      0.8s ease、延遲 0.3s。本頁把該組 CSS transition 改成 CSS animation，
+      掛在 .bc-coffee-title__kicker-anim／__kicker-label（見 css [H]）：
+      banner 就是第一屏，「進視口觸發一次」＝載入後播一次 ⇒ 不需要
+      IntersectionObserver，也不新增 JS。
+    · 位置：.bc-coffee-title__stage 是一格 grid，h1 與 kicker 疊在同一格
+      ⇒ kicker 的 left 0 ＝ 字的左緣；再 translate 往上移自身高度＋8px
+      ⇒ 貼在字的左上角外側（大字 line-height 0.8，字框頂比字形頂還高，
+      從字框頂往上移看起來就是「字形的左上角」）。
+    · ⚠ stage 必須是 **非定位**（static）元素：字在 pin 內靠 grid 置中，
+      bc-coffee-title.js 的 measure() 用 word.offsetTop 算捲動出場距離
+      （geo.lift）；一旦 stage 變成 position:relative，word.offsetParent
+      會變成 stage、offsetTop 變 0，出場距離會少算一個「置中偏移」。
+    · ⚠ kicker 不能放進 h1：bc-coffee-title.js 的 splitChars() 會
+      word.textContent = "" 後逐字重建 ⇒ 會被清掉。
+
 ============================================================
 {% endcomment %}
 <div class="bc-coffee-title" data-bc-coffee-title>
     <div class="bc-coffee-title__pin">
-        <h1 class="bc-coffee-title__word">COFFEE</h1>
+        <div class="bc-coffee-title__stage">
+            <h1 class="bc-coffee-title__word">COFFEE</h1>
+            <p class="bc-coffee-title__kicker">
+                <span class="bc-coffee-title__kicker-anim"><span class="bc-coffee-title__parenthis">(</span><span class="bc-coffee-title__kicker-label">Line Up</span><span class="bc-coffee-title__parenthis">)</span></span>
+            </p>
+        </div>
     </div>
 </div>
