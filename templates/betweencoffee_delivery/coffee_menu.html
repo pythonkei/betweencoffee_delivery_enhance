@@ -6,7 +6,7 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261118f">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261118g">
 {% endblock %}
 
 {% block content %}
@@ -18,20 +18,20 @@
         __pin 的 place-items:center 把整組（含 ( Line Up )）置中。
         ⇒ 這裡不再需要 absolute／em 對位，left/top/right/bottom 全部交還 grid。
      ② 只剩三件事：尺寸、比例、白色不透明。
-     ③ 尺寸 width:min(0.62em, calc(100vw - 2.072em - 2vw))（em ＝ 大字字級：
+     ③ 尺寸 width:min(0.86em, calc(100vw - 2.072em - 2vw))（em ＝ 大字字級：
         本元素在 .bc-coffee-title 內，font-size 繼承其 --bc-ct-fs＝
         min(40vw,448px)）。兩項各是一個上限，取小：
-        · 0.62em：大螢幕上限 ⇒ 277.8×360，插畫高 ＝ 字框高（358.4）
-          ⇒ 視覺上「與字同高」（2026-11-18 使用者要求「放大」：原
-          0.52em＝233×302，只有字框的 84%）。
+        · 0.86em：大螢幕上限 ⇒ 385.3×499.4（≒ banner 的 500px 高）
+          ⇒ 插畫高 499.4 ＝ 字框（358.4）的 1.39 倍，視覺上是左側主視覺
+          （2026-11-18 兩次放大：原 0.52em＝233×302 → 0.62em＝277.8×360
+           「與字同高」→ 0.86em）。
         · calc(100vw − 2.072em − 2vw)：可用寬度不足時的上限。
           2.072em ＝ 字寬 1.972em ＋ 本元素右側間距 0.1em（兩者都是 em，
-          隨字級等比縮放）；再扣 2vw ＝ 兩側各留 1vw 呼吸。
-          字級封頂（≥1120px）之後多出來的寬度幾乎都給插畫 ⇒ 1120 → 169.3、
-          1180 → 228.1、1240 以上 → 277.8（＝0.62em 上限）；
-          手機與原本幾乎相同（390 → 58.9、320 → 48.6）—— 窄螢幕的剩餘寬度
-          本來就只有約 17vw（COFFEE 佔 78.9vw），再大就會撐出水平捲軸。
-        ⇒ 實測 320/360/390/430/768/1024/1180/1440/1920 都沒有水平捲軸。
+          隨字級等比縮放）；再扣 2vw ＝ 兩側各留 1vw 呼吸 ⇒ 插畫永遠塞得進去。
+          約 1240px 以下由這一項接管（1280 → 326.1、1180 → 228.1、1120 → 169.3、
+          1024 → 154.8、768 → 116.1、390 → 59）—— 窄螢幕的剩餘寬度本來就
+          只有約 17vw（COFFEE 佔 78.9vw），要在手機再大只能縮小大字字級。
+        ⇒ 實測 320~1920 共 10 個寬度都沒有水平捲軸。
      ④ aspect-ratio 540/700（＝原 viewBox 比例）＋ background-size:100% 100%
         ⇒ 任何尺寸都不變形。
      ⑤ opacity:1（原 0.5）：使用者指示「白色、不透明」。插畫本身是 fill:#fff，
@@ -44,10 +44,21 @@
     right: auto;
     bottom: auto;
     left: auto;
-    width: min(0.62em, calc(100vw - 2.072em - 2vw));
+    width: min(0.86em, calc(100vw - 2.072em - 2vw));
     height: auto;
     aspect-ratio: 540 / 700;
-    margin: 0 0.1em 0 0; /* 與 COFFEE 的間距（0.1em ≈ 44.8px @448） */
+    /* 上下等量負 margin：插畫（0.86em 寬 ⇒ 高 0.86 × 700/540 ＝ 1.1148em）比字框
+       （line-height .8 ⇒ 0.8em）高，grid 會把「那一列」撐成插畫高 ⇒ 同格的
+       kicker（align-self:start）會被推到列頂，離 'C' 墨跡頂約 (1.1148−0.8)/2
+       ＝ 0.1574em（@448 ≈ 70px）——看起來 kicker 飄在字上方。
+       給上下各 −0.1574em 後：插畫佔的列高 ＝ 1.1148 − 2×0.1574 ＝ 0.8em
+       ＝ 字框高 ⇒ 列高回到由字決定，kicker 重新對齊 'C' 墨跡頂；
+       插畫本身是 align-items:center（見 bc-coffee-title.css 的 __stage），
+       對稱負 margin 不改中心點 ⇒ 視覺位置與不加時完全相同（只是溢出列外，
+       overflow 都是 visible）。
+       ⚠ 窄螢幕插畫比字還小（由 calc 那項決定）⇒ 負 margin 把貢獻壓成負值，
+         列高仍由字決定，結果一樣正確，不必另寫斷點。 */
+    margin: -0.1574em 0.1em -0.1574em 0; /* 0.1em ＝ 與 COFFEE 的間距（@448 ≈ 44.8px） */
     padding: 0;
     background-size: 100% 100%;
     background-position: 0 0;

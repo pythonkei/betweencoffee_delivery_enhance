@@ -235,10 +235,14 @@
      JS 順序：關掉 transition ⇒ 加 --anim ⇒ 強制 reflow ⇒ 還原 transition
      ⇒ 下一帧加 .is-ready 收回原位（關掉過渡那步不可省，見 js ①b 的說明）。
    · 托住＋出場由 bc-coffee-title.js 寫 inline transform（見 [6b]/[7]）。
-   · 尺寸（2026-11-18 使用者要求「放大」）：coffee_menu.html 的 inline
-     width: min(0.62em, calc(100vw - 2.072em - 2vw)) ⇒ 大螢幕 277.8×360
-     （插畫高 ＝ 字框高 358.4、與字同高）；窄螢幕由 calc 那項讓出剩餘寬度，
-     不會撐出水平捲軸。比例與白色不透明也在同一段 inline。
+   · 尺寸（2026-11-18 使用者兩次要求「放大」）：coffee_menu.html 的 inline
+     width: min(0.86em, calc(100vw - 2.072em - 2vw)) ⇒ 大螢幕 385.3×499.4
+     （≒ banner 的 500px 高；插畫高 ＝ 字框 358.4 的 1.39 倍），
+     窄螢幕（約 <1240px）由 calc 那項讓出剩餘寬度（1280 → 326.1、1180 → 228.1、
+     390 → 59），不會撐出水平捲軸。比例與白色不透明也在同一段 inline。
+     ⚠ 插畫比字框（0.8em）高 ⇒ 會把 grid 那一列撐高，害 kicker（align-self:start）
+       偏離 'C' 墨跡頂；inline 用上下各 -0.1574em 的等量負 margin 抵掉，列高回到
+       由字決定（詳見 coffee_menu.html 的 inline 註解）。
    ⚠ 進場一定要用 `translate` 屬性、不可用 transform：捲動時 JS 寫的 inline
      transform 會整條覆蓋掉 CSS 的 transform（進場直接消失）；`translate` 與
      `transform` 是兩條獨立屬性，會依序相加（translate → rotate → scale →
