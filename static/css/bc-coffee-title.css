@@ -29,7 +29,7 @@
          .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移）
          （2026-11-17 新增，見 [H]）
          .bc-coffee-title__stage   ＝ 一格 grid：字與左上角 kicker 疊在同一格
-         .bc-coffee-title__kicker  ＝ 字的左上角小標「( Line Up )」
+         .bc-coffee-title__kicker  ＝ 字的左上角小標「( Line Up )」（2026-11-18 起為直排）
 
    [2] 與原站的三個必要差異（其餘照抄）
        ① 原站是白底黑字、字高 510px 佔滿整個首屏；本頁 banner 只有 500px
@@ -141,6 +141,14 @@
 .bc-coffee-title {
     /* 見 [3]；2026-11-17 使用者要求整體縮 20%（50vw→40vw、560→448） */
     --bc-ct-fs: min(40vw, 448px);
+    /* 大字「墨跡頂」相對「字框頂」的偏移（em，乘 --bc-ct-fs 即為 px）。
+       字框頂 ≠ 字形頂：line-height .8 讓 half-leading 變負值。
+       2026-11-18 以 canvas measureText 實測 trade-gothic @448px：
+         fontBoundingBox ascent 433／descent 104 ⇒ half-leading -89.3px
+         'C' actualBoundingBoxAscent 336 ⇒ 墨跡頂 = -89.3 + (433-336) = 7.7px
+         ⇒ 7.7 / 448 = 0.0172em（等比例，任何斷點都成立）
+       用途：直排 kicker 的欄頂要對齊 'C' 頂（見 [H1]）。 */
+    --bc-ct-cap-offset: 0.0172;
 
     position: absolute;
     inset: 0;
@@ -238,25 +246,42 @@
     translate: none;
 }
 
-/* ---- [H] 左上角 kicker：`( Line Up )`（2026-11-17 使用者指示） ------------
-   使用者原話：「在 COFFEE 文字左上角新增文字 (Line Up) 和相同互動效果，
+/* ---- [H] 左上角 kicker：`( Line Up )` 直排（2026-11-17 建立／2026-11-18 改直排）
+   使用者原話（11-17）：「在 COFFEE 文字左上角新增文字 (Line Up) 和相同互動效果，
    顯示文字和效果與 index.html .section-title section-title--left (About) 相同」
+   使用者原話（11-18）：「將（Line Up）更改為垂直文本, 位置在'C'左上角,
+   保留 'C'頂部相一對齊, 保留互動效果」
    ------------------------------------------------------------
    外觀／效果來源＝首頁 who section 的 kicker（index.html:336-347）：
      .section-title__kicker > .sukima-parenthis-anim
        · 括號列 ( )：scale(0) → scale(1)，0.5s cubic-bezier(.25,1,.5,1)
-       · 中間的字：max-width 0 → 133px（overflow:hidden 逐字吐出），
+       · 中間的字：展開 0 → 全長（overflow:hidden 逐字吐出），
          0.8s ease、延遲 0.3s
    本站唯一差異是「觸發方式」：
      首頁靠 bc-who.js 的 IntersectionObserver 在 section 進視口時加 .show；
      本頁 banner 就是第一屏，等同載入即觸發 ⇒ 直接用 CSS animation 播一次
      （fill-mode: both ⇒ 延遲期間停在收起的起點），不必新增 JS。
+
+   [H1] 直排版面（2026-11-18 使用者指示）
+     · 寫法：kicker 自己 writing-mode: vertical-rl ＋ text-orientation: upright
+       ⇒ 文字由上往下、拉丁字母「站直」逐字堆疊（不是整串轉 90°）。
+     · 位置：仍在 stage 的同一格（grid-area 1/1）、align-self／justify-self start，
+       再用 translate 兩軸各推一段：
+         X = -(自身寬度 + 8px)        ⇒ 直排欄貼在 'C' 字框左緣外側
+         Y = +(--bc-ct-fs × 0.0172)   ⇒ 欄頂對齊 'C' 的「墨跡頂」（見 [A] 變數說明）
+       ⚠ 不可用「字框頂」對齊：line-height .8 讓半行距是負的，字框頂比字形頂高
+         7.7px（@448），直接對齊會看起來低一截。
+     · 欄長：字級改成跟著大字走 clamp(10.5px, --bc-ct-fs × .045, 20px)
+       ⇒ 整串 ( Line Up ) 的長度 ≈ 'C' 字高的 0.6 倍（手機 ≈0.9 倍），
+       不會出現「手機大字變小、直排欄卻比字還長」的失衡
+       （原本固定 18px，在 390 時欄長會是 C 字高的 1.6 倍）。
+     · 直排時 line-height 是「欄的厚度」不是行高 ⇒ 不可留橫排的 1.5。
+     · 括號要 rotate:90deg 才會「躺平」成直排的 ︵／︶；rotate 是獨立屬性，
+       不影響 flex 排版與 gap，也不會蓋掉 [D] 字的進場 transform。
    ------------------------------------------------------------
    版面（見 partial 檔頭說明）：
      .bc-coffee-title__stage   一格 grid，h1 與 kicker 疊在同一格。
-     .bc-coffee-title__kicker  左緣＝字左緣（justify-self:start），
-                               再 translate 往上移「自身高度＋8px」
-                               ⇒ 貼在字的左上角外側。
+     .bc-coffee-title__kicker  直排欄，貼在字的左上角外側（見 [H1]）。
    ⚠ stage 必須保持 static（不可 position:relative／absolute）：字在 pin 內靠
      grid 置中，bc-coffee-title.js 的 measure() 用 word.offsetTop 算出場距離
      （geo.lift）；stage 一旦變成定位元素就會攔走 word 的 offsetParent、
@@ -277,16 +302,33 @@
     margin: 0;
     align-self: start;
     justify-self: start;
-    /* 往上一個自身高度＋8px：字框頂再往上（見上方版面說明） */
-    translate: 0 calc(-100% - 8px);
+    /* 直排欄位置：左＝字框左緣再往左一個自身寬度＋8px；下＝對齊 'C' 墨跡頂
+       （兩軸各自獨立，見 [H1]） */
+    translate: calc(-100% - 8px) calc(var(--bc-ct-fs) * var(--bc-ct-cap-offset, 0.0172));
+
+    /* 直排：由上往下 ＋ 拉丁字母直立堆疊（不旋轉） */
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+
     font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 18px; /* 同首頁 .bc-who-section .who-kicker（≥834 21px、≥1920 26px） */
+    /* 跟著大字等比縮放（見 [H1] 欄長）：桌機 20px、390 時 10.5px */
+    font-size: clamp(10.5px, calc(var(--bc-ct-fs) * 0.045), 20px);
     font-weight: 400;
-    /* 標籤會 overflow:hidden 裁切 ⇒ 行高要容得下 "Up" 的 p 字尾 */
-    line-height: 1.5;
-    letter-spacing: normal;
+    /* 直排時 line-height ＝ 欄的厚度；標籤會被 overflow:hidden 裁切，
+       厚度只需容得下單一字母（1em）＋一點呼吸空間 */
+    line-height: 1.1;
+    /* 直立字母之間的節奏；同時決定標籤長度（7 字 × 1.04em ＝ 7.28em，
+       故 __kicker-label 的展開長度變數取 7.4em，見下） */
+    letter-spacing: 0.04em;
     white-space: nowrap;
     color: #fff; /* 同首頁 .sukima-parenthesis／.sukima-label */
+}
+
+/* 直排的括號：轉 90° 才是直排的開／閉括號（︵ ／ ︶）。
+   用獨立屬性 rotate（不佔 flex 排版、也不動 transform） */
+.bc-coffee-title__parenthis {
+    display: inline-block;
+    rotate: 90deg;
 }
 
 /* 括號列＝首頁 .sukima-parenthis-anim（同 gap／同時長／同曲線） */
@@ -298,12 +340,17 @@
     animation: bc-ct-kicker-pop 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.55s both;
 }
 
-/* 中間的字＝首頁 .sukima-label（max-width 0 → var(--label-width)、0.8s ease、
-   延遲 0.3s；首頁變數值 133px 見 bc-who.css:70）
-   0.85s ＝ 括號列起點（上面 0.55s）＋ 首頁的 0.3s 相對延遲 */
+/* 中間的字＝首頁 .sukima-label 的直排版：
+   首頁是 max-width 0 → 133px（橫向吐出），直排改成 max-height 0 → 7.4em
+   （由上往下吐出；直排的 inline 軸是垂直，裁切要看 max-height）
+   0.8s ease、延遲 0.85s ＝ 括號列起點（上面 0.55s）＋ 首頁的 0.3s 相對延遲 */
 .bc-coffee-title__kicker-label {
+    /* "Line Up" 7 個字 ×（1em ＋ 0.04em 字距）＝ 7.28em ⇒ 取 7.4em 留餘裕，
+       避免尾字「p」被裁掉；值隨字級（em）等比縮放，任何斷點都成立 */
+    --bc-ct-kicker-label-h: 7.4em;
+
     overflow: hidden;
-    max-width: var(--bc-ct-kicker-label-w, 133px);
+    max-height: var(--bc-ct-kicker-label-h);
     animation: bc-ct-kicker-unroll 0.8s ease 0.85s both;
 }
 
@@ -318,23 +365,10 @@
 
 @keyframes bc-ct-kicker-unroll {
     from {
-        max-width: 0;
+        max-height: 0;
     }
     to {
-        max-width: var(--bc-ct-kicker-label-w, 133px);
-    }
-}
-
-/* 字級斷點：與首頁 who-kicker 完全一致（834／1920） */
-@media (min-width: 834px) {
-    .bc-coffee-title__kicker {
-        font-size: 21px;
-    }
-}
-
-@media (min-width: 1920px) {
-    .bc-coffee-title__kicker {
-        font-size: 26px;
+        max-height: var(--bc-ct-kicker-label-h);
     }
 }
 
@@ -357,7 +391,7 @@
     }
 
     /* 左上角 kicker（見 [H]）：不播動畫；兩個元素的「終態」就是 CSS 基準值
-       （括號列 transform:none、標籤 max-width 已展開）⇒ 直接顯示完整字樣 */
+       （括號列 transform:none、標籤 max-height 已展開）⇒ 直接顯示完整直排字樣 */
     .bc-coffee-title__kicker-anim,
     .bc-coffee-title__kicker-label {
         animation: none !important;
