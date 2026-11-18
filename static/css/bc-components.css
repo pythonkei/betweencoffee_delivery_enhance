@@ -152,13 +152,33 @@ body {
   text-decoration: none;
 }
 @media screen and (max-width: 991.98px) {
-  .bc-navbar-brand-fixed { top: 31.5px; left: 15px; font-size: 42px; }
+  /* 2026-11-14（使用者指示「手機：logo 距左邊緣太遠，不是 logo 的正常位置」）：
+     ① 量到「看不見的留白」＝字面左側空白：字串開頭的全角「｛」Mogra 沒有這個字
+        ⇒ 落到後備字型，字面左側留白 ≈0.71em（**實測像素**：34px→24px、42px→30px）。
+        原本 left:15px ＋ 24px 留白 ⇒ 墨跡實際從 39px 才開始（比下方正文的 20px
+        內距還右縮 19px）＝ 看起來「離左邊太遠」。
+        （註：canvas measureText 的 actualBoundingBoxLeft 只給 0.38em，與實際 paint
+         不符 ⇒ 一切以截圖像素量測為準，勿再用 canvas 值反推。）
+     ② 解法：text-indent 扣掉這段留白（用 em ⇒ 34／36／42px 三種字級自動適用，
+        不必分三個斷點）＋ left 16px ⇒ **墨跡左緣固定在 16px**，與推薦雙卡的手機
+        內距（16px）對齊；只動這幾種小螢幕字級，≥992px 桌機維持 left 37px 不動。 */
+  .bc-navbar-brand-fixed {
+    top: 31.5px;
+    left: 16px;
+    text-indent: -0.71em;
+    font-size: 42px;
+  }
 }
 @media screen and (max-width: 767.98px) {
-  .bc-navbar-brand-fixed { top: 30.2px; font-size: 36px; }
+  /* 2026-11-17（使用者指示「行動端縮小 logo 文字」）：36 → 32px。
+     只動字級、top 不動 ⇒ 字的上緣留在原位（與右側圖示同一水平線），字高變小
+     所以視覺重心略上移 2px（可接受）；text-indent:-0.71em 是 em 值 ⇒ 墨跡左緣
+     仍固定 16px。nav 內佔位 .bc-navbar-brand-spacer 不變 ⇒ 選單／浮動鈕不受影響。 */
+  .bc-navbar-brand-fixed { top: 30.2px; font-size: 32px; }
 }
 @media screen and (max-width: 575.98px) {
-  .bc-navbar-brand-fixed { top: 27.2px; font-size: 34px; }
+  /* 2026-11-17（同上）：34 → 28px（390/414 等手機）。 */
+  .bc-navbar-brand-fixed { top: 27.2px; font-size: 28px; }
 }
 /* 不支援 mix-blend-mode 的瀏覽器：白字遇淺色底會消失 → 補描邊陰影（純後備，不影響現行外觀） */
 @supports not (mix-blend-mode: difference) {
@@ -1032,8 +1052,9 @@ body {
 
 .bc-cart-item {
   display: flex;
-  gap: 18px;
-  padding: 18px 0;
+  gap: 20px;
+  /* 2026-11-13：內距 18px → 22px、間距 18px → 20px（使用者反映卡片太緊湊） */
+  padding: 22px 0;
   border-bottom: 1px solid var(--bc-border);
 }
 .bc-cart-item:last-child {
@@ -1070,15 +1091,54 @@ body {
   flex: 1;
   min-width: 0;
 }
+/* ===== 購物車選項清單（2026-11-13 改版 v2：可收合） =====
+   一行一項：標籤小字灰 ＋ 值正常白（無 icon，抽屜窄、圖示會搶焦點）。
+   預設只顯示前 2 項，第 3 項起由 nth-child(n+3) 隱藏，點「還有 N 項 ＋」加
+   .is-expanded 展開 → 4 個選項的卡片從 4 行（約 96px）降到 2 行（約 52px）。
+   不用 [hidden]：作者這裡設了 display:flex，特異度會蓋過 UA 的 [hidden]。
+   DOM 由 static/js/bc-slideout-cart.js 的 _renderOptionTags() 產生。 */
 .bc-cart-item-options {
-  font-size: 0.95rem;
-  color: var(--bc-text-muted);
-  margin: 0 0 14px;
+  margin: 2px 0 12px;
 }
-.bc-cart-item-options .material-symbols-outlined {
-  font-size: 0.95rem;
-  vertical-align: middle;
-  margin-right: 1px;
+.bc-cart-item-option-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--bc-text);
+  min-width: 0;
+}
+.bc-cart-item-option-row:nth-child(n+3) {
+  display: none;
+}
+.bc-cart-item-options.is-expanded .bc-cart-item-option-row:nth-child(n+3) {
+  display: flex;
+}
+.bc-cart-item-option-label {
+  color: var(--bc-text-muted);
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+.bc-cart-item-option-value {
+  min-width: 0;
+}
+.bc-cart-item-options-toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bc-gold);
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color var(--bc-transition);
+}
+.bc-cart-item-options-toggle:hover {
+  color: var(--bc-gold-hover);
 }
 .bc-cart-item-price {
   font-size: 1.05rem;
@@ -1093,7 +1153,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 6px;
+  margin-top: 12px;   /* 2026-11-13：選項清單與數量列之間留白（2px → 12px，改善「太緊湊」） */
 }
 .bc-cart-item-qty-btn {
   background: var(--bc-bg-input);
@@ -1121,6 +1181,9 @@ body {
   text-align: center;
 }
 .bc-cart-item-remove {
+  /* 2026-11-13：移到列尾（margin-left:auto）＋垂直置中 —— 避免緊貼「+」被誤認為數量控制 */
+  margin-left: auto;
+  align-self: center;
   background: none;
   border: none;
   color: var(--bc-text-dim);
@@ -1128,7 +1191,6 @@ body {
   font-size: 0.85rem;
   padding: 2px;
   transition: color var(--bc-transition);
-  align-self: flex-start;
 }
 .bc-cart-item-remove:hover {
   color: #ef4444;

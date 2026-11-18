@@ -387,7 +387,9 @@ html.bc-attract-pending .bc-floating-cart {
   }
   .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 1.05rem; }
   .bc-attract-buy .bc-attract-buy__link [lang='en'] {
-    font-size: 0.85rem;
+    /* 2026-11-18（使用者指示「In mobile side, bc-attract-buy 'ORDER' 文字縮小」）：
+       0.85rem → 0.75rem（-12%）；長條寬度／高度不動，豎排文字兩側留白變多。 */
+    font-size: 0.75rem;
     letter-spacing: 0.16em;
   }
   .bc-attract-profile {
@@ -412,7 +414,9 @@ html.bc-attract-pending .bc-floating-cart {
   }
   .bc-attract-buy .bc-attract-buy__link .c-icon { font-size: 0.95rem; }
   .bc-attract-buy .bc-attract-buy__link [lang='en'] {
-    font-size: 0.78rem;
+    /* 2026-11-18（使用者指示「In mobile side, bc-attract-buy 'ORDER' 文字縮小」）：
+       0.78rem → 0.70rem（-10%）。 */
+    font-size: 0.70rem;
     letter-spacing: 0.14em;
   }
   .bc-attract-profile {
@@ -423,4 +427,19 @@ html.bc-attract-pending .bc-floating-cart {
     height: 36px;
   }
   .bc-attract-profile .bc-attract-profile__link .c-icon { font-size: 1.1rem; }
+}
+
+/* ===== 購物車抽屜開啟時，右側浮動群組讓位（2026-11-13） =====
+   問題：`.bc-attract-buy`（垂直 ORDER 長條）與 `.bc-attract-profile`（個人圓鈕）
+   都是 z-index: 99999，而購物車遮罩／抽屜只有 9998／9999 → 抽屜一打開，
+   這兩顆就浮在抽屜右緣，直接蓋住商品價格（`.bc-cart-item-price`）與「+」按鈕。
+   解法：由 static/js/bc-slideout-cart.js 的 open()／close() 切換 body class，
+   這裡負責隱藏。用 visibility 而非 display —— 元素仍保有版面盒，
+   浮動購物車量測 `.bc-attract-buy` 座標（--bc-fc-*）時結果不會因開關抽屜而改變；
+   pointer-events: none 則確保連隱形熱區都不吃點擊（抽屜右緣可正常操作）。
+   註：浮動購物車 #bc-floating-cart 本來就由 JS 以 .hide 收起，不在此列。 */
+body.bc-cart-open .bc-attract-buy,
+body.bc-cart-open .bc-attract-profile {
+  visibility: hidden;
+  pointer-events: none;
 }

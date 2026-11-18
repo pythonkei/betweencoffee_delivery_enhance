@@ -42,6 +42,9 @@
 | `docs/archive/task_progress_20261024_issue59_bean_bubbles.md` | #59 咖啡豆詳情頁氣泡文字完整記錄（2026-10-25 從 `task_progress.md` 移出） | 追查氣泡欄位／migration `0081`–`0083` 細節 |
 | `docs/archive/task_progress_20261104_done_rows.md` | 2026-10-24 ~ 10-28 一行式完成紀錄（2026-11-04 從 `task_progress.md` 移出，控制 11.7K 預算） | 追查 #58~#61／SERIES 字型等舊項目 |
 | `docs/archive/task_progress_20261105_pushed_batches.md` | about 首屏 sticky MV／首頁製程 `[2b-2]`／#61 推薦雙卡／#59–#60 摘要（2026-11-05 從 `task_progress.md` 移出） | 追查已 push 批次參數與驗證值 |
+| `docs/archive/task_progress_20261114_recent_entries.md` | 2026-11-11 ~ 11-14 who／reviews／next-link 等舊任務段（2026-11-14 從 `task_progress.md` 移出，控制 11.7K 預算） | 追查 who 版面／reviews 跑馬燈／字體舊值 |
+| `docs/archive/task_progress_20261116_who_gtmv_rounds.md` | 首頁 who section 主視覺 global-tree 移植（需求①／②、11-14 ~ 11-16 各批指示、逐值實測）（2026-11-16 從 `task_progress.md` 移出） | 改 `bc-gt-mv.css/.js`／who 內文時比對舊值 |
+
 | `docs/archive/task_progress_20261105_sticky_mv_details.md` | about 首屏 sticky 影片＋產品照輪播的完整細節（sticky 機制／輪播參數／踩雷） | 改 `bc-sticky-mv` 前先讀 |
 | `docs/archive/task_progress_20261105_weather_navbar.md` | navbar 天氣模組手機／平板位移的根因與舊值對照 | 再動 `bc-weather.css` 時比對 |
 | `docs/archive/task_progress_20261105_baker_ring_badge.md` | 氣泡頭像換 `baker_01–04.svg`（box 換算）＋首頁環形照片列改名／hover 徽章 | 再動 `bc-coffee-comment.css`／`bc-hand-ring.css` 時比對 |

@@ -26,12 +26,13 @@
  C 首屏圓點 ::before：`.-current` 為白（寬 32px；≤743.98px 一層為 24px）、其餘 6 顆為品牌金（共 7 顆）
    C0／C4 另做 CSSOM 靜態檢查（基底規則＝var(--bc-gold, #c49b63)、`.-current` 規則＝白/32px）
    —— 靜態檢查不受「輪播換頁時 0.3s 過渡」影響，可當長期防線
- D `.bc-floating-cart-badge`（購物車空時 display:none，仍在 DOM）：底色品牌金、數字深字 rgb(14,14,14)
+ D `.bc-floating-cart-badge`（購物車空時 display:none，仍在 DOM）：**2026-11-11 起＝無底色／無圓角、白字**
+   （原本是品牌金圓底＋深字；使用者指示改為白字並置中於 onlineshop-cart.svg 中心）
  E **首頁不得再出現任何第二主題色 rgb(252,255,75)**（含 ::before/::after）＝本次改動的回歸防線
  F CSSOM 掃描：已載入 CSS 中除 `:root` 定義外**不得再有規則引用 var(--bc-theme2)**
    → 這條同時涵蓋登入後才會出現的 `.bc-yama-discount`（未登入時 DOM 上量不到）
  G ≥769 球內文字色 == rgb(27,27,27) 且對品牌金對比 ≥ 4.5:1（AA 內文）
- H /about/、/coffee_menu/ 的 badge 同為品牌金、且無第二主題色殘留（bc-components 為全站檔）
+ H /about/、/coffee_menu/ 的 badge 同樣是白字、無底色、且無第二主題色殘留（bc-components 為全站檔）
 
 前置：Django 127.0.0.1:8081 ＋ CDP 瀏覽器 9222（見 docs/verify/CDP_SETUP.md）。
 執行：setsid nohup python3 docs/verify/cdp_verify_theme_color_index.py > /tmp/vtc.log 2>&1 < /dev/null &
@@ -51,7 +52,9 @@ GOLD = "rgb(196, 155, 99)"      # #c49b63 品牌金（第一主題色）
 LIME = "rgb(252, 255, 75)"      # #FCFF4B 第二主題色
 NEAR_BLACK = "rgb(19, 18, 17)"  # #131211 ≤768 圓球底色
 DARK_TEXT = "rgb(27, 27, 27)"   # #1b1b1b ≥769 球內文字
-BADGE_TEXT = "rgb(14, 14, 14)"  # #0e0e0e 數字深字
+BADGE_TEXT = "rgb(14, 14, 14)"  # #0e0e0e 數字深字（2026-11-11 前的圓圈版）
+BADGE_WHITE = "rgb(255, 255, 255)"  # 2026-11-11 起：數字改白字、無圓圈
+PAGE_BG = "rgb(14, 14, 14)"         # #0e0e0e 頁面底色（白字的對比基準）
 VERSION = "20261008e"
 
 VIEWPORTS = [(1440, 900, False), (1024, 800, False), (768, 900, True), (390, 844, True)]
@@ -339,13 +342,15 @@ async def main():
                 f"C3 -current 圓點為白＋{cur_w}（實得 {[(d['bg'], d['w']) for d in cur]}；"
                 "已凍結過渡，若此處仍是品牌金即為真缺陷）")
 
-            # D. badge
+            # D. badge（2026-11-11：無底色／無圓角、白字、對深底高對比）
             b = v["badge"]
             chk(b.get("exists"), "D1 .bc-floating-cart-badge 存在於 DOM")
-            chk(b.get("bg") == GOLD, f"D2 badge 底色={b.get('bg')}（應為第一主題色 {GOLD}）")
-            chk(b.get("color") == BADGE_TEXT, f"D3 badge 數字色={b.get('color')}（應深字 {BADGE_TEXT}）")
-            cb = contrast(BADGE_TEXT, GOLD)
-            chk(cb >= 4.5, f"D4 數字對品牌金對比={cb}:1")
+            chk(b.get("bg") in ("rgba(0, 0, 0, 0)", "transparent"),
+                f"D2 badge 不得有底色（實得 {b.get('bg')}；2026-11-11 起移除圓圈）")
+            chk(b.get("color") == BADGE_WHITE,
+                f"D3 badge 數字色={b.get('color')}（應白字 {BADGE_WHITE}）")
+            cb = contrast(BADGE_WHITE, PAGE_BG)
+            chk(cb >= 4.5, f"D4 白字對頁面深底對比={cb}:1")
 
             # E. 第二主題色不得再出現
             chk(len(v["lime"]) == 0,
@@ -363,10 +368,10 @@ async def main():
                 v = await ev(JS)
                 print("  versions:", v["versions"], "| badge:", v["badge"], "| lime:", v["lime"])
                 b = v["badge"]
-                chk(b.get("exists") and b.get("bg") == GOLD,
-                    f"H1 {name} {w} badge 底色={b.get('bg')}（應 {GOLD}）")
-                chk(b.get("color") == BADGE_TEXT,
-                    f"H2 {name} {w} badge 數字色={b.get('color')}（應 {BADGE_TEXT}）")
+                chk(b.get("exists") and b.get("bg") in ("rgba(0, 0, 0, 0)", "transparent"),
+                    f"H1 {name} {w} badge 不得有底色（實得 {b.get('bg')}）")
+                chk(b.get("color") == BADGE_WHITE,
+                    f"H2 {name} {w} badge 數字色={b.get('color')}（應 {BADGE_WHITE}）")
                 chk(len(v["lime"]) == 0, f"H3 {name} {w} 無第二主題色殘留（實得 {len(v['lime'])} 筆）")
                 chk(v["versions"].get("bc-components") == VERSION,
                     f"H4 {name} {w} bc-components ?v={v['versions'].get('bc-components')}")

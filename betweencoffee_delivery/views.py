@@ -95,11 +95,19 @@ PHOTOAREA_TILES = 5
 #     bc-photoarea.js 也照 DOM 順序輪播），不必動模板、CSS、JS。
 #   · 版號由下方 _mv_versioned_static() 自動加 ?v=<檔案 mtime> ⇒ 換同名檔就失效快取，
 #     不像圖片那邊需要手動升 ?v=。
-#   · 順序（現況）：① hero_00.webm（原本那一支）→ ② hero_04.webm → ③ hero_05.webm。
+#   · 順序（現況，2026-11-14 使用者指示追加 3 支）：① hero_00.webm（原本那一支）
+#     → ② hero_04.webm → ③ hero_05.webm → ④ hero_03.webm → ⑤ hero_02.webm → ⑥ hero_06.webm。
+#     ② 之後的順序就是這個清單由上往下播（不洗牌），繞回第 ① 支再循環。
 PA_VIDEOS = [
     "media/hero_00.webm",
     "media/hero_04.webm",
     "media/hero_05.webm",
+    # 2026-11-14（使用者指示「現在使用的在之後添加」）：3 → 6 支。
+    # 模板每支都輸出 <video preload="none">（只有當前支／下一支才會被 prime() 抓檔），
+    # 所以追加不影響首屏流量；總量 2.2MB → 約 3.9MB 是「全片單都輪過一輪」才會抓完。
+    "media/hero_03.webm",
+    "media/hero_02.webm",
+    "media/hero_06.webm",
 ]
 
 

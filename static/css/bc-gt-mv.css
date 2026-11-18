@@ -1,0 +1,393 @@
+/* ============================================================================
+   Between Coffee —「global-tree 首屏主視覺」逐值移植（圖片 ＋ 文字）
+   ----------------------------------------------------------------------------
+   來源：https://global-tree.jp/ 首頁
+         <div class="sm:flex flex-row-reverse justify-end items-center">
+           ├ .layeredText.-home-mv            ← 大字 3 份疊在同一格，各裁一條直條
+           └ .sm:w-[20.8%] > .splide > .layeredImage.-home-mv   ← 照片 3 條直排切片
+
+   [1] 版面（原站值 → 本站值，比例一字不改）
+       · 外框 ._l-container：content-box、左右 padding 1.25rem；≥768px 為 2.9166vw
+         （@1440 = 42px，照片左緣 42px、文字右緣 1252px 皆由此而來）。
+       · 橫排 sm:flex flex-row-reverse justify-end items-center
+         ＝ display:flex; flex-direction:row-reverse; justify-content:flex-end;
+           align-items:center;（DOM 先文字、後照片 ⇒ 視覺上照片在左、文字在右，
+           整組靠左，多出來的空白留右邊）。
+         ※ 2026-11-16（使用者指示「文字 Hm..... 移到圖片頂部對齊」）：本站改為
+           align-items:flex-start ＋ `.bc-gtmv__text` 的負 margin-top
+           （值見下方 2026-11-18 註解；Akzidenz 時期為 calc(-0.10361em - 20px)）
+           讓大字上緣（墨跡）與照片上緣齊平；照片仍吃原站 -20px、區塊總高不變 ⇒ 照片與下方內容都不動。
+       · 照片欄寬：原站三條切片 49 / 97 / 293px ＋ 2 × (-1px) 疊縫 @1440 ⇒ 437px
+         ＝ 30.3472vw（本檔用同一個 vw，內部再用 flex 比例 49:97:293 切一次，
+         所以任何寬度下三條的相對寬度都與原站相同）。
+         高度：原站由第 3 條 aspect-[293/380] 決定（@1440 = 380px）→ 本檔照抄。
+         手機：原站 --w-mobile 31 / 62 / 185（/375 ⇒ 合計 74.1333vw），第 3 條同一個 293:380。
+       · sm:mr-fluid-20 ＝ margin-right: clamp(1.25rem, 20/1440*3840px, 20/1440*100vw)
+         —— clamp 的 max 比 min 小 ⇒ 恆等於 20px。
+         sm:-mt-fluid-20 ＝ 同一個 clamp 取負 ⇒ -20px（原站是「垂直置中時整體上移 10px」；
+         2026-11-16 起本站文字改與照片上緣對齊，靠 flex-start ＋ 文字自己的負 margin 抵掉，
+         照片欄這個 -20px 保留不動 ⇒ 照片位置與原站實測一致）。
+       · 文字字級 _text-ja-heading-mxl ＝ clamp(1.25rem, 145/1440*100vw, 145/1440*240rem)
+         ⇒ @1440 = 145px；行高 94%（原站 136.3px）。原站是三行，本站 2026-11-14
+         依使用者指示改成單行 `Hm.......`（行高不變，照片欄仍由 293:380 決定高度）。
+         ※ 原站 -.11em 字距是日文全角字的視覺修正，本站用拉丁字（Akzidenz）故給 0。
+         ※ 2026-11-16 第五批（使用者指示「修改 who-section 為 'Hm.......' -> 'Hmmm...'，
+           and 文字縮小」）：文案改 `Hmmm...`，字級再乘 --gt-fs-scale（0.8）
+           ⇒ @1440 = 116px、單行寬 444 → 約 355px。縮放倍率集中成變數，
+           本檔其餘以 em 為單位的值（0.25/0.36em 裁切、位移、對齊補正）自動等比縮小。
+
+   [2] 文字動畫（原站 .layeredText 純 CSS，觸發點＝加上 .is-show）
+       · 外層 __text-wrapper-wrapper：scale(1.5) → scale(1)，1s cubic-bezier(.16,1,.3,1)
+       · 三份切片都從 translateX(-12%) 歸位，同一條曲線、同一個 1s：
+           -index-1 → 0
+           -index-2 → calc(--firstLetterVisibleArea + --margin)        = .25em + .1em
+           -index-3 → calc(--firstLetter + --secondLetter + 2×margin)  = .25+.36+.2em
+       · 裁切（靜態，不動畫）：-index-1 只露到 .25em、-index-2 到 .36em、-index-3 到 110%，
+         下緣一律裁在 94%（--bottomLetterVisibleArea，-home-mv 的覆寫值）。
+         ⇒ 三份同一段話錯位疊在一起 ＝ 原站那種「印刷套印不準」的鬼影效果。
+       · 本站改用 @keyframes（只寫 from，to 用元素自己的終態）＋ fill:backwards：
+         基底樣式＝終態，動畫沒跑（reduced-motion／舊瀏覽器／被中斷）時就是完成後的樣子。
+
+   [3] 圖片動畫 → 直接沿用 bc-photoarea.css 的 bc-pa-wipe / bc-pa-slice / bc-pa-image
+       三組 keyframes（同一支 GSAP expo.out 的逐格取樣），因此本檔必須在
+       bc-photoarea.css 之後載入；若那三組不存在的話只是「沒有進場動畫」，
+       基底樣式仍然是完整照片（不會空白）。
+
+   [4] 換片：原站是 Splide 自動輪播（每片 3 個 .layeredImage），換片時重播本組動畫。
+       本站用 bc-gt-mv.js 每 5s 把 is-on 從上一片搬到下一片（搬 class ⇒ 動畫重新開始）。
+
+   [5] 同一個原站元件本站另有實作（刻意各自獨立，因為版面／觸發方式不同）：
+       · `.bc-pa-stair*`（bc-photoarea.css）＝首頁 hero 背景照片格
+       本檔＝原站那個「照片 ＋ 大字」完整區塊。2026-11-14 起它掛在首頁 who section
+       的 .section-title__text（原本該位置的「Hmm...........」分層文字
+       .who-title-layers／.who-title-layer 已移除）。兩者數值同源，
+       改其中一處記得同步另一處。
+   ============================================================================ */
+
+.bc-gtmv {
+  /* 原站 .layeredText 的變數（.layeredText.-home-mv 只覆寫 --bottomLetterVisibleArea） */
+  --gt-a: 0.25em; /* --firstLetterVisibleArea */
+  --gt-b: 0.36em; /* --secondLetterVisibleArea */
+  --gt-m: 0.1em; /* --margin */
+  --gt-bottom: 94%; /* --bottomLetterVisibleArea */
+  --gt-start: -12%; /* --startLinetranslateX */
+  --gt-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --gt-dur: 1s;
+
+  position: relative;
+  width: 100%;
+  color: var(--bc-text, rgba(255, 255, 255, 0.9));
+  /* 2026-11-14（使用者指示「clear this section blk bg color」）：原站這塊是淺色底，
+     本站先前直接鋪 --bc-bg（#0e0e0e）＝在頁面的 bg_4.jpg 上出現一塊純黑方塊。
+     改為不畫底色（transparent），讓 body 的底圖連續；需要局部壓暗時再另加。 */
+  background: transparent;
+}
+
+/* 放置位置：2026-11-14（使用者指示「替換此內容到 .section-title__text」）
+   ⇒ 掛在首頁 who section 的 .section-title__text（原「Hmm...........」標題位置）。
+   該處已吃 .bc-who-section 的內距，外框留白要歸零，見檔尾 [6]。 */
+
+/* ---- 外框：._l-container ＋ 橫排 ------------------------------------------ */
+.bc-gtmv__row {
+  box-sizing: content-box;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .bc-gtmv__row {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    /* 2026-11-16（使用者指示「文字 Hm..... 移到圖片頂部對齊」）：原 center
+       （＝原站 items-center，文字垂直置中在照片右側）改為 flex-start，
+       文字的對齊補正見下方 .bc-gtmv__text 的 margin-top。 */
+    align-items: flex-start;
+  }
+}
+
+@media (min-width: 768px) {
+  .bc-gtmv__row {
+    padding: 0 2.9166667vw;
+  }
+}
+
+/* ---- 讀屏用文字：本頁沒有載入 Bootstrap 的 .visually-hidden，這裡自帶一份 -------- */
+.bc-gtmv .visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- 文字：3 份同一段話，各裁一條直條 ------------------------------------- */
+.bc-gtmv__text {
+  position: relative;
+  /* 2026-11-18（使用者指示「'Hmmm...' 將字體變更為 logo 字體 and 文字縮小」）：
+     字體改為 **Mogra**（＝左上角 logo／.bc-recommended-page__title 同一支，
+     由 base.html 的 Google Fonts 載入）。Mogra 只有單一字重 400 ⇒ font-weight 500→400。
+     字級再縮一階：--gt-fs-scale 0.8 → 0.68（理由見下）。 */
+  font-family: "Mogra", "Akzidenz Grotesk Pro", Arial, sans-serif;
+  /* 原站 _text-ja-heading-mxl（@1440 = 145px）× --gt-fs-scale
+     · 2026-11-16 第五批（使用者指示「文字縮小」）：0.8 ⇒ @1440 = 116px
+     · 2026-11-18 換 Mogra 後再縮：0.68 ⇒ @1440 ≈ 98.6px
+       （Mogra 字寬約為 Akzidenz 的 1.10 倍、capHeight 0.703em，同字級看起來
+        更大一號，故同步下修以維持「文字比照片欄窄」的版面關係）
+     要再調整只改這一個變數，其餘 em 值（裁切、位移、對齊補正）自動等比跟上。 */
+  --gt-fs-scale: 0.68;
+  font-size: calc(var(--gt-fs-scale) * clamp(1.25rem, 10.0694444vw, 24.1666667rem));
+  font-weight: 400;
+  line-height: 94%;
+  letter-spacing: 0;
+}
+
+/* 2026-11-16（使用者指示「文字 Hm..... 移到圖片頂部對齊」）：照片欄位置不動，
+   只把大字往上提到與照片上緣齊平。要補的落差（以 em ⇒ 隨字級縮放）：
+   ① 行盒（line-height 94%）內大寫字母的墨跡頂點落在行盒頂點下方 X em；
+   ② `.bc-gtmv__scale > *` 的 -0.025em 已經把切片往上帶 ⇒ 文字元素只需再補 (X − 0.025)em；
+   另有 20px：照片欄在 ≥640px 有 margin-top:-20px（原站 sm:-mt-fluid-20），
+   flex-start 的起點在照片欄上緣之上，文字要跟著上移同一個量。
+
+   2026-11-16 原字體 Akzidenz：X = 0.12861em（半 leading −23.35px ＋ 字身 145px −
+   'H' 帽高 103px，@145px ⇒ 18.65px）⇒ margin-top = −0.10361em − 20px；
+   實測 @1440 墨跡頂點 249.79px ＝ 照片上緣 249.78px。
+
+   2026-11-18（使用者指示「Hmmm... 換 logo 字體」）：換成 Mogra 後 X = **0em**
+   —— Mogra 的字身（ascent .75em / descent .25em）＋ line-height 94% 的半 leading
+   剛好讓 'H' 帽高上緣貼齊行盒上緣（像素實測：以 98.6px 渲染 'Hmmm...'，
+   墨跡首列 = 行盒頂點，偏移 0.00px、墨跡高 70px ＝ 0.703em 帽高）。
+   ⇒ 只需補「-0.025em 已上帶的那 0.025em」＋「照片欄的 −20px」，
+   即 margin-top = +0.025em − 20px（@98.6px ⇒ −17.54px；實測需 −17.57px，差 0.03px）。
+   ⚠ 之後若再換字體，X 必須重新用像素實測（不要沿用這條公式）。 */
+@media (min-width: 640px) {
+  .bc-gtmv__text {
+    margin-top: calc(0.0246em - 20px);
+  }
+}
+
+.bc-gtmv__scale {
+  display: grid;
+  transform-origin: center left;
+}
+
+.bc-gtmv__scale > * {
+  grid-area: 1 / 1;
+  margin-top: -0.025em;
+}
+
+.bc-gtmv__slice {
+  position: relative;
+  white-space: nowrap;
+  /* 終態位移（動畫的 to 值就是這裡算出來的結果） */
+  transform: translateX(var(--gt-end, 0));
+  clip-path: polygon(
+    -10% -10%,
+    var(--gt-a) -10%,
+    var(--gt-a) var(--gt-bottom),
+    -10% var(--gt-bottom)
+  );
+}
+
+.bc-gtmv__slice.-index-1 {
+  --gt-end: 0;
+}
+
+.bc-gtmv__slice.-index-2 {
+  --gt-end: calc(var(--gt-a) + var(--gt-m) * 1);
+  clip-path: polygon(
+    -10% -10%,
+    var(--gt-b) -10%,
+    var(--gt-b) var(--gt-bottom),
+    -10% var(--gt-bottom)
+  );
+}
+
+.bc-gtmv__slice.-index-3 {
+  --gt-end: calc(var(--gt-a) + var(--gt-b) + var(--gt-m) * 2);
+  clip-path: polygon(
+    -10% -10%,
+    110% -10%,
+    110% var(--gt-bottom),
+    -10% var(--gt-bottom)
+  );
+}
+
+.bc-gtmv__line {
+  display: block;
+}
+
+/* `.bc-gtmv__line.-accent`（金色行）已移除：2026-11-14 使用者指示文案改單行
+   `Hm.......`（2026-11-16 再改為 `Hmmm...`），沒有需要換色的行；日後要多行時再加回來即可。 */
+
+/* ---- 照片欄：3 條直排切片 ------------------------------------------------ */
+.bc-gtmv__media {
+  flex-shrink: 0;
+  width: 74.1333333vw; /* 手機：31 + 62 + 185（/375） */
+  margin-top: 0.5rem; /* 原站 mt-2 */
+}
+
+@media (min-width: 640px) {
+  .bc-gtmv__media {
+    width: 30.3472222vw; /* 49 + 97 + 293 - 2（/1440） */
+    margin-top: -20px; /* sm:-mt-fluid-20 */
+    margin-right: 20px; /* sm:mr-fluid-20 */
+  }
+}
+
+.bc-gtmv__shots {
+  position: relative;
+}
+
+.bc-gtmv__item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+}
+
+/* 第一片留在流內 ⇒ 由它的 293:380 決定整個照片欄高度（換片不會跳高度） */
+.bc-gtmv__item.-index-1 {
+  position: relative;
+  /* 沒有 JS／reduced-motion／腳本被阻擋時的第一片可見度：
+     .is-on 由 bc-gt-mv.js 進視口才加，若這裡不給 1 就永遠 opacity:0（＝看不到照片）。 */
+  opacity: 1;
+}
+
+.bc-gtmv__item.is-on {
+  opacity: 1;
+}
+
+/* 起播後（JS 在根節點加 .is-live）第一片回到「只有 is-on 才顯示」，
+   否則換到第 2／3 片時第一片會一直疊在上面 */
+.bc-gtmv.is-live .bc-gtmv__item.-index-1:not(.is-on) {
+  opacity: 0;
+}
+
+/* ＝ .layeredImage__image-wrapper：三層橫排，往左推出的部分由這裡裁掉 */
+.bc-gtmv__wrap {
+  position: relative;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  /* 原站 wrapper 的 clip-path；--tr／--br 預設 1 ＝ 全開 */
+  clip-path: polygon(
+    0% 0%,
+    calc(var(--tr, 1) * 100%) 0%,
+    calc(var(--br, 1) * 100%) 100%,
+    0% 100%
+  );
+}
+
+/* ＝ .layeredImage__image：49 : 97 : 293（後兩層 1px 疊縫）
+   起始位移沿用 bc-photoarea.css `@keyframes bc-pa-slice` 讀的同一個變數 --pa-x
+   （-index-1/2/3 ＝ -100% / -151% / -50%，與原站逐值相同） */
+.bc-gtmv__px {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bc-gtmv__px.-index-1 {
+  flex: 49 1 0;
+  --pa-x: -100%;
+}
+
+.bc-gtmv__px.-index-2 {
+  flex: 97 1 0;
+  margin-left: -1px;
+  --pa-x: -151%;
+}
+
+.bc-gtmv__px.-index-3 {
+  flex: 293 1 0;
+  margin-left: -1px;
+  aspect-ratio: 293 / 380;
+  isolation: isolate;
+  --pa-x: -50%;
+}
+
+@media (max-width: 639.98px) {
+  .bc-gtmv__px.-index-1 {
+    flex: 31 1 0;
+  }
+
+  .bc-gtmv__px.-index-2 {
+    flex: 62 1 0;
+  }
+
+  .bc-gtmv__px.-index-3 {
+    flex: 185 1 0;
+  }
+}
+
+/* 同一張圖：w-full h-full object-cover（第 3 層寬度由 bc-pa-image 從 0 展開） */
+.bc-gtmv__px > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- 進場動畫：文字掛在根的 .is-live（JS 進視口才加）、照片掛在 .is-on ------
+   fill-mode 一律 backwards：延遲期間先吃 from 影格，播完回基底（＝完整可見）。
+   文字不逐片重播（原站的 .layeredText 也是一次性），換片只重播照片。 */
+@media (prefers-reduced-motion: no-preference) {
+  .bc-gtmv.is-live .bc-gtmv__scale {
+    animation: bc-gtmv-zoom var(--gt-dur) var(--gt-ease) backwards;
+  }
+
+  .bc-gtmv.is-live .bc-gtmv__slice {
+    animation: bc-gtmv-line var(--gt-dur) var(--gt-ease) backwards;
+  }
+
+  .bc-gtmv__item.is-on .bc-gtmv__wrap {
+    animation: bc-pa-wipe 0.9s linear backwards;
+  }
+
+  .bc-gtmv__item.is-on .bc-gtmv__px {
+    animation: bc-pa-slice 1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
+  .bc-gtmv__item.is-on .bc-gtmv__px.-index-3 > img {
+    animation: bc-pa-image 1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+}
+
+/* 只寫 from：to 由元素自己的終態決定（三條切片各自歸位到不同位移） */
+@keyframes bc-gtmv-zoom {
+  from {
+    transform: scale(1.5);
+  }
+}
+
+@keyframes bc-gtmv-line {
+  from {
+    transform: translateX(var(--gt-start));
+  }
+}
+
+/* ============================================================================
+   [6] 放進 who section 的 .section-title__text 後的外框補正（2026-11-14）
+   · 原站 ._l-container 的左右 padding（1.25rem／2.9166vw）是「相對視窗」，
+     搬進 .bc-who-section（自身已有 96px 80px 內距）後會多縮一層 ⇒ 歸零，
+     讓照片左緣／文字右緣與 kicker「(About)」、下方內文對齊。
+   · 小螢幕時文字最寬一行（10.0694vw 是「視窗」寬的比例）可能比容器多出
+     幾 px ⇒ overflow-x: clip 收掉，不產生橫向捲動，也不動字級。
+   ============================================================================ */
+.bc-who-section .section-title__text > .bc-gtmv {
+  overflow-x: clip;
+}
+
+.bc-who-section .section-title__text > .bc-gtmv .bc-gtmv__row {
+  padding-left: 0;
+  padding-right: 0;
+}
+

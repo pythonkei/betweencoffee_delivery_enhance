@@ -102,10 +102,34 @@
         }, 0);
 
         // 讀取響應式目標寬度（CSS 變數，bc-who.css 依斷點設定）
+        // 2026-11-14：值不再一定是純 px（--who-visual03-w 改為 clamp(48px,14vw,62px)
+        // 讓小螢幕縮小）。parseFloat("clamp(...)") 會得到 NaN → 用隱藏探針 div 把值
+        // 交給瀏覽器解析成長度，再讀回 px；純 px 值仍走原本的快路徑。
+        // 結果以 resize 為單位快取（scrub 每幀都會呼叫，避免每幀觸發額外 layout）。
+        var probe = document.createElement("div");
+        probe.setAttribute("aria-hidden", "true");
+        probe.style.cssText =
+            "position:absolute;top:0;left:0;width:0;height:0;visibility:hidden;pointer-events:none";
+        section.appendChild(probe);
+        var varCache = {};
         function getVar(name) {
-            var v = getComputedStyle(section).getPropertyValue(name);
-            return parseFloat(v) || 0;
+            if (Object.prototype.hasOwnProperty.call(varCache, name)) {
+                return varCache[name];
+            }
+            var raw = getComputedStyle(section).getPropertyValue(name).trim();
+            var n;
+            if (/^-?[\d.]+px$/.test(raw)) {
+                n = parseFloat(raw);
+            } else {
+                probe.style.width = raw || "0px";
+                n = probe.getBoundingClientRect().width;
+            }
+            varCache[name] = n || 0;
+            return varCache[name];
         }
+        window.addEventListener("resize", function () {
+            varCache = {};
+        });
         function visualTarget(el) {
             return el.classList.contains("wwa-visual-03") ? getVar("--who-visual03-w") : getVar("--who-visual01-w");
         }

@@ -52,8 +52,11 @@
   isolation: isolate;
 }
 
-.bc-photoarea img,
-.bc-photoarea .bc-pa-video {
+/* 只對「格位本體」給幾何；2026-11-14 起照片格位是 .bc-pa-stair 容器，
+   內層 .bc-pa-stair__slice > img 的尺寸由下方階梯段另管 ⇒ 這裡一律用子代選擇器 `>` */
+.bc-photoarea > img,
+.bc-photoarea > .bc-pa-video,
+.bc-photoarea > .bc-pa-stair {
   position: absolute;
   height: auto;
   width: min(var(--pa-w), var(--pa-w-cap));
@@ -63,8 +66,8 @@
 }
 
 /* 寬版（原站 .yoko 那一張）：等比裁切，讓節奏與 4 張直式不同 */
-.bc-photoarea img.yoko,
-.bc-photoarea .bc-pa-video.yoko {
+.bc-photoarea > img.yoko,
+.bc-photoarea > .bc-pa-video.yoko {
   width: min(calc(var(--pa-w) * 1.35), 760px);
   aspect-ratio: 3 / 2;
   object-fit: cover;
@@ -148,6 +151,275 @@
   .bc-photoarea .y_4 { top: 60%; bottom: auto; }
   .bc-photoarea .y_5 { top: 85%; bottom: auto; }
   /* yoko 在手機改回與其他張同寬（原站 ≤768px 也是單一寬度；影片格位同規則） */
-  .bc-photoarea img.yoko,
-  .bc-photoarea .bc-pa-video.yoko { width: min(var(--pa-w), var(--pa-w-cap)); }
+  .bc-photoarea > img.yoko,
+  .bc-photoarea > .bc-pa-video.yoko { width: min(var(--pa-w), var(--pa-w-cap)); }
+}
+
+/* ============================================================
+   階梯式圖片揭露 —— 逐值移殖 global-tree.jp `.layeredImage`（2026-11-14）
+   ------------------------------------------------------------
+   原站原始碼（https://global-tree.jp/ 首頁 .layeredImage | -home-mv；
+   值取自 build/index-wua8aVMQ.css 與 build/index-CEEWSRgo.js 的 Alpine 元件 layeredImage）：
+
+     <div class="layeredImage -home-mv" x-data="layeredImage({ debug:false, useIntersectionObserver:false })">
+       <div class="layeredImage__image-wrapper | overflow-hidden flex shrink-0">
+         <div class="layeredImage__image -index-1 [--w-mobile:31] [--w-desktop:49]
+              w-[calc(var(--w-desktop)/1440*100vw)]"> <img class="w-full h-full object-cover">
+         <div class="layeredImage__image -index-2 ml-[-1px] [--w-mobile:62] [--w-desktop:97] …>
+         <div class="layeredImage__image -index-3 ml-[-1px] isolate [--w-mobile:185]
+              [--w-desktop:293] aspect-[293/380]"> <img class="h-full object-cover">
+
+   CSS（原值）：
+     .layeredImage__image.-index-1 { transform: translateX(-100%) }
+     .layeredImage__image.-index-2 { transform: translateX(-151%) }
+     .layeredImage__image.-index-3 { transform: translateX(-50%) }
+     .layeredImage__image.-index-3 img { width: 0% }
+     .layeredImage.is-show .layeredImage__image { transform: none;
+       transition: transform 1s cubic-bezier(.16,1,.3,1) var(--delay) }
+     .layeredImage.is-show .layeredImage__image.-index-3 img { width: 100%;
+       transition: width 1s cubic-bezier(.16,1,.3,1) var(--delay) }
+     .layeredImage__image-wrapper.is-show { --tl:0; --tr:0; --bl:1; --br:0;
+       clip-path: polygon(0% calc(var(--tl)*100%), calc(var(--tr)*100%) 0%,
+                          calc(var(--br)*100%) 100%, 0% calc(var(--bl)*100%)) }
+
+   JS（原值，GSAP）：wrapper 加 .is-show 後 tween { value: 0→1, duration: .9,
+     delay: 0, ease: 'expo.out' }，每幀寫 --tr = value²、--br = value、--tl = 0、--bl = 1
+     ⇒ 上緣（tr）永遠落後下緣（br）⇒ 掃過去的邊是斜的（本檔 bc-pa-wipe 就是這條式子的取樣）。
+     原站 --delay 為 0s：多個 .layeredImage 各自進場，彼此不級聯。
+
+   本地對應（class 前綴 bc-pa-，其餘逐值照抄）：
+     .bc-pa-stair        ＝ .layeredImage（本站格位：絕對定位 ＋ width:min(--pa-w,--pa-w-cap)
+                             ＋ aspect-ratio:var(--pa-ratio) 定高 ＝ 改動前單張照片的盒子）
+     .bc-pa-stair__track ＝ .layeredImage__image-wrapper（flex ＋ overflow:hidden ＋ clip-path）
+     .bc-pa-stair__slice ＝ .layeredImage__image（49 : 97 : 293；原站後兩層有 margin-left:-1px
+                            疊縫，本站這條被 bc-brand-stage.css 的 `#bc-brand-stage span{margin:0}`
+                            蓋掉 ⇒ 實際是無縫相接，剛好等於 49:97:293 的純比例）
+     三層 <img> 共用同一個 src（只下載一次）皆 object-fit:cover；2026-11-16 起三層的圖都
+     放大到整個 track 寬、各自往左推前段累計寬 ⇒ 每層只露出自己那一段，拼起來＝原本
+     那一張完整照片（改動前是「同一張圖印 3 份」的錯位疊印感，使用者要求移除）。
+
+   與原站只差三點（比例、動作、時間曲線完全相同）：
+     ① 寬度：原站把 49/97/293px 換算成 vw（@1440 組寬 437px）；本站在格位內用 flex 比例
+        49:97:293 ⇒ 比例一字不差，只是隨本站格寬縮放。
+     ② 高度：原站由第 3 層 aspect-[293/380] 決定（380px）；本站沿用各照片原始比例（--pa-ratio）
+        ⇒ 版面零變化（與改動前單張照片同尺寸），三層一起拉高等比切成同一張圖的直條。
+     ③ 驅動：原站 Alpine＋GSAP 逐幀寫變數（腳本第一繪製前還沒跑 ⇒ 原站本身會先閃一張完整
+        照片）；本地改成等價 @keyframes（expo.out 以 1% 為單位取樣，誤差 < 0.05% 格寬）⇒
+        收合只存在於 0% 影格（第一繪製前就生效、不閃），基底樣式＝終態（動畫關掉仍是照片）。
+   ============================================================ */
+
+/* 格位本體＝改動前那張照片的盒子；幾何規則在檔頭「.bc-photoarea > img／.bc-pa-video」那組 */
+.bc-photoarea > .bc-pa-stair {
+  position: absolute;
+  width: min(var(--pa-w), var(--pa-w-cap));
+  aspect-ratio: var(--pa-ratio, 768 / 1075);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+/* 舊瀏覽器（不支援 aspect-ratio，如 Safari ≤14／Chrome ≤87）的退路：沒有這條時格子高度會塌成 0
+   ⇒ 看起來像「照片全部不見」。本站 5 張照片比例都是 768:1075（=1.40），故直接給固定倍數。 */
+@supports not (aspect-ratio: 1 / 1) {
+  .bc-photoarea > .bc-pa-stair {
+    height: calc(min(var(--pa-w), var(--pa-w-cap)) * 1.4);
+  }
+}
+
+/* ＝ .layeredImage__image-wrapper：三層橫排，往左推出的部分由這裡裁掉 */
+.bc-pa-stair__track {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* 原站 wrapper 的 clip-path（tl=0 / bl=1 代入後的展開式）；--tr／--br 預設 1 ＝ 全開 */
+  clip-path: polygon(0% 0%, calc(var(--tr, 1) * 100%) 0%,
+                     calc(var(--br, 1) * 100%) 100%, 0% 100%);
+}
+
+/* ＝ .layeredImage__image：49 : 97 : 293（原站 49 / 97 / 293px @1440）＋ 1px 疊縫 */
+.bc-pa-stair__slice {
+  position: relative;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  /* 起始位移（原站 -index-1/-2/-3 的 translateX）；歸位後為 0 */
+  --pa-x: 0%;
+}
+
+.bc-pa-stair__slice.-index-1 { --pa-x: -100%; flex: 49 1 0; }
+.bc-pa-stair__slice.-index-2 { --pa-x: -151%; flex: 97 1 0; margin-left: -1px; }
+.bc-pa-stair__slice.-index-3 { --pa-x: -50%; flex: 293 1 0; margin-left: -1px; isolation: isolate; }
+
+/* 2026-11-16（使用者指示「移除錯位疊印」）：三層 <img> 不再各自把「整張圖」cover 進自己的窄條
+   （那會讓同一張照片在格子裡重複出現 3 次，看起來像套印沒對準），改成
+   **三層的圖都放大成整個 track 的寬度、各自往左推「該層之前的累計寬」**
+   ⇒ 每層只露出自己那一段，接起來就是原本那一張完整照片（接縫無重複、無錯位）。
+   尺寸換算（flex 49 : 97 : 293，總和 439；見上面 .-index-1~3）：第 n 層的 left ＝
+   「前面各層佔比」的負值，寬度 ＝ 439 / 自己佔比：
+     第 1 層  left: 0                  寬 100% × 439/49  = 895.92%（＝ track 寬）
+     第 2 層  left: -(49/97)%          寬 100% × 439/97  = 452.58%
+     第 3 層  left: -(146/293)%        寬 100% × 439/293 = 149.83%
+   註：11-14 從原站抄來的 `margin-left:-1px`（疊縫）在本站 hero 一直被 bc-brand-stage.css
+   的 reset `#bc-brand-stage span { margin: 0 }`（ID 選擇器）蓋掉 ⇒ 三條本來就沒有重疊，
+   偏移用純比例即可（不需要再補 1px／2px）。若要恢復疊縫，兩邊都要處理，這裡不必動。
+   第 3 層的寬度仍由 bc-pa-image 從 0 展開（終態＝這裡的 149.83%，該 keyframes 只寫 from）。 */
+.bc-pa-stair__slice > img {
+  position: absolute;
+  top: 0;
+  display: block;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bc-pa-stair__slice.-index-1 > img {
+  left: 0;
+  width: calc(100% * 439 / 49);
+}
+
+.bc-pa-stair__slice.-index-2 > img {
+  left: calc(-100% * 49 / 97);
+  width: calc(100% * 439 / 97);
+}
+
+.bc-pa-stair__slice.-index-3 > img {
+  left: calc(-100% * 146 / 293);
+  width: calc(100% * 439 / 293);
+}
+
+/* ---- 動畫只在「未要求減少動態」時掛上；其餘情況＝上面的基底樣式（不裁切／三層歸位／滿寬）
+   fill-mode 一律用 backwards（不是 both）：延遲期間先吃 0% 影格，播完就回基底樣式
+   ⇒ 即使動畫被中斷、被瀏覽器丟棄、或使用者關掉動畫，照片都還是「完整可見」。 */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .bc-pa-stair__track {
+    animation: bc-pa-wipe 0.9s linear backwards;
+  }
+
+  .bc-pa-stair__slice {
+    animation: bc-pa-slice 1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
+  .bc-pa-stair__slice.-index-3 > img {
+    animation: bc-pa-image 1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+}
+
+@keyframes bc-pa-slice {
+  from { transform: translateX(var(--pa-x, -100%)); }
+  to { transform: translateX(0); }
+}
+
+@keyframes bc-pa-image {
+  /* 只寫 from：to 由元素自己的終態寬度決定（2026-11-16 起＝ track 寬 439/293 ＝ 149.83%），
+     這樣三層的圖才會拼成同一張照片；寫死 `to { width: 100% }` 會把第 3 層縮回自己那條寬。 */
+  from { width: 0; }
+}
+
+/* ---- 斜向擦除：原站 GSAP tween 的逐格取樣 ----------------------------------
+   v(t) = expo.out(t)（GSAP：t === 1 ? 1 : 1 − 2^(−10t)），上緣 = v²、下緣 = v，
+   每 1% 一格（0.9s ⇒ 每 9ms 一格）。上緣永遠 ≤ 下緣 ⇒ 邊往右下斜、前段極快後段收斂。
+   改這個動畫只要改下表；t 與 --tr/--br 的關係：tr = v²、br = v。
+   ------------------------------------------------------------------------- */
+@keyframes bc-pa-wipe {
+  0% { clip-path: polygon(0 0, 0.000% 0, 0.000% 100%, 0 100%); }
+  1% { clip-path: polygon(0 0, 0.448% 0, 6.697% 100%, 0 100%); }
+  2% { clip-path: polygon(0 0, 1.676% 0, 12.945% 100%, 0 100%); }
+  3% { clip-path: polygon(0 0, 3.525% 0, 18.775% 100%, 0 100%); }
+  4% { clip-path: polygon(0 0, 5.863% 0, 24.214% 100%, 0 100%); }
+  5% { clip-path: polygon(0 0, 8.579% 0, 29.289% 100%, 0 100%); }
+  6% { clip-path: polygon(0 0, 11.577% 0, 34.025% 100%, 0 100%); }
+  7% { clip-path: polygon(0 0, 14.778% 0, 38.443% 100%, 0 100%); }
+  8% { clip-path: polygon(0 0, 18.118% 0, 42.565% 100%, 0 100%); }
+  9% { clip-path: polygon(0 0, 21.540% 0, 46.411% 100%, 0 100%); }
+  10% { clip-path: polygon(0 0, 25.000% 0, 50.000% 100%, 0 100%); }
+  11% { clip-path: polygon(0 0, 28.460% 0, 53.348% 100%, 0 100%); }
+  12% { clip-path: polygon(0 0, 31.891% 0, 56.472% 100%, 0 100%); }
+  13% { clip-path: polygon(0 0, 35.269% 0, 59.387% 100%, 0 100%); }
+  14% { clip-path: polygon(0 0, 38.573% 0, 62.107% 100%, 0 100%); }
+  15% { clip-path: polygon(0 0, 41.789% 0, 64.645% 100%, 0 100%); }
+  16% { clip-path: polygon(0 0, 44.906% 0, 67.012% 100%, 0 100%); }
+  17% { clip-path: polygon(0 0, 47.916% 0, 69.221% 100%, 0 100%); }
+  18% { clip-path: polygon(0 0, 50.812% 0, 71.283% 100%, 0 100%); }
+  19% { clip-path: polygon(0 0, 53.591% 0, 73.206% 100%, 0 100%); }
+  20% { clip-path: polygon(0 0, 56.250% 0, 75.000% 100%, 0 100%); }
+  21% { clip-path: polygon(0 0, 58.789% 0, 76.674% 100%, 0 100%); }
+  22% { clip-path: polygon(0 0, 61.209% 0, 78.236% 100%, 0 100%); }
+  23% { clip-path: polygon(0 0, 63.511% 0, 79.694% 100%, 0 100%); }
+  24% { clip-path: polygon(0 0, 65.697% 0, 81.054% 100%, 0 100%); }
+  25% { clip-path: polygon(0 0, 67.770% 0, 82.322% 100%, 0 100%); }
+  26% { clip-path: polygon(0 0, 69.733% 0, 83.506% 100%, 0 100%); }
+  27% { clip-path: polygon(0 0, 71.590% 0, 84.611% 100%, 0 100%); }
+  28% { clip-path: polygon(0 0, 73.344% 0, 85.641% 100%, 0 100%); }
+  29% { clip-path: polygon(0 0, 75.001% 0, 86.603% 100%, 0 100%); }
+  30% { clip-path: polygon(0 0, 76.562% 0, 87.500% 100%, 0 100%); }
+  31% { clip-path: polygon(0 0, 78.034% 0, 88.337% 100%, 0 100%); }
+  32% { clip-path: polygon(0 0, 79.420% 0, 89.118% 100%, 0 100%); }
+  33% { clip-path: polygon(0 0, 80.725% 0, 89.847% 100%, 0 100%); }
+  34% { clip-path: polygon(0 0, 81.951% 0, 90.527% 100%, 0 100%); }
+  35% { clip-path: polygon(0 0, 83.104% 0, 91.161% 100%, 0 100%); }
+  36% { clip-path: polygon(0 0, 84.186% 0, 91.753% 100%, 0 100%); }
+  37% { clip-path: polygon(0 0, 85.203% 0, 92.305% 100%, 0 100%); }
+  38% { clip-path: polygon(0 0, 86.157% 0, 92.821% 100%, 0 100%); }
+  39% { clip-path: polygon(0 0, 87.052% 0, 93.301% 100%, 0 100%); }
+  40% { clip-path: polygon(0 0, 87.891% 0, 93.750% 100%, 0 100%); }
+  41% { clip-path: polygon(0 0, 88.677% 0, 94.169% 100%, 0 100%); }
+  42% { clip-path: polygon(0 0, 89.414% 0, 94.559% 100%, 0 100%); }
+  43% { clip-path: polygon(0 0, 90.105% 0, 94.923% 100%, 0 100%); }
+  44% { clip-path: polygon(0 0, 90.751% 0, 95.263% 100%, 0 100%); }
+  45% { clip-path: polygon(0 0, 91.356% 0, 95.581% 100%, 0 100%); }
+  46% { clip-path: polygon(0 0, 91.923% 0, 95.877% 100%, 0 100%); }
+  47% { clip-path: polygon(0 0, 92.453% 0, 96.153% 100%, 0 100%); }
+  48% { clip-path: polygon(0 0, 92.949% 0, 96.410% 100%, 0 100%); }
+  49% { clip-path: polygon(0 0, 93.414% 0, 96.651% 100%, 0 100%); }
+  50% { clip-path: polygon(0 0, 93.848% 0, 96.875% 100%, 0 100%); }
+  51% { clip-path: polygon(0 0, 94.254% 0, 97.084% 100%, 0 100%); }
+  52% { clip-path: polygon(0 0, 94.633% 0, 97.280% 100%, 0 100%); }
+  53% { clip-path: polygon(0 0, 94.988% 0, 97.462% 100%, 0 100%); }
+  54% { clip-path: polygon(0 0, 95.319% 0, 97.632% 100%, 0 100%); }
+  55% { clip-path: polygon(0 0, 95.629% 0, 97.790% 100%, 0 100%); }
+  56% { clip-path: polygon(0 0, 95.919% 0, 97.938% 100%, 0 100%); }
+  57% { clip-path: polygon(0 0, 96.190% 0, 98.076% 100%, 0 100%); }
+  58% { clip-path: polygon(0 0, 96.443% 0, 98.205% 100%, 0 100%); }
+  59% { clip-path: polygon(0 0, 96.679% 0, 98.325% 100%, 0 100%); }
+  60% { clip-path: polygon(0 0, 96.899% 0, 98.438% 100%, 0 100%); }
+  61% { clip-path: polygon(0 0, 97.106% 0, 98.542% 100%, 0 100%); }
+  62% { clip-path: polygon(0 0, 97.298% 0, 98.640% 100%, 0 100%); }
+  63% { clip-path: polygon(0 0, 97.478% 0, 98.731% 100%, 0 100%); }
+  64% { clip-path: polygon(0 0, 97.646% 0, 98.816% 100%, 0 100%); }
+  65% { clip-path: polygon(0 0, 97.802% 0, 98.895% 100%, 0 100%); }
+  66% { clip-path: polygon(0 0, 97.949% 0, 98.969% 100%, 0 100%); }
+  67% { clip-path: polygon(0 0, 98.086% 0, 99.038% 100%, 0 100%); }
+  68% { clip-path: polygon(0 0, 98.213% 0, 99.103% 100%, 0 100%); }
+  69% { clip-path: polygon(0 0, 98.332% 0, 99.163% 100%, 0 100%); }
+  70% { clip-path: polygon(0 0, 98.444% 0, 99.219% 100%, 0 100%); }
+  71% { clip-path: polygon(0 0, 98.547% 0, 99.271% 100%, 0 100%); }
+  72% { clip-path: polygon(0 0, 98.644% 0, 99.320% 100%, 0 100%); }
+  73% { clip-path: polygon(0 0, 98.735% 0, 99.365% 100%, 0 100%); }
+  74% { clip-path: polygon(0 0, 98.819% 0, 99.408% 100%, 0 100%); }
+  75% { clip-path: polygon(0 0, 98.898% 0, 99.448% 100%, 0 100%); }
+  76% { clip-path: polygon(0 0, 98.972% 0, 99.485% 100%, 0 100%); }
+  77% { clip-path: polygon(0 0, 99.040% 0, 99.519% 100%, 0 100%); }
+  78% { clip-path: polygon(0 0, 99.105% 0, 99.551% 100%, 0 100%); }
+  79% { clip-path: polygon(0 0, 99.164% 0, 99.581% 100%, 0 100%); }
+  80% { clip-path: polygon(0 0, 99.220% 0, 99.609% 100%, 0 100%); }
+  81% { clip-path: polygon(0 0, 99.272% 0, 99.636% 100%, 0 100%); }
+  82% { clip-path: polygon(0 0, 99.321% 0, 99.660% 100%, 0 100%); }
+  83% { clip-path: polygon(0 0, 99.366% 0, 99.683% 100%, 0 100%); }
+  84% { clip-path: polygon(0 0, 99.409% 0, 99.704% 100%, 0 100%); }
+  85% { clip-path: polygon(0 0, 99.448% 0, 99.724% 100%, 0 100%); }
+  86% { clip-path: polygon(0 0, 99.485% 0, 99.742% 100%, 0 100%); }
+  87% { clip-path: polygon(0 0, 99.520% 0, 99.760% 100%, 0 100%); }
+  88% { clip-path: polygon(0 0, 99.552% 0, 99.776% 100%, 0 100%); }
+  89% { clip-path: polygon(0 0, 99.582% 0, 99.791% 100%, 0 100%); }
+  90% { clip-path: polygon(0 0, 99.610% 0, 99.805% 100%, 0 100%); }
+  91% { clip-path: polygon(0 0, 99.636% 0, 99.818% 100%, 0 100%); }
+  92% { clip-path: polygon(0 0, 99.660% 0, 99.830% 100%, 0 100%); }
+  93% { clip-path: polygon(0 0, 99.683% 0, 99.841% 100%, 0 100%); }
+  94% { clip-path: polygon(0 0, 99.704% 0, 99.852% 100%, 0 100%); }
+  95% { clip-path: polygon(0 0, 99.724% 0, 99.862% 100%, 0 100%); }
+  96% { clip-path: polygon(0 0, 99.742% 0, 99.871% 100%, 0 100%); }
+  97% { clip-path: polygon(0 0, 99.760% 0, 99.880% 100%, 0 100%); }
+  98% { clip-path: polygon(0 0, 99.776% 0, 99.888% 100%, 0 100%); }
+  99% { clip-path: polygon(0 0, 99.791% 0, 99.895% 100%, 0 100%); }
+  100% { clip-path: polygon(0 0, 100.000% 0, 100.000% 100%, 0 100%); }
 }

@@ -6,12 +6,16 @@
    - .reviews：block / relative / overflow:hidden / nowrap / font-size:0
    - .reviewsInner：inline-block / nowrap（GSAP 控制 translateX 跑馬燈）
    - .reviewsTarget：inline-block（每組評論單元）
-   - .reviewsBox：inline-block / 25px 高 / 1px 邊框（--line 透明底 / --bgColor 填充 /
+   - .reviewsBox：inline-flex / 31px 高 / 1px 邊框（--line 透明底 / --bgColor 填充 /
      --borderR 膠囊圓角 / --maru 圓形）
-   - .reviewsBox__text：15px（maru 14px）/ scaleX(1.15) / line-height 21px
+   - .reviewsBox__text：16.5px（maru 15.5px）/ scaleX(1.15) / line-height 23px
+     （2026-11-13 由 15px/21px、maru 14px 放大約 10%；膠囊高度／左右內距同步 25→27→29→31px、
+     15→16.5→18px，垂直呼吸固定 3px（31 − 2 邊框 − 23 行高），見下方 2026-11-13 註解）
    - .reviewsMark__box / .reviewsMark / .reviewsMark__inner：十字圓點標記
      （mask-image reviews--dot.svg，22×22 viewBox）
    動畫：GSAP x:0 → -半寬、repeat:-1、線性 ~80px/s（原站 4311.8px/53.9s）。
+   （duration = 實測半寬 / 80，字級或文字內容改變時自動重算，速度維持 80px/s；
+     首頁內容前後半不同時，bc-reviews.js 會先自我複製一份再以「一份寬度」當循環距離。）
    黑底適配：原站深棕 rgb(102,36,11) → 白色系（Between Coffee 黑底）；
    原站橙 rgb(254,130,54) → 2026-09-04 重點字改品牌主題金 var(--bc-gold, #c49b63)；白字（--line/maru/dot）不變。
 
@@ -56,10 +60,16 @@
   white-space: nowrap;
 }
 
-/* ---- reviewsBox：膠囊/圓形/線框（原站 1px solid 深棕 → 黑底白色系） ---- */
+/* ---- reviewsBox：膠囊/圓形/線框（原站 1px solid 深棕 → 黑底白色系） ----
+ * 2026-11-13：改 inline-flex + 置中（align-items/justify-content center）
+ *   ⇒ 文字（含 scaleX 視覺放大）在膠囊內「水平／垂直都居中」由版面保證，
+ *     不再依賴上下 padding 數值剛好對齊行高（換字型或斷行都不會偏）。
+ *   同日第三輪：高度再加大一級（垂直呼吸 2→3px、高 29→31，左右內距不變），文字仍由 flex 置中。 */
 .bc-reviews .reviewsBox {
-  display: inline-block;
-  height: calc(25px * var(--rv-scale, 1));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(31px * var(--rv-scale, 1));
   border: calc(1px * var(--rv-scale, 1)) solid rgba(255, 255, 255, 0.35);
   box-sizing: border-box;
 }
@@ -73,47 +83,63 @@
   border-radius: 9999px;
 }
 .bc-reviews .reviewsBox--maru {
-  width: calc(25px * var(--rv-scale, 1));
+  width: calc(31px * var(--rv-scale, 1));
   border-radius: 50%;
 }
 
-/* ---- reviewsBox__text（原站 notoSerif-jp） ---- */
+/* ---- reviewsBox__text（原站 notoSerif-jp） ----
+ * 2026-11-13：內文文字放大約 10% ⇒ 膠囊幾何同步等比放大（維持上下／左右內距比例）：
+ *   文字：桌機 15→16.5px（line-height 21→23）、≤768 13→14.5px（18→20）、≤480 11→12px（15→16）；
+ *         maru 14→15.5 / 12→13.5 / 10→11px。
+ *   膠囊：高 25→27→29→31 / 22→24→26→28 / 18→20→22→24
+ *         （= line-height ＋ 上下各 3px 呼吸 ＋ 上下 1px 邊框；第三輪把呼吸 2→3px），
+ *         左右內距 15→16.5→18 / 12→13→14.5 / 9→10→11.5，
+ *         --borderR 25→27→30 / 20→22→24 / 15→16.5→18；
+ *         maru 直徑同高、reviewsMark__box 高度同高（圓點維持垂直對齊）。
+ *         ⇒ 內高 31-2=29、line-height 23 → 上下各留 3px。
+ *   垂直置中：改由 `.reviewsBox` 的 flex `align-items:center` 負責（文字只留左右 padding），
+ *   行高與膠囊內高不必整除也永遠置中；水平由 `justify-content:center`（＋左右對稱 padding）負責。
+ *   文字變寬 → scrollWidth 變長 → bc-reviews.js 的 duration（半寬/80）自動等比例變長，
+ *   線性速度仍為 80px/s（無需改 JS）。 */
 .bc-reviews .reviewsBox__text {
   display: block;
+  margin: 0;
   font-family: "Noto Serif JP", "Noto Serif TC", "Noto Sans TC", serif;
-  font-size: calc(15px * var(--rv-scale, 1));
+  font-size: calc(16.5px * var(--rv-scale, 1));
   font-weight: 600;
-  line-height: calc(21px * var(--rv-scale, 1));
-  padding: 0 calc(15px * var(--rv-scale, 1));
+  line-height: calc(23px * var(--rv-scale, 1));
+  /* 只留左右內距（同時吸收 transform:scaleX(1.15) 的橫向外擴）；上下交給 flex 置中 */
+  padding: 0 calc(18px * var(--rv-scale, 1));
   transform: scaleX(1.15);
   white-space: nowrap;
   color: rgba(255, 255, 255, 0.9);
 }
-/* 膠囊圓角（--borderR）：文字橫向 padding 加大（原站 0 25px） */
+/* 膠囊圓角（--borderR）：文字橫向 padding 加大（原站 0 25px → 11-13 兩輪：27 → 30px，隨字級同步） */
 .bc-reviews .reviewsBox--borderR .reviewsBox__text {
-  padding: 0 calc(25px * var(--rv-scale, 1));
+  padding: 0 calc(30px * var(--rv-scale, 1));
 }
 /* 填充底（--bgColor）：文字用品牌主題金 var(--bc-gold, #c49b63)（2026-09-04 由原站橙改，白字不變） */
 .bc-reviews .reviewsBox--bgColor .reviewsBox__text {
   color: var(--bc-gold, #c49b63);
 }
-/* 圓形（--maru）：14px / 置中 / 無 padding */
+/* 圓形（--maru）：15.5px（2026-11-13 原 14px 放大約 10%）/ 無 padding / 由 flex 置中 */
 .bc-reviews .reviewsBox--maru .reviewsBox__text {
-  font-size: calc(14px * var(--rv-scale, 1));
+  font-size: calc(15.5px * var(--rv-scale, 1));
   padding: 0;
   text-align: center;
 }
 
 /* ---- reviewsMark 十字圓點標記（mask-image reviews--dot.svg） ----
- * 2026-08-28 修正：reviewsMark__box 高度改為與 reviewsBox 一致（25px）並用
+ * 2026-08-28 修正：reviewsMark__box 高度改為與 reviewsBox 一致並用
  * inline-flex 垂直居中，dot 點與文字框垂直對齊（原 height:18px + vertical-align:top
- * 使 dot 貼頂偏上）。 */
+ * 使 dot 貼頂偏上）。
+ * 2026-11-13：reviewsBox 高 25→27→29→31 ⇒ box 高度同步 31（純文字／膠囊圓點仍同一水平線）。 */
 .bc-reviews .reviewsMark__box {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: calc(26px * var(--rv-scale, 1));
-  height: calc(25px * var(--rv-scale, 1));
+  height: calc(31px * var(--rv-scale, 1));
   margin: 0 calc(8px * var(--rv-scale, 1));
   vertical-align: top;
 }
@@ -140,9 +166,12 @@
 
 /* ============================================================
    2026-09-06：行動端整個模組縮小尺寸（平板中縮 / 手機全縮）
-   - ≤768px：膠囊 25→22px、主字 15→13px、模組上下 padding 48→34px
-   - ≤480px：膠囊 22→18px、主字 13→11px、模組上下 padding 34→24px
-   （含 reviewsBox/maru/dot/reviewsMark 同步縮放，維持原比例）
+   - ≤768px：膠囊 28px、主字 14.5px、模組上下 padding 34px
+   - ≤480px：膠囊 24px、主字 12px、模組上下 padding 24px
+   （含 reviewsBox/maru/dot/reviewsMark 同步縮放，維持原比例；2026-11-13 文字放大 10% 後
+    膠囊同步 22→24、18→20、左右內距 12→13、9→10；同日第二輪再加內距：膠囊 24→26、20→22、
+    左右內距 13→14.5、10→11.5、--borderR 22→24、16.5→18，內距比例仍與放大前一致；
+    同日第三輪只加高度呼吸：膠囊 26→28、22→24，左右內距不變）
 
    2026-10-07：以下數值同樣乘上 --rv-scale（首頁 1.15 / 其餘 1），
    使放大率「全端」一致（桌機、平板、手機皆 ×1.15）。
@@ -152,25 +181,25 @@
     padding: calc(34px * var(--rv-scale, 1)) 0;
   }
   .bc-reviews .reviewsBox {
-    height: calc(22px * var(--rv-scale, 1));
+    height: calc(28px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox__text {
-    font-size: calc(13px * var(--rv-scale, 1));
-    line-height: calc(18px * var(--rv-scale, 1));
-    padding: 0 calc(12px * var(--rv-scale, 1));
+    font-size: calc(14.5px * var(--rv-scale, 1));
+    line-height: calc(20px * var(--rv-scale, 1));
+    padding: 0 calc(14.5px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--borderR .reviewsBox__text {
-    padding: 0 calc(20px * var(--rv-scale, 1));
+    padding: 0 calc(24px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru {
-    width: calc(22px * var(--rv-scale, 1));
+    width: calc(28px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru .reviewsBox__text {
-    font-size: calc(12px * var(--rv-scale, 1));
+    font-size: calc(13.5px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark__box {
     width: calc(24px * var(--rv-scale, 1));
-    height: calc(22px * var(--rv-scale, 1));
+    height: calc(28px * var(--rv-scale, 1));
     margin: 0 calc(6px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark {
@@ -188,25 +217,25 @@
     padding: calc(24px * var(--rv-scale, 1)) 0;
   }
   .bc-reviews .reviewsBox {
-    height: calc(18px * var(--rv-scale, 1));
+    height: calc(24px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox__text {
-    font-size: calc(11px * var(--rv-scale, 1));
-    line-height: calc(15px * var(--rv-scale, 1));
-    padding: 0 calc(9px * var(--rv-scale, 1));
+    font-size: calc(12px * var(--rv-scale, 1));
+    line-height: calc(16px * var(--rv-scale, 1));
+    padding: 0 calc(11.5px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--borderR .reviewsBox__text {
-    padding: 0 calc(15px * var(--rv-scale, 1));
+    padding: 0 calc(18px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru {
-    width: calc(18px * var(--rv-scale, 1));
+    width: calc(24px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsBox--maru .reviewsBox__text {
-    font-size: calc(10px * var(--rv-scale, 1));
+    font-size: calc(11px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark__box {
     width: calc(20px * var(--rv-scale, 1));
-    height: calc(18px * var(--rv-scale, 1));
+    height: calc(24px * var(--rv-scale, 1));
     margin: 0 calc(5px * var(--rv-scale, 1));
   }
   .bc-reviews .reviewsMark {

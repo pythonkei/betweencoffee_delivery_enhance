@@ -17,7 +17,8 @@
                                     mobile 上200/左右16/下64。
      · 卡片：pc 高 540、圓角 24、內距 32 40 40；
              mobile 高 240、圓角 16、內距 20 24 22。
-     · 卡片間距：gap 8（× spacing）。
+     · 卡片間距：gap 8（× spacing）；2026-11-14 起手機／平板直向堆疊改用
+       --gap-stack（clamp 20–36px），見下方 --gap / --gap-stack 註解。
      · 桌機 hover 寬度：active ＝ (100% - gap) × 2/3、
                          inactive ＝ (100% - gap) / 3；
        mobile 不套寬度規則（卡片維持 100%，原站規則只在 ≥64rem 生效）。
@@ -32,6 +33,18 @@
          .recommended-page__title 30 → 28（pc 60 → 56）：@1440 由 60px → 56px、
          @375 由 28.125px → 26.25px。label 不動（維持 12／pc 16）。
          標題仍是 --spacing 倍數 → 各斷點等比縮小；clip 圖與卡片尺寸未動。
+     · 2026-11-13（使用者指示）：標題「Coffee / Beans」改用左上角 logo 的
+       Mogra 字型（text-transform: uppercase ＋ 字距 -0.04167em）；同日晚間再依指示
+       **移除 ｛ ｝ 括號**，只留純文字；見下方 `.recommended-page__title` 的 2026-11-13 註解。
+     · 2026-11-14（使用者指示）：標題文字「再稍微小一點」——
+       .recommended-page__title 28 → 26（mobile）、56 → 52（pc ≥64rem）：
+       @1440 由 56px → 52px、@375 由 26.25px → 24.375px（約 -7%，等比縮小）。
+       仍是 --spacing 倍數；clip 圖、卡片尺寸、label 皆未動。
+     · 2026-11-14（使用者指示，手機／平板）：兩張卡片之間太擠 → 增加間距。
+       直向堆疊（<64rem）改用新的 --gap-stack＝clamp(20px, 24×spacing, 36px)
+       （@375 由 7.5px → 22.5px、@768 以上由 15.4px → 36px）；
+       橫向排列（≥64rem）的 --gap 加 12px 下限（1024px 時原本只有 5.7px，
+       iPad 橫向兩卡幾乎貼在一起）。卡片尺寸、clip 圖、label 皆未動。
      · 標題結尾原本另加裝飾 APNG（2026-10-24 使用者指示，非常駐原站元素）：
        來源 static/images/ani_{coffee,bean}_apng.png，離線縮成 176×176 的
        static/images/recommended-pages/title-*-ani.png。
@@ -62,7 +75,12 @@
 .bc-recommended-pages {
   /* 流體等比單位（原站 spacing-unit） */
   --spacing: calc(100vw / 400);
+  /* 卡片間距（2026-11-14 使用者指示：手機／平板兩卡之間太擠 → 分開兩種）：
+     · --gap      ：≥64rem 橫向排列用（8×spacing，並加 12px 下限，見下方 pc 區塊）。
+     · --gap-stack：<64rem 直向堆疊用 → clamp(20px, 24×spacing, 36px)
+                    （@375 22.5px、@768 以上 36px；原本 8×spacing 只有 7.5／15.4px）。 */
   --gap: calc(var(--spacing) * 8);
+  --gap-stack: clamp(20px, calc(var(--spacing) * 24), 36px);
   --cols: 2;
   /* 原站 --ease-1 / --ease-2 / --ease-3 */
   --rp-ease-1: cubic-bezier(0.18, 0.06, 0.23, 1);
@@ -83,7 +101,8 @@
 .bc-recommended-pages__list {
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  /* 直向堆疊（手機／平板）用加大後的間距；≥64rem 橫向排列時改回 var(--gap) */
+  gap: var(--gap-stack);
 }
 
 /* ---------- 卡片 ---------- */
@@ -166,11 +185,33 @@
   gap: 0.22em;
   margin: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: calc(var(--spacing) * 28);
+  font-size: calc(var(--spacing) * 26);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0;
   transition: color 0.5s var(--rp-ease-2);
+}
+
+/* ---------- 標題字體（2026-11-13 使用者指示） ----------
+   「Coffee / Beans」改用左上角 logo（.bc-navbar-brand-fixed，見 bc-components.css:135）
+   的 Mogra 字型。**font-size 完全不動**（沿用上面的 --spacing 倍數：pc 56、mobile 28，
+   ≤991.98 的覆寫也不動）→ 只換字型、不改大小。
+   · font-weight 400：Mogra 只有單一字重，logo 也是預設 400；
+     沿用 700 會被瀏覽器做「偽粗體」而糊掉，故標題一併設 400。
+   · 2026-11-14 起 **font-size 由 28／56 縮為 26／52**（使用者指示「再稍微小一點」）；
+     以下三行只覆寫字型相關屬性，font-size 仍由上面的 #spacing 規則決定。
+   · text-transform: uppercase：與 logo 同做法（nav.html 寫的是「Between」，CSS 轉大寫）
+     ⇒ 呈現「COFFEE」／「BEANS」，HTML 仍保留好讀的 Coffee / Beans。
+   · letter-spacing：-2px ÷ 48px（logo 的 -2px ＠48px）= -0.04167em，
+     改用 em ⇒ 各斷點與 logo 等比例（@56px ≈ -2.33px、@26.25px ≈ -1.09px）。
+     ⚠ 不可寫死 px，否則行動端字小會黏在一起。
+   · 2026-11-13 後續指示：**移除 ｛ ｝ 全角括號**（原寫法抄 nav.html:112 的 logo），
+     標題只剩 Mogra 文字，故也不再需要「Mogra 缺括號 → Arial 補字」的後備處理。 */
+.recommended-page__title {
+  font-family: "Mogra", Arial, sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: -0.04167em;
 }
 
 /* 標題結尾的裝飾 APNG（.recommended-page__title-ani）已於 2026-10-25
@@ -230,12 +271,16 @@
 @media (min-width: 64rem) {
   .bc-recommended-pages {
     --spacing: calc(100vw / 1440);
+    /* 2026-11-14（使用者指示，平板橫向）：8×spacing 在 1024px 只有 5.7px，
+       iPad 橫向兩卡幾乎貼在一起 → 加 12px 下限（≥2160px 之後才回到 8×spacing）。 */
+    --gap: max(12px, calc(var(--spacing) * 8));
     padding: calc(var(--spacing) * 240) calc(var(--spacing) * 24)
       calc(var(--spacing) * 80);
   }
 
   .bc-recommended-pages__list {
     flex-direction: row;
+    gap: var(--gap);
   }
 
   .recommended-pages__link {
@@ -264,7 +309,7 @@
   }
 
   .recommended-page__title {
-    font-size: calc(var(--spacing) * 56);
+    font-size: calc(var(--spacing) * 52);
     white-space: nowrap;
     transform-origin: 0 0;
     transition: transform 0.6s var(--rp-ease-1), color 0.5s var(--rp-ease-2);

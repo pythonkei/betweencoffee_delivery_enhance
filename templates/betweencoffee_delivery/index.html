@@ -30,6 +30,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 
 {% block content %}
 
+
+
 <!-- 2026-09-04: yama-beer.com header-bot(_pc) + tax-nav 整合（樣式/動畫複刻；僅 PC ≥769px 顯示）
      - header-bot：底部帳號列（僅 Cart，開啟既有滑出購物車）；首 scroll is-view / footer 交會 is-hide
      - tax-nav：黃色公告圓球（連結登入頁）；init 延遲 0.7s 淡入 / hover 灰掃 / footer 交會隱藏 -->
@@ -114,6 +116,10 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
             2026-10-27 由 about 頁整組移入，位置＝推薦雙卡正下方）
        [3] <section hidden class="hero bc-gunte-hero">（暫時隱藏）
        [4] <section hidden class="feed overflow-hidden">（其餘首頁內容，維持原狀）
+       [4b] 2026-11-18（使用者指示「section feed feed--video and bc-review 位置互換」）：
+            `.bc-reviews-section`（reviews 跑馬燈）與 `.feed--video`（烘焙影片蒙版）
+            互換 → 現在順序＝ 兩段 blank-small → reviews → blank-small → .feed--video。
+            兩者之間那個 .ftco-section-blank-small 留在原位（整頁總留白不變）。
        2026-10-25（使用者指示）：四步咖啡旅程 Rive 圖示列（.bc-steps）與 SALON/STORE SEARCH
          大區塊（.bc-search）整組移至 about 頁（markup／CSS／JS 一併移轉），首頁不再輸出；
          原本夾在兩者之間與其後的 .ftco-section-blank-small 留白一併移除（避免孤立空白）。
@@ -206,6 +212,10 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
            正方形黑圓底＋白線稿，故 CSS 用 object-fit: contain ＋黑底）
          · 舊的 coffee/bean-{bg,clip}.webp 已於 2026-10-25 被上述檔案取代並刪除；
            過渡期的 coffee-clip.jpg／bean_clip.jpg 同批改為 APNG 後移除
+     - 標題（2026-11-13 使用者指示）：改用左上角 logo 的 Mogra 字型，以 CSS
+       text-transform: uppercase ＋ 字距 -0.04167em（= logo 的 -2px ＠48px）
+       呈現純文字「COFFEE」／「BEANS」，font-size 不變。
+       同日後續指示：**移除 ｛ ｝ 全角括號**，標題只剩文字（HTML 即 Coffee／Beans）。
      - 標題結尾的裝飾 APNG（2026-10-24 追加的 title-coffee-ani.png／
        title-bean-ani.png）已於 2026-10-25 依使用者指示移除：檔案刪除、
        CSS .recommended-page__title-ani 移除，標題只剩
@@ -279,11 +289,29 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
             top calc(48% + 0.26em)，免寫斷點）
          ⓑ wwa-visual-03（wwa-03.gif；右側 0.4em 間隔，見 bc-who.css）
             → 掛在「同時我哋外賣堅持「有熱無凍」」之後
-         ⓒ wwa-visual-02（wwa-02.png）→ 留在「…先鎖得住最純粹嘅果香回甘」之後
+         ⓒ wwa-visual-01（wwa-01.svg）→ 留在句尾「…Stay Warm, Stay Awake.」之後
+            （2026-11-16 使用者指示「wwa-02.png、wwa-01.svg 交換」：兩個 container
+             連 img 整組對調位置，container 的 class／左偏移／margin 跟著圖走，
+             所以換過去也不用重調樣式。原為 wwa-visual-02（wwa-02.png））
             （2026-11-14 換成高解析版 29KB→94KB；img 加 ?v=20261114a 破 WhiteNoise 1 年快取）
+            ⇒ 2026-11-16（使用者指示）：該句由「先鎖得住最純粹嘅果香回甘！」改為
+            「先鎖得住最純粹產地嘅極緻, 釋放咖啡豆最真實靈魂提供俾Lover! Stay Warm, Stay Awake.」，
+            小圖仍掛在同一句句尾（原「！」一併移除）。逐字 .wwa-anim-char 幀數 82 → 120；
+            揭示時序是 progress × totalDur（bc-who.js 動態以元素數推算），
+            新增字元只是把整段拉長，仍隨「文字區塊滾到視口頂」剛好走完，不需改 CSS／JS。
+            ⇒ 2026-11-16 第二批（使用者指示）：①「Stay Warm, Stay Awake.」與「飲完…」
+            之間補一個真正的空白字元（掛在小圖 container 前）——小圖 container 展開前
+            寬度是 0，兩句原本會黏成「Awake.飲完…」；②小圖右側由 bc-who.css 的
+            `.wwa-visual-02{margin-right:.5em}` 推開（原本 0 間距，字會貼著圖片邊緣）。
+            ③ `.who-content-text` 字級 ×0.93（27/39/57 → 25/36/53，字距 2.9/4.3），
+            三張小圖 px 尺寸不動（使用者明示「照片不要修改」）。
+
          ⓓ 手繪箭頭（.video-anim-wwa）→ 2026-11-12 起掛「腦力」（箭頭尖對準
             「腦力」正中央、由下方往上指；該處是最後一行，下方為空白不會壓字）
-         ⓔ wwa-visual-01（wwa-01.svg）→ 掛在「帶包豆返 Office」之後
+         ⓔ wwa-visual-02（wwa-02.png）→ 掛在「帶包豆返 Office」之後
+            （2026-11-16 與 wwa-01.svg 對調；原本是 wwa-visual-01（wwa-01.svg））
+            ⇒ 右側 `margin-right:.5em`（.wwa-visual-02）現在推開的是「，」，
+              效果＝照片與逗號之間留 18px（36px 字級）。
          ⓕ 2026-11-13（使用者指示「『有溫度』文字添加動畫 → 動畫是 about.html 內
             .bc-other-members【 他にもいます！】的 SVG 動畫」）：把「有、溫、度」三字
             外包 .wwa-anim-members，內含 about 同一支手繪塗抹 SVG（mask 白線 tracer
@@ -315,16 +343,21 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
                     <p class="section-title__kicker sm who-kicker">
                         <span class="sukima-parenthis-anim slow">
                             <span class="sukima-parenthesis sprt-left">(</span>
-                            <span class="sukima-label">Between Say:</span>
+                            <span class="sukima-label">About</span>
                             <span class="sukima-parenthesis sprt-right">)</span>
                         </span>
                     </p>
                 </div>
             </div>
-            <h2 class="section-title__text">
-                <span class="section-title__marker" aria-hidden="true"></span> Hmm....Coffee is always better hot not matter
-                <svg width="60" height="78" viewBox="0 0 60 78" fill="none" xmlns="http://www.w3.org/2000/svg" class="culture-kangaeteiru-svg" aria-hidden="true"> <defs> <mask id="thoughtBubbleRevealMask2"> <rect width="60" height="78" fill="black"></rect> <path class="thought-bubble-reveal-tracer" d="M0.5 73L3 77.5L9 74.5L4 70.5L0 71L12 54L19 59.5V63L12 62L10.5 60.5L20.5 33.5L31.5 42L30 48L24.5 49L19 45.5L22 39L26 45.5L35 52.5L31.5 26L26 25L22 16L21 3L26.5 1.5L35.5 1L45.5 4.5L52.5 9L58 16L60.5 22L56 28L50.5 31L41 32L34.5 30.5L26 16L27 4.5L38.5 5.5L49.5 11L55.5 23L43.5 27.5L35 25L30 13L31.5 7.5L49.5 16L48 23L38.5 23.5L33.5 11L45.5 20H41" stroke="white" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="500" stroke-dashoffset="500"></path> </mask> <clipPath id="thoughtBubbleClip2"> <rect width="60" height="78" fill="white"></rect> </clipPath> </defs> <g opacity="0.75" clip-path="url(#thoughtBubbleClip2)" mask="url(#thoughtBubbleRevealMask2)"> <path d="M59.7547 23.1241C57.8265 26.9736 55.2459 29.8245 51.0924 30.9525C49.2934 31.4406 47.5493 32.3714 45.7342 32.504C41.3965 32.824 37.1235 32.5104 32.9958 30.6939C29.2913 29.0649 26.3037 26.6698 24.0493 23.4117C23.2128 22.1996 22.2664 20.9585 22.0791 19.2971C21.8563 17.3416 21.1522 15.4411 20.8453 13.4888C20.6935 12.5321 20.6386 11.3006 21.1134 10.5604C22.063 9.07682 21.585 7.80332 21.052 6.49751C20.264 4.57756 21.2491 2.38935 23.2451 1.67503C26.1422 0.631021 29.1847 -0.0251205 32.1884 0.000737309C35.8897 0.0330595 39.5717 0.524357 43.0147 2.4249C45.4144 3.75012 47.9304 4.86523 50.1041 6.56538C52.7525 8.63724 55.0263 11.1034 57.0094 13.7926C57.9364 15.0532 58.6921 16.5562 59.0829 18.0624C59.4931 19.6494 60.4491 21.217 59.7515 23.1208M30.2117 23.764C30.538 24.0097 30.8448 24.2877 31.1968 24.4848C31.452 24.627 31.7685 24.6594 32.0592 24.7402C31.9462 24.4557 31.888 24.1293 31.7071 23.8966C30.4055 22.2158 29.0813 20.548 27.7506 18.8931C27.6182 18.7282 27.376 18.6539 27.1854 18.5375C27.1499 18.7606 27.0369 19.0062 27.0918 19.2066C27.5698 20.9585 28.6841 22.3031 30.2117 23.764ZM46.8775 27.5781C47.1456 27.1029 47.2586 26.6666 46.4932 26.6472C45.8149 26.6278 45.3627 26.951 45.2497 27.6589C45.6308 27.6556 46.0119 27.6524 46.8775 27.5781Z" fill="#BFFF00"></path> <path d="M19.3455 46.5282C17.3882 44.4531 16.4096 42.1809 16.429 39.5337C16.4484 37.158 18.073 35.7585 20.4856 35.2251C22.6496 34.7468 24.497 35.4352 26.4995 35.8554C29.5452 36.4954 31.9837 40.2868 32.3874 43.1215C32.8525 46.4022 30.1201 49.0494 26.338 49.4792C23.4893 49.8025 21.503 48.2898 19.3455 46.5282Z" fill="#BFFF00"></path> <path d="M12.0961 53.6794C13.4979 53.5986 14.3538 53.9379 15.0934 55.0143C15.5456 55.6736 16.5565 56.026 17.3833 56.3362C19.2114 57.0215 20.0479 58.1075 20.1577 59.6622C20.2482 60.9777 19.2405 61.928 18.5719 62.0185C16.8246 62.2544 15.2775 63.3793 13.4268 63.0625C11.6214 62.7554 9.78037 62.6165 8.5046 61.023C7.72299 60.0468 7.62933 58.7022 8.33019 57.6744C8.95677 56.7532 9.70932 55.887 10.1679 54.8882C10.5458 54.064 11.153 53.8604 12.0994 53.6826L12.0961 53.6794Z" fill="#BFFF00"></path> <path d="M1.1625 71.1708C3.04225 70.0331 4.77988 69.6614 6.60472 71.0157C8.26483 72.2472 8.63949 73.1522 7.54782 75.001C5.6713 78.1718 5.32572 78.466 1.93443 77.5415C0.380891 77.1181 0.180644 75.6701 0.0417624 74.5938C-0.097119 73.5368 0.0643709 72.1825 1.16573 71.1708H1.1625Z" fill="#BFFF00"></path> </g> </svg>
-            </h2>
+            <!-- 2026-11-14（使用者指示「替換此內容到 .section-title__text」）：
+                 原「Hmm...........」分層切片文字 → 整塊 global-tree 首屏主視覺
+                 （照片 3 條切片 ＋ 大字 3 條切片，partials/bc_gt_mv.html；
+                 樣式 static/css/bc-gt-mv.css、換片 static/js/bc-gt-mv.js）。
+                 外框由 h2 改 div：模組內容是區塊層級（div／img），h2 只容許
+                 phrasing content；無障礙標題由模組內的 visually-hidden h2 提供。 -->
+            <div class="section-title__text">
+                {% include 'betweencoffee_delivery/partials/bc_gt_mv.html' %}
+            </div>
         </div>
         <div class="who-content flx">
             <p class="who-content-text">
@@ -343,7 +376,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
                         <g clip-path="url(#flowingRibbonClipWwa)" mask="url(#flowingRibbonRevealMaskWwa)">
                             <path d="M123.373 18.7394C116.613 19.3335 110.082 19.9096 103.551 20.5277C99.2589 20.9358 94.955 21.2658 90.6993 21.8959C85.6852 22.6341 80.7071 23.6243 75.7291 24.5784C71.4614 25.4006 67.2418 26.4508 62.962 27.1709C58.5438 27.921 54.0714 28.4011 49.623 28.9832C48.3469 29.1513 46.5291 27.483 46.4869 26.0487C46.4328 24.3504 47.5524 24.2064 48.9549 24.0443C53.325 23.5222 57.677 22.8441 62.023 22.166C65.2313 21.6679 68.4216 21.0738 71.6179 20.5157C73.2852 20.2276 74.9526 19.9456 76.6079 19.5975C76.8608 19.5435 77.0293 19.1174 77.234 18.8654C76.939 18.6734 76.638 18.3013 76.3611 18.3133C74.7058 18.4033 73.0445 18.5113 71.4072 18.7454C67.4765 19.2975 63.5579 19.9576 59.6273 20.5037C56.0939 20.9958 52.5605 21.5959 49.003 21.7999C45.1627 22.022 45.1867 21.8419 44.1574 18.0612C44.0611 17.7132 43.0137 17.3531 42.4901 17.4431C40.4314 17.7972 38.3367 18.1573 36.3804 18.8534C34.7973 19.4175 33.5994 19.1954 33.1299 17.7132C32.5581 15.9189 33.9726 15.0847 35.4474 14.7486C40.4194 13.6024 45.4155 12.5282 50.4116 11.496C52.7591 11.01 55.1248 10.5239 57.5084 10.2958C64.9123 9.5997 72.292 8.83756 79.6658 7.76337C85.318 6.94122 91.2411 6.44913 96.9535 8.07543C97.7902 8.31547 98.6871 8.92758 99.1506 9.63571C99.4455 10.0858 98.976 11.016 98.8917 11.7361C98.8616 11.9821 98.8917 12.3782 99.0362 12.4682C99.3372 12.6483 99.7465 12.7683 100.096 12.7323C103.593 12.3782 107.078 11.9161 110.575 11.6161C114.915 11.244 119.267 10.8359 123.613 10.7699C126.244 10.7279 128.91 11.142 131.493 11.6821C132.498 11.8921 133.262 13.0863 134.226 13.6864C134.972 14.1485 135.869 14.6826 136.693 14.6766C141.702 14.6286 146.704 14.2986 151.706 14.3106C158.502 14.3286 165.304 14.4006 172.081 14.7906C176.102 15.0247 180.105 15.8108 184.072 16.579C185.077 16.771 186.125 17.6832 186.763 18.5473C187.13 19.0514 187.016 20.5697 186.606 20.8337C185.878 21.2958 184.277 21.6019 183.879 21.1878C181.496 18.6794 178.269 19.0334 175.452 18.8474C166.58 18.2593 157.677 18.1032 148.78 17.8692C144.585 17.7612 140.383 17.7372 136.188 17.8812C131.986 18.0312 127.791 18.4453 123.367 18.7394M73.0746 12.9423C69.8903 13.6864 66.7 14.3886 63.5278 15.1927C62.4624 15.4628 61.4571 15.9789 60.4278 16.3809C61.734 16.501 63.0643 16.861 64.3344 16.699C67.2538 16.3269 70.1251 15.5048 73.0505 15.2167C77.7396 14.7546 82.4588 14.5926 87.166 14.2626C87.6234 14.2325 88.0568 13.8965 88.4962 13.7044C88.0388 13.4524 87.5813 12.9843 87.1178 12.9843C82.5852 12.9303 78.0526 12.9483 73.0746 12.9483M50.9413 16.2849C51.3506 16.2129 51.8201 16.2309 52.1572 16.0329C52.4281 15.8768 52.5424 15.4628 52.729 15.1567C52.4642 15.0127 52.1632 14.7066 51.9285 14.7486C50.5681 14.9947 49.2077 15.2827 47.8714 15.6368C47.5283 15.7268 47.2574 16.0869 46.9564 16.3209C47.3658 16.483 47.7751 16.777 48.1844 16.771C49.0271 16.771 49.8758 16.603 50.9413 16.2789V16.2849Z" fill="#BFFF00"></path>
                         </g>
-                    </svg></span><span class="wwa-anim-char">，</span><span class="wwa-anim-char">先</span><span class="wwa-anim-char">鎖</span><span class="wwa-anim-char">得</span><span class="wwa-anim-char">住</span><span class="wwa-anim-char">最</span><span class="wwa-anim-char">純</span><span class="wwa-anim-char">粹</span><span class="wwa-anim-char">嘅</span><span class="wwa-anim-char">果</span><span class="wwa-anim-char">香</span><span class="wwa-anim-char">回</span><span class="wwa-anim-char">甘</span><span class="wwa-anim-visual wwa-visual-02"> <img src="{% static 'images/wwa-02.png' %}?v=20261114a" alt="" loading="lazy" decoding="async"> </span><span class="wwa-anim-char">！</span><span class="wwa-anim-char">飲</span><span class="wwa-anim-char">完</span><span class="wwa-anim-char">意</span><span class="wwa-anim-char">猶</span><span class="wwa-anim-char">未</span><span class="wwa-anim-char">盡</span><span class="wwa-anim-char">？</span><span class="wwa-anim-char">帶</span><span class="wwa-anim-char">包</span><span class="wwa-anim-char">豆</span><span class="wwa-anim-char">返</span> <span class="wwa-anim-char">O</span><span class="wwa-anim-char">f</span><span class="wwa-anim-char">f</span><span class="wwa-anim-char">i</span><span class="wwa-anim-char">c</span><span class="wwa-anim-char">e</span><span class="wwa-anim-visual wwa-visual-01"> <img src="{% static 'images/wwa-01.svg' %}" alt="" loading="lazy" decoding="async"> </span><span class="wwa-anim-char">，</span><span class="wwa-anim-char">今</span><span class="wwa-anim-char">日</span><span class="wwa-anim-char">嘅</span><span class="video-anim-wwa relative"><span class="wwa-anim-char">腦</span><span class="wwa-anim-char">力</span><svg width="146" height="79" viewBox="0 0 146 79" fill="none" xmlns="http://www.w3.org/2000/svg" class="who-arrow-svg"> <defs> <mask id="arm-arrowwwa2"> <rect width="146" height="79" fill="black"></rect> <path class="reveal-brush-arrow-wwa" d="M146.5 78L126.5 64L110 52L94.5 43.5L76.5 41.5L60.5 40L37.5 32L22 21.5L11 10.5L3 5L13.5 29L7 3.5L13.5 2.5L31 8.5" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="300" stroke-dashoffset="300"></path> </mask> <clipPath id="mcarrowwwa2"> <rect width="146" height="79" fill="white"></rect> </clipPath> </defs> <g opacity="0.75" clip-path="url(#mcarrowwwa2)" mask="url(#arm-arrowwwa2)"> <path d="M146 76.0605C145.732 75.9251 143.574 73.2402 143.407 73.1086C139.277 69.9208 135.19 66.6787 131.049 63.5064C127.47 60.7634 123.825 58.1056 120.239 55.3742C117.72 53.4553 115.333 51.3585 112.736 49.5595C109.46 47.2885 106.083 45.2187 102.342 43.6596C99.1939 42.3481 96.0499 41.1449 92.7623 40.29C91.4621 39.9534 90.1424 39.6323 88.811 39.5046C86.1251 39.2454 83.4275 39.0868 80.7299 38.9552C76.34 38.7425 71.9268 38.8082 67.568 38.3401C64.2532 37.9842 60.9424 37.2104 57.748 36.2316C50.3111 33.9529 43.1305 31.0475 36.2798 27.3025C32.736 25.3643 29.2466 23.3409 26.1531 20.7953C22.1708 17.5223 18.4446 13.9321 14.6408 10.4425C14.1556 9.99759 13.7752 9.3902 13.4919 8.79054C13.0766 7.91233 12.2421 6.58922 12.5603 6.13657C13.2551 5.14617 14.404 6.17913 15.3433 6.39191C18.5998 7.12698 21.5381 8.7209 24.4492 10.2297C26.1919 11.135 27.5155 10.7443 28.9671 10.0904C30.1626 9.55268 30.6012 7.84269 29.7395 6.88711C29.006 6.0708 28.055 4.94113 27.1429 4.88696C24.4181 4.71674 22.3415 3.02609 19.8846 2.26782C17.5635 1.5521 15.3472 0.581039 12.8631 0.472714C11.326 0.406945 9.76959 -0.130812 8.27136 0.0239383C6.05118 0.252195 3.6447 0.17482 1.90193 2.08212C1.39734 2.63148 0.283371 2.91003 0.16304 3.46326C-0.0698395 4.52717 -0.0776062 5.81934 0.322189 6.81361C2.72092 12.7947 6.03177 18.2613 9.88991 23.4338C11.1591 25.1322 12.7156 26.1496 14.5593 26.9814C15.3317 27.3296 15.9876 27.3606 16.3525 26.6526C16.5427 26.2812 16.3758 25.5732 16.1274 25.1631C14.5515 22.513 12.9135 19.9016 11.2872 17.2825C11.1941 17.1354 10.9961 17.0503 10.9185 16.8995C10.1577 15.4371 9.40862 13.9669 8.6595 12.5007C9.85887 13.5259 11.1553 14.4583 12.2421 15.5879C17.4005 20.9694 23.3274 25.4301 29.5299 29.4768C33.458 32.0418 37.7314 34.0613 42.1252 35.868C45.7116 37.342 49.2942 38.8276 52.9583 40.0849C56.3545 41.2455 59.8595 42.0154 63.3877 42.7273C68.1269 43.6867 72.8933 43.6558 77.683 43.7989C81.8283 43.9227 86.0979 43.9343 90.0609 44.9634C94.245 46.0467 98.5767 46.9674 102.365 49.5285C104.515 50.9832 107.147 51.8227 109.305 53.3818C112.069 55.3781 114.739 57.5021 117.46 59.5486C120.177 61.5913 122.925 63.5953 125.634 65.6497C128.153 67.557 130.622 69.53 133.145 71.4373C136.65 74.0874 140.046 76.8923 144.067 78.9969C144.203 77.1283 146.004 78.0606 146.004 76.0566L146 76.0605Z" fill="#bfff00"></path> </g> </svg></span><span class="wwa-anim-char">由</span><span class="wwa-anim-char">我</span><span class="wwa-anim-char">哋</span><span class="wwa-anim-char">承</span><span class="wwa-anim-char">包</span><span class="wwa-anim-char">。</span></p>
+                    </svg></span><span class="wwa-anim-char">，</span><span class="wwa-anim-char">先</span><span class="wwa-anim-char">鎖</span><span class="wwa-anim-char">得</span><span class="wwa-anim-char">住</span><span class="wwa-anim-char">最</span><span class="wwa-anim-char">純</span><span class="wwa-anim-char">粹</span><span class="wwa-anim-char">產</span><span class="wwa-anim-char">地</span><span class="wwa-anim-char">嘅</span><span class="wwa-anim-char">極</span><span class="wwa-anim-char">緻</span><span class="wwa-anim-char">,</span> <span class="wwa-anim-char">釋</span><span class="wwa-anim-char">放</span><span class="wwa-anim-char">咖</span><span class="wwa-anim-char">啡</span><span class="wwa-anim-char">豆</span><span class="wwa-anim-char">最</span><span class="wwa-anim-char">真</span><span class="wwa-anim-char">實</span><span class="wwa-anim-char">靈</span><span class="wwa-anim-char">魂</span><span class="wwa-anim-char">提</span><span class="wwa-anim-char">供</span><span class="wwa-anim-char">俾</span><span class="wwa-nowrap"><span class="wwa-anim-char">L</span><span class="wwa-anim-char">o</span><span class="wwa-anim-char">v</span><span class="wwa-anim-char">e</span><span class="wwa-anim-char">r</span><span class="wwa-anim-char">!</span></span> <span class="wwa-nowrap"><span class="wwa-anim-char">S</span><span class="wwa-anim-char">t</span><span class="wwa-anim-char">a</span><span class="wwa-anim-char">y</span> <span class="wwa-anim-char">W</span><span class="wwa-anim-char">a</span><span class="wwa-anim-char">r</span><span class="wwa-anim-char">m</span><span class="wwa-anim-char">,</span> <span class="wwa-anim-char">S</span><span class="wwa-anim-char">t</span><span class="wwa-anim-char">a</span><span class="wwa-anim-char">y</span> <span class="wwa-anim-char">A</span><span class="wwa-anim-char">w</span><span class="wwa-anim-char">a</span><span class="wwa-anim-char">k</span><span class="wwa-anim-char">e</span><span class="wwa-anim-char">.</span></span> <span class="wwa-anim-visual wwa-visual-01"> <img src="{% static 'images/wwa-01.svg' %}" alt="" loading="lazy" decoding="async"> </span><span class="wwa-anim-char">飲</span><span class="wwa-anim-char">完</span><span class="wwa-anim-char">意</span><span class="wwa-anim-char">猶</span><span class="wwa-anim-char">未</span><span class="wwa-anim-char">盡</span><span class="wwa-anim-char">？</span><span class="wwa-anim-char">帶</span><span class="wwa-anim-char">包</span><span class="wwa-anim-char">豆</span><span class="wwa-anim-char">返</span> <span class="wwa-nowrap"><span class="wwa-anim-char">O</span><span class="wwa-anim-char">f</span><span class="wwa-anim-char">f</span><span class="wwa-anim-char">i</span><span class="wwa-anim-char">c</span><span class="wwa-anim-char">e</span></span><span class="wwa-anim-visual wwa-visual-02"> <img src="{% static 'images/wwa-02.png' %}?v=20261114a" alt="" loading="lazy" decoding="async"> </span><span class="wwa-anim-char">，</span><span class="wwa-anim-char">今</span><span class="wwa-anim-char">日</span><span class="wwa-anim-char">嘅</span><span class="video-anim-wwa relative"><span class="wwa-anim-char">腦</span><span class="wwa-anim-char">力</span><svg width="146" height="79" viewBox="0 0 146 79" fill="none" xmlns="http://www.w3.org/2000/svg" class="who-arrow-svg"> <defs> <mask id="arm-arrowwwa2"> <rect width="146" height="79" fill="black"></rect> <path class="reveal-brush-arrow-wwa" d="M146.5 78L126.5 64L110 52L94.5 43.5L76.5 41.5L60.5 40L37.5 32L22 21.5L11 10.5L3 5L13.5 29L7 3.5L13.5 2.5L31 8.5" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="300" stroke-dashoffset="300"></path> </mask> <clipPath id="mcarrowwwa2"> <rect width="146" height="79" fill="white"></rect> </clipPath> </defs> <g opacity="0.75" clip-path="url(#mcarrowwwa2)" mask="url(#arm-arrowwwa2)"> <path d="M146 76.0605C145.732 75.9251 143.574 73.2402 143.407 73.1086C139.277 69.9208 135.19 66.6787 131.049 63.5064C127.47 60.7634 123.825 58.1056 120.239 55.3742C117.72 53.4553 115.333 51.3585 112.736 49.5595C109.46 47.2885 106.083 45.2187 102.342 43.6596C99.1939 42.3481 96.0499 41.1449 92.7623 40.29C91.4621 39.9534 90.1424 39.6323 88.811 39.5046C86.1251 39.2454 83.4275 39.0868 80.7299 38.9552C76.34 38.7425 71.9268 38.8082 67.568 38.3401C64.2532 37.9842 60.9424 37.2104 57.748 36.2316C50.3111 33.9529 43.1305 31.0475 36.2798 27.3025C32.736 25.3643 29.2466 23.3409 26.1531 20.7953C22.1708 17.5223 18.4446 13.9321 14.6408 10.4425C14.1556 9.99759 13.7752 9.3902 13.4919 8.79054C13.0766 7.91233 12.2421 6.58922 12.5603 6.13657C13.2551 5.14617 14.404 6.17913 15.3433 6.39191C18.5998 7.12698 21.5381 8.7209 24.4492 10.2297C26.1919 11.135 27.5155 10.7443 28.9671 10.0904C30.1626 9.55268 30.6012 7.84269 29.7395 6.88711C29.006 6.0708 28.055 4.94113 27.1429 4.88696C24.4181 4.71674 22.3415 3.02609 19.8846 2.26782C17.5635 1.5521 15.3472 0.581039 12.8631 0.472714C11.326 0.406945 9.76959 -0.130812 8.27136 0.0239383C6.05118 0.252195 3.6447 0.17482 1.90193 2.08212C1.39734 2.63148 0.283371 2.91003 0.16304 3.46326C-0.0698395 4.52717 -0.0776062 5.81934 0.322189 6.81361C2.72092 12.7947 6.03177 18.2613 9.88991 23.4338C11.1591 25.1322 12.7156 26.1496 14.5593 26.9814C15.3317 27.3296 15.9876 27.3606 16.3525 26.6526C16.5427 26.2812 16.3758 25.5732 16.1274 25.1631C14.5515 22.513 12.9135 19.9016 11.2872 17.2825C11.1941 17.1354 10.9961 17.0503 10.9185 16.8995C10.1577 15.4371 9.40862 13.9669 8.6595 12.5007C9.85887 13.5259 11.1553 14.4583 12.2421 15.5879C17.4005 20.9694 23.3274 25.4301 29.5299 29.4768C33.458 32.0418 37.7314 34.0613 42.1252 35.868C45.7116 37.342 49.2942 38.8276 52.9583 40.0849C56.3545 41.2455 59.8595 42.0154 63.3877 42.7273C68.1269 43.6867 72.8933 43.6558 77.683 43.7989C81.8283 43.9227 86.0979 43.9343 90.0609 44.9634C94.245 46.0467 98.5767 46.9674 102.365 49.5285C104.515 50.9832 107.147 51.8227 109.305 53.3818C112.069 55.3781 114.739 57.5021 117.46 59.5486C120.177 61.5913 122.925 63.5953 125.634 65.6497C128.153 67.557 130.622 69.53 133.145 71.4373C136.65 74.0874 140.046 76.8923 144.067 78.9969C144.203 77.1283 146.004 78.0606 146.004 76.0566L146 76.0605Z" fill="#bfff00"></path> </g> </svg></span><span class="wwa-anim-char">由</span><span class="wwa-anim-char">我</span><span class="wwa-anim-char">哋</span><span class="wwa-nowrap"><span class="wwa-anim-char">承</span><span class="wwa-anim-char">包</span><span class="wwa-anim-char">。</span></span></p>
         </div>
     </div>
 </section>
@@ -578,6 +611,262 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 
 <section class="ftco-section-blank-small"></section>
 
+<!-- 2026-11-18（使用者指示「section feed feed--video and bc-review 位置互換」）：
+     reviews 跑馬燈（本區塊）與下方 .feed--video（烘焙影片蒙版）互換順序 ——
+     現在 reviews 在上、影片在下，兩者之間的 .ftco-section-blank-small 留在原位
+     （＝兩塊之間仍是同一段留白，整頁總留白不變）。區塊自身 markup 一字未改。 -->
+<section class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
+    <div class="bc-reviews">
+        <div class="reviews">
+        <div class="reviewsInner">
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">唉同事？</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">你杯啡貢香嘅 ~</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">手沖尾韻</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">。 </p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">熱啡無限!</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">用五感烘焙出</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">具立體感</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">嘅</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">靚豆!</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">堅持</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">精煉</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">信任</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">隨心</p></div>
+        <div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不硬銷</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">返公司</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">慢慢嘆</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">匿埋喺葵涌嘅</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">自己友</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">一口</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">就放空</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">餐後</p></div>
+                <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喺</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">需要幸福感</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">沖煮</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">靈魂</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">嘅</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">層次</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">自製</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">高質Me Time ~</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喚醒我的</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不是鬧鐘</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">是咖啡</p></div>
+        <div class="reviewsMark__box">
+        <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">幫你頂住</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">每個Deadline!</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">磨豆聲</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">就</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">是</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">開店的信號</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">熱!熱!熱!</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">先鎖得住最純粹</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">最佳狀態</p></div>
+                <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">嘅</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">是犒賞自己</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">能量追加!</p></div>
+        <div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">叉電</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">。</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">日常</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">行過</p></div>
+        <div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">路過</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">叫番杯</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">延續至你嘅靈魂~</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">選豆</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">烘焙</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">到手沖</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBoxR--bgColor"><p class="notoSerif-jp reviewsBox__text">每一道</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">皆是</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">純粹</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">做個識嘆</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">嘅</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">同事!</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">每杯</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">裡</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">相遇</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">你的節奏</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">由我哋承包~</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">我哋奉行公平貿易</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">單一產地豆</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">堅持符合道德規範</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">驅動</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">溫暖</p></div>
+        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">和</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">留白</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">烘焙出嚟</p></div>
+                <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">嘅</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">豆香~</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">係為咗</p></div>
+                <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">你</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喚醒我的</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不是鬧鐘</p></div>
+                <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">是</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">咖啡</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">因為執著</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">所以地道</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">滿口</p></div>
+        <div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">共鳴</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">先對得住今日!</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">配方單品</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">燻出</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">風土</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+    <div class="reviewsTarget">
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">萃取</p></div>
+                <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">。</p></div>
+        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">平衡</p></div>
+        <div class="reviewsMark__box">
+            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
+        </div>
+    </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="ftco-section-blank-small"></section>
+
+<!-- 2026-11-18（使用者指示「section feed feed--video and bc-review 位置互換」）：
+     本區塊（烘焙影片蒙版）原在 .bc-reviews-section「之前」，現在改到它「之後」
+     （reviews 在上、影片在下）。markup 與下方 IntersectionObserver 腳本皆未改動。 -->
 <!-- 2026-09-11：複製一組 .feed（第二組，加 .feed--video）；底層「背景圖片」
      index_feed_image.png 改為影片容器（.feed__video > video roasting.webm）→
      蒙版形狀輪廓內顯示的內容由靜態照片改為烘焙影片；蒙版幾何與 feedScroll 動畫
@@ -604,240 +893,6 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
             <path d="m0,0v570h2430V0H0Zm504.23,564.12H14.29V5.88h157.38v458.02h11.88V5.88h150.69v458.02h11.88V5.88h158.12v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V115.01c0-33.15,9.77-59.63,29.32-79.43,19.54-19.79,46.64-29.69,81.29-29.69h241.26v449.11Zm382.3,109.12h-169.99V106.1h-11.88v458.02h-170V5.88h351.87v558.24Zm382.3-109.12c0,33.16-9.78,59.64-29.32,79.43-19.56,19.8-46.65,29.69-81.29,29.69h-241.26V5.88h351.87v449.11Zm382.29-118.03h-170V106.1h-11.88v242.74h181.87v100.22h-181.87v11.88h181.87v103.18h-351.87V5.88h351.87v331.08Zm382.3-23.01c0,30.19-10.15,55.43-30.44,75.72-1.28,1.28-2.58,2.51-3.9,3.71h34.34v170.74h-169.25v-111.35h-12.62v111.35h-170V5.88h351.87v308.07Z"/>
         </clipPath>
         </svg>
-    </div>
-</section>
-
-
-<section class="ftco-section-blank-small"></section>
-
-<section class="bc-reviews-section bc-reviews-section--lg" data-bc-reviews-reverse>
-    <div class="bc-reviews">
-        <div class="reviews">
-            <div class="reviewsInner">
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">沒有比這</p></div>
-        <div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">更香</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">外帶</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">好夥伴</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">爽</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">味蕾</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">重叠</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">都想喝</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">隨時</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">熟客</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">的最愛</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">微苦</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">卻</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">上癮</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">一口</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">就放空</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">出勤前</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">的一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">輕輕</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">飄香</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喝幾次都</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不膩</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喚醒我的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不是鬧鐘</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">是咖啡</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">午後</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">好選擇</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">連等待</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">也</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">是享受</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的時光</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喝幾次都</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不膩</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">最佳狀態</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">是犒賞自己</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">能量滿口</p></div>
-        <div class="reviewsBox reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">釋放</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">每朝</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">追加</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">外帶</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">好夥伴</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">熱的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">冰的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">拿鐵</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">都想喝</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">隨時</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">熟客</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">的最愛</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">微苦</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">卻</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">上癮</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喝一口</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">就放空</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">出勤前</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">的一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">輕輕</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">飄香</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喝幾次都</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不膩</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喚醒我的</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不是鬧鐘</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">是咖啡</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">探班</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">好選擇</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">連等待</p></div>
-        <div class="reviewsBox reviewsBox--maru reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">也</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">是享受</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的時光</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">喝幾次都</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">不膩</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-    <div class="reviewsTarget">
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--bgColor"><p class="notoSerif-jp reviewsBox__text">犒賞自己</p></div>
-        <div class="reviewsBox reviewsBox--borderR reviewsBox--line"><p class="notoSerif-jp reviewsBox__text">的一杯</p></div>
-        <div class="reviewsMark__box">
-            <div class="reviewsMark"><div class="mask reviewsMark__inner"></div></div>
-        </div>
-    </div>
-            </div>
-        </div>
     </div>
 </section>
 
@@ -990,11 +1045,11 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-10-24（使用者指示）：首頁「推薦頁面」雙卡（移植 union-tec recommendedPages），
      位置：2026-10-24 稍後改為品牌舞台（.bc-brand-stage-hero）下方（原為 .feed--video 下方）。
      互動 JS：bc-recommended-pages.js。 -->
-<link rel="stylesheet" href="{% static 'css/bc-recommended-pages.css' %}?v=20261027a">
+<link rel="stylesheet" href="{% static 'css/bc-recommended-pages.css' %}?v=20261114b">
 <!-- 2026-11-10（使用者指示）：sukima who section 樣式隨模組自 about.html 移入本頁
      （about 已不再載入）。為模組在首頁的唯一定義來源；全部規則 scoped 於 .bc-who-section。
      版號 20260825e → 20261110a：檔頭註解改記「index 頁」，CSS 規則未變。 -->
-<link rel="stylesheet" href="{% static 'css/bc-who.css' %}?v=20261114a">
+<link rel="stylesheet" href="{% static 'css/bc-who.css' %}?v=20261116c">
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 樣式隨模組自 about.html 移入本頁
      （about 已不再載入）。為模組在首頁的唯一定義來源。
      版號 20260825b → 20261027a：模組整體放大＋頁面置中。 -->
@@ -1012,8 +1067,8 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
                  並移除原本讓浮動購物車避讓到左側的規則（新位置＝Buy 按鈕正上方） -->
 <!-- 2026-09-06：reviews 水平跑馬燈（首頁 feed 下方反向版） -->
 <!-- 2026-10-07：首頁 section 追加 .bc-reviews-section--lg（--rv-scale:1.15）→ 整個模組全端放大 15% -->
-<link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20261007a">
-<link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20261008e">
+<link rel="stylesheet" href="{% static 'css/bc-reviews.css' %}?v=20261113g">
+<link rel="stylesheet" href="{% static 'css/bc-yama-header.css' %}?v=20261114b">
 <!-- 2026-10-14（使用者指示）：環形照片列共用模組（GUNTE hero 的手套圓抽出）——
      首頁 hero 與其下方 BC 動態 hero 的照片格（#bc-stage-photo-ring）共用；
      必須排在 bc-gunte-hero.css 之前（同名變數/屬性以 hero 的規則為準）。
@@ -1058,7 +1113,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      #bc-brand-stage 第一個子節點 .bc-photoarea；位移由 js/bc-photoarea.js 控制）。
      2026-11-09 起：5 格中第 3 格改為影片容器（.bc-pa-video＋<video>），其餘 4 格仍是照片；
      2026-11-09 稍晚：該格再改為「可輪播的影片容器」（多支 <video> 疊在同一框，清單＝
-     views.PA_VIDEOS，現況 3 支：hero_00 → hero_04 → hero_05）⇒ 本檔升 ?v=20261109h。
+     views.PA_VIDEOS，現況 6 支：hero_00 → hero_04 → hero_05 → hero_03 → hero_02 → hero_06；2026-11-14 追加後 3 支）⇒ 本檔升 ?v=20261109h。
      2026-11-09 稍後（使用者指示）：每格（4 張照片＋影片）加黑蒙版壓暗
      （filter:brightness(var(--pa-dim))，等同疊一層 rgba(0,0,0,1--pa-dim)）
      ⇒ 初版 40%（--pa-dim:.6、?v=20261109c），同日改 50%（--pa-dim:.5、?v=20261109d），
@@ -1066,7 +1121,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
        → **75%（--pa-dim:.25、?v=20261109g）**。
      必須排在 bc-brand-stage.css 之後：本檔對 #bc-brand-stage 補 isolation:isolate，
      讓 z-index:-1 的照片層留在 stage 內（機制與差異見該檔檔頭）。只有首頁載入。 -->
-<link rel="stylesheet" href="{% static 'css/bc-photoarea.css' %}?v=20261109h">
+<link rel="stylesheet" href="{% static 'css/bc-photoarea.css' %}?v=20261116a">
 {% endblock %}
 
 {% block extra_scripts %}
@@ -1075,7 +1130,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
 <!-- 2026-09-04：yama-beer header-bot(_pc) + tax-nav 動畫（tax init 延遲淡入 / is-view / footer 交會 / Cart 開抽屜） -->
 <script src="{% static 'js/bc-yama-header.js' %}?v=20260916b"></script>
 <!-- 2026-09-06：reviews 跑馬燈動畫（支援 data-bc-reviews-reverse 反向；GSAP base defer） -->
-<script src="{% static 'js/bc-reviews.js' %}?v=20260906a"></script>
+<script src="{% static 'js/bc-reviews.js' %}?v=20261113c"></script>
 <!-- 2026-09-07：GUNTE Lab. hero 動畫（Splide 引擎 + hero 初始化）
      2026-10-13（使用者指示：載入時就要看得到環形字）：Splide start 3 → 1
      （Splide start 為 0-based；環形字只有第 2 張 BUTTER KING 顯示）
@@ -1143,7 +1198,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      原生 scroll + rAF，非 GSAP）隨模組自 about.html 移入本頁 ⇒ about 已不再載入。
      版號 20260825k → 20261110a（檔頭註解）→ 20261111a（文案／字型）→ 20261111b
      （進度基準改 .who-content-text＋每秒推進上限，見檔頭 2026-11-11 段）。 -->
-<script src="{% static 'js/bc-who.js' %}?v=20261114a"></script>
+<script src="{% static 'js/bc-who.js' %}?v=20261114b"></script>
 <!-- 2026-10-27（使用者指示）：sukima capabilities-gallery 動畫隨模組自 about.html 移入本頁
      （原生 scroll + requestAnimationFrame，不依賴 GSAP／ScrollTrigger；about 已不再載入）。 -->
 <script src="{% static 'js/bc-capabilities.js' %}?v=20260825k"></script>
@@ -1187,7 +1242,7 @@ coffee_04.png 704KB）；該輪播已不在首頁渲染，preload 反而讓瀏�
      2026-11-09：第 3 格改為影片容器（.bc-pa-video＋<video>），本檔同時負責「進到視窗才播、
      捲離就 pause」；播放邏輯與 GSAP 解耦（CDN 掛掉時影片照樣正常）。
      2026-11-09（同日）：該格改為「可輪播的影片容器」——可放多支 <video>（清單＝views.PA_VIDEOS，
-     現況 3 支：hero_00 → hero_04 → hero_05），照 DOM 順序循環、距結束 0.75s 交叉淡入下一支。
+     現況 6 支：hero_00 → hero_04 → hero_05 → hero_03 → hero_02 → hero_06；2026-11-14 追加後 3 支），照 DOM 順序循環、距結束 0.75s 交叉淡入下一支。
      機制與驗收見 docs/home-photoarea.md。 -->
 <script defer src="{% static 'js/bc-photoarea.js' %}?v=20261109c"></script>
 {% endblock %}

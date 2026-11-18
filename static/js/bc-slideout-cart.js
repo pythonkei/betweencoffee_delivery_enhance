@@ -29,12 +29,19 @@ class SlideoutCart {
     if (!this.drawer) return;
 
     this.isOpen = false;
+    // 2026-11-13：已展開選項的卡片 key（收合式選項清單用；重新渲染時保留展開狀態）
+    this._expandedOptions = new Set();
     this.csrfToken = this._getCSRF();
     this._bindEvents();
 
     // ✅ 修復：初始化時立即從伺服器同步購物車 badge 數量
     // 確保從支付平台返回時，badge 能正確反映清空後的購物車狀態
     this._syncBadgeFromServer();
+  }
+
+  /** 購物車卡片預設顯示的選項數（其餘收合） */
+  static get OPTION_PREVIEW_COUNT() {
+    return 2;
   }
 
   // ===== 公開方法 =====
@@ -44,6 +51,10 @@ class SlideoutCart {
     this.isOpen = true;
     this.overlay?.classList.add('open');
     this.drawer.classList.add('open');
+    // 2026-11-13：body 標記購物車開啟狀態 —— 右側「ORDER 長條 + 個人圓鈕」
+    //   （.bc-attract-buy／.bc-attract-profile，z-index 99999）原本會浮在抽屜（9999）之上，
+    //   蓋住商品價格；隱藏規則見 static/css/bc-attract.css 檔尾 body.bc-cart-open 段落。
+    document.body.classList.add('bc-cart-open');
     // 先隱藏浮動按鈕再鎖定滾動（避免 _lockScroll 對按鈕 right 補償造成點擊瞬間位移）
     this._cartOpenHiddenFloating = true;
     this._hideFloatingCart();
@@ -56,6 +67,8 @@ class SlideoutCart {
     this.isOpen = false;
     this.overlay?.classList.remove('open');
     this.drawer.classList.remove('open');
+    // 2026-11-13：解除 body.bc-cart-open（讓右側 ORDER 長條／個人圓鈕回到畫面）
+    document.body.classList.remove('bc-cart-open');
     this._unlockScroll();
     // 清除標記，允許 _updateFloatingCartVisibility 再次處理浮動按鈕
     this._cartOpenHiddenFloating = false;
@@ -121,6 +134,11 @@ class SlideoutCart {
     // 使用 forceRefresh=true 避免瀏覽器快取 /cart/count/ 的舊響應
     window.addEventListener('pageshow', (event) => {
       this._syncBadgeFromServer(true);
+      // 2026-11-13：bfcache／跨頁還原時 body 可能仍掛著 bc-cart-open，
+      //   會讓右側 ORDER 長條／個人圓鈕一直隱藏 → 抽屜實際沒開就清掉狀態
+      if (this.drawer && !this.drawer.classList.contains('open')) {
+        document.body.classList.remove('bc-cart-open');
+      }
     });
   }
 
@@ -154,7 +172,7 @@ class SlideoutCart {
 
     let html = '';
     items.forEach(item => {
-      const optionsText = this._formatOptions(item);
+      const optionTags = this._renderOptionTags(this._formatOptions(item), item.item_id);
       html += `
         <div class="bc-cart-item" data-key="${item.item_id}">
           <img src="${item.image || '/static/images/placeholder.png'}" alt="${item.name}" class="bc-cart-item-image">
@@ -163,7 +181,7 @@ class SlideoutCart {
               <p class="bc-cart-item-name">${this._escapeHtml(item.name)}</p>
               <p class="bc-cart-item-price">$${item.total_price}</p>
             </div>
-            ${optionsText ? `<p class="bc-cart-item-options">${optionsText}</p>` : ''}
+            ${optionTags}
             <div class="bc-cart-item-qty">
               <button class="bc-cart-item-qty-btn" data-action="decrease" data-key="${item.item_id}">−</button>
               <span class="bc-cart-item-qty-value">${item.quantity}</span>
@@ -185,6 +203,7 @@ class SlideoutCart {
         if (action === 'increase') this._updateQuantity(key, 1);
         else if (action === 'decrease') this._updateQuantity(key, -1);
         else if (action === 'remove') this._removeItem(key);
+        else if (action === 'toggle-options') this._toggleOptions(key, btn);
       });
     });
 
@@ -533,56 +552,117 @@ class SlideoutCart {
       // 故重新量測定位，避免浮動鈕停留在補償後的偏移位置
       this._placeFloatingCart();
       // 2026-09-21（使用者指示）：空車也顯示圖示 → 一律恢復顯示
-      this._showFloatingCart();
+      //
+      // ★ 2026-11-13（使用者回報「關閉抽屜時整個按鈕從底部動畫回到原位」）：
+      //   這裡必須傳 animated=false（靜默顯示）。關閉抽屜只是「還原」原本就存在的按鈕，
+      //   不是「加入購物車」事件，不該播進場動畫。
+      //   舊版沒傳參數 → 預設 animated=true → 移除 no-anim 後重新加 .show，
+      //   CSS 的 `.bc-floating-cart.show{animation:bcFloatingIn}` 立刻被觸發
+      //   （translateY(100px) → 0、opacity 0 → 1）＝整個按鈕從畫面底部滑回原位。
+      this._showFloatingCart(false);
     });
   }
 
+  /**
+   * 選項摘要 → [{ label, value }]（2026-11-13 改版）
+   *
+   * 舊版回傳 `<i>icon</i> 標籤: 值<br>…` 的 HTML 字串，4 個選項就在 420px 抽屜裡
+   * 佔掉 4 行（約 96px）並帶著 4 個 material 圖示，與品名／價格搶視覺焦點。
+   * 改成「資料」回傳，由 _renderOptionTags() 排成可收合清單（一行一項）：
+   *   杯量 正常 / 香草 默認 /（還有 2 項 ＋）→ 面層配料 碎朱古力 / 配豆 意式拼配
+   * 圖示不再使用（抽屜寬度可貴，標籤已足夠辨識；icon 對照仍由 API 提供，未刪除）。
+   *
+   * 資料來源不變：extra_options_cn／extra_options_labels（新式，新增選項組自動生效）
+   *   ＋ cup_level／strength_level／milk_level／grinding_level／weight（舊資料後備，
+   *     已存在於 extra_options 的 key 不重複顯示）。
+   * 樣式見 static/css/bc-components.css 的 .bc-cart-item-options / .bc-cart-item-option-row。
+   */
   _formatOptions(item) {
-    const parts = [];
+    const rows = [];
+    const push = (label, value) => {
+      if (value === undefined || value === null || value === '') return;
+      rows.push({ label: label || '', value: String(value) });
+    };
+    // 舊資料／未知 key 的標籤後備（新增選項組一律由 API 的 extra_options_labels 提供）
+    const labelMap = { cup_level:'杯量', strength_level:'濃度', milk_level:'奶量', milk:'奶類', caramel:'焦糖', butter:'黃油', coconut:'椰奶', vanilla:'香草', special:'特調', oolong:'烏龍茶', jasmine:'茉莉花茶', matcha:'抹茶', green:'綠茶', hojicha:'焙茶', topping:'面層配料', bean_blend:'配豆', roast_level:'烘焙', tea_type:'茶種', grinding_level:'研磨' };
+    const cn = item.extra_options_cn || {};
+    const labels = item.extra_options_labels || {};
+    const pushExtra = () => {
+      Object.entries(cn).forEach(([k, v]) => push(labels[k] || labelMap[k] || k, v));
+    };
+
     if (item.type === 'coffee') {
-      if (item.cup_level) {
-        const map = { Small: '細', Medium: '中', Large: '大' };
-        parts.push(`<i class="icon material-symbols-outlined">water_full</i> 杯量: ${map[item.cup_level] || item.cup_level}`);
+      if (item.cup_level && !cn.cup_level) {
+        push('杯量', { Small: '細', Medium: '中', Large: '大' }[item.cup_level] || item.cup_level);
       }
-      if (item.strength_level) {
-        const map = { Normal: '預設', Extra: '特濃' };
-        const label = map[item.strength_level] || item.strength_level;
-        parts.push(`<i class="icon material-symbols-outlined">bolt</i> 濃度: ${label}`);
+      if (item.strength_level && !cn.strength_level) {
+        push('濃度', { Normal: '預設', Extra: '特濃' }[item.strength_level] || item.strength_level);
       }
-      if (item.milk_level) {
-        const map = { Light: '少', Medium: '正常', Extra: '追加' };
-        const label = map[item.milk_level] || item.milk_level;
-        parts.push(`<i class="icon material-symbols-outlined">humidity_mid</i> 奶量: ${label}`);
+      if (item.milk_level && !cn.milk_level) {
+        push('奶量', { Light: '少', Medium: '正常', Extra: '追加' }[item.milk_level] || item.milk_level);
       }
-      // 自訂選項組（2026-08-15；2026-10-06 修正）：API 已譯為中文並回傳標籤／圖示
-      //   → 直接採用（前端不再維護清單，新增選項組自動生效）；
-      //   labelMap 僅作舊資料／未知 key 的後備（同時補上 roast_level／tea_type）。
-      if (item.extra_options_cn) {
-        const labelMap = { cup_level:'杯量', strength_level:'濃度', milk_level:'奶量', milk:'奶類', caramel:'焦糖', butter:'黃油', coconut:'椰奶', vanilla:'香草', special:'特調', oolong:'烏龍茶', jasmine:'茉莉花茶', matcha:'抹茶', green:'綠茶', hojicha:'焙茶', topping:'面層配料', bean_blend:'配豆', roast_level:'烘焙', tea_type:'茶種' };
-        const icons = item.extra_options_icons || {};
-        const labels = item.extra_options_labels || {};
-        Object.entries(item.extra_options_cn).forEach(([k, v]) => {
-          parts.push(`<i class="icon material-symbols-outlined">${icons[k] || 'add_circle'}</i> ${labels[k] || labelMap[k] || k}: ${v}`);
-        });
-      }
+      pushExtra();
     } else if (item.type === 'bean') {
-      // 咖啡豆自訂選項組（2026-09-21）：API 已回傳中文／圖示／標籤 → 直接使用，不再硬寫對照表
-      const cn = item.extra_options_cn || {};
-      const icons = item.extra_options_icons || {};
-      const labels = item.extra_options_labels || {};
-      Object.entries(cn).forEach(([k, v]) => {
-        parts.push(`<i class="icon material-symbols-outlined">${icons[k] || 'add_circle'}</i> ${labels[k] || k}: ${v}`);
-      });
+      pushExtra();
       // 舊資料／未啟用研磨組：沿用既有欄位（研磨已在 extra_options_cn 時不重複顯示）
       if (item.grinding_level && !cn.grinding_level) {
-        const map = { Non: '免研磨', Light: '細研磨', Medium: '中研磨', Deep: '粗研磨' };
-        parts.push(`<i class="icon material-symbols-outlined">roller_shades</i> 研磨:${map[item.grinding_level] || item.grinding_level}`);
+        push('研磨', { Non: '免研磨', Light: '細研磨', Medium: '中研磨', Deep: '粗研磨' }[item.grinding_level] || item.grinding_level);
       }
-      if (item.weight) {
-        parts.push(`<i class="icon material-symbols-outlined">scale</i> 重量:${item.weight}`);
-      }
+      if (item.weight) push('重量', item.weight);
+    } else {
+      pushExtra();
     }
-    return parts.join('<br>');
+    return rows;
+  }
+
+  /**
+   * 選項清單 HTML（2026-11-13 改版 v2：可收合）
+   *
+   * 一行一項：`<span label>杯量</span><span value>正常</span>`；
+   * 預設只顯示前 OPTION_PREVIEW_COUNT（2）項，其餘 `.bc-cart-item-option-row:nth-child(n+3)`
+   * 由 CSS 隱藏，點「還有 N 項 ＋」加 `.is-expanded` 展開（不用 hidden 屬性 —— 作者
+   * 的 display:flex 會蓋過 UA 的 [hidden]，這點踩過）。
+   * 無選項 → 回傳空字串（呼叫端不需再判斷）。
+   */
+  _renderOptionTags(options, itemKey) {
+    if (!Array.isArray(options) || options.length === 0) return '';
+    const key = String(itemKey ?? '');
+    const expanded = this._expandedOptions.has(key);
+    const rows = options.map(o => {
+      const label = o.label
+        ? `<span class="bc-cart-item-option-label">${this._escapeHtml(o.label)}</span>`
+        : '';
+      return `<div class="bc-cart-item-option-row">${label}<span class="bc-cart-item-option-value">${this._escapeHtml(o.value)}</span></div>`;
+    }).join('');
+    const rest = options.length - SlideoutCart.OPTION_PREVIEW_COUNT;
+    const toggle = rest > 0
+      ? `<button type="button" class="bc-cart-item-options-toggle" data-action="toggle-options" data-key="${key}" aria-expanded="${expanded ? 'true' : 'false'}">
+           <span class="bc-cart-item-options-toggle-label">${expanded ? '收起' : `還有 ${rest} 項`}</span>
+           <span class="bc-cart-item-options-toggle-sign">${expanded ? '－' : '＋'}</span>
+         </button>`
+      : '';
+    return `<div class="bc-cart-item-options${expanded ? ' is-expanded' : ''}" data-key="${key}">${rows}${toggle}</div>`;
+  }
+
+  /**
+   * 展開／收起某張卡片的選項清單（事件由 _renderItems 統一綁定）
+   * 狀態寫回 this._expandedOptions，數量增減造成重新渲染時仍保持展開。
+   */
+  _toggleOptions(key, btn) {
+    const wrap = btn?.closest('.bc-cart-item-options');
+    if (!wrap) return;
+    const expanded = wrap.classList.toggle('is-expanded');
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    const total = wrap.querySelectorAll('.bc-cart-item-option-row').length;
+    const labelEl = btn.querySelector('.bc-cart-item-options-toggle-label');
+    const signEl = btn.querySelector('.bc-cart-item-options-toggle-sign');
+    if (labelEl) {
+      labelEl.textContent = expanded ? '收起' : `還有 ${Math.max(0, total - SlideoutCart.OPTION_PREVIEW_COUNT)} 項`;
+    }
+    if (signEl) signEl.textContent = expanded ? '－' : '＋';
+    const k = String(key ?? '');
+    if (expanded) this._expandedOptions.add(k);
+    else this._expandedOptions.delete(k);
   }
 
   _escapeHtml(text) {

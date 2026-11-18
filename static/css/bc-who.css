@@ -22,13 +22,28 @@
    不變；section 外距 padding 96/80 不動，避免動到頁面節奏）。要再調
    大小只需等比改下列各斷點的 px（下方列的是「原始值」，現值＝原值×1.15）：
      base  text 27／ls 2.2／max-w 460／min-h 444／title 42／title ls 1.1／
-           kicker ml 100（font 16）／label-w 133／spacer 87／v01 66／v03 62／
+           kicker font 18／ml 0／label-w 133／spacer 87／v01 66／v03 62
+           （2026-11-14 起 v03 改 clamp(48px,14vw,62px)，小螢幕自動縮小）／
+           ⚠ 2026-11-14（使用者指示，手機文字縮小）：text 27 與 title 42 已改
+             clamp（text：clamp(20px,5.45vw,25px)、title：clamp(34px,9.2vw,42px)）
+             （2026-11-16 使用者指示「who-content-text 整個文字稍微縮小一點，
+               照片不要修改」⇒ text 再 ×0.93：25／36／53，字距 2.9／4.3；
+               三張小圖仍是原 px ⇒ 只有文字變小）
+
+             ⇒ 上表列的是「≥462px 的上限值」，小螢幕會自動變小，詳見各自註解／
            visual h 34／circle 118／arrow 131／bubble 49
      ≥704  max-w 506／min-h 368
-     ≥834  text 39／ls 3.1／max-w 736／min-h 486／title 65／kicker ml 199／
+     ≥834  text 36／ls 2.9／max-w 736／min-h 486／title 65／kicker font 21／
            spacer 103／v01 103／v03 88／visual h 50／circle 181／arrow 168／bubble 69
-     ≥1920 text 57／ls 4.6／max-w 986／title 92／kicker ml 302／
+     ≥1920 text 53／ls 4.3／max-w 986／title 92／kicker font 26／
            spacer 161／v01 165／v03 145／visual h 65／circle 234／arrow 216／bubble 92
+   ------------------------------------------------------------
+   2026-11-14（使用者指示「修改 sukima-label」）：kicker 括號標籤
+     ① 文案 `Between Say:` → `About`（index.html；括號與 flex gap 4px 不動）
+     ② 原本的內縮排放（ml 100／199／302）→ 全部歸零，`(` 左緣對齊標題文字左緣
+     ③ 字級 16 → 18px（≥834 21／≥1920 26），括號同步變大
+     ⚠ `.sukima-label` 的 `max-width: var(--label-width)` 是**上限**（文字過長會被裁），
+       目前 133px 遠大於 26px 字級的 `About`（實測 ≈72px）⇒ 不會截字。
    ------------------------------------------------------------
    2026-11-12（使用者指示，文案改粵語）：手繪圓圈改圈「執著」（2 個 CJK 字）
    ⇒ 新增修飾子 .who-circle-svg--cjk（在本檔最尾，刻意蓋掉上面的 px 斷點值），
@@ -49,12 +64,18 @@
     padding: 96px 80px;
     max-width: 1920px;
     margin: 0 auto;
-    /* kicker 標籤展開寬度（原站預設 100px；等比調整後避免截字；實測文字寬 109px） */
+    /* kicker 標籤展開寬度（原站預設 100px；等比調整後避免截字；實測文字寬 109px）
+       2026-11-14：文案改 `About` 後文字寬大幅縮短（18px ≈50px／26px ≈72px），
+       133px 僅作上限（`max-width`），不會截字；保留原值以維持展開動畫時長感。 */
     --label-width: 133px;
     /* 響應式目標寬度（bc-who.js scroll scrub 讀取） */
     --who-spacer-w: 87px;
     --who-visual01-w: 66px;
-    --who-visual03-w: 62px;
+    /* 2026-11-14 使用者指示（手機：「wwa-visual-03 沒有基於螢幕尺寸縮小」）：
+       62px 固定值 → clamp(48px, 14vw, 62px)：@320 48px、@375 52.5px、
+       @430 60.2px、@443 以上回到 62px（桌機／平板值不變）。
+       ⚠ 值不是純 px，bc-who.js 的 getVar() 已改用隱藏探針解析長度（見該檔註解）。 */
+    --who-visual03-w: clamp(48px, 14vw, 62px);
 }
 @media all and (max-width: 1080px) {
     .bc-who-section {
@@ -73,21 +94,49 @@
     justify-content: center;
 }
 .bc-who-section .who-kicker {
-    margin-left: 100px;
-    font-size: 16px;
+    /* 2026-11-14（使用者指示「sukima-label 移動到左邊緣的位置」）：原 margin-left
+       100px（≥834 199px／≥1920 302px，複刻原站的內縮排放）→ 0 ⇒ 括號「(」的
+       左緣與下方 .section-title__text 標題文字左緣對齊（＝section 內容左緣）。 */
+    margin-left: 0;
+    /* 2026-11-14（使用者指示「文字加大點」）：16 → 18px（括號同步變大，同一層字級）；
+       ≥834 21px、≥1920 26px，見下方斷點。 */
+    font-size: 18px;
 }
 .bc-who-section .who-content {
     justify-content: flex-end;
 }
 .bc-who-section .who-content-text {
     position: relative;
-    font-size: 27px;
+    /* 2026-11-14（使用者指示「手機：who-content-sticky 內部文字縮小尺寸」）：
+       固定 27px → clamp ⇒ **桌機／平板值完全不變**（≥462px 仍是 27px），
+       只有小螢幕縮小：@320 21px、@360 21.1px、@375 21.9px、@390 22.8px、
+       @430 25.2px。手機一行可容納的字數變多、整段不再佔滿一屏。
+       ⚠ 本檔所有裝飾都以 em 跟著這個字級走（手繪圈 4.62em／「有溫度」緞帶
+         4.28em／gif 間距 0.4em…）⇒ 自動等比例縮小，不必另寫斷點。
+       2026-11-16（使用者指示「who-content-text 整個文字稍微縮小一點，照片不要
+       修改」）：整體 ×0.93 ⇒ 上限 27 → 25px、clamp 下限 21 → 20px、vw 5.85 →
+       5.45；≥834 39 → 36px、≥1920 57 → 53px（見下方斷點）。
+       只有**文字**縮小：三張小圖仍是 px 值（--who-visual01-w 66／103／165、
+       --who-visual03-w 62／88／145），尺寸不變（使用者明示「照片不要修改」）。
+       ⇒ 小圖相對字級變得稍大一點點，是本指示的預期結果。 */
+    font-size: clamp(20px, 5.45vw, 25px);
     font-weight: 500;
     line-height: 180%;
-    letter-spacing: 2.2px;
+    /* 2026-11-14：2.2px → 0.0815em（＝ 27px 時的 2.2px）。字級被 clamp 縮小後
+       字距跟著等比，不會相對變鬆；≥834／≥1920 仍由下方斷點的 px 值覆蓋。 */
+    letter-spacing: 0.0815em;
     max-width: 460px;
     min-height: 444px;
     color: #fff; /* 本地黑底適配：白字 */
+}
+
+/* 2026-11-16：不可斷單位（拉丁句子與句尾「承包。」）。
+   逐字 .wwa-anim-char ＋ letter-spacing 讓瀏覽器可以在任兩個字元之間斷行，
+   拉丁單字／句點／驚嘆號因此可能被拆到下一行開頭（純視覺瑕疵）；包一層
+   nowrap 後只會在單位前後斷行。包裝層不含 .wwa-anim-char，bc-who.js 的
+   逐字清單與時序不受影響。 */
+.bc-who-section .wwa-nowrap {
+    white-space: nowrap;
 }
 
 
@@ -98,13 +147,19 @@
 }
 .bc-who-section .section-title__text {
     position: relative;
-    display: inline-block;
+    /* 2026-11-14（使用者指示「替換此內容到 .section-title__text」）：內容改為
+       區塊層級的主視覺模組（見下方標題區說明）⇒ inline-block 的 shrink-wrap
+       會讓外框貼著內容、右側留白不同，改 block 撐滿。 */
+    display: block;
     /* 2026-11-11（使用者指示）：字型改為品牌舞台「Follow Your Rhythm」同一支
        Akzidenz Grotesk Pro（--bc-font-akzidenz，@font-face 在全站
        css/bc-fonts.css）。此標題本身是英文，Akzidenz 直接命中；
        後備鏈保留 Noto Sans TC 以防日後插入中文字。 */
     font-family: var(--bc-font-akzidenz, "Josefin Sans", "Noto Sans TC", sans-serif);
-    font-size: 42px;
+    /* 2026-11-14（同上一項「手機內部文字縮小」）：固定 42px → clamp
+       ⇒ @375 34.5px、@430 39.6px、≥457px 回到 42px；≥834（65px）／
+       ≥1920（92px）的斷點值不受影響。 */
+    font-size: clamp(34px, 9.2vw, 42px);
     line-height: 100%;
     font-weight: 500;
     letter-spacing: 1.1px;
@@ -113,6 +168,14 @@
 .bc-who-section .section-title--left {
     align-items: flex-start;
 }
+
+/* ============================================================
+   標題區：2026-11-14（使用者指示「替換此內容到 .section-title__text」）
+   原「Hmm...........」分層切片文字（.who-title-layers／.who-title-layer，
+   移植 global-tree.jp .layeredText）已由 static/css/bc-gt-mv.css 的 .bc-gtmv
+   整塊取代（照片 3 條切片 ＋ 大字 3 條切片），該組樣式連同它的
+   reduced-motion 覆寫一併移除；需要舊版請看 git 歷史。
+   ============================================================ */
 
 /* ---------- flx ---------- */
 .bc-who-section .flx {
@@ -193,7 +256,12 @@
    （×1.3 時 70 寬 → gif 高 ≈ 40.4、top 8px；2026-11-12 ×1.15 時 62 寬 →
    gif 高 ≈ 35.8、top 7px） */
 .bc-who-section .wwa-visual-03 img {
-    top: 7px;
+    /* 2026-11-14：容器寬度改為 clamp（可能小於 62px）→ gif 高度也變小，
+       若沿用固定 top:7px，底緣會隨之往上浮。改用「底緣定位」：
+       62px 寬時 gif 高 35.8、容器高 34 → 底緣 -8.8px（與原 top:7px 落點完全相同），
+       寬度縮小時底緣固定在原位。 */
+    top: auto;
+    bottom: -8.8px;
     left: 4px;
 }
 /* 2026-11-12 第四次（使用者：wwa-03.gif 與「——有溫度」之間要留間隔）：
@@ -203,6 +271,28 @@
    JS 動的是 width（inline style），與 margin 不衝突。 */
 .bc-who-section .wwa-visual-03 {
     margin-right: 0.4em;
+}
+/* 2026-11-16（使用者指示）：
+   ① 「此文字錯誤已更改為兩行 'Stay Warm, Stay Awake.飲完意猶未盡？…' 修復它」
+      ⇒ 小圖展開前 container 寬 0，英文句尾與後面的粵語句沒有留白，讀起來黏成
+         「Awake.飲完…」→ 在 index.html 的 `</span>`（Stay Warm, Stay Awake.）與
+         本 container 之間補一個**真正的空白字元**：同一行時是一個空格（≈0.3em），
+         剛好在這裡斷行時空白被瀏覽器吃掉、下一行以小圖開頭，都不會再黏字。
+   ② 「wwa-02.png 照片和『飲完…』太近，之間增加間隔」
+      ⇒ 容器右側 0.5em（比 gif 的 0.4em 再寬一點；25／36／53px 字級 ⇒
+         12.5／18／26.5px）。
+   與 visual-03 相同手法：img 是 absolute（寬度由 JS 寫 inline style），
+   margin 只推開後面的文字，不動圖本身；JS 動畫動的是 width，不受影響。 */
+.bc-who-section .wwa-visual-02 {
+    margin-right: 0.5em;
+}
+/* 2026-11-16 第四批（使用者指示「wwa-02.png、wwa-01.svg 交換」）：
+   互換後 wwa-01.svg 改落在句尾「…Stay Warm, Stay Awake.」之後、右邊緊接「飲完」，
+   原本它掛在「Office」與「，」之間、右側沒有 margin，換位後會貼著「飲」字
+   （實測 3px）。這裡補上與 png 相同的 0.5em（36px 字級 ⇒ 18px），
+   另一側則靠 index.html 的空白字元。1440 量測行尾尚餘 27px，加 18px 不會換行。 */
+.bc-who-section .wwa-visual-01 {
+    margin-right: 0.5em;
 }
 
 /* ---------- sukima-anim-wwa / video-anim-wwa 容器 ---------- */
@@ -308,11 +398,14 @@
         font-size: 65px;
     }
     .bc-who-section .who-kicker {
-        margin-left: 199px;
+        /* 2026-11-14：原 margin-left: 199px（內縮）已移除，改為居左；只放大字級 */
+        font-size: 21px;
     }
     .bc-who-section .who-content-text {
-        font-size: 39px;
-        letter-spacing: 3.1px;
+        /* 2026-11-16：39 → 36px（字距 3.1 → 2.9px，維持原比例；max-width／
+           min-height 不動 ⇒ 區塊寬度與捲動節奏不變，只是字變小一行多放幾個字） */
+        font-size: 36px;
+        letter-spacing: 2.9px;
         max-width: 736px;
         min-height: 486px;
     }
@@ -327,8 +420,10 @@
     }
     .bc-who-section .wwa-visual-03 img {
         /* 底緣不變：gif 高 = 容器寬×277/480；×1.3 時 117 寬（高 ≈ 67.5）→ top 13px，
-           2026-11-12 ×1.15 時 103 寬（高 ≈ 59.4）→ top 11px */
+           2026-11-12 ×1.15 時 103 寬（高 ≈ 59.4）→ top 11px
+           2026-11-14：base 的 bottom:-8.8px 在此斷點不適用（top 由這裡決定）→ bottom:auto */
         top: 11px;
+        bottom: auto;
         left: 7px;
     }
 }
@@ -346,11 +441,13 @@
         font-size: 92px;
     }
     .bc-who-section .who-kicker {
-        margin-left: 302px;
+        /* 2026-11-14：原 margin-left: 302px（內縮）已移除，改為居左；只放大字級 */
+        font-size: 26px;
     }
     .bc-who-section .who-content-text {
-        font-size: 57px;
-        letter-spacing: 4.6px;
+        /* 2026-11-16：57 → 53px（字距 4.6 → 4.3px） */
+        font-size: 53px;
+        letter-spacing: 4.3px;
         max-width: 986px;
     }
     .bc-who-section .wwa-anim-visual {
@@ -381,45 +478,12 @@
 }
 
 /* ============================================================
-   sukima content-block-title 思考氣泡手繪畫線動畫（2026-08-25 整合）
-   完全複製 sukima.tokyo.jp 的 .culture-kangaeteiru-svg：
-   - absolute 於「Who we are」標題右側上方（top 8/22/41、right 0/0/-6）
-   - mask 白線 tracer（thought-bubble-reveal-tracer，dasharray 500/
-     offset 500）透過 animSvgStrokeTo 2s ease-in-out forwards 畫線揭示
-     #BFFF00 思考氣泡（g opacity .75）
-   - 觸發：who section 進視口加 .show（bc-who.js 既有機制）
+   （2026-11-14 移除）原先「思考氣泡」手繪畫線動畫（.culture-kangaeteiru-svg
+   ＋ .thought-bubble-reveal-tracer／@keyframes animSvgStrokeTo）是為了標題旁
+   的「Hmm...........」加問號氣泡；該標題已由 global-tree 主視覺模組
+   （.bc-gtmv）取代、SVG markup 一併移除 ⇒ 這組樣式不再有對應元素，
+   需要舊版請看 git 歷史。
    ============================================================ */
-.bc-who-section .culture-kangaeteiru-svg {
-    position: absolute;
-    top: 10px;
-    right: -10px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
-    transform: translate3d(100%, -100%, 0);
-    width: 49px;
-    height: auto;
-}
-.bc-who-section.show .thought-bubble-reveal-tracer {
-    animation: animSvgStrokeTo 2s ease-in-out forwards;
-}
-@keyframes animSvgStrokeTo {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-@media (min-width: 834px) {
-    .bc-who-section .culture-kangaeteiru-svg {
-        top: 26px;
-        right: -10px; /* 2026-08-25 使用者要求稍微向右移動（原 0） */
-        width: 69px;
-    }
-}
-@media (min-width: 1920px) {
-    .bc-who-section .culture-kangaeteiru-svg {
-        top: 47px;
-        right: -18px; /* 2026-08-25 使用者要求稍微向右移動（原 -6） */
-        width: 92px;
-    }
-}
-
 /* ============================================================
    who-circle-svg--cjk：手繪圓圈改圈「執著」（2026-11-12 文案改粵語）
    - 原圈是為「sukima」6 個小寫拉丁字母設計（viewBox 158×88 ≈ 1.8:1）。

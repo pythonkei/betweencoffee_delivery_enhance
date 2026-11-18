@@ -71,18 +71,48 @@ hero，GUNTE hero 移到它下方。本檔與頁尾版（bc_brand_stage.html）�
        data-pa-shift ＝ 整層額外上飄量（原站 Sticky1 的容器位移）。
        兩層相加＝照片比內容更快往上飄，機制／驗收見 docs/home-photoarea.md。 -->
 <div class="bc-photoarea" aria-hidden="true" data-pa-shift="-10">
-  <img class="x_{{ pa_slots.0.x|default:4 }} y_{{ pa_slots.0.y|default:2 }} d_1" data-para="-8" alt="" width="768" height="1075"
-       loading="lazy" decoding="async"
-       src="{% static 'images/photoarea/pa-1.webp' %}?v=20261109b">
-  <img class="x_{{ pa_slots.1.x|default:2 }} y_{{ pa_slots.1.y|default:3 }} d_2" data-para="-13" alt="" width="640" height="896"
-       loading="lazy" decoding="async"
-       src="{% static 'images/photoarea/pa-2.webp' %}?v=20261109b">
+  <!-- 2026-11-14（使用者指示）：4 個照片格「逐值」移殖 global-tree.jp 首頁的 `.layeredImage`
+       ——同一張圖印 3 份並排（原站 49 / 97 / 293px @1440 ⇒ 比例 49:97:293、後兩層
+       margin-left:-1px 疊縫），進場時三層從 translateX(-100% / -151% / -50%) 歸位
+       （1s cubic-bezier(.16,1,.3,1)），第 3 層的 img 再從寬 0 展開；
+       外層 track 同步做斜向擦除（clip-path ＝原站 GSAP expo.out 0.9s 的 --tr=v² / --br=v）。
+       結構＝原站 markup 一對一：.bc-pa-stair（＝.layeredImage）＞ .bc-pa-stair__track
+       （＝__image-wrapper）＞ .bc-pa-stair__slice ×3（＝__image -index-1~3）。
+       全部純 CSS @keyframes（收合只存在於 0% 影格）⇒ 沒有 JS、不會先閃一張完整照片；
+       基底樣式＝終態，動畫沒跑（reduced-motion／舊瀏覽器）時就是靜態照片。
+       總寬／高度仍等於改動前的單張照片（寬度走 CSS 的 --pa-w，高度由 style 的
+       --pa-ratio 給該檔實際比例）⇒ 落點、尺寸、視差完全不變；x_n／y_n／d_n／
+       data-para 一律搬到外層 .bc-pa-stair（視差與層序照舊）。
+       三份 <img> 共用同一個 src ⇒ 只下載一次；手機也保留三層（與原站一致）。
+       2026-11-16（使用者指示）：移除「錯位疊印」感 —— 動畫與三層結構全部不動，只把三層
+       的 img 改成「都放大到整個 track 寬、各自往左推前段累計寬」（CSS 見 bc-photoarea.css）
+       ⇒ 每層露出自己那一段，拼起來＝原本那一張完整照片，不會再重複出現 3 次。
+       （改動前這裡是單一 <img> 直接絕對定位，width/height 屬性只是為了避免載入跳動；
+         現在幾何由 CSS 的 aspect-ratio 決定，故不再寫在 img 上。）
+       細節：static/css/bc-photoarea.css 檔尾（「階梯式圖片揭露」段）、docs/home-photoarea.md。 -->
+  <div class="bc-pa-stair x_{{ pa_slots.0.x|default:4 }} y_{{ pa_slots.0.y|default:2 }} d_1"
+       data-para="-8" style="--pa-ratio: 768 / 1075">
+    <div class="bc-pa-stair__track">
+      <span class="bc-pa-stair__slice -index-1"><img src="{% static 'images/photoarea/pa-1.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-2"><img src="{% static 'images/photoarea/pa-1.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-3"><img src="{% static 'images/photoarea/pa-1.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+    </div>
+  </div>
+  <div class="bc-pa-stair x_{{ pa_slots.1.x|default:2 }} y_{{ pa_slots.1.y|default:3 }} d_2"
+       data-para="-13" style="--pa-ratio: 640 / 896">
+    <div class="bc-pa-stair__track">
+      <span class="bc-pa-stair__slice -index-1"><img src="{% static 'images/photoarea/pa-2.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-2"><img src="{% static 'images/photoarea/pa-2.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-3"><img src="{% static 'images/photoarea/pa-2.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+    </div>
+  </div>
   <!-- 2026-11-09（使用者指示）：pa-3 這個格位是「可輪播的影片容器」——外層 .bc-pa-video 沿用同一組
        幾何 class（d_3 yoko ＋洗牌得來的 x_n／y_n）＋ data-para（視差位移掛外層）；
        內層可放多支 <video>（全部絕對定位疊在同一框，只有帶 .is-on 的那支 opacity:1，
        換片＝下一支淡入 0.6s，見 bc-photoarea.css）。清單＝views.PA_VIDEOS（依序輪播）：
-       ① hero_00.webm（原本那支）② hero_04.webm ③ hero_05.webm —— 要加片只改 views.py，
-       模板會自動長出 <video>，不必動這裡。
+       ① hero_00.webm（原本那支）② hero_04.webm ③ hero_05.webm
+       → 2026-11-14 使用者指示追加 ④ hero_03.webm ⑤ hero_02.webm ⑥ hero_06.webm
+       （共 6 支；要再加／減片只改 views.py，模板會自動長出 <video>，不必動這裡）。
        本格不再使用照片檔（pa-3 已於 11-09 15:27 改名為 pa-3__.webp 備份、不參與畫面）
        ⇒ <video> 沒有 poster：影片還沒播／prefers-reduced-motion／iOS 省電擋 autoplay 時，
        該格就是「空的」（露出後面的深色底，不會破圖、也不會多一支 404 請求）。
@@ -95,12 +125,22 @@ hero，GUNTE hero 移到它下方。本檔與頁尾版（bc_brand_stage.html）�
     </video>
     {% endfor %}
   </div>
-  <img class="x_{{ pa_slots.3.x|default:1 }} y_{{ pa_slots.3.y|default:4 }} d_4" data-para="-23" alt="" width="767" height="1074"
-       loading="lazy" decoding="async"
-       src="{% static 'images/photoarea/pa-4.webp' %}?v=20261109b">
-  <img class="x_{{ pa_slots.4.x|default:5 }} y_{{ pa_slots.4.y|default:1 }} d_5" data-para="-28" alt="" width="768" height="1075"
-       loading="lazy" decoding="async"
-       src="{% static 'images/photoarea/pa-5.webp' %}?v=20261109b">
+  <div class="bc-pa-stair x_{{ pa_slots.3.x|default:1 }} y_{{ pa_slots.3.y|default:4 }} d_4"
+       data-para="-23" style="--pa-ratio: 767 / 1074">
+    <div class="bc-pa-stair__track">
+      <span class="bc-pa-stair__slice -index-1"><img src="{% static 'images/photoarea/pa-4.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-2"><img src="{% static 'images/photoarea/pa-4.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-3"><img src="{% static 'images/photoarea/pa-4.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+    </div>
+  </div>
+  <div class="bc-pa-stair x_{{ pa_slots.4.x|default:5 }} y_{{ pa_slots.4.y|default:1 }} d_5"
+       data-para="-28" style="--pa-ratio: 768 / 1075">
+    <div class="bc-pa-stair__track">
+      <span class="bc-pa-stair__slice -index-1"><img src="{% static 'images/photoarea/pa-5.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-2"><img src="{% static 'images/photoarea/pa-5.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+      <span class="bc-pa-stair__slice -index-3"><img src="{% static 'images/photoarea/pa-5.webp' %}?v=20261109b" alt="" loading="lazy" decoding="async"></span>
+    </div>
+  </div>
 </div>
 <div class="bc-stage-content">
   <div class="bc-stage-content-inner">
