@@ -19,6 +19,8 @@
     .bc-coffee-title__pin    ＝ 原站 .pin（托住層；JS 給 translate3d）
     .bc-coffee-title__stage  ＝ 兩欄 grid：（第 1 欄）插畫 ｜（第 2 欄）h1 ＋ kicker
     .bc-coffee-title__word   ＝ 原站 h1.init-anim（文字原文就寫在這裡）
+    .bc-coffee-title__featured ＝ 字上方的小標「Featured」（2026-11-18 新增；
+                                 h1 的兄弟節點，不可放進 h1，見 html 註解與 css [I]）
     .bc-coffee-title__char   ＝ 原站外層 .char（原為進場位移；2026-11-18 移除進場後
                                 只是出場位移的容器；由 JS 產生）
     .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移；由 JS 產生）
@@ -69,7 +71,18 @@
       （geo.lift）；一旦 stage 變成 position:relative，word.offsetParent
       會變成 stage、offsetTop 變 0，出場距離會少算一個「置中偏移」。
     · ⚠ kicker 不能放進 h1：bc-coffee-title.js 的 splitChars() 會
-      word.textContent = "" 後逐字重建 ⇒ 會被清掉。
+      word.textContent = "" 後逐字重建 ⇒ 會被清掉（「Featured」小標同理）。
+
+  [字上方的「Featured」小標（2026-11-18 建立）]
+    使用者原話：「修改 bc-coffee-title__stage, bc-coffee-title__word 文本添加文字
+    'Featured' 分開兩行, 行距小, 相同互動效果, 位置在 COFFEE 文字上」
+    · 標記是 h1 的兄弟節點（<p class="bc-coffee-title__featured">），
+      排在 h1 之前；沒有 JS 時就是「Featured / COFFEE」兩行的靜態版面。
+    · 版面：不進文件流，疊在 h1 同一格（grid-area 1/2）再往上推，兩行間距只由
+      css [I] 的 --bc-ct-featured-gap 決定；定位用 `translate`，出場位移用
+      `transform`（兩條屬性相加，互不覆蓋）。
+    · 互動：在 __pin 內 ⇒ 托住由 __pin 帶著走；出場跟第 0 個字（C）同步
+      （bc-coffee-title.js ④，與 kicker 同一組）。
 
 ============================================================
 {% endcomment %}
@@ -83,6 +96,11 @@
             <div class="svg-bg ftco-counter noise_animation bc-coffee-title-bg"
                  data-bc-coffee-title-bg
                  style="background-image: url({% static 'images/title_bg_img_01.svg' %});"></div>
+            <!-- 2026-11-18（使用者指示「添加文字 'Featured' 分開兩行、行距小、位置在
+                 COFFEE 文字上、相同互動效果」）：獨立一行、疊在 h1 同一格往上推，
+                 版面見 static/css/bc-coffee-title.css [I]。
+                 ⚠ 不可放進 h1：bc-coffee-title.js 的 splitChars() 會清空重建。 -->
+            <p class="bc-coffee-title__featured">Featured</p>
             <h1 class="bc-coffee-title__word">COFFEE</h1>
             <p class="bc-coffee-title__kicker">
                 <span class="bc-coffee-title__kicker-anim"><span class="bc-coffee-title__parenthis">(</span><span class="bc-coffee-title__kicker-label">Line Up</span><span class="bc-coffee-title__parenthis">)</span></span>

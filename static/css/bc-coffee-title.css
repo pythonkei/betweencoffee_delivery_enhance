@@ -30,6 +30,7 @@
          （2026-11-17 新增，見 [H]）
          .bc-coffee-title__stage   ＝ 一格 grid：字與左上角 kicker 疊在同一格
          .bc-coffee-title__kicker  ＝ 字的左上角小標「( Line Up )」（2026-11-18 起為直排）
+         .bc-coffee-title__featured ＝ 字上方的小標「Featured」（2026-11-18 新增，見 [I]）
 
    [2] 與原站的三個必要差異（其餘照抄）
        ① 原站是白底黑字、字高 510px 佔滿整個首屏；本頁 banner 只有 500px
@@ -300,10 +301,12 @@
     align-items: center;
 }
 
-/* 文字與 kicker 疊在第 2 欄同一格（寬高仍由字決定，kicker 不會撐大版面）；
-   插畫（.bc-coffee-title-bg）在第 1 欄，見 [G] */
+/* 文字、kicker 與「Featured」小標疊在第 2 欄同一格（寬高仍由字決定，
+   另外兩個都不會撐大版面）；插畫（.bc-coffee-title-bg）在第 1 欄，見 [G]。
+   「Featured」見 [I]。 */
 .bc-coffee-title__word,
-.bc-coffee-title__kicker {
+.bc-coffee-title__kicker,
+.bc-coffee-title__featured {
     grid-area: 1 / 2;
 }
 
@@ -376,6 +379,52 @@
     to {
         max-height: var(--bc-ct-kicker-label-h);
     }
+}
+
+/* ---- [I] 大字上方的「Featured」小標（2026-11-18 使用者指示） ---------------
+   使用者原話：「修改 bc-coffee-title__stage, bc-coffee-title__word 文本添加文字
+   'Featured' 分開兩行, 行距小, 相同互動效果, 位置在 COFFEE 文字上」
+     · 分開兩行：Featured 是 h1 的「兄弟」節點，不是子節點
+       （bc-coffee-title.js 的 splitChars() 會清空 h1 再逐字重建，塞進去會被拆成
+        單字；見 partial 檔頭 ⚠）。
+     · 行距小：**不進文件流**，而是疊在 h1 同一格（grid-area 1/2，見上方群組規則）
+       再往上推 ⇒ 兩行間距只由 --bc-ct-featured-gap 決定（桌機 ≈8px、手機 ≈3px），
+       也不會被 h1 的 line-height .8 影響。
+     · 在 COFFEE 文字上：底邊停在「字框頂 ＋ cap-offset」＝ 'C' 的墨跡頂
+       （同 kicker 的對位基準，見 [A] 變數說明），左緣對齊 'C' 左緣
+       （justify-self:start）⇒ 看起來像黏在大字左上角的一行小標。
+     · 相同互動：在 __pin 內 ⇒ 托住由 __pin 的 translate3d 帶著走；出場由
+       bc-coffee-title.js ④ 跟第 0 個字（C）同步寫 transform（與 kicker 同一組）。
+   ⚠ 定位一律用 `translate`（不是 transform／margin-top）：
+     ① JS 出場寫的是 inline `transform`，兩條屬性會相加 ⇒ 出場位移不會蓋掉定位；
+     ② margin-top／flex 會改變第 2 欄的列高 ⇒ COFFEE 與插畫的置中位置一起跑掉
+        （本模組所有對位都以「字框」為基準算出來的）。
+   ⚠ 不可 position:relative／absolute：__stage 必須維持 static（見 [H] 末尾 ⚠）。
+   ⚠ 字級跟著大字等比（與 kicker 同一個邏輯）：clamp(14px, --bc-ct-fs × .0714, 32px)
+     ⇒ 使用者指定的「約 32px」在 ≥1120px 封頂，1180 起都固定 32px、390 縮到 14px。
+   ------------------------------------------------------------------------- */
+.bc-coffee-title__featured {
+    /* 兩行之間的空隙：桌機 448 × .018 ≈ 8px、手機 156 × .018 ≈ 2.8 → 取 3px 下限 */
+    --bc-ct-featured-gap: max(3px, calc(var(--bc-ct-fs) * 0.018));
+
+    margin: 0;
+    align-self: start;   /* 頂端先對齊 h1 的字框頂，再由 translate 往上推 */
+    justify-self: start; /* 左緣對齊 'C' 左緣 */
+
+    font-family: inherit; /* trade-gothic（與大字同一套 condensed gothic） */
+    font-size: clamp(14px, calc(var(--bc-ct-fs) * 0.0714), 32px);
+    font-weight: 400;
+    line-height: 1; /* 元素高 ＝ 字級 ⇒ 下面 translate 的 -100% 就是自身高度 */
+    letter-spacing: 0.04em;
+    text-transform: none; /* 不繼承大字的 uppercase：文案就是「Featured」 */
+    white-space: nowrap;
+    color: inherit;
+
+    /* 底邊 ＝ 字框頂 ＋ cap-offset（'C' 墨跡頂）− 行距 */
+    translate: 0
+        calc(
+            -100% - var(--bc-ct-featured-gap) + var(--bc-ct-cap-offset, 0.0172) * var(--bc-ct-fs)
+        );
 }
 
 /* ---- [F] 減少動態：不做任何位移（見 [7]） ------------------------------ */

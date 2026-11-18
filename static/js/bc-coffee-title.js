@@ -84,6 +84,14 @@
           ⚠ 位移寫在 `transform`，CSS 的位置用 `translate` 屬性（兩條屬性相加）
             ⇒ 不會互相覆蓋（跟 [裝飾] 同一招）。
 
+   [featured] 大字上方的「Featured」小標（2026-11-18 使用者指示：分開兩行、行距小、
+          位置在 COFFEE 文字上、相同互動效果；版面見 css [I]）：
+            節點是 h1 的兄弟（<p class="bc-coffee-title__featured">），
+            不可以放進 h1 —— splitChars() 會清空重建，塞進去會被拆成單字。
+            本檔只負責「出場」：與 [kicker] 同一組（init 內的 attached），
+            沿用第 0 個字（C）的 local／y；托住由 ① 的 __pin transform 帶著走。
+          ⚠ 定位在 CSS 用 `translate`、這裡寫 `transform` ⇒ 兩者相加、互不覆蓋。
+
    [效能] 捲動用 requestAnimationFrame 節流，且值沒變就不寫 style；幾何
           （banner 高度／字高）只在 init 與 resize 量測，不在捲動中讀 offsetHeight。
 
@@ -153,6 +161,7 @@
     var word = root.querySelector(".bc-coffee-title__word");
     var pin = root.querySelector(".bc-coffee-title__pin");
     var kicker = root.querySelector(".bc-coffee-title__kicker");
+    var featured = root.querySelector(".bc-coffee-title__featured");
     var banner = root.closest ? root.closest(".subpage-banner-h500") : null;
     if (!word || !pin || !banner) return;
 
@@ -193,6 +202,11 @@
        在 __pin 外 ⇒ 由本檔補 hold。見檔頭 [裝飾] 的 ⚠。 */
     var bgInPin = [];
     for (var bq = 0; bq < bgCount; bq++) bgInPin.push(pin.contains(bgs[bq]));
+
+    /* ---- ②d 跟著字一起出場的「附掛文字」：左上角 kicker ＋ 字上方的 Featured
+       （見檔頭 [kicker]／[featured]）；兩者都在 __pin 內，托住已由 ① 負責，
+       這裡只補出場位移。null 會被自動跳過（例如別頁沒有小標）。 ---- */
+    var attached = [kicker, featured];
 
     /* ---- ③ 幾何：只在 init／resize 量測（見檔頭 [效能]） ---- */
     var geo = { holdMax: 0, start: 0, span: 0, lift: 0 };
@@ -263,17 +277,22 @@
           }
         }
 
-        /* ④ 左上角 kicker（見檔頭 [kicker]）：跟第 0 個字（C）一起出場。
-              它在 __pin 內，托住已由 ① 負責 ⇒ 這裡只補出場位移；
-              local 直接取最外側那個字的值，不再另外算一次。 */
-        if (kicker && count) {
-          var kLocal = clamp01((p - offsets[0]) / (1 - EXIT_SPREAD));
-          var kY = geo.lift * easeInOut(kLocal);
+        /* ④ 托住層內的「附掛文字」（見檔頭 [kicker]／[featured]）：左上角 kicker
+              與字上方的 Featured 都在 __pin 內，托住已由 ① 負責 ⇒ 這裡只補出場
+              位移；local 取第 0 個字（最左的 C、最外側最早出發）的值，兩者共用
+              同一組 y ⇒ 字往上飛時它們一起離開畫面。 */
+        if (count) {
+          var aLocal = clamp01((p - offsets[0]) / (1 - EXIT_SPREAD));
+          var aY = geo.lift * easeInOut(aLocal);
+          var aTransform =
+            aY < -0.05 ? "translate3d(0, " + aY.toFixed(2) + "px, 0)" : "";
 
-          if (kY < -0.05) {
-            kicker.style.transform = "translate3d(0, " + kY.toFixed(2) + "px, 0)";
-          } else if (kicker.style.transform) {
-            kicker.style.transform = "";
+          for (var a = 0; a < attached.length; a++) {
+            var attachedEl = attached[a];
+            if (!attachedEl) continue;
+            if (attachedEl.style.transform !== aTransform) {
+              attachedEl.style.transform = aTransform;
+            }
           }
         }
       }
