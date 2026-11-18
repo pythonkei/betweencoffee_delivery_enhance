@@ -460,10 +460,29 @@ class Coffee(View):
         enabled.sort(key=_order_key)
         enabled_groups = [g for _, g in enabled]
 
+        # 系列切換（2026-11-18）：首屏巨型 Prev／Next（移植 droptokyo .p-pagenate__dirs）。
+        # 排序完全沿用 CoffeeMenu.get 的 queryset（all().order_by("sort_order", "id")），
+        # 也不另加 is_published 過濾 → 與 /coffee_menu/ 顯示順序、可見品項一致，
+        # 不會出現「菜單看得到卻切不到」。
+        # 首尾循環：第 1 杯的上一杯＝最後一杯；只有 1 杯時兩者皆 None（模板整段不輸出）。
+        series = list(CoffeeItem.objects.all().order_by("sort_order", "id"))
+        prev_coffee = None
+        next_coffee = None
+        if len(series) > 1:
+            index = next(
+                (i for i, item in enumerate(series) if item.id == coffee.id), None
+            )
+            if index is not None:
+                prev_coffee = series[index - 1]
+                next_coffee = series[(index + 1) % len(series)]
+
         context = {
             "coffee": coffee,
             "cart": cart,  # Add the cart to the context
             "option_groups": enabled_groups,
+            # 首屏巨型 Prev／Next（partials/bc_coffee_dirs.html）
+            "prev_coffee": prev_coffee,
+            "next_coffee": next_coffee,
         }
         return render(request, "betweencoffee_delivery/coffee.html", context)
 

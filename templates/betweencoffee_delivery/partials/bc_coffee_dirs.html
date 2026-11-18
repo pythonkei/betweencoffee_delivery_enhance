@@ -1,0 +1,57 @@
+{% comment %}
+============================================================
+   betweencoffee_delivery/partials/bc_coffee_dirs.html
+   咖啡詳情頁首屏「巨型 Prev／Next」系列切換（2026-11-18 建立）
+   ※ 注意：Django 的 {# #} 不支援跨行、內文也不可再出現 {#／#}（會提早結束註解），
+     故本檔說明一律使用 comment 區塊。
+   ------------------------------------------------------------------
+   移植 droptokyo.com 單篇文章頁固定的 .p-pagenate[data-type=dir]：
+     <nav class="p-pagenate" data-type="dir">
+       <div class="p-pagenate__dirs">
+         <div class="p-pagenate__dir p-pagenate__dir--prev">
+           <a rel="prev" href="…">Prev<i class="c-icon c-icon--bracket_l"></i></a>
+         </div>
+         <div class="p-pagenate__dir p-pagenate__dir--next">
+           <a rel="next" href="…">Next<i class="c-icon c-icon--bracket_r"></i></a>
+         </div>
+       </div>
+     </nav>
+   原站特色：字 clamp 級巨型英文貼齊視窗左右緣（略出血被邊界裁掉）、
+   金色（鄰頁主題色）、hover 時內側滑入一條極細斜線標記。
+   本檔差異（2026-11-18 使用者定案）：
+     ① 位置改為「navbar 與商品照片之間」的獨立滿版帶（原站是 fixed top:174px，
+        在本站會撞到固定 .bc-attract-buy 的 ORDER 長條與購物袋，故不採 fixed）。
+     ② 標記不用 icon 字（本站規範：只准 icomoon）→ 改用 CSS 偽元素細斜線。
+     ③ 不做 Barba.js 方向性整頁轉場。
+     ④ 追加小字咖啡名稱（原站無）：10 杯只差名字／價格，沒有名稱不知道要切去哪。
+   資料來源（betweencoffee_delivery/views.py → Coffee.get）：
+     prev_coffee / next_coffee 依 /coffee_menu/ 的排序（sort_order, id）計算，
+     首尾循環；只有 1 杯時兩者皆 None → 本檔整段不輸出。
+   樣式：static/css/bc-coffee-dirs.css（純 CSS、無 JS）。
+   使用方式：{% include 'betweencoffee_delivery/partials/bc_coffee_dirs.html' %}
+             放在 coffee.html 的 .ftco-section-blank-small 之後、
+             .ftco-subpage-section（含 {BREWED FAST} 背景大字）之前。
+============================================================
+{% endcomment %}
+{% if prev_coffee or next_coffee %}
+<nav class="bc-coffee-dirs" aria-label="咖啡系列切換">
+    {% if prev_coffee %}
+    <a class="bc-coffee-dirs__dir bc-coffee-dirs__dir--prev"
+       href="{% url 'coffee' product_id=prev_coffee.id %}"
+       rel="prev"
+       aria-label="上一杯：{{ prev_coffee.name }}">
+        <span class="bc-coffee-dirs__word">Prev</span>
+        <span class="bc-coffee-dirs__name">{{ prev_coffee.name }}</span>
+    </a>
+    {% endif %}
+    {% if next_coffee %}
+    <a class="bc-coffee-dirs__dir bc-coffee-dirs__dir--next"
+       href="{% url 'coffee' product_id=next_coffee.id %}"
+       rel="next"
+       aria-label="下一杯：{{ next_coffee.name }}">
+        <span class="bc-coffee-dirs__word">Next</span>
+        <span class="bc-coffee-dirs__name">{{ next_coffee.name }}</span>
+    </a>
+    {% endif %}
+</nav>
+{% endif %}
