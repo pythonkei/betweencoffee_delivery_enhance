@@ -22,7 +22,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態（2026-11-11）**：live＝`c3f7509c`（11-03）⇒ **待部署 66 筆＋**（`git rev-list --count c3f7509c..main`）；部署後 `/about/` 應有 `bc-sticky-mv`（`grep -c` >0 才算成功）。
+- **版本狀態（2026-11-18）**：live＝`17f3f96d`（11-13）⇒ **待部署 6 筆**（`git rev-list --count 17f3f96d..main`；尖端 `d2cf0e01`＝coffee_menu 整批）。部署後 `/coffee_menu/` 應有 `bc-coffee-title__kicker`（`grep -c` >0）。
 
 ## 2. 核心業務
 
@@ -45,14 +45,14 @@
 | `static/css/bc-components.css` | 品牌元件庫（`.bc-btn` / `.bc-input` / `.bc-card` / `.bc-order-collapse`） |
 | `static/css/bc-recommended-pages.css`、`static/js/bc-recommended-pages.js` | 首頁「推薦頁面」雙卡（緊接品牌舞台 `[2b]`） |
 | `static/css/bc-home-service.css`、`static/js/bc-home-service.js`、`partials/bc_home_service.html` | 「咖啡豆製程」捲動模組（union-tec `homeService` 移植：clip-path 膠囊→滿版、4 段輪播；原生 JS）。**掛 `/about/` 的 `.bc-search` 下方** |
-| `static/css/bc-brand-stage.css`、`static/js/bc-brand-stage.js`、`partials/bc_brand_stage{,_hero}.html` | 首頁／about 共用的「品牌舞台」（時鐘＋環形照片列＋跑馬燈＋社群列；grid-area 版面）。子元素 class **2026-11-10 由 `footer*` 改名 `.bc-stage-*`**（對照表在 CSS 檔頭）；`<footer>`／`id`／`data-*` 未動 |
+| `static/css/bc-brand-stage.css`、`static/js/bc-brand-stage.js`、`partials/bc_brand_stage{,_hero}.html` | 首頁／about 共用的「品牌舞台」（時鐘＋環形照片列＋跑馬燈＋社群列；grid-area 版面；子元素 `.bc-stage-*`，`<footer>`／`id`／`data-*` 未動） |
 | `static/css/bc-photoarea.css`、`static/js/bc-photoarea.js`、`images/photoarea/pa-1~5.webp`、`partials/bc_brand_stage_hero.html` | 首頁 hero 背景照片視差（hicard）：`z-index:-1`＋`pointer-events:none`、黑蒙版 **75%**、落點每次載入洗牌；第 3 格＝影片輪播 `.bc-pa-video`（片單見 views）。細節見 `docs/home-photoarea.md` |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（3 行 × 4 種字體、`.74s` step-end 每 185ms 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
 | `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00~06.webm`（7 支） | `/about/` 首屏 sticky 影片＋產品照輪播（`--mv-vh`=`100svh`、黑遮罩 75%；片單 `views.MV_VIDEOS` 不洗牌、層數 min(片單,`MV_MAX`=7)、剩 0.75s 交叉淡入 0.6s；URL 由 `_mv_versioned_static()` 加 mtime）。細節見 `docs/about-sticky-mv.md` |
 | `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（popeye50 移植，置於 `#bc-sticky-mv` 下方） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
-| `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（daisheng `.c-footer__section` 移植：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景 `bean_menu.jpg`；**置於 `</footer>` 之後**）。說明用 `{% comment %}` |
-| `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉） |
+| `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（daisheng `.c-footer__section` 移植：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景 `bean_menu.jpg`；**置於 `</footer>` 之後**） |
+| `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉）＋左上 `( Line Up )` kicker＋插畫 `.svg-bg` 同套互動 |
 
 ## 4. 開發規範
 
