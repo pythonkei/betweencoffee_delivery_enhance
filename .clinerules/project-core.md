@@ -53,6 +53,7 @@
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 | `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（daisheng `.c-footer__section` 移植：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景 `bean_menu.jpg`；**置於 `</footer>` 之後**） |
 | `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉）＋左上 `( Line Up )` kicker＋插畫 `.svg-bg` 同套互動 |
+| `static/css/bc-coffee-dirs.css`、`partials/bc_coffee_dirs.html` | `/coffee/<id>/` 首屏「巨型 Prev／Next」滿版帶（droptokyo 移植、純 CSS）：貼邊出血字、hover 內側細斜線、名稱在字上緣；右端退 `--bc-cd-inset-r` 避開 ORDER／頭像 |
 
 ## 4. 開發規範
 
@@ -83,11 +84,11 @@
 - **`.bc-attract` 負 margin** 會讓「外層盒」與「可見長條」差 24px，量測一律量可見元素。
 - **Render free plan** 無 Redis：不要引入需要 Redis 的功能；Celery 任務同步執行。
 - **Migration 編號**：`python3 manage.py makemigrations --check` 必須乾淨；資料搬移用 data migration，不在 view 裡寫死。
-- **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:230` `#bc-brand-stage .bc-stage-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。（2026-11-10 前該 class 名為 `.footer-socials`。）
-- **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方內容自動整齊上移，不要再補留白。
-- **大型原始素材不進版控**：`static/images/ani_{coffee,bean}_apng.png`（12.8MB，僅供重新產圖）已列 `.gitignore`；頁面用的是 `static/images/recommended-pages/title-*.png`（176×176 APNG）。同理 `static/images/hero_bg.mp4`（81MB／4K，首屏影片原始素材，**勿刪**）與 `recommended-pages/` 底線開頭的 webm／png 暫存變體也列 `.gitignore`。
+- **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:230` `#bc-brand-stage .bc-stage-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。（舊名 `.footer-socials`。）
+- **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方自動上移，不必補留白。
+- **大型原始素材不進版控**：`ani_{coffee,bean}_apng.png`（12.8MB，僅供重產圖）、`hero_bg.mp4`（81MB／4K，首屏影片原始素材，**勿刪**）、`recommended-pages/` 底線暫存變體皆列 `.gitignore`；頁面用 `recommended-pages/title-*.png`（176×176 APNG）。
 - **新增 CSS／JS 檔要跟引用它的模板同一次 commit**（曾漏 `bc-catch.css` → 正式站該頁 404 到 11-04 才補）。push 後用 `git ls-tree -r origin/main --name-only static/css static/js | grep <檔名>` 對照一次。
-- **商品圖走 `get_index_image()`**：`image_index` 空 → fallback 到詳情圖（`860×1100`，杯身佔畫布寬 80%），列表圖是 `840×1200`（杯身 62–87%）；同一個 3:4 `object-fit: contain` 盒下杯身寬差可達 40% ⇒ 看起來像「某組間距跟別組不同」。**要讓某品項在列表／輪播一致，補 `image_index`（data migration），不要針對單品加 CSS 間距**（`0084` 補 #7 Nice Step）。
+- **商品圖走 `get_index_image()`**：`image_index` 空 → fallback 詳情圖（`860×1100`，杯身佔寬 80%），列表圖 `840×1200`（62–87%）⇒ 同一 3:4 `contain` 盒下杯身寬差達 40%，像「間距不同」。**補 `image_index`（data migration），不要針對單品加 CSS**（`0084` 補 #7）。
 - **`/about/` 首屏輪播品項＝`views.About` 的 `MV_EXCLUDE_IDS`**（現為 `{7}` → 5 張）；`series_coffees` 仍是完整 6 筆，只給下方 SERIES 括號滑桿／字輪用。增減首屏品項改常數，不要在模板加 `{% if coffee.id != 7 %}`。
 
 ## 8. 文件導覽
