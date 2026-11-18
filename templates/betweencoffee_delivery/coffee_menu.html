@@ -6,101 +6,71 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261118c">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261118f">
 {% endblock %}
 
 {% block content %}
 <style>
-  /* 2026-11-16（使用者指示「ftco-subpage-banner 移除內部 container 文字內容，
-     保持此 title_bg_img_01.svg 在背景中」）：
-     ① 文字容器（.container > .row：Explore Between／｛咖啡｝／副標／首頁連結）已整段移除，
-        HTML 只剩背景裝飾 div。
-     ② 但 .ftco-subpage-banner 的內容一空，高度就只剩 padding（桌機 238px），
-        而 .svg-bg 是它的 absolute 子層（top:-110px;bottom:0）⇒ 背景框從 712px 塌成
-        348px；title_bg_img_01.svg 沒有 width/height 只有 viewBox（540×700），
-        background-size:auto 會依框等高縮小 ⇒ 裝飾圖變成一小角、等同消失。
-     ③ 修法：本頁讓定位框交還給固定高度的 section（banner 改 position:static、
-        高度仍由 .subpage-banner-h500 的 500px／手機 82vw 決定），並把 .svg-bg 的框
-        撐回整個 banner（top:0;bottom:0），同時清掉 .ftco-counter 的 7em 直向 padding
-        —— 那是原站計數器版型的留白，會把背景繪製區（padding box）再壓掉 196px。
-        結果：SVG 以 540:700 原比例填滿 banner 高度（桌機繪製區 386×500；改動前
-        398×516 且中心低 20px，兩者外觀幾乎相同）。 */
-  /* ↑ 選擇器必須帶到 #section-counter：style-custom.css 的
-       `#section-counter{position:relative}`（特異度 1,0,0）
-     會壓過純 class 的 (0,3,0)，導致只有 class 的寫法形同無效（實測 banner 仍
-     relative、.svg-bg 框仍只有 238px）。banner 改 static 後 z-index 一併失效，
-     .svg-bg 的 z-index:-1 就改由 section（position:relative + z-index:0）承接。 */
-  .subpage-banner-h500.bc-banner-bgonly .ftco-subpage-banner#section-counter {
-    position: static;
-  }
+  /* 2026-11-18（使用者指示「title_bg_img_01.svg 放到 COFFEE 文字左側、放進文字
+     容器，然後整組頁面居中對齊；插畫改白色、不透明」）：
+     ① 插畫（.svg-bg.bc-coffee-title-bg）已從 banner 搬進 partial 的
+        .bc-coffee-title__stage 第 1 欄 ⇒ 版面成為「插畫 ｜ COFFEE」，再由
+        __pin 的 place-items:center 把整組（含 ( Line Up )）置中。
+        ⇒ 這裡不再需要 absolute／em 對位，left/top/right/bottom 全部交還 grid。
+     ② 只剩三件事：尺寸、比例、白色不透明。
+     ③ 尺寸 width:min(0.62em, calc(100vw - 2.072em - 2vw))（em ＝ 大字字級：
+        本元素在 .bc-coffee-title 內，font-size 繼承其 --bc-ct-fs＝
+        min(40vw,448px)）。兩項各是一個上限，取小：
+        · 0.62em：大螢幕上限 ⇒ 277.8×360，插畫高 ＝ 字框高（358.4）
+          ⇒ 視覺上「與字同高」（2026-11-18 使用者要求「放大」：原
+          0.52em＝233×302，只有字框的 84%）。
+        · calc(100vw − 2.072em − 2vw)：可用寬度不足時的上限。
+          2.072em ＝ 字寬 1.972em ＋ 本元素右側間距 0.1em（兩者都是 em，
+          隨字級等比縮放）；再扣 2vw ＝ 兩側各留 1vw 呼吸。
+          字級封頂（≥1120px）之後多出來的寬度幾乎都給插畫 ⇒ 1120 → 169.3、
+          1180 → 228.1、1240 以上 → 277.8（＝0.62em 上限）；
+          手機與原本幾乎相同（390 → 58.9、320 → 48.6）—— 窄螢幕的剩餘寬度
+          本來就只有約 17vw（COFFEE 佔 78.9vw），再大就會撐出水平捲軸。
+        ⇒ 實測 320/360/390/430/768/1024/1180/1440/1920 都沒有水平捲軸。
+     ④ aspect-ratio 540/700（＝原 viewBox 比例）＋ background-size:100% 100%
+        ⇒ 任何尺寸都不變形。
+     ⑤ opacity:1（原 0.5）：使用者指示「白色、不透明」。插畫本身是 fill:#fff，
+        換色不用動檔案、也不用 filter，改透明度即可。 */
   .subpage-banner-h500.bc-banner-bgonly .svg-bg {
-    padding: 0;
-    /* 2026-11-17（使用者指示「title_bg_img_01.svg 層級在 COFFEE 字上、產品
-       下層；位置移到 'C'、尺寸放大 20%」）：
-       · 盒模型改成「插畫大小的固定盒」，用 left/top 百分比＋em 對位。原本是
-         width:1080px ＋ left:-4em/-26em/-18em（各斷點不同）搭 background-size:
-         auto，可視位置隨 media query 漂移、也無法對到某個字。
-       · 尺寸／位置全部用 em（em ＝ 本元素字級，這裡刻意跟 .bc-coffee-title
-         的 --bc-ct-fs 設成同一個 min(40vw,448px)）：字與 'C' 的幾何都隨字級
-         等比縮放 ⇒ 一條規則就吃所有斷點（字級由來見 bc-coffee-title.css [3]）。
-       · 放大 20%：原本 background-size:auto 對 540×700 viewBox 等效 contain
-         進 1080×500 盒（實測 scale 0.714、畫出的插畫 335×311）⇒ 現在
-         scale 0.714×1.2＝0.857 ⇒ 圖 540×0.857＝462.9px、700×0.857＝600px，
-         換算 em（÷448）＝1.0332em × 1.3393em；插畫因此是 402×374（原
-         335×311 的 1.2 倍）。
-       · 對位：'C' 的中心 ＝ banner 中心往左 (字寬−C寬)/2＝0.808em、垂直 ＝
-         banner 中心（字在 banner 內垂直置中，見 bc-coffee-title.css [B]）。
-         插畫在圖內的左上角是 (35,111)/540×700 ⇒ 插畫中心距圖左上
-         (269×0.857, 329×0.857)＝(230.6, 282.0)px＝(0.5147em, 0.6295em)，
-         故 left ＝ 50% − 0.808em − 0.5147em、top ＝ 50% − 0.6295em，
-         兩者都落在 C 的正中央（實測 1440：插畫 402×374、中心 (358,350)
-         ＝ C 中心）。
-       · ⚠ 別改回 `width:auto; left:0; right:0`（想「鋪滿 banner 再用
-         background-position 對位」）—— 這個元素在 Chrome 實測會被算成
-         width:0 並自動置中，位置完全不受控。 */
-    left: calc(50% - 1.3227em);
-    top: calc(50% - 0.6295em);
+    /* 蓋掉 style-bootstrap 的 `.subpage-banner-h500 .svg-bg`（absolute、1080px 寬、
+       left:-4em，各斷點另有 -26em／650px）：現在它是 grid item，要留在文流裡 */
+    position: relative;
+    top: auto;
     right: auto;
     bottom: auto;
-    width: 1.0332em;
-    height: 1.3393em;
-    margin: 0;
-    font-size: min(40vw, 448px); /* ⚠ 與 .bc-coffee-title 的 --bc-ct-fs 同步 */
-    background-size: 100% 100%; /* 盒比例＝540:700，不會變形 */
+    left: auto;
+    width: min(0.62em, calc(100vw - 2.072em - 2vw));
+    height: auto;
+    aspect-ratio: 540 / 700;
+    margin: 0 0.1em 0 0; /* 與 COFFEE 的間距（0.1em ≈ 44.8px @448） */
+    padding: 0;
+    background-size: 100% 100%;
     background-position: 0 0;
-    /* 2026-11-17（使用者指示「title_bg_img_01.svg z-index 位置在 COFFEE 文字上」）：
-       堆疊本來就已經對（本元素 3 > 字 2，同屬 section 這個 stacking context），
-       但**看不到它在字上**——原因是 style-bootstrap.css:3367 給
-       `.subpage-banner-h500 .svg-bg` 的 `opacity: 0.06`：6% 的白線疊在
-       rgba(255,255,255,.9) 的白字上等於完全消失（疊在黑底才看得到）⇒ 肉眼看起來
-       像「被字蓋住」。這裡把本頁的透明度蓋掉（選擇器 0,3,0 > 原規則 0,2,0；
-       其他頁面沿用 0.06 不變）。
-       · 0.5＝現在的值：線稿在字上清楚可見、字仍讀得出來；（實測對照 1440）
-         0.3 更含蓄、0.75 以上幾乎變成白色貼紙。要調只改這一行。
-       · 只影響「畫得亮不亮」，不影響 z-index／進場／托住／出場（那些動的是
-         translate／transform）。 */
-    opacity: 0.5;
-    /* 字（.bc-coffee-title）是 z-index:2，這裡給 3 ⇒ 裝飾在字之上；商品區是
-       banner 之後的 sibling section，整層仍在 banner 之上 ⇒ 不會蓋到商品卡。 */
-    z-index: 3;
-    pointer-events: none; /* 純裝飾：不擋點擊 */
-    /* 2026-11-17（使用者指示「互動效果和 COFFEE 文字相同」）：本元素同時標記
-       data-bc-coffee-title-bg ⇒ static/js/bc-coffee-title.js 讓它吃與字完全相同
-       的 進場（translate .16em→0）／托住（與 __pin 同一個 hold）／出場
-       （跟第 0 個字 'C' 同節奏，因為插畫就是對在 C 上；要換字可用根的
-       data-bc-ct-bg-char）。這裡的 left/top/width/height 只是「靜態基準
-       位置」（沒有 JS／減少動態時的樣子），動畫寫的是 translate／transform，
-       不會改動這些值。邏輯見 bc-coffee-title.js 檔頭 [裝飾]、bc-coffee-title.css
-       [6b][G]。 */
+    background-repeat: no-repeat;
+    opacity: 1;              /* ⑤ 白色、不透明 */
+    /* 在字之下：兩者已不重疊，但手機（≤430px）時 kicker 的直排欄會貼到插畫右緣
+       約 4.5px（見 [H1] 的 translate −100%−8px），插畫壓在上面會蓋掉白字
+       ⇒ 給 1（字與 kicker 沒設 z-index，塗在後面一層）。 */
+    z-index: 1;
+    pointer-events: none;    /* 純裝飾：不擋點擊 */
+    /* 2026-11-17（使用者指示「互動效果和 COFFEE 文字相同」）：本元素標記
+       data-bc-coffee-title-bg ⇒ static/js/bc-coffee-title.js 讓它吃與字完全相同的
+       進場（translate .16em→0）／托住（與 __pin 同一個 hold）／出場（跟第 0 個字
+       'C' 同節奏；要換字可用根的 data-bc-ct-bg-char）。上面這些 width/height
+       只是「靜態基準尺寸」（沒有 JS／減少動態時的樣子），動畫寫的是
+       translate／transform，不會改動它們。邏輯見 bc-coffee-title.js 檔頭
+       [裝飾]、bc-coffee-title.css [G]。 */
   }
-  /* 2026-11-17（使用者指示「文字放在產品下層級」）：先前為讓大字在托住時壓在
-     商品區之上，把 banner 提到 z-index:1；現在改回站預設 z-index:0
+  /* 2026-11-17（使用者指示「文字放在產品下層級」）：banner 維持站預設 z-index:0
      （style-bootstrap.css:3340）。同層的 .ftco-subpage-section 是
-     position:relative + z-index:auto 且 DOM 在其後 ⇒ 依繪製順序（同在 step 8）
-     畫在 banner 之上，巨型字捲進商品區時會從卡片「下面」穿過（托住／出場
-     邏輯不變，只是被商品卡片遮住，卡片間隙仍看得到字）。
-     導覽列 #ftco-navbar 是 z-index:100，仍在最上層；.svg-bg 的 -1 相對 banner
-     自己的 stacking context（z-index:0 會建立），不受影響。
+     position:relative + z-index:auto 且 DOM 在其後 ⇒ 依繪製順序畫在 banner 之上，
+     巨型字捲進商品區時會從卡片「下面」穿過（托住／出場邏輯不變，只是被商品卡片
+     遮住，卡片間隙仍看得到字）。導覽列 #ftco-navbar 是 z-index:100，仍在最上層。
      ⚠ 不要再把這裡調高，否則字會蓋回商品圖。 */
   .subpage-banner-h500.bc-banner-bgonly {
     z-index: 0;
@@ -112,19 +82,15 @@
      （購物袋 → Order 長條 → 個人圓鈕，整組對齊 navbar-brand 頂邊）。 -->
 <!-- Header Banner-->
 <section class="subpage-banner-h500 py-lg-4 bc-banner-bgonly">
-  <div class="ftco-subpage-banner" id="section-counter">
-    <!-- 2026-11-17：bc-coffee-title-bg ＋ data-bc-coffee-title-bg ⇒ 這張背景插畫
-         與「COFFEE」字吃同一套互動（進場／托住／出場），z-index 仍在字之上、
-         商品卡片之下。見本檔上方 inline 說明與 bc-coffee-title.{css,js}。 -->
-    <div class="svg-bg ftco-counter noise_animation bc-coffee-title-bg"
-         data-bc-coffee-title-bg
-         style="background-image: url({% static 'images/title_bg_img_01.svg' %});"></div>
-  </div>
+  <!-- 2026-11-18：背景插畫（title_bg_img_01.svg）已搬進 partial 的 __stage
+       （COFFEE 左側），這裡只留空殼 div 當本頁 #section-counter（main.js waypoint）。
+       ⇒ 不要在這裡再加 .svg-bg，否則會多畫一張插畫在 banner 左上角。 -->
+  <div class="ftco-subpage-banner" id="section-counter"></div>
   {% comment %}
   2026-11-16（使用者指示「移植 und-ny.com/about/ 首屏 ABOUT US 的 .pin-spacer ＋
   .init-anim 拆字進場到 subpage-banner-h500，保留 title_bg_img_01.svg 當背景，
-  ABOUT US 改 COFFEE」）：巨型字模組掛在 banner 內、背景 div 之後（模組本身是
-  position:absolute 鋪滿 banner 的覆蓋層，不吃滑鼠事件、不畫底色）。
+  ABOUT US 改 COFFEE」）：巨型字模組掛在 banner 內（模組本身是 position:absolute
+  鋪滿 banner 的覆蓋層，不吃滑鼠事件、不畫底色）。
   說明見 partials/bc_coffee_title.html 檔頭；樣式 static/css/bc-coffee-title.css。
   {% endcomment %}
   {% include 'betweencoffee_delivery/partials/bc_coffee_title.html' %}
@@ -201,5 +167,5 @@
 
 {# 首屏「COFFEE」巨型字模組的觸發腳本（見 partials/bc_coffee_title.html 檔頭） #}
 {% block extra_scripts %}
-<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261117d"></script>
+<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261118a"></script>
 {% endblock %}

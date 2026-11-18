@@ -1,3 +1,4 @@
+{% load static %}
 {% comment %}
 ============================================================
   betweencoffee_delivery/partials/bc_coffee_title.html
@@ -16,6 +17,7 @@
   [結構] 與原站一對一（class 對照表見 static/css/bc-coffee-title.css 檔頭 [1]）
     .bc-coffee-title         ＝ 鋪滿 banner 的覆蓋層（純裝飾、不吃滑鼠事件）
     .bc-coffee-title__pin    ＝ 原站 .pin（托住層；JS 給 translate3d）
+    .bc-coffee-title__stage  ＝ 兩欄 grid：（第 1 欄）插畫 ｜（第 2 欄）h1 ＋ kicker
     .bc-coffee-title__word   ＝ 原站 h1.init-anim（文字原文就寫在這裡）
     .bc-coffee-title__char   ＝ 原站外層 .char（進場位移；由 JS 產生）
     .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移；由 JS 產生）
@@ -30,6 +32,8 @@
          拆字進場 ＋ 捲動托住 ＋ 捲動時逐字往上跑掉，托住距離＝banner 高＋字高）
   [放置] templates/betweencoffee_delivery/coffee_menu.html 的
          <section class="subpage-banner-h500 …"> 內、.ftco-subpage-banner 之後。
+         ⚠ 插畫（.bc-coffee-title-bg）必須留在 __stage 內的第 1 欄：整組置中
+           （插畫 ＋ COFFEE）就是靠這個 grid 成立的，搬出去字又會單獨置中。
          ⚠ 本模組的字層級在本頁被設定成「商品卡片的下層」（banner 維持
            z-index:0，見 css 檔頭 [5] 末尾與 coffee_menu.html 的 inline 說明）：
            搬到別頁時若要字蓋在內容之上，必須自行調整該頁 banner／內容的
@@ -69,6 +73,13 @@
 <div class="bc-coffee-title" data-bc-coffee-title>
     <div class="bc-coffee-title__pin">
         <div class="bc-coffee-title__stage">
+            <!-- 2026-11-18（使用者指示「title_bg_img_01.svg 放到 COFFEE 文字左側、
+                 放進文字容器、整組頁面居中」）：插畫從 banner 搬進 stage 的第 1 欄，
+                 與字一起被 __pin 置中；白色／不透明與尺寸見 coffee_menu.html 的
+                 inline 區塊，互動見 bc-coffee-title.js 檔頭 [裝飾]。 -->
+            <div class="svg-bg ftco-counter noise_animation bc-coffee-title-bg"
+                 data-bc-coffee-title-bg
+                 style="background-image: url({% static 'images/title_bg_img_01.svg' %});"></div>
             <h1 class="bc-coffee-title__word">COFFEE</h1>
             <p class="bc-coffee-title__kicker">
                 <span class="bc-coffee-title__kicker-anim"><span class="bc-coffee-title__parenthis">(</span><span class="bc-coffee-title__kicker-label">Line Up</span><span class="bc-coffee-title__parenthis">)</span></span>

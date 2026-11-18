@@ -49,19 +49,27 @@
             不會被外層進場的 .95s transition 拖慢。
           ※ 捲回頂端時 p 回到 0，位移清除，字回到原位（可重播）。
 
-   [裝飾] banner 內的背景插畫（coffee_menu.html 的 title_bg_img_01.svg，標記
-          data-bc-coffee-title-bg）吃同一套互動：
+   [裝飾] 背景插畫（title_bg_img_01.svg，標記 data-bc-coffee-title-bg）吃同一套
+          互動：
             進場 = 與字相同的起點位移 .16em／時長／曲線（CSS 用 `translate`
                    屬性做，見 bc-coffee-title.css [G]），延遲 0（＝第一個字 C）。
                    起點位移的 class（--anim）由本檔加 ⇒ 腳本沒跑時插畫不動。
             托住＋出場 = 同一支 JS 直接寫 inline transform
-                   translate3d(0, hold ＋ y, 0)
-                   · hold 與 __pin 完全相同（所以插畫跟字一起被托住、不會先滑走）
+                   translate3d(0, hold' ＋ y, 0)
+                   · hold' = 插畫在 __pin 之外時才等於 hold（＝托住距離）；
+                     在 __pin 之內時為 0 —— 見下方 ⚠
                    · y 與「插畫對齊的那個字」相同 ⇒ 一路保持對齊（預設第 0 個字
                      ＝C，因為插畫就是以 C 為中心對位；可用根的
                      data-bc-ct-bg-char="1" 改成跟第 2 個字一起走）
             用 `translate`（進場）＋ `transform`（捲動）兩條屬性相加，所以插畫
             不需要像字那樣拆內外兩層。
+            ⚠ 托住位移只能算一次（2026-11-18 修正）：插畫搬進
+              .bc-coffee-title__stage（＝__pin 內）之後，① 寫在 __pin 上的
+              translate3d 已經把整組（含插畫）一起托住；若這裡再加一次 hold，
+              插畫會比字多滑一段（捲動時看起來像「互動反轉」）。
+              故以 pin.contains(bg) 判斷：在 __pin 內 ⇒ 只補出場位移 y；
+              插畫若搬回 __pin 外（banner 內其他位置）⇒ 由本檔補回 hold，
+              行為與搬動前相同。
             ⚠ 不要改成在 CSS 給插畫 `transform` 起點位移：JS 的 inline transform
               會整組覆蓋，進場就消失。`.noise_animation` 自己的
               transform: translate3d(0,0,0)（animate-custom.css:186）會被 inline
@@ -208,11 +216,18 @@
       bgOffset = offsets[bgChar];
     }
 
+    /* ---- ②c 裝飾層是否在 __pin 內（2026-11-18 插畫搬進 __stage 之後） ----
+       在 __pin 內 ⇒ 托住位移已由 ① 寫在 __pin 上（整組一起被托住），本檔不可
+       再加一次 hold，否則插畫會比字多滑一段（看起來像互動反轉）；
+       在 __pin 外 ⇒ 由本檔補 hold。見檔頭 [裝飾] 的 ⚠。 */
+    var bgInPin = [];
+    for (var bq = 0; bq < bgCount; bq++) bgInPin.push(pin.contains(bgs[bq]));
+
     /* ---- ③ 幾何：只在 init／resize 量測（見檔頭 [效能]） ---- */
     var geo = { holdMax: 0, start: 0, span: 0, lift: 0 };
     var lastHold = -1;
     var lastP = -1;
-    var lastBg = null;
+    var lastBg = [];  // 每個裝飾層上一次寫入的位移（逐元素，見檔頭 [裝飾]）
 
     function measure() {
       var bannerH = banner.offsetHeight;
@@ -233,7 +248,8 @@
       // 幾何變了 ⇒ 下一次 update 一定要重算
       lastHold = -1;
       lastP = -1;
-      lastBg = null;
+      lastBg = [];
+      for (var r = 0; r < bgCount; r++) lastBg.push(null);
     }
 
     var ticking = false;
@@ -291,24 +307,26 @@
         }
       }
 
-      /* ③ 裝飾層：托住 ＋ 出場寫成同一個 transform（兩者在同一元素上相加，
-            見檔頭 [裝飾]）；hold 或 p 任一變了就要重算 */
+      /* ③ 裝飾層：出場位移 ＋（只有在 __pin 之外才需要的）托住位移，兩者相加
+            寫在同一個 transform（見檔頭 [裝飾]）；hold 或 p 任一變了就要重算 */
       if (bgCount && (holdChanged || pChanged)) {
         var bgLocal = clamp01((p - bgOffset) / (1 - EXIT_SPREAD));
-        var bgTotal = hold + geo.lift * easeInOut(bgLocal);
+        var bgY = geo.lift * easeInOut(bgLocal);
 
-        if (lastBg === null || Math.abs(bgTotal - lastBg) > 0.01) {
-          lastBg = bgTotal;
+        for (var b = 0; b < bgCount; b++) {
+          /* 在 __pin 內 ⇒ 托住已由 ① 的 pin transform 帶著走，再加一次會雙倍 */
+          var bgTotal = (bgInPin[b] ? 0 : hold) + bgY;
+
+          if (lastBg[b] != null && Math.abs(bgTotal - lastBg[b]) <= 0.01) continue;
+          lastBg[b] = bgTotal;
 
           var bgTransform =
             Math.abs(bgTotal) < 0.05
               ? ""
               : "translate3d(0, " + bgTotal.toFixed(2) + "px, 0)";
 
-          for (var b = 0; b < bgCount; b++) {
-            if (bgs[b].style.transform !== bgTransform) {
-              bgs[b].style.transform = bgTransform;
-            }
+          if (bgs[b].style.transform !== bgTransform) {
+            bgs[b].style.transform = bgTransform;
           }
         }
       }
