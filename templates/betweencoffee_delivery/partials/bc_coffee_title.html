@@ -48,9 +48,10 @@
       banner 就是第一屏，「進視口觸發一次」＝載入後播一次 ⇒ 不需要
       IntersectionObserver，也不新增 JS。
     · 直排（11-18）：kicker 自己 writing-mode: vertical-rl ＋
-      text-orientation: upright ⇒ 字母由左往右「站直」往下堆疊；括號用
-      rotate:90deg 躺平成直排的 ︵／︶。標籤的展開動畫改成
-      max-height 0 → 7.4em（由上往下吐出），時長／延遲與橫排版相同。
+      text-orientation: sideways ⇒ 整串文字由上往下、每個字母都轉 90°（側躺），
+      等同把整條橫排字轉成直書（不是 upright 的一字一行站直）。因為是整串一起轉，
+      括號不需再 rotate。標籤的展開動畫改成 max-height 0 → 4em（由上往下吐出），
+      時長／延遲與橫排版相同。
     · 位置：.bc-coffee-title__stage 是一格 grid，h1 與 kicker 疊在同一格
       ⇒ kicker 的起點＝字的「字框」左上角；再用 translate 兩軸推到
       X ＝ -(自身寬度＋8px)（貼在 'C' 字框左緣外側）、

@@ -263,21 +263,21 @@
      （fill-mode: both ⇒ 延遲期間停在收起的起點），不必新增 JS。
 
    [H1] 直排版面（2026-11-18 使用者指示）
-     · 寫法：kicker 自己 writing-mode: vertical-rl ＋ text-orientation: upright
-       ⇒ 文字由上往下、拉丁字母「站直」逐字堆疊（不是整串轉 90°）。
+     · 寫法：kicker 自己 writing-mode: vertical-rl ＋ text-orientation: sideways
+       ⇒ 整串文字由上往下、每個字母都轉 90°（側躺），就像把橫排字整條轉成直書；
+       ⚠ 不是 upright（upright 會把字母「站直」一字一行堆疊，使用者明確否決）。
      · 位置：仍在 stage 的同一格（grid-area 1/1）、align-self／justify-self start，
        再用 translate 兩軸各推一段：
          X = -(自身寬度 + 8px)        ⇒ 直排欄貼在 'C' 字框左緣外側
          Y = +(--bc-ct-fs × 0.0172)   ⇒ 欄頂對齊 'C' 的「墨跡頂」（見 [A] 變數說明）
        ⚠ 不可用「字框頂」對齊：line-height .8 讓半行距是負的，字框頂比字形頂高
          7.7px（@448），直接對齊會看起來低一截。
-     · 欄長：字級改成跟著大字走 clamp(10.5px, --bc-ct-fs × .045, 20px)
-       ⇒ 整串 ( Line Up ) 的長度 ≈ 'C' 字高的 0.6 倍（手機 ≈0.9 倍），
-       不會出現「手機大字變小、直排欄卻比字還長」的失衡
-       （原本固定 18px，在 390 時欄長會是 C 字高的 1.6 倍）。
+     · 欄長：字級跟著大字走 clamp(11px, --bc-ct-fs × .05, 22px)
+       ⇒ 整串 ( Line Up ) 的長度 ≈ 'C' 字高的 0.4 倍（手機 ≈0.6 倍），
+       不會出現「手機大字變小、直排欄卻比字還長」的失衡。
      · 直排時 line-height 是「欄的厚度」不是行高 ⇒ 不可留橫排的 1.5。
-     · 括號要 rotate:90deg 才會「躺平」成直排的 ︵／︶；rotate 是獨立屬性，
-       不影響 flex 排版與 gap，也不會蓋掉 [D] 字的進場 transform。
+     · sideways 是「整串一起轉」⇒ 括號本身已跟著轉，不能再加 rotate:90deg
+       （加了會變回橫排的括號，且與文字方向錯開 90°）。
    ------------------------------------------------------------
    版面（見 partial 檔頭說明）：
      .bc-coffee-title__stage   一格 grid，h1 與 kicker 疊在同一格。
@@ -306,30 +306,26 @@
        （兩軸各自獨立，見 [H1]） */
     translate: calc(-100% - 8px) calc(var(--bc-ct-fs) * var(--bc-ct-cap-offset, 0.0172));
 
-    /* 直排：由上往下 ＋ 拉丁字母直立堆疊（不旋轉） */
+    /* 直排：由上往下 ＋ 整串字母轉 90°（側躺，不是一字一行站直） */
     writing-mode: vertical-rl;
-    text-orientation: upright;
+    text-orientation: sideways;
 
     font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
-    /* 跟著大字等比縮放（見 [H1] 欄長）：桌機 20px、390 時 10.5px */
-    font-size: clamp(10.5px, calc(var(--bc-ct-fs) * 0.045), 20px);
+    /* 跟著大字等比縮放（見 [H1] 欄長）：桌機 22px、390 時 11px */
+    font-size: clamp(11px, calc(var(--bc-ct-fs) * 0.05), 22px);
     font-weight: 400;
     /* 直排時 line-height ＝ 欄的厚度；標籤會被 overflow:hidden 裁切，
        厚度只需容得下單一字母（1em）＋一點呼吸空間 */
     line-height: 1.1;
-    /* 直立字母之間的節奏；同時決定標籤長度（7 字 × 1.04em ＝ 7.28em，
-       故 __kicker-label 的展開長度變數取 7.4em，見下） */
+    /* 側躺字母之間的節奏（沿著欄的垂直方向） */
     letter-spacing: 0.04em;
     white-space: nowrap;
     color: #fff; /* 同首頁 .sukima-parenthesis／.sukima-label */
 }
 
-/* 直排的括號：轉 90° 才是直排的開／閉括號（︵ ／ ︶）。
-   用獨立屬性 rotate（不佔 flex 排版、也不動 transform） */
-.bc-coffee-title__parenthis {
-    display: inline-block;
-    rotate: 90deg;
-}
+/* 括號：sideways 模式下整串一起轉，括號自然就是直書的 ︵／︶，
+   不可以再加 rotate:90deg（見 [H1]）。原本 upright 版的
+   display:inline-block／rotate:90deg 已隨改版移除。 */
 
 /* 括號列＝首頁 .sukima-parenthis-anim（同 gap／同時長／同曲線） */
 .bc-coffee-title__kicker-anim {
@@ -341,13 +337,14 @@
 }
 
 /* 中間的字＝首頁 .sukima-label 的直排版：
-   首頁是 max-width 0 → 133px（橫向吐出），直排改成 max-height 0 → 7.4em
+   首頁是 max-width 0 → 133px（橫向吐出），直排改成 max-height 0 → 4em
    （由上往下吐出；直排的 inline 軸是垂直，裁切要看 max-height）
    0.8s ease、延遲 0.85s ＝ 括號列起點（上面 0.55s）＋ 首頁的 0.3s 相對延遲 */
 .bc-coffee-title__kicker-label {
-    /* "Line Up" 7 個字 ×（1em ＋ 0.04em 字距）＝ 7.28em ⇒ 取 7.4em 留餘裕，
-       避免尾字「p」被裁掉；值隨字級（em）等比縮放，任何斷點都成立 */
-    --bc-ct-kicker-label-h: 7.4em;
+    /* sideways 是整串轉 ⇒ 長度＝原橫排寬度："Line Up" 實測 3.827em
+       （22px 字級 84.2px），取 4em 留一點餘裕避免尾字「p」被裁；
+       值隨字級（em）等比縮放，任何斷點都成立 */
+    --bc-ct-kicker-label-h: 4em;
 
     overflow: hidden;
     max-height: var(--bc-ct-kicker-label-h);
