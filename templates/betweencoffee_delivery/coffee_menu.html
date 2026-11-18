@@ -6,7 +6,7 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261118g">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261118h">
 {% endblock %}
 
 {% block content %}
@@ -71,11 +71,11 @@
     pointer-events: none;    /* 純裝飾：不擋點擊 */
     /* 2026-11-17（使用者指示「互動效果和 COFFEE 文字相同」）：本元素標記
        data-bc-coffee-title-bg ⇒ static/js/bc-coffee-title.js 讓它吃與字完全相同的
-       進場（translate .16em→0）／托住（與 __pin 同一個 hold）／出場（跟第 0 個字
-       'C' 同節奏；要換字可用根的 data-bc-ct-bg-char）。上面這些 width/height
-       只是「靜態基準尺寸」（沒有 JS／減少動態時的樣子），動畫寫的是
-       translate／transform，不會改動它們。邏輯見 bc-coffee-title.js 檔頭
-       [裝飾]、bc-coffee-title.css [G]。 */
+       托住（與 __pin 同一個 hold）／出場（跟第 0 個字 'C' 同節奏；要換字可用根的
+       data-bc-ct-bg-char）。進場（translate .16em→0）已於 2026-11-18 依使用者指示
+       與字一起移除。上面這些 width/height 只是「靜態基準尺寸」（沒有 JS／減少動態
+       時的樣子），動畫寫的是 transform，不會改動它們。邏輯見
+       bc-coffee-title.js 檔頭 [裝飾]、bc-coffee-title.css [G]。 */
   }
   /* 2026-11-17（使用者指示「文字放在產品下層級」）：banner 維持站預設 z-index:0
      （style-bootstrap.css:3340）。同層的 .ftco-subpage-section 是
@@ -178,5 +178,5 @@
 
 {# 首屏「COFFEE」巨型字模組的觸發腳本（見 partials/bc_coffee_title.html 檔頭） #}
 {% block extra_scripts %}
-<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261118a"></script>
+<script defer src="{% static 'js/bc-coffee-title.js' %}?v=20261118b"></script>
 {% endblock %}

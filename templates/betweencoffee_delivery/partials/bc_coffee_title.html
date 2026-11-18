@@ -19,7 +19,8 @@
     .bc-coffee-title__pin    ＝ 原站 .pin（托住層；JS 給 translate3d）
     .bc-coffee-title__stage  ＝ 兩欄 grid：（第 1 欄）插畫 ｜（第 2 欄）h1 ＋ kicker
     .bc-coffee-title__word   ＝ 原站 h1.init-anim（文字原文就寫在這裡）
-    .bc-coffee-title__char   ＝ 原站外層 .char（進場位移；由 JS 產生）
+    .bc-coffee-title__char   ＝ 原站外層 .char（原為進場位移；2026-11-18 移除進場後
+                                只是出場位移的容器；由 JS 產生）
     .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移；由 JS 產生）
 
   [為什麼文字直接寫在 h1 內、不在模板拆字]
@@ -29,7 +30,9 @@
 
   [樣式] static/css/bc-coffee-title.css（由 coffee_menu.html 的 extra_css 載入）
   [腳本] static/js/bc-coffee-title.js（由 coffee_menu.html 的 extra_scripts 載入；
-         拆字進場 ＋ 捲動托住 ＋ 捲動時逐字往上跑掉，托住距離＝banner 高＋字高）
+         拆字 ＋ 捲動托住 ＋ 捲動時逐字往上跑掉，托住距離＝banner 高＋字高。
+         ⚠ 原站的 .init-anim 進場（從下往上浮出）已於 2026-11-18 依使用者指示移除
+           ⇒ 載入即是最終位置，只有捲動互動。）
   [放置] templates/betweencoffee_delivery/coffee_menu.html 的
          <section class="subpage-banner-h500 …"> 內、.ftco-subpage-banner 之後。
          ⚠ 插畫（.bc-coffee-title-bg）必須留在 __stage 內的第 1 欄：整組置中

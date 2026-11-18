@@ -2,20 +2,21 @@
    Between Coffee — bc-coffee-title.js
    ----------------------------------------------------------------------------
    [用途] /coffee_menu/ 首屏 banner 的「COFFEE」巨型字（移植 und-ny.com/about/
-          首屏 .pin-spacer ＋ .init-anim 拆字進場 ＋ 捲動時逐字往上跑掉）。
+          首屏 .pin-spacer ＋ 捲動時逐字往上跑掉）。
           本檔做三件事：
-            ① 拆字 ＋ 觸發進場（對應原站 data-animation-type="chars"）
+            ① 拆字（原站的 .init-anim 進場已於 2026-11-18 移除，見下方 [拆字]）
             ② 托住（pin）：捲動時給 __pin 反向 transform（見 CSS 檔頭 [5]）
             ③ 出場（scroll-out）：捲到一定高度後，每個字各自往上滾出畫面
 
    [拆字] 原始文案留在 h1 內（沒有 JS 時就是完整一行字），JS 讀出文字後換成
             <span class="bc-coffee-title__char"><span class="bc-coffee-title__char-inner">C</span></span>
-          內外兩層＝原站的雙層 .char：外層負責「進場」位移（CSS transition），
-          內層負責「出場」位移（本檔依 scrollY 直接寫 transform、不帶 transition），
-          兩者互不干擾（inline transform 也不會壓過 .is-ready 的樣式表規則）。
+          內外兩層＝原站的雙層 .char：外層原本負責「進場」位移，內層負責「出場」
+          位移（本檔依 scrollY 直接寫 transform、不帶 transition）。
+          ⚠ 2026-11-18 使用者指示「title_bg_img_01.svg 與 COFFEE 文字移除初始時的
+            從下到上的動畫效果」⇒ 外層進場（.16em 位移／transition／60ms from edges
+            的 stagger 延遲）全部取消，外層現在只是出場位移的容器。拆字仍保留，
+            因為「出場」是逐字各自往上滾掉、需要逐字節點。詳見 css 檔頭 [4]。
             · h1 設 aria-label="COFFEE"（讀屏讀原文），內層 span 全 aria-hidden
-            · 每字 inline transition-delay = 距首尾的距離 × 60ms
-              （＝原站 stagger 0.06s from edges：首尾先起、中央字最後）
 
    [托住] 不使用 GSAP pin 的原因見 CSS 檔頭 [5]。公式：
              holdMax = banner 高度 ＋ 字高（＝托住總距離）
@@ -51,9 +52,8 @@
 
    [裝飾] 背景插畫（title_bg_img_01.svg，標記 data-bc-coffee-title-bg）吃同一套
           互動：
-            進場 = 與字相同的起點位移 .16em／時長／曲線（CSS 用 `translate`
-                   屬性做，見 bc-coffee-title.css [G]），延遲 0（＝第一個字 C）。
-                   起點位移的 class（--anim）由本檔加 ⇒ 腳本沒跑時插畫不動。
+            進場 = 已取消（2026-11-18 與字同步移除，見上）；插畫載入即定位，
+                   不再有 .bc-coffee-title-bg--anim／.is-ready 這兩個 class。
             托住＋出場 = 同一支 JS 直接寫 inline transform
                    translate3d(0, hold' ＋ y, 0)
                    · hold' = 插畫在 __pin 之外時才等於 hold（＝托住距離）；
@@ -94,8 +94,6 @@
 (function () {
   "use strict";
 
-  // 進場：每字延遲 60ms（對應原站 stagger 0.06s from edges）
-  var STAGGER_MS = 60;
   // 出場：起點＝托住距離的 30%（原站約 27%）
   var EXIT_START = 0.3;
   // 出場：中央字先走、邊緣字最晚，最多落後 28% 的出場區間（原站約 190px）
@@ -145,11 +143,6 @@
 
       outer.appendChild(inner);
 
-      // from edges：離首或尾越近越早（中央字最後）；起點位移由 CSS 給
-      // （見 static/css/bc-coffee-title.css [D]：不可寫 inline transform）
-      var edge = Math.min(i, total - 1 - i);
-      outer.style.transitionDelay = edge * STAGGER_MS + "ms";
-
       word.appendChild(outer);
       chars.push(outer);
     }
@@ -170,34 +163,12 @@
       return; // 見檔頭 [安全性]
     }
 
-    /* ---- ① 拆字 ＋ 進場 ---- */
+    /* ---- ① 拆字（只為出場：進場已於 2026-11-18 移除，見檔頭 [拆字]） ---- */
     var chars = splitChars(word);
-    if (chars.length) {
-      // 強制一次樣式計算，確保起點位移已經生效，下一帧的 .is-ready 才會轉場
-      void word.offsetWidth;
-    }
 
-    /* ---- ①b 裝飾層（見檔頭 [裝飾]）：先進場（起點位移由 CSS [G] 的
-       .bc-coffee-title-bg--anim 給），下一帧再加 .is-ready 讓它跟字一起收回原位。
-       --anim 只有 JS 會加 ⇒ 沒有 JS／腳本被擋時插畫停在靜態基準位置。
-       ⚠ 加 --anim 前要先關掉 transition：這個元素本來是 translate:none，直接
-         加 class 會先跑一段 0 → .16em 的過渡、緊接著 is-ready 又拉回 0，
-         結果完全看不到進場（字沒有這問題，因為 span 是 JS 新建的、出生就帶
-         起點位移，不會有「上一版的值」）。 ---- */
+    /* ---- ①b 裝飾層：進場已於 2026-11-18 移除 ⇒ 這裡只取節點，交給下方
+       ②b／③ 做出場位移（不再加 .bc-coffee-title-bg--anim／.is-ready）。 ---- */
     var bgs = banner.querySelectorAll(BG_SELECTOR);
-    for (var b = 0; b < bgs.length; b++) {
-      var bgEl = bgs[b];
-      bgEl.style.transition = "none";
-      bgEl.classList.add("bc-coffee-title-bg--anim");
-      void bgEl.offsetWidth;      // 強制 reflow：讓 0.16em 成為已渲染的起點
-      bgEl.style.transition = ""; // 交回 CSS 的 --bc-ct-dur／--bc-ct-ease
-      void bgEl.offsetWidth;      // 再 flush 一次，確認過渡已重新掛上
-    }
-
-    requestAnimationFrame(function () {
-      if (chars.length) root.classList.add("is-ready");
-      for (var b = 0; b < bgs.length; b++) bgs[b].classList.add("is-ready");
-    });
 
     /* ---- ② 出場：每字的起始偏移（中央 0 → 邊緣最大） ---- */
     var count = chars.length;

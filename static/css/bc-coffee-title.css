@@ -63,14 +63,17 @@
          封頂而為 46~79%）。448px 封頂是「banner 只有 500px 高」這個本頁條件
          下的上限（再大就會撞到導覽列）。
 
-   [4] 進場（對應原站 data-animation-type="chars"）
-       JS 拆字後，每個字由 CSS 給起點 transform: translate3d(0, .16em, 0)
-       （原站是固定 100px；本頁字級隨視窗變動，改用 em 讓各斷點位移比例一致），
-       下一帧加上根節點 .is-ready ⇒ 由本檔的 transition 收回到 0。
-       時長 .95s、曲線 cubic-bezier(.22,1,.36,1)（≈ power4.out）、
-       每字延遲 60ms 且 from edges（距離首尾越近越早，中央字最後）。
-       起點位移只掛在 JS 產生的 .bc-coffee-title__char 上 ⇒ 沒有 JS／腳本被擋
-       時 h1 就是完整一行字，不會停在下方的位移狀態（不需要 <noscript> 補救）。
+   [4] 進場（原站 data-animation-type="chars"）— 2026-11-18 已移除
+       使用者指示「title_bg_img_01.svg 與 COFFEE 文字移除初始時的從下到上的
+       動畫效果」⇒ 字與插畫都不再有起點位移／transition／stagger：
+         · .bc-coffee-title__char 不再有 transform／transition（見 [D]）
+         · 插畫不再加 .bc-coffee-title-bg--anim（見 [G]）
+         · --bc-ct-dur／--bc-ct-ease、根節點 .is-ready 這組掛勾一併刪除
+           （它們原本只為進場而存在）
+       現況：載入即是最終版面（字與插畫都在定位上），捲動托住／逐字出場不變。
+       拆字（雙層 span）仍保留，因為「出場」要逐字各自往上滾掉、需要逐字節點。
+       對照原站：仍是 .16em 起點／.95s 時長／60ms from edges；本站刻意拿掉，
+       日後要恢復就照上面那三個掛勾加回去。
 
    [5] 托住（pin）＝ transform 反向補償，不用 GSAP pin
        原站 .pin 用 GSAP pin（pinSpacing:false）＋inline translateY；
@@ -111,34 +114,25 @@
 
    [6b] 裝飾層（title_bg_img_01.svg）＝與字同一套互動（2026-11-17 使用者指示
         「互動效果和 COFFEE 文字相同、z-index 在 COFFEE 文字上」）
-        · 進場：起點位移 .16em、同一組 --bc-ct-dur／--bc-ct-ease、delay 0
-          （＝第一個字 C；字是 from edges，C 本來就是 delay 0）
+        · 進場：**已移除**（2026-11-18，與 COFFEE 文字同步；原本是 .16em 起點位移、
+          delay 0 ＝第一個字 C）⇒ 插畫載入即在最終位置，沒有 --anim／.is-ready
         · 托住＋出場：bc-coffee-title.js 對它寫 inline transform
           translate3d(0, hold′ ＋ y, 0)，y 與 C 相同 ⇒ 全程貼著 C，不會先滑走。
           ⚠ hold′ 只有在插畫位於 __pin **之外**時才等於托住距離；2026-11-18
             插畫搬進 __stage（＝__pin 內）之後，托住已由 __pin 的 transform
             帶著走，JS 再加一次會讓插畫多滑一段（看起來像互動反轉）⇒ 現在
             hold′ ＝ 0，只補出場位移。詳見 js 檔頭 [裝飾]。
-        · 技術重點：進場走 `translate` 屬性、捲動走 `transform` 屬性 —— 兩條屬性
-          會相加、互不覆蓋；若都用 transform，JS 一寫就整條被蓋掉（進場消失）。
-          插畫因此不需要像字那樣拆內外兩層。見 [G]。
+        · 技術重點：捲動位移一律寫 `transform`（與 kicker 的 [H] 同一招）；進場還在時
+          是靠另一條 `translate` 屬性相加才不會被蓋掉。進場移除後插畫的
+          `translate` 已無作用，JS 的 transform 邏輯不受影響。
 
    [7] 無 JS／減少動態
        · 沒有 JS：不拆字、不托住、不出場 ⇒ 靜態巨型字置中於 banner，版面與
          動畫終態相同（只有「大字不隨捲動托住／跑掉」這項差異）。
        · prefers-reduced-motion: reduce：JS 直接跳過拆字與捲動；下方的
-         media query 另外把 .bc-coffee-title__char（及 __char-inner）的
-         transform 歸零，即使拆字已發生也不會位移。
+         media query 另外把 .bc-coffee-title__char-inner（出場位移）歸零，
+         即使拆字已發生也不會位移（外層進場已於 2026-11-18 移除）。
    ============================================================ */
-
-/* ---- [A0] 字與裝飾層共用的時長／曲線 -------------------------------------
-   2026-11-18 起裝飾層已在 .bc-coffee-title 內（會繼承），仍在本體宣告一份，
-   讓它被搬到別處時行為不變；見 [4] 與 [G]。 */
-.bc-coffee-title,
-.bc-coffee-title-bg {
-    --bc-ct-dur: 0.95s;           /* 見 [4] */
-    --bc-ct-ease: cubic-bezier(0.22, 1, 0.36, 1); /* ≈ GSAP power4.out */
-}
 
 /* ---- [A] 根節點：鋪滿 banner 的覆蓋層（不吃滑鼠事件、不畫底色） -------- */
 .bc-coffee-title {
@@ -190,28 +184,22 @@
     color: inherit;
 }
 
-/* ---- [D] 單字：＝原站 .char（JS 產生；起點位移見下方說明） ------------- */
+/* ---- [D] 單字：＝原站 .char（JS 產生；進場已於 2026-11-18 移除） ------------- */
 .bc-coffee-title__char {
     display: inline-block;
-    /* 起點位移：往下 .16em（原站是固定 100px；本頁字級隨視窗變動，改用 em
-       讓各斷點的比例一致）。只有 JS 產生的 .bc-coffee-title__char 會吃到，
-       所以「沒有 JS」時 h1 不會停在下方位移狀態。
-       ⚠ 不可改由 JS 寫 inline transform：inline 會壓過下面 .is-ready 的
-         `transform: none`（inline 優先於樣式表）⇒ 字會卡在位移狀態。 */
-    transform: translate3d(0, 0.16em, 0);
-    transition: transform var(--bc-ct-dur) var(--bc-ct-ease);
-    will-change: transform;
+    /* 2026-11-18 移除進場：原本這裡是起點位移 translate3d(0, .16em, 0)
+       ＋ transition（.95s、每字 60ms from edges）；使用者要求「移除初始時的
+       從下到上的動畫」後全部拿掉 ⇒ 外層只是出場位移的容器，沒有樣式動畫。
+       ⚠ 出場位移仍寫在內層 __char-inner（見 [E]），不要搬到這裡。 */
 }
 
-/* JS 加 .is-ready 後回到基準位置（延遲由 JS 依 from-edges 規則寫在每個字的
-   inline transition-delay） */
-.bc-coffee-title.is-ready .bc-coffee-title__char {
-    transform: none;
-}
+/* 2026-11-18：原本這裡是 `.bc-coffee-title.is-ready .bc-coffee-title__char
+   { transform: none }`（JS 加 .is-ready 後把字收回原位）；進場移除後
+   .is-ready 這個掛勾已無作用，字與插畫都不再需要它。 */
 
 /* ---- [E] 出場位移層：＝原站內層 .char（JS 依 scrollY 直寫 transform） -----
    ⚠ 這一層不可以有 transition：出場要與捲動 1:1 連動（見檔頭 [6]）；
-     進場的 transition 留在外層 [D]，兩層分開才不會互相拖慢。 */
+     外層 [D] 的進場 transition 已於 2026-11-18 移除（見檔頭 [4]）。 */
 .bc-coffee-title__char-inner {
     display: inline-block;
     will-change: transform;
@@ -228,12 +216,9 @@
          data-bc-coffee-title-bg>。2026-11-18 起它放在 .bc-coffee-title__stage 的
          第 1 欄（＝COFFEE 左側、與字同一組置中）；尺寸／白色不透明的 inline
          區塊仍留在 coffee_menu.html，因為那組數字綁本頁字級。
-   · 這裡只負責「進場」：與字相同的起點位移 .16em、同一組 --bc-ct-dur／
-     --bc-ct-ease、delay 0（＝第一個字 C）。
-   · 起點位移掛在 JS 才加的 .bc-coffee-title-bg--anim（＝字的 .bc-coffee-title__char
-     做法）：沒有 JS 時插畫就是靜態基準位置，不會卡在下方的位移狀態。
-     JS 順序：關掉 transition ⇒ 加 --anim ⇒ 強制 reflow ⇒ 還原 transition
-     ⇒ 下一帧加 .is-ready 收回原位（關掉過渡那步不可省，見 js ①b 的說明）。
+   · 進場：**已移除**（2026-11-18，與 COFFEE 文字同步）⇒ 本檔不再有起點位移／
+     transition；插畫載入即在最終位置，沒有 .bc-coffee-title-bg--anim，
+     也沒有 .is-ready 掛勾（js 的 ①b 區塊一併刪除）。
    · 托住＋出場由 bc-coffee-title.js 寫 inline transform（見 [6b]/[7]）。
    · 尺寸（2026-11-18 使用者兩次要求「放大」）：coffee_menu.html 的 inline
      width: min(0.86em, calc(100vw - 2.072em - 2vw)) ⇒ 大螢幕 385.3×499.4
@@ -243,22 +228,11 @@
      ⚠ 插畫比字框（0.8em）高 ⇒ 會把 grid 那一列撐高，害 kicker（align-self:start）
        偏離 'C' 墨跡頂；inline 用上下各 -0.1574em 的等量負 margin 抵掉，列高回到
        由字決定（詳見 coffee_menu.html 的 inline 註解）。
-   ⚠ 進場一定要用 `translate` 屬性、不可用 transform：捲動時 JS 寫的 inline
-     transform 會整條覆蓋掉 CSS 的 transform（進場直接消失）；`translate` 與
-     `transform` 是兩條獨立屬性，會依序相加（translate → rotate → scale →
-     transform）。
+   ⚠ 捲動位移只能走 inline `transform`：日後若要加回進場，記得改用 `translate`
+     屬性（它套用在 transform 之前、兩者相加），否則 JS 的 inline transform
+     會整條蓋掉 CSS 的進場位移。
    ⚠ `.noise_animation` 這個 class 自帶 transform: translate3d(0,0,0)
      （animate-custom.css:186）會被 JS 的 inline transform 蓋過，不衝突。 */
-.bc-coffee-title-bg--anim {
-    translate: 0 0.16em;
-    transition: translate var(--bc-ct-dur) var(--bc-ct-ease);
-    will-change: transform, translate; /* 兩條屬性都會動：translate＝進場、transform＝捲動 */
-}
-
-.bc-coffee-title-bg--anim.is-ready {
-    translate: none;
-}
-
 /* 插畫固定在 stage 的第 1 欄（COFFEE 左側，見 [B] 之後的兩欄說明）；
    尺寸／比例／白色不透明由 coffee_menu.html 的 inline 區塊給。
    ⚠ 層級：插畫是 grid item、position:relative，本頁 inline 給 z-index:1 ⇒ 塗在
@@ -266,6 +240,7 @@
      （≤430px）kicker 的直排欄會貼到插畫右緣約 4.5px，插畫若在上面就會蓋掉白字。 */
 .bc-coffee-title-bg {
     grid-area: 1 / 1;
+    will-change: transform; /* 捲動時由 JS 寫 inline transform（進場已移除，見 [G]） */
 }
 
 /* ---- [H] 左上角 kicker：`( Line Up )` 直排（2026-11-17 建立／2026-11-18 改直排）
@@ -405,19 +380,8 @@
 
 /* ---- [F] 減少動態：不做任何位移（見 [7]） ------------------------------ */
 @media (prefers-reduced-motion: reduce) {
-    .bc-coffee-title__char {
-        transform: none !important;
-        transition: none !important;
-    }
-
+    /* 字的進場已於 2026-11-18 移除（[4]/[D]）⇒ 只剩出場位移要歸零 */
     .bc-coffee-title__char-inner {
-        transform: none !important;
-    }
-
-    /* 裝飾層（見 [G]）：JS 已整支跳過，這裡再加一層保險 */
-    .bc-coffee-title-bg--anim {
-        translate: none !important;
-        transition: none !important;
         transform: none !important;
     }
 
