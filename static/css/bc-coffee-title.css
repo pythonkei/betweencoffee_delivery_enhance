@@ -400,8 +400,10 @@
      ② margin-top／flex 會改變第 2 欄的列高 ⇒ COFFEE 與插畫的置中位置一起跑掉
         （本模組所有對位都以「字框」為基準算出來的）。
    ⚠ 不可 position:relative／absolute：__stage 必須維持 static（見 [H] 末尾 ⚠）。
-   ⚠ 字級跟著大字等比（與 kicker 同一個邏輯）：clamp(14px, --bc-ct-fs × .0714, 32px)
-     ⇒ 使用者指定的「約 32px」在 ≥1120px 封頂，1180 起都固定 32px、390 縮到 14px。
+   ⚠ 字級跟著大字等比（與 kicker 同一個邏輯）：clamp(14px, --bc-ct-fs × .1071, 48px)
+     ⇒ 使用者指定的「約 48px」在 ≥1120px（字級封頂 448）封頂：448 × .1071 ≈ 48；
+       1120 以下等比縮（1024 → 43.9、768 → 32.9、390 → 16.7、320 觸 14 下限）。
+       11-18 沿革：首版 .0714／上限 32px → 使用者「約 48px」⇒ 改 .1071／上限 48px。
    ------------------------------------------------------------------------- */
 .bc-coffee-title__featured {
     /* 兩行之間的空隙：桌機 448 × .018 ≈ 8px、手機 156 × .018 ≈ 2.8 → 取 3px 下限 */
@@ -412,7 +414,7 @@
     justify-self: start; /* 左緣對齊 'C' 左緣 */
 
     font-family: inherit; /* trade-gothic（與大字同一套 condensed gothic） */
-    font-size: clamp(14px, calc(var(--bc-ct-fs) * 0.0714), 32px);
+    font-size: clamp(14px, calc(var(--bc-ct-fs) * 0.1071), 48px);
     font-weight: 400;
     line-height: 1; /* 元素高 ＝ 字級 ⇒ 下面 translate 的 -100% 就是自身高度 */
     letter-spacing: 0.04em;
