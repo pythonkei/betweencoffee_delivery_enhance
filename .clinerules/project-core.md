@@ -22,7 +22,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態**：live＝`17f3f96d`（11-13）⇒ 待部署 `17f3f96d..main`（筆數用 `git rev-list --count 17f3f96d..main` 查，尖端 `9179832c`）。部署後 `/coffee_menu/` 應有 `bc-coffee-title__kicker`（`grep -c` >0）。
+- **版本狀態**：live＝`954bd18c`（11-19）⇒ 待部署筆數用 `git rev-list --count 954bd18c..main` 查。部署後 `/coffee/<id>/` 驗 `bc-coffee-dirs.css?v=20261119c`。
 
 ## 2. 核心業務
 
