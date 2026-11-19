@@ -18,7 +18,10 @@
      背景大字與咖啡杯）維持原本位置，巨型字浮在 navbar 與商品內容之間的空白帶。
      2026-11-19 第二版（使用者指示「move to page center」）：兩字改為頁面
      水平正中並排（桌機右上角旋轉貼紙會壓到貼右緣的 Next，字級再小也避不開）。
-     仍放在 .ftco-subpage-section 之前（DOM 順序＝視覺上的頁首），內容不變。
+     2026-11-19 第三版（使用者定案「頁面中間左右邊緣」）：回到 space-between 貼邊
+     ＋ ≥992px 垂直置中；2026-11-19 第四版（使用者指示「不使用文字，改為相關的
+     咖啡圖片，同時加入咖啡名稱」）：字樣 → 咖啡圖片＋名稱，hover 箭頭動畫不變。
+     仍放在 .ftco-subpage-section 之前（fixed，不影響文件流）。
      資料（prev_coffee／next_coffee）由 views.Coffee 提供。 -->
 {% include 'betweencoffee_delivery/partials/bc_coffee_dirs.html' %}
 
@@ -558,11 +561,13 @@ function debugLog(message) {
 <!-- 2026-11-11（使用者指示）：頁尾 next-link 面板（移植 daisheng .c-footer__section
      的進場放大淡入／hover 放大／背景視差／( Next ) 文字上捲） -->
 <link rel="stylesheet" href="{% static 'css/bc-next-link.css' %}?v=20261111h">
-<!-- 2026-11-18（使用者指示）：首屏巨型 Prev／Next（移植 droptokyo .p-pagenate__dirs；
-     純 CSS、無 JS）。2026-11-19 改為 fixed overlay（不佔流）＋細角括號 SVG 箭頭；
-     同日第二版：兩字改為頁面水平正中並排 → 同日第三版（使用者定案）改回
-     「頁面中間的左右邊緣」：貼左右緣＋≥992px 垂直置中 → 版號 20261119b → c -->
-<link rel="stylesheet" href="{% static 'css/bc-coffee-dirs.css' %}?v=20261119c">
+<!-- 2026-11-18（使用者指示）：首屏「上一杯／下一杯」系列切換（移植 droptokyo
+     .p-pagenate__dirs；純 CSS、無 JS）。2026-11-19 改為 fixed overlay（不佔流）＋
+     細角括號 SVG 箭頭；同日第二版：兩字改為頁面水平正中並排 → 同日第三版（使用者
+     定案）改回「頁面中間的左右邊緣」：貼左右緣＋≥992px 垂直置中（b → c）；
+     同日第四版（使用者指示）改為「鄰杯圖片＋咖啡名稱」（d）；同日第五版（使用者
+     指示）行動端 ≤767.98px 整組隱藏（e） -->
+<link rel="stylesheet" href="{% static 'css/bc-coffee-dirs.css' %}?v=20261119e">
 {% endblock %}
 
 {% block extra_scripts %}

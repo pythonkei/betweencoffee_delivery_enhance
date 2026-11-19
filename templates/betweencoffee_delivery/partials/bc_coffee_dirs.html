@@ -1,7 +1,7 @@
 {% comment %}
 ============================================================
    betweencoffee_delivery/partials/bc_coffee_dirs.html
-   咖啡詳情頁首屏「巨型 Prev／Next」系列切換（2026-11-18 建立）
+   咖啡詳情頁首屏「上一杯／下一杯」系列切換（2026-11-18 建立）
    ※ 注意：Django 的 {# #} 不支援跨行、內文也不可再出現 {#／#}（會提早結束註解），
      故本檔說明一律使用 comment 區塊。
    ------------------------------------------------------------------
@@ -35,8 +35,17 @@
         尺寸與位置由 CSS 的 --bc-cd-mark-* 依 --bc-cd-fs 換算，
         故任何字級都不會走位；≤767 依原站隱藏（觸控無 hover）。
      ③ 不做 Barba.js 方向性整頁轉場。
-     ④ 不顯示小字咖啡名稱（2026-11-18 使用者定案：只要 Prev／Next 字樣），
-        咖啡名稱只留在 aria-label，供螢幕閱讀器辨識目的地。
+     ④ **2026-11-19 第四版（使用者指示「不使用文字，改為相關的咖啡圖片，
+        同時加入咖啡名稱」）**：巨型 Prev／Next 字樣整段移除 →
+        改為「上一杯／下一杯的咖啡圖片（CoffeeItem.get_index_image，
+        與菜單列表同一張）＋ 咖啡名稱」；箭頭 hover 動畫位置不變，
+        改成貼在圖片盒內側（CSS 見 static/css/bc-coffee-dirs.css）。
+        名稱同時寫進 aria-label（「上一杯：X」）與 __name 文字。
+        圖片 alt 留空（相鄰已有名稱、連結也有 aria-label，避免重覆朗讀）。
+     ⑤ **2026-11-19 第五版（使用者指示「行動端不需要這個上一頁／下一頁
+        功能，因為螢幕顯示效果不太好」）**：≤767.98px 由 CSS 整組
+        display:none（bc-coffee-dirs.css 檔頭 ⑦），行動端不顯示也不佔版面；
+        平板／桌機（≥768px）仍照 ①–④ 的版面。
    資料來源（betweencoffee_delivery/views.py → Coffee.get）：
      prev_coffee / next_coffee 依 /coffee_menu/ 的排序（sort_order, id）計算，
      首尾循環；只有 1 杯時兩者皆 None → 本檔整段不輸出。
@@ -55,11 +64,16 @@
        href="{% url 'coffee' product_id=prev_coffee.id %}"
        rel="prev"
        aria-label="上一杯：{{ prev_coffee.name }}">
-        <span class="bc-coffee-dirs__word">Prev</span>
-        <svg class="bc-coffee-dirs__arrow" viewBox="0 0 77.5 87.5"
-             preserveAspectRatio="none" aria-hidden="true" focusable="false">
-            <path d="M77.5 0 L0 43.75 L77.5 87.5" stroke-width="1"></path>
-        </svg>
+        <span class="bc-coffee-dirs__media">
+            <img class="bc-coffee-dirs__img"
+                 src="{{ prev_coffee.get_index_image }}"
+                 alt="" decoding="async">
+            <svg class="bc-coffee-dirs__arrow" viewBox="0 0 77.5 87.5"
+                 preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M77.5 0 L0 43.75 L77.5 87.5" stroke-width="1"></path>
+            </svg>
+        </span>
+        <span class="bc-coffee-dirs__name">{{ prev_coffee.name }}</span>
     </a>
     {% endif %}
     {% if next_coffee %}
@@ -67,11 +81,16 @@
        href="{% url 'coffee' product_id=next_coffee.id %}"
        rel="next"
        aria-label="下一杯：{{ next_coffee.name }}">
-        <span class="bc-coffee-dirs__word">Next</span>
-        <svg class="bc-coffee-dirs__arrow" viewBox="0 0 77.5 87.5"
-             preserveAspectRatio="none" aria-hidden="true" focusable="false">
-            <path d="M0 0 L77.5 43.75 L0 87.5" stroke-width="1"></path>
-        </svg>
+        <span class="bc-coffee-dirs__media">
+            <img class="bc-coffee-dirs__img"
+                 src="{{ next_coffee.get_index_image }}"
+                 alt="" decoding="async">
+            <svg class="bc-coffee-dirs__arrow" viewBox="0 0 77.5 87.5"
+                 preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 0 L77.5 43.75 L0 87.5" stroke-width="1"></path>
+            </svg>
+        </span>
+        <span class="bc-coffee-dirs__name">{{ next_coffee.name }}</span>
     </a>
     {% endif %}
 </nav>
