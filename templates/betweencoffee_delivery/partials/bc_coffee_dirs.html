@@ -51,6 +51,10 @@
          名稱改白（CSS `__name` 取 `--bc-text`）；商品主區捲出視窗時整組
          淡出、捲回時淡入 —— 由 static/js/bc-coffee-dirs.js 以
          IntersectionObserver 切換 `.is-out`（CSS 第七版 ⑨）。
+      ⑦ **2026-11-19 第八版（使用者指示「反轉動畫，hover 狀態時正常顯示和
+         箭頭動畫，正常狀態時暗」）**：明暗反轉 —— 預設整組 dim（`opacity`
+         .4，圖片一起變暗），`:hover`／`:focus-visible` 回到 1 ＋ 箭頭滑入
+         （CSS 第八版 ⑩）。標記與資料不變（本檔無需修改內容）。
    資料來源（betweencoffee_delivery/views.py → Coffee.get）：
      prev_coffee / next_coffee 依 /coffee_menu/ 的排序（sort_order, id）計算，
      首尾循環；只有 1 杯時兩者皆 None → 本檔整段不輸出。
