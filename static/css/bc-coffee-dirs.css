@@ -34,22 +34,23 @@
         插在 .ftco-section-blank-small 之後、.ftco-subpage-section 之前，
         讓 {BREWED FAST} 背景大字（.bc-section-with-bg-text::before，
         以 section 頂端為基準）與咖啡杯整組一起下移，相對位置不變。
-     ② 標記：本站規範「圖示只用 icomoon」→ 不新增 icon 字，
-        改用偽元素細斜線（1px × .62em、±18deg），保留 opacity 0→1 ＋
-        translateX ±25% → 0 的滑入感；過渡沿用站上 cubic-bezier(.4,0,.2,1)。
+     ② 標記：本站規範「圖示只用 icomoon」→ 用 icon-long-arrow-left /
+        icon-long-arrow-right（字級 0.45em），位置在字的內側、hover 才由
+        外側滑入（opacity 0→1、translateX ±35% → 0），過渡沿用站上
+        cubic-bezier(.4,0,.2,1)。舊版是偽元素細斜線，使用者反映「只看得到
+        一條線、不像箭頭」→ 2026-11-18 改為真正的左右箭頭。
      ③ 不做 Barba.js 方向性整頁轉場 → 一般連結導覽。
-     ④ 追加小字咖啡名稱（原站無），讓使用者知道要切去哪一杯。
-     ⑤ 尺寸換算成 em：出血量 -9px / -11.4px @108px ＝ -.083em / -.106em，
-        標記內縮 36px @108px ＝ -.333em（改字級時比例不失真）。
+     ④ 不顯示小字咖啡名稱（2026-11-18 使用者定案）；名稱只留在 aria-label。
+     ⑤ 尺寸換算成 em：出血量 -9px / -11.4px @108px ＝ -.083em / -.106em。
 
    尺寸（--bc-cd-fs = clamp(2rem, 7.5vw, 6.75rem)）
      1920 → 108px（上限）  1440 → 108px  1024 → 76.8px
       768 → 57.6px           390 → 32px（下限）
    帶高 ≈ 上留白 29px ＋ 字 108px ＋ 下留白 75px ≈ 212px @1440。
-   咖啡名稱絕對定位在巨型字「上緣」（見 .bc-coffee-dirs__name 說明）。
-   右側內縮 --bc-cd-inset-r 避開固定 UI，實測淨空（2026-11-18）：
-     390 → 13px／768 → 12px／1024 → 約 22px／1440 → 18–23px／1920 → 約 19px。
-   觸控裝置（hover:none）沒有 hover → 斜線常駐 opacity .35 當可點提示。
+   右側內縮 --bc-cd-inset-r 避開固定 UI 與 ORDER 長條的磁吸位移（實測 2026-11-19）：
+      390 → 約 57px（≤575.98px 退到 100px，見變數註解）／768 → 12px／
+      1024 → 22px／1440 → 19px／1920 → 19px。
+   觸控裝置（hover:none）沒有 hover → 箭頭常駐 opacity .35 當可點提示。
    prefers-reduced-motion：關閉所有過渡。
    ============================================================ */
 
@@ -58,14 +59,26 @@
   --bc-cd-fs: clamp(2rem, 7.5vw, 6.75rem);
   --bc-cd-bleed-l: -0.083em;   /* 對照原站 left:-9px @108px */
   --bc-cd-bleed-r: -0.106em;   /* 對照原站 right:-11.4px @108px */
-  --bc-cd-mark: 0.18em;      /* 斜線與字的水平間距（實測 0.333em 太遠，2026-11-18 縮為 .18em ~19px） */
+  /* 箭頭與字的水平間距；em 基準＝箭頭自身字級（0.45 × --bc-cd-fs）
+     ⇒ 108px 字級時約 20px。 */
+  --bc-cd-mark: 0.42em;
   /* 右側安全內縮（2026-11-18 實測後追加）：本站固定 UI 佔住右上角
      —— .bc-attract-buy（直排 ORDER 長條，右緣固定 26px、寬 40px @≥992；
      10px／30px @手機）與 .bc-attract-profile（頭像）——巨型字若像原站
      一樣貼死右緣，會直接被切成「Nex|t」或整個字被長條蓋掉。
      ⇒ 巨型字右端一律退 clamp(56px, 11vw, 96px)：390→56、768→84、
      1024→96、1440→96、1920→96（實測皆與長條保 5–25px 淨空）。
-     左側沒有固定 UI，Prev 維持貼邊出血。 */
+     左側沒有固定 UI，Prev 維持貼邊出血。
+
+     ※ 2026-11-19 追加（磁吸實測）：長條不是靜止的——bc-attract.js 以
+       「滑鼠距長條中心 60px 內」觸發磁吸，最多往游標方向平移 48px（向左＝
+       壓進巨型字）。手機只有 390／360 寬時，游標停在 Next 字上就已落在
+       60px 內 → 長條滑過來正好切在字中間（實測 390：長條左緣 350 → 302，
+       Next 右緣 337 → 字被切成「Ne|ORDER|t」）。
+       ⇒ ≤575.98px 再退到 100px（長條右緣 10＋寬 30＋磁吸 48＋淨空 8＋
+       出血 3.4 ≈ 100），游標停在整顆字上都不會觸發磁吸。
+       ≥576px 的長條是右緣 26＋寬 40（同樣公式 ≈ 133px），但只有游標刻意
+       貼到字尾時才會短暫滑過，維持原構圖不變（2026-11-18 使用者定案）。 */
   --bc-cd-inset-r: clamp(56px, 11vw, 96px);
 
   position: relative;
@@ -76,7 +89,7 @@
   width: 100%;
   /* 貼邊裁切：字略出血被視窗邊界切掉，且不會產生水平滾動條 */
   overflow: hidden;
-  /* 上緣留白容納「絕對定位的咖啡名稱」；下緣留白＝必須大於商品區貼紙
+  /* 上緣留白＝navbar 與巨型字之間的呼吸空間；下緣留白＝必須大於商品區貼紙
      （.sticker-box，z-index 5，固定突出 section 上緣 62px）的侵入量，
      否則巨型字右下角會被圓形貼紙／頭像切掉。 */
   padding: clamp(24px, 2vw, 34px) 0 clamp(68px, 5.2vw, 96px);
@@ -110,6 +123,15 @@
   margin-right: var(--bc-cd-inset-r);
 }
 
+/* 手機（≤575.98px）長條更靠邊、也更窄，磁吸位移反而更容易壓到巨型字 →
+   Next 再往內退到 100px（見上方 --bc-cd-inset-r 的實測說明）。
+   唯一覆寫點：改這裡或上面的預設值，不要在其他斷點再寫第二次。 */
+@media (max-width: 575.98px) {
+  .bc-coffee-dirs {
+    --bc-cd-inset-r: 100px;
+  }
+}
+
 .bc-coffee-dirs__dir--next .bc-coffee-dirs__word {
   margin-right: var(--bc-cd-bleed-r);
 }
@@ -129,14 +151,16 @@
   transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* hover 才出現的細斜線標記（原站 c-icon--bracket_l/r 的替代） */
-.bc-coffee-dirs__word::after {
-  content: "";
+/* hover 才出現的左右箭頭（原站 c-icon--bracket_l/r；本站改用 icomoon
+   icon-long-arrow-left / -right，符合「圖示只用 icomoon」規範）。
+   絕對定位在字的「內側」：Prev 在字右邊、Next 在字左邊；不佔版面寬度，
+   所以不會推動巨型字、也不會改變帶高。 */
+.bc-coffee-dirs__arrow {
   position: absolute;
   top: 50%;
-  width: 1px;
-  height: 0.62em;
-  background: currentColor;
+  font-size: 0.45em;           /* 相對 --bc-cd-fs：108px → 48.6px */
+  line-height: 1;
+  color: currentColor;         /* 跟著 hover 的字色（金色） */
   opacity: 0;
   pointer-events: none;
   transition:
@@ -144,41 +168,16 @@
     transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 標記一律在「內側」：Prev 在字的右邊、Next 在字的左邊（同原站） */
-.bc-coffee-dirs__dir--prev .bc-coffee-dirs__word::after {
-  right: calc(var(--bc-cd-mark) * -1);
-  transform: translate(25%, -50%) rotate(18deg);
+.bc-coffee-dirs__dir--prev .bc-coffee-dirs__arrow {
+  left: 100%;
+  margin-left: var(--bc-cd-mark);
+  transform: translate(35%, -50%);
 }
 
-.bc-coffee-dirs__dir--next .bc-coffee-dirs__word::after {
-  left: calc(var(--bc-cd-mark) * -1);
-  transform: translate(-25%, -50%) rotate(-18deg);
-}
-
-/* 名稱：絕對定位在巨型字「上緣」（不出現在字下方）——因為商品區的
-   .sticker-box 貼紙會突出 section 上緣 62px，名稱若放字下會被貼紙蓋住；
-   放字上方可維持帶高不變、且一定有位置顯示（2026-11-18 實測後調整）。 */
-.bc-coffee-dirs__name {
-  position: absolute;
-  bottom: calc(100% + clamp(3px, 0.45vw, 7px));
-  display: block;
-  max-width: 100%;
-  font-family: var(--bc-font-akzidenz, "Helvetica Neue", Arial, sans-serif);
-  font-size: clamp(0.7rem, 0.55rem + 0.4vw, 0.9rem);
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-  color: var(--bc-text-muted, rgba(255, 255, 255, 0.5));
-  transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.bc-coffee-dirs__dir--prev .bc-coffee-dirs__name {
-  left: 0;
-}
-
-.bc-coffee-dirs__dir--next .bc-coffee-dirs__name {
-  right: 0;
+.bc-coffee-dirs__dir--next .bc-coffee-dirs__arrow {
+  right: 100%;
+  margin-right: var(--bc-cd-mark);
+  transform: translate(-35%, -50%);
 }
 
 /* ── hover / 鍵盤聚焦（滑鼠、觸控筆才套） ─────────────────── */
@@ -187,20 +186,12 @@
     color: var(--bc-gold-hover, #d4ab73);
   }
 
-  .bc-coffee-dirs__dir:hover .bc-coffee-dirs__name {
-    color: var(--bc-text, rgba(255, 255, 255, 0.9));
-  }
-
-  .bc-coffee-dirs__dir:hover .bc-coffee-dirs__word::after {
+  .bc-coffee-dirs__dir:hover .bc-coffee-dirs__arrow {
     opacity: 1;
-  }
-
-  .bc-coffee-dirs__dir--prev:hover .bc-coffee-dirs__word::after {
-    transform: translate(0, -50%) rotate(18deg);
-  }
-
-  .bc-coffee-dirs__dir--next:hover .bc-coffee-dirs__word::after {
-    transform: translate(0, -50%) rotate(-18deg);
+    /* 與 hover 的字同色（.bc-coffee-dirs__dir 本身固定金色，箭頭若只吃
+       currentColor 會停在 #c49b63，比字暗一階） */
+    color: var(--bc-gold-hover, #d4ab73);
+    transform: translate(0, -50%);
   }
 }
 
@@ -210,21 +201,15 @@
   outline-offset: 0.12em;
 }
 
-.bc-coffee-dirs__dir:focus-visible .bc-coffee-dirs__word::after {
+.bc-coffee-dirs__dir:focus-visible .bc-coffee-dirs__arrow {
   opacity: 1;
+  color: var(--bc-gold-hover, #d4ab73);
+  transform: translate(0, -50%);
 }
 
-.bc-coffee-dirs__dir--prev:focus-visible .bc-coffee-dirs__word::after {
-  transform: translate(0, -50%) rotate(18deg);
-}
-
-.bc-coffee-dirs__dir--next:focus-visible .bc-coffee-dirs__word::after {
-  transform: translate(0, -50%) rotate(-18deg);
-}
-
-/* ── 觸控（無 hover）：斜線常駐淡顯，當作可點提示 ─────────── */
+/* ── 觸控（無 hover）：箭頭常駐淡顯，當作可點提示 ─────────── */
 @media (hover: none) {
-  .bc-coffee-dirs__word::after {
+  .bc-coffee-dirs__arrow {
     opacity: 0.35;
   }
 }
@@ -232,8 +217,7 @@
 /* ── 減少動態偏好：不做過渡 ──────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .bc-coffee-dirs__word,
-  .bc-coffee-dirs__name,
-  .bc-coffee-dirs__word::after {
+  .bc-coffee-dirs__arrow {
     transition: none;
   }
 }

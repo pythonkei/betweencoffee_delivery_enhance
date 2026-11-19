@@ -21,9 +21,11 @@
    本檔差異（2026-11-18 使用者定案）：
      ① 位置改為「navbar 與商品照片之間」的獨立滿版帶（原站是 fixed top:174px，
         在本站會撞到固定 .bc-attract-buy 的 ORDER 長條與購物袋，故不採 fixed）。
-     ② 標記不用 icon 字（本站規範：只准 icomoon）→ 改用 CSS 偽元素細斜線。
+     ② 標記：本站規範「圖示只用 icomoon」→ 用 icon-long-arrow-left /
+        icon-long-arrow-right（箭頭在字的內側，hover 才由外側滑入）。
      ③ 不做 Barba.js 方向性整頁轉場。
-     ④ 追加小字咖啡名稱（原站無）：10 杯只差名字／價格，沒有名稱不知道要切去哪。
+     ④ 不顯示小字咖啡名稱（2026-11-18 使用者定案：只要 Prev／Next 字樣），
+        咖啡名稱只留在 aria-label，供螢幕閱讀器辨識目的地。
    資料來源（betweencoffee_delivery/views.py → Coffee.get）：
      prev_coffee / next_coffee 依 /coffee_menu/ 的排序（sort_order, id）計算，
      首尾循環；只有 1 杯時兩者皆 None → 本檔整段不輸出。
@@ -41,7 +43,7 @@
        rel="prev"
        aria-label="上一杯：{{ prev_coffee.name }}">
         <span class="bc-coffee-dirs__word">Prev</span>
-        <span class="bc-coffee-dirs__name">{{ prev_coffee.name }}</span>
+        <i class="bc-coffee-dirs__arrow icon-long-arrow-left" aria-hidden="true"></i>
     </a>
     {% endif %}
     {% if next_coffee %}
@@ -50,7 +52,7 @@
        rel="next"
        aria-label="下一杯：{{ next_coffee.name }}">
         <span class="bc-coffee-dirs__word">Next</span>
-        <span class="bc-coffee-dirs__name">{{ next_coffee.name }}</span>
+        <i class="bc-coffee-dirs__arrow icon-long-arrow-right" aria-hidden="true"></i>
     </a>
     {% endif %}
 </nav>
