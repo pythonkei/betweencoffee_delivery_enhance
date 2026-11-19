@@ -22,7 +22,7 @@
 - **Live**：https://betweencoffee-delivery-enhance-v1.onrender.com/ ｜ GitHub：`pythonkei/betweencoffee_delivery_enhance`
 - **部署**：Render Docker（service `srv-d8jce6rtqb8s73897t4g`、singapore、free）。
   ⚠ **autoDeploy 已關閉（2026-10-06 起）→ 必須在 dashboard 按 Manual Deploy**。
-- **版本狀態**：live＝`f7e90a4b`（11-19）⇒ 待部署筆數用 `git rev-list --count f7e90a4b..main` 查。部署後 `/coffee/<id>/` 驗 `bc-coffee-dirs.css?v=20261119e`。
+- **版本狀態**：live＝`9c66cd66`（11-19）⇒ 待部署筆數用 `git rev-list --count 9c66cd66..main` 查。部署後 `/coffee/<id>/` 驗 `bc-coffee-dirs.css?v=20261119f`。
 
 ## 2. 核心業務
 
@@ -53,7 +53,7 @@
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 | `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（daisheng `.c-footer__section` 移植：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景 `bean_menu.jpg`；**置於 `</footer>` 之後**） |
 | `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉）＋左上 `( Line Up )` kicker＋插畫 `.svg-bg` 同套互動 |
-| `static/css/bc-coffee-dirs.css`、`partials/bc_coffee_dirs.html` | `/coffee/<id>/` 首屏「上一杯／下一杯」帶（droptokyo 移植、純 CSS）：**鄰杯圖片**（`get_index_image`，3:4 `contain`）**＋金色名稱**＋hover 滑入細角括號 SVG；貼左右緣、≥992px 置中（淨空 352px）；**≤767.98px 隱藏（行動端不顯示）**；右端退 `--bc-cd-inset-r` 避 ORDER |
+| `static/css/bc-coffee-dirs.css`、`partials/bc_coffee_dirs.html` | `/coffee/<id>/` 首屏「上一杯／下一杯」帶（droptokyo 移植、純 CSS）：**鄰杯圖片**（`get_index_image`，3:4 `contain`）**＋金色名稱（寬度＝圖片寬、置中，與照片同軸）**＋hover 滑入細角括號 SVG；貼左右緣、≥992px 置中（淨空 352px）；**≤767.98px 隱藏（行動端不顯示）**；右端退 `--bc-cd-inset-r` 避 ORDER |
 
 ## 4. 開發規範
 
