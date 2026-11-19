@@ -99,6 +99,18 @@
         兩端都用既有 `transition: opacity`，沒有新增動畫曲線。
         觸控（`hover:none`）無 hover 可觸發 → 模組常駐 .4，箭頭改為 .8
         （淨值約 .32）當「可點」提示，較第七版的 .35 更亮。
+      ⑪ **2026-11-19 第九版（使用者指示「修正正常狀態時暗，不是不透明值，
+        讓照片顯示變暗」＋「修正捲動淡出淡入，不包含頁腳 footer section」）**：
+        ① 變暗改為 **`filter: brightness(.4)`**（`--bc-cd-dim`），不再用 opacity
+           —— 照片是真的變暗且**仍不透明**（背後 BETWEEN／FAST 大字不會透出），
+           名稱與箭頭同受濾鏡；hover／focus 回 `brightness(1)`（.25s）。
+        ② `.is-out` 觸發改為「**主區已填不滿視窗**」：`section.bottom <= 視窗高`
+           ⇒ 1440×900 於 scrollY 592（捲到數量／加入購物車時）就淡出，頁腳
+           （y1610 起）出現時帶子早已淡出；捲回（bottom > 視窗高）反向淡入。
+           不再等「主區連同頁腳整段捲完」才淡出（第八版以前的條件）。
+           主區比視窗矮時（罕見，例如超高視窗）退回舊規則「完全捲出才淡出」，
+           避免一捲動就消失。實作改為 scroll + rAF：IO 的 threshold 無法表達
+           「bottom 與視窗高的比較」。
 
    尺寸換算（僅 ≥768px；≤767.98px 整組隱藏，見「本頁差異 ⑦」）
       圖片寬   768–991 clamp(96px, 13vw, 118px)
@@ -115,7 +127,8 @@
              貼紙（y128–336）／ORDER 長條／頭像下方，重疊 0。
      768–991：top = navbar 高 + 6px（768 → 108），
              右側保留 --bc-cd-inset-r 避開 ORDER 長條（含磁吸 48px）。
-   觸控裝置（hover:none ≥768）：整組 dim .4、箭頭 .8（淨值 .32）當可點提示。
+   觸控裝置（hover:none ≥768）：整組 brightness .4、箭頭 opacity .8（淨值 .32）當可點提示。
+   變暗方式（第九版）：filter: brightness(--bc-cd-dim＝.4)，非 opacity。
    prefers-reduced-motion：關閉所有過渡。
    ============================================================ */
 
@@ -139,6 +152,8 @@
   --bc-cd-mark-w: calc(var(--bc-cd-mark-h) * 0.886);
   --bc-cd-mark-gap: 6px;
   --bc-cd-slide: calc(var(--bc-cd-mark-w) * 0.35);
+  /* 第九版：未 hover 時的「變暗」量（filter brightness；1＝正常亮度） */
+  --bc-cd-dim: 0.4;
 
   /* overlay：不佔文件流，商品區不會被往下推（同原站 .p-pagenate） */
   position: fixed;
@@ -204,10 +219,11 @@
   text-decoration: none;
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
-  /* 第八版：預設 dim（連圖片一起變暗，背景透出＝暗），hover/focus 才回正常亮度 1。
-     原站 .no-touch a:not(.has-unique-style):hover{opacity:.65} 的方向已反轉。 */
-  opacity: 0.4;
-  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 第九版：預設「真的變暗」＝ filter brightness（不再用 opacity，避免半透明
+     透出背後的 BETWEEN／FAST 大字），hover/focus 才回到 brightness(1)；明暗
+     反轉方向沿用第八版（原站 .no-touch a:hover{opacity:.65} 已反轉）。 */
+  filter: brightness(var(--bc-cd-dim));
+  transition: filter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 圖片盒貼外側邊緣（左組貼左、右組貼右）；名稱不再隨組別左右對齊，
@@ -293,9 +309,10 @@
 
 /* ── hover / 鍵盤聚焦（滑鼠、觸控筆才套） ─────────────────── */
 @media (hover: hover) and (pointer: fine) {
-  /* 第八版反轉：預設 .4（暗）→ hover 回 1（正常顯示），箭頭同時滑入 */
+  /* 第九版：預設 brightness .4（真的變暗）→ hover 回 brightness 1（正常亮度），
+     箭頭同時滑入（箭頭自身的 opacity 0→1 動畫不變） */
   .bc-coffee-dirs__dir:hover {
-    opacity: 1;
+    filter: brightness(1);
   }
 
   .bc-coffee-dirs__dir:hover .bc-coffee-dirs__arrow {
@@ -308,7 +325,7 @@
 .bc-coffee-dirs__dir:focus-visible {
   outline: 1px solid var(--bc-gold-hover, #d4ab73);
   outline-offset: 4px;
-  opacity: 1;
+  filter: brightness(1);
 }
 
 .bc-coffee-dirs__dir:focus-visible .bc-coffee-dirs__arrow {
@@ -316,8 +333,8 @@
   transform: translate(0, -50%);
 }
 
-/* ── 觸控（無 hover，≥768 仍顯示）：整組常駐 dim .4，箭頭提亮到 .8
-   （淨值 ≈ .32）當「可點」提示（第八版） ───────────────────── */
+/* ── 觸控（無 hover，≥768 仍顯示）：整組常駐變暗（brightness .4），箭頭
+   提亮到 .8（淨值約 .32）當「可點」提示（第九版沿用第八版量值） ─────── */
 @media (hover: none) {
   .bc-coffee-dirs__arrow {
     opacity: 0.8;

@@ -55,6 +55,12 @@
          箭頭動畫，正常狀態時暗」）**：明暗反轉 —— 預設整組 dim（`opacity`
          .4，圖片一起變暗），`:hover`／`:focus-visible` 回到 1 ＋ 箭頭滑入
          （CSS 第八版 ⑩）。標記與資料不變（本檔無需修改內容）。
+      ⑧ **2026-11-19 第九版（使用者指示「正常狀態時暗，不是不透明值，讓照片
+         顯示變暗」＋「捲動淡出淡入修正，不包含頁腳 footer section」）**：
+         變暗改為 `filter: brightness(.4)`（照片真的變暗且不透明），hover／
+         focus 回 `brightness(1)`；捲動淡出改由「主區填不滿視窗」觸發，頁腳不
+         再包含在淡出範圍（CSS 第九版 ⑪＋js/bc-coffee-dirs.js 第九版）。
+         標記與資料同樣不變。
    資料來源（betweencoffee_delivery/views.py → Coffee.get）：
      prev_coffee / next_coffee 依 /coffee_menu/ 的排序（sort_order, id）計算，
      首尾循環；只有 1 杯時兩者皆 None → 本檔整段不輸出。

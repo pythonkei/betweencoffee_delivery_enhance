@@ -569,16 +569,18 @@ function debugLog(message) {
      指示）行動端 ≤767.98px 整組隱藏（e）；同日第六版（使用者指示）名稱改為與
      照片同軸置中並放大字級（f）；同日第七版（使用者指示）名稱改為白色＋捲出
      商品主區時淡出、捲回則淡入（g，搭配 js/bc-coffee-dirs.js）；同日第八版（使用者
-     指示）明暗反轉：預設 dim .4、hover／focus 才回正常亮度＋箭頭滑入（h） -->
-<link rel="stylesheet" href="{% static 'css/bc-coffee-dirs.css' %}?v=20261119h">
+     指示）明暗反轉：預設 dim .4、hover／focus 才回正常亮度＋箭頭滑入（h）；
+     同日第九版（使用者指示）變暗改用 filter:brightness（非 opacity，照片真的變暗
+     且不透明）＋淡出條件改為「主區填不滿視窗」就不再包含頁腳（i） -->
+<link rel="stylesheet" href="{% static 'css/bc-coffee-dirs.css' %}?v=20261119i">
 {% endblock %}
 
 {% block extra_scripts %}
 <!-- 2026-09-11：氣泡 is-show 輪播（每 3 秒隨機輪替；僅 /coffee/10/ 有此區塊） -->
 <script src="{% static 'js/bc-coffee-comment.js' %}?v=20261024a"></script>
-<!-- 2026-11-19：上一杯／下一杯帶的捲動淡出（IntersectionObserver 觀察商品主區；
-     css/bc-coffee-dirs.css 第七版的 .is-out 狀態） -->
-<script src="{% static 'js/bc-coffee-dirs.js' %}?v=20261119a"></script>
+<!-- 2026-11-19：上一杯／下一杯帶的捲動淡出（scroll + rAF 比較主區下緣與視窗高；
+     css/bc-coffee-dirs.css 的 .is-out 狀態） -->
+<script src="{% static 'js/bc-coffee-dirs.js' %}?v=20261119b"></script>
 <!-- 2026-11-11：next-link 面板（IntersectionObserver 進場可重播＋rAF 視差；背景為照片） -->
 <script src="{% static 'js/bc-next-link.js' %}?v=20261111e"></script>
 {% endblock %}
