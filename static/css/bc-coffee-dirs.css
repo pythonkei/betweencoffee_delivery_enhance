@@ -53,7 +53,7 @@
         ※ fixed（同原站）：往下捲時整組留在視窗原位，不做捲頁淡出
           （需 JS，目前不做）。
      ② 內容（第四版）：`__media`（3:4 圖片盒，同菜單列表圖比例）＋
-        `__name`（咖啡名稱，金色、單行、貼外側對齊）。圖片用
+        `__name`（咖啡名稱，金色、單行、寬度＝圖片盒、置中對齊）。圖片用
         `object-fit:contain`，去背 PNG 不會被裁切；不做原站的「出血被
         視窗裁切」——那是巨型字才需要的效果，照片出血會切到杯身。
      ③ 箭頭：原站 c-icon--bracket_l/r 本站 icomoon 無同字碼 → inline SVG
@@ -70,12 +70,19 @@
         —— 小螢幕首屏被兩杯縮圖＋名稱擠壓，且與 ORDER 長條／頭像幾乎貼邊。
         因此 <768 的尺寸（原 --bc-cd-img-w 72–100、--bc-cd-inset-r 100px）
         全部失效，平板（≥768）以上才顯示，程式碼不再保留 <768 的微調。
+      ⑧ **2026-11-19 第六版（使用者指示「咖啡名稱要基於照片置中對齊，
+        咖啡名稱需要文字增大」）**：`__name` 由「貼外側對齊」改為
+        `width: var(--bc-cd-img-w)` ＋ `text-align: center`（名稱盒＝照片盒
+        ⇒ 置中必然與照片同軸；超長名稱仍以 ellipsis 收尾）；字級
+        .78rem → .9rem（768–991）、.95rem → 1.15rem（≥992）。
+        連結改 `align-items: center`，`--prev/--next` 不再各自左右對齊。
 
    尺寸換算（僅 ≥768px；≤767.98px 整組隱藏，見「本頁差異 ⑦」）
       圖片寬   768–991 clamp(96px, 13vw, 118px)
               ≥992  clamp(130px, 11.5vw, 176px)
       圖片高   寬 × 4/3（＝菜單列表圖 840×1200 的比例）
-      名稱     .78rem(768–991) / .95rem(≥992)，行高 1.5
+      名稱     .9rem(768–991) / 1.15rem(≥992)，行高 1.5；
+              寬度固定＝圖片寬、text-align:center（與照片同軸）
       右側內縮 clamp(56px, 11vw, 96px)（≥992px 0）
           ＝避開固定在右上角的 .bc-attract-buy ORDER 長條與頭像
      箭頭     高＝圖片高 × .5、寬＝高 × .886（墨跡 77.5×87.5）、
@@ -96,7 +103,7 @@
   --bc-cd-img-w: clamp(72px, 19vw, 100px);
   --bc-cd-img-h: calc(var(--bc-cd-img-w) * 4 / 3);
   --bc-cd-gap: 8px;
-  --bc-cd-name-fs: 0.72rem;
+  --bc-cd-name-fs: 0.9rem;
   --bc-cd-name-h: calc(var(--bc-cd-name-fs) * 1.5);
   /* 整組高度：圖片 + 間距 + 名稱（≥992 置中靠它扣半高） */
   --bc-cd-h: calc(var(--bc-cd-img-h) + var(--bc-cd-gap) + var(--bc-cd-name-h));
@@ -130,7 +137,7 @@
   .bc-coffee-dirs {
     --bc-cd-img-w: clamp(96px, 13vw, 118px);
     --bc-cd-gap: 8px;
-    --bc-cd-name-fs: 0.78rem;
+    --bc-cd-name-fs: 0.9rem;
     --bc-cd-top: 108px;
   }
 }
@@ -139,18 +146,19 @@
   .bc-coffee-dirs {
     --bc-cd-img-w: clamp(130px, 11.5vw, 176px);
     --bc-cd-gap: 10px;
-    --bc-cd-name-fs: 0.95rem;
+    --bc-cd-name-fs: 1.15rem;
     /* 垂直置於視窗正中，但不可高於淨空下限 352px（頭像下緣 348px） */
     --bc-cd-top: max(352px, calc(50% - var(--bc-cd-h) / 2));
     --bc-cd-inset-r: 0px;
   }
 }
 
-/* ── 連結（＝圖片盒 + 名稱的直向排列） ─────────────────────── */
+/* ── 連結（＝圖片盒 + 名稱的直向排列；名稱以圖片盒寬度置中） ───── */
 .bc-coffee-dirs__dir {
   position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--bc-cd-gap);
   min-width: 0;
   color: var(--bc-gold, #c49b63);
@@ -161,13 +169,9 @@
   transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 圖片盒貼外側邊緣（左組貼左、右組貼右），名稱跟同一側對齊 */
-.bc-coffee-dirs__dir--prev {
-  align-items: flex-start;
-}
-
+/* 圖片盒貼外側邊緣（左組貼左、右組貼右）；名稱不再隨組別左右對齊，
+   一律在圖片盒寬度內置中（第六版） */
 .bc-coffee-dirs__dir--next {
-  align-items: flex-end;
   margin-right: var(--bc-cd-inset-r);
 }
 
@@ -189,10 +193,12 @@
   object-position: center;
 }
 
-/* 咖啡名稱：金色單行，貼外側對齊（Prev 靠左、Next 靠右） */
+/* 咖啡名稱：金色單行，寬度＝圖片盒寬度並置中（與照片同軸；第六版） */
 .bc-coffee-dirs__name {
   display: block;
-  max-width: calc(var(--bc-cd-img-w) + 24px);
+  width: var(--bc-cd-img-w);
+  max-width: 100%;
+  text-align: center;
   font-family: var(--bc-font-akzidenz, "Helvetica Neue", Arial, sans-serif);
   font-size: var(--bc-cd-name-fs);
   font-weight: 500;
