@@ -9,20 +9,31 @@
      <nav class="p-pagenate" data-type="dir">
        <div class="p-pagenate__dirs">
          <div class="p-pagenate__dir p-pagenate__dir--prev">
-           <a rel="prev" href="…">Prev<i class="c-icon c-icon--bracket_l"></i></a>
+           <a rel="prev" href="…"><i class="c-icon c-icon--bracket_l"></i>Prev</a>
          </div>
          <div class="p-pagenate__dir p-pagenate__dir--next">
-           <a rel="next" href="…">Next<i class="c-icon c-icon--bracket_r"></i></a>
+           <a rel="next" href="…"><i class="c-icon c-icon--bracket_r"></i>Next</a>
          </div>
        </div>
      </nav>
-   原站特色：字 clamp 級巨型英文貼齊視窗左右緣（略出血被邊界裁掉）、
-   金色（鄰頁主題色）、hover 時內側滑入一條極細斜線標記。
-   本檔差異（2026-11-18 使用者定案）：
-     ① 位置改為「navbar 與商品照片之間」的獨立滿版帶（原站是 fixed top:174px，
-        在本站會撞到固定 .bc-attract-buy 的 ORDER 長條與購物袋，故不採 fixed）。
-     ② 標記：本站規範「圖示只用 icomoon」→ 用 icon-long-arrow-left /
-        icon-long-arrow-right（箭頭在字的內側，hover 才由外側滑入）。
+   原站特色：巨型英文貼齊視窗左右緣（略出血被邊界裁切）、金色、
+   hover 時字變淡（opacity .65）、內側滑入一條極細的角括號標記。
+   本檔差異：
+     ① 位置（2026-11-19 使用者指示「整個 section 向下沉了，原站不是這種效果」）：
+        改回原站的 overlay —— position:fixed，不佔文件流，商品區不再被往下推；
+        巨型字浮在 navbar 與商品內容之間的空白帶。原站 top:174px 會壓到本站
+        商品名稱，故上緣改為「navbar 高度 + 6px」（見 CSS 檔頭 ①）。
+        ※ 2026-11-19 第三版（使用者定案「位置不是頁面中心，而是在頁面中間
+        左右邊緣」）：水平回到左右邊緣（space-between ＋ 原站出血），
+        ≥992px 垂直置於視窗正中（top:calc(50% - .5em)）→ 兩字落在右上角
+        旋轉貼紙／ORDER 長條的下方，不再重疊；<992px 仍為上緣空白帶。
+        版面推導見 CSS 檔頭「版面」段。
+     ② 標記（2026-11-19 使用者指示「hover 箭頭也不同」）：原站用的是自家
+        icomoon 版本的 c-icon--bracket_l/r；本站 icomoon 沒有對應字碼
+        （e90a/e90d 已被其他圖示佔用）→ 改用 inline SVG 重繪同一形狀：
+        細角括號（< ／ >），stroke 1 單位、非填色，顏色取文字色（白）。
+        尺寸與位置由 CSS 的 --bc-cd-mark-* 依 --bc-cd-fs 換算，
+        故任何字級都不會走位；≤767 依原站隱藏（觸控無 hover）。
      ③ 不做 Barba.js 方向性整頁轉場。
      ④ 不顯示小字咖啡名稱（2026-11-18 使用者定案：只要 Prev／Next 字樣），
         咖啡名稱只留在 aria-label，供螢幕閱讀器辨識目的地。
@@ -32,7 +43,9 @@
    樣式：static/css/bc-coffee-dirs.css（純 CSS、無 JS）。
    使用方式：{% include 'betweencoffee_delivery/partials/bc_coffee_dirs.html' %}
              放在 coffee.html 的 .ftco-section-blank-small 之後、
-             .ftco-subpage-section（含 {BREWED FAST} 背景大字）之前。
+             .ftco-subpage-section 之前（fixed，不影響文件流）。
+   ※ SVG 路徑：viewBox 0 0 77.5 87.5 ＝ 箭頭墨跡原始尺寸（108px 字級實測），
+     頂點在左（Prev <）／在右（Next >），端點填滿整個 viewBox。
 ============================================================
 {% endcomment %}
 {% if prev_coffee or next_coffee %}
@@ -43,7 +56,10 @@
        rel="prev"
        aria-label="上一杯：{{ prev_coffee.name }}">
         <span class="bc-coffee-dirs__word">Prev</span>
-        <i class="bc-coffee-dirs__arrow icon-long-arrow-left" aria-hidden="true"></i>
+        <svg class="bc-coffee-dirs__arrow" viewBox="0 0 77.5 87.5"
+             preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path d="M77.5 0 L0 43.75 L77.5 87.5" stroke-width="1"></path>
+        </svg>
     </a>
     {% endif %}
     {% if next_coffee %}
@@ -52,7 +68,10 @@
        rel="next"
        aria-label="下一杯：{{ next_coffee.name }}">
         <span class="bc-coffee-dirs__word">Next</span>
-        <i class="bc-coffee-dirs__arrow icon-long-arrow-right" aria-hidden="true"></i>
+        <svg class="bc-coffee-dirs__arrow" viewBox="0 0 77.5 87.5"
+             preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path d="M0 0 L77.5 43.75 L0 87.5" stroke-width="1"></path>
+        </svg>
     </a>
     {% endif %}
 </nav>

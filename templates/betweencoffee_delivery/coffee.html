@@ -13,10 +13,13 @@
 <section class="ftco-section-blank-small"></section>
 
 <!-- 2026-11-18（使用者指示）：首屏巨型 Prev／Next（移植 droptokyo .p-pagenate__dirs）。
-     位置＝navbar 與商品照片之間的獨立滿版帶，會把商品區整體往下推。
-     必須放在 .ftco-subpage-section 之前：該 section 的 {BREWED FAST} 背景大字
-     是以 section 頂端定位的偽元素，插在前面可讓「背景大字＋咖啡杯」一起下移、
-     相對位置不變。資料（prev_coffee／next_coffee）由 views.Coffee 提供。 -->
+     2026-11-19 改版（使用者指示「整個 section 向下沉了，原站不是這種效果」）：
+     改為 position:fixed 的 overlay，**不佔文件流** → 商品區（含 {BREWED FAST}
+     背景大字與咖啡杯）維持原本位置，巨型字浮在 navbar 與商品內容之間的空白帶。
+     2026-11-19 第二版（使用者指示「move to page center」）：兩字改為頁面
+     水平正中並排（桌機右上角旋轉貼紙會壓到貼右緣的 Next，字級再小也避不開）。
+     仍放在 .ftco-subpage-section 之前（DOM 順序＝視覺上的頁首），內容不變。
+     資料（prev_coffee／next_coffee）由 views.Coffee 提供。 -->
 {% include 'betweencoffee_delivery/partials/bc_coffee_dirs.html' %}
 
 <section hidden class="ftco-single-product" id="section-single-product" data-stellar-background-ratio="0.5">
@@ -556,8 +559,10 @@ function debugLog(message) {
      的進場放大淡入／hover 放大／背景視差／( Next ) 文字上捲） -->
 <link rel="stylesheet" href="{% static 'css/bc-next-link.css' %}?v=20261111h">
 <!-- 2026-11-18（使用者指示）：首屏巨型 Prev／Next（移植 droptokyo .p-pagenate__dirs；
-     純 CSS、無 JS） -->
-<link rel="stylesheet" href="{% static 'css/bc-coffee-dirs.css' %}?v=20261118k">
+     純 CSS、無 JS）。2026-11-19 改為 fixed overlay（不佔流）＋細角括號 SVG 箭頭；
+     同日第二版：兩字改為頁面水平正中並排 → 同日第三版（使用者定案）改回
+     「頁面中間的左右邊緣」：貼左右緣＋≥992px 垂直置中 → 版號 20261119b → c -->
+<link rel="stylesheet" href="{% static 'css/bc-coffee-dirs.css' %}?v=20261119c">
 {% endblock %}
 
 {% block extra_scripts %}
