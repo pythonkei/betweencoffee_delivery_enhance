@@ -50,10 +50,11 @@
         ※ 768–991 仍用「navbar 高度 + 6px」的上緣帶：768 → 108px。
           平板直式（768）上緣帶下方就是商品照片盒（y189 起），故圖片
           維持小尺寸（≤118px 寬）。※ ≤767.98px 整組隱藏（見 ⑦）。
-        ※ fixed（同原站）：往下捲時整組留在視窗原位，不做捲頁淡出
-          （需 JS，目前不做）。
+        ※ fixed（同原站）：往下捲時整組留在視窗原位。2026-11-19 第七版起
+          改由 JS 依「商品主區是否還在視窗內」淡出／淡入（見 ⑨）。
      ② 內容（第四版）：`__media`（3:4 圖片盒，同菜單列表圖比例）＋
-        `__name`（咖啡名稱，金色、單行、寬度＝圖片盒、置中對齊）。圖片用
+        `__name`（咖啡名稱，白色〔第七版前為金色〕、單行、寬度＝圖片盒、
+        置中對齊）。圖片用
         `object-fit:contain`，去背 PNG 不會被裁切；不做原站的「出血被
         視窗裁切」——那是巨型字才需要的效果，照片出血會切到杯身。
      ③ 箭頭：原站 c-icon--bracket_l/r 本站 icomoon 無同字碼 → inline SVG
@@ -76,6 +77,19 @@
         ⇒ 置中必然與照片同軸；超長名稱仍以 ellipsis 收尾）；字級
         .78rem → .9rem（768–991）、.95rem → 1.15rem（≥992）。
         連結改 `align-items: center`，`--prev/--next` 不再各自左右對齊。
+      ⑨ **2026-11-19 第七版（使用者指示「咖啡名稱改為白色」＋「捲動出
+        .ftco-subpage-section 這部分要淡出動畫、捲回則反向淡入」）**：
+        ① `__name` 金色 → **白色**（`--bc-text`＝rgba(255,255,255,.9)，
+           與箭頭同色，仍靠 `__dir` 的 hover opacity .65 回饋）。
+        ② 新增 `.is-out` 狀態：`opacity` 1 → 0（.45s，同購物車
+           cubic-bezier(.4,0,.2,1)）；`visibility:hidden` 延到淡出結束
+           才生效（同時退出 Tab 序／讀屏樹），並 `pointer-events:none`
+           避免隱形時被點到。class 由 static/js/bc-coffee-dirs.js 以
+           IntersectionObserver 觀察商品主區
+           （`.ftco-subpage-section.ftco-section-single-product`）切換：
+           主區完全離開視窗 → 加 `.is-out`；回到視窗內 → 移除（反向淡入）。
+        ③ 沒有 JS 時永遠顯示（＝第六版行為），不做 CSS-only 的替代方案
+           （`animation-timeline: view()` 瀏覽器支援仍不齊）。
 
    尺寸換算（僅 ≥768px；≤767.98px 整組隱藏，見「本頁差異 ⑦」）
       圖片寬   768–991 clamp(96px, 13vw, 118px)
@@ -131,6 +145,22 @@
   overflow: hidden;
   /* 只有連結本身可點，帶子其餘區域不吃事件（同原站 .p-pagenate） */
   pointer-events: none;
+  /* 第七版：商品主區捲出視窗時淡出、捲回時淡入（狀態由 JS 切 .is-out） */
+  transition:
+    opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0s;
+}
+
+/* 商品主區（.ftco-subpage-section.ftco-section-single-product）完全離開視窗時
+   JS 加上 .is-out → 淡出（第七版，2026-11-19 使用者指示）。visibility 等淡出
+   結束才切，隱形期間同時退出 Tab 序／讀屏樹，pointer-events 一併關閉。 */
+.bc-coffee-dirs.is-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0.45s;
 }
 
 @media (min-width: 768px) {
@@ -161,7 +191,7 @@
   align-items: center;
   gap: var(--bc-cd-gap);
   min-width: 0;
-  color: var(--bc-gold, #c49b63);
+  color: var(--bc-text, rgba(255, 255, 255, 0.9)); /* 第七版：白字（原金色） */
   text-decoration: none;
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
@@ -193,7 +223,8 @@
   object-position: center;
 }
 
-/* 咖啡名稱：金色單行，寬度＝圖片盒寬度並置中（與照片同軸；第六版） */
+/* 咖啡名稱：白色單行（第七版改白，原金色），寬度＝圖片盒寬度並置中
+   （與照片同軸；第六版） */
 .bc-coffee-dirs__name {
   display: block;
   width: var(--bc-cd-img-w);
@@ -204,7 +235,7 @@
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: 0.02em;
-  color: var(--bc-gold, #c49b63);
+  color: var(--bc-text, rgba(255, 255, 255, 0.9));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -281,8 +312,11 @@
   }
 }
 
-/* ── 減少動態偏好：不做過渡 ──────────────────────────────── */
+/* ── 減少動態偏好：不做過渡（.is-out 仍會切換，只是瞬間完成）──────── */
 @media (prefers-reduced-motion: reduce) {
+  .bc-coffee-dirs,
+  /* .is-out 的特異度（0,2,0）高於單一 class，必須一起列出才蓋得掉 */
+  .bc-coffee-dirs.is-out,
   .bc-coffee-dirs__dir,
   .bc-coffee-dirs__arrow {
     transition: none;

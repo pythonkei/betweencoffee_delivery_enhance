@@ -46,10 +46,15 @@
         功能，因為螢幕顯示效果不太好」）**：≤767.98px 由 CSS 整組
         display:none（bc-coffee-dirs.css 檔頭 ⑦），行動端不顯示也不佔版面；
         平板／桌機（≥768px）仍照 ①–④ 的版面。
+      ⑥ **2026-11-19 第七版（使用者指示「咖啡名稱改為白色」＋「捲動出
+         .ftco-subpage-section 這部分新增淡出動畫，捲動入則反向淡入」）**：
+         名稱改白（CSS `__name` 取 `--bc-text`）；商品主區捲出視窗時整組
+         淡出、捲回時淡入 —— 由 static/js/bc-coffee-dirs.js 以
+         IntersectionObserver 切換 `.is-out`（CSS 第七版 ⑨）。
    資料來源（betweencoffee_delivery/views.py → Coffee.get）：
      prev_coffee / next_coffee 依 /coffee_menu/ 的排序（sort_order, id）計算，
      首尾循環；只有 1 杯時兩者皆 None → 本檔整段不輸出。
-   樣式：static/css/bc-coffee-dirs.css（純 CSS、無 JS）。
+   樣式：static/css/bc-coffee-dirs.css；捲動淡出：static/js/bc-coffee-dirs.js。
    使用方式：{% include 'betweencoffee_delivery/partials/bc_coffee_dirs.html' %}
              放在 coffee.html 的 .ftco-section-blank-small 之後、
              .ftco-subpage-section 之前（fixed，不影響文件流）。
