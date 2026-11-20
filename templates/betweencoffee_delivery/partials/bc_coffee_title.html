@@ -17,10 +17,14 @@
   [結構] 與原站一對一（class 對照表見 static/css/bc-coffee-title.css 檔頭 [1]）
     .bc-coffee-title         ＝ 鋪滿 banner 的覆蓋層（純裝飾、不吃滑鼠事件）
     .bc-coffee-title__pin    ＝ 原站 .pin（托住層；JS 給 translate3d）
-    .bc-coffee-title__stage  ＝ 兩欄 grid：（第 1 欄）插畫 ｜（第 2 欄）h1 ＋ kicker
+    .bc-coffee-title__stage  ＝ 兩欄 grid：（第 1 欄）插畫 ｜（第 2 欄）h1 ＋ featured
+                                 （2026-11-20 起 kicker 已移除，見下方 [kicker]）
     .bc-coffee-title__word   ＝ 原站 h1.init-anim（文字原文就寫在這裡）
-    .bc-coffee-title__featured ＝ 字上方的小標「Featured」（2026-11-18 新增；
-                                 h1 的兄弟節點，不可放進 h1，見 html 註解與 css [I]）
+    .bc-coffee-title__featured ＝ 字上方的小標「[Line up]: Featured」（2026-11-18 新增、
+                                 2026-11-20 改文案；h1 的兄弟節點，不可放進 h1，
+                                 見 html 註解與 css [I]）
+    .bc-coffee-title__kicker ＝ 原「( Line Up )」直排小標；**2026-11-20 已依使用者指示
+                                 隱藏（節點自本檔移除）**，css [H] 仍保留樣式供復原
     .bc-coffee-title__char   ＝ 原站外層 .char（原為進場位移；2026-11-18 移除進場後
                                 只是出場位移的容器；由 JS 產生）
     .bc-coffee-title__char-inner ＝ 原站內層 .char（捲動出場位移；由 JS 產生）
@@ -99,12 +103,17 @@
             <!-- 2026-11-18（使用者指示「添加文字 'Featured' 分開兩行、行距小、位置在
                  COFFEE 文字上、相同互動效果」）：獨立一行、疊在 h1 同一格往上推，
                  版面見 static/css/bc-coffee-title.css [I]。
+                 2026-11-20（使用者指示「修改 .bc-coffee-title__word 文字 'Featured'
+                 -> '[Line up]: Featured'」）：原本的垂直 ( Line Up ) 已隱藏 ⇒ 把線索
+                 併進這一行小標。
                  ⚠ 不可放進 h1：bc-coffee-title.js 的 splitChars() 會清空重建。 -->
-            <p class="bc-coffee-title__featured">Featured</p>
+            <p class="bc-coffee-title__featured">[Line up]: Featured</p>
             <h1 class="bc-coffee-title__word">COFFEE</h1>
-            <p class="bc-coffee-title__kicker">
-                <span class="bc-coffee-title__kicker-anim"><span class="bc-coffee-title__parenthis">(</span><span class="bc-coffee-title__kicker-label">Line Up</span><span class="bc-coffee-title__parenthis">)</span></span>
-            </p>
+            <!-- 2026-11-20（使用者指示「隱藏垂直文字 (Line Up)」）：原本的直排
+                 <p class="bc-coffee-title__kicker"> ( Line Up ) </p> 已自本檔移除
+                 （資訊移到上方的「[Line up]: Featured」）。css [H]/[H1] 的樣式與
+                 動畫仍保留，要復原只要把該段 <p> 貼回 __stage 內即可
+                 （bc-coffee-title.js 的 attached 陣列會自動跳過 null，無需改 JS）。 -->
         </div>
     </div>
 </div>

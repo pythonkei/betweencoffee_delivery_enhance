@@ -6,7 +6,12 @@
 {#   樣式 bc-coffee-title.css ／ 腳本 bc-coffee-title.js 皆只在本頁使用，故掛在本頁 extra 區塊 #}
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261118j">
+{% comment %}
+  2026-11-20（使用者指示）：隱藏直排 ( Line Up )、小標改「[Line up]: Featured」、
+  桌面 banner 加高到 620px ⇒ CSS 版號 20261118j → 20261120a（[H] 加了說明註解）。
+  ※ 用 comment 區塊而非 {# #}：後者不支援跨行，跨行會把內文印在頁面上。
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261120a">
 {% endblock %}
 
 {% block content %}
@@ -15,7 +20,7 @@
      容器，然後整組頁面居中對齊；插畫改白色、不透明」）：
      ① 插畫（.svg-bg.bc-coffee-title-bg）已從 banner 搬進 partial 的
         .bc-coffee-title__stage 第 1 欄 ⇒ 版面成為「插畫 ｜ COFFEE」，再由
-        __pin 的 place-items:center 把整組（含 ( Line Up )）置中。
+        __pin 的 place-items:center 把整組（含「[Line up]: Featured」）置中。
         ⇒ 這裡不再需要 absolute／em 對位，left/top/right/bottom 全部交還 grid。
      ② 只剩三件事：尺寸、比例、白色不透明。
      ③ 尺寸 width:min(0.86em, calc(100vw - 2.072em - 2vw))（em ＝ 大字字級：
@@ -85,6 +90,24 @@
      ⚠ 不要再把這裡調高，否則字會蓋回商品圖。 */
   .subpage-banner-h500.bc-banner-bgonly {
     z-index: 0;
+  }
+  /* 2026-11-20（使用者指示「bc-coffee-title 在桌面版間距太近了，與頂部增加間距」）：
+     banner 是 height:500px 固定高、整組字由 __pin 的 place-items:center 置中
+     ⇒ 500px 時巨型字頂只離固定導覽列（140px）31px，連「[Line up]: Featured」
+     都被導覽列蓋住（實測 featured top 122 < 導覽列底 140）。
+     作法是「加高 banner」而不是把字往下推：
+       · 字組垂直置中 ⇒ 高度 +120px，整組下移 60px（上緣多 60px 呼吸，
+         下方也同步多 60px，不會一頭大一頭小）。
+       · 插畫（高 499.4px）在 620px 的 banner 內仍完整落地（top 160／bottom 659，
+         banner 100–720），不會溢出到下方商品區。
+       · 實測桌面 1440×900：word top 171 → 231、featured top 122 → 182
+         （導覽列底 140 之下 42px），字仍與插畫同一條中線。
+     ⚠ 只在 ≥992px 生效：手機 banner 是 82vw（390 寬 ⇒ 320px），Featured 目前
+       已在導覽列下方 46px，加高只會把商品區推得更遠。 */
+  @media (min-width: 992px) {
+    .subpage-banner-h500.bc-banner-bgonly {
+      height: 620px;
+    }
   }
 </style>
 <!-- 2026-09-21（使用者指示「全端 bc-attract-buy and profile 和 index 一樣」）：

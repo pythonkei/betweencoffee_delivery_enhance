@@ -52,7 +52,7 @@
 | `static/css/bc-coffee-ring.css`、js 同名檔 | 字輪模組（原 `bc-popeye50`）：about＝`#bc-sticky-mv` 下方（`.cw-loader` → 播 2020→2026）；`/coffee/<id>/`＝商品主區下方（無 loader → `hasIntro` 跳開場；`--detail`＝字級 1.4×＋頂距） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 | `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（daisheng `.c-footer__section` 移植：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景 `bean_menu.jpg`；**置於 `</footer>` 之後**） |
-| `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉）＋左上 `( Line Up )` kicker＋插畫 `.svg-bg` 同套互動 |
+| `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉）＋插畫 `.svg-bg` 同套互動；小標「[Line up]: Featured」（11-20 起，原直排 kicker 已移除、桌面 banner 620px） |
 | `static/css/bc-coffee-dirs.css`、`static/js/bc-coffee-dirs.js`、`partials/bc_coffee_dirs.html` | `/coffee/<id>/` 首屏「上一杯／下一杯」帶（鄰杯圖片＋置中白色名稱、未 hover `brightness(.4)`、貼左右緣、≥992 置中、≤767 隱藏、主區填不滿視窗就 `.is-out` 淡出） |
 
 ## 4. 開發規範
@@ -86,7 +86,7 @@
 - **Migration 編號**：`python3 manage.py makemigrations --check` 必須乾淨；資料搬移用 data migration，不在 view 裡寫死。
 - **`hidden` 屬性在品牌舞台無效**：`static/css/bc-brand-stage.css:230` `#bc-brand-stage .bc-stage-socials{display:flex}`（特異度 1,1,0）壓過 UA `[hidden]`（0,1,0）→ 要隱藏必須寫作者 CSS。（舊名 `.footer-socials`。）
 - **`#bc-brand-stage` 是明確 `grid-area` 版面**：藏掉一列（社群列 `grid-area:6/3/7/7`，≤991px 為 `grid-column:1/7`）整列連 `padding-top` 一起消失，下方自動上移，不必補留白。
-- **大型原始素材不進版控**：`ani_{coffee,bean}_apng.png`（12.8MB，僅供重產圖）、`hero_bg.mp4`（81MB／4K，首屏影片原始素材，**勿刪**）、`recommended-pages/` 底線暫存變體皆列 `.gitignore`；頁面用 `recommended-pages/title-*.png`（176×176 APNG）。
+- **大型原始素材不進版控**：`ani_{coffee,bean}_apng.png`、`hero_bg.mp4`（81MB／4K，**勿刪**）、`recommended-pages/` 底線暫存變體皆列 `.gitignore`；頁面用 `recommended-pages/title-*.png`。
 - **新增 CSS／JS 檔要跟引用它的模板同一次 commit**（曾漏 `bc-catch.css` → 正式站該頁 404 到 11-04 才補）。push 後用 `git ls-tree -r origin/main --name-only static/css static/js | grep <檔名>` 對照一次。
 - **商品圖走 `get_index_image()`**：`image_index` 空 → fallback 詳情圖（`860×1100`，杯身佔寬 80%），列表圖 `840×1200`（62–87%）⇒ 同一 3:4 `contain` 盒下杯身寬差達 40%，像「間距不同」。**補 `image_index`（data migration），不要針對單品加 CSS**（`0084` 補 #7）。
 - **`/about/` 首屏輪播品項＝`views.About` 的 `MV_EXCLUDE_IDS`**（現為 `{7}` → 5 張）；`series_coffees` 仍是完整 6 筆，只給下方 SERIES 括號滑桿／字輪用。增減首屏品項改常數，不要在模板加 `{% if coffee.id != 7 %}`。

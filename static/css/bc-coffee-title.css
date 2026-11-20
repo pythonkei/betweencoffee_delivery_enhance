@@ -245,6 +245,10 @@
 }
 
 /* ---- [H] 左上角 kicker：`( Line Up )` 直排（2026-11-17 建立／2026-11-18 改直排）
+   ⚠ 2026-11-20 依使用者指示「隱藏垂直文字 (Line Up)」：節點已自 partial 移除
+     （資訊併入 [I] 的「[Line up]: Featured」）⇒ 本節規則目前不生效，
+     但整組保留：要把直排小標貼回去，只要恢復 partial 裡那段 <p> 即可
+     （JS 的 attached 陣列會自動跳過 null，不必改 JS）。
    使用者原話（11-17）：「在 COFFEE 文字左上角新增文字 (Line Up) 和相同互動效果，
    顯示文字和效果與 index.html .section-title section-title--left (About) 相同」
    使用者原話（11-18）：「將（Line Up）更改為垂直文本, 位置在'C'左上角,
