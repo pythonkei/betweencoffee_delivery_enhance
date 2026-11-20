@@ -11,7 +11,7 @@
   桌面 banner 加高到 620px ⇒ CSS 版號 20261118j → 20261120a（[H] 加了說明註解）。
   ※ 用 comment 區塊而非 {# #}：後者不支援跨行，跨行會把內文印在頁面上。
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261120a">
+<link rel="stylesheet" href="{% static 'css/bc-coffee-title.css' %}?v=20261120b">
 {% endblock %}
 
 {% block content %}
@@ -108,6 +108,15 @@
     .subpage-banner-h500.bc-banner-bgonly {
       height: 620px;
     }
+  }
+  /* 2026-11-20（使用者指示「bc-coffee-title 與 ftco-subpage-section 咖啡產品列表
+     縮小間距」）：banner 底 → 第一排商品的留白 = .ftco-subpage-section 的 1em 上內距
+     ＋ .bean-mix-grid 的 2rem（≤767.98px 為 1rem）上內距；後者在這頁是多餘的
+     （banner 內已由 __pin 的 padding-top 給足標題下方留白）⇒ 收掉。
+     ⚠ 選擇器綁定 .coffee-mix-grid（只有 coffee_menu 用這層外框，見 149-151 行），
+       bean_menu 的 .bean-mix-grid 不受影響，符合「共用 class、個別頁微調」原則。 */
+  .coffee-mix-grid > .bean-mix-grid {
+    padding-top: 0;
   }
 </style>
 <!-- 2026-09-21（使用者指示「全端 bc-attract-buy and profile 和 index 一樣」）：

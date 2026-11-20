@@ -168,7 +168,34 @@
     inset: 0;
     display: grid;
     place-items: center; /* 字在 banner 內水平／垂直置中 */
+    /* 2026-11-20（使用者指示「bc-coffee-title 再與頂部增加間距」）：
+       整組（插畫＋字＋小標）在置中狀態下再往下壓一階 ⇒ 頂部留白加大。
+       ⚠ 用 padding-top 而不是 translate／translateY：
+          · __pin 是 inset:0（height 由 banner 決定、border-box）⇒ 上內距 P 會把
+            置中內容往下移 P/2（內容高 = banner − P），下緣同步多留 P/2 的呼吸
+            空間，不會溢出。
+          · offsetTop 是「相對於 offsetParent 的 padding edge」，會跟著 P 變大 ⇒
+            bc-coffee-title.js 的 measure() 用 word.offsetTop 算 geo.lift（字要跑
+            多遠才完全離開視窗）時自動含這段位移；若改用 translate 則 offsetTop
+            不變，出場會少走 P/2 而留下一小條字。
+          · __stage 必須維持 static（見 [H] 末尾 ⚠），所以位移只能加在這層。
+       實際值（P／整組下移量）：≥992px 96px／+48、≥768px 64px／+32、其餘 48px／+24。
+       對照 1440×900：字頂 231 → 279（小標 182 → 230，導覽列底 140 之下 90px）、
+       插畫底 660 → 708（banner 底 720，仍完整落地）。 */
+    padding-top: 48px;
     will-change: transform;
+}
+
+@media (min-width: 768px) {
+    .bc-coffee-title__pin {
+        padding-top: 64px;
+    }
+}
+
+@media (min-width: 992px) {
+    .bc-coffee-title__pin {
+        padding-top: 96px;
+    }
 }
 
 /* ---- [C] 大字本體：＝原站 h1.init-anim --------------------------------- */
