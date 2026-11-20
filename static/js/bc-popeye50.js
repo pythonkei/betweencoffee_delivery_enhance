@@ -24,6 +24,8 @@
      6. prefers-reduced-motion：開場直接到終態、轉輪不自動旋轉
      7. [2026-11-02] 中心圖文加連結 → 目前高亮咖啡的詳情頁（url 來自 wheel_items）；
         拖曳轉字輪後鬆手會吃掉那次 click（位移門檻 8px），避免誤觸導頁
+     8. [2026-11-20] loader（細線＋2020→2026）改為選配：模板沒有輸出 .cw-loader
+        時跳過開場時間軸，字輪與直排副標直接顯示 → /coffee/<id>/ 詳情頁用這個模式
    ============================================================ */
 (function () {
   'use strict';
@@ -68,16 +70,21 @@
 
     var stage = root.querySelector('.cw-stage');
     var wheel = root.querySelector('.cw-wheel');
+    // 2026-11-20（使用者指示）：本模組移植到 /coffee/<id>/ 詳情頁時「移除 2020 2026
+    // 動畫」→ loader（細線＋年份滾動）四件套改為選配：
+    //   有輸出 → 跑原本的開場時間軸（/about/ 完全不變）
+    //   沒輸出 → 跳過開場，字輪與直排副標直接顯示（詳情頁）
     var loader = root.querySelector('.cw-loader');
     var yearEl = root.querySelector('.cw-loader-moving-year');
     var startYearEl = root.querySelector('.cw-loader-start-year');
     var lineFill = root.querySelector('.cw-loader-line-fill');
+    var hasIntro = !!(loader && yearEl && startYearEl && lineFill);
     var titleEl = root.querySelector('.cw-title-sub');
     var emptyEl = root.querySelector('.cw-empty');
     var dataEl = document.getElementById('bc-popeye50-data');
 
-    // 缺節點（例如資料未輸出）→ 直接顯示終態，不讓 loader 蓋住畫面
-    if (!stage || !wheel || !loader || !yearEl || !startYearEl || !lineFill || !titleEl || !dataEl) {
+    // 缺必要節點（例如資料未輸出）→ 直接顯示終態，不讓 loader 蓋住畫面
+    if (!stage || !wheel || !titleEl || !dataEl) {
       root.classList.remove('is-loading');
       root.classList.add('is-ready');
       if (loader) loader.classList.add('is-complete');
@@ -752,7 +759,14 @@
     // ---------------- 啟動 ----------------
     updateCurrent();
     start();
-    runIntro();
+    if (hasIntro) {
+      runIntro();
+    } else {
+      // 無開場（/coffee/<id>/）：直接終態 —— stage 不從 opacity:0 淡入、副標立刻可見
+      root.classList.remove('is-loading');
+      root.classList.add('is-ready');
+      titleEl.classList.add('is-visible');
+    }
 
     window.addEventListener('pagehide', stop);
     window.addEventListener('pageshow', function () {

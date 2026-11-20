@@ -423,6 +423,34 @@ def _get_user_avatar(user):
     except Exception:
         pass
     return ""
+
+
+def _build_wheel_items(coffees):
+    """bc-popeye50 旋轉字輪的品項（About 頁與咖啡詳情頁共用）。
+
+    2026-11-02 建立（/about/ 首屏移植 popeyemagazine.jp/50interviews/）；
+    2026-11-20 抽成本函式（使用者指示：把 about 頁的 .bc-popeye50 移植到
+    /coffee/<id>/ 詳情頁）⇒ 兩頁吃同一份結構，改欄位只要改這裡。
+
+    欄位：
+      word  → 字輪上的英文品名（CoffeeItem.name）
+      name  → 中心顯示的中文亮點（highlight，留空時退回 name）
+      image → 中心去背圖（get_index_image()：列表圖，缺圖會 fallback）
+      url   → 中心連結目標（該咖啡詳情頁）
+
+    品項不足 10 筆時由前端重複排列補滿圓周（只影響密度，不改資料）。
+    """
+    return [
+        {
+            "word": coffee.name,
+            "name": coffee.highlight or coffee.name,
+            "image": coffee.get_index_image(),
+            "url": reverse("coffee", kwargs={"product_id": coffee.id}),
+        }
+        for coffee in coffees
+    ]
+
+
 # List out coffee item
 class CoffeeMenu(View):
     def get(self, request, *args, **kwargs):
@@ -483,6 +511,10 @@ class Coffee(View):
             # 首屏巨型 Prev／Next（partials/bc_coffee_dirs.html）
             "prev_coffee": prev_coffee,
             "next_coffee": next_coffee,
+            # 2026-11-20（使用者指示）：About 頁的 .bc-popeye50 旋轉字輪移植到詳情頁
+            # （位置＝商品主區 .bc-section-with-bg-text 正下方）。字輪品項沿用本頁
+            # 已在用的 series（全部咖啡、與菜單同排序）→ 與 Prev／Next 帶同一組資料。
+            "wheel_items": _build_wheel_items(series),
         }
         return render(request, "betweencoffee_delivery/coffee.html", context)
 
@@ -585,18 +617,9 @@ class About(View):
 
         # 2026-11-02（使用者指示）：首屏移植 popeyemagazine.jp/50interviews/ 旋轉字輪
         # → 字輪字（英文品名）／中心圖文（中文亮點＋去背圖）都改由本店咖啡提供。
-        # 品項不足 10 筆時前端會自動重複排列補滿圓周（只影響密度，不改資料）。
-        # 2026-11-02（使用者指示第二輪）：首屏字輪中心圖文加上連結 → 該咖啡的詳情頁
-        # （url 於前端換品項時同步換 href，見 static/js/bc-popeye50.js 的 updateCenterLink）
-        wheel_items = [
-            {
-                "word": coffee.name,
-                "name": coffee.highlight or coffee.name,
-                "image": coffee.get_index_image(),
-                "url": reverse("coffee", kwargs={"product_id": coffee.id}),
-            }
-            for coffee in series_coffees
-        ]
+        # 2026-11-20（使用者指示）：同一份資料結構抽成 _build_wheel_items()，與
+        # /coffee/<id>/ 詳情頁的字輪共用（品項清單仍各自傳入，本頁＝series_coffees）。
+        wheel_items = _build_wheel_items(series_coffees)
 
         # 2026-11-06（使用者指示）：首屏背景影片改「多支輪播」（見檔頭 MV_VIDEOS 說明）。
         # json_script 產出的 JSON 內無法執行 {% static %} → 在此先解析成絕對 URL；
