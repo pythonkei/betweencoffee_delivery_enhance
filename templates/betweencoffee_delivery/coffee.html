@@ -195,18 +195,21 @@
 </section>
 <!-- end for loop coffee_id -->
 
-<!-- 2026-11-20（使用者指示）：把 about.html 的 .bc-popeye50 旋轉字輪移植到咖啡詳情頁，
+<!-- 2026-11-20（使用者指示）：把 about.html 的 .bc-coffee-ring 旋轉字輪移植到咖啡詳情頁，
      位置＝商品主區（.ftco-subpage-section ... .bc-section-with-bg-text）正下方。
      依指示「移除 2020 2026 動畫」→ 這裡刻意不輸出 .cw-loader（細線伸出＋年份
-     2020→2026 滾動那段）；js/bc-popeye50.js 以 loader 是否存在分流（hasIntro）：
+     2020→2026 滾動那段）；js/bc-coffee-ring.js 以 loader 是否存在分流（hasIntro）：
      沒有 loader 就跳過開場時間軸，字輪與直排副標直接顯示（root 直接標 is-ready）。
      其餘行為與 about.html 同一模組：自動慢轉＋滾輪／拖曳慣性、中心去背圖＋中文亮點、
      中心可點進該杯詳情頁（href 由 JS 隨中心品項同步）。
      資料＝views.Coffee 的 wheel_items（_build_wheel_items()，與 About 共用結構；
      品項沿用本頁 Prev／Next 帶的 series＝全部咖啡、菜單排序）。
-     樣式 static/css/bc-popeye50.css（未改動，沿用 about 版號）／腳本
-     static/js/bc-popeye50.js（loader 選配改動 → 升版 20261120a）。 -->
-<section class="bc-popeye50 is-ready" aria-label="Between Coffee 咖啡字輪">
+     樣式 static/css/bc-coffee-ring.css／腳本 static/js/bc-coffee-ring.js。
+     2026-11-20（使用者指示，本輪）：① 模組改名 .bc-coffee-ring（原 bc-popeye50）；
+     ② 字輪咖啡名稱放大（CSS `.bc-coffee-ring--detail .cw-word` 的 scale，見檔尾）；
+     ③ 與上方商品主區間距太近 → 本頁加修飾類別 `bc-coffee-ring--detail`，
+     由 CSS 給 margin-top（about 頁不加，避免 sticky-mv 下方多一段空白）。 -->
+<section class="bc-coffee-ring bc-coffee-ring--detail is-ready" aria-label="Between Coffee 咖啡字輪">
     <p class="cw-title-sub is-visible"><b>一杯咖啡<br>一段留白</b></p>
 
     <div class="cw-stage">
@@ -231,7 +234,7 @@
         <div class="cw-wheel" aria-hidden="true"></div>
     </div>
 
-    {{ wheel_items|json_script:"bc-popeye50-data" }}
+    {{ wheel_items|json_script:"bc-coffee-ring-data" }}
 </section>
 
 <div class="flexable-vh-20"></div>
@@ -612,9 +615,11 @@ function debugLog(message) {
      同日第九版（使用者指示）變暗改用 filter:brightness（非 opacity，照片真的變暗
      且不透明）＋淡出條件改為「主區填不滿視窗」就不再包含頁腳（i） -->
 <link rel="stylesheet" href="{% static 'css/bc-coffee-dirs.css' %}?v=20261119i">
-<!-- 2026-11-20（使用者指示）：About 頁的 .bc-popeye50 旋轉字輪移植到本頁（商品主區下方）。
-     CSS 未改動 → 沿用 about 頁版號；JS 因「loader 選配」改動升版。 -->
-<link rel="stylesheet" href="{% static 'css/bc-popeye50.css' %}?v=20261102f">
+<!-- 2026-11-20（使用者指示）：About 頁的 .bc-coffee-ring 旋轉字輪移植到本頁（商品主區下方）。
+     2026-11-20 第二輪（使用者指示）：模組改名 bc-coffee-ring；本頁字輪咖啡名稱放大、
+     與商品主區間距加大（規則在 css 檔尾 `.bc-coffee-ring--detail`）→ CSS 一併升版。
+     JS 因「loader 選配」＋改名升版。 -->
+<link rel="stylesheet" href="{% static 'css/bc-coffee-ring.css' %}?v=20261120a">
 {% endblock %}
 
 {% block extra_scripts %}
@@ -624,8 +629,8 @@ function debugLog(message) {
      css/bc-coffee-dirs.css 的 .is-out 狀態） -->
 <script src="{% static 'js/bc-coffee-dirs.js' %}?v=20261119b"></script>
 <!-- 2026-11-20（使用者指示）：旋轉字輪（移植 about 頁；本頁無 .cw-loader → 跳過
-     2020→2026 開場，直接顯示字輪）。loader 選配改動 → 版號 20261120a。 -->
-<script src="{% static 'js/bc-popeye50.js' %}?v=20261120a"></script>
+     2020→2026 開場，直接顯示字輪）。loader 選配＋模組更名 → 版號 20261120b。 -->
+<script src="{% static 'js/bc-coffee-ring.js' %}?v=20261120b"></script>
 <!-- 2026-11-11：next-link 面板（IntersectionObserver 進場可重播＋rAF 視差；背景為照片） -->
 <script src="{% static 'js/bc-next-link.js' %}?v=20261111e"></script>
 {% endblock %}

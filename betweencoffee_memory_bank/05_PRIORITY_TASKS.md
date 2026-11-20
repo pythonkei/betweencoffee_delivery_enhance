@@ -14,7 +14,7 @@
 
 | # | 任務 | 類型 | 備註 |
 |---|---|---|---|
-| 1 | **手動部署 `c3f7509c..origin/main`（66 筆＋）** | 維運 | 到 Render dashboard 按 Manual Deploy；上線後複驗：`/about/` 有 `bc-sticky-mv`（`grep -c` >0）＋首屏 7 支多層輪播＋三段位置、`bc-catch` 字輪有樣式、`bc-popeye50` 在 sticky 下方、`/about/` 有製程模組、首頁推薦雙卡下方有 who section、品牌舞台渲染後**不得再出現 `footer*` class**（`bc-stage-content`／`bc-stage-photo-cell` 等新名要命中）、環形照片列 hover 徽章／拖曳、`/bean/<id>/` 氣泡、migration `0081`–`0084` 已套用 |
+| 1 | **手動部署 `c3f7509c..origin/main`（66 筆＋）** | 維運 | 到 Render dashboard 按 Manual Deploy；上線後複驗：`/about/` 有 `bc-sticky-mv`（`grep -c` >0）＋首屏 7 支多層輪播＋三段位置、`bc-catch` 字輪有樣式、`bc-coffee-ring` 在 sticky 下方、`/about/` 有製程模組、首頁推薦雙卡下方有 who section、品牌舞台渲染後**不得再出現 `footer*` class**（`bc-stage-content`／`bc-stage-photo-cell` 等新名要命中）、環形照片列 hover 徽章／拖曳、`/bean/<id>/` 氣泡、migration `0081`–`0084` 已套用 |
 | 2 | 咖啡／咖啡豆氣泡文案校稿 | 內容（Admin） | 咖啡：`CoffeeItem.staff_comment_1/2/3`（留空＝不顯示，目前僅 Butter King 有第 1、3 句）；咖啡豆：`0083` 已預填 6 款草稿待改寫 |
 | 3 | 行動端 `.bc-reviews-section` 縮放 | 前端 | 新增 ≤768 媒體查詢；純 CSS、可逆 |
 | 4 | `bean_menu` REAL 模組驗收 | 前端 | 響應式檢查後收尾 |

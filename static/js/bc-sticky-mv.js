@@ -20,7 +20,7 @@
    分層上浮（translateY -18% / -6% / 0）全在 CSS，本檔只切換
    .is-active-logical / .is-prev-logical / .is-next-logical。
 
-   守衛：找不到 #bc-sticky-mv 或輪播節點時立即 return（比照 bc-popeye50.js）。
+   守衛：找不到 #bc-sticky-mv 或輪播節點時立即 return（比照 bc-coffee-ring.js）。
    ============================================================ */
 (function () {
   'use strict';

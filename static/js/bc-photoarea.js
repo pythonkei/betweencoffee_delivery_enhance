@@ -17,7 +17,7 @@
      · vh 一律用 window.innerHeight 現算，並在 ScrollTrigger refresh 時重算
        （invalidateOnRefresh + 函式型數值）⇒ 轉橫向／換視窗高度都會跟上
 
-   守衛（比照 bc-sticky-mv.js / bc-popeye50.js）：
+   守衛（比照 bc-sticky-mv.js / bc-coffee-ring.js）：
      · 找不到 #bc-brand-stage 或 .bc-photoarea／裡面沒有 data-para 元素 ⇒ 直接 return
      · gsap／ScrollTrigger 未載入（CDN 失效）⇒ 直接 return（照片停在 CSS 的 translate3d(0)，
        仍是正常靜態背景，不會空白）

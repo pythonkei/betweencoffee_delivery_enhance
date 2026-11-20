@@ -1,5 +1,8 @@
 /* ============================================================
-   bc-popeye50.js — popeyemagazine.jp/50interviews/ 首屏動畫移植（about.html 第一屏）
+   bc-coffee-ring.js — popeyemagazine.jp/50interviews/ 首屏動畫移植（about.html 第一屏）
+   2026-11-20 更名（使用者指示）：bc-popeye50.js → bc-coffee-ring.js，
+              root 選擇器 `.bc-popeye50` → `.bc-coffee-ring`、資料節點 id
+              `bc-popeye50-data` → `bc-coffee-ring-data`（內層 `.cw-*` 不動）
    2026-11-02 建立（使用者指示：把該站最上方的動畫 1:1 搬到 about 頁最上方）
 
    來源：https://popeyemagazine.jp/wp-content/themes/popeyemagazine-v4/
@@ -15,9 +18,9 @@
      🎉 彩帶（CELEBRATION_CONFIG／confetti／balloon）、ABOUT／INDEX 面板、
      人像燈箱（modal）—— 使用者只要視覺 hero
    改寫（不動動畫行為）
-     1. document.body.classList → 模組 root（.bc-popeye50）的 class，不污染 <body>
+     1. document.body.classList → 模組 root（.bc-coffee-ring）的 class，不污染 <body>
      2. 尺寸一律取 .cw-stage 實際 rect（原站讀 window.innerWidth/Height）
-     3. 資料來源 <script id="bc-popeye50-data" type="application/json">
+     3. 資料來源 <script id="bc-coffee-ring-data" type="application/json">
         （Django json_script；資料由 About view 以 CoffeeItem 組出）
      4. 年份區間讀 data-year-start / data-year-end（預設 2020→2026）
      5. 捲出視窗時暫停 rAF（本頁下方還有很長內容，避免長駐耗電）
@@ -65,7 +68,7 @@
   var WHEEL_MAX_ITEMS = 24;
 
   function init() {
-    var root = document.querySelector('.bc-popeye50');
+    var root = document.querySelector('.bc-coffee-ring');
     if (!root) return;
 
     var stage = root.querySelector('.cw-stage');
@@ -81,7 +84,7 @@
     var hasIntro = !!(loader && yearEl && startYearEl && lineFill);
     var titleEl = root.querySelector('.cw-title-sub');
     var emptyEl = root.querySelector('.cw-empty');
-    var dataEl = document.getElementById('bc-popeye50-data');
+    var dataEl = document.getElementById('bc-coffee-ring-data');
 
     // 缺必要節點（例如資料未輸出）→ 直接顯示終態，不讓 loader 蓋住畫面
     if (!stage || !wheel || !titleEl || !dataEl) {
@@ -113,12 +116,12 @@
     var items = [];
     try {
       var parsed = JSON.parse(dataEl.textContent || '[]');
-      if (!Array.isArray(parsed)) throw new Error('bc-popeye50-data is not an array');
+      if (!Array.isArray(parsed)) throw new Error('bc-coffee-ring-data is not an array');
       items = parsed.filter(function (it) {
         return it && typeof it.word === 'string' && it.word.length > 0;
       });
     } catch (e) {
-      console.warn('[bc-popeye50] invalid JSON', e);
+      console.warn('[bc-coffee-ring] invalid JSON', e);
       items = [];
     }
 
@@ -500,7 +503,7 @@
 
       var introPlayer = reduceMotion ? playReduced : play;
       introPlayer().catch(function (e) {
-        console.warn('[bc-popeye50] intro failed', e);
+        console.warn('[bc-coffee-ring] intro failed', e);
         showFinalState();
       });
 

@@ -426,10 +426,10 @@ def _get_user_avatar(user):
 
 
 def _build_wheel_items(coffees):
-    """bc-popeye50 旋轉字輪的品項（About 頁與咖啡詳情頁共用）。
+    """bc-coffee-ring 旋轉字輪的品項（About 頁與咖啡詳情頁共用）。
 
     2026-11-02 建立（/about/ 首屏移植 popeyemagazine.jp/50interviews/）；
-    2026-11-20 抽成本函式（使用者指示：把 about 頁的 .bc-popeye50 移植到
+    2026-11-20 抽成本函式（使用者指示：把 about 頁的 .bc-coffee-ring 移植到
     /coffee/<id>/ 詳情頁）⇒ 兩頁吃同一份結構，改欄位只要改這裡。
 
     欄位：
@@ -511,7 +511,7 @@ class Coffee(View):
             # 首屏巨型 Prev／Next（partials/bc_coffee_dirs.html）
             "prev_coffee": prev_coffee,
             "next_coffee": next_coffee,
-            # 2026-11-20（使用者指示）：About 頁的 .bc-popeye50 旋轉字輪移植到詳情頁
+            # 2026-11-20（使用者指示）：About 頁的 .bc-coffee-ring 旋轉字輪移植到詳情頁
             # （位置＝商品主區 .bc-section-with-bg-text 正下方）。字輪品項沿用本頁
             # 已在用的 series（全部咖啡、與菜單同排序）→ 與 Prev／Next 帶同一組資料。
             "wheel_items": _build_wheel_items(series),

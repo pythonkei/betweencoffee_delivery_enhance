@@ -1,6 +1,9 @@
 /* ============================================================
-   bc-popeye50.css — popeyemagazine.jp/50interviews/ 首屏動畫移植（about.html 第一屏）
+   bc-coffee-ring.css — popeyemagazine.jp/50interviews/ 首屏動畫移植（about.html 第一屏）
    2026-11-02 建立（使用者指示：把該站最上方的動畫 1:1 搬到 about 頁最上方）
+   2026-11-20 更名（使用者指示）：bc-popeye50.css → bc-coffee-ring.css，
+              root class `.bc-popeye50` → `.bc-coffee-ring`（內層 `.cw-*` 不動）；
+              同日新增 `.bc-coffee-ring--detail`（/coffee/<id>/ 專用：間距＋字級放大，見檔尾）
    ------------------------------------------------------------------
    來源：https://popeyemagazine.jp/wp-content/themes/popeyemagazine-v4/
          dist/special/50interviews/styles.css（792 行）
@@ -17,12 +20,12 @@
      body.popeye-50interviews-single 專用分支（單篇頁）
 
    改寫（不影響動畫行為，只是必要的 scoping）
-     1. 所有選擇器 scope 在 .bc-popeye50 之下，不污染其他頁面。
+     1. 所有選擇器 scope 在 .bc-coffee-ring 之下，不污染其他頁面。
      2. position:fixed → absolute：模組只佔第一屏，不浮在整份 about 頁上。
      3. .cw-stage width:100vw → 100%（避免捲軸造成水平溢出）。
-     4. :root 的 --cw-bg/--cw-fg/--cw-font 改由 .bc-popeye50 提供
+     4. :root 的 --cw-bg/--cw-fg/--cw-font 改由 .bc-coffee-ring 提供
         → 品牌色：--bgcolor #0e0e0e（背景）、--primarycolor #c49b63（主色）。
-     5. body.is-loading / is-ready → .bc-popeye50.is-loading / is-ready。
+     5. body.is-loading / is-ready → .bc-coffee-ring.is-loading / is-ready。
      6. 行動端 .cw-center-name 的 radial-gradient 是原站用來「遮住字輪」的
         遮罩（邊緣透明，不是裝飾性漸層色）→ **[2026-11-02 移除]**：本站字輪半徑
         大於中心名稱方塊，字不會壓到名字，遮罩反而會變成深色貼布。
@@ -45,7 +48,7 @@
        .cw-center-name 的 radial-gradient＋text-shadow（材質上會變成深色方塊）。
 
    2026-11-02（使用者指示第二輪）
-     1. 旋轉字輪略微縮小：直徑係數 0.92 → 0.86（在 bc-popeye50.js 的 baseWheelSize，
+     1. 旋轉字輪略微縮小：直徑係數 0.92 → 0.86（在 bc-coffee-ring.js 的 baseWheelSize，
         不在 CSS）→ 字輪離視窗邊緣多留一點呼吸空間。
      2. 中心品名略微放大：桌機 clamp(0.82rem, 1.5vmin, 1rem)（原 0.7/1.25vmin/0.85）、
         手機 0.9rem（原 0.78rem）。放大後名稱方塊仍在字輪內圈之內，不會被字壓到。
@@ -54,7 +57,7 @@
         拖曳轉字輪後鬆手不會誤觸導頁（JS 內 dragMoved 門檻 8px）。
    ============================================================ */
 
-.bc-popeye50 {
+.bc-coffee-ring {
   /* 原站由 :root 提供；這裡以品牌色覆寫（原站白底黑字 → 本站深底金字） */
   --bgcolor: #0e0e0e;
   --primarycolor: #c49b63;
@@ -92,19 +95,19 @@
 /* 貼齊視窗頂端：bc-components.css 會給「內容首個 section」margin-top 100px/72px/60px
    預留 navbar 高度；本模組是「蓋滿第一屏」的 hero（原站 loader 也蓋滿整個視窗、
    navbar 浮在上面），故抵銷。否則模組中心點會低於視窗中心、loader 的底部年份會落到視窗外。 */
-.bc-page-content > section.bc-popeye50:first-of-type {
+.bc-page-content > section.bc-coffee-ring:first-of-type {
   margin-top: 0;
 }
 
 /* 原站 reset 的 * { box-sizing: border-box } → 只在本模組內生效 */
-.bc-popeye50 *,
-.bc-popeye50 *::before,
-.bc-popeye50 *::after {
+.bc-coffee-ring *,
+.bc-coffee-ring *::before,
+.bc-coffee-ring *::after {
   box-sizing: border-box;
 }
 
 /* ---------------- loader（開場：細線 ＋ 年份滾動） ---------------- */
-.bc-popeye50 .cw-loader {
+.bc-coffee-ring .cw-loader {
   position: absolute;
   inset: 0;
   z-index: 10;
@@ -117,21 +120,21 @@
   pointer-events: none;
   transition: background-color var(--cw-loader-bg-fade, 520ms) ease;
 }
-.bc-popeye50 .cw-loader.is-complete {
+.bc-coffee-ring .cw-loader.is-complete {
   /* 2026-11-02：底色已改透明 → 這條淡出只剩「保留原時間軸契約」的作用（no-op） */
   background-color: transparent;
 }
 @supports (bottom: env(safe-area-inset-bottom)) {
-  .bc-popeye50 .cw-loader {
+  .bc-coffee-ring .cw-loader {
     --cw-loader-year-bottom-offset: calc(1rem + env(safe-area-inset-bottom));
   }
 }
 @supports (bottom: constant(safe-area-inset-bottom)) {
-  .bc-popeye50 .cw-loader {
+  .bc-coffee-ring .cw-loader {
     --cw-loader-year-bottom-offset: calc(1rem + constant(safe-area-inset-bottom));
   }
 }
-.bc-popeye50 .cw-loader-line {
+.bc-coffee-ring .cw-loader-line {
   position: absolute;
   left: 0;
   right: 0;
@@ -140,13 +143,13 @@
   background: transparent;
   transform: translateY(-50%);
 }
-.bc-popeye50 .cw-loader-line-fill {
+.bc-coffee-ring .cw-loader-line-fill {
   width: 0;
   height: 100%;
   background: var(--cw-fg);
   transform-origin: 100% 50%;
 }
-.bc-popeye50 .cw-loader-year {
+.bc-coffee-ring .cw-loader-year {
   position: absolute;
   left: 0;
   top: 50%;
@@ -167,25 +170,25 @@
     font-size 420ms ease;
   will-change: left, top, opacity, transform, font-size;
 }
-.bc-popeye50.is-loading .cw-loader-year {
+.bc-coffee-ring.is-loading .cw-loader-year {
   font-size: clamp(2rem, 4.2vmin, 4.4rem);
 }
-.bc-popeye50 .cw-loader.is-year-layout-animated .cw-loader-year {
+.bc-coffee-ring .cw-loader.is-year-layout-animated .cw-loader-year {
   transition:
     opacity var(--cw-loader-year-fade, 560ms) ease,
     top var(--cw-loader-year-position-dur, 520ms) ease,
     transform var(--cw-loader-year-position-dur, 520ms) ease,
     font-size 420ms ease;
 }
-.bc-popeye50 .cw-loader-year.is-visible {
+.bc-coffee-ring .cw-loader-year.is-visible {
   opacity: 1;
 }
-.bc-popeye50 .cw-loader-start-year {
+.bc-coffee-ring .cw-loader-start-year {
   left: 0;
 }
 
 /* ---------------- 直排副標（原站 .cw-title-sub） ---------------- */
-.bc-popeye50 .cw-title-sub {
+.bc-coffee-ring .cw-title-sub {
   position: absolute;
   /* 原站 right:1rem; top:5rem；本站右緣被 .bc-attract-buy（Order 分頁）與會員／
      購物車按鈕佔滿（y≈90–390），且 loader 年份固定在左右兩側垂直中線 →
@@ -204,15 +207,15 @@
   transition: opacity var(--cw-title-sub-fade, 560ms) ease;
 }
 /* 原站 reset 有 b { font: inherit } → 副標實際不是粗體；照原樣還原 */
-.bc-popeye50 .cw-title-sub b {
+.bc-coffee-ring .cw-title-sub b {
   font-weight: inherit;
 }
-.bc-popeye50 .cw-title-sub.is-visible {
+.bc-coffee-ring .cw-title-sub.is-visible {
   opacity: 1;
 }
 
 /* ---------------- stage / wheel ---------------- */
-.bc-popeye50 .cw-stage {
+.bc-coffee-ring .cw-stage {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -233,15 +236,15 @@
   opacity: 1;
   transition: opacity var(--cw-stage-fade, 420ms) ease;
 }
-.bc-popeye50 .cw-stage.is-dragging {
+.bc-coffee-ring .cw-stage.is-dragging {
   cursor: grabbing;
 }
-.bc-popeye50.is-loading .cw-stage {
+.bc-coffee-ring.is-loading .cw-stage {
   opacity: 0;
   pointer-events: none;
 }
 
-.bc-popeye50 .cw-wheel-hitarea {
+.bc-coffee-ring .cw-wheel-hitarea {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -254,7 +257,7 @@
   touch-action: none;
 }
 
-.bc-popeye50 .cw-wheel {
+.bc-coffee-ring .cw-wheel {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -266,7 +269,7 @@
   pointer-events: none;
 }
 
-.bc-popeye50 .cw-empty {
+.bc-coffee-ring .cw-empty {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -279,14 +282,14 @@
   text-align: center;
   letter-spacing: 0;
 }
-.bc-popeye50 .cw-empty[hidden] {
+.bc-coffee-ring .cw-empty[hidden] {
   display: none;
 }
-.bc-popeye50 .cw-stage.is-empty {
+.bc-coffee-ring .cw-stage.is-empty {
   cursor: default;
 }
 
-.bc-popeye50 .cw-word {
+.bc-coffee-ring .cw-word {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -304,12 +307,12 @@
     translateX(var(--cw-radius, 18.75rem))
     translateX(-100%);
 }
-.bc-popeye50 .cw-word.is-current {
+.bc-coffee-ring .cw-word.is-current {
   color: var(--cw-fg);
 }
 
 /* ---------------- 中心（人像＋名稱） ---------------- */
-.bc-popeye50 .cw-center {
+.bc-coffee-ring .cw-center {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -326,7 +329,7 @@
 /* 中心＝連結（2026-11-02 使用者指示：咖啡相關連結 → 詳情頁）
    .cw-center 本身 pointer-events:none（避免擋住字輪拖曳），由連結取回事件。
    目標網址＝目前高亮咖啡的詳情頁，JS 於中心換品項時同步 href。 */
-.bc-popeye50 .cw-center-link {
+.bc-coffee-ring .cw-center-link {
   display: block;
   color: inherit;
   text-decoration: none;
@@ -334,17 +337,17 @@
   cursor: pointer;
   -webkit-user-drag: none;
 }
-.bc-popeye50 .cw-center-link:focus-visible {
+.bc-coffee-ring .cw-center-link:focus-visible {
   outline: 1px solid var(--cw-fg);
   outline-offset: 4px;
 }
-.bc-popeye50 .cw-center-link:hover .cw-center-name,
-.bc-popeye50 .cw-center-link:focus-visible .cw-center-name {
+.bc-coffee-ring .cw-center-link:hover .cw-center-name,
+.bc-coffee-ring .cw-center-link:focus-visible .cw-center-name {
   /* 品牌金 hover（#d4ab73）：只提亮文字，不加位移或陰影，維持輕鬆感 */
   color: #d4ab73;
 }
 
-.bc-popeye50 .cw-center-img-wrap {
+.bc-coffee-ring .cw-center-img-wrap {
   display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -360,14 +363,14 @@
     opacity 1600ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 1600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.bc-popeye50 .cw-center-picture {
+.bc-coffee-ring .cw-center-picture {
   display: block;
   width: 100%;
   height: 100%;
   /* 原站 scale(0.9)；照片縮小留白 → 改 1（容器已放大到 0.5 倍字輪） */
   transform: scale(1);
 }
-.bc-popeye50 .cw-center-img {
+.bc-coffee-ring .cw-center-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -375,11 +378,11 @@
   opacity: 0;
   transition: opacity 220ms ease;
 }
-.bc-popeye50 .cw-center-img.is-loaded {
+.bc-coffee-ring .cw-center-img.is-loaded {
   opacity: 1;
 }
 
-.bc-popeye50 .cw-center-name {
+.bc-coffee-ring .cw-center-name {
   margin-top: 0.3rem;
   /* 2026-11-02（使用者指示第二輪）：中心高亮品名略微放大
      0.7rem / 1.25vmin / 0.85rem → 0.82rem / 1.5vmin / 1rem（桌機 1440×900 約 13.5px）
@@ -392,22 +395,22 @@
 
 /* ---------------- 斷點（原站 767px：手機字級／中心遮罩） ---------------- */
 @media (max-width: 767px) {
-  .bc-popeye50.is-loading .cw-loader-year {
+  .bc-coffee-ring.is-loading .cw-loader-year {
     font-size: clamp(1.55rem, 6.5vw, 2.2rem);
   }
-  .bc-popeye50 .cw-word {
+  .bc-coffee-ring .cw-word {
     font-size: var(--cw-word-size, clamp(10px, 2.9vmin, 13px));
   }
-  .bc-popeye50 .cw-center-img-wrap {
+  .bc-coffee-ring .cw-center-img-wrap {
     /* 2026-11-02：原站在此鋪一塊底＋大範圍 box-shadow 遮住字輪；本站照片是去背 PNG、
        且字輪半徑（s/2）大於照片盒半角，字不會壓到照片 → 移除深色貼布（會透出黑方塊） */
     background: transparent;
     box-shadow: none;
   }
-  .bc-popeye50 .cw-center-picture {
+  .bc-coffee-ring .cw-center-picture {
     transform: scale(0.94);
   }
-  .bc-popeye50 .cw-center-name {
+  .bc-coffee-ring .cw-center-name {
     /* 2026-11-02（使用者指示第二輪）：手機 0.78rem → 0.9rem（略微放大，仍小於本站正文） */
     font-size: 0.9rem;
     margin-right: -1rem;
@@ -425,42 +428,81 @@
      會伸進品名區。原站是用深色底塊遮住字輪（黑板材上會露出方塊），這裡改用徑向遮罩讓靠中心的
      一段自然淡出：視覺上不留矩形邊界，也不擋字輪外圈的閱讀。
      遮罩半徑＝字輪半徑（.cw-wheel 是 --cw-size 正方形，closest-side 即環半徑）。 */
-  .bc-popeye50 .cw-wheel {
+  .bc-coffee-ring .cw-wheel {
     -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0) 54%, #000 76%);
     mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0) 54%, #000 76%);
   }
-  .bc-popeye50 .cw-title-sub {
+  .bc-coffee-ring .cw-title-sub {
     top: 8rem;
   }
 }
 
 /* 使用者要求減少動態：轉輪不自動旋轉（JS 同步停用 rAF），過渡時間歸零 */
 @media (prefers-reduced-motion: reduce) {
-  .bc-popeye50 .cw-loader,
-  .bc-popeye50 .cw-loader-year,
-  .bc-popeye50 .cw-title-sub,
-  .bc-popeye50 .cw-stage,
-  .bc-popeye50 .cw-word {
+  .bc-coffee-ring .cw-loader,
+  .bc-coffee-ring .cw-loader-year,
+  .bc-coffee-ring .cw-title-sub,
+  .bc-coffee-ring .cw-stage,
+  .bc-coffee-ring .cw-word {
     transition-duration: 0.01ms;
   }
 }
 
 /* 保險：JS 若沒執行（或時間軸被瀏覽器節流卡住），15 秒後由 CSS 強制收掉 loader
    並顯示字輪，避免首屏永遠停在開場畫面（時間與 js 內的保險一致） */
-.bc-popeye50.is-loading .cw-loader {
-  animation: bc-popeye50-loader-failsafe 1ms linear 15s forwards;
+.bc-coffee-ring.is-loading .cw-loader {
+  animation: bc-coffee-ring-loader-failsafe 1ms linear 15s forwards;
 }
-.bc-popeye50.is-loading .cw-stage {
-  animation: bc-popeye50-stage-failsafe 1ms linear 15s forwards;
+.bc-coffee-ring.is-loading .cw-stage {
+  animation: bc-coffee-ring-stage-failsafe 1ms linear 15s forwards;
 }
-@keyframes bc-popeye50-loader-failsafe {
+@keyframes bc-coffee-ring-loader-failsafe {
   to {
     background-color: transparent;
   }
 }
-@keyframes bc-popeye50-stage-failsafe {
+@keyframes bc-coffee-ring-stage-failsafe {
   to {
     opacity: 1;
     pointer-events: auto;
   }
 }
+
+/* ============================================================
+   2026-11-20（使用者指示）：模組改名 bc-popeye50 → bc-coffee-ring；
+   同日第二輪 → /coffee/<id>/ 專用調整（以修飾類別 .bc-coffee-ring--detail
+   分流，about 頁完全不受影響）
+     ① 與上方商品主區（.ftco-subpage-section.bc-section-with-bg-text）間距太近
+        → margin-top 撐開。body 與本模組都用同一張 fixed 的 bg_4.jpg，
+        空白帶的底材質會與模組連續、不會出現色塊接縫。
+     ② 字輪咖啡名稱放大：.cw-word 以倍率乘上原尺寸。
+        JS 在 ≤767px 會把 --cw-word-size 直接寫在 .cw-stage 上，
+        故用 calc() 相乘（非覆寫變數），桌機（JS 不設該變數，吃 CSS fallback）
+        與手機都能吃到同一倍率。
+     ③ 放大後字要以「自身中心」貼在圓上 → margin-top 由固定 -0.5rem
+        改為 -0.5em（em＝放大後的字級，剛好上移半個字高）。
+   ============================================================ */
+.bc-coffee-ring--detail {
+  /* 桌機 1440×900 → 約 108px（clamp 下限 80px／上限 160px） */
+  margin-top: clamp(5rem, 12vh, 10rem);
+  --cw-word-scale: 1.4;
+}
+
+.bc-coffee-ring--detail .cw-word {
+  font-size: calc(var(--cw-word-size, clamp(8px, 1.7vmin, 20px)) * var(--cw-word-scale, 1));
+  margin-top: -0.5em;
+}
+
+@media (max-width: 767px) {
+  .bc-coffee-ring--detail {
+    /* 手機（390×844）→ 64px */
+    margin-top: 4rem;
+    /* 手機圓周較短（16 字 × 每字弧長約 66px），倍率限縮避免鄰字重疊 */
+    --cw-word-scale: 1.15;
+  }
+  .bc-coffee-ring--detail .cw-word {
+    /* 手機的 --cw-word-size 由 JS fitMobileWordSize() 寫入 stage（10–13px） */
+    font-size: calc(var(--cw-word-size, clamp(10px, 2.9vmin, 13px)) * var(--cw-word-scale, 1));
+  }
+}
+
