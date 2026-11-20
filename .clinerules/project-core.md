@@ -49,11 +49,11 @@
 | `static/css/bc-photoarea.css`、`static/js/bc-photoarea.js`、`images/photoarea/pa-1~5.webp`、`partials/bc_brand_stage_hero.html` | 首頁 hero 背景照片視差（hicard）：`z-index:-1`＋`pointer-events:none`、黑蒙版 **75%**、落點每次載入洗牌；第 3 格＝影片輪播 `.bc-pa-video`（片單見 views）。細節見 `docs/home-photoarea.md` |
 | `static/css/bc-catch.css` | `/about/` 品牌宣言「字體輪播」（3 行 × 4 種字體、step-end 硬切、**純 CSS 無 JS**；位置＝`.bc-reviews-section` 正下方） |
 | `static/css/bc-sticky-mv.css`、`static/js/bc-sticky-mv.js`、`static/media/hero_00~06.webm`（7 支） | `/about/` 首屏 sticky 影片＋產品照輪播（`--mv-vh`=`100svh`、黑遮罩 75%；片單 `views.MV_VIDEOS` 不洗牌、`MV_MAX`=7；換片直接覆蓋同名檔）。細節見 `docs/about-sticky-mv.md` |
-| `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（popeye50 移植，置於 `#bc-sticky-mv` 下方） |
+| `static/css/bc-popeye50.css`、`static/js/bc-popeye50.js` | 字輪模組（popeye50 移植）：about＝`#bc-sticky-mv` 下方（有 `.cw-loader` → 播 2020→2026）；`/coffee/<id>/`＝商品主區下方（無 loader → 跳過開場，JS `hasIntro` 分流） |
 | `eshop/models/shop_items.py`、`static/js/bc-coffee-comment.js` | 咖啡／咖啡豆詳情頁氣泡（`measure_bubble_geometry()`＋6 落點） |
 | `static/css/bc-next-link.css`、`static/js/bc-next-link.js`、`partials/bc_next_link.html` | `/coffee/<id>/` 頁尾「前往咖啡豆選單」面板（daisheng `.c-footer__section` 移植：進場放大淡入**每次捲回都重播**／hover 1.1／視差／`( Next )` 上捲；背景 `bean_menu.jpg`；**置於 `</footer>` 之後**） |
 | `static/css/bc-coffee-title.css`、`static/js/bc-coffee-title.js`、`partials/bc_coffee_title.html` | `/coffee_menu/` 首屏「COFFEE」大字（und-ny 移植：拆字＋托住＋逐字往上滾掉）＋左上 `( Line Up )` kicker＋插畫 `.svg-bg` 同套互動 |
-| `static/css/bc-coffee-dirs.css`、`static/js/bc-coffee-dirs.js`、`partials/bc_coffee_dirs.html` | `/coffee/<id>/` 首屏「上一杯／下一杯」帶：**鄰杯圖片**（`get_index_image`）**＋白色名稱（置中同軸）**；**未 hover＝`brightness(.4)`（變暗、非半透明）、hover 回 1＋滑入括號**；貼左右緣、≥992 置中；**≤767 隱藏**；主區填不滿視窗→`.is-out` 淡出、捲回淡入（不含頁腳）|
+| `static/css/bc-coffee-dirs.css`、`static/js/bc-coffee-dirs.js`、`partials/bc_coffee_dirs.html` | `/coffee/<id>/` 首屏「上一杯／下一杯」帶（鄰杯圖片＋置中白色名稱、未 hover `brightness(.4)`、貼左右緣、≥992 置中、≤767 隱藏、主區填不滿視窗就 `.is-out` 淡出） |
 
 ## 4. 開發規範
 

@@ -44,6 +44,7 @@
 | `docs/archive/task_progress_20261105_pushed_batches.md` | about 首屏 sticky MV／首頁製程 `[2b-2]`／#61 推薦雙卡／#59–#60 摘要（2026-11-05 從 `task_progress.md` 移出） | 追查已 push 批次參數與驗證值 |
 | `docs/archive/task_progress_20261114_recent_entries.md` | 2026-11-11 ~ 11-14 who／reviews／next-link 等舊任務段（2026-11-14 從 `task_progress.md` 移出，控制 11.7K 預算） | 追查 who 版面／reviews 跑馬燈／字體舊值 |
 | `docs/archive/task_progress_20261116_who_gtmv_rounds.md` | 首頁 who section 主視覺 global-tree 移植（需求①／②、11-14 ~ 11-16 各批指示、逐值實測）（2026-11-16 從 `task_progress.md` 移出） | 改 `bc-gt-mv.css/.js`／who 內文時比對舊值 |
+| `docs/archive/task_progress_20261119_coffee_dirs_band.md` | `/coffee/<id>/` 上一杯／下一杯帶 v1–v9（逐版參數與實測值）（2026-11-20 從 `task_progress.md` 移出） | 改 `bc-coffee-dirs` 時比對舊值 |
 
 | `docs/archive/task_progress_20261105_sticky_mv_details.md` | about 首屏 sticky 影片＋產品照輪播的完整細節（sticky 機制／輪播參數／踩雷） | 改 `bc-sticky-mv` 前先讀 |
 | `docs/archive/task_progress_20261105_weather_navbar.md` | navbar 天氣模組手機／平板位移的根因與舊值對照 | 再動 `bc-weather.css` 時比對 |
